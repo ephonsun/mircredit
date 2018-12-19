@@ -1,0 +1,84 @@
+<div class="loan-bg">
+	#if($!exceptionRepaymentPlanList)
+	   <div class="loan-pad">
+		#set($Principal = $!exceptionRepaymentPlanList.principal - $!exceptionRepaymentPlanList.paidPrincipal)
+		#set($Interest = $!exceptionRepaymentPlanList.interest - $!exceptionRepaymentPlanList.paidInterest)
+		 <label style="margin-left:15px; color:red;" >逾期本金： $!vmHelper.getUnityDecimalMoney($Principal)元</label>
+		  <label style="margin-left:15px;color:red; float:right; margin-right:20px; margin-bottom:10px">逾期利息: $!vmHelper.getUnityDecimalMoney($Interest)元</label>
+       </div>
+	#end
+<p class="bold loan-lheight">还款计划</p>
+        #if((!$queryPlan.accountRemaining || $!queryPlan.accountRemaining<$!queryPlan.principal) && $loan.isFull !=1)
+            <label style="margin-left:15px; color:red;">账户余额： $!vmHelper.getUnityDecimalMoney($!queryPlan.accountRemaining)元</label>
+        #else
+            <label style="margin-left:15px;" >账户余额： $!vmHelper.getUnityDecimalMoney($!queryPlan.accountRemaining)元</label>
+        #end
+    <label style="margin-left:15px; float:right; margin-right:20px; margin-bottom:10px">贷款余额: $!vmHelper.getUnityDecimalMoney($!queryPlan.remaining)元</label>
+        <div class="loan-pad">
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="还款日期">还款日期</label></th>
+            <th><label title="应还本金(元)">应还本金(元)</label></th>
+            <th><label title="应还利息(元)">应还利息(元)</label></th>
+			<th><label title="应还利息(元)">已还本金(元)</label></th>
+			<th><label title="应还利息(元)">已还利息(元)</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #if($lnRepaymentPlanList)
+                #foreach($repaymentPlan in $lnRepaymentPlanList)
+                <tr>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!repaymentPlan.planDate)">$!date.format('yyyy-MM-dd',$!repaymentPlan.planDate)</label></td>
+                    <td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.principal)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.principal)</label></td>
+                    <td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.interest)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.interest)</label></td>
+					<td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.interest)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.paidPrincipal)</label></td>
+					<td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.interest)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.paidInterest)</label></td>
+                </tr>
+				#end
+			#else
+				#foreach($repaymentPlan in $lnERepaymentPlanList)
+                <tr>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!repaymentPlan.planDate)">$!date.format('yyyy-MM-dd',$!repaymentPlan.planDate)</label></td>
+                    <td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.Principal)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.Principal)</label></td>
+                    <td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.Interest)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.Interest)</label></td>
+					<td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.interest)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.paidPrincipal)</label></td>
+					<td><label title="$!vmHelper.getUnityDecimalMoney($repaymentPlan.interest)">$!vmHelper.getUnityDecimalMoney($repaymentPlan.paidInterest)</label></td>
+                </tr>
+				#end
+            #end
+        </tbody>
+    </table>
+</div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $("#remainFull").click(function(){
+            var remainFull=$(this);
+            var isChecked=remainFull.attr('checked');
+            if(isChecked=="checked"){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':1
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已标记为余额已足');
+                    }
+                });
+            }else{
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':0
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已取消标记为余额已足');
+                    }
+                });
+            }
+        });
+    });
+</script>

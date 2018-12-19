@@ -1,0 +1,214 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有栏目</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    	.datatbl a{ text-decoration:underline !important; }
+    </style>
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+
+    <script type="text/javascript">
+	
+    	function setstate(){
+			$('.datatbl tbody tr:first a.up').unbind();
+			$('.datatbl tbody tr:first a.up').removeAttr("href");
+			$('.datatbl tbody tr:last a.down').unbind();
+			$('.datatbl tbody tr:last a.down').removeAttr("href");
+			$('.datatbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.datatbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+    	}
+		
+		$(function(){
+			$('select').select(); 
+			$('#colTab').table();
+			setstate();
+		});
+		
+		//新建栏目
+		function addColumn(){
+			var url="toAddColumn.html?random="+Math.random()*100000;
+    		var result = window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=320px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+			if(result){
+				jQuery.post(
+				'showAllColumnList.html',
+				{},
+				function(html){
+					var gridId = "colTab";
+					refreshTab(gridId,html);
+				});
+			}
+		}
+		
+		function refreshTab(gridId,html){
+			$('#' + gridId).html(html).table();
+			setstate();
+			$('#totalCount').text($('#count').val());			
+		}
+		
+		//搜索
+		function souSuo(){
+			var gridId = "colTab";
+			jQuery.post(
+				'refreshTab.html',
+				{'feColumn.columnName':$('#souSuoName').val().replace(/(^\s*)|(\s*$)/g,"")},
+				function(html){
+					refreshTab(gridId,html);
+				}
+			);
+		}
+		
+		//编辑
+		function editColumn(columnId){
+			var url="toEditColumn.html?columnId="+columnId+"&random="+Math.random()*100000;
+    		var result = window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=320px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+			if(result){
+				jQuery.post(
+				'showAllColumnList.html',
+				{},
+				function(html){
+					var gridId = "colTab";
+					refreshTab(gridId,html);
+				});
+			}
+		}
+		
+		//删除
+		function delColumn(columnId,name){
+			if(confirm("您确定要删除栏目“"+name+"”吗？")){
+    			jQuery.post(
+        			'delColumn.html',
+    				{'feColumn.columnId':columnId},
+    				function(data){
+						if(data==0){
+							jQuery.post(
+                				'showAllColumnList.html',
+                				{},
+                				function(html){
+                					var gridId = "colTab";
+                					refreshTab(gridId,html);
+                				});
+						}else{
+							banger.page.showMessageBox("栏目’重要财经‘下还有关联的文章，不能够删除");						
+						}
+    				}
+    			);
+			}
+		}
+		
+		//上移
+		function upColumn(columnId){
+			var gridId = "colTab";
+			jQuery.post(
+				'upColumn.html',
+				{'feColumn.columnId':columnId},
+				function(html){
+					refreshTab(gridId,html);
+				}
+			);
+		}
+		
+		//下移
+		function downColumn(columnId){
+			var gridId = "colTab";
+			jQuery.post(
+				'downColumn.html',
+				{'feColumn.columnId':columnId},
+				function(html){
+					refreshTab(gridId,html);
+				}
+			);
+		
+		}
+		//启用/停用
+		function ssColumn(columnId){
+			var gridId = "colTab";
+		    var states = $('#'+columnId).text();
+			if(states=="启用"){
+    			jQuery.post(
+    				'ssColumn.html',
+    				{'feColumn.columnId':columnId,
+					 'feColumn.isStart':0},
+    				function(html){
+    					refreshTab(gridId,html);
+    				}
+				);
+			}else if(states=="停用"){
+				jQuery.post(
+    				'ssColumn.html',
+    				{'feColumn.columnId':columnId,
+					 'feColumn.isStart':1},
+    				function(html){
+    					refreshTab(gridId,html);
+    				}
+				);
+			}
+		}
+		
+		//清空
+		function empetySou(){
+			document.getElementById("souSuoName").value="";
+		}
+		//刷新
+		function refreshAllColumn(){
+			var gridId = "colTab";
+			jQuery.post(
+				'refreshTab.html',
+				{'feColumn.columnName':""},
+				function(html){
+					refreshTab(gridId,html);
+				}
+			);
+		}		
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>栏目名称：</label>
+                </td>
+                <td colspan="7">
+                	<div class="ui-div-text" style="width:150px">
+                		<input type="text" class="text" id="souSuoName"/>
+                	</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl bold">
+            所有栏目(<label class="green" id="totalCount">$!feColumnList.size()</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空" onclick="empetySou();"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="souSuo();"/>
+    </div>
+    
+	<div class="action-bar">
+        <span class="ui-span-btn fl" onclick="addColumn();">
+        	<label>新建栏目</label>
+        </span>
+        <span class="ui-span-btn fr" onclick="refreshAllColumn();">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <table class="datatbl" id="colTab">
+       #parse("/velocity/finance/allColumn_tab.vm") 
+        
+    </table>
+</body>
+</html>

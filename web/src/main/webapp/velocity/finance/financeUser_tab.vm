@@ -1,0 +1,23 @@
+<ul class="ui-fe-reviews">
+	#foreach($!user in $!feFinanceUserPage.items)
+    	<li class="item">
+        	<div class="summary">
+    			<img src="../../images/public/exchange area/touxiang.png" alt="暂无头像" class="avatar" />
+            	<label class="name">$!user.userName</label>
+                <label class="level">业绩排名:#if($!user.buessRank)$!user.buessRank#else无#end</label>
+                <p class="pfrom">来自：$!user.deptName</p>
+            </div>
+            <div class="footer">
+				#if($!actionType=="collect")
+					<label class="time">#if($!user.collectDate != '')$date.format("yyyy-MM-dd HH:mm:ss",$!user.collectDate)#else&nbsp;#end</label>
+				#elseif($!actionType=="read")
+					<label class="time">#if($!user.readDate != '')$date.format("yyyy-MM-dd HH:mm:ss",$!user.readDate)#else&nbsp;#end</label>
+				#else
+					<label class="time">&nbsp;</label>
+				#end
+            </div>
+        </li>
+	#end
+</ul>
+<hr />
+<div class="floatR" style="height:24px">#parse("/velocity/ajaxPage.vm")</div>

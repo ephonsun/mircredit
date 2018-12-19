@@ -1,0 +1,195 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>计划联系量明细</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		h4.plan-title { border-bottom: 1px solid #b1b1b1; margin-bottom: 10px; text-align: center; line-height: 40px; font-size: 14px; }
+		div.contact-amount { border: 1px solid #b1b1b1; margin-bottom: 10px; padding: 5px 10px; line-height: 24px; }
+    	div.contact-amount label.ml { margin-left: 20px; }
+		div.sz label{ line-height:26px; font-size:12px;}
+	</style>
+    #scriptLink("core")
+	#scriptLink("page")
+   	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+   	<script type="text/javascript">
+		//查看客户
+    	function customerDetail(customerId){
+    		jQuery.ajax({
+    			  type: 'POST',
+    			  url: "/customer/isDeleteCus.html?random="+Math.random()*1000,
+    			  data: {"cusId":customerId},
+    			  success:function(data){
+    			  		var obj = jQuery.parseJSON(data);
+    			  		if(obj[0].isDel=='1'){
+    			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+    			  		}else{
+    						var options = {id: "task_Customer_detail_detail" + customerId , pid: GetId(), title: "客户详情", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+    						tab.add(options);
+    					}
+    			  	}
+    		});	
+    	}
+		
+		function toRecord(customerId,number){
+			var url = "/record/showRecordListForTsk.html";
+    		var id;
+    		if(customerId>0) {
+    			url = url+"?customerId="+customerId+"&random="+Math.random();
+    			id = customerId;
+    		}else if(number) {
+    			url = url+"?number="+number+"&random="+Math.random();
+    			id = number;	
+    		}
+    		var options = {id: "task_record_detail"+id , pid: GetId(), title: "联系记录", url: url, lock: false};
+        	tab.add(options);
+		}
+    </script>
+</head>
+
+<body>
+<div class="sz" style="margin-top: 0;">
+    <label class="fl bold">
+		$!userNameDetail执行情况-计划联系量(<label class="green">$!page.totalRowsAmount</label>)
+	</label>
+</div>
+<div class="ui-panel-box2" style="padding-left:0;">
+    <table class="datatbl">
+        <thead>
+            <tr>
+                <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+                <th><label title="客户归属">客户归属</label></th>
+                <th><label title="关联任务">关联任务</label></th>
+                <th><label title="联系情况">联系情况</label></th>
+                <th><label title="联系事项">联系事项</label></th>
+				<th><label title="计划联系日期">计划联系日期</label></th>
+            </tr>
+        </thead>
+        <tbody>
+			#foreach($plan in $!taskPlanCustomerPage.items)
+            <tr>
+                <td>
+                	<div class="customer-infor">
+					   #if($!plan.customerId>0)
+                           #if($!plan.defaultPhoneType=='1')
+								#set($phoneNo=$!plan.mobilePhone1)
+        						<span class="link" onclick="customerDetail('$!plan.customerId','$!plan.customerName')" title="$!plan.customerName（$!plan.mobilePhone1）">$!plan.customerName（$!plan.mobilePhone1）</span>
+                            #elseif($!plan.defaultPhoneType=='2')
+								#set($phoneNo=$!plan.mobilePhone2)
+                            	<span class="link" onclick="customerDetail('$!plan.customerId','$!plan.customerName')" title="$!plan.customerName（$!plan.mobilePhone2）">$!plan.customerName（$!plan.mobilePhone2）</span>
+                            #elseif($!plan.defaultPhoneType=='3')
+								#set($phoneNo=$!plan.phone)
+                            	<span class="link" onclick="customerDetail('$!plan.customerId','$!plan.customerName')" title="$!plan.customerName（$!plan.phone）">$!plan.customerName（$!plan.phone）</span>
+                            #elseif($!plan.defaultPhoneType=='4')
+								#set($phoneNo=$!plan.fax)
+                            	<span class="link" onclick="customerDetail('$!plan.customerId','$!plan.customerName')" title="$!plan.customerName（$!plan.fax）">$!plan.customerName（$!plan.fax）</span>
+						   #end
+						#else
+							<span class=""><label title="$!plan.customerNameExternal('$!plan.phoneNo')">$!plan.customerNameExternal（$!plan.phoneNo）</label></span>
+							#set($phoneNo=$!plan.phoneNo)
+					    #end
+                       <div class="icon">
+							#if($!plan.customerId>0)
+                            	#if($!plan.defaultPhoneType=='1' && $!plan.isDel==0)
+                                	<i class="i phone" onclick="dial('$!plan.mobilePhone1','$!plan.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!plan.customerId')" title="座谈" >dsc</i>
+                                	#if($urlPermitUtil.hasPermission('toAddSms'))
+                                	<i class="i sms" onclick="sendSms('$!plan.mobilePhone1','$!plan.customerId')" title="短信">sms</i>
+                                	#end
+    	                			#if($urlPermitUtil.hasPermission('toAddMms'))
+                                	<i class="i mms" onclick="sendMms('$!plan.mobilePhone1','$!plan.customerId')" title="彩信">mms</i>
+                                	#end
+                                #elseif($!plan.defaultPhoneType=='2' && $!plan.isDel==0)
+                                	<i class="i phone" onclick="dial('$!plan.mobilePhone2','$!plan.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!plan.customerId')" title="座谈" >dsc</i>
+                                	#if($urlPermitUtil.hasPermission('toAddSms'))
+                                	<i class="i sms" onclick="sendSms('$!plan.mobilePhone2','$!plan.customerId')" title="短信">sms</i>
+                                	#end
+    	                			#if($urlPermitUtil.hasPermission('toAddMms'))
+                                	<i class="i mms" onclick="sendMms('$!plan.mobilePhone2','$!plan.customerId')" title="彩信">mms</i>
+                               		#end
+                                #elseif($!plan.defaultPhoneType=='3' && $!plan.isDel==0)
+                                	<i class="i phone" onclick="dial('$!plan.phone','$!plan.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!plan.customerId')" title="座谈" >dsc</i>
+                                	#if($!plan.mobilePhone1 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!plan.mobilePhone1','$!plan.customerId')" title="短信">sms</i>	
+                                		#end
+    	                				#if($urlPermitUtil.hasPermission('toAddMms'))
+                                		<i class="i mms" onclick="sendMms('$!plan.mobilePhone1','$!plan.customerId')" title="彩信">mms</i>
+                                		#end
+                                	#elseif($!plan.mobilePhone2 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!plan.mobilePhone2','$!plan.customerId')" title="短信">sms</i>
+                                		#end
+    	                				#if($urlPermitUtil.hasPermission('toAddMms'))
+                                		<i class="i mms" onclick="sendMms('$!plan.mobilePhone2','$!plan.customerId')" title="彩信">mms</i>
+                                		#end
+                                	#end
+                                #elseif($!plan.defaultPhoneType=='4' && $!plan.isDel==0)
+                                	<i class="i phone" onclick="dial('$!plan.fax','$!plan.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!plan.customerId')" title="座谈" >dsc</i>
+                                	#if($!plan.mobilePhone1 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!plan.mobilePhone1','$!plan.customerId')" title="短信">sms</i>	
+                                		#end
+    	                				#if($urlPermitUtil.hasPermission('toAddMms'))
+                                		<i class="i mms" onclick="sendMms('$!plan.mobilePhone1','$!plan.customerId')" title="彩信">mms</i>
+                                		#end
+                                	#elseif($!plan.mobilePhone2 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!plan.mobilePhone2','$!plan.customerId')" title="短信">sms</i>
+                                		#end
+    	                				#if($urlPermitUtil.hasPermission('toAddMms'))
+                                		<i class="i mms" onclick="sendMms('$!plan.mobilePhone2','$!plan.customerId')" title="彩信">mms</i>
+                                		#end
+                                	#end
+    							#end
+							#else
+								<i class="i phone" onclick="dial('$!plan.phoneNo','')" title="拨号">phone</i>
+							#end
+                        </div>
+                        <div class="other">
+                            <label class="item cusTitle" title="$!plan.customerTitle">$!plan.customerTitle</label>
+                            <label class="item">$!plan.sex</label>
+                            <label class="item">
+								#if($!plan.age)
+									$!plan.age岁
+								#end
+							</label>
+                        </div>
+                    </div>
+                </td>
+                <td><label title="$!plan.userName">$!plan.userName</label></td>
+                <td><label title="$!plan.taskPlanCount">#if($!plan.taskPlanCount) $!plan.taskPlanCount #else 0 #end</label></td>
+                <td><label class="ui-link-btn" onclick="toRecord('$!plan.customerId','$phoneNo')">
+						#if($!plan.isFinish==0)
+							未完成
+						#else
+							已完成
+						#end
+				</label></td>
+                <td><label title="$!subString.replaceRemark($!plan.remark)">$!plan.remark</label></td>
+				<td><label title="$!date.format("yyyy-MM-dd",$!plan.taskPlanDate)">$!date.format("yyyy-MM-dd",$!plan.taskPlanDate)</label></td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6">
+					<input type="hidden" value="$!userId" name="userId" />
+					<input type="hidden" value="$!startDate" name="startDate" />
+					<input type="hidden" value="$!endDate" name="endDate" />
+					<input type="hidden" value="$!detailFlag" name="detailFlag" />
+                	#parse("/velocity/page.vm")
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+</body>
+</html>

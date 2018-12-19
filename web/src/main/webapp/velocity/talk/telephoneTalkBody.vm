@@ -1,0 +1,1943 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>通话窗口</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css">
+		
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<style type="text/css">
+	body { margin: 0; padding: 0; }
+	/* 头像 Begin */
+	.avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 96px; height: 96px; margin-bottom: 5px; overflow: hidden; }
+	.avatar img { width: 100%; height: 100%; border: 0; }
+	.addavatar { cursor: pointer; position: relative; width: 70px; height: 22px; border: 1px solid #bcbcbc; background: url(../../images/common/button.gif) repeat-x center center; overflow: hidden; line-height: 24px; }
+	.addavatar label { display: block; }
+	.addavatar .file { cursor: pointer; position: absolute; top: 0; left: 0; width: 70px; height: 22px; margin: 0; padding: 0; filter: alpha(opacity:0); opacity: 0; }
+	/* 头像 End */
+	</style>
+</head>
+<script>
+
+function setWinKey(){			//屏蔽刷新
+	jQuery(document.body).bind("contextmenu",function(e){
+		return false;
+	});
+	
+	$(document).bind("keydown",function(e){
+		e=window.event || e;
+		if(e.keyCode==116){
+			e.keyCode = 0;
+			return false; //屏蔽F5刷新键   
+		}
+	});
+}
+
+var autoLogin = "$!autoLogin";
+
+jQuery(document).ready(function(){
+	setWinKey();
+	$("#tabs").tabs();
+	jQuery("#talkForm").validator();
+	
+	#if($custCount>0)
+		jQuery("#selCust").bind("change",function(){
+			//添加业务
+			$("#tabs-add").attr("disabled",false);
+			var custId = this.value;
+			selCust(custId);
+		});
+	#end
+	
+	setPhone();
+	initPhoneType();
+	
+	initDate('birthday',{maxDate:new Date()});
+	initDate('datepicker');
+	initProvince('$!crmCustomer.province');
+	
+ 	dateInput("input[dateFlag$='true']");
+	numInput("input[intFlag$='true']");
+	floatInput("input[floatFlag$='true']");
+	maxTextArea("textarea[maxlength]");
+	
+	$("input[dateFlag$='true']").each(function(i){
+		initDate(this.id);
+	});
+	
+ 	$("div[comboFlag$='true']").each(function(i){
+		var codes = $(this).attr("codes");
+		var list = codes.split(",");
+		jQuery(this).combobox({"allcheck":true,"clear":true,"rev":true,"array":list});
+	});
+	
+	$("#headImage").change(function(){
+        upLoadFile();
+    });
+	
+	var selCustVal = $("#selCust").val();
+	if(selCustVal)
+	{
+		var cusId = parseInt(selCustVal);
+		if(cusId>0)
+		{
+			bindData();
+			//任务信息
+    		$('#taskMsg').load("${ctx}/tskMicroTaskTarget/taskCustomerCard.html?"+autoLogin+"customerId="+cusId,{});
+    		//联系记录
+    		$('#recordMsg').load("${ctx}/record/queryAllByCustomerId.html?"+autoLogin+"customerId="+cusId+"&actionType=browse&needLine=0&phoneLine=0",{});
+    		//亲友信息
+    		$('#relativesInfo').load("${ctx}/customerRelatives/relativesInfo.html?"+autoLogin+"customerId="+cusId+"&actionType=modify&needLine=0&phoneLine=0",{});
+    		
+            //日程安排
+    		$('#taskSchedule').load("${ctx}/tskSchedule/getScheduleListCard.html?"+autoLogin+"customerId="+cusId+"&needLine=0",{});
+            //贷款信息
+            $('#loanInfo').load("${ctx}/loan/getAllLoanByCusId.html?"+autoLogin+"customerId="+cusId+"&needLine=0",{});
+            //资料信息
+            $('#dataMsg').load("${ctx}/data/showDataByCusId.html?"+autoLogin+"customerId="+cusId+"&needLine=0",{});
+            //客户意向
+            $('#customerPdtProduct').load("${ctx}/tskSchedule/getCustomerPdtProduct.html?"+autoLogin+"tskSchedule.customerId="+cusId+"&needLine=0",{});
+			
+		}
+		else
+		{
+			setCustHead('');
+		}
+	}
+	else
+	{
+		setCustHead('');
+	}
+	
+	setCurrentTalkInfo();	//
+	talkTimeStart();		//开始通话计时
+	setPhoneTabName();		//设置页卡标题
+	setToolBarState();		//设置通话按钮状态
+	setPhoneNumState();
+	
+	mobileInput('#mobilePhone1',onPhoneNumberChange);
+	mobileInput('#mobilePhone2',onPhoneNumberChange);
+	numInput('#phone',onPhoneNumberChange);
+	telInput('#phoneExt');
+	numInput('#fax',onPhoneNumberChange);
+	telInput('#faxExt');
+	idInput('#idCard');
+	emailInput('#email');
+	maxInput('#remark',2000);
+	maxInput('#recordremark',200);
+	
+	$("select[id!='selCust']").select();
+	#if($custCount>0)
+		$('#selCust').select({beforeClick:changeMutlCusts});
+	#else
+		$('#selCust').select();
+	#end
+});
+
+function onPhoneNumberChange()				//
+{
+	$('[phoneType=\'divGroup\']').removeClass('v-fails');
+	if(checkPhoneNull())
+	{
+		if($("#mobilePhone1").val().length>0 && $("#mobilePhone1").val().length<11){
+			$('#divMobilePhone1').addClass('v-fails');
+			$('#mobilePhone1').attr('tips', '手机格式必须是1开头，11位');
+		}
+		if($("#mobilePhone2").val().length>0 && $("#mobilePhone2").val().length<11){
+			$('#divMobilePhone2').addClass('v-fails');
+			$('#mobilePhone2').attr('tips', '手机格式必须是1开头，11位');
+		}
+	}
+	else
+	{
+		$('[phoneType=\'divGroup\']').addClass('v-fails');
+		$('[phoneType=\'divGroup\']').attr('tips', '请至少填写一个联系电话');
+	}
+	setToolBarState();			//如果是固话时,号码不一至时,禁用分机
+}
+
+function openCustomerPhoneChange()			//打开替换客户号码
+{
+	var num = '$!record.incomingNumber';
+	if(num=="")return;
+	if($("#editEnable").val()=="0")return;			//无权限客户不替换
+	var isMobile = '$!isMobile';
+	var custName = $("#cusName").val();
+	if(isMobile=="1")
+	{
+		var p1 = $('#mobilePhone1').val()+"";
+		var p2 = $('#mobilePhone2').val()+"";
+		if(p1==num || p2==num)return;
+		else
+		{
+			if(p1=="")$('#mobilePhone1').val(num);
+			else if(p2=="")$('#mobilePhone2').val(num);
+			else
+			{
+				var url="getTalkNumberChange.html?"+autoLogin+"isMobile=1&crmCustomer.mobilePhone1="+p1+"&crmCustomer.mobilePhone2="+p2+"&random="+Math.random();
+				var result=banger.page.openDialog(url,{"custName":custName},400,200);
+				if(result!=null && result!="")
+				{
+					switch(result)
+					{
+						case "1":
+							$('#mobilePhone1').val(num);
+							break;
+						case "2":
+							$('#mobilePhone2').val(num);
+							break;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		var tel = $('#phone').val()+"";
+		var fax = $('#fax').val()+"";
+		if(tel==num || fax==num)return;
+		else
+		{
+			if(tel=="")$('#phone').val(num);
+			else if(fax=="")$('#fax').val(num);
+			else
+			{
+				var url="getTalkNumberChange.html?"+autoLogin+"isMobile=0&crmCustomer.phone="+tel+"&crmCustomer.fax="+fax+"&random="+Math.random();
+				var result=banger.page.openDialog(url,{"custName":custName},400,200);
+				if(result!=null && result!="")
+				{
+					switch(result)
+					{
+						case "3":
+							$('#phone').val(num);
+							break;
+						case "4":
+							$('#fax').val(num);
+							break;
+					}
+				}
+			}
+		}
+	}
+}
+
+function setCustHead(headPath){				//设置头像
+	if(headPath){
+		var url = "../showImage?fullPath="+headPath;
+		var html = "<img src="+url+" />";
+		jQuery('.avatar').html(html);
+	}else{
+		var path;
+		var sex = $("#cusSex").val() || $("#sex").text();
+		switch(sex){
+			case "":
+				path = "${ctx}/images/headImage/a.bmp";
+				break;
+			case "男":
+				path = "${ctx}/images/headImage/b.bmp";
+				break;
+			case "女":
+				path = "${ctx}/images/headImage/c.bmp";
+				break;
+		} 
+		var html = "<img src='"+path+"'/>";
+		jQuery('.avatar').html(html);
+		$("#headshow").attr("headPath","");
+	}
+}
+
+function changeMutlCusts(sel)
+{
+	for(var i=0;i<sel.options.length;i++)
+	{
+		var op = sel.options[i];			//多人匹配客户地，如果客户单位不为空，则显示客户信息
+		
+		#if($!crmCustomer.company && $!crmCustomer.company!='')
+			if(op.text=="多人匹配客户")op.text="$!jsUtil.escapeJs($crmCustomer.customerName)";
+		#else
+			if(op.text=="多人匹配客户")op.text="新客户";
+		#end
+	}
+	$(sel).select();
+}
+
+var talkTimeHandler=-1;
+var beginDate = new Date();
+
+function containTalkId(talkId){		//是否包涵通话id
+	var id = $("#recordNo").val();
+	return id==talkId;
+}
+
+function setPhoneTabName(){
+	var title = '$!tabTitle';
+	if(title)
+	{
+		var tabId = $("#tabId").val();
+		if(window.parent.renameTab)
+		{
+			var stateStr = "";
+			var flag = checkHangup();
+			#if($record.callType!=4)
+				if(flag)stateStr="<span style='font-size: 12px;'>（通话结束）</span>";
+				else stateStr="<span style='font-size: 12px;'>（通话中）</span>";
+			#else
+				if(flag)stateStr="<span style='font-size: 12px;'>（座谈结束）</span>";
+				else stateStr="<span style='font-size: 12px;'>（座谈中）</span>";
+			#end
+			window.parent.renameTab(tabId,title,stateStr);
+		}
+	}
+}
+
+
+function setRecordFileName(fileName){	  //设置本地录音文件地址
+	#if($whiteTelNumber==false)
+		setTimeout(function(){
+			$("#recordFileName").val(fileName);
+			$("#barListen").css({filter:""});
+			$("#txtListen").css({color:""});
+		},1000);
+	#end
+}
+
+function talkTimeStart(){		//通话计时开始
+	talkTimeHandler = setInterval(reflashTime,200);
+}
+
+function talkTimeEnd(){			//通话计时结束
+	clearInterval(talkTimeHandler);
+	talkTimeHandler=-1;        
+}
+
+
+function recordListen(elem){		//播放录音
+	if(elem.style.filter!="gray")
+	{
+		var fileName = $("#recordFileName").val();
+		var talkId = $("#recordNo").val();
+		if(fileName)
+		{
+			if(window.parent.recordListen){
+				setTimeout(function(){window.parent.recordListen(talkId,fileName);},1000);
+			}
+		}
+	}
+}
+
+function resetPhone(){				//选择新客户时，重置默认号码
+	var flag = hasSamePhoneNumber('$!record.incomingNumber');
+	if(flag)return;
+	var isMobile = '$!isMobile';
+	if(isMobile=="1")
+	{
+		var mb = $("#mobilePhone1").val();
+		if(!mb)$("#mobilePhone1").val('$!record.incomingNumber');
+		$("#rdo1").attr("checked",true);
+	}
+	else
+	{
+		var tel = $("#phone").val();
+		if(!tel)$("#phone").val('$!record.incomingNumber');
+		$("#rdo3").attr("checked",true);
+	}
+}
+
+function hasSamePhoneNumber(number){
+	var phone1 = $("#mobilePhone1").val()+"";
+	var phone2 = $("#mobilePhone2").val()+"";
+	var tel = $("#phone").val();
+	var fax = $("#fax").val();
+	if(number==phone1)return true;
+	if(number==phone2)return true;
+	if(number==tel)return true;
+	if(number==fax)return true;
+	return false;
+}
+
+function setPhone(){
+	var flag = hasSamePhoneNumber('$!record.incomingNumber');
+	if(flag)return;
+	var isMobile = '$!isMobile';
+	var defaultType = '$!crmCustomer.defaultPhoneType';
+	if(isMobile=="1")
+	{
+		var mb = $("#mobilePhone1").val();
+		if(!mb)$("#mobilePhone1").val('$!record.incomingNumber');
+		if(!defaultType)$("#rdo1").attr("checked",true);	
+	}
+	else
+	{
+		var tel = $("#phone").val();
+		if(!tel)$("#phone").val('$!record.incomingNumber');
+		if(!defaultType)$("#rdo3").attr("checked",true);
+	}
+}
+
+function reflashTime(){
+	try{
+    	var d = new Date();
+    	var t = parseInt(d.getTime()/1000-beginDate.getTime()/1000);
+    	var h = parseInt((t<3600)?0:(t/3600));
+    	var m = parseInt((t-h*3600)/60);
+    	var s = parseInt(t-h*3600-m*60);
+    	var text = ((h>9)?h:"0"+h)+":"+((m>9)?m:"0"+m)+":"+((s>9)?s:"0"+s);
+    	$("#talkTimeSpan").text(text);
+	}
+	catch(e)
+	{
+	}
+}
+
+var talkInfo ={};
+
+function setCurrentTalkInfo() 			//设置当前通话信息
+{
+	var talkId = $("#recordInfoId").val();
+	talkInfo["talkId"] = talkId;
+	window.parent.currentTalk = talkInfo;
+}
+
+function stopScene(elem)		//结束现场录音
+{
+	if(elem.style.filter!="gray")
+	{
+		window.parent.stopScene();
+		talkTimeEnd();
+		setHangupStatus();
+	}
+}
+
+function callForward(elem)			//来电转接
+{
+	if(elem.style.filter!="gray")
+	{
+		var url="getCallForwardPage.html?"+autoLogin+"random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,null,600,500);
+		if(result)
+		{
+			window.parent.dialExt(result);
+		}
+	}
+}
+
+function record(elem){			//开始录音
+	if(elem.style.filter!="gray")
+	{
+		if(window.parent.openPhoneRecord)
+		{
+			window.parent.openPhoneRecord();
+			setTimeout(function(){setToolBarState();},200);
+		}
+	}
+}
+
+function redial(elem){			//重播电话
+	if(elem.style.filter!="gray")
+	{
+		var number = $("#renumber").val();
+		window.parent.dial(number,'$!crmCustomer.customerId');
+		$("#barRecial").css({filter:"gray"});
+		$("#txtRecial").css({color:"gray"});
+	}
+}
+
+function exdial(elem){			//续拨分机
+	if(elem.style.filter!="gray")
+	{
+		var cityCode = '$!cityCode';
+		var telNum = '$!record.incomingNumber';
+		var fullTelNum = cityCode+telNum;
+		
+		if(telNum == $("#phone").val() || fullTelNum == $("#phone").val()){
+			var px = $("#phoneExt").val();
+			if(px){
+				window.parent.continuedDial(px);
+				$("#barRedirectExt").css({filter:"gray"});
+				$("#txtRedirectExt").css({color:"gray"});
+			}
+		}
+		else if(telNum == $("#fax").val() || fullTelNum == $("#fax").val()){
+			var fx = $("#faxExt").val();
+			if(fx){
+				window.parent.continuedDial(fx);
+				$("#barRedirectExt").css({filter:"gray"});
+				$("#txtRedirectExt").css({color:"gray"});
+			}
+		}
+	}
+}
+
+function openSelCust()			//打开客户选择页面
+{
+	var url="../customer/customerSelect.html?"+autoLogin+"selType=single&random="+Math.random()*1000;
+	var result=banger.page.openDialog(url,{"msg":"请选择客户!"},1000,700);
+	if(result)
+	{
+		selCust(result);
+		
+		$("#selCustPart").hide();
+		$("#disCustPart").show();
+	}
+}
+
+function disContactCust()
+{
+	var custId = $("#customerId").val();
+	if(custId!="" && parseInt(custId)>0)
+	{
+		var custName = $("#cusName").val();
+		
+		var flag = confirm("您确认要将 "+custName+" 的通话记录设置成未知客户吗？");
+		if(flag)
+		{
+			clearCustTab();
+			clearCust();
+			resetPhone();
+			showPerssionPart();
+			setCustHead('');
+			
+			$("#sharePart").hide();
+			$("#custBelongTo").hide();
+			
+			$("#selCustPart").show();
+			$("#disCustPart").hide();
+			
+		}
+	}
+}
+
+function setRecordStatus()
+{
+	$("#barListen").css({filter:""});
+	$("#txtListen").css({color:""});
+}
+
+function setToolBarState()		//设置开起录音状态
+{
+	var phone = window.parent.getPhone();
+	if(phone==null)
+	{
+		$("#barRecord").css({filter:"gray"});
+		$("#txtRecord").css({color:"gray"});
+		$("#barHangup").css({filter:"gray"});
+		$("#txtHangup").css({color:"gray"});
+		
+		$("#barRedirectExt").css({filter:"gray"});
+		$("#txtRedirectExt").css({color:"gray"});
+		$("#barScene").css({filter:"gray"});
+		$("#txtScene").css({color:"gray"});
+		
+		$("#barListen").css({filter:"gray"});
+		$("#txtListen").css({color:"gray"});
+		$("#barRecial").css({filter:"gray"});
+		$("#txtRecial").css({color:"gray"});
+		
+		talkTimeEnd();
+	}
+	#if($record.callType!=4)
+		if(window.parent.getPhoneState)
+		{
+			var closed = checkHangup();
+			if(closed)
+			{
+				//$("#barRecord").css({filter:"gray"});
+				//$("#txtRecord").css({color:"gray"});
+				$("#barRecord").hide();
+				$("#barListen").css({filter:"gray"});
+				$("#txtListen").css({color:"gray"});
+				$("#barListen").show();
+				$("#barRecial").css({filter:""});
+				$("#txtRecial").css({color:""});
+				$("#barHangup").css({filter:"gray"});
+				$("#txtHangup").css({color:"gray"});
+				talkTimeEnd();
+				return;
+			}
+			var status = window.parent.getPhoneState();
+			var json = jQuery.parseJSON(status);
+			//设置录音按钮状态
+			var isRecording = json["recording"];
+			if(!isRecording)
+			{
+				$("#barRecord").css({filter:""});
+				$("#txtRecord").css({color:""});
+			}
+			else
+			{
+				$("#barRecord").css({filter:"gray"});
+				$("#txtRecord").css({color:"gray"});
+			}
+			//设置挂机按钮状态
+			var isHookUp = json["hookUp"];
+			if(!isHookUp)
+			{
+				$("#barHangup").css({filter:""});
+				$("#txtHangup").css({color:""});
+			}
+			else
+			{
+				$("#barHangup").css({filter:"gray"});
+				$("#txtHangup").css({color:"gray"});
+			}
+			
+			#if($record.callType==2)
+				#if($custCount>0)
+					var isMobile = '$!isMobile';
+					if(isMobile=="1")
+					{
+						$("#barRedirectExt").css({filter:"gray"});
+						$("#txtRedirectExt").css({color:"gray"});
+					}
+					else
+					{
+						var cityCode = '$!cityCode';
+						var telNum = '$!record.incomingNumber';
+						var fullTelNum = cityCode+telNum;
+						var phoneNum = $("#phone").val()+"";
+						var phoneExtNum = $("#phoneExt").val()+"";
+						var faxNum = $("#fax").val()+"";
+						var faxExtNum = $("#faxExt").val()+"";
+						if(((phoneNum==telNum || phoneNum==fullTelNum) && phoneExtNum!="") || ((faxNum==telNum || faxNum==fullTelNum) && faxExtNum!=""))
+						{
+							$("#barRedirectExt").css({filter:""});
+							$("#txtRedirectExt").css({color:""});
+						}
+						else
+						{
+							$("#barRedirectExt").css({filter:"gray"});
+							$("#txtRedirectExt").css({color:"gray"});
+						}
+					}
+				#else
+					$("#barRedirectExt").css({filter:"gray"});
+					$("#txtRedirectExt").css({color:"gray"});
+				#end
+			#end
+		}
+		
+		
+	#end
+}
+
+function isAnswerRunning(){			//是否座谈中
+	if($record.callType == 4){
+		return talkTimeHandler > 0;
+	}
+	return false;
+}
+
+function setHangupStatus()
+{
+	#if($record.callType==4)
+		$("#barScene").css({filter:"gray"});
+		$("#txtScene").css({color:"gray"});
+	#else
+		$("#barRecial").css({filter:""});
+		$("#txtRecial").css({color:""});
+		$("#barRedirectExt").css({filter:"gray"});
+		$("#txtRedirectExt").css({color:"gray"});
+		$("#barHangup").css({filter:"gray"});
+		$("#txtHangup").css({color:"gray"});
+		$("#barRecord").css({filter:"gray"});
+		$("#txtRecord").css({color:"gray"});
+		
+		//通话结束后把录音按钮替换为播放录音
+		$("#barRecord").hide();
+		$("#barListen").show();
+	#end
+	setTimeout(function(){setPhoneTabName();},100);
+}
+
+function hangup(elem){			//挂断
+	if(elem.style.filter!="gray")
+	{
+		window.parent.hangup();
+		talkTimeEnd();
+		setHangupStatus();
+		closeConfirm();
+	}
+}
+
+var confirmFlag = true;
+
+function closeConfirm()			//通话结束后关闭方式
+{
+	if(confirmFlag)
+	{
+		confirmFlag = false;
+		var type = $("#closeType").val();
+		if(type=="3"){
+			closeSave();
+		}
+		else if(type=="1"){
+			var flag = confirm("是否要关闭当前通话页面!");
+			if(flag)
+			{
+				closeSave();
+			}
+		}
+	}
+}
+
+function closeTalkTab()
+{
+	var tabId = $("#tabId").val();
+	if(window.parent.Tab){
+		var tabCount = window.parent.Tab.Tabs.children().length;
+		if(tabCount>1)
+		{
+			window.parent.Tab.Close(tabId);
+		}
+		else
+		{
+			window.parent.closeWindow();
+		}
+	}
+}
+
+//初始化默认号码状态
+function setPhoneNumState()
+{
+	var p1 = $("#mobilePhone1").val();
+	var p2 = $("#mobilePhone2").val();
+	var tel = $("#phone").val();
+	var fax = $("#fax").val();
+	
+	if(p1){
+		$("#rdo1").attr("disabled",false);
+	}else{
+		$("#rdo1").attr("disabled",true);
+	}
+	
+	if(p2){
+		$("#rdo2").attr("disabled",false);
+	}else{
+		$("#rdo2").attr("disabled",true);
+	}
+	
+	if(tel){
+		$("#rdo3").attr("disabled",false);
+		$("#phoneExt").attr("disabled",false);
+	}else{
+		$("#rdo3").attr("disabled",true);
+		$("#phoneExt").attr("disabled",true);
+	}
+	
+	if(fax){
+		$("#rdo4").attr("disabled",false);
+		$("#faxExt").attr("disabled",false);
+	}else{
+		$("#rdo4").attr("disabled",true);
+		$("#faxExt").attr("disabled",true);
+	}
+}
+
+function selCust(custVal){			//选择客户
+	if(custVal)
+	{
+		showCust();
+		var custId = parseInt(custVal);
+		if(custId>0)
+		{
+			setCust(custId);
+			$("#custBelongTo").show();
+		}
+		else
+		{
+			clearCustTab();
+			clearCust();
+			showPerssionPart();
+			resetPhone();
+			//initPhoneType();
+			$("#custBelongTo").hide();
+			setCustHead('');
+			$("#sharePart").hide();
+			$("#editEnable").val("1");
+		}
+	}
+	else
+	{
+		clearCustTab();
+		clearCust();
+		hideCust();
+		resetPhone();
+		setCustHead('');
+		$("#sharePart").hide();
+	}
+}
+
+//绑定数据
+function bindData(){
+	if('$!crmCustomer.sex'){
+		$("#cusSex").val('$!crmCustomer.sex');
+	}
+	if('$!crmCustomer.customerTypeId'){
+		$("#customerTypeId").val('$!crmCustomer.customerTypeId');
+	}
+	if('$!crmCustomer.customerIndustryId'){
+		$("#customerIndustryId").val('$!crmCustomer.customerIndustryId');
+	}
+	
+	if('$!crmCustomer.headshow'){
+		var html = "<img src='../showImage?fullPath=$!crmCustomer.headshow'/>";
+		jQuery('.avatar').html(html);
+	}else{
+		var path;
+		switch($("#cusSex").val()){
+			case "":
+				path = "${ctx}/images/headImage/a.bmp";
+				break;
+			case "男":
+				path = "${ctx}/images/headImage/b.bmp";
+				break;
+			case "女":
+				path = "${ctx}/images/headImage/c.bmp";
+				break;
+		} 
+		var html = "<img src='"+path+"'/>";
+		jQuery('.avatar').html(html);
+		$("#headshow").attr("headPath","");
+	}
+}
+
+function setCust(custId)		//设置客户
+{
+	var url = "getCustomerJson.html?"+autoLogin+"id="+custId+"&random="+Math.random()*10000;
+	var taskId = $('#taskId').val();
+	if(taskId!=null && taskId!="" && taskId!="-1")
+	{
+		url = url+"&taskId="+taskId;
+	}
+	jQuery.post(url+"&random="+Math.random()*1000000,{},
+		function(jsonString){
+		 	var json = jQuery.parseJSON(jsonString);
+		 	clearCust();
+		 	bindCust(json);
+		 	setCustTab(json);
+		 	openCustomerPhoneChange();
+		 	setPhoneNumState();
+		});
+}
+
+function showPerssionPart()				//显示有权限客户
+{
+	$("#hasRight").show();
+	$("#hasRightFields").show();
+	$("#noRight").hide();
+	$("#tabs-operate").show();
+	$("#noRightTitle").hide();
+}
+
+function hidePerssionPart()				//隐藏无权限客户
+{
+	$("#hasRight").hide();
+	$("#hasRightFields").hide();
+	$("#noRight").show();
+	$("#tabs-operate").hide();
+	$("#noRightTitle").show();
+}
+
+function clearCustTab()					//清空选项卡
+{
+	$('#tasks').hide();
+	$('#records').hide();
+	$('#relatives').hide();
+	$('#taskSchedules').hide();
+	$('#loanInfos').hide();
+	$('#datas').hide();
+	$('#customerPdtProducts').hide();
+	$("li[tabFlag$='true']").each(function(i){
+		$(this).hide();
+		reinit(this);
+	});
+	$("#cusBase").click();
+	$("#noRightTitle").show();
+}
+
+function setCustTab(json)				//设置页卡的显示或隐藏
+{
+	var cus=json["customer"];
+	var custId = cus["customerId"];
+	var tempIds = cus["templateIds"];
+	var hasPerssion = cus["hasPerssion"];
+	var shareCus = cus["shareCus"];
+	
+	$("li[tabFlag$='true']").each(function(i){
+		if(tempIds){
+			var tIds = tempIds.split(","), flag = false;
+			
+			for(var idx in tIds){
+				if($(this).attr('id') == ("exTab" + tIds[idx])){
+					flag = true;
+				}
+			}
+			
+			if(hasPerssion>0 || shareCus)
+			{
+    			if(flag){
+    				$(this).show();
+    			}
+    			else{
+    				$(this).hide();
+    			}
+			}
+			else{
+				$(this).hide();
+			}
+		}
+		else{
+			$(this).hide();
+		}
+		
+		reinit(this);
+	});
+	
+	if(hasPerssion>0 || shareCus)
+	{
+		if($("#tasks:hidden"))
+		{
+			$('#tasks').show();
+		}
+		if($("#records:hidden"))
+		{
+			$('#records').show();
+		}
+		if($("#relatives:hidden"))
+		{
+			$('#relatives').show();
+		}
+		if($("#taskSchedules:hidden"))
+		{
+			$('#taskSchedules').show();
+		}
+		if($("#loanInfos:hidden"))
+		{
+			$('#loanInfos').show();
+		}
+		if($("#datas:hidden"))
+		{
+			$('#datas').show();
+		}
+		if($("#customerPdtProducts:hidden"))
+		{
+			$('#customerPdtProducts').show();
+		}
+		
+		//任务信息
+		$('#taskMsg').load("${ctx}/tskMicroTaskTarget/taskCustomerCard.html?"+autoLogin+"customerId="+custId,{});
+		//联系记录
+		$('#recordMsg').load("${ctx}/record/queryAllByCustomerId.html?"+autoLogin+"customerId="+custId+"&actionType=browse&needLine=0",{});
+		//亲友信息
+		$('#relativesInfo').load("${ctx}/customerRelatives/relativesInfo.html?"+autoLogin+"customerId="+custId+"&actionType=modify&needLine=0",{});
+        //日程安排
+		$('#taskSchedule').load("${ctx}/tskSchedule/getScheduleListCard.html?"+autoLogin+"customerId="+custId+"&needLine=0",{});
+        //贷款信息
+        $('#loanInfo').load("${ctx}/loan/getAllLoanByCusId.html?"+autoLogin+"customerId="+custId+"&needLine=0",{});
+        //资料信息
+        $('#dataMsg').load("${ctx}/data/showDataByCusId.html?"+autoLogin+"customerId="+custId+"&needLine=0",{});
+        //客户意向
+        $('#customerPdtProduct').load("${ctx}/tskSchedule/getCustomerPdtProduct.html?"+autoLogin+"tskSchedule.customerId="+custId+"&needLine=0",{});
+		
+	}
+	else
+	{
+		if($("#tasks"))
+		{
+			$('#tasks').hide();
+		}
+		if($("#records"))
+		{
+			$('#records').hide();
+		}
+		if($("#relatives"))
+		{
+			$('#relatives').hide();
+		}
+		if($("#taskSchedules"))
+		{
+			$('#taskSchedules').hide();
+		}
+		if($("#loanInfos"))
+		{
+			$('#loanInfos').hide();
+		}
+		if($("#datas"))
+		{
+			$('#datas').hide();
+		}
+		if($("#customerPdtProducts"))
+		{
+			$('#customerPdtProducts').hide();
+		}
+		
+		
+		
+		
+	}
+	$("#cusBase").click();
+}
+
+function bindCust(json)			//绑定客户数据
+{
+	var cus=json["customer"];
+	var citys=json["city"];
+	var fields=json["fields"];
+	var hasPerssion = cus["hasPerssion"];
+	var shareCus = cus["shareCus"];
+	
+	if(shareCus>0)$("#sharePart").show();
+	else $("#sharePart").hide();
+	
+	if(hasPerssion>0 || shareCus>0)				//有权限
+	{
+		$('#hasRight').show();
+		$('#noRight').hide();
+		
+		if(cus.customerId!=null)$("#customerId").val(cus.customerId);
+		if(cus.customerName!=null)$("#cusName").val(cus.customerName);
+		if(cus.sex!=null)$("#cusSex").val(cus.sex);
+		if(cus.customerNo!=null)$("#customerNo").val(cus.customerNo);
+		if(cus.customerTitle!=null)$("#nickName").val(cus.customerTitle);
+		if(cus.age!=null)$("#age").html(cus.age+'<label>周岁</label>');
+		if(cus.birthday!=null)$("#birthday").val(cus.birthday);
+		if(cus.customerTypeId!=null)$("#customerTypeId").val(cus.customerTypeId);
+		if(cus.customerIndustryId!=null)$("#customerIndustryId").val(cus.customerIndustryId);
+		if(cus.idCard!=null)$("#idCard").val(cus.idCard);
+		if(cus.company!=null)$("#company").val(cus.company);
+		if(cus.remark!=null)$("#remark").val(cus.remark);
+		if(cus.province!=null)
+		{
+			$("#province").val(cus.province);
+			var cSel=$("#city");
+			cSel.empty();
+			for(var i=0;i<citys.length;i++)
+			{
+				var c=citys[i];
+				if(c["code"]==cus.city)cSel.append($("<OPTION VALUE='"+c["code"]+"' checked >"+c["name"]+"</option>"));
+				else cSel.append($("<OPTION VALUE='"+c["code"]+"' >"+c["name"]+"</option>"));
+			}
+		}
+		if(cus.address!=null)$("#address").val(cus.address);
+		if(cus.mobilePhone1!=null)$("#mobilePhone1").val(cus.mobilePhone1);
+		if(cus.mobilePhone2!=null)$("#mobilePhone2").val(cus.mobilePhone2);
+		if(cus.phone!=null)$("#phone").val(cus.phone);
+		if(cus.phoneExt!=null)$("#phoneExt").val(cus.phoneExt);
+		if(cus.fax!=null)$("#fax").val(cus.fax);
+		if(cus.faxExt!=null)$("#faxExt").val(cus.faxExt);
+		if(cus.email!=null)$("#email").val(cus.email);
+		if(cus.deptName!=null)$("#deptName").text(cus.deptName);
+		if(cus.userName)$("#userName").text("（"+cus.userName+"）");
+		else $("#userName").text("");
+		if(cus.belongDeptId)$("#belongDeptId").val(cus.belongDeptId);
+		if(cus.belongUserId)$("#belongUserId").val(cus.belongUserId);
+		if(cus.defaultPhoneType!=null)initPhoneType(cus.defaultPhoneType+"");
+		if(cus.isReceiveSms!=null)$("#allow").attr("checked",cus.isReceiveSms==1);
+		$("#editEnable").val("1");
+		
+		setCustHead(cus.headshow);
+		
+		for(var nm in fields)
+		{
+			var exfield = $("#"+nm);
+			var val = fields[nm];
+			if(exfield && val!=null)
+			{
+				exfield.val(val);
+			}
+		}
+		
+		showPerssionPart();
+	}
+	else
+	{
+		$('#noRight').show();
+		if(cus.customerId!=null){
+			$("#recordCustId").val(cus.customerId);
+			$("#customerId").val(cus.customerId);
+		}
+		if(cus.customerName!=null)$("#lbl_customerName").text(cus.customerName);
+		if(cus.sex!=null)$("#lbl_sex").text(cus.sex);
+		if(cus.customerNo!=null)$("#lbl_customerNo").text(cus.customerNo);
+		if(cus.customerTitle!=null)$("#lbl_customerTitle").text(cus.customerTitle);
+		if(cus.age!=null)$("#lbl_age").text(cus.age);
+		if(cus.birthday!=null)$("#lbl_birthday").text(cus.birthday);
+		if(cus.customerTypeName!=null)$("#lbl_customerTypeName").text(cus.customerTypeName);
+		if(cus.customerIndustryName!=null)$("#lbl_customerIndustryName").text(cus.customerIndustryName);
+		if(cus.deptName!=null)$("#deptName").text(cus.deptName);
+		if(cus.userName)$("#userName").text("（"+cus.userName+"）");
+		else $("#userName").text("");
+		if(cus.belongDeptId)$("#belongDeptId").val(cus.belongDeptId);
+		if(cus.belongUserId)$("#belongUserId").val(cus.belongUserId);
+		$("#editEnable").val("0");
+		
+		setCustHead(cus.headshow);
+		
+		hidePerssionPart();
+	}
+}
+
+function clearCust()			//清空客户数据
+{
+	$("#customerId").val("-1");
+	$("#recordCustId").val("");
+	$("input[type$='text'][clearFlag!='false']").val("");
+	$("input[type$='radio']").removeAttr("checked");
+	$("select:not([clearFlag='false'])").val("");
+	$("#city").empty();
+	$("select").select();
+	$("textarea:not([clearFlag='false'])").val("");
+	$("#belongDeptId").val("");
+	$("#belongUserId").val("");
+	$("#age").html("");
+	$("#allow").attr("checked",false);
+	
+}
+
+function showCust()				//显示客户
+{
+	$("#cusPanel").show();
+}
+
+function hideCust()				//隐藏客户
+{
+	$("#cusPanel").hide();
+}
+
+//根据生日生成年龄		
+function onBirthdayExit(){
+	if($("#birthday").val()){
+		var year = $("#birthday").val().substring(0,4);
+		var dd = new Date();
+		var age = dd.getFullYear()-year;
+		if(age<=200&&age>=0){
+			$("#age").text(age + " 周岁");
+		 }else{
+			$("#age").text("");
+		 }
+	}
+}
+
+//初始化默认号码
+function initPhoneType(phoneType)
+{
+	if(phoneType==null)phoneType = '$!crmCustomer.defaultPhoneType';
+	if(phoneType)
+	{
+		switch(phoneType)
+		{
+			case "1":
+				$("#rdo1").attr("checked",true);
+				break;
+			case "2":
+				$("#rdo2").attr("checked",true);
+				break;
+			case "3":
+				$("#rdo3").attr("checked",true);
+				break;
+			case "4":
+				$("#rdo4").attr("checked",true);
+				break;
+		}
+	}
+}
+
+function checkPhoneNull()
+{
+	var r1 = $("#rdo1").attr("checked");
+	var r2 = $("#rdo2").attr("checked");
+	var r3 = $("#rdo3").attr("checked");
+	var r4 = $("#rdo4").attr("checked");
+	
+	if(r1 || r2 || r3 || r4)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function checkPhoneNullOld()
+{
+	var r1 = $("#rdo1").attr("checked");
+	if(r1 && $("#mobilePhone1").val()==""){
+		banger.page.showMessageBox("默认号码不能为空");
+		return false;
+	}
+	var r2 = $("#rdo2").attr("checked");
+	if(r2 && $("#mobilePhone2").val()==""){
+		banger.page.showMessageBox("默认号码不能为空");
+		return false;
+	}
+	var r3 = $("#rdo3").attr("checked");
+	if(r3 && $("#phone").val()==""){
+		banger.page.showMessageBox("默认号码不能为空");
+		return false;
+	}
+	var r4 = $("#rdo4").attr("checked");
+	if(r4 && $("#fax").val()==""){
+		banger.page.showMessageBox("默认号码不能为空");
+		return false;
+	}
+	
+	if(r1 || r2 || r3 || r4)
+	{
+		return true;
+	}
+	else
+	{
+		banger.page.showMessageBox("必须选择一个默认号码");
+		return false;
+	}
+}
+
+//初始化省份城市
+function initProvince(val){
+	var pSel=$("#province");
+	pSel.bind("change",function(e){
+		if(this.value)
+		{
+			buildCity(this.value);
+		}
+		else
+		{
+			var cSel=$("#city");
+			cSel.empty();
+			var op=$("<OPTION></option>");
+			cSel.append(op);
+			cSel.select();
+		}
+	});
+	if(val)
+	{
+		buildCity(val);
+		pSel.val(val);
+	}
+}
+
+function buildCity(val)
+{
+	jQuery.post("../advancedCustomer/getCityJson.html?"+autoLogin+"provCode="+val,{},
+		function(json){
+			var ds=jQuery.parseJSON(json);
+			var cSel=$("#city");
+			var cityVal = cSel.attr("city");
+			cSel.empty();
+			var op=$("<OPTION></option>");
+			cSel.append(op);
+			for(var i=0;i<ds.length;i++)
+			{
+				var d=ds[i];
+				var selStr = (d["code"]==cityVal)?"selected":"";
+				var op=$("<OPTION VALUE='"+d["code"]+"' "+selStr+" >"+d["name"]+"</option>");
+				cSel.append(op);
+			}
+			$("#city").select();
+	});
+}
+
+function insertChar(index,text,oldText){
+	if(index> oldText.length-1) 
+      index=oldText.length-1; 
+    if(index <0) 
+      index=0; 
+
+    return  oldText.substring(0,index)+text+oldText.substring(index); 	
+}
+
+//根据身份证生成生日 年龄
+function iDCardExitEvent(id){
+	var iDCardStr = $("#"+id).val();
+	if((!iDCardStr)&&(iDCardStr.length!=15)&&(iDCardStr.length!=18)){
+		return;
+	}
+	if(checkIDCard(iDCardStr)){
+		//如果是15位身份证 先转换成18位
+		if(iDCardStr.length==15){
+			iDCardStr=insertChar(6,'19',iDCardStr);
+		}
+		var newBirthday = iDCardStr.substring(6,14);
+		var year = newBirthday.substring(0,4);
+		var month = newBirthday.substring(4,6);
+		var day = newBirthday.substring(6,9);
+		newBirthday = year+'-'+month+'-'+day;
+		var dd = new Date();
+		if(($("#birthday").val())&&($("#birthday").val()!=newBirthday)){
+			if(confirm('根据身份证，建议生日从'+$("#birthday").val()+'修改为 '+newBirthday+'。您确定要修改吗？')){
+				 $("#birthday").val(newBirthday);
+				 //$("#age").text(dd.getFullYear()-year);
+				 var age = dd.getFullYear()-year;
+				 if(age<=200&&age>=0){
+					$("#age").text(age + " 周岁");
+				 }else{
+					$("#age").text("");
+				 }
+			}
+		}else{
+			$("#birthday").val(newBirthday);
+			//$("#age").text(dd.getFullYear()-year);
+			var age = dd.getFullYear()-year;
+			 if(age<=200&&age>=0){
+				$("#age").text(age + " 周岁");
+			 }else{
+				$("#age").text("");
+			 }
+		}
+	}
+}
+
+//生成称谓事件
+function onSexblur(flag){
+	if($("#cusName").val()!=''){
+		if($("#cusSex").val()!=''){
+			//获取百家姓  返回称谓
+			jQuery.ajax({
+			  type: 'POST',
+			  url: "../customer/getNickName.html?"+autoLogin+"&random="+Math.random()*1000,
+			  data: {'cusName':jQuery.trim($("#cusName").val()),'cusSex':jQuery.trim($("#cusSex").val())},
+			  success:function(nickName){
+			  	if($("#nickName").val()==''){
+			  		$("#nickName").val(nickName);
+			  	}else{
+			  		if($("#nickName").val()!=nickName){
+			  			if(confirm("根据姓名和性别，建议称谓从"+ $("#nickName").val()+"修改为 "+nickName+"。您确定要修改吗？")){
+				  			$("#nickName").val(nickName);
+			}}}}});
+		}else{
+			$("#nickName").val("");
+		}
+	}
+	if(flag == 'sex'){
+		if('$!crmCustomer.headshow'){
+			return;	
+		}
+		var path;
+		switch($("#cusSex").val()){
+			case "":
+				path = "${ctx}/images/headImage/a.bmp";
+				break;
+			case "男":
+				path = "${ctx}/images/headImage/b.bmp";
+				break;
+			case "女":
+				path = "${ctx}/images/headImage/c.bmp";
+				break;
+		}
+		var html = "<img src='"+path+"'/>";
+		jQuery('.avatar').html(html);
+		$("#headshow").attr("headPath","");
+	}
+}
+//控制默认号码
+function ctrlDefaultNumberState(textid, rdoid){
+	if ($('#'+textid).val()==""){
+		if($("#"+rdoid).attr("checked")){
+			$("#"+rdoid).attr("checked",false);		
+		}
+		$("#"+rdoid).attr("disabled",true);
+		
+		if(!raidoHaschecked()){
+			if($("#mobilePhone1").val()!=''){
+				$("#rdo1").attr("checked",true);	
+			}else if($("#mobilePhone2").val()!=''){
+				$("#rdo2").attr("checked",true);
+			}else if($("#phone").val()!=''){
+				$("#rdo3").attr("checked",true);
+			}else if($("#fax").val()!=''){
+				$("#rdo4").attr("checked",true);
+			}
+		}
+	}else{
+		$("#"+rdoid).attr("disabled",false);
+	    if(!raidoHaschecked()){
+	    	$("#"+rdoid).attr("checked",true);	
+	    }
+	}
+}
+function raidoHaschecked(){
+	if((!$("#rdo1").attr("checked"))
+		&&(!$("#rdo2").attr("checked"))
+		&&(!$("#rdo3").attr("checked"))
+		&&(!$("#rdo4").attr("checked"))){
+		return false
+	}else{
+		return true;
+	}
+}
+//控制固话分机
+function ctrlPhoneExt(textid, rdoid, extId){
+	ctrlDefaultNumberState(textid, rdoid)
+	if($("#"+textid).val()){
+		//$("#"+extId).val("");
+		$("#"+extId).attr("disabled",false);
+	}else{
+		$("#"+extId).val("");
+		$("#"+extId).attr("disabled",true);
+	}
+}
+
+function checkHangup(msgFlag)			//检查话机是否挂断
+{
+	var flag = talkTimeHandler<0;
+	#if($record.callType!=4)
+	if(!flag)
+	{
+		if(window.parent.getPhoneState)
+		{
+			var status = window.parent.getPhoneState();
+			if(status){
+				var json = jQuery.parseJSON(status);
+				flag = (json["onLine"])?false:true;
+			}
+		}
+	}
+	#end
+	if(!flag && msgFlag){
+		#if($record.callType==4)
+			banger.page.showMessageBox("当前还在座谈中,请先结束座谈后再保存!");
+		#else
+			banger.page.showMessageBox("当前还在通话中,请先挂断电话后再保存!");
+		#end
+	}
+	return flag;
+}
+
+function checkSave()
+{
+	if(!checkHangup())
+	{
+		#if($record.callType==4)
+			banger.page.showMessageBox("当前还在座谈中,请先结束座谈后再保存!");
+		#else
+			banger.page.showMessageBox("当前还在通话中,请先挂断电话后再保存!");
+		#end
+		return false;
+	}
+	var selCustElem = $("#selCust")[0];
+	if(selCustElem)
+	{
+		for(var i=0;i<selCustElem.options.length;i++)
+		{
+			var op = selCustElem.options[i];
+			if(op.value=="多人匹配客户" && op.value=="-1")
+			{
+				banger.page.showMessageBox("多人匹配客户,请先选择客户或新建客户!");
+				return false;
+			}
+		}
+	}
+	
+	return true;
+}
+
+function checkCustName()
+{
+	if($("#cusName").length)
+	{
+		var custName = $("#cusName").val();
+		if(custName=="")
+		{
+			banger.page.showMessageBox("客户姓名不能为空");
+			return false;
+		}
+	}
+	return true;
+}
+
+function extendvalidator()
+{
+	return true;
+}
+
+var postRunning = false;
+function saveAll()			//保存
+{
+	if(!checkSave())return;
+	if($("#editEnable").val()=="1"){
+		var flag = jQuery.validator({ form: 'talkForm', extend: true, extendhandler: extendvalidator });
+		$("#cusBase").click();
+		if(!flag)return;
+	}
+
+	//if(!jQuery("#talkForm").validationEngine('validate'))return;
+
+	if(postRunning)return;
+	else
+	{
+		postRunning=true;
+		var postJson = getPostJson();
+		var isReceiveSms = ($("#allow").attr("checked")=="checked")?"0":"1";
+		postJson["crmCustomer.isReceiveSms"] = isReceiveSms;
+		postJson['crmCustomer.headshow']=jQuery.trim($("#headshow").attr("headPath"));
+		postJson["taskId"] = '$!taskId';
+	
+		jQuery.post("saveTelephoneTalk.html?"+autoLogin+"random="+Math.random()*1000000,postJson,
+			function(text){
+				postRunning=false;
+				if(text=="success")
+				{
+					var tabId = $("#tabId").val();
+					if(window.parent.Tab){
+						var tabCount = window.parent.Tab.Tabs.children().length;
+						if(tabCount>1)
+						{
+							window.parent.Tab.Close(tabId);
+						}
+						else
+						{
+							window.parent.closeWindow();
+						}
+					}
+				}
+				else
+				{
+					if(text!="error")
+					{
+						var json = jQuery.parseJSON(text);
+						for(var i=0;i<json.errors.length;i++){
+							var error = json.errors[i];
+							if(error.type=="crmCustomerService.checkCustomerNo"){
+								$('#divCustomerNo').addClass('v-fails');
+								$("#customerNo").attr('tips', error.message);
+							}
+						}
+					}
+					else
+					{
+						banger.page.showMessageBox({"type":"error","content":"保存数据出错!"});
+					}
+				}
+		});
+	}
+}
+
+function cannel()		//取消保存
+{
+	if(!checkHangup())
+	{
+		#if($record.callType==4)
+			banger.page.showMessageBox("当前还在座谈中,请先结束座谈后再保存!");
+		#else
+			banger.page.showMessageBox("当前还在通话中,请先挂断电话后再保存!");
+		#end
+		return false;
+	}
+	else
+	{
+		closeSave();
+		/*
+		var tabId = $("#tabId").val();
+		if(window.parent.Tab){
+			var tabCount = window.parent.Tab.Tabs.children().length;
+			if(tabCount>1)
+			{
+				window.parent.Tab.Close(tabId);
+			}
+			else
+			{
+				window.parent.closeWindow();
+			}
+		}
+		*/
+	}
+}
+
+function closeSave(){
+	var postJson = getPostJson(["crmCustomer","record"]);
+	var custId = postJson["crmCustomer.customerId"];
+	var bizType = postJson["record.bizTypeName"];
+	var progressId = postJson["record.commProgressId"];
+	var remark = postJson["record.remark"];
+	postJson["taskId"] = '$!taskId';
+	var hasVal = false;
+	if(custId!=null && custId!="" && parseInt(custId)>0)hasVal=true;
+	if(bizType!=null && bizType!="")hasVal=true;
+	if(progressId!=null && progressId!="")hasVal=true;
+	if(remark!=null && remark!="")hasVal=true;
+	if(hasVal)
+	{
+		jQuery.post("closeSaveTelephoneTalk.html?"+autoLogin+"random="+Math.random()*1000000,postJson,
+			function(text){
+				var tabId = $("#tabId").val();
+				if(window.parent.Tab){
+					var tabCount = window.parent.Tab.Tabs.children().length;
+					if(tabCount>1)
+					{
+						window.parent.Tab.Close(tabId);
+					}
+					else
+					{
+						window.parent.closeWindow(true);
+					}
+				}
+			}
+		);
+	}
+	else
+	{
+		var tabId = $("#tabId").val();
+		if(window.parent.Tab){
+			var tabCount = window.parent.Tab.Tabs.children().length;
+			if(tabCount>1)
+			{
+				window.parent.Tab.Close(tabId);
+			}
+			else
+			{
+				window.parent.closeWindow();
+			}
+		}
+	}
+}
+
+function upLoadFile(){
+	ajaxFileUpload({
+		url:"../customer/upLoadHead.html?"+autoLogin+"random="+Math.random()*10000,
+        id:'headImage',
+        callback:function(){
+        	var data = this.responseText;  
+        	var json = jQuery.parseJSON(data);
+        	if(json.error){
+				banger.page.showMessageBox(json.error);
+        	}else{
+        		var html = "<img src='../showImage?fullPath=" + json.fullPath+"'/>";
+				jQuery('.avatar').html(html);
+				$("#headshow").attr("headPath",json.fullPath);
+        	}
+        }
+    });  
+	return false;
+}
+
+//获取客户id
+function getCustomerId(){
+	var custId=null;
+	var cusotmerId=$("#customerId").val();
+	var recId=$("#recordCustId").val();
+	if(cusotmerId!=null && cusotmerId!="" && parseInt(cusotmerId)>0){
+		custId = $("#customerId").val();
+	}else if(recId!=null && recId!="" && parseInt(recId)>0){
+		custId = $("#recordCustId").val();
+	}
+	return custId;
+}
+
+</script>
+<body>
+<form id="talkForm" method="post">
+	<input type="hidden" id="isCommon" name="isCommon" value="$!isCommon" >
+	<input type="hidden" id="recordInfoId" name="record.recordInfoId" value="$!record.recordInfoId" >
+	<input type="hidden" id="recordNo" name="record.recordNo" value="$!record.recordNo" >
+	<input type="hidden" id="callType" name="record.callType" value="$!record.callType" >
+	<input type="hidden" id="recordCustId" name="record.customerId" value="$!record.customerId" >
+	<input type="hidden" id="remotePhone" name="record.remotePhone" value="$!record.remotePhone" >
+	<input type="hidden" id="tabId" name="tabId" value="$!tabId" >
+	<input type="hidden" id="customerId" name="crmCustomer.customerId" value="$!crmCustomer.customerId" >
+    <input type="hidden" name="crmCustomer.belongDeptId" value="$!crmCustomer.belongDeptId" id="belongDeptId"/>
+	<input type="hidden" name="crmCustomer.belongUserId" value="$!crmCustomer.belongUserId" id="belongUserId"/>
+	<input type="hidden" name="renumber" value="$!renumber" id="renumber" />
+	<input type="hidden" name="closeType" value="$!closeType" id="closeType" />
+	#if($hasPerssion>0 || $shareCus==true)
+		<input type="hidden" value="1" id="editEnable" />
+	#else
+		<input type="hidden" value="0" id="editEnable" />
+	#end
+	
+	<input type="hidden" id="recordFileName" />
+	<div class="action-bar" onselectstart="return false;">
+    	<ul onselectstart="return false;" >
+    		#if($record.callType==4)
+    			<li class="action-bar-callback" id="barListen" style="filter:gray" onselectstart="return false;" onclick="javascript:recordListen(this)" ><label id="txtListen" onselectstart="return false;" style="color:gray;" >播放录音</label></li>
+	        	<li class="action-bar-transfer" id="barScene" onselectstart="return false;" onclick="javascript:stopScene(this)" ><label id="txtScene" onselectstart="return false;" >结束座谈</label></li>
+    		#else
+    			<li class="action-bar-callback" id="barListen" style="filter:gray;display:none;" onselectstart="return false;" onclick="javascript:recordListen(this)" ><label id="txtListen" onselectstart="return false;" style="color:gray;" >播放录音</label></li>
+	        	<li class="action-bar-answer" id="barRecord" style="filter:gray" onselectstart="return false;" onclick="javascript:record(this)" ><label id="txtRecord" onselectstart="return false;" style="color:gray;" >开始录音</label></li>
+	        	#if($record.callType==2)
+	        		<li class="action-bar-callback" id="barRecial" style="filter:gray" onselectstart="return false;" onclick="javascript:redial(this)" ><label id="txtRecial" onselectstart="return false;" style="color:gray;" >重拨电话</label></li>
+	        		<li class="action-bar-transfer" id="barRedirectExt" style="filter:gray" onselectstart="return false;" onclick="javascript:exdial(this)" ><label id="txtRedirectExt" onselectstart="return false;" style="color:gray;" >续拨分机</label></li>
+	        	#else
+	        		<li class="action-bar-callback" id="barRecial" style="filter:gray" onselectstart="return false;" onclick="javascript:redial(this)" ><label id="txtRecial" onselectstart="return false;" style="color:gray;" >回拨电话</label></li>
+	        		<li class="action-bar-transfer" id="barRedirectExt" onselectstart="return false;" onclick="javascript:callForward(this)" ><label id="txtRedirectExt" onselectstart="return false;" >来电转接</label></li>
+	        	#end
+	        	<li class="action-bar-hangup" id="barHangup" style="filter:gray" onselectstart="return false;" onclick="javascript:hangup(this)" ><label onselectstart="return false;" id="txtHangup" style="color:gray;" >挂断电话</label></li>
+	        #end
+        </ul>
+    </div>
+    <table class="call-tiptbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	#if($record.callType != 4)<td width="70" align="center">通话号码：</td>
+					<td width="150"><label>$!record.incomingNumber</label>#if($phoneAreaName!="")(<label>$!phoneAreaName</label>)#end</td>
+				#end
+            	<td width="70" align="center">时长：</td>
+            	<td><label id="talkTimeSpan" >00:00:00</label></td>
+            	#if($custCount<1)
+            	<td width="100">
+            		<div id="selCustPart" ><a href="javascript:void(0);" onclick="javascritp:openSelCust()" >添加到现有客户</a></div>
+                </td>
+                <td width="100">
+                	<div id="disCustPart" style="display:none;" ><a href="javascript:void(0);" onclick="javascritp:disContactCust()" >取消关联</a><div>
+                </td>
+                #end
+            	<td width="44" align="right">#if($custCount>0)客户：#end</td>
+            	<td width="150" align="right">
+            		#if($custCount>0)
+                    <select id="selCust" name="selCust" clearFlag="false" style="width: 138px; -width: 140px;">
+						#if($custs.size()==0)
+							<option value="-1" >新客户</option>
+                    	#elseif($custs.size()==1)
+	                		#foreach($cust in $custs)
+	            				<option value="$cust.customerId" SELECTED >$cust.customerName</option>
+	            			#end
+	            			<option value="-1" >新客户</option>
+                    	#else
+            				#if($crmCustomer.customerId>0)
+            					<option value="$crmCustomer.customerId" selected >多人匹配客户</option>
+            					#foreach($cust in $custs)
+                					#if($cust.customerId!=$crmCustomer.customerId)
+                						<option value="$cust.customerId" >$cust.customerName</option>
+                					#end
+            					#end
+            					<option value="-1" >新客户</option>
+            				#else
+            					#foreach($cust in $custs)
+                					<option value="$cust.customerId" >$cust.customerName</option>
+            					#end
+            					<option value="-1" selected >多人匹配客户</option>
+            				#end
+                		#end
+                    </select>
+                    #end
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="80" align="right" nowrap="nowrap">业务类型：</td>
+            	<td width="240">
+                    <select id="bizType" name="record.bizType" value="$!record.bizType" clearFlag="false" style="width: 140px;">
+                        <option></option>
+                        #foreach($type in $bizType.getRecbizTypeForPad())
+							<option value="$!type.bizTypeId" >$!type.bizTypeName</option>
+						#end
+                    </select>
+                </td>
+                <td>
+					<div id="planD2" style="display:none;">
+                    	<input type="checkbox" class="chk" name="finishPlan" id="finishPlan" />
+    					<label for="finish">难以联系</label>
+                    </div>
+                </td>
+				<td>
+					<div id="planD3" style="display:none;">
+						<input  type="checkbox" class="chk" name="tskPlan" id="tskPlan" onclick="nextContactPlan(this)"/>
+						下次联系-设置新计划
+                        <span id="nextConPlanContent" style="display:none">
+    						(计划日期：<label id="nextPlanDate"></label>)
+    						<a href="javascript:void(0);" onclick="javascript:nextContactPlan('editor')">编辑</a>
+    					</span>
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="80" align="right" nowrap="nowrap">沟通进度：</td>
+            	<td>
+                    <select id="commProgressId" name="record.commProgressId" value="$!record.commProgressId" clearFlag="false" style="width: 140px;">
+                        <option></option>
+                        #foreach($pro in $progress.getCommProgressList())
+							<option value="$!pro.commProgressId" >$!pro.commProgressName</option>
+						#end
+                    </select>
+                </td>
+                <td colspan="2">
+					<div id="isSpeakDiv" style="display:none;">
+                    	<input type="checkbox" class="chk" id="isSpeak" name="record.isSpeak"/>
+    					<label>客户约访</label>
+                    </div>
+					
+					<div id="planD4" style="display:none;">
+                    	<input type="checkbox" class="chk" name="nextTask" id="nextTask" onclick="nextContactTask(this)"/>
+        					下次联系-安排新日程
+    					<span id="nextConTaskContent" style="display:none">
+    							(任务时间：
+                            <label id="tskStartDate"></label>
+        						至
+        					<label id="tskEndDate"></label>
+        						)
+                            <a href="javascript:void(0);" onclick="javascript:nextContactTask('editor')">编辑</a>
+    					</span>
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="80" align="right" nowrap="nowrap">备注：</td>
+            	<td colspan="3" >
+                	<div class="dtxtarea1">
+                    	<textarea id="recordremark" name="record.remark" clearFlag="false" >$!record.remark</textarea>
+                    </div>
+                </td>
+            </tr>
+		</tbody>
+	</table>
+	<div id="cusPanel" >
+	#if($hasPerssion>0 || $shareCus==true)
+		#set($noRightStyle="display:none")
+	#else
+		#set($hasRightStyle="display:none")
+	#end
+	#set($noRightTitleStyle="display:none")
+	#if($hasPerssion!=1)
+		#if($shareCus==false)
+			#set($noRightTitleStyle="")
+		#end
+    #end
+    <div id="noRightTitle" class="bold" style="margin-top:3px;margin-bottom:3px;$noRightTitleStyle" ><span class="red" style="font-size:12pt" >您无此客户访问权限</span></div>
+    #if($crmCustomer.customerId<1)
+    	#set($custBelongToStyle="display:none;")
+    #end
+    #if($shareCus==true)
+    	<div class="ui-prompt-banner" id = "sharePart" >
+    		<p class="warning"><label class="bold red">共享客户</label></p>
+    	</div>
+    #else
+    	<div class="ui-prompt-banner" id = "sharePart" style="display:none;" >
+    		<p class="warning"><label class="bold red">共享客户</label></p>
+    	</div>
+    #end
+   
+	<table id="custBelongTo" style="$!custBelongToStyle" class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+                <td width="80" align="right" nowrap="nowrap" class="bold"><span class="red">*</span>客户归属：</td>
+                <td>
+                    <label id="deptName" >$!crmCustomer.deptName</label>
+                    #if($!crmCustomer.userName && $!crmCustomer.userName!="")
+                    	<label id="userName" >（$!crmCustomer.userName）</label>
+                    #else
+						<label id="userName" />
+					#end
+                </td>
+            </tr>
+    	</tbody>
+    </table>
+	<div id="tabs" class="tabs" style="margin-top: 10px;">
+        <div class="tabs-header">
+            <div id="tabs-items-zone" class="tabs-items-zone">
+                <ul id="tabs-items" class="tabs-items">
+                    <li id="cusBase" ><label>基本信息</label></li>
+                    #if($crmCustomer.customerId>0)
+                    	#if($hasPerssion>0 || $shareCus)
+	                    	<li id="tasks" init="false" ><label>联系记录</label></li>
+	                    	<li id="records" init="false" ><label>任务安排</label></li>
+	                    	<li id="relatives" init="false" ><label>亲友信息</label></li>
+							<li id="taskSchedules" init="false" ><label>日程安排</label></li>
+	                    	<li id="loanInfos" init="false" ><label>贷款信息</label></li>
+	                    	<li id="datas" init="false" ><label>资料信息</label></li>
+	                    	<li id="customerPdtProducts" init="false" ><label>客户意向</label></li>
+	                    #else
+	                    	<li id="tasks" init="false" style="display:none;"><label>联系记录</label></li>
+	                    	<li id="records" init="false" style="display:none;"><label>任务安排</label></li>
+	                    	<li id="relatives" init="false" style="display:none;"><label>亲友信息</label></li>
+							<li id="taskSchedules" init="false" style="display:none;"><label>日程安排</label></li>
+	                    	<li id="loanInfos" init="false" style="display:none;"><label>贷款信息</label></li>
+	                    	<li id="datas" init="false" style="display:none;"><label>资料信息</label></li>
+	                    	<li id="customerPdtProducts" init="false" style="display:none;"><label>客户意向</label></li>
+	                    #end
+	                #else
+	                	<li id="tasks" init="false" style="display:none;"><label>联系记录</label></li>
+	                    	<li id="records" init="false" style="display:none;"><label>任务安排</label></li>
+	                    	<li id="relatives" init="false" style="display:none;"><label>亲友信息</label></li>
+							<li id="taskSchedules" init="false" style="display:none;"><label>日程安排</label></li>
+	                    	<li id="loanInfos" init="false" style="display:none;"><label>贷款信息</label></li>
+	                    	<li id="datas" init="false" style="display:none;"><label>资料信息</label></li>
+	                    	<li id="customerPdtProducts" init="false" style="display:none;"><label>客户意向</label></li>
+					#end
+                    #foreach($template in $temp.getAllCrmTemplate())
+		        		#if($template.isBasic == 0)
+		        			#if($!subString.existChar("$crmCustomer.templateIds","$template.templateId"))
+		        				<li id="exTab$!template.templateId" style="$!hasRightStyle" tabFlag="true" ><label>$template.templateName</label></li>	
+		        			#else
+		        				<li id="exTab$!template.templateId" style="$!hasRightStyle" tabFlag="true" class="hide"><label>$template.templateName</label></li>
+		        			#end
+		        		#end
+		        	#end
+                </ul>
+            </div>
+            <div id="tabs-operate" style="$hasRightStyle" class="tabs-operate">
+            	<input type="button" value="添加业务" id="tabs-add" class="tabs-open" />
+                <ul id="tabs-list" class="tabs-list">
+                	
+                </ul>
+            </div>
+        </div>
+        <div id="tabs-pages" class="tabs-pages" style="padding: 0;">
+        	<div class="tabs-page">
+        		
+        		<div id="hasRight" style="$hasRightStyle" >
+            		#parse("/velocity/customer/customerBaseInfo.vm")
+            	</div>
+            	<div id="noRight" style="$noRightStyle" >
+            		#parse("/velocity/customer/telephoneCustomerInfo.vm")
+            	</div>
+            #foreach($template in $temp.getTemplates())
+				#if($template.isBasic > 0)
+						<div id="hasRightFields" style="$hasRightStyle" >
+							#tabOption($template.fields,$exField,0)
+						</div>
+					</div>
+					#if($crmCustomer.customerId>0)
+	            		<div class="tabs-page" id="recordMsg"></div>
+	            		<div class="tabs-page" id="taskMsg"></div>
+	            		<div class="tabs-page" id="relativesInfo"></div>
+						<div class="tabs-page" id="taskSchedule"></div>
+						<div class="tabs-page" id="loanInfo"></div>
+						<div class="tabs-page" id="dataMsg"></div>
+						<div class="tabs-page" id="customerPdtProduct"></div>
+	            	#else
+	            		<div class="tabs-page" id="recordMsg"></div>
+	            		<div class="tabs-page" id="taskMsg"></div>
+	            		<div class="tabs-page" id="relativesInfo"></div>
+						<div class="tabs-page" id="taskSchedule"></div>
+						<div class="tabs-page" id="loanInfo"></div>
+						<div class="tabs-page" id="dataMsg"></div>
+						<div class="tabs-page" id="customerPdtProduct"></div>
+            		#end
+				#else
+					<div class="tabs-page" >
+						#tabOption($template.fields,$exField,0)
+					</div>
+				#end
+			#end
+			
+        </div>
+    </div>
+    
+</div>
+<hr style="margin: 20px 0px;" />
+    <p class="halign">
+    	#if($urlPermitUtil.hasPermission('addCustomer'))
+	    	<input type="button" value="保 存" class="btn6 btn6bg1" onclick="saveAll(); "/>
+		#else
+			<input type="button" value="保 存" disabled="disabled" class="btn6 btn6bg3" />
+		#end
+        <input type="button" value="取 消" class="btn6 btn6bg3" onclick="cannel(); "/>
+    </p>
+</form>
+</body>
+</html>

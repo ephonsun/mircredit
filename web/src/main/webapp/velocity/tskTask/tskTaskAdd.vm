@@ -1,0 +1,228 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+     <title>新建联系任务</title>    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css" />
+	<style type="text/css">
+		.gray_self { color:#999999; }
+	</style>
+</head>
+
+<body>
+    <div id="etabs" class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+				<form id="taskForm" name="taskForm" method="post" action="/tskContact/saveTskContact.html">
+                	<table class="htmltbl" style="table-layout: auto;">
+                        <tbody>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>任务标题：</label>
+                                </td>
+                                <td colspan="3">
+									<input type="hidden" name="tskContact.isNextContact" value="0" />
+                                    <div class="ui-div-text" style="width:392px; overflow:hidden;">
+                                        <input type="text" class="text" name="tskContact.contactTitle" rule="\S" tips='“任务标题”必须填写' maxlength="100" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>联系目的：</label>
+                                </td>
+                                <td colspan="3">
+                                    <select id="taskPurpose" name="tskContact.contactPurpose" style="width: 140px;" rule="\S" tips='“联系目的”必须填写'>
+											<option value=""></option>
+											#foreach($!purpose in $!taskPurposeList)
+												<option value="$!purpose.taskPurposeId">$!purpose.taskPurposeName</option>
+											#end
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>开始日期：</label>
+                                </td>
+                                <td width="150">
+                                    <div class="ui-div-text" style="width: 140px;">
+                                        <input type="text" readonly="readonly" class="text datepicker" name="tskContact.startDate" id="datepicker1" rule="\S" tips='“开始日期”必须填写'/>
+                                        <i class="date"></i>
+                                    </div>
+                                </td>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>结束日期：</label>
+                                </td>
+                                <td>
+                                    <div class="ui-div-text" style="width: 140px;">
+                                        <input type="text" readonly="readonly" fun="dateFunction" class="text datepicker"   name="tskContact.endDate" id="datepicker2"  rule="\S" tips='“结束日期”必须填写' />
+                                        <i class="date"></i>
+                                    </div>
+									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                    <label>任务概述：</label>
+                                </td>
+                                <td colspan="3">
+                                    <div class="ui-div-textarea" style="height: 100px; width:392px;">
+                                        <textarea class="textarea" style="height:100px;" name="tskContact.remark" style="border: 0;" id="remark"></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                    <label>是否紧急：</label>
+                                </td>
+                                <td colspan="3">
+                                	<input type="checkbox" class="checkbox" id="isEmergency" name="tskContact.isEmergency"/>
+                                    <label for="isEmergency">紧急任务</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                    <label>上传附件：</label>
+                                </td>
+                                <td colspan="3">
+									<input type="file" name="fileInput" id="fileInput" />
+                                    <label class="gray_self" title="添加附件">(*单个文件不能超过100M)</label>
+									<div id="fileQueue"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>                   
+        
+                    <hr />
+                    
+                    <div class="center">
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="addTask();" value="下一步" />
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancelAddTask();" value="取消" />
+                    </div>
+				</form>
+            </div>        
+        </div>
+    </div>
+</body>    
+#scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js "></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>	
+<script type="text/javascript">
+	jQuery(function(){
+		if($!roleType!=0){
+			tab.title(tab.self,'新建日程');
+		}else{
+			tab.title(tab.self,'新建联系任务');			
+		}
+		setUpload();
+		
+		//备注字数限制
+		maxInput('#remark',200);
+		
+		//加载内部页卡
+		$('#etabs').etabs({
+			index: 0,
+			beforeOnclick: function(){ return false; }
+		});
+		//加载下拉选择框
+		$('select').select();
+		
+		//加载验证控件
+		jQuery("#taskForm").validator();
+							
+		//是否是紧急任务单击
+		$("#isEmergency").click(function(){
+			var flag = $(this).attr("checked");
+			if(flag){
+				$(this).val(1);
+			}
+			else{
+				$(this).val(0);
+			}
+		});
+	});
+
+	function addTask(){
+		var bool = jQuery.validator({ form: 'taskForm'});
+		if(bool){			
+			var isUpload = false;
+			//是否有上传文件
+			var fileUpload = $('input[name=fileInput]');
+			if(fileUpload){
+				$('input[name=fileInput]').each(function(){
+					var fileQueue =$('#fileQueue')[0].innerText;
+					if(fileQueue!=""){
+						$(this).uploadifyUpload();
+						isUpload = true;
+					}
+				});
+			}
+			if(!isUpload){
+				submitMessage();
+			}
+		}
+	}
+	
+	function submitMessage(){
+		document.taskForm.submit();
+	}
+	
+	function getParentUn(){
+		return window.top.getUn();
+	}
+	
+	function cfirm(){
+		var title;
+		if($!roleType!=0){
+			title='新建日程';
+		}else{
+			title='新建联系任务';
+		}
+		if(sccCount!=count){
+			if(confirm('正在上传联系任务相关的文件，您确认要关闭'+title+'页卡吗？')) return true;
+		}else{
+			if(confirm('放弃'+title+'并关闭选项卡？')) return true;
+		}
+	}
+	
+	function cancelAddTask(){
+		if(cfirm()){
+			tab.close(GetId(), false);
+		}
+	}
+	
+	function dateFunction(obj){
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		var endDate=$("#datepicker2").val();
+		if(endDate.length>0){
+			if(endDate<systemDate){
+				$(obj).attr('tips', '未完成的任务，执行结束日期不能小于今天'); return false;
+			}else if(startDate>endDate){
+				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+			}else return true;
+		}else return true;
+	}
+</script>
+</html>

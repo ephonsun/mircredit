@@ -1,0 +1,69 @@
+<script>
+	jQuery(function(){
+			/**
+			 * 行单击事件
+			**/
+			$('tbody tr', $('.b-bomb-box1 .collist')).click(function(){
+				if(!$(this).hasClass('active')){
+					$(this).addClass('active').siblings().removeClass('active');
+				}
+			});
+			/**
+			 * 行划过事件
+			**/
+			$('tbody tr', $('.b-bomb-box1 .collist')).hover(
+				function(){
+					if(!$(this).hasClass('active')){ $(this).addClass('hover'); }
+				},
+				function(){
+					$(this).removeClass('hover');
+				}
+			);
+			/**
+			 * 执行者 确定 按钮事件
+			**/
+			$('.ok', $('.b-bomb-box1')).click(function(){
+				var tr = $('.collist table tbody tr.active', $('.b-bomb-box1'));
+				if(tr.size() == 0){
+					alert('请您选择联系客户的执行者!'); return false;
+				}
+				window.returnValue=tr[0].rowid;
+				window.close();
+			});
+			/**
+			 * 执行者 取消 按钮事件
+			**/
+			$('.close', $('.b-bomb-box1')).click(function(){
+				window.returnValue=0;
+				window.close();
+			});
+		});
+</script>
+<div class="colheader">
+    <table>
+        <thead>
+            <tr>
+                <th width="200">客户经理</th>
+                <th width="200">用户名</th>
+				<th width="12"><label>&nbsp;</label></th>
+            </tr>
+       </thead>
+    </table>
+</div>
+<div class="collist">
+	<table>
+        <tbody>
+    		#foreach($deptUser in $!userList)
+                <tr rowid="$!deptUser.executeId">
+                    <td width="200"><label>$!deptUser.userName</label></td>
+                    <td width="200"><label title="$!deptUser.deptName">$!deptUser.account</label></td>
+                </tr>
+    		#end
+        </tbody>
+	</table>
+</div>
+<div class="clear"></div>
+<div class="b">
+    <input type="button" class="btn1 ok" value="确定" />
+    <input type="button" class="btn1 close" value="取消" />
+</div>

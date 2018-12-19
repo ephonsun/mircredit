@@ -1,0 +1,169 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>$!pagename-明细</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .viewtbl{ margin-top:20px; }
+        body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <link type="text/css" rel="stylesheet" href="../css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+//        $(function(){
+//            jQuery('#detailTable').validator();
+//            //确定
+//            jQuery('.ui-footer-btn1-save').click(function(){
+//                alert('hello');
+##                var bool = jQuery.validator({form:'detailTable',extend:true,extendhandler:extendvalidator});
+##                if(!bool){
+##                    return false;
+##                }
+##                var postJson = {};
+##                for(var i=1;i<=$!num;i++){
+##                    postJson['amount'+i]=$("#amount"+i).val();
+##                    postJson['remark'+i]=$("#remark"+i).val();
+##                }
+##                var url ='${ctx}/loan/updatDetails.html' + "?loanId=" + $("#loanId").val()
+##                        + "&itemId="+ $("#id").val()
+##                        + "&num="+$("#num").val()
+##                        + "&random=" + Math.random() * 1000;
+##                jQuery.ajax({
+##                    type: 'POST',
+##                    url: url,
+##                    data: postJson,
+##                    success:function(data){
+##                        if(data=="success"){
+##                            window.returnValue="success";
+##                            window.close();
+##                            getProfitTable($!flag,$!type,$!div);
+##                        }
+##
+##                    }
+##                });
+##
+##
+##            });
+##
+##            jQuery('.ui-footer-btn1-cancel').click(function(){
+##                window.close();
+##            });
+##
+//        });
+//        //验证必须输入项是否有输入数据
+//        function extendvalidator(){
+//            var bool = true;
+//            return true;
+//        }
+$(function(){
+//    $("select").each(function () {
+//        $(this).select({scroll: 10});
+//    });
+    jQuery('#detailTable').validator();
+    //确定
+    jQuery('.ui-footer-btn1-save').click(function(){
+        var bool = jQuery.validator({form:'detailTable',extend:true,extendhandler:extendvalidator});
+        if(!bool){
+            return false;
+        }
+        var postJson = {};
+        for(var i=1;i<=$('#num').val();i++){
+            postJson['amount'+i]=$("#amount"+i).val();
+            postJson['remark'+i]=$("#remark"+i).val();
+        }
+        var url ='${ctx}/loan/updatDetails.html' + "?loanId=" + $("#loanId").val()
+                            + "&itemId="+ $("#id").val()
+                            + "&num="+$("#num").val()
+                            + "&random=" + Math.random() * 1000;
+//        alert(url);
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            data: postJson,
+            success:function(data){
+                if(data=="success"){
+                    window.returnValue="success";
+                    window.close();
+                }
+##
+            }
+        });
+
+
+    });
+
+    jQuery('.ui-footer-btn1-cancel').click(function(){
+        window.close();
+    });
+});
+
+//验证必须输入项是否有输入数据
+function extendvalidator(){
+    var bool = true;
+    return true;
+}
+
+
+    </script>
+</head>
+<body>
+
+<input type="hidden" id="loanId" value="$!loanId"/>
+<input type="hidden" id="id" value="$!id"/>
+<input type="hidden" id="type" value="$!type"/>
+<input type="hidden" id="flag" value="$!flag"/>
+<input type="hidden" id="num" value="$!num"/>
+
+
+
+<p class="bold loan-ttlbg">$!pagename-明细</p>
+
+<div class="loan-add-box" id="loanProfitLoss">
+    <table class="viewtbl" style="table-layout: auto;" id="detailTable">
+        <thead>
+            <tr>
+                <th><label title="月份">月份</label></th>
+                <th><label title="金额">金额</label></th>
+                <th><label title="备注">备注</label></th>
+            </tr>
+        </thead>
+        <tbody>
+            #foreach($detail in $detailList)
+            <tr>
+                <td><label title="$!detail.month">$!detail.month</label></td>
+                <td><input type="text" id="amount$!detail.sortNo" value="$!detail.amount" maxlength="16" rule="^(0|[1-9]\d{0,13})(\.\d{0,2})?$" tips='"金额"必须填写,[13位].[2位]' /></td>
+                <td><input type="text" id="remark$!detail.sortNo" value="$!detail.remark" maxlength="1000"/></td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+##<p></p>
+<hr />
+<div class="center">
+    <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+</div>
+
+</body>
+</html>
+

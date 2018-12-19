@@ -1,0 +1,265 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>分配贷款</title>
+
+    #styleLink("base")
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+        .b-bomb-box1 { position: relative; display: block; float: left; border: 0; padding: 0; }
+        .b-bomb-box1 .l { height: 318px; }
+        .b-bomb-box1 .r .collist { height: 299px; }
+        .button { text-align: right; }
+        .assign-me{cursor: pointer;color:#333; height: 24px; width: 120px; margin-left:18px; padding:2px 5px; }
+        .assign-me-click{ color:#000; border:1px solid #FFB951;background: #FFE6B0;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+        var flag = "brUser";
+        var isFirst = true;
+        $(function(){
+            initTree();
+            $('.sub').show().siblings('.self, .agency').hide();
+      //      changeType('brUser');
+        //    initAllotLoanToMe();
+		searchUser(3);
+        });
+        //初始化机构树
+        function initTree(){
+            var setting = {
+                view: {
+                    showIcon: false,
+                    dblClickExpand: false
+                },
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                },
+                callback: {
+                    onClick: onClick
+                }
+            };
+            jQuery.fn.zTree.init($("#userList"), setting, $deptArray);
+            jQuery.fn.zTree.init($("#deptTree"), setting, $deptArray);
+        }
+        //树 点击事件
+        function onClick(e, treeId, treeNode) {
+            $("#belongUserId").val('0');
+            $("#belongUserName").val("");
+            $('.assign-me').removeClass('assign-me-click');//移除分配给我的选中样式
+            switch(flag){
+                case "brMine":
+                    break;
+                case "brUser":
+                    searchUser(treeNode.id);
+                    break;
+                case "brDept":
+                    $('#belongDeptId').val(treeNode.id);
+                    $('#belongUserId').val('0');
+                    break;
+            }
+        }
+        //切换页卡
+        function changeType(type){
+            flag = type;
+            switch(type){
+                case "brUser":
+                    $('#belongDeptId').val('0');
+                    $('#belongUserId').val('0');
+                    if(isFirst){
+                        var treeObj = jQuery.fn.zTree.getZTreeObj("userList");
+                        var nodes = treeObj.getNodes();
+                        if (nodes.length>0) {
+                            treeObj.selectNode(nodes[0]);
+                        }
+                        if (nodes[0])
+                            searchUser(nodes[0].id);
+                        isFirst = false;
+                    }else{
+                        var treeObj = jQuery.fn.zTree.getZTreeObj("userList");
+                        var nodes = treeObj.getSelectedNodes();
+                        $("#belongDeptId").val(nodes[0].id);
+                    }
+                break;
+            }
+        }
+        //查询用户
+        function searchUser(deptId)
+        {
+            $("#belongDeptId").val(deptId);
+            var postJson = {};
+            postJson['deptId'] = deptId;
+            postJson['isWorkTransfer'] = 1;
+            var urlStr = "../loan/searchUser.html?RandNum="+ Math.random();
+            jQuery.ajax({
+                type: 'POST',
+                url: urlStr,
+                data: postJson,
+                success:function(html){
+                    var elem = $(html);
+                    hover(elem);
+                    $("#tablelist").empty().append(elem);
+                }
+            });
+        }
+        var user = {};
+        function hover(obj){
+            /**
+             * 行单击事件
+             **/
+            $('tbody tr', obj).click(function(){
+                if(!$(this).hasClass('active')){
+                    $(this).addClass('active').siblings().removeClass('active');
+                }
+            });
+            /**
+             * 行划过事件
+             **/
+            $('tbody tr', obj).hover(
+                    function(){
+                        if(!$(this).hasClass('active')){ $(this).addClass('hover'); }
+                    },
+                    function(){
+                        $(this).removeClass('hover');
+                    }
+            );
+        }
+
+        function userClick(userId,userName){
+            $("#belongUserId").val(userId);
+            $("#belongUserName").val(userName);
+        }
+
+        function btnOk(){
+            var belongDeptId = $("#belongDeptId").val();
+            var belongUserId = $('#belongUserId').val();
+            var belongUserName = $('#belongUserName').val();
+            var loanCount = $("#loanCount").val();
+            if(flag=='brUser'){
+                if(belongUserId=='0'){
+                    banger.page.showMessageBox('您没有选择人员，请先选择要分配的人员！');
+                    return;
+                }
+            }
+
+			/**
+			var applyUserId = $("#applyUserId").val();
+			var array = applyUserId.split(",");
+			for (var i=0 ; i< array.length ; i++){
+				if(belongUserId == array[i]){
+			  		banger.page.showMessageBox('不能将贷款分配给申请者！');
+                    return;
+				}
+			}
+			*/
+
+
+            if(confirm("您确定将选择的"+loanCount+"笔贷款分配给“"+belongUserName+"”吗？")){
+                var str = belongDeptId + ',' + belongUserId+","+belongUserName;
+                window.returnValue=str;
+                window.close();
+            }
+        }
+
+        function allotLoanToMe(){
+            var userId = '$!belongUserId';
+            var userName = '$!belongUserName';
+            var deptId = '$!belongDeptId';
+            var belongUserAccount = '$!belongUserAccount';
+            $("#belongUserId").val(userId);
+            $("#belongUserName").val(userName);
+            $('#belongDeptId').val(deptId);
+
+            $('.assign-me').addClass('assign-me-click');//分配给我添加选中样式
+            var zTree = jQuery.fn.zTree.getZTreeObj('userList');  //获取树对象
+            if(zTree != null){
+                var node = zTree.getSelectedNodes();//获取树选中节点
+                if (node.length>0) {
+                    zTree.cancelSelectedNode(node[0]);//取消树节点选中
+                }
+            }
+            $('#tablelist').html(''); //清空有侧列表数据
+            var elem = $('<table><tbody><tr><td width="180"><label>'+userName+'</label></td>'+
+                    '<td width="180"><label>'+belongUserAccount+'</label></td></tr></tbody></table>');
+            hover(elem);
+            $('#tablelist').html(elem);
+        }
+
+        //如果机构树节点数为空，则默认选中“分配给我”
+        function initAllotLoanToMe(){
+            var userListTree = jQuery.fn.zTree.getZTreeObj("userList");
+            var nodes = userListTree.getNodes();
+            if(nodes.length < 1){
+                allotLoanToMe();
+            }
+        }
+    </script>
+</head>
+
+<body>
+<input id="belongDeptId" name="belongDeptId" type="hidden" />
+<input id="belongUserId" name="belongUserId" type="hidden" />
+<input id="belongUserName" name="belongUserName" type="hidden"/>
+<input id="loanCount" name="loanCount" type="hidden" value="$!loanCount"/>
+
+<input id="applyUserId" name="applyUserId" type="hidden" value="$!applyUserId"/>
+<table class="viewtbl">
+    <tbody>
+    <tr class="self">
+        <td width="1%" class="field"></td>
+    </tr>
+    <tr class="sub hide">
+        <td width="1%" class="field"></td>
+        <td>
+            <div class="b-bomb-box1">
+                <div class="fl l">
+         ##           <label class="assign-me" onclick="allotLoanToMe();">
+                       ## 分配给我</label>
+                    <ul id="userList" class="ztree"></ul>
+                </div>
+                <div class="fl r" style="width: 388px;">
+                    <div class="colheader">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th width="180"><label>姓名</label></th>
+                                <th width="180"><label>用户名</label></th>
+                                <th width="12"><label>&nbsp;</label></th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="collist" id="tablelist">
+                        #parse("/velocity/loan/userTableList.vm")
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr class="agency hide">
+        <td width="1%" class="field"></td>
+        <td>
+            <div class="mtree">
+                <ul id="deptTree" class="ztree"></ul>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<hr />
+
+<div class="halign">
+    <input type="button" class="btn6 btn6bg1" value="确定" onclick="btnOk()"/>
+    <input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close()"/>
+</div>
+</body>
+</html>

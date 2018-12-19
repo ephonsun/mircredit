@@ -1,0 +1,155 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>拒绝原因</title>
+    #styleLink("base")
+	#scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    #scriptLink("page")	
+    <script type="text/javascript">
+		//设置第一行 上移 按钮禁用；最后一行 下移 按钮禁用
+		function setstate(){
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+		}	
+	
+		jQuery(function(){
+			jQuery("#recTypeForm").validator();
+			setstate();
+		});
+		
+		function add(){
+			var bool = jQuery.validator({ form: 'recTypeForm', extend: true, extendhandler: extendvalidator});
+			if(bool){
+			    document.recTypeForm.submit();
+			}
+		}
+    	
+    	function extendvalidator(){
+    		var bool = true;
+			if($('#cancelReasonName').val()){
+				var postJson = {};
+        		postJson['lnCancelReason.cancelReasonName']=$('#cancelReasonName').val();
+        		jQuery.ajax({
+        			type: 'POST',
+        			url:'exsitsCancelReason.html',
+        			data:postJson,
+        			cache: false, 
+        			async: false,
+        			success:function(data){
+        				if(data!=""){
+                           banger.page.showMessageBox("已存在相同的选项！");
+            				bool=false;
+            			}else{
+            				bool=true;
+            			}
+        			}
+        		});
+			}else bool=false;
+    		
+    		return bool;
+    	}
+		
+		//通过id删除拒绝原因
+		function delCancelReasonById(id,obj){
+		  if(confirm('您确定要删除选项“'+obj.parentNode.parentNode.childNodes[0].innerText+'”吗？')){
+		     location.href="deleteCancelReason.html?lnCancelReason.cancelReasonId="+id;
+		  }
+		}
+		
+		//更新拒绝原因
+		function updateA(code){
+		 var url="toUpdatePage.html?lnCancelReason.cancelReasonId="+code+"&random="+Math.random()*10000;
+		 var result=window.showModalDialog(url,{window: window},'dialogWidth=550px;dialogHeight=220px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+		  if(result==1){
+		    RR();
+		  }
+		}
+		
+		function RR(){
+			document.location.href = "cancelReasonList.html?random="+Math.random();
+		}
+	
+		function upOrdown(code,flag){
+			jQuery.post('upOrDown.html',{
+				'lnCancelReason.cancelReasonId':code,
+				'moveFlag':flag
+			},function(data){
+				if(data!='True'){
+				RR();
+					return ;
+				}
+				RR();
+			});
+		}
+		
+		function valBizType(){
+			if(!$("#cancelReasonName").val()){
+				$("#cancelReasonName").attr('tips', '“拒绝原因”必须填写');
+				return false;
+			}
+			return true;
+		}
+	</script>
+</head>
+
+<body>
+	<table class="viewtbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="70" class="field"><label>名称：</label></td>
+            	<td><label>拒绝原因</label></td>
+            	<td width="70" class="field"><label>字段类型：</label></td>
+            	<td><label>系统级</label></td>
+            	<td width="70" class="field"><label>数据类型：</label></td>
+            	<td><label>单选下拉框</label></td>
+            </tr>
+        </tbody>
+    </table>
+    <div style="margin: 10px 0px;"><label>选项列表</label></div>
+	<div style="border: 1px solid #ccc; padding: 10px;">
+		<form name="recTypeForm"  id ="recTypeForm" action="insertCancelReason.html"  method="post">
+    		<div class="sz" style="text-align: left;">
+	        	<label class="fl red">*</label>
+            	<label class="fl">新选项：</label>
+				<div class="dtxt2 fl" id="recDiv" style="width: 150px; margin-right: 5px;">
+					<input type="text" fun="valBizType" name="lnCancelReason.cancelReasonName" id="cancelReasonName" class="dtxt2-txt" maxlength="20" rule="\S" tips="“拒绝原因”必须填写"/>
+                </div>
+                <input type="text" style="display:none">
+				<input type="button" value="添 加" class="btn1 fl" onclick="add()"/>
+            </div>
+		</form>
+		<table class="listtbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>选项名称</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            	#foreach($lnCancelReason in $!lReasons)
+                <tr>
+                    <td><label>$!lnCancelReason.cancelReasonName</label></td>
+                    <td width="150">
+						<a class="slink" href="#" onclick="updateA('$!lnCancelReason.cancelReasonId')">编辑</a>
+						<a class="slink" href="#" onclick="delCancelReasonById('$!lnCancelReason.cancelReasonId',this)">删除</a>
+                    	<a href="#" class="slink up" onclick="upOrdown('$!lnCancelReason.cancelReasonId','up')">上移</a>
+    					<a href="#" class="slink down" onclick="upOrdown('$!lnCancelReason.cancelReasonId','down')">下移</a>
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+	<div class="halign" style="margin-top: 20px;">
+       <input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+    </div>
+</body>
+</html>

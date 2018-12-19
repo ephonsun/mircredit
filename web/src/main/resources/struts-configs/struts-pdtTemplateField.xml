@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="pdtTemplateField" extends="default" namespace="/pdtTemplateField" > 	 
+		<!--  业务模板字段列表页面 -->
+		<action name="showPdtTemplateFieldList" class="pdtCrmTemplateFieldAction" method="showCrmTemplateFieldByTemplateId">
+			<result name="success">/velocity/pdtTemplateField/showTemplateFieldList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  跳转到新增业务模板字段列表页面 -->
+		<action name="toAddPdtTemplateFieldPage" class="pdtCrmTemplateFieldAction" method="toAddTemplateFieldPage">
+			<result name="success">/velocity/pdtTemplateField/addTemplateField.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  新增业务模板字段列表 -->
+		<action name="addPdtCrmTemplateField" class="pdtCrmTemplateFieldAction" method="addCrmTemplateField">
+			<result name="success" type="redirectAction">showPdtTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  编辑业务模板字段列表 -->
+		<action name="updatePdtCrmTemplateField" class="pdtCrmTemplateFieldAction" method="updateCrmTemplateField">
+			<result name="success" type="redirectAction">showPdtTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  编辑业务模板字段列表 -->
+		<action name="updatePdtCrmTemplateFieldIsPopup" class="pdtCrmTemplateFieldAction" method="updateCrmTemplateFieldIsPopup">
+			<result name="success" type="redirectAction">showPdtTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 移动模版字段页面（上移和下移） -->
+		<action name="movePdtFieldItems" class="pdtCrmTemplateFieldAction"
+			method="moveFieldItems">
+			<result name="success" type="redirectAction">showPdtTemplateFieldList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  删除业务模板字段列表 -->
+		<action name="delPdtTemplateField" class="pdtCrmTemplateFieldAction" method="deleteCrmTemplateField">
+			<result name="success" type="redirectAction">showPdtTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  跳转到编辑业务模板字段列表页面 -->
+		<action name="toUpdatePdtTemplateFieldPage" class="pdtCrmTemplateFieldAction" method="toUpdateTemplateFieldPage">
+			<result name="success">/velocity/pdtTemplateField/updateTemplateField.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	</package>
+</struts>

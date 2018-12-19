@@ -1,0 +1,348 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>有效通话量设置</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+    	h4 { border-bottom: 1px solid #ccc; line-height: 30px; font-size: 12px; }
+		h4.mt { margin: 20px 0px 0px 0px; }
+		div.button { margin: 10px 0px; }
+		
+		.shcus { height: auto; overflow: auto; zoom: 1; }
+		.shcus div.item { border: 1px solid #ccc; float: left; height: 20px; margin: 0 5px 5px 0; padding: 5px; line-height: 20px; white-space: nowrap; }
+		.shcus div.item label {  }
+		.shcus div.item span { cursor: pointer; margin-left: 5px; color: #0000ff; font-size: 14px; font-weight: bold; }
+		.shcus div.item:hover, .shcus div.hover { border-color: #f60; }
+		.shcus div.item span:hover, .shcus div.item span.hover { color: #f60; }
+		
+		.accmanager { display: none; border: 1px solid #ccc; width: 300px; height: 186px; overflow: auto; }
+		
+		.aui_main { vertical-align: top !important; }
+		.gray_self { color:#999999; }
+    </style>
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+      var setting = {
+			check: {
+				enable: true,
+				chkboxType: { "Y": "ps", "N": "ps" }
+			},
+			view: {
+				showIcon: true,
+				dblClickExpand: false
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				beforeClick: null,
+				onClick: null,
+				beforeCheck: null,
+				onCheck: null
+			}
+		}
+	 var delList = [];
+       function ajaxurl(){
+			return '../customer/getCusBelongToJson.html?BelongToType=brShareUser&random=' + Math.random()*1000000;
+		}
+		$(function(){
+			//加载校验控件
+			jQuery("#organize").validator();
+			jQuery.ajax({
+				type: 'POST',
+				url: ajaxurl(),
+				dataType: 'json',
+				
+				success: function(nodes){
+					if(nodes && nodes.length != 0){
+						nodes = (typeof(nodes)=='string') ? jQuery.parseJSON(nodes) : nodes;
+						
+						jQuery.fn.zTree.init(jQuery('#utree'), setting, nodes);
+					}
+					else{
+						
+					}
+				},
+				error: function(){
+					
+				}
+			});
+		});
+		
+		function addContactCustomer(){
+			var tObj = jQuery.fn.zTree.getZTreeObj('utree');
+			if(tObj!=null){
+				tObj.checkAllNodes(false);
+			}
+			accmanager();
+		}
+		function setTalklimitConfig(){
+		   var isChecked = $("#bootset").attr("checked") == "checked";
+			if (isChecked){
+				$('#organize').show();
+			}else{
+				$('#organize').hide();			
+			}
+			jQuery.ajax({
+				type: 'POST',
+				url: '../sysTalklimitConfig/setTalklimitConfig.html',
+				dataType: 'json',
+				data:{'openTalkLimitConfig':isChecked},
+				success: function(data){
+				}
+			});
+		}
+		
+		function remove(id){
+			 $(id).parent().parent().remove();
+			// var config = {};
+			// var talklimitConifId = $(id).parent().parent().attr("id");
+			// if("" != talklimitConifId){
+			// 	config['talklimitConifId'] = talklimitConifId;
+			 //	delList.push(config);
+			// }
+			 
+		}
+		
+		function submit(){
+			
+			var bool = jQuery.validator({ form: 'organize', extend: false});
+			if(!bool){
+				return false;
+			}
+			var list = [];
+			var ttt = $("#talkConfigTable tbody");
+	        var nTds = $('tr', ttt);
+	        var i = 0;
+	        
+	        nTds.each(function () {
+	        	   var talklimitConifId = $(nTds[i]).attr("id"); 
+	        	   var userid = $($("td", nTds[i])[1]).attr("userid");
+	               var val1 = jQuery('input',$($("td", nTds[i])[2])).val();
+		           var val2 = jQuery('input',$($("td", nTds[i])[3])).val();
+		           var config = {};
+		           config['toplimit'] = val1;
+		           config['lowerlimit'] = val2;
+		           config['talklimitConifId'] = talklimitConifId;
+		           config['userid'] = userid;
+		           
+				   list.push(config);
+		           i++;
+	       		  });
+	       
+	       jQuery.ajax({
+				type: 'POST',
+				url: '../sysTalklimitConfig/saveTalklimitConfigList.html',
+				data:{'configList':jQuery.toJsonString(list)},
+				dataType:'json',
+				success: function(data){
+					if(data == '0'){
+						tab.close(GetId(), false);
+					}
+				},
+				error: function(){
+					
+				}
+			});
+			
+		}
+		
+		
+		
+		/**
+		 * 超时弹层
+		**/
+		function accmanager(){
+			art.dialog({
+				title: '选择人员',
+				padding: 15,
+				lock: true,
+				opacity: 0,
+				esc: false,
+				content: document.getElementById('accmanager'),
+				ok: btnOk,
+				cancel: btnCancel
+			});
+		}
+		
+		//选择客户经理 确定
+		function btnOk(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj('utree');
+			var nodes = treeObj.getCheckedNodes(true);
+			
+			var len = nodes.length;
+			for(var i=0; i<len; i++){
+				if(nodes[i].flag=='U'){
+					if(!hasSelect(nodes[i].id)){
+						addUser(nodes[i].id, nodes[i].name, nodes[i].deptName);
+					}
+				}
+			}
+		}
+		
+		function hasSelect(id){
+			var boo = false;
+			var ttt = $("#talkConfigTable tbody");
+	        var nTds = $('tr', ttt);
+	        var i = 0;
+	        nTds.each(function () {
+	        	   var userid = $($("td", nTds[i])[1]).attr("userid");
+	        	   if(userid==id){
+	        	   	  boo = true;
+	        	   }
+		           i++;
+	       		  });
+			return boo;
+		}
+		
+		function addUser(userId, userName, deptName){
+			var ttt = $("#talkConfigTable tbody");
+			var ht='<tr id=""><td><label title="'+deptName+'">'+deptName+'</label></td><td userid="'+userId+'"><label title="'+userName+'">'+userName+'</label></td>'+
+			       '<td><div class="ui-div-text"><input type="text" class="text" fun="toplimitValFunction" style="ime-mode: disabled" onkeydown="return keyDown(this)" onbeforepaste="return textPaste(this)" value="0" tips="" maxlength="3"/></div></td>'+
+			       '<td><div class="ui-div-text"><input type="text" class="text" fun="lowerlimitValFunction" style="ime-mode: disabled" onkeydown="return keyDown(this)" onbeforepaste="return textPaste(this)" value="0"  tips="" maxlength="2"/></div></td>'+
+			       '<td><label class="ui-link-btn" title="移除" onclick="remove(this)">移除</label></td></tr>';
+			ttt.append(ht);
+			jQuery("#organize").validator();
+		}
+		
+		//选择客户经理 取消
+		function btnCancel(){
+		}
+		
+		function toplimitValFunction(a){
+			var lowerVal = parseInt($(a).parent().parent().next().find("input").val());
+			var topVal = parseInt($(a).val());
+			if(topVal ==0 || lowerVal == 0)
+				return true;
+			if(topVal < lowerVal){
+				$(a).attr('tips','上限需大于下限');
+				return false;
+			}
+			return true;
+		}
+		
+		function lowerlimitValFunction(a){
+			var topVal = parseInt($(a).parent().parent().prev().find("input").val());
+			var lowerVal = parseInt($(a).val());
+			if(topVal ==0 || lowerVal == 0)
+				return true;
+			if(topVal < lowerVal){
+				$(a).attr('tips','上限需大于下限');
+				return false;
+			}
+			return true;
+		}
+		
+		function keyDown(obj){
+    	var e = window.event;
+		var key = e.keyCode || e.which;
+		var flag = (e.shiftKey && jQuery.keyboard.insert==key) || (e.ctrlKey && key==86) || (e.ctrlKey && key==67);
+		if(key==229)
+		{
+			jQuery.input.fn.imeKeyDown(obj,checkNumber);
+			return true;
+		}
+		else
+		{
+			if(!flag)
+			{
+				return jQuery.input.fn.textKeyDown(e,obj,checkNumber);
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+	
+	function textPaste(obj){
+		var e = window.event;
+		return jQuery.input.fn.textPasteNew(e,obj,checkNumber);
+	}
+    
+	function checkNumber(text){
+		if(text=="")return false;
+		if(!inChars(text,"0123456789"))return false;
+		//if(text.substr(0,1)=='0')return false;
+		return true;
+	}
+		
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td width="8%">
+                	<input type="checkbox" class="checkbox" id="bootset" onclick="setTalklimitConfig()" #if ($!openTalkLimitConfig)checked="true" #else "disabled" #end/>
+					<label for="bootset">启动有效通话量设置</label><br />
+					<label class="gray_self">开启有效通话的每日数量提醒</label>
+                </td>
+        	</tr>
+        </tbody>
+    </table>
+	<div id="organize" style=#if($!openTalkLimitConfig)"display:inline" #else "display:none"  #end>
+		<div class="action-bar">
+        <span class="ui-span-btn fl" onclick="addContactCustomer()">
+            <label>添加用户</label>
+        </span>
+    	</div>
+		<table class="datatbl"  id="talkConfigTable">
+			<thead>
+				<tr>
+					<th><label title="组织机构">组织机构</label></th>
+					<th><label title="用户名">用户名</label></th>
+					<th><label title="话量上限">话量上限/日</label></th>
+					<th><label title="话量下限">话量下限/日</label></th>
+					<th><label title="操作">操作</label></th>
+				</tr>
+			</thead>
+			<tbody>
+				#foreach($!talklimitConfig in $!sysTalklimitConfigList)
+				
+				<tr id="$!talklimitConfig.talklimitConifId">
+					<td><label title="$!talklimitConfig.deptName">$!talklimitConfig.deptName</label></td>
+					<td userid="$!talklimitConfig.userid"><label title="$!talklimitConfig.userName">$!talklimitConfig.userName</label></td>
+					<td>
+						<div class="ui-div-text">
+                			<input type="text" class="text" fun="toplimitValFunction" style="ime-mode: disabled" onkeydown="return keyDown(this)" onbeforepaste="return textPaste(this)" value="$!talklimitConfig.toplimit" tips="" maxlength="3"/>
+                		</div>
+
+					</td>
+					<td>
+						<div class="ui-div-text">
+                			<input type="text" class="text" fun="lowerlimitValFunction" style="ime-mode: disabled" onkeydown="return keyDown(this)" onbeforepaste="return textPaste(this)" value="$!talklimitConfig.lowerlimit"  tips="" maxlength="2"/>
+                		</div>
+
+					</td>
+					<td><label class="ui-link-btn" title="移除" onclick="remove(this)">移除</label></td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+	</div>
+	<hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" onclick="submit()"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+   <div id="accmanager" class="accmanager"><ul id="utree" class="ztree"></ul></div>
+</body>
+</html>
+

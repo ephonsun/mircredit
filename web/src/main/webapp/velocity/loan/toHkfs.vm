@@ -1,0 +1,163 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>还款计划</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .viewtbl{ margin-top:20px; }
+        body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/json2.js"></script>
+    <script type="text/javascript">
+
+        $(function(){
+
+
+            $(".ui-footer-btn2-cancel").click(function(){
+                window.close();
+            });
+            //确定
+            $('.ui-footer-btn2-save').click(function(){
+                var num =0;
+                var sum=0;
+                var j =0;
+                var q=0;
+
+                var limitYear = $("#limitYear").val();
+                var principalJson ={};
+                var interestJson ={};
+                if(null!=limitYear&&""!=limitYear){
+                    for(var i=0; i<parseInt(limitYear);i++){
+                        j=0;
+                        q=0;
+                        j=parseFloat($("#principal"+(i+1)).val());
+                        q=parseFloat($("#interest"+(i+1)).val());
+                        num =num+j;
+                        sum=sum+q;
+                        principalJson[i+1] = j
+                        interestJson[i+1]=  q;
+                    }
+                }
+                eval("var jsonString = '"+JSON.stringify(principalJson)+"'")
+                eval("var interestString = '"+JSON.stringify(interestJson)+"'")
+
+                var money =$("#money").val();
+                var repaRate =$("#repaRate").val();
+                var adviceRepayWayId =$("#adviceRepayWayId").val();
+                var amount =$("#amount").val();
+                  if (amount/1.00 != num.toFixed(2)){
+                      alert("请重新核对本金金额！");
+                      return false;
+                  }
+                var avg=$("#avg").val();
+               if(adviceRepayWayId!="4"){
+                   if(avg/1.000 != sum.toFixed(3)){
+                       alert("请重新核对应还利息！");
+                       return false;
+                   }
+               }
+                var postJson = {};
+                postJson['loanId'] = $("#loanId").val();
+                postJson['repayDate']=$("#repayDate").val();
+                postJson['registerLoanDate']=$("#registerLoanDate").val();
+                postJson['interest']=$("#interest").val();
+                postJson['resultRepayWayId']=$("#resultRepayWayId").val();
+                postJson['adviceRepayWayId']=$("#adviceRepayWayId").val();
+                postJson['jsonString']=jsonString;
+                postJson['interestString']=interestString;
+                postJson['money']=money;
+                postJson['repaRate']=repaRate;
+                postJson['avg']=avg;
+
+                var urlStr = "../loan/addRepaymentPlan.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+                        if(data == "success"){
+                            window.returnValue="success";
+                            window.close();
+                        }
+                        window.close();
+                    }
+                });
+            });
+
+
+
+        });
+    </script>
+</head>
+<body>
+<input type="hidden" id="loanId" value="$!loanId"/>
+<input type="hidden" id="money" value="$!money"/>
+<input type="hidden" id="limitYear" value="$!limitYear"/>
+<input type="hidden" id="repayDate" value="$!repayDate"/>
+<input type="hidden" id="repaRate" value="$!repaRate"/>
+<input type="hidden" id="adviceRepayWayId" value="$!adviceRepayWayId"/>
+<input type="hidden" id="resultRepayWayId" value="$!resultRepayWayId"/>
+<input type="hidden" id="registerLoanDate" value="$!registerLoanDate"/>
+<input type="hidden" id="avg" value="$!avg"/>
+<input type="hidden" id="amount" value="$!amount"/>
+
+<p class="bold loan-ttlbg">还款计划</p>
+
+
+<div id="pledgeList" >
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="还款期数">还款期数</label></th>
+            <th><label title="还款日期">还款日期</label></th>
+            <th><label title="应还本金">应还本金</label></th>
+            <th><label title="应还利息">应还利息</label></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            #foreach($plan in $planList)
+            <tr>
+                <td><label>$!plan.sortno</label></td>
+                <td><label  id="planDate$!plan.planDate" maxlength="20"/>$!date.format('yyyy-MM-dd',$!plan.planDate)</td>
+                <td><input class="text" type="text"  id="principal$!plan.sortno" maxlength="20" value="$!plan.principal"/></td>
+                <td><input class="text" type="text"  id="interest$!plan.sortno"  maxlength="20" value="$!plan.interest"/></td>
+            </tr>
+            #end
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+<div class="center">
+    #if("$!isLend"!="true" && "$!isLend" != "onlyShow")
+        <input type="button" id="submit" class="ui-footer-btn1 ui-footer-btn2-save button" value="保存  " />
+    #end
+    <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn2-cancel button" value="  取消" />
+
+</div>
+</body>
+</html>

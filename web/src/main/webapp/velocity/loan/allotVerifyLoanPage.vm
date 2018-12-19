@@ -1,0 +1,159 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>未审计贷款分配</title>
+    #styleLink("base")
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+        .div-allot-loan{ border:1px solid #ccc; width:480px;height: 330px;_width:470px;_height:310px;overflow:auto; }
+        .assign-me{cursor: pointer;color:#333; height: 24px; width: 120px; margin-left:10px; padding:2px 5px; }
+        .assign-me-click{ color:#000; border:1px solid #FFB951;background: #FFE6B0;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            initTree();
+            $('.sub').show().siblings('.self, .agency').hide();
+        });
+        //初始化机构树
+        function initTree(){
+            var setting = {
+                view: {
+                    showIcon: true,
+                    dblClickExpand: false
+                },
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                },
+                callback: {
+                    onClick: onClick
+                }
+            };
+            jQuery.fn.zTree.init($("#userList"), setting, $array);
+        }
+        function onClick(e,treeId,tnode){
+            $('.assign-me').removeClass('assign-me-click');//移除分配给我的选中样式
+            var postJson = {};
+            postJson = getOnclickJson(treeId,'U');
+            $('#userIds').val(postJson.ids);
+            $('#userText').val(postJson.names);
+            $('#userIdForMe').val("");
+            $('#userNameForMe').val("");
+        }
+
+        function getOnclickJson(treeId,flag){
+            var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+            var nodes = treeObj.getSelectedNodes(true);
+            var len = nodes.length;
+            var uIds = "";
+            var uName = "";
+            for(var i = 0; i < len; i++){
+                if(flag == 'U'){
+                    if(nodes[i].flag == flag){
+                        if(uIds == ""){
+                            uIds = nodes[i].id;
+                            uName = nodes[i].name;
+                        }
+                    }else {
+                        $('#userIdForMe').val("");
+                        $('#userNameForMe').val("");
+                    }
+                }
+            }
+            var postJson = {};
+            postJson['ids'] = uIds;
+            postJson['names'] = uName;
+            return postJson;
+        }
+
+        function btnOk(){
+
+            var userIdForMe = $('#userIdForMe').val();
+            var userNameForMe = $('#userNameForMe').val();
+            var uIds = $('#userIds').val();
+            var uNames = $('#userText').val();
+            if(userIdForMe != ""){
+                uIds = userIdForMe;
+            }
+            if(userIdForMe != ""){
+                uNames = userNameForMe;
+            }
+            if(uIds == ""){
+                banger.page.showMessageBox('请先选择审计员，再进行分配操作！');
+                return;
+            }
+            var str = uIds+"&"+uNames;
+            window.returnValue = str;
+            window.close();
+        }
+
+        function selectAllotToMe(obj){
+
+            var userId = '$!userId';
+            var userName = '$!userName';
+            $('#userIdForMe').val(userId);
+            $('#userNameForMe').val(userName);
+
+            $('.assign-me').addClass('assign-me-click')
+            var zTree = jQuery.fn.zTree.getZTreeObj('userList');  //获取树对象
+            if(zTree != null){
+                var node = zTree.getSelectedNodes();//获取树选中节点
+                if (node.length>0) {
+                    zTree.cancelSelectedNode(node[0]);//取消树节点选中
+                }
+            }
+
+        }
+    </script>
+</head>
+
+<body>
+<table class="viewtbl">
+    <input id="belongDeptId" name="belongDeptId" type="hidden" />
+    <input id="belongUserId" name="belongUserId" type="hidden" />
+    <input id="belongUserName" name="belongUserName" type="hidden"/>
+    <input id="loanCount" name="loanCount" type="hidden" value="$!loanCount"/>
+    <tbody>
+    <tr class="self">
+        <td width="1%" class="field"></td>
+    </tr>
+    <tr class="sub hide">
+        <td width="1%" class="field"></td>
+        <td>
+            <div>
+                <div>
+                    <input type="hidden" id="userIdForMe"/>
+                    <input type="hidden" id="userNameForMe"/>
+                    <label class="assign-me" onclick="selectAllotToMe(this);">分配给我</label>
+                </div>
+                <div class="fl l" >
+                    <input type="hidden" class="text" readonly="readonly" id="userText"/>
+                    <input id="userIds" name="userIds" type="hidden" class="text"/>
+                    <ul class="ztree" id="userList"></ul>
+                </div>
+            </div>
+        </td>
+    </tr>
+
+    </tbody>
+</table>
+
+<hr />
+
+<div class="halign">
+    <input type="button" class="btn6 btn6bg1" value="确定" onclick="btnOk()"/>
+    <input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close()"/>
+</div>
+</body>
+</html>

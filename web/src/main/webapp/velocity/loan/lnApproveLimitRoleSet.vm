@@ -1,0 +1,71 @@
+<script type="text/javascript">
+floatInput('input[id=\'limitMoney\']',12,4);
+			
+function updateLimitRole(id,newValue,oldValue,roleId){
+ 	if(oldValue==newValue){
+		return false;
+	}else{
+		jQuery.post("updateLimitRoleById.html", {"id": id, "value": newValue,"roleId":roleId}, function(){
+    	});
+	}
+}
+	
+//刷新roleSet
+function refreshGridLimitRole(gridId,html)
+{
+	var elem = $(html);
+	var grid = $("#"+gridId);
+	grid[0].innerHTML="";
+	grid.append(elem);
+}
+//分页跳转
+function gotoPageLimitRole(page)
+{
+	gotoLimitRole(page,"getLimitRoles.html?random="+Math.random(),{
+		"page.currentPage":page
+	},function(html){refreshGridLimitRole('roleSet',html);});
+}
+</script>
+<div class="search-bar">
+    <span class="fl bold">可设置角色(<label class="green">$!roleCount</label>)</span>
+</div>
+<div class="action-bar" style="clear:both;height:33px;" >
+</div>
+<table class="datatbl">
+    <thead>
+        <tr>
+            <th>
+                <label title="角色名称">角色名称</label>
+            </th>
+            <th>
+                <label title="审批额度（元）">审批额度（万元）</label>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($lnApproveLimitRole in $!lnApproveLimitRoleList.items)
+        <tr>
+            <td>
+                <label title="$!lnApproveLimitRole.roleName">$!lnApproveLimitRole.roleName</label>
+            </td>
+			<td align="center">
+                <div class="ui-div-text m1">
+                    <input type="text" id="limitMoney" class="text" style="text-align:center;" value="$vmHelper.getDecimalMoney($!lnApproveLimitRole.limitMoney)" onblur="updateLimitRole('$!lnApproveLimitRole.limitRoleId',this.value,'$!lnApproveLimitRole.limitMoney','$!lnApproveLimitRole.roleId');" />
+                </div>                        
+            </td>
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="2">
+				<div class="floatR">#pageSize($page,'LimitRole')</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<hr />
+<div class="center">
+    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="tab.close(GetId(), false);"/>
+</div>
+	

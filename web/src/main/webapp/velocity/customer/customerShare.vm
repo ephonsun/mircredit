@@ -1,0 +1,310 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择共享</title>
+
+  	#styleLink("base")
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+    	h4 { border-bottom: 1px solid #ccc; line-height: 30px; font-size: 12px; }
+		h4.mt { margin: 20px 0px 0px 0px; }
+		div.button { margin: 10px 0px; }
+
+		.shcus { height: auto; overflow: auto; zoom: 1; }
+		.shcus div.item { border: 1px solid #ccc; float: left; height: 20px; margin: 0 5px 5px 0; padding: 5px; line-height: 20px; white-space: nowrap; }
+		.shcus div.item label {  }
+		.shcus div.item span { cursor: pointer; margin-left: 5px; color: #0000ff; font-size: 14px; font-weight: bold; }
+		.shcus div.item:hover, .shcus div.hover { border-color: #f60; }
+		.shcus div.item span:hover, .shcus div.item span.hover { color: #f60; }
+
+		.accmanager { display: none; border: 1px solid #ccc; width: 300px; height: 186px; overflow: auto; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.scroll.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.model-layer.js"></script>
+    <script type="text/javascript">
+		var setting = {
+			check: {
+				enable: true,
+				chkboxType: { "Y": "ps", "N": "ps" }
+			},
+			view: {
+				showIcon: true,
+				dblClickExpand: false
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				beforeClick: null,
+				onClick: null,
+				beforeCheck: null,
+				onCheck: null
+			}
+		}
+
+		function ajaxurl(){
+			return '../customer/getCusBelongToJson.html?BelongToType=toAllot&random=' + Math.random()*1000000;
+		}
+
+		jQuery(function(){
+			jQuery.ajax({
+				type: 'POST',
+				url: ajaxurl(),
+				dataType: 'json',
+				success: function(nodes){
+					if(nodes && nodes.length != 0){
+						nodes = (typeof(nodes)=='string') ? jQuery.parseJSON(nodes) : nodes;
+
+						jQuery.fn.zTree.init(jQuery('#utree'), setting, nodes);
+					}
+					else{
+
+					}
+				},
+				error: function(){
+
+				}
+			});
+
+			if('$actionType'=="modify"){
+				bindUser();
+			}
+
+			//添加分配人员
+			$('.addShareUser').click(function(){
+				var tObj = jQuery.fn.zTree.getZTreeObj('utree');
+				if(tObj!=null){
+					tObj.checkAllNodes(false);
+				}
+				accmanager();//弹出分配的人员
+			});
+		});
+		/**
+		 * 超时弹层
+		**/
+		function accmanager(){
+			art.dialog({
+				title: '选择分配人员',
+				padding: 15,
+				lock: true,
+				opacity: 0,
+				esc: false,
+				content: document.getElementById('accmanager'),
+				ok: btnOk,
+				cancel: btnCancel
+			});
+		}
+		//选择客户经理 确定
+		function btnOk(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj('utree');
+			var nodes = treeObj.getCheckedNodes(true);
+			var len = nodes.length;
+			if(len!=1){
+                banger.page.showMessageBox("只能选取一个分配人员!");
+				return false;
+			}
+			for(var i=0; i<len; i++){
+					if(!hasSelect(nodes[i].id)){
+//                        alert(nodes[i].id+"--"+nodes[i].name+"--"+nodes[i].deptName);
+						addUser(nodes[i].id, nodes[i].name, nodes[i].deptName);
+					}
+			}
+		}
+		function hasSelect(userid){
+			var boo = false;
+			var obj = $("div#userList .item");
+			var len = obj.length;
+			for(var i=0; i<len; i++){
+				if(obj[i].id==userid){
+					boo = true;
+				}
+			}
+			return boo;
+		}
+		//选择客户经理 取消
+		function btnCancel(){
+		}
+
+		function bindUser(){
+			var data = $shareUsers;//jQuery.parseJSON($shareUsers);
+			var len = data.length;
+			for(var i=0; i<len; i++){
+				addUser(data[i].userId, data[i].userName, data[i].deptName);
+			}
+		}
+		//移除客户
+		function delCustomer(cusId){
+			$("[cusid="+cusId+"]").remove();
+			var count = $('#cusCount').text() -1;
+			$('#cusCount').text(count);
+		}
+		var num = 0;
+		function addUser(userId, userName, deptName){
+			if(num==1){
+                banger.page.showMessageBox("已经选择了一个分配人员,请删除重新选择!");
+				return false;
+			}
+			var ht="<div class='item' id='"+userId +"'>" +
+					"<lable>" + userName + "(" + deptName + ")</lable>" +
+					"<span onclick='delUser(" + userId + ")'>×</span>";
+
+			$("#userList").append(ht);
+			num++;
+		}
+
+		//删除共享人员
+		function delUser(userId){
+			$('#'+userId).remove();
+			num--;
+		}
+		//获得客户ids
+		function getCustomers(){
+			var obj = $("div#cusShareList tr");
+			var len = obj.length;
+			var cusIds="";
+			for(var i=0; i<len; i++){
+				if((i>0)&&(i<len-1)){
+					if(cusIds == ""){
+						cusIds = $(obj[i]).attr("cusid");
+					}else{
+						cusIds = cusIds + "," +$(obj[i]).attr("cusid");
+					}
+				}
+			}
+			return cusIds;
+		}
+		//获得人员ids
+		function getShareUsers(){
+			var obj = $("div#userList .item");
+			var len = obj.length;
+			var uids = "";
+			for(var i=0; i<len; i++){
+				if(uids == ""){
+					uids = obj[i].id;
+				}else{
+					uids = uids + "," +obj[i].id;
+				}
+			}
+			return uids;
+		}
+		function getOldShareUsers(){
+			var data = $shareUsers;
+			var len=data.length;
+			var uids = "";
+			for(var i=0; i<len; i++){
+				if(uids == ""){
+					uids = data[i].userId;
+				}else{
+					uids = uids + "," +data[i].userId;
+				}
+			}
+			return uids;
+		}
+		//保存
+		function saveShareCustomer(){
+			var postJson = {};
+			var cids = getCustomers();
+			var uids = getShareUsers();
+			if(cids==""){
+				banger.page.showMessageBox("请您选择要分配的客户");
+				return;
+			}
+			if(uids==""){
+				banger.page.showMessageBox("请您选择客户的分配人员！");
+				return;
+			}
+			postJson['customerIds']=cids;
+			postJson['shareUsers']=uids;
+			postJson['actionType']='$actionType';
+			if('$actionType'=="insert"){
+				var urlStr = "../customer/saveShareCustomer.html?RandNum="+ Math.random();
+				save(postJson, urlStr);
+			}else if('$actionType'=="modify"){
+				postJson['oldShareUsers']=getOldShareUsers();
+				var urlStr = "../customer/saveShareCustomer.html?RandNum="+ Math.random();
+				save(postJson, urlStr);
+			}
+		}
+		function save(postJson, urlStr){
+				jQuery.ajax({
+				  type: 'POST',
+				  url: urlStr,
+				  data: postJson,
+				  success:function(){
+				  		window.returnValue="ok";
+				  		window.close();
+				  	}
+				});
+		}
+
+		function browseCustomer(cusId){
+            jQuery.ajax({
+            	type: 'POST',
+            	url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+            	data: {"cusId":cusId},
+            	success:function(data){
+            		var obj = jQuery.parseJSON(data);
+
+            		if(obj[0].isDel == '1'){
+            			banger.page.showMessageBox('客户' + obj[0].customerName + '被删除，无法查看具体资料！');
+            		}
+                    else{
+						aui.builder({
+                    		title: '查看客户',
+                    		url: '../customer/browseCustomer.html?actionType=browse&&needLine=0&&isBrowseLayer=1&&crmCustomer.customerId=' + cusId
+                    	});
+					}
+              	}
+            });
+	    }
+    </script>
+</head>
+
+<body>
+	<h4 class="ttl">所选的分配客户</h4>
+    <div class="sz">
+        <span class="fl bold">
+            选择的分配客户(<label class="dgreen"><span id="cusCount">$!cusCount</span></label>)
+        </span>
+    </div>
+    <div id="cusShareList">
+    	#parse("/velocity/customer/cusTableSahreList.vm")
+    </div>
+
+	<h4 class="ttl mt">选择分配人员</h4>
+    <div>
+    	<div class="button"><input type="button" class="btn1 addShareUser" value="添加分配人员" /></div>
+
+        <div class="shcus" id="userList">
+        </div>
+    </div>
+
+    <hr />
+##    #if($urlPermitUtil.hasPermission('showCusBelongTo'))
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="分配" onclick="saveShareCustomer()"/>
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close()"/>
+    </div>
+##    #else
+##    <div class="halign">
+##    	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="javascript:window.close()"/>
+##    </div>
+##    #end
+    <div id="accmanager" class="accmanager">
+		<ul id="utree" class="ztree"></ul>
+	</div>
+    <iframe id="cusFrame" name="cusFrame" frameborder="0" style="display: none; width: 970px;"></iframe>
+</body>
+</html>

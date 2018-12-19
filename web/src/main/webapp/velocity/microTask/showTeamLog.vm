@@ -1,0 +1,306 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>组织机构</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+   <style type="text/css">
+		.hide { display: none !important; }
+    	.Agency-left { position: absolute; left: 10px; width: 170px; }
+		.Agency-left h4 { height: 30px; border: 1px solid #ccc; padding: 0px 5px; line-height: 30px; font-size: 12px; font-family: Microsoft Yahei; }
+		.Agency-left h4 label { float: left;}
+		.Agency-left h4 p { float: right; }
+		.Agency-left h4 p a { float: left; width: 20px; overflow: hidden; text-indent: -1000px; }
+		.Agency-left h4 p a.edi-add { background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-up { background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-down { background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-del { background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-edi { background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent; }
+		.Agency-left .Agency-tree {width:99%; display: block; height: 500px; border: 1px solid #ccc; margin-top: 2px; overflow: auto; }
+		
+		.Agency-right {min-height: 534px; height: auto !important; height: 534px; margin-left: 180px; }
+    </style>
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+　　<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+		var oldPostJson={};
+		var postJson={};
+		var setting = {
+			callback:{
+				onClick:treeOnclick
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				showIcon: false
+			}
+			
+		};
+		//json树数据
+		var zNodes = $!deptJson; 
+		
+		//默认选择第一个节点
+		function initNodeSelect(){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    		var nodes = treeObj.getNodes();
+    		if (nodes.length>0) {
+    			treeObj.selectNode(nodes[0]);
+				$("#deptId").val(nodes[0].id);
+				$("#dName").text(nodes[0].name);
+				if(nodes[0].id == 2) {
+					$("#detailData").text("下所有人员");
+					$("#deptCheckbox").attr("checked",true);
+					$("#deptCheckbox").attr("disabled",true);
+				}
+				treeOnclick(event, nodes[0].id, nodes[0]);
+    		}
+		}
+		
+		//延迟器
+		var timer = null;
+		
+ 		//机构树加载
+		$(document).ready(function(){
+			jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+			$('#deptGrid table').table();
+			timer = setTimeout(delay, 100);
+		});
+		
+		function delay(){
+			initNodeSelect();
+			
+			clearTimeout(timer);
+		}
+		
+		//清空
+		function qingkong(){
+			$("#userName").val("");
+			$("#account").val("");
+			$("#isActived").val("");
+			$("#isActived").select();
+			$("#deptCheckbox").attr("checked", false);
+		}
+		
+ 		//点击节点查询本部门用户
+ 		function treeOnclick(event, treeId, treeNode) {
+			$("#deptId").val(treeNode.id);
+     		$("#dName").text(treeNode.name);
+			document.getElementById("account").value = "";
+     		document.getElementById("userName").value = "";
+			$("#isActived").val("");
+			$("#isActived").select();
+			//如果点击虚拟根节点
+			if(treeNode.id == 2){
+				$("#detailData").text("下所有人员");
+				$("#deptCheckbox").attr("checked",true);
+				$("#deptCheckbox").attr("disabled",true);
+				postJson={};
+				postJson['flagInt']=3;
+				oldPostJson = postJson;
+				jQuery.post('getUserPageList.html',
+        					postJson,
+        					function(html){
+								$("#deptGrid").html(html).find('table').table();
+    			    			$("#total").text($("#totalAmount").val());
+        				});
+			}else{
+    			$("#deptCheckbox").attr("disabled",false);
+    			document.getElementById("searchCode").value = "query";//查询本部门
+     			document.getElementById("deptCheckbox").checked = false;
+     			$("#detailData").text("下直属人员");
+				postJson={};
+				postJson['deptId']=treeNode.id;
+				postJson['flagInt']=1;
+				oldPostJson = postJson;
+        		jQuery.ajax({
+    			    type:"post", //请求方式
+    			    url:"getUserPageList.html", //发送请求地址
+    			    data:postJson,
+    			    //请求成功后的回调函数
+    			    success:function(html){
+    			    	$("#deptGrid").html(html).find('table').table();
+    			    	$("#total").text($("#totalAmount").val());
+    			    }
+    			});
+    		}
+		}
+		//模糊查询搜索用户
+		function postUserQuery(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+			var node = treeObj.getSelectedNodes()[0];
+            if (node) {
+                var name = node.name;
+                var deptId = node.id;
+                $("#deptId").val(deptId);
+                $("#dName").text(name);
+                if (deptId == 2) {
+                    $("#selectSearch").val("selected");
+                    $("#detailData").text("下所有人员");
+                    $("#deptCheckbox").attr("checked", true);
+                    $("#deptCheckbox").attr("disabled", true);
+                    postJson = {};
+                    postJson = getQueryJson();
+                    postJson['flagInt'] = 4;
+                    oldPostJson = postJson;
+                    jQuery.post('getUserPageList.html',
+                            postJson,
+                            function (html) {
+                                $("#deptGrid").html(html).find('table').table();
+                                $("#total").text($("#totalAmount").val());
+                            });
+                } else {
+                    $("#selectSearch").val("noSelected");
+                    var check = document.getElementById("deptCheckbox").checked;
+                    var flag;
+                    if (check) {
+                        $("#detailData").text("下所有人员");
+                        flag = 1;
+                    } else {
+                        $("#detailData").text("下直属人员");
+                        flag = 0;
+                    }
+                    postJson = {};
+                    postJson = getQueryJson();
+                    postJson['flagInt'] = 2;
+                    postJson['deptId'] = deptId;
+                    postJson['flag'] = flag;
+                    oldPostJson = postJson;
+                    jQuery.ajax({
+                        type: "post",
+                        url: "getUserPageList.html",
+                        data: postJson,
+                        success: function (html) {
+                            $("#deptGrid").html(html).find('table').table();
+                            $("#total").text($("#totalAmount").val());
+                        }
+                    });
+                }
+            }
+		}
+		//组装数据
+		function getQueryJson(){
+    		postJson['deptUserBean.account']=jQuery.trim($('#account').val());
+			postJson['deptUserBean.userName']=jQuery.trim($('#userName').val());
+			postJson['deptUserBean.isActived']=jQuery.trim($('#isActived').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+
+		function keydownQuery() 
+		{ 
+			if (event.keyCode==13) //判断输入的是不是回车
+			{ 
+				postUserQuery(); 
+			} 
+		}
+
+
+
+        function newTab(actionType, id){
+             if(actionType == "userId"){
+                var options = {id: "userId"+id, pid: GetId(), title: "查看团队日志", url: "../tskMicroTask/lookTeamLog.html?userId="+id, lock: false};
+                tab.add(options);
+            }else if(actionType == "allDeptId"){
+                 var options = {id: "allDeptId"+id, pid: GetId(), title: "查看团队日志", url: "../tskMicroTask/lookTeamLog.html?allDeptId="+id, lock: false};
+                 tab.add(options);
+            }else if(actionType == "deptId"){
+                 var options = {id: "deptId"+id, pid: GetId(), title: "查看团队日志", url: "../tskMicroTask/lookTeamLog.html?deptId="+id, lock: false};
+                 tab.add(options);
+             }
+        }
+
+
+        function daochu(actionType,id){
+            if(actionType == "userId"){
+                document.location.href = '../tskMicroTask/exportTeamLog.html?userId=' + id;
+            }else if(actionType == "allDeptId"){
+                document.location.href = '../tskMicroTask/exportTeamLog.html?allDeptId=' + id;
+            }else if(actionType == "deptId"){
+                document.location.href = '../tskMicroTask/exportTeamLog.html?deptId=' + id;
+            }
+        }
+    </script>
+</head>
+ 
+<body>
+	<div class="Agency-left">
+    	<h4>
+        	<label>组织机构</label>
+            <p>
+				<input id="searchCode" type="hidden" name="serachCode" />
+				<input id="deptId" type="hidden" name="deptId" />
+				<input id="rootData" type="hidden" name="rootData" value="1" />
+				<input id="selectSearch" type="hidden" name="selectSearch"/>
+            </p>
+        </h4>
+        <div class="Agency-tree">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+    </div>
+    <div class="Agency-right">
+		<form name="deptList" id="deptList" style="width: 100%;">
+			<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                        <td width="6%" class="field" style="text-align: left;">
+                        	<label>用户名:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt1">
+								<input type="text" id="account" name="deptUserBean.account" onkeydown="keydownQuery()" class="dtxt1-txt" maxlength="20" />
+							</div>
+                        </td>
+                        <td width="6%" class="field" style="text-align: left;">
+                        	<label>姓名:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt1">
+                        	<input type="text" id="userName" name="deptUserBean.userName" onkeydown="keydownQuery()"  class="dtxt1-txt" maxlength="20"/>
+                            </div>
+                        </td>
+						 <td width="6%" class="field" style="text-align: left;">
+                        	<label>角色:</label>
+                        </td>
+                        <td width="20%">
+                        	<select id="isActived" name="deptUserBean.isActived" render="select">
+								 <option value=""></option>
+								#foreach($item in $!sysRoleList)
+                                    #if($!item.roleId!=3&&$!item.roleId!=4)
+                                        <option value="$!item.roleId">$!item.roleName</option>
+                                    #end
+								#end
+							</select>
+                        </td>
+                        <td class="field" style="text-align: left;">
+                        	<input type="checkbox" id="deptCheckbox" class="chk" />
+                            <label for="chk-include">包含下属机构</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+	     </form>
+    		 <p  class="sz">
+            	<label class="fl bold">
+					<label>[<span id="dName">$!deptName</span>]</label>
+                    <span id="detailData">下直属人员</span>
+				</label>
+                <input type="button" value="清 空" onclick="qingkong()" class="btn1" />
+                <input type="button" value="搜 索" onclick="postUserQuery()" class="btn1" />
+    		</p>
+    	   <div id="deptGrid">
+			#parse("/velocity/microTask/teamLogList.vm")
+           </div>
+    </div>
+</body>
+</html>

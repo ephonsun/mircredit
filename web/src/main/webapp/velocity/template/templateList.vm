@@ -1,0 +1,55 @@
+<table class="datatbl" cellpadding="0" cellspacing="0" >
+	<thead>
+    	<tr>
+        	<th width="60"><label>序号</label></th>
+        	<th width="180"><label>模板名称</label></th>
+        	<th><label>描述</label></th>
+        	<th width="180"><label>操作</label></th>
+        </tr>
+    </thead>
+	<tbody>
+		#set($pageIndex = ($page.currentPage - 1) * $page.pageSize)
+		#foreach($crmTemplate in $!crmTemplatList.items)
+			#set($pageIndex = $pageIndex+1)
+			#set($velocityCount = $pageIndex)			
+			#if($crmTemplate.isBasic==1)
+				<tr>
+					<td width="60"><label title="$velocityCount">$velocityCount</label></td>
+					<td width="180"><label title="$!crmTemplate.templateName">$!crmTemplate.templateName</label></td>
+					<td style="text-align:left;"><label title="$!crmTemplate.remark">$!crmTemplate.remark</label></td>
+					<td width="180">	
+						<a class="slink" href="javascript:void(0);" onclick="editTemp($!crmTemplate.templateId)">编辑</a>
+						<a disabled>删除</a>
+						<a disabled>上移</a>
+						<a disabled>下移</a>
+						<a class="slink" href="javascript:void(0)" onclick="toTemplateField('$!crmTemplate.templateId','$!crmTemplate.templateName')">模板字段</a>
+					</td>
+				</tr>
+			#else   
+    	  	  	<tr>
+					<td width="60"><label title="$velocityCount">$velocityCount</label></td>
+					<td width="180"><label title="$!crmTemplate.templateName">$!crmTemplate.templateName</label></td>
+					<td style="text-align:left;"><label title="$!crmTemplate.remark">$!crmTemplate.remark</label></td>
+					<td width="180">		
+						<a class="slink" href="javascript:void(0);" onclick="editTemp($!crmTemplate.templateId)">编辑</a>
+						<a class="slink" href="javascript:void(0);" onclick="delData('$!crmTemplate.templateId','$!crmTemplate.templateName')">删除</a>
+						#if($pageIndex>2)
+							<a class="slink" href="javascript:void(0);" onclick="moveData('$!crmTemplate.templateId','Up')">上移</a>
+						#else
+							<a disabled>上移</a>
+						#end
+						#if($pageIndex<$page.totalRowsAmount)
+							<a class="slink" href="javascript:void(0);" onclick="moveData('$!crmTemplate.templateId','Down')">下移</a>
+						#else
+							<a disabled>下移</a>
+						#end
+						<a class="slink" href="javascript:void(0)" onclick="toTemplateField('$!crmTemplate.templateId','$!crmTemplate.templateName')">模板字段</a>
+					</td>
+				</tr>
+			#end  
+		#end
+    </tbody>
+    <tfoot>
+    	<tr><td colspan="4"><div class="fr">#parse("/velocity/ajaxPage.vm")</div></td></tr>
+    </tfoot>
+</table>

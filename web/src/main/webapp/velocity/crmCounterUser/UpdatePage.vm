@@ -1,0 +1,190 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑柜台人员</title>
+    <base target="_self" />
+    
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+   		var setting = {
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				beforeClick: beforeClick,
+				onClick: onClick
+			},
+
+			view: {
+				dblClickExpand: false,
+				showIcon: showIconForTree
+			}
+		
+		};
+		var zNodes = $!deptJson; 
+		function beforeClick(treeId, treeNode) {
+			var check = (treeNode);
+			return check;
+		}
+		function onClick(e, treeId, treeNode) {
+			var zTree = jQuery.fn.zTree.getZTreeObj("smsTree");
+			var nodes = zTree.getSelectedNodes();
+			var v = "";
+			nodes.sort(function compare(a,b){return a.id-b.id;});
+			for (var i=0, l=nodes.length; i<l; i++) {
+				v += nodes[i].name + ",";
+			}
+			if (v.length > 0 ) v = v.substring(0, v.length-1);
+			var smsObj = $("#smsKind");
+			smsObj.attr("value", v);
+		//	$("#deptId").attr("value",treeNode.id);
+			$("#deptId").val(treeNode.id);
+		}
+		//不显示节点图标
+		function showIconForTree(treeId, treeNode) {
+			return !treeNode;
+		}
+    	function showMenu() {
+			var smsKindObj = $("#smsKind");
+			var smsKindOffset = $("#smsKind").offset();
+			$("#menuContent").css({left:smsKindOffset.left + "px", top:smsKindOffset.top + smsKindObj.outerHeight() + "px"}).slideDown("fast");
+			$("body").bind("mousedown", onBodyDown);
+		}
+		function hideMenu() {
+			$("#menuContent").fadeOut("fast");
+			$("body").unbind("mousedown", onBodyDown);
+		}
+		function onBodyDown(event) {
+			if (!(event.target.id == "menuBtn" || event.target.id == "smsKind" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+				hideMenu();
+			}
+		}
+		//树加载
+		$(document).ready(function(){
+			jQuery.fn.zTree.init($("#smsTree"), setting, zNodes);
+			$('#tabs').easytabs();
+			jQuery("#counterUserupd").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		//保存，提交
+		function addsubmit(){
+			var bool = jQuery.validator({ form: 'counterUserupd', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+    		jQuery.post('validateCrmCounterUser.html',
+    					{'crmCounterUser.counterUserAccount':$('#userAccount').val().replace(/(^\s*)|(\s*$)/g,""),
+    					 'crmCounterUser.counterUserName':$('#userName').val().replace(/(^\s*)|(\s*$)/g,""),
+    					 'crmCounterUser.deptId':$('#deptId').val(),
+    					 'crmCounterUser.counterUserId':$('#crmCounterUserId').val()
+    					},
+    		function(data){
+    			if(data!=""){
+    				banger.page.showMessageBox(data);
+    			}else{
+    				jQuery.post('updateCrmCuser.html',
+    				{'crmCounterUser.counterUserAccount':$('#userAccount').val().replace(/(^\s*)|(\s*$)/g,""),
+    					 'crmCounterUser.counterUserName':$('#userName').val().replace(/(^\s*)|(\s*$)/g,""),
+    					 'crmCounterUser.deptId':$('#deptId').val(),
+    					 'crmCounterUser.counterUserId':$('#crmCounterUserId').val()
+    				},
+    				function(data){
+    						window.returnValue=1;
+    				window.close();
+    				});
+    		//		document.counterUserupd.submit();
+			//		window.returnValue=1;
+    		//		window.close();
+    			}
+    		});
+	}
+	//检查长度
+	  	function checkLength(str){
+    		if(str.length>19){
+    		if(event.keyCode!=8)
+    				window.event.returnValue = false;
+    		}
+    	}
+    </script>
+</head>
+
+<body>
+	<form name="counterUserupd"  id ="counterUserupd" action="updateCrmCuser.html"  method="post" >
+	<input type="hidden" id="crmCounterUserId" name="crmCounterUser.counterUserId" value="$!crmCounterUser.counterUserId">
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>
+                <td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>用户名：</label>
+                </td>
+                <td>
+                	<div class="dtxt2" style="width: 200px;">
+                    	<input id="userAccount" name="crmCounterUser.counterUserAccount" value="$!crmCounterUser.counterUserAccount"  type="text" class="dtxt2-txt" rule="\S" tips="“用户名”必须填写" maxLength="20"/>
+                    </div>
+                </td>
+            </tr>
+             <tr>
+                <td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>人员姓名：</label>
+                </td>
+                <td>
+                	<div class="dtxt2" style="width: 200px;">
+                    	<input id="userName" name="crmCounterUser.counterUserName" value="$!crmCounterUser.counterUserName" type="text" class="dtxt2-txt"  rule="\S" tips="“人员姓名”必须填写" maxLength="20"/>
+                    </div>
+                </td>
+            </tr>
+             <tr>
+                <td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>归属机构：</label>
+                </td>
+                <td>
+                	<div class="dtxt2" style="width: 200px;">
+                		<input id="deptId" type="hidden" value="$!crmCounterUser.deptId" name="crmCounterUser.deptId"/>
+                		<input id="crmCounterUserId" type="hidden" value="$!crmCounterUser.counterUserId" name="crmCounterUser.counterUserId"/> 
+                    	<input id="smsKind"   type="text" maxlength="20" class="dtxt2-txt" data-prompt-position="bottomRight" value="$!deptName" readonly="true"/>
+                        <span class="dtxt2-ddl" onclick="showMenu()">ddl</span>
+                    </div>
+                </td>
+            </tr>
+            
+            
+            
+        </tbody>
+    </table>
+    <hr />
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="确定" onclick="addsubmit()"/>
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close();"/>
+    </div>
+    <div id="menuContent" class="menuContent" style="display:none; position: absolute; overflow-x: hidden; border: 1px solid #ccc; background-color: #fff;">
+		<ul id="smsTree" class="ztree" style="margin-top:0; width:160px;"></ul>
+	</div>
+    </form>
+</body>
+</html>

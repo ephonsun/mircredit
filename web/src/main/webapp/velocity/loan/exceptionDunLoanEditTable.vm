@@ -1,0 +1,45 @@
+<thead>
+<tr>
+    <th><label title="还款日期">还款日期</label></th>
+    <th><label title="应还金额(元)">应还金额(元)</label></th>
+    <th><label title="已还金额(元)">已还金额(元)</label></th>
+    <th><label title="还款状态">还款状态</label></th>
+    <th width="100"><label title="操作">操作</label></th>
+</tr>
+</thead>
+<tbody>
+    #foreach($eQuery in $eQueryList)
+    <tr>
+        <td><label title="$!date.format('yyyy-MM-dd',$!eQuery.planDate)">$!date.format('yyyy-MM-dd',$!eQuery.planDate)</label></td>
+        <td><label title="$!vmHelper.getUnityDecimalMoney($eQuery.owedPrincipal)">$!vmHelper.getUnityDecimalMoney($eQuery.owedPrincipal)</label></td>
+        #if($eQuery.sortno ==$loan.sortno)
+        <td>
+            <div class="ui-div-text">
+                <input type="text" class="text" id="principal" exId="$eQuery.exceptionRepaymentPlanId" title="$!vmHelper.getUnityDecimalMoney($eQuery.paidPrincipal)" value="$!vmHelper.getUnityDecimalMoney($eQuery.paidPrincipal)"/>
+            </div>
+        </td>
+        #else
+            <td><label title="$!vmHelper.getUnityDecimalMoney($eQuery.paidPrincipal)">$!vmHelper.getUnityDecimalMoney($eQuery.paidPrincipal)</label></td>
+        #end
+        #if($!eQuery.status ==1)
+            <td><label title="待催收">待催收</label></td>
+            <td>
+                <span  class="link" onclick="alreadyRepayCheck($!eQuery.exceptionRepaymentPlanId,'true')">已还款</span>
+                <span onclick="del($!eQuery.exceptionRepaymentPlanId)" class="link">移除</span>
+            </td>
+        #elseif($!eQuery.status ==2)
+            <td><label title="已还款">已还款</label></td>
+            <td>
+                <span style="color:gray;">已还款</span>
+            </td>
+        #else
+            <td></td>
+            <td>
+            	#if($urlPermitUtil.hasPermission('lnExpDunDelete'))
+                <span onclick="del($!eQuery.exceptionRepaymentPlanId)" class="link">移除</span>
+                #end
+            </td>
+        #end
+    </tr>
+    #end
+</tbody>

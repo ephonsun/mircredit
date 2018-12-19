@@ -1,0 +1,171 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新增机构</title>
+	<base target="_self" />
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+		.ttl { border-bottom: 1px solid #b1b1b1; margin-bottom: 10px; padding-bottom: 7px; font-weight: bold; }
+	</style>
+	#scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.ddmenuSelect-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+ 	<script type="text/javascript">
+		var zNodes = $!deptJson;
+
+ 		//机构树加载
+		$(function(){
+			maxInput('#remark',200);
+			//escapeInput('#deptName');
+			$('#deptList').ddMenuSelect({
+				id: 'deptTree',
+				nodes: zNodes,
+				beforeClick: function(treeId, treeNode){
+					var check = (treeNode);
+					return check;
+				},
+				onClick: function(e, treeId, treeNode){
+					$('#Agency input[type=\'text\']').val(treeNode.name);
+					
+					
+					var zTree = jQuery.fn.zTree.getZTreeObj('deptTree'), nodes = zTree.getSelectedNodes(), v = '';
+					
+        			nodes.sort(function compare(a,b){return a.id-b.id;});
+					
+        			for (var i=0, l=nodes.length; i<l; i++) {
+        				v += nodes[i].name + ',';
+        			}
+					
+        			if (v.length > 0 ) v = v.substring(0, v.length-1);
+        			
+        			$('#citySel').val(v);
+        			$('#deptId').val(treeNode.id);
+				}
+			});
+			
+			$('#deptInsert').validator();
+		});
+		
+		function addsubmit(flag){
+			var bool = jQuery.validator({ form: 'deptInsert', extend: false});
+			if(!bool){
+				return false;
+			}
+			var deptname_isexist="";
+			var deptcode_isexist="";
+    		jQuery.ajax({ 
+	            type:'post',
+				url :'validateInsterDept.html',
+				data:{'deptParentName':$('#citySel').val().replace(/^\s+|\s+$/g,""),
+				 	  'dept.deptName':$('#deptName').val().replace(/^\s+|\s+$/g,""),
+				 	  'dept.deptCode':$('#deptCode').val().replace(/^\s+|\s+$/g,""),
+				 	  'dept.remark':$('#remark').val().replace(/^\s+|\s+$/g,""),
+				 	  'deptId':$('#deptId').val()
+				     },
+			    cache: false,
+				async: false,
+    			success:function(data){
+    				var json=jQuery.parseJSON(data);
+					if(json['deptname_isexist'])deptname_isexist=json['deptname_isexist'];
+					if(json['deptcode_isexist']) deptcode_isexist = json['deptcode_isexist'];
+					
+    				if(deptname_isexist!= ""){
+						$('#d1').addClass('v-fails');
+  						$('#deptName').attr('tips', deptname_isexist); 
+    				}
+					if(deptcode_isexist!= ""){
+						$('#d2').addClass('v-fails');
+  						$('#deptCode').attr('tips', deptcode_isexist); 
+					}
+					if(deptname_isexist =="" && deptcode_isexist ==""){
+						$('#state').val(flag);
+						window.returnValue=1;
+        				document.deptInsert.submit();
+					}
+		         }
+			});
+		}
+		
+    	function checkUnique(obj){
+    		if(obj.value == "") obj.tips = obj.tipworn;
+    	}
+    	
+    	function validateDeptName(obj){
+    		var deptName=$("#deptName").val();
+    		if(deptName == ""){ 
+    			$(obj).attr('tips', '“机构名称”必须填写'); return false;
+    		}else{
+    			var dname=deptName.toLowerCase().replace(/\s+/g,"");
+    			if(dname=='null'){
+    				$(obj).attr('tips', '“机构名称”不合法'); return false;
+    			}else{
+    				$('#d1').removeClass('v-fails');
+    				return true;
+    			}
+    		}
+    	}
+	</script>
+</head>
+
+<body>
+	<form name="deptInsert"  id ="deptInsert" action="insertDept.html"  method="post" >
+		<input type="hidden" name="state" id="state" >
+		<input type="hidden" name="deptId" id="deptId" value="$!deptId">
+		<div class="ttl">新增机构</div>
+		<table class="htmltbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	                <td width="70" class="field">
+	                	<label class="red">*</label><label>机构名称：</label>
+	                </td>
+	            	<td>
+	            		<div id="d1" class="dtxt1" style="width: 200px;">
+	            			<input id="deptName" name="dept.deptName" fun="validateDeptName" type="text" class="dtxt1-txt" maxLength="20" rule="\S" onkeyup="checkUnique(this)" tips='“机构名称”必须填写' tipworn='“机构名称”必须填写'/>
+	            		</div>
+	            	</td>
+	            </tr>
+	        	<tr>
+	            	<td width="70" class="field"><span class="red">*</span><label>机构编号：</label></td>
+	            	<td>
+	            		<div id="d2" class="dtxt1" style="width: 200px;">
+	            			<input id="deptCode" name="dept.deptCode" type="text" class="dtxt1-txt" maxLength="20" rule="\S" onkeyup="checkUnique(this)" tips='“机构编号”必须填写' tipworn='“机构编号”必须填写'/>
+	            		</div>
+	            	</td>
+	            </tr>
+	            <tr>
+	                <td width="70" class="field"><span class="red">*</span><label>归属机构：</label></td>
+	            	<td>
+	                	<div id="deptList" class="dtxt2" style="width: 200px">
+	                    	<input id="citySel" name="deptParentName" readOnly="true" type="text" class="dtxt2-txt" value="$!deptParentName" />
+	                        <i class="dtxt2-ddl"></i>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="70" class="field"><label>机构备注：</label></td>
+	            	<td>
+	                	<div class="dtxtarea1">
+	                		<textarea id="remark" name="dept.remark" style="height: 80px; border: 0;"></textarea>
+	                	</div>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+	    
+	    <hr />
+	    
+	    <div class="halign">
+	    	<input type="button"  class="btn6 btn6bg1" onclick="addsubmit('save')" value="保存" />
+			<input type="button" class="btn6 btn6bg2" onclick="addsubmit('saveAndNew')" value="保存并新建" />
+        	<input type="button"  class="btn6 btn6bg3" onclick="javascript:window.close();" value="取消" />
+	    </div>
+    </form>
+</body>
+</html>

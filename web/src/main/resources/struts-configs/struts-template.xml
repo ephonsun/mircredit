@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="template" extends="default" namespace="/template" > 	 
+		 <!--  业务模板列表页面 -->
+		<action name="showCrmTemplatListPage" class="crmTemplateAction" method="showCrmTemplatListPage">
+			<result name="success">/velocity/template/crmTemplateList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  业务模板列表分页查询页面 -->
+		<action name="queryCrmTemplatListPage" class="crmTemplateAction" method="showCrmTemplatListPage">
+			<result name="success">/velocity/template/templateList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  删除业务模板 -->
+		<action name="delCrmTemplat" class="crmTemplateAction" method="delCrmTemplat">
+			<result name="success" type="redirectAction">showCrmTemplatListPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  新增业务模板 -->
+		<action name="addCrmTemplat" class="crmTemplateAction" method="addCrmTemplat">
+			<result name="success">/velocity/role/refreshPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  新增业务模板并继续 -->
+		<action name="addCrmTemplateAndContinue" class="crmTemplateAction" method="addCrmTemplateAndContinue">
+			<result name="success" type="redirectAction">jumpCrmTemplat</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  跳转新增业务模板 -->
+		<action name="jumpCrmTemplat" class="crmTemplateAction" method="jumpCrmTemplat">
+			<result name="success">/velocity/template/addCrmTemplate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  编辑业务模板 -->
+		<action name="editCrmTemplat" class="crmTemplateAction" method="editCrmTemplat">
+			<result name="success">/velocity/role/refreshPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  编辑业务模板并继续 -->
+		<action name="editCrmTemplateAndContinue" class="crmTemplateAction" method="editCrmTemplateAndContinue">
+			<result name="success" type="redirectAction">jumpCrmTemplat</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 
+		<!--  查看业务模板 -->
+		<action name="crmTemplatDetail" class="crmTemplateAction" method="crmTemplatDetail">
+			<result name="success" >/velocity/template/editCrmTemplate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 移动 -->
+		<action name="moveCrmTemplat" class="crmTemplateAction" method="moveCrmTemplat">
+			<result name="success"  type="redirectAction">showCrmTemplatListPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="validateUpdate" class="crmTemplateAction" method="validateUpdate">
+		</action> 
+		<action name="validateAdd" class="crmTemplateAction" method="validateAdd">
+		</action> 
+	</package>
+
+</struts>

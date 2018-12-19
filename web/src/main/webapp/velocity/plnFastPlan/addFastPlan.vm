@@ -1,0 +1,600 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>进行快速规划</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+    		var cusObj=$("#idforcustomer").val();
+			escapeInput('#plnFastPlanName');
+			
+			jQuery('select').each(function(){ $(this).select(); });
+			
+    		$('#tabs').easytabs();
+			jQuery("#plnFastPlanForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		
+			$("#isDoHousePlan, #isDoCollagePlan").click(function(){
+				if($(this).attr("checked")){
+					$(this).parent().next().show();
+				}
+				else{
+					$(this).parent().next().hide();
+				}
+			});
+			
+			if($("#plnFastPlanage").val()!=""){
+				$("#plnFastPlanage").attr("readOnly", true).css("color", "#666");;
+			}
+			
+			
+			
+			//购房参与规划
+			$("#isDoHousePlan").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$(this).val(1);
+				}
+				else{
+					$(this).val(0);
+				}
+			});
+			//子女教育参与规划
+			$("#isDoCollagePlan").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$(this).val(1);
+				}
+				else{
+					$(this).val(0);
+				}
+			});
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		//保存
+		function validateOrSave(){
+			var bool = jQuery.validator({ form: 'plnFastPlanForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+				save();
+				closeTab();
+		}
+		function save(){
+		
+			var postJson = {};
+			$("input[type$='text']").each(function(i){
+   				postJson[this.name]=this.value;
+	 		});
+	 		$("input[type$='hidden']").each(function(i){
+	   			postJson[this.name]=this.value;
+	 		});
+	    	$("select").each(function(i){
+	   			postJson[this.name]=this.value;
+	 		});
+	 		$("textarea").each(function(i){
+	   			postJson[this.name]=this.value;
+	 		});
+	 		$("input[type$='checkbox']").each(function(i){
+	 				postJson[this.name]=this.value;
+	 		});
+	 		
+	 		var urlStr="addPlnFastPlan.html";
+	 		
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  async:false,
+			  data: postJson,
+			  success:function(result){
+			  	$("#saveButton").attr("disabled",true);
+			  	$("#reportButton").attr("disabled",false);
+			  	$("#valueForReport").val(result);
+			  	
+			  }
+			});	
+		}
+		//生成报告
+		function createReport(){
+			var bool = jQuery.validator({ form: 'plnFastPlanForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			save();
+			var fastPlanId = $("#valueForReport").val();
+			jQuery.post("../plnReportTemplate/validateReport.html",
+				{'fastPlanId':fastPlanId},
+				function(data){
+					var json=jQuery.parseJSON(data);
+					if(json['error']){	
+						banger.page.showMessageBox({"type":"error","content":json['error']});
+					}else{
+						if(json['reportId']){
+							 var url = "/plnReportTemplate/generateReport.html?reportId="+json['reportId'];
+							 banger.page.openDialog(url,"理财规划报告",800,600);
+						}
+					}
+				});
+		}
+		
+		//验证小数
+		 function clearNoNum(obj){
+       		//先把非数字的都替换掉，除了数字和.
+       		 obj.value = obj.value.replace(/[^\d.]/g,"");
+        	//必须保证第一个为数字而不是.
+        	obj.value = obj.value.replace(/^\./g,"");
+        	//保证只有出现一个.而没有多个.
+        	obj.value = obj.value.replace(/\.{2,}/g,".");
+        	//保证.只出现一次，而不能出现两次以上
+        	obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+    	}
+    	function checkNum(obj){
+    		obj.value = obj.value.replace(/[^\d]/g,"");
+    	}
+    	//验证小数点后位数
+    	function validateLength(obj){
+    		var node =".";
+    		var res =obj.value.lastIndexOf(node);
+    		if(res!=-1){
+    			var pos= res+2;
+    			if(obj.value.length>pos){
+    				if(event.keyCode!=8)
+    					window.event.returnValue = false;
+    			}
+    		}
+    	}
+		
+		function closeTab(){
+			tab.close(GetId(), true);
+		}	
+    </script>
+</head>
+
+<body>
+	<table class="step2" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td align="center">第一步：选择客户类别</td>
+                <td align="center">第二步：确认目标客户</td>
+                <td class="bar" align="center">第三步：进行快速规划</td>
+            </tr>
+        </tbody>
+    </table>
+    <form id="plnFastPlanForm" name="plnFastPlanForm" action="addPlnFastPlan.html" method="post">
+    <dl class="stretch1">
+    	<dt class="strdt">
+        	<label class="bold">客户基本信息</label>
+            <label class="red">（必填）</label>
+        </dt>
+        <dd class="strdd">
+        	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="10%" class="field halr">
+                        	<label>规划名称：</label>
+                        </td>
+                    	<td colspan="7">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanName" name="plnFastPlan.planName" value="" rule="\S" tips="“规划名称”必须填写" maxlength="100"/>
+                                <input type="hidden" value="$!customer" id="idforcustomer">
+                            </div>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="10%" class="field halr">
+                        	<label>客户编号：</label>
+                        </td>
+                    	<td width="15%">
+							#if($!customer!='')
+								$!customer.customerNo
+								<input type="hidden" id="plnFastPlanCustomerNo" value="$!customer.customerNo" name="plnFastPlan.customerNo"/>
+							#else
+                            <div class="dtxt1" id="NoDiv">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanCustomerNo" value="$!customer.customerNo" name="plnFastPlan.customerNo" rule="\S" tips="“客户编号”必须填写" maxlength="20"/>
+                            </div>
+							#end
+                        </td>
+                    	<td width="10%" class="field halr">
+                        	<label>客户姓名：</label>
+                        </td>
+                    	<td width="15%">
+							#if($!customer!='')
+								$!customer.customerName
+								<input type="hidden" id="plnFastPlanCustomerName" value="$!customer.customerName" name="plnFastPlan.customerName"/>
+							#else
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanCustomerName" value="$!customer.customerName" name="plnFastPlan.customerName" rule="\S" tips="“客户姓名”必须填写" maxlength="20"/>
+                            </div>
+							#end
+                        </td>
+                    	<td width="10%" class="field halr">
+                        	<label>性别：</label>
+                        </td>
+                    	<td width="15%">
+							#if($!customer!='')
+								$!customer.sex
+								<input type="hidden" id="plnFastPlanSex" value="$!customer.sex" name="plnFastPlan.sex"/>
+							#else
+                             <select name="plnFastPlan.sex" id="plnFastPlanSex" class="" rule="\S" tips="请选择一条记录">
+                            	<option #if($!customer.sex!=""||$!customer.sex=="") disabled="disabled" #end></option>
+                            	<option value="男" #if($!customer.sex=="男") selected=true #end #if($!customer.sex=="女"||$!customer.sex=="") disabled="disabled" #end>男</option>
+                            	<option value="女" #if($!customer.sex=="女") selected=true #end #if($!customer.sex=="男"||$!customer.sex=="") disabled="disabled" #end>女</option>
+                        	</select>
+							#end
+                        </td>
+                        <td width="10%" class="field halr">
+                        	<label>年龄：</label>
+                        </td>
+                    	<td width="15%">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanage" name="plnFastPlan.age" value="$!customer.age" rule="^\d+$" tips="“年龄”的数据类型只能是正整数" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                        </td>
+                    </tr>
+                	<tr>
+                		<td width="10%" class="field halr">
+                        	<label>联系电话：</label>
+                        </td>
+                    	<td width="15%">
+							#if($!customer!='')
+								#if($!customer.defaultPhoneType=='1')$!customer.mobilePhone1#elseif($!customer.defaultPhoneType=='2')$!customer.mobilePhone1#elseif($!customer.defaultPhoneType=='3')$!customer.phone#elseif($!customer.defaultPhoneType=='4')$!customer.fax#end
+								<input type="hidden"   id="plnFastPlanPhone" name="plnFastPlan.phone" value="#if($!customer.defaultPhoneType=='1')$!customer.mobilePhone1#elseif($!customer.defaultPhoneType=='2')$!customer.mobilePhone1#elseif($!customer.defaultPhoneType=='3')$!customer.phone#elseif($!customer.defaultPhoneType=='4')$!customer.fax#end" />
+							#else
+                            <div class="dtxt1">
+                               <input type="text" class="dtxt1-txt" rule="\S" tips="“联系电话”必须填写" id="plnFastPlanPhone" #if($!customer.defaultPhoneType=='1') value="$!customer.mobilePhone1"#elseif($!customer.defaultPhoneType=='2')value="$!customer.mobilePhone1" #elseif($!customer.defaultPhoneType=='3')value="$!customer.phone" #elseif($!customer.defaultPhoneType=='4')value="$!customer.fax" #end  name="plnFastPlan.phone" maxlength="11"/>
+                            </div>
+							#end
+                        </td>
+                    	<td width="10%" class="field halr">
+                        	<label>证件类型：</label>
+                        </td>
+                    	<td width="15%">
+							#if($!customer!='')
+								$!customer.idTypeName
+								<input type="hidden" id="plnFastPlanIdTypeId" value="$!cardType.idTypeName" name="plnFastPlan.idTypeId"/>
+							#else
+                             <select name="plnFastPlan.idTypeId" id="plnFastPlanIdTypeId" class="" rule="\S" tips="请选择一条记录">
+                            	<option #if($!flag==1) disabled="disabled" #end></option>
+									#foreach($cardType in $!cardTypeList)
+								<option value="$!cardType.idTypeId" #if($!flag==1&&$!cardType.idTypeName=="身份证") selected="true" #end #if($!flag==1&&$!cardType.idTypeName!="身份证") disabled="disabled" #end>$!cardType.idTypeName</option>
+									#end
+                        	 </select>
+							 #end
+                        </td>
+                        <input type="hidden" id="flagForType" value="$!flag"/>
+                    	<td width="10%" class="field halr">
+                        	<label>证件号码：</label>
+                        </td>
+                    	<td colspan="3">
+							#if($!customer!='')
+								$!customer.idCard
+								<input type="hidden" id="plnFastPlanIdNo" value="$!cardType.idCard" name="plnFastPlan.idNo"/>
+							#else
+                            <div class="dtxt1">
+								<input type="text" class="dtxt1-txt" rule="\S" tips="“证件号码”必须填写" id="plnFastPlanIdNo" value="$!customer.idCard" name="plnFastPlan.idNo" maxlength="20"/>
+							</div>
+							#end
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+    	<dt class="strdt">
+        	<label class="bold">客户财务现状</label>
+            <label class="red">（必填）</label>
+        </dt>
+        <dd class="strdd">
+        	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>每月家庭日常消费：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“每月家庭日常消费”必须填写" id="plnFastPlanMonthlyFamilyExpend" name="plnFastPlan.monthlyFamilyExpend" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>每月家庭固定支出：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“每月家庭固定支出”必须填写" id="plnFastPlanMonthlyFamilyOutLay" name="plnFastPlan.monthlyFamilyOutLay" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>退休前每月储蓄：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“退休前每月储蓄”必须填写" id="plnFastPlanMonthlyDeposit" name="plnFastPlan.monthlyDeposit"value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>目前可用于投资的资金：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“目前可用于投资的资金”必须填写" id="plnFastPlanAvailableInvestMoney" name="plnFastPlan.availableInvestMoney" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>现有房产价值：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“现有房产价值”必须填写" id="plnFastPlanHouseValue" name="plnFastPlan.houseValue" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>现有房产贷款余额：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“现有房产贷款余额”必须填写" id="plnFastPlanHouseCreditRemaining" name="plnFastPlan.houseCreditRemaining" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>现有房产贷款月还款额：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“现有房产贷款月还款额”必须填写" id="plnFastPlanHouseMonthlyRepayMent" name="plnFastPlan.houseMonthlyRepayMent" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>购房贷款利率：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“购房贷款利率”必须填写" onkeydown="validateLength(this)" id="plnFastPlanHouseCreditRate" name="plnFastPlan.houseCreditRate" value="" onkeyup="clearNoNum(this)" maxlength="15"/>
+                            </div>
+                            <label class="unit">%</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>现有房产贷款剩余年限：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="^\d+$" tips="“年限”的数据类型只能是正整数" id="plnFastPlanHouseCreditYearLimit" name="plnFastPlan.houseCreditYearLimit" value="" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                            <label class="unit">年</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>预计通贷膨胀：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“预计通贷膨胀”必须填写" onkeydown="validateLength(this)" id="plnFastPlanInflation" name="plnFastPlan.inflation" value="" onkeyup="clearNoNum(this)" maxlength="15"/>
+                            </div>
+                            <label class="unit">%</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+    	<dt class="strdt">
+        	<label class="bold">投资偏好</label>
+            <label class="red">（必填）</label>
+        </dt>
+        <dd class="strdd">
+        	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>投资偏好：</label>
+                        </td>
+                    	<td>
+                                <select name="plnFastPlan.intervalTypeId" id="plnFastPlanIntervalTypeId" class="" rule="\S" tips="请选择一条记录" style="width: 150px;">
+                                	<option></option>
+									#foreach($rskIntervalType in $!rskIntervalTypeList)
+									<option value="$!rskIntervalType.typeId">$!rskIntervalType.typeName</option>
+									#end
+                            	 </select>
+                            <label class="unit">&nbsp; &nbsp; </label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>期望的投资收益率：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“期望的投资收益率”必须填写" id="plnFastPlanInvestIncomingRate" name="plnFastPlan.investIncomingRate" value="" onkeydown="validateLength(this)" onkeyup="clearNoNum(this)" maxlength="15"/>
+                            </div>
+                            <label class="unit">%</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+    	<dt class="strdt">
+        	<label class="bold">退休目标</label>
+            <label class="red">（必填）</label>
+        </dt>
+        <dd class="strdd">
+        	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>计划退休年龄：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="^\d+$" tips="“年龄”的数据类型只能是整数" id="plnFastPlanRetireAge" name="plnFastPlan.retireAge" value="" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                            <label class="unit">岁</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>养老年限：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" rule="^\d+$" tips="“养老年限”的数据类型只能是正整数"  id="plnFastPlanRetireYearLimit" name="plnFastPlan.retireYearLimit" value="" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                            <label class="unit">年</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>退休后每月生活支出：</label>
+                        </td>
+                    	<td colspan="3">
+                            <div class="dtxt1 fl" style="width: 150px;"> 
+                                <input type="text" class="dtxt1-txt" rule="\S" tips="“退休后每月生活支出”必须填写" id="plnFastPlanRetireMonthlyCost" name="plnFastPlan.retireMonthlyCost" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+    	<dt class="strdt">
+        	<label class="bold">购房目标</label>
+            <input type="checkbox" id="isDoHousePlan" class="chk" style="margin: 7px 0px;" name="plnFastPlan.isDoHousePlan" value="0" />
+            <label>参与规划</label>
+        </dt>
+        <dd class="strdd" style="display: none;">
+        	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>计划购房时间：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanPlanHouseYear" name="plnFastPlan.planHouseYear" value="" onkeydown="if(event.keyCode==13)event.keyCode=9" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                            <label class="unit">年后</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>计划购房价格：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanPlanHousePrice" name="plnFastPlan.planHousePrice" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>计划购房首付比例：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanPlanHouseDownPayMent" onkeydown="validateLength(this)" name="plnFastPlan.planHouseDownPayMent" value="" onkeyup="clearNoNum(this)" maxlength="15"/>
+                            </div>
+                            <label class="unit">%</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>计划购房贷款年限：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;"> 
+                                <input type="text" class="dtxt1-txt" id="plnFastPlanPlanHouseYearLimit" name="plnFastPlan.planHouseYearLimit" value="" onkeydown="if(event.keyCode==13)event.keyCode=9" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                            <label class="unit">年</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+    	<dt class="strdt">
+        	<label class="bold">子女教育目标</label>
+            <input type="checkbox" id="isDoCollagePlan" class="chk" style="margin: 7px 0px;" name="plnFastPlan.isDoCollagePlan" value="0" />
+            <label>参与规划</label>
+        </dt>
+        <dd class="strdd" style="display: none;">
+        	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>孩子接受高等教育年限：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" id="collageYearLimit" name="plnFastPlan.collageYearLimit" value="" maxlength="3" onkeydown="if(event.keyCode==13)event.keyCode=9" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" />
+                            </div>
+                            <label class="unit">年</label>
+                        </td>
+                    	<td width="140" class="field halr">
+                        	<label>目前每年高等教育费用：</label>
+                        </td>
+                    	<td>
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" id="collageCost" name="plnFastPlan.collageCost" value="" onkeyup="clearNoNum(this)" onkeydown="validateLength(this)" onpaste = "return false" maxlength="15"/>
+                            </div>
+                            <label class="unit">元</label>
+                        </td>
+                    </tr>
+                	<tr>
+                    	<td width="140" class="field halr">
+                        	<label>孩子距离上大学年数：</label>
+                        </td>
+                    	<td colspan="3">
+                            <div class="dtxt1 fl" style="width: 150px;">
+                                <input type="text" class="dtxt1-txt" id="collageYearNeed" name="plnFastPlan.collageYearNeed" value="" onkeydown="if(event.keyCode==13)event.keyCode=9" onKeyPress="if ((event.keyCode<48 || event.keyCode>57)) event.returnValue=false" maxlength="3"/>
+                            </div>
+                            <label class="unit">年</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+    </dl>
+    <hr />
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="保 存" onclick="validateOrSave()" id="saveButton"/>
+    	<input type="button" class="btn6 btn6bg2" value="生 成 报 告" onclick="createReport()"  id="reportButton"/>
+    	<input type="button" class="btn6 btn6bg3" value="关 闭" onclick="closeTab();" id="closeTabButton"/>
+    	<input type="hidden" id="valueForReport" value="0" />
+    	<input type="hidden" id="hiddenButton" value="$!customer.customerId" name="plnFastPlan.customerId"/>
+    </div>
+    </form>
+</body>
+</html>

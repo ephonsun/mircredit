@@ -1,0 +1,174 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择客户</title>
+  
+  	#styleLink("base")
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.model-layer.js"></script>
+    <script type="text/javascript">
+    	var autoLogin = "$!autoLogin";
+    	//是否执行任务页面添加在行客户
+        var isVonExe  ="$!isVonExe";
+    	var fn = {};
+		//实时更新可见框架的高度
+		fn.monitor = function(){
+			var iframe = jQuery('iframe:visible')[0];
+			
+			try{
+				iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 150 + 'px';
+			}
+			catch(e){
+			}
+			
+		    setTimeout('fn.monitor()', 100);
+		};
+    	
+    	jQuery(function(){
+    		//菜单鼠标单击和划过效果
+			jQuery('ul.menu li').click(function(){
+				if(jQuery(this).hasClass('active')){
+					return false;
+				}
+				else{
+					jQuery(this).addClass('active').siblings().removeClass('active');
+				}
+			}).hover(
+				function(){
+					if(!jQuery(this).hasClass('active')) jQuery(this).addClass('hover');
+				},
+				function(){
+					jQuery(this).removeClass('hover');
+				}
+			);
+			
+    		//设置第一个菜单项激活
+    		jQuery('ul.menu li').eq(0).click();
+			
+			//实时更新可见框架的高度
+			fn.monitor();
+    	});
+    	
+    	function btnOk(){
+    		var win = $('#frame')[0].contentWindow;
+    		#if($selType=='single')
+	    		var cusId = (win.getSelectSingleCus)?win.getSelectSingleCus():"";
+	    		if(cusId){
+	    			window.returnValue=cusId;   
+	    			window.close();
+	    		}else{
+	    			var msg = window.dialogArguments.msg;
+	    			if(msg){
+	    				banger.page.showMessageBox(msg);
+	    			}else{
+	    				banger.page.showMessageBox("请选择客户!");
+	    			}
+	    		}
+    		#else
+    			var cusIds = (win.getSelectCus)?win.getSelectCus():"";
+	    		if(cusIds){
+	    			window.returnValue=cusIds;   
+	    			window.close();
+	    		}else{
+	    			var msg = window.dialogArguments.msg;
+	    			if(msg){
+	    				banger.page.showMessageBox(msg);
+	    			}else{
+	    				banger.page.showMessageBox("请选择客户!");
+	    			}
+	    		}
+    		#end
+    	}
+    	
+    	function btnAll(){
+    		var win = $('#frame')[0].contentWindow;
+    		var postJson = win.getSelectAllCustJson();
+    		var count= postJson['recordCount'];
+    		if(parseInt(count)>5000){
+    			banger.page.showMessageBox("暂时只支持最大选择5000个客户！");
+    			return false;
+    		};
+			if(confirm("您确定要添加全部客户吗?")){
+				if(parseInt(count)==0){
+    			  	window.returnValue="success";   
+    	    		window.close();
+				}else{ 
+            		postJson["batchType"] = '$!batchType';
+            		postJson["targetId"] = '$!targetId';
+            		jQuery.ajax({
+        			  type: 'POST',
+        			  url: postJson['url'],
+        			  data: postJson,
+        			  success:function(data){
+        			  	window.returnValue="success";   
+        	    		window.close();
+        			  }
+        			});	
+				}
+			}
+    	};
+    </script>
+</head>
+
+<body style="height: auto !important; height: 0px; min-height: 0px;">
+    <div class="b-common-body1">
+		<div class="l">
+            <div class="l-box">
+                <ul class="menu">
+                    #if($isInChargeof)
+                    <li><a id="allCustUrl" target="frame">所有客户</a></li>
+                    <script>document.getElementById("allCustUrl").href="../customer/FirstLoad.html?"+autoLogin+"BelongToType=brAll&isSelectCus=True&selType=$!selType&random="+Math.random()</script>
+                    #end
+                    <li><a id="myCustUrl" target="frame">我的客户</a></li>
+                    <script>document.getElementById("myCustUrl").href="../customer/FirstLoadMyCustomer.html?"+autoLogin+"BelongToType=brMine&isSelectCus=True&selType=$!selType&random="+Math.random()</script>
+                    #if($isInChargeof)
+                    <li><a id="unAllocateUrl" target="frame">待分配客户</a></li>
+                    <script>document.getElementById("unAllocateUrl").href="../customer/FirstLoadUnAllocate.html?"+autoLogin+"BelongToType=brUnAllocate&isSelectCus=True&selType=$!selType&random="+Math.random()</script>
+                    #end
+                    <li><a id="advancedUrl" target="frame">高级搜索客户</a></li>
+                    #if($isInChargeof)
+                    <script>document.getElementById("advancedUrl").href="../advancedCustomer/showCustomerPage.html?"+autoLogin+"target=sms&selType=$!selType&random="+Math.random()</script>
+                    #else
+                    	<script>document.getElementById("advancedUrl").href="../advancedCustomer/showCustomerPage.html?"+autoLogin+"target=sms&selType=$!selType&isVonExe=isVonExe&random="+Math.random()</script>
+                    #end
+                    #if(!$!isVonExe)
+	                    #foreach($query in $queryMenus)
+	                	<li><a id="userQuery$!query.userQueryId" target="frame">$!query.queryName</a></li>
+	                	<script>document.getElementById("userQuery$!query.userQueryId").href="../advancedCustomer/showCustomerPage.html?"+autoLogin+"target=sms&queryId=$!query.userQueryId&selType=$!selType&random="+Math.random()</script>
+	                    #end
+                    #end
+                </ul>
+            </div>
+        </div>
+        <div class="r">
+            <div class="r-box">
+                #if($isInChargeof)
+                	<iframe id="frame" name="frame" frameborder="0"></iframe>
+                	<script>document.getElementById("frame").src="../customer/FirstLoad.html?"+autoLogin+"BelongToType=brAll&isSelectCus=True&selType=$!selType&random="+Math.random()</script>
+				#else
+					<iframe id="frame" name="frame" frameborder="0"></iframe>
+					<script>document.getElementById("frame").src="../customer/FirstLoadMyCustomer.html?"+autoLogin+"BelongToType=brMine&isSelectCus=True&selType=$!selType&random="+Math.random()</script>
+				#end
+            </div>
+        </div>
+    </div>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" onclick="btnOk()" value="确定" />
+    	#if($!batchType)
+    		<input type="button" class="btn6 btn6bg1" onclick="btnAll()" value="全部" />
+    	#end
+    	<input type="button" class="btn6 btn6bg3" onclick="javascript:window.close()" value="取消" />
+    </div>
+	
+    <iframe id="cusFrame" name="cusFrame" frameborder="0" style="display: none; width: 970px; height: 600px;"></iframe>
+</body>
+</html>

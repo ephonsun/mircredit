@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="crmRecordRemind" extends="default" namespace="/crmRecordRemind" >
+	
+		 <!--  录音提示音参数 -->
+		<action name="showCrmRecordRemindPage" class="crmRecordRemindAction" method="showCrmRecordRemindPage">
+			<result name="success">/velocity/crmRecordRemind/crmRecordRemind.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 <!--  更新 -->
+		<action name="updateRecordRemind" class="crmRecordRemindAction" method="updateRecordRemind">
+			<result name="success" type="redirect-action">showCrmRecordRemindPage</result>
+			<result name="error">/velocity/error.vm</result>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		
+		<!-- 上传 -->
+		<action name="doUpload" class="crmRecordRemindAction" method="doUpload"></action>
+	  
+	  	<!-- 验证播放文件是否存在与服务器上 -->
+	  	<action name="isFile" class="crmRecordRemindAction" method="isFile"></action>
+	  	
+	</package>
+
+</struts>

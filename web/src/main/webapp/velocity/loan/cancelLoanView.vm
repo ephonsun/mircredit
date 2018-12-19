@@ -1,0 +1,62 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>撤销贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .tl p { margin-left:15px; margin-top:15px; font-size:14px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            var url = "../loan/vLoan.html?RandNum="+ Math.random()+"&loanId="+$!loanId;
+            $('#viewLoan').load(url,{},function(){
+
+            });
+        });
+
+
+
+        function fun1(h, b){
+            return true;
+        }
+
+        function fun2(h, b){
+        }
+    </script>
+</head>
+<body>
+<div class="loan-bg-one tl">
+    <p class="bold">撤销贷款</p>
+    #if($!cancelReasonId)
+        <p style="font-size:13px;">撤销原因：$!cancelReason</p>
+    #else
+        <p style="font-size:13px;">撤销原因：$!cancelReasonOther</p>
+    #end
+    <p class="dashed-one"></p>
+    <p style="font-size:13px;">撤销备注： $!confirmCancelRemark</p>
+</div>
+<div id="viewLoan">
+</div>
+</body>
+</html>

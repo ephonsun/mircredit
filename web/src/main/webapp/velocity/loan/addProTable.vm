@@ -1,0 +1,40 @@
+<span class="bold" style="line-height:40px;font-size:14px;width:100px">加权毛利率($!proRate%)</span>
+#if("$!write" == "1")
+<span id="addPro" class="ui-span-btn fr" style="margin-top:10px;margin-right:10px">
+                        	<label onclick="addPro()">新增</label>
+                    </span>
+    #end
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <thead>
+    <tr>
+        <th><label title="产品种类">产品种类</label></th>
+        <th><label title="销售价格(元)">销售价格(元)</label></th>
+        <th><label title="成本价格(元">成本价格(元)</label></th>
+        <th><label title="毛利润(元)">毛利润(元)</label></th>
+        <th><label title="毛利率(%)">毛利率(%)</label></th>
+        <th><label title="销售比例(%)">销售比例(%)</label></th>
+        <th><label title="备注">备注</label></th>
+        <th><label title="操作">操作</label></th>
+    </tr>
+    </thead>
+    <tbody>
+
+        #foreach($lnProfitLossProd in $lnProfitLossProdList)
+        <tr>
+            <td><label title="$!lnProfitLossProd.productName">$!lnProfitLossProd.productName</label></td>
+            <td><label title="$!lnProfitLossProd.sellingPrice">$!lnProfitLossProd.sellingPrice</label></td>
+            <td><label title="$!lnProfitLossProd.costPrice">$!lnProfitLossProd.costPrice</label></td>
+            <td><label title="$!lnProfitLossProd.grossValue">$!lnProfitLossProd.grossValue</label></td>
+            <td><label title="$!lnProfitLossProd.grossRate">$!lnProfitLossProd.grossRate</label></td>
+            <td><label title="$!lnProfitLossProd.sellingRate">$!lnProfitLossProd.sellingRate</label></td>
+            <td><label title="$!lnProfitLossProd.remark">$!lnProfitLossProd.remark</label></td>
+            <td>
+            #if("$!write" == "1")
+                <a href="javascript:removePro($!lnProfitLossProd.profitLossId,$!lnProfitLossProd.loanId)">移除</a>&nbsp;&nbsp;<a href="javascript:editPro($!lnProfitLossProd.profitLossId,$!lnProfitLossProd.loanId)">编辑</a>
+            #end
+            </td>
+        </tr>
+        #end
+
+    </tbody>
+</table>

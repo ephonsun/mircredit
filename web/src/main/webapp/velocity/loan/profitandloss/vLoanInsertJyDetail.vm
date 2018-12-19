@@ -1,0 +1,214 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<style tyle="text/css">
+		html, body{ overflow-x:hidden !important; }
+	</style>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加损益</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	
+    #scriptLink("core")
+    #scriptLink("page")
+	
+	
+   
+  
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+ 	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+
+   <script type="text/javascript">
+     jQuery(document).ready(function () {
+	 
+	 var par= window.dialogArguments.window
+	 var arry=par.dynamicTable();
+	 
+	 
+	//动态生成行
+	var monTd=0;
+	var monthValue=""
+	var count="";
+	var x=0;
+	for(var i=Number(arry[2]);i<=Number(arry[2])+Number(arry[0]);i++){
+			x++;
+		    count+="<tr>";
+			count+='<td class="field" width="8%">';
+			if(i>12){
+				++monTd;
+				if(monTd>0&&monTd<10){
+					count+='<label>'+(Number(arry[1])+1)+"年"+"0"+monTd+"月"+'：</label></td>';
+				}else{
+					count+='<label>'+(Number(arry[1])+1)+"年"+monTd+"月"+'：</label></td>';
+				}
+			monthValue=$("#month"+x).val()
+			count+=' <td><div class="ui-div-text" id="schtxtnum">';
+			count+='<input type="text" maxlength="15"  name="lnLoanProfitandlossJyDetail.month'+x+'" value="'+monthValue+'"  class="text" id="txtCphNumber"  rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"/>';
+	
+			}else if(i>0&&i<10){
+				monthValue=$("#month"+x).val()
+				count+='<label>'+arry[1]+"年"+("0"+i)+"月"+'：</label></td>';
+				count+=' <td><div class="ui-div-text" id="schtxtnum">';
+			    count+='<input type="text" maxlength="15"  name="lnLoanProfitandlossJyDetail.month'+x+'" value="'+monthValue+'" intFlag="true" class="text" id="txtCphNumber"  rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"/>';
+			
+			}else{
+				monthValue=$("#month"+x).val()
+				count+='<label>'+arry[1]+"年"+(i)+"月"+'：</label></td>';
+				count+=' <td><div class="ui-div-text" id="schtxtnum">';
+			    count+='<input type="text" maxlength="15"  name="lnLoanProfitandlossJyDetail.month'+x+'" value="'+monthValue+'" class="text" id="txtCphNumber" rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"/>';
+			
+			}
+			count+=' </div></td></tr>'
+		
+		}
+		    monthValue=$("#monthRep").val();
+		    count+='<tr>';
+			count+='<td class="field" width="8%">';
+			count+='<label class="red">*</label> ';
+			count+='<label>预期代表月份：</label></td>';
+			count+='<td id="month"><div class="ui-div-text">';
+			count+=' <input type="text" maxlength="15"  rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"  name="lnLoanProfitandlossJyDetail.monthRep" value="'+monthValue+'" class="text" />';
+			count+='</div></td></tr>';
+			
+			$("table").append(count);
+			
+			fixedCost()
+			
+		  jQuery('#asset').validator();
+			jQuery("#btnOk").click(function () {
+              
+                var bool = jQuery.validator({form:'asset',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+				
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",
+                    url: "${ctx}/loan/insertJyDetail.html",
+                    data: $("#asset").serialize(),
+                    success: function (data) {
+                        var json = eval( "(" + data + ")" );
+						if(json.success){
+							window.close();
+						 window.returnValue="success";
+						}
+                    }
+                });
+            });
+
+        });
+			  //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+		
+		function fixedCost(obj){
+			
+			//当项目为固定成本时，项目细分也是下拉框
+			if($("#itemId").val()=="180"){
+				
+				$("#itemDetailName").hide()
+				
+			    $("#itemDetailId").show()
+				$("#itemDetailId").attr("disabled",null);
+				xfItemName()
+				$("#itemDetailName").blur();
+			}else{
+			
+				$("#itemDetailName").show()
+			    $("#itemDetailId").hide()
+				$("#itemDetailId").attr("disabled","disabled");
+			}
+		
+		}
+		
+		//项细分赋name值
+		         
+		function xfItemName(obj){
+			//alert("fdfd")
+			var name=$("#itemDetailId option:selected").text()
+			//alert(name)
+			$("#itemDetailName").val(name)
+		
+		}
+     </script>	 
+    
+</head>
+
+<body >
+  <form id="asset" method="post" style="height:100%;">
+  	 <input type="hidden" value="$!loanProfitandlossId" id="loanProfitandlossId" name="lnLoanProfitandlossJyDetail.loanProfitandlossId">
+	 <input type="hidden" value="$!asset.profitandlossJyDetailId" id="profitandlossJyDetailId" name="lnLoanProfitandlossJyDetail.profitandlossJyDetailId">
+      <table class="htmltbl" style="table-layout:auto;width:100%">
+          <tbody>
+             <tr>
+                  <td class="field" width="8%">
+                      <label>项目：</label>
+                  </td>
+                  <td >
+				  <div class="ui-div-text">
+                      <select style="width:100%" id="itemId"  class="text" name="lnLoanProfitandlossJyDetail.itemId" onchange="fixedCost(this)">
+                    
+                    	#foreach($dic in $!dictionary)
+                    	
+                    		#if($!dic.loanInfoDictionaryId==$!asset.itemId)
+								<option value="$!dic.loanInfoDictionaryId" selected>$!dic.dictionaryValue</option>
+                    		#else
+								<option value="$!dic.loanInfoDictionaryId" >$!dic.dictionaryValue</option>
+                    		#end
+                    	#end
+                      </select>
+					  </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>                  
+                      <label>项目细分：</label>
+                  </td>
+                  <td id="month">
+                      <div class="ui-div-text">
+                        <input type="text"  id="itemDetailName" rule="\S" maxlength="20" tips='"项目细分"必须填写'  name="lnLoanProfitandlossJyDetail.itemDetailName" value="$!asset.itemDetailName" class="text" />
+						
+						<select style="width:100%;display: none;" class="text" disabled="disabled" id="itemDetailId" name="lnLoanProfitandlossJyDetail.itemDetailId"  onchange="xfItemName(this)">
+                    #foreach($dic in $!dictionaryItem)
+                       	#if($!dic.loanInfoDictionaryId==$!asset.itemDetailId)
+                    		<option value="$!dic.loanInfoDictionaryId" selected>$!dic.dictionaryValue</option>
+                    		#else
+								<option value="$!dic.loanInfoDictionaryId" >$!dic.dictionaryValue</option>
+                    		#end
+                    	#end
+                      </select>
+					 </div>
+			      </td>              
+              </tr>
+			  
+             <input type="hidden" id="month1" value="$!asset.month1">
+			 
+			 <input type="hidden" id="month12" value="$!asset.month12">
+			 <input type="hidden" id="month11" value="$!asset.month11">
+			 <input type="hidden" id="month10" value="$!asset.month10">
+			 <input type="hidden" id="month9" value="$!asset.month9">
+			 <input type="hidden" id="month8" value="$!asset.month8">
+			 <input type="hidden" id="month7" value="$!asset.month7">
+			 <input type="hidden" id="month6" value="$!asset.month6">
+			 <input type="hidden" id="month5" value="$!asset.month5">
+			 <input type="hidden" id="month4" value="$!asset.month4">
+			 <input type="hidden" id="month3" value="$!asset.month3">
+			 <input type="hidden" id="month2" value="$!asset.month2">
+			 <input type="hidden" id="monthRep" value="$!asset.monthRep">
+			 
+          </tbody>
+      </table> 
+    </form> 
+   <hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>贷款统计表</title>
+    <link type="text/css" rel="stylesheet" href="/banger/css/base.css" />
+<link type="text/css" rel="stylesheet" href="/banger/css/common.css" />
+    <link type="text/css" rel="stylesheet" href="/banger/css/tree/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="/banger/css/jquery.ui/base/jquery.ui.base.css" />
+    
+    <script type="text/javascript" src="/banger/js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/banger/js/banger/banger.core.js"></script>
+<script type="text/javascript" src="/banger/js/banger/banger.input.js"></script>
+<script type="text/javascript" src="/banger/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="/banger/js/banger/banger.page.js"></script>
+<script type="text/javascript" src="/banger/js/dialog4.1.6/artDialog.source.js?skin=default"></script>
+<script type="text/javascript" src="/banger/js/dialog4.1.6/_doc/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/banger/js/dialog4.1.6/_doc/highlight/languages/javascript.js"></script>
+    <script type="text/javascript" src="/banger/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="/banger/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="/banger/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="/banger/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="/banger/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="/banger/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="/banger/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="/banger/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="/banger/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="/banger/js/system/b.abnormal.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="/banger/js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="/banger/js/report/install_lodop64.exe"></embed>
+	</object> 
+
+<style media=print> 
+.Noprint{display:none;} 
+.PageNext{page-break-after: always;} 
+</style> 
+
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000; 
+    border-style: solid; 
+    border-top-width: 2px; 
+    border-right-width: 2px; 
+    border-bottom-width: 1px; 
+    border-left-width: 1px; 
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+#win{
+   
+    border:1px red solid;
+   
+    width : 300px;
+    height: 200px;
+   
+    position : absolute;
+    top : 100px;
+    left: 350px;
+   
+    display : none;
+}
+
+#title{
+    background-color : blue;
+    color : red;
+   
+    padding-left: 3px;
+}
+#cotent{
+    padding-left : 3px;
+    padding-top :  5px;
+}
+
+#close{
+    margin-left: 188px;
+   
+    cursor: pointer;
+}
+</style> 
+<script>
+	function onAfterQuery(){
+	
+        $("#cognosIframe").show();
+        cgParentValue();
+  }
+
+  function cgParentValue(){
+    	 //login.action="http://155.101.252.187:9300/p2pd/servlet/dispatch";
+         //login.action="http://155.101.252.187:9300/p2pd/servlet/dispatch";
+         $("#form1").submit();
+     }
+
+function showWin(){  
+   
+    var winNode = $("#win");  
+   //方法一：利用js修改css的值，实现显示效果  
+   // winNode.css("display", "block");  
+   //方法二：利用jquery的show方法，实现显示效果  
+   winNode.show("slow");  
+    
+}  
+function hide(){  
+    var winNode = $("#win");  
+    //方法一：修改css的值  
+    //winNode.css("display", "none");  
+    //方法二：jquery的fadeOut方式  
+    winNode.fadeOut("slow");  
+    //方法三：jquery的hide方法  
+    winNode.hide("slow");  
+}
+/*验证开始日期*/
+function searchStartDateFun(obj){
+	var startDate=$("#dateBegin").val();
+	var endDate=$("#dateEnd").val();
+	if(endDate.length>0&&startDate.length>0){
+		if(endDate<startDate){
+			$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+		}else{
+			$('#endDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+/*验证结束日期*/
+function searchEndDateFun(obj){
+	var startDate=$("#dateBegin").val();
+	var endDate=$("#dateEnd").val();
+	if(endDate.length>0&&startDate.length>0){
+		if(startDate>endDate){
+			$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+		}else{
+			$('#startDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+
+ function getTeam(){
+            var url = "../report/getTeam.html?RandNum="+Math.random();
+            var result = window.showModalDialog(url,{window: 
+
+window},'dialogWidth=550px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            return result;
+        }
+</script>
+</head>
+<body style="padding-bottom: 200px;">
+	<form id="form1" method="post" action=$reportUrl target="cognosIframe">
+		<input type="hidden" id="b_action" name="b_action" value="cognosViewer" /> 
+		<input type="hidden" id="ui.action" name="ui.action" value="run" /> 
+		<input type="hidden" id="run.outputFormat" name="run.outputFormat" value="" /> 
+		<input type="hidden" id="run.prompt" name="run.prompt" value="true" /> 
+		<input type="hidden" id="cv.toolbar" name="cv.toolbar" value="true" /> 
+		<input type="hidden" id="cv.header" name="cv.header" value="false" /> 
+		<input type="hidden" id="p_dateB" name="p_dateB" value="" /> 
+	    <input type="hidden" id="p_dateE" name="p_dateE" value="" /> 
+	    <input type="hidden" id="p_custID" name="p_custID" value="" /> 
+		<input type="hidden" id="ui.object" name="ui.object" value="/content/folder[@name='积分管理']/package[@name='积分管理']/report[@name='积分兑换明细查询']" />
+		<center class="Noprint" >
+	  	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">开始日期：</label>
+                <div class="dtxt2 fl" id="startDiv" style="width: 150px;">
+                    <input type="text" id="dateBegin" fun="searchStartDateFun" readonly="readonly" name="condition.dateBegin" dateFlag="true" class="dtxt2-txt date" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">结束日期：</label>
+                <div class="dtxt2 fl" id="endDiv" style="width: 150px;">
+                    <input type="text" id="dateEnd" fun="searchEndDateFun" readonly="readonly" name="condition.dateEnd" dateFlag="true" class="dtxt2-txt date" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </div>
+			<label class="condi-i-field">团队：</label>
+			 <input type="text" id="team" onclick="getTeam()"  />
+        </div>
+		<label class="condi-i-field">团队   的：</label>
+		<input id="query" type="button" class="btn1" onclick="showWin()" value="搜索" />
+	</form>
+	        <div class="sz">
+	            <input id="query" type="button" class="btn1" onclick="onAfterQuery()" value="搜 索" />
+				
+	        </div>
+        </center>
+		<div style="position: absolute; z-index: 10; width: 100%; height: 100%">
+            <iframe id="cognosIframe" name="cognosIframe" style="z-index: 0;" width="100%" height="515"
+    									marginheight="0" marginwidth="0" frameborder="no" noResize="no" align="middle"> </iframe>
+	    </div>
+</body>

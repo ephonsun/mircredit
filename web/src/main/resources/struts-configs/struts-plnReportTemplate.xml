@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="plnReportTemplate" extends="default" namespace="/plnReportTemplate" >
+		<global-results>
+			<result name="error">/velocity/error.vm</result>
+		</global-results>
+		 <!--理财规划报告模板列表 -->
+		<action name="showPlnReportTemplateList" class="plnReportTemplateAction" method="showPlnReportTemplateList">
+			<result name="success">/velocity/plnReportTemplate/plnReportTemplateList.vm</result>
+		</action>
+		<!-- 分页 -->
+	 	 <action name="getPlnReportTemplatePage" class="plnReportTemplateAction" method="getPlnReportTemplatePage">
+			<result name="success">/velocity/plnReportTemplate/plnReportTemplateTable.vm</result>
+		 </action>
+		 <!-- 新建理财规划模板界面-->
+		 <action name="savePlanTemplateForm" class="plnReportTemplateAction" method="savePlanTemplateForm">
+		 	<result name="success">/velocity/plnReportTemplate/plnReportTemplateInsert.vm</result>
+		 </action>
+		<!-- 新建理财规划模板-->
+		<action name="savePlanTemplate" class="plnReportTemplateAction" method="savePlanTemplate">
+			<result name="success">/velocity/plnReportTemplate/plnReportTemplateInsert.vm</result>
+		</action>
+		<!-- 插入标签 -->
+		<action name="targetList" class="plnReportTemplateAction" method="targetList">
+			<result name="success">/eWebEditor/dialog/editor_label.vm</result>
+		</action>
+		<!-- 查看模板 -->
+		<action name="getPlanTemplateDetail" class="plnReportTemplateAction" method="getPlanTemplateDetail">
+			<result name="success">/velocity/plnReportTemplate/plnReportTemplateDetail.vm</result>
+		</action>
+		<!-- 编辑模板 界面-->
+		<action name="updatePlanTemplateForm" class="plnReportTemplateAction" method="updatePlanTemplateForm">
+			<result name="success">/velocity/plnReportTemplate/plnReportTemplateUpdate.vm</result>
+		</action>
+		<!-- 编辑模板 -->
+		<action name="updatePlanTemplate" class="plnReportTemplateAction" method="updatePlanTemplate">
+			<result name="success">/velocity/plnReportTemplate/plnReportTemplateUpdate.vm</result>
+		</action>
+		<!-- 删除多个模板 -->
+		<action name="delPlanTemplates" class="plnReportTemplateAction" method="delPlanTemplates">
+		</action>
+		<!-- 启用停用模板 -->
+		<action name="activePlanTemplate" class="plnReportTemplateAction" method="activePlanTemplate">
+		</action>
+		<!-- 验证是否生成报告 -->
+		<action name="validateReport" class="plnReportTemplateAction" method="validateReport">
+		</action>
+		<!-- 生成报告 -->
+		<action name="generateReport" class="plnReportTemplateAction" method="generateReport">
+			<result name="success">/velocity/plnReportTemplate/templateReport.vm</result>
+		</action>
+		
+	</package>
+
+</struts>

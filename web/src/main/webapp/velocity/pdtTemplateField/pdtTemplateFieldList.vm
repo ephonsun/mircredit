@@ -1,0 +1,181 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<title>业务模板字段列表</title>
+	
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">	
+	function setstate(){
+			$('.datatbl tbody tr:eq(1) span[move=up]').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:eq(1) span[move=up]').removeClass('link');
+			$('.datatbl tbody tr:eq(1) span[move=up]').removeAttr('onclick');
+			$('.datatbl tbody tr:last span[move=down]').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:last span[move=down]').removeClass('link');
+			$('.datatbl tbody tr:last span[move=down]').removeAttr('onclick');
+	}
+	
+	jQuery(function(){  
+		$('table.datatbl').table();
+		setstate();
+	});
+    //新建完成后重刷页面
+	function addData(code){
+		var url="toAddTemplateFieldPage.html?templateId="+code+"&random="+Math.random()*10000;
+		var result=banger.page.openDialog(url,"新建业务字段",640,500);
+		//window.showModalDialog(url, '新建业务字段', 'dialogWidth=640px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+		if(result==1){
+			location.reload();
+		}
+	}
+	//编辑
+	function updateData(code){
+		var url="toUpdateTemplateFieldPage.html?templateFieldId="+code+"&random="+Math.random()*10000;
+		var result=banger.page.openDialog(url,"编辑业务字段",640,500);
+		//window.showModalDialog(url, '编辑业务字段', 'dialogWidth=640px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+		if(result==1){
+			location.reload();
+		}
+	}
+	//设置搜索字段
+	function updatePopup(id,isPopup){
+		var isPopupVal = 0;
+		if(isPopup.checked){
+			isPopupVal = 1;
+		}
+		var mm=document.getElementsByName("templateFieldSearch");
+		var count=0;
+		for(var i=0;i<mm.length;i++){
+			if(mm[i].checked==true){
+				count++;
+			}
+		}
+		if(count>3){
+			isPopup.checked=false;
+			banger.page.showMessageBox("目前最多支持三项设置为搜索项！");
+			return;
+		}else{
+    		jQuery.ajax({
+    			    type:"post", //请求方式
+    			    url:"updateTemplateFieldSearch.html", //发送请求地址
+    			    data:{ //发送给数据库的数据
+    			    'templateField.templateFieldId':id,
+    			    'templateField.templateFieldSearch':isPopupVal
+    			    },
+    			    success:function(data){
+    			 	  location.reload();
+    			    }
+    			});
+		}
+	}
+	//上移下移
+	function moveData(vid,vmoveType){
+    	var moveType;
+    	jQuery.ajax({
+		    type:"post", //请求方式
+		    url:"moveFieldItems.html", //发送请求地址
+		    data:{ //发送给数据库的数据
+		    'templateField.templateFieldId':vid,
+		    'templateField.templateId':$("#templateId").val(),
+		    saveType:vmoveType
+		    },
+		    success:function(data){
+		 	  location.reload();
+		    }
+			});
+		}
+	//删除
+	function delData(id,name,type){
+		jQuery.post(
+    		'velidateDelFeild.html',
+    		{'templateField.templateFieldId':id,
+        	 'templateField.templateId':$("#templateId").val()
+    		 },
+    		 function(data){
+    		 	if(data!=""){
+    				if(confirm(data)){
+						jQuery.post('delTemplateField.html',
+							{'templateField.templateFieldId':id,
+							'templateField.templateId':$("#templateId").val(),
+							'templateField.templateFieldType':type},
+							function(){location.reload();}
+						);
+            		}
+    			}else{
+    				jQuery.post('delTemplateField.html',
+							{'templateField.templateFieldId':id,
+							'templateField.templateId':$("#templateId").val(),
+							'templateField.templateFieldType':type},
+							function(){location.reload();}
+						);
+    			}
+		});
+	}
+	</script>
+</head>
+<body>
+	<form id="crmTemplateField">
+		<input type="hidden" id="templateId" name="templateId" value="$!templateId" />
+		<div class="action-bar">
+	    	<span onclick="addData('$!templateId');"  class="ui-span-btn fl">
+	            <label class="btn2-txt">添加字段</label>
+	        </span>
+	    </div>
+	    <table class="datatbl">
+	    	<thead>
+	        	<tr>
+	            	<th width="20%"><label title="名称">名称</label></th>
+					<th width="20%"><label title="类型">类型</label></th>
+					<th width="20%"><label title="设置为搜索字段">设置为搜索字段</label></th>
+					<th><label title="操作">操作</label></th>
+	            </tr>
+	        </thead>
+	    	<tbody>
+	    	#foreach($templateField in $!pdtTemplateFieldList)
+				#if($templateField.isBuiltin==1)
+    				<tr>
+                    	<td><label>$!templateField.templateFieldName</label></td>
+                    	<td><label>${feildTypeMap.get($!templateField.templateFieldType)}</label></td>
+                    	<td>
+        	            	<input type="checkbox" class="checkbox" rel="row" name="templateFieldSearch" onclick="updatePopup('$!templateField.templateFieldId',this)" #if($!templateField.templateFieldSearch==1) checked="true" #end/>
+                       	</td>
+                    	<td>
+                        	<span class="link" onclick="updateData('$!templateField.templateFieldId')" >编辑</span>
+							<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    						<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    						<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        </td>
+                    </tr>
+				#else
+                	<tr>
+                    	<td><label>$!templateField.templateFieldName</label></td>
+                    	<td><label>${feildTypeMap.get($!templateField.templateFieldType)}</label></td>
+                    	<td>
+        	            	<input type="checkbox" class="checkbox" rel="row" name="templateFieldSearch" onclick="updatePopup('$!templateField.templateFieldId',this)" #if($!templateField.templateFieldSearch==1) checked="true" #end/>
+						</td>
+                    	<td>
+                        	<span class="link" onclick="updateData('$!templateField.templateFieldId')" >编辑</span>
+                            <span class="link" onclick="delData('$!templateField.templateFieldId','$!templateField.templateFieldName','$!templateField.templateFieldType')">删除</span>
+                            <span class="link" move="up"  onclick="moveData('$!templateField.templateFieldId','up')">上移</span>
+                            <span class="link" move="down" onclick="moveData('$!templateField.templateFieldId','down')">下移</span>
+                        </td>
+                    </tr>
+				#end
+	        #end
+	        </tbody>
+	    </table>
+	    <div class="halign" style="margin-top: 20px;">
+	       <input type="button" onclick="javascript:tab.close(GetId(), false);" class="btn6 btn6bg3" value="关闭" />
+	    </div>
+	</form>
+</body>
+</html>

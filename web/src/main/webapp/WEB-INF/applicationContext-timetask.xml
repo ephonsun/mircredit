@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+       default-lazy-init="true">
+    <!--事务配置-->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="10"/>
+        <property name="maxPoolSize" value="100"/>
+        <property name="queueCapacity" value="500"/>
+    </bean>
+
+    <!-- 贷款自动催收 start -->
+    <bean id="autoLoanDunJob" class="com.banger.mobile.facade.impl.AutoLoanDunJobImpl">
+        <property name="lnLoanService" ref="lnLoanService" ></property>
+        <property name="lnRepaymentPlanService" ref="lnRepaymentPlanService" ></property>
+        <property name="lnDunLogService" ref="lnDunLogService" ></property>
+        <property name="lnDunSetingService" ref="lnDunSetingService" ></property>
+        <property name="lnOpHistoryService" ref="lnOpHistoryService" ></property>
+        <property name="lnExceptionRepaymentPlanService" ref="lnExceptionRepaymentPlanService" ></property>
+        <property name="isRun" value="${crmImport.isRun}"/>
+    </bean>
+    <bean id="autoLoanDunJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="autoLoanDunJob"/>
+        </property>
+        <property name="targetMethod">
+            <value>doJob</value>
+        </property>
+        <property name="concurrent">
+            <value>false</value>
+        </property>
+    </bean>
+    <bean id="cronTrigger1" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail">
+            <ref bean="autoLoanDunJobDetail"/>
+        </property>
+        <property name="cronExpression">
+            <value>${loan.autoDun.cronExpression}</value>
+        </property>
+    </bean>
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref local="cronTrigger1"/>
+            </list>
+        </property>
+    </bean>
+    <!-- 贷款自动催收 end -->
+
+    <!-- 删除服务器临时存放文件 start -->
+    <bean id="delTempRecordJob" class="com.banger.mobile.facade.impl.record.DelTempRecordJobImpl">
+        <property name="sysUploadFileService" ref="sysUploadFileService" ></property>
+        <property name="sysParamService" ref="sysParamService" ></property>
+        <property name="deleteTempFileDays" value="${cms.delete.tempfile.days}"></property>
+        <property name="isRun" value="${crmImport.isRun}"/>
+    </bean>
+    <bean id="delTempRecordJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="delTempRecordJob"/>
+        </property>
+        <property name="targetMethod">
+            <value>doDelTempRecJob</value>
+        </property>
+        <property name="concurrent">
+            <value>false</value>
+        </property>
+    </bean>
+    <bean id="cronTrigger3" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail">
+            <ref bean="delTempRecordJobDetail"/>
+        </property>
+        <property name="cronExpression">
+            <value>${cleanRecords.cronExpression}</value>
+        </property>
+    </bean>
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref local="cronTrigger3"/>
+            </list>
+        </property>
+    </bean>
+    <!-- 删除服务器临时存放文件end -->
+
+    <!-- 贷款饭放款同步市信贷文件 start -->
+    <bean id="writeLendingLoanJob" class="com.banger.mobile.facade.impl.record.WriteLendingLoanJobImpl">
+        <property name="sysParamService" ref="sysParamService" ></property>
+        <property name="lnLoanService" ref="lnLoanService" ></property>
+        <property name="lnLoanInfoService" ref="lnLoanInfoService" ></property>
+        <property name="crmCustomerService" ref="crmCustomerService" />
+        <property name="lnLoanGuarantorService" ref="lnLoanGuarantorService" />
+        <property name="sysUserService" ref="sysUserService" />
+        <property name="lnBalanceService" ref="lnBalanceService" />
+        <property name="lnRepaymentPlanService" ref="lnRepaymentPlanService" />
+    </bean>
+    <bean id="writeLendingLoanJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="writeLendingLoanJob"/>
+        </property>
+        <property name="targetMethod">
+            <value>doWrite</value>
+        </property>
+        <property name="concurrent">
+            <value>false</value>
+        </property>
+    </bean>
+    <bean id="cronTrigger4" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail">
+            <ref bean="writeLendingLoanJobDetail"/>
+        </property>
+        <property name="cronExpression">
+            <value>${writeLendingLoan.cronExpression}</value>
+        </property>
+    </bean>
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref local="cronTrigger4"/>
+            </list>
+        </property>
+    </bean>
+    <!-- 贷款饭放款同步市信贷文件 -->
+</beans>

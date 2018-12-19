@@ -1,0 +1,136 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择拒绝原因</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        div.ztree-box { height: 430px; border: 1px solid #ccc; padding: 2px; overflow: auto; margin-top:-1px; }
+        div.ztree-box ul{ margin-left:15px; margin-top:10px;}
+        div.ztree-box ul li{ vertical-align:middle; list-style-type:none; line-height:22px; -margin-bottom:6px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+
+    <script type="text/javascript">
+        jQuery(function(){
+            jQuery('#cancelReasonDiv').validator();
+        });
+        $(document).ready(function(){
+            $(".but").bind("click",function(){
+                $(".h2").hide();
+            });
+        });
+
+        $(document).ready(function(){
+            jQuery.fx.off = true;
+            $(".but1").bind("click",function(){
+                $(".h2").show();
+            });
+        });
+        function extendvalidator(){
+            var bool = true;
+            return bool;
+        }
+        //确定撤销贷款
+        function sureCancel(){
+            var otherElem = document.getElementById("other");
+            if(otherElem.checked){
+                var bool = jQuery.validator({ form: 'cancelReasonDiv', extend: true, extendhandler: extendvalidator });
+                if(!bool){
+                    return false;
+                }
+            }
+
+            var radioValue = getRadioValue();
+            window.returnValue=radioValue;
+            window.close();
+
+        }
+
+        //取消撤销贷款
+        function cancelCancel(){
+            window.close();
+        }
+
+        //当点击其他radio时，让input元素显示出来
+        function showInput(){
+            $("#input_other").type = "text";
+        }
+
+        function getRadioValue(){
+            var requestValue = {};
+
+            var otherElem = document.getElementById("other");
+            if(otherElem.checked){
+                var otherRemark = getOtherRemark();
+                if(jQuery.trim(otherRemark) == ""){
+                    $('#input_other').addClass('v-fails');
+//                    $('#input_other').attr('tips', '请至少填写一个联系电话');
+                }
+                requestValue['cancelReasonOther'] = jQuery.trim($('#input_other').val());
+            }else{
+                var radios = document.getElementsByName("rdo");
+                var radioValue;
+                var remarkValue;
+                for(var i = 0; i < radios.length; i++){
+                    var radio = radios.item(i);
+                    if(radio.checked){
+                        radioValue = radio.value;
+                        remarkValue = radio.title;
+                        break;
+                    }
+                }
+                requestValue['cancelReasonId'] = radioValue;
+                requestValue['cancelReasonName'] = remarkValue;
+            }
+            return requestValue;
+        }
+
+        //输入其他备注信息
+        function getOtherRemark(){
+            var otherRemark = $("#input_other").val();
+            return otherRemark;
+        }
+    </script>
+</head>
+<body>
+<p class="bold loan-ttlbg">请选择拒绝原因</p>
+<div class="ztree-box" id="cancelReasonDiv">
+    <ul>
+        #foreach($lnCancelReason in $!lnCancelReasonList)
+            <li><input type="radio" name="rdo" #if($velocityCount == 1)
+                checked="checked"
+            #end class="checkbox but" value="$lnCancelReason.cancelReasonId" title="$lnCancelReason.cancelReasonName"/>
+                <label>$lnCancelReason.cancelReasonName</label></li>
+        #end
+        <li>
+            <div class="fl" style="-margin-top:4px;">
+                <input type="radio" class="checkbox but1" name="rdo" id="other"/>
+                <label>其他</label>
+            </div>
+            <div class="fl">
+                <input type="text" style="-margin-left:-15px;" id="input_other" class="ui-div-text1 hide h2" maxlength="50"  rule="\S" tips='"其他原因"必须填写'/>
+            </div>
+        </li>
+    </ul>
+    <hr style="clear:both; margin-top:35px; +margin-top:0px;" />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确认" onclick="sureCancel()" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="cancelCancel()" />
+    </div>
+</div>
+</body>
+</html>

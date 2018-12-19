@@ -1,0 +1,96 @@
+ <table class="datatbl">
+        <thead>
+            <tr>
+                <th><label title="任务标题">任务标题</label></th>
+                <th><label title="联系目的">联系目的</label></th>
+                <th><label title="开始日期">开始日期</label></th>
+                <th><label title="结束日期">结束日期</label></th>
+                <th><label title="完成情况">完成情况</label></th>
+                <th><label title="分配者">分配者</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+        <tbody>
+        	#foreach($taskBean in $!tskTaskPage.items)
+        	
+        		#set($execDate=$date.format("yyyy-MM-dd",$!taskBean.endDate))
+				#set($startDate=$date.format("yyyy-MM-dd",$!taskBean.startDate))
+				#set($result=$!dateString.getSystemDate($execDate))
+				#set($resultExection=$!dateString.getExecutionDate($startDate,$execDate))
+				#set($classtxt='')
+				#if($result==1 && $!taskBean.isSuspend!=1) 
+					#set($classtxt='class=yellow') 
+				#else
+    				#if($taskBean.isEmergency==1) 
+    					#set($classtxt='class=red') 
+    				#end 
+				#end 
+		
+				#set($canStop=0)
+				#set($canRestart=0)
+				#set($canDelete=0)
+				#set($canUpdate=0)
+				#if($!taskBean.assignId==$!loginUserId&&$result!=1&&!$moneyUtil.decimePercent($!taskBean.percent).equals('100.00')&&$!taskBean.isSuspend==0)
+					#set($canStop=1)
+				#end
+				#if($!taskBean.assignId==$!loginUserId&&$!taskBean.isSuspend==1)
+					#set($canRestart=1)
+				#end
+				#if($!taskBean.assignId==$!loginUserId&&$result!=1&&!$moneyUtil.decimePercent($!taskBean.percent).equals('100.00')&&$!taskBean.isSuspend==0)
+					#set($canDelete=1)
+				#end
+				#if($!taskBean.assignId==$!loginUserId&&$result!=1&&!$moneyUtil.decimePercent($!taskBean.percent).equals('100.00')&&$!taskBean.isSuspend==0)
+					#set($canUpdate=1)
+				#end
+            <tr $!classtxt>
+                <td style="color:#00f !important;"><label class="ui-link-btn" onclick="detailTsk($!taskBean.contactId,$!taskBean.isNextContact);" title="$!taskBean.contactTitle">$!taskBean.contactTitle</label></td>
+                <td><label title="$!taskBean.taskPurpose">$!taskBean.taskPurpose</label></td>
+                <td><label title="$date.format("yyyy-MM-dd",$!taskBean.startDate)">#if($!taskBean.startDate)$date.format("yyyy-MM-dd",$!taskBean.startDate)#end</label></td>
+                <td><label title="$date.format("yyyy-MM-dd",$!taskBean.endDate)">#if($!taskBean.endDate)$date.format("yyyy-MM-dd",$!taskBean.endDate)#end</label></td>
+                <td>
+					#if($!taskBean.isSuspend==1)
+						已中止
+					#else
+						#if($!resultExection!=2)
+							<label title="$!taskBean.hasfinishedTask/$!taskBean.totalTask">$moneyUtil.decimePercent($!taskBean.percent)%</label>
+						#else
+							未开始
+						#end
+					#end
+				</td>
+                <td><label title="$!taskBean.assignName">$!taskBean.assignName</label></td>
+                <td>#if($!taskBean.isSuspend!=1)
+						#if($canStop==0)
+							<span href="#" disabled="true" style="cursor: default;">中止</span>
+						#else
+							<span class="link" onclick="stopTask($!taskBean.contactId,$!taskBean.isSuspend,this)" >中止</span>
+						#end
+                    #else
+						#if($canRestart==0)
+							<span href="#" disabled="true" style="cursor: default;">重启</span>
+						#else
+							<span class="link" onclick="reStartTask($!taskBean.contactId,this)">重启</span>
+						#end
+					#end
+					#if($canUpdate==0)
+						<span href="#" disabled="true" style="cursor: default;">编辑</span>
+					#else
+						<span class="link" #if($moneyUtil.decimePercent($!taskBean.percent).equals('100.00')||$!taskBean.isSuspend == 1) disabled="true" style="cursor: default;" #end onclick="updateTask($!taskBean.contactId,$!taskBean.isNextContact)">编辑</span>
+					#end
+                    #if($canDelete==0)
+						<span href="#" disabled="true" style="cursor: default;">删除</span>
+					#else
+						<span class="link" onclick="deleteTask($!taskBean.contactId,this)" >删除</span>
+					#end
+                </td>
+            </tr>
+            #end
+        </tbody>
+        <tfoot align="right">
+        	<tr>
+            	<td colspan="7">
+                	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+</table>

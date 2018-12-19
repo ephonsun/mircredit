@@ -1,0 +1,209 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>导入进度</title>
+    
+    #styleLink("base")
+    
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    
+	var confirmMsg;
+	var proId;
+	function exportCustomer(){
+		confirmMsg = 1;
+		importExcel();
+		proId = setInterval("progressBar()", 1000);
+    		
+	}
+	
+    	
+    function importExcel(){
+		var postJson =getPostJson();
+		jQuery.ajax({
+	    	type: 'post',
+			url:'excelToList.html',
+			data:postJson,
+			success:function(json){
+    			var outStr=jQuery.parseJSON(json);
+				if(outStr==""){
+					$('#failRecordCount').text(0);
+					$('#successRecordCount').text(0);
+				}else{
+					$('#failRecordCount').text(outStr['failRecordCount']);
+					$('#successRecordCount').text(outStr['successRecordCount']);
+					$("#errorFilePath").attr("value",outStr['errorFilePath']);
+				}
+			}
+    	});	
+    
+    }	
+    	
+	
+	//导出进度
+	function progressBar(){
+	    var totalAmount=$("#bathchCount").val();
+		jQuery.post('importBar.html?random='+Math.random()*10000,
+						{},
+						function(json){
+							var curr, p, ds=jQuery.parseJSON(json);
+							if(ds["curr"]) {
+								curr = ds["curr"];
+							}
+							if(!curr) curr = 0;
+							if(totalAmount==0) 
+								p = "100%";
+                			else 
+								p = Math.round(parseInt(curr) * 100 /parseInt(totalAmount))+'%';
+                			$("#percent").text(p);
+                			$("#porgressBar").css("width",p);
+                			if(p == "100%"){
+								sleep(500);
+                				$("#d2").css("display","none");
+                				$("#d3").css("display","block");
+								confirmMsg=2;
+								if($('#failRecordCount').text()!="0")
+                					$("#d4").css("display","block");
+                				else
+                					$("#d4").css("display","none");
+								clearInterval(proId);
+                			}
+						}
+			);
+	}
+	function sleep(numberMillis) {    
+        var now = new Date();    
+        var exitTime = now.getTime() + numberMillis;   
+        while (true) { 
+        now = new Date();       
+        if (now.getTime() > exitTime) 
+      	  return;    
+        } 
+    } 
+	//意外关闭
+	function cfirm(){
+	
+	if(confirmMsg == 1){
+			if(confirm('您确定要取消导入通话白名单吗？')) 
+			tab.close(GetId(), true);return false;
+		}else tab.close(GetId(), true);
+		return true;	
+	}
+	
+	//导出失败记录
+	function exportExcel(){
+		var filePath=$("#errorFilePath").val();
+		if(filePath==""){
+			banger.page.showMessageBox("失败文件路径错误！");
+			return false;		
+		}
+		document.location.href="exportFailData.html?filePath="+filePath+"&random="+Math.random()*100000;
+	}
+		
+	function closeTab(){
+        var tempId=GetId();
+        if(tempId)
+		    tab.close(GetId(), true);
+	}
+		
+	$(function(){
+		if($!total){
+			$("#totalCount").text("$!total");
+		}
+		if($!bathchCount){
+			$("#bathchCount").attr("value",$!bathchCount);
+		}
+		var totalCount=$("#totalCount").text();
+		if(totalCount<=0){
+ 			 $("#importBtn").attr("disabled",true);
+		}
+		exportCustomer();
+	})
+	
+	
+	
+    </script>
+</head>
+
+<body>
+	<input type="hidden" name="fileName"  value="$!fileName" />
+	<input type="hidden" name="filePath"  value="$!filePath" />
+	<input type="hidden" id="errorFilePath" name="errorFilePath">
+	<input type="hidden" id="bathchCount"  value="$!bathchCount" />
+	<input type="hidden" id="total" value="$!total" />
+	<div id="d2" >
+		<table class="step1" width="100%" border="0" cellpadding="2" cellspacing="2">
+    	<tr>
+        	<td class="over">第 1 步</td>
+        	<td class="over">第 2 步</td>
+        	<td>完成</td>
+        </tr>
+    </table>
+    <h4 class="step-title">第二步：导入队列进度</h4>
+	
+     <div class="pgrbar">
+        	<div class="ppt">
+            	<span class="fl">
+                    正在导入数据，共
+                    <label id="totalCount" class="dgreen bold">0</label>
+                    条数据…
+                </span>
+                <span id="percent" class="fr">
+                </span>
+            </div>
+            <div class="bar" >
+                <div id="porgressBar"></div>
+            </div>
+        </div>
+	 </div>
+	
+	 <div id="d3" style="display:none">
+		<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">完成</td>
+            </tr>
+        </table>
+            
+            <h4 class="steptxt">
+            	完成通话白名单导入
+            </h4>
+            
+            <dl class="sucppt">
+            	<dt>通话白名单导入已完成！</dt>
+                <dd class="img"></dd>
+                <dd>
+                	共
+                    <span>$!total</span>
+                    条数据，成功
+                    <span class="green"><label id="successRecordCount" ></label></span>
+                    条，失败 
+                    <span class="red"><label id="failRecordCount" ></label></span> 
+                    条。
+            	</dd>
+            </dl>
+			
+			<div id="d4" style="display:none">
+                <dl style="line-height: 24px;">
+                   <dt>您可以另存导入失败的记录</dt>
+				   <dd>1、根据失败原因，更改信息。</dd>
+				   <dd>2、如果不需要再次导入失败的记录，可以删除这行。</dd>
+                </dl>
+                <div style="margin: 20px 0px;">
+                		<input type="button" class="btn1" value="另存导入失败的白名单"  onclick="exportExcel()"/>
+                </div>
+			</div>
+            <hr />
+            
+            <div class="halign">
+            	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="closeTab()" />
+            </div>
+     </div>
+</body>
+</html>

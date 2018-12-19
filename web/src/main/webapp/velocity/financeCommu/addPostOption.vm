@@ -1,0 +1,202 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>发布投票</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		span.ml { margin-left: -1px; }
+		div.mt { margin-top: 0 !important; }
+		.inp{ width: 30px; border: 1px solid #ccc; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+    	$(function(){
+			
+			$('select').select();
+			jQuery("#optionForm").validator();
+			unsignedIntInput("#selectOptionCount");
+			unsignedIntInput("#countVotesDays");
+			$("#submitOption").click(function(){
+			var bool = jQuery.validator({ form: 'optionForm', extend: true,extendhandler:initOptionContent});
+				if(bool){
+					var partitionId='$!partitionId';
+					var templateId='$!templateId';
+					jQuery.post('insertOption.html',{
+						'theme.themeTitle':$("#themeTitle").val(),
+						'theme.themeContent':$("#content").text(),
+						'theme.partitionId':partitionId,
+        				'theme.templateId':templateId,
+        				'theme.themeType':2,
+						'theme.selectOptionCount':$('#selectOptionCount').val(),
+						'theme.countVotesDays':$('#countVotesDays').val(),
+						'theme.showOptionResult':($('#showOptionResult').attr('checked')=='checked')?1:0,
+						'theme.showOptionUser':($('#showOptionUser').attr('checked')=='checked')?1:0,
+						'optionList':jQuery.toJsonString(getOptionList())
+					},function(date){
+						if(date>0){
+							tab.close(GetId(), true);
+						}else{
+							banger.page.showMessageBox("发布投票失败!");
+						}
+					});
+				}
+			});
+		});
+		
+		function fun2(h,b){
+    		if(h.index() == 0){
+				var partitionId='$!partitionId';
+				var templateId='$!templateId';
+    			window.location.href="insertTheme.html?partitionId="+partitionId+"&templateId="+templateId+"&random="+Math.random();
+    		}
+		}
+		function initOptionContent(){
+			var value= jQuery.trim(window.content_html.getHTML());
+			if(value.length==0){
+				banger.page.showMessageBox("帖子内容不能为空！");return false;
+			}else if(value.length<2){
+				banger.page.showMessageBox("帖子内容字数不能够小于2个字！");return false;
+			}
+			else{$("#content").text(value);return true;} 
+		}
+		
+		function writeText(value){
+			var le=value.length;
+			$("#sz").text(80-parseInt(le));
+		}
+		
+		function getOptionList(){
+			var optionList = [];
+			$("input[name='voteOptionContent']").each(function(){
+				var option = {};
+				var optionContent = jQuery.trim($(this).val());
+				if(optionContent){
+					option['optionContent'] = optionContent;
+					optionList.push(option);
+				}
+			});
+			return optionList;
+		}
+		
+		function addVoteOption(){
+			var vLength = $('#vOptionTD').children("div .voteOption").length;
+			if(vLength >= 10){
+				banger.page.showMessageBox("选项最多可填 10 项!");
+				return;
+			}
+			$('#addVOptionP').before('<div class="voteOption"><div class="inner option"><div class="border"><div class="ui-div-text">'
+									+'<input type="text" class="text" name="voteOptionContent" maxlength="100"/></div></div></div><div class="inner delimg"><div class="border">'
+									+'<i onclick="delVoteOption(this)">&nbsp;</i></div></div></div>');
+		}
+		
+		function delVoteOption(a){
+			$(a).parents('div .voteOption').remove();
+		}
+		
+    </script>
+</head>
+
+<body>
+	<div class="ui-exchangearea-banner">
+		<p>
+			<label class="fl">$!partition.partitionName >></label><label class="fl">$!temp.templateName >></label><label class="fl bold">发表投票</label>
+        </p>
+	</div>
+				<div class="votepost" id="optionForm" >
+						<div style="margin-bottom:5px;">
+							<table>
+								<tbody>
+									<tr>
+										<td>
+											<div class="ui-div-text">
+												<input type="text" class="text" onkeyup="writeText(this.value)" name="theme.themeTitle" id="themeTitle" rule="\S" tips='“标题”必须填写' maxlength="80">
+											</div>
+										</td>
+										<td class="notwrap" width="34%">
+                                            (<label>还可以输入<strong > <span id="sz">80</span> </strong>个字符</label>)
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<table cellpadding="0" cellspacing="0">
+							<tbody>
+								<tr class="vOption">
+									<td>
+										<label class="bold">选项最多可填 10 项</label>
+									</td>
+									<td style="border-left:1px dotted #ccc;" width="34%"></td>
+								</tr>
+								<tr class="vOption">
+									<td id="vOptionTD">
+										<div class="voteOption">
+											<div class="inner option">
+												<div class="border">
+													<div class="ui-div-text">
+														<input type="text" class="text" rule="\S" tips='“选项内容”必须填写' maxlength="100" name="voteOptionContent"/>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="voteOption">
+											<div class="inner option">
+												<div class="border">
+													<div class="ui-div-text">
+														<input type="text" class="text" name="voteOptionContent" rule="\S" tips='“选项内容”必须填写' maxlength="100"/>
+													</div>
+												</div>
+											</div>
+										</div>
+										<p class="addVOption" id="addVOptionP">
+											<a href="javascript:void(0);"  onclick="addVoteOption()" hideFocus="true">+增加选项</a>
+										</p>
+									</td>
+									
+									<td width="34%" class="vItem">
+										<p>
+											<label>最多可选</label>
+												 <input type="text" class="inpt" value="1" id="selectOptionCount" rule="\S" tips='“最多可选”必须填写' maxlength="1"/>
+											<label>项</label>
+										</p>
+										<p>
+											<label>记票天数</label>
+												 <input type="text" class="inpt" value="" id="countVotesDays" maxlength="2"/>
+											<label>天</label>
+										</p>
+										<p>
+											<input type="checkbox" class="checkbox" id="showOptionResult" checked/>
+											<label for="showOptionResult">投票后结果可见</label>
+										</p>
+										<p>
+											<input type="checkbox" class="checkbox" id="showOptionUser" />
+											<label for="showOptionUser">公开投票参与人</label>
+										</p>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div style="padding-top:10px;">
+							<div class="ui-div-textarea">
+								<textarea style="display:none" class="textarea" id="content"></textarea>
+									<IFRAME ID="eWebEditor2" name="content_html" src="$request.contextPath/eWebEditor/eWebEditor.jsp?id=content&style=standard" frameborder="0" scrolling="no" width="100%" height="300"></IFRAME> 
+							</div>
+						</div>
+						<hr />
+						<div>
+							<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="发起投票" id="submitOption"/>
+						</div>
+					</div>
+</body>
+</html>

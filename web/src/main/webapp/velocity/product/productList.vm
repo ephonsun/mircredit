@@ -1,0 +1,235 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <style type="text/css">
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+	</style>
+	#scriptLink("core")
+	#scriptLink("page")
+	
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript">
+		var oldPostJson={};
+    	$(document).ready(function () {
+			$('#form1').validator();
+			getQueryJson();
+         });
+		
+		//根据id查看详情
+		function queryProductById(id){
+			var options = {id: "product_queryProductById"+id, pid: GetId()+id, title: "查看产品详情", url: "${ctx}/product/queryProductById.html?productId="+id+"&random="+Math.random(), lock: false};
+			tab.add(options);
+		}
+		
+		//日期验证
+		function checkDate(obj){
+			var bool = true;
+			var date1=$("#datepicker1").val();
+        	var date2=obj.value;
+			if(date2!=''){
+    			if(date1!=''&&date1>date2){
+        			$("#datepicker2").parent().addClass('v-fails');
+        			$(obj).attr('tips', '日期必须晚于'+date1); 
+    				bool = false;
+    			}else{
+        			$("#datepicker2").parent().removeClass('v-fails');
+        		}
+			}
+			return bool;
+		}
+		
+		function sub(){
+			var bool = jQuery.validator({ form: 'form1', extend: false});
+			if(!bool){
+				return false;
+			}
+			var postJson=getQueryJson();
+			oldPostJson = postJson;
+			jQuery.post("getProductListPage.html?fenye=1&&random="+Math.random()*1000000,postJson,
+			function(html){
+				refreshGrid('grid',html);
+			});
+		}
+		function getQueryJson(){
+        	var postJson = {};
+    		postJson['productCode']=jQuery.trim($('#productNo').val());
+			postJson['productName']=jQuery.trim($('#productName').val());
+			postJson['datepicker1']=jQuery.trim($('#datepicker1').val());
+			postJson['datepicker2']=jQuery.trim($('#datepicker2').val());
+			postJson['expireType']=jQuery.trim($('#expireType').val());
+    		return postJson;
+    	}
+		//新建产品信息
+		function openSaveProduct(){
+			var options = {id: "product_openSaveProduct", pid: GetId(), title: "新建产品", url: "${ctx}/product/openSaveProduct.html?random="+Math.random(), lock: false};
+    		tab.add(options);
+		}
+		
+		//修改产品信息
+		function productUpdate(id){
+			var options = {id: "product_openUpdateProduct"+id, pid: GetId(), title: "修改产品信息", url: "${ctx}/product/openUpdateProduct.html?productId="+id+"&random="+Math.random(), lock: false};
+    		tab.add(options);
+		}
+		
+		//删除产品
+		function deleteProduct(id,productName){
+			jQuery.post("queryProductRelated.html", {"productId": id}, function(result){
+				if(result=="1"){
+					banger.page.showMessageBox("产品“"+productName+"”下有客户的购买记录，不能够删除！");
+					return;
+				}else if(result=="2"){
+					banger.page.showMessageBox("产品“"+productName+"”与营销任务关联，不能够删除！");
+					return;
+				}
+				if(confirm("你确定要删除产品“"+productName+"”吗？")){
+					location.href="deleteProduct.html?expireType="+$("#expireType").val()+"&productId="+id;
+    			}
+        	});
+		}
+		
+		//跳转到未处理客户列表
+		function isDealCustomer(productId){
+			var options = {id: "product_isDealCustomer"+productId, pid: GetId(), title: "未处理客户", url: "${ctx}/product/isDealCustomer.html?productId="+productId+"&dealType=0&random="+Math.random(), lock: false};
+    		tab.add(options);
+		}
+		
+		//清空
+		function clean(){
+    		var length = document.forms[0].length
+    		for(i=0;i<length;i++)
+    		{
+    			 var type = document.forms[0].elements[i].type;
+    			 if(type!="button"&&type!="hidden"){
+    				 document.forms[0].elements[i].value = "";
+    			 }
+    		}
+		}
+		
+		//分页跳转
+		function gotoPage(page){
+    		if(!oldPostJson['expireType']){
+    			oldPostJson['expireType'] = $('#expireType').val();
+    		}
+			goto(page,"getProductListPage.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新Grid
+    	function refreshGrid(gridId,html)
+    	{
+    		$("#" + gridId).html(html);
+    		$('table.datatbl').table();
+    		var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+    	}
+		
+		//刷新
+		function refresh(){
+			if(!oldPostJson['expireType']){
+    			oldPostJson['expireType'] = $('#expireType').val();
+    		}
+    		goto(null,"getProductListPage.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		
+    </script>
+</head>
+
+<body>
+	<form id="form1" method="post">
+    	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td width="7%" class="field">
+                        <label>产品编号：</label>
+						<input type="hidden" id="expireType" name="expireType" value="$!expireType"/>
+						<input type="hidden" id="hproductNo" value="$!productCode"/>
+						<input type="hidden" id="hproductName" value="$!productName"/>
+						<input type="hidden" id="hdatepicker1" value="$!datepicker1"/>
+						<input type="hidden" id="hdatepicker2" value="$!datepicker2"/>
+                    </td>
+                    <td width="18%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="productNo" value="$!productCode" maxlength="20"/>
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>产品名称：</label>
+                    </td>
+                    <td width="18%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="productName" value="$!productName" maxlength="100"/>
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>到期日期：</label>
+                    </td>
+                    <td colspan="3">
+                        <table class="celltbl">
+                        	<tr>
+                            	<td width="110">
+                                    #if($!expireType==1||$!expireType==5)
+                                    	<div class="dtxt2">
+    										<input type="text" class="dtxt2-txt date" name="startDate" id="datepicker1" readonly value="$!datepicker1"/>
+                                            <span class="dtxt2-date">date</span>
+                                        </div>
+									#else
+										<label>#if($!datepicker1)$date.format("yyyy-MM-dd",$!datepicker1)#end</label>
+									#end
+                                </td>
+                            	<td width="20">
+                                	<label>—</label>
+                                </td>
+                            	<td width="110">
+									#if($!expireType==1||$!expireType==5)
+										<div class="dtxt2">
+                                            <input type="text" class="dtxt2-txt " id="datepicker2" fun="checkDate" readonly value="$!datepicker2"/>
+                                            <span class="dtxt2-date">date</span>
+										</div>
+									#else
+										<label>#if($!datepicker2)$date.format("yyyy-MM-dd",$!datepicker2)#end</label>
+									#end
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="sz">
+            <label class="fl bold">
+            	所有理财产品(<span id="queryCount" class="dgreen">$!count</span>)
+            </label>
+            <input type="button" class="btn1" value="清 空" onclick="clean();"/>
+            <input type="button" class="btn1" value="搜 索" onclick="sub();"/>
+        </div>
+    </form>
+    
+    <div class="actrow">
+		#if($urlPermitUtil.hasPermission('openSaveProduct'))
+        	<span class="btn2 fl" onclick="openSaveProduct();">
+    				<label>新建</label>
+            </span>
+		#end
+		<span class="btn2 fr" onclick="refresh();">
+            <label>刷新</label>
+        </span>
+    </div>
+    <div id="grid">
+		 #parse("/velocity/product/productListTabel.vm")
+	</div>
+</body>
+</html>

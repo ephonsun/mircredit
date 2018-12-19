@@ -1,0 +1,326 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有文章</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    
+
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	 <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			$('select').select(); 
+			$("#htmltbl").validator();
+		});
+		var oldPostJson={};
+		//新建文章
+		function newArticle(){
+			var url="/finance/addFeArticle.html";
+			var title="新建文章";
+			var id="FeArticle_add";
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false,confirm: true});
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"/finance/showFeArticlePageBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+	  //刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+			$('table.datatbl').table();
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+			
+		}
+		//刷新
+		function refreshForm(){
+			goto(null,"/finance/showFeArticlePageBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//清空搜索条件
+		function resetValue(){
+	    	$(':text').val('');
+	    	$('.htmltbl :checkbox').attr('checked',false);
+	    	$("select").each(function(){
+    		this.selectedIndex = 0;
+    		$(this).select();
+    	}); 
+	    }
+	    //搜索
+	    function search(){
+			var bool = jQuery.validator({ form: 'taskForm'});
+			if(bool){
+    	    	var postJson=getQueryJson();
+    			oldPostJson = postJson;
+    	    	jQuery.post('/finance/showFeArticlePageBySearch.html?random='+Math.random()*1000000,postJson,function(html){
+    	    					 refreshGrid('grid',html);
+    	    	});
+			}
+	    }
+	    
+	    //表单数据
+	    function getQueryJson(){
+        	var postJson = {};
+    		postJson['feArticle.articleTitle']=jQuery.trim($('#articleTitle').val());
+    		
+    		postJson['feArticle.articleReadtimeBegin']=jQuery.trim($('#articleReadtimeBegin').val());
+    		postJson['feArticle.articleReadtimeEnd']=jQuery.trim($('#articleReadtimeEnd').val());
+    		if($('#articleColumnId').val() > 0){
+    			postJson['feArticle.articleColumnId']=jQuery.trim($('#articleColumnId').val());
+    		}
+    		postJson['publishDateBegin']=jQuery.trim($('#publishDateBegin').val());
+    		postJson['publishDateEnd']=jQuery.trim($('#publishDateEnd').val());
+    		postJson['feArticle.isMastread'] =  ($("#readrequied").attr("checked")=="checked")?1:0;
+    		if($("#appendix").attr("checked")=="checked")
+    			postJson['isAttachment'] =  1;
+    		
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+    	
+    	function updateArticle(articleId){
+			var id="";
+			var title="编辑文章";
+			id="article_update";
+			var url="/finance/toArticleUpdatePage.html";
+			url=url+"?feArticle.articleId="+articleId;
+			
+			var options = {id: id+articleId, pid: GetId(), title: title, url: url, lock: false,confirm: true};
+			tab.add(options);
+    	}
+    	
+    	function getCheckedList(){
+    		var articleIds = '';
+    		$('input[name=checkboxList]:checked').each(function(obj){
+    			if(articleIds==''){
+    				articleIds = $(this).prev().val();
+    			}else{
+    				articleIds = articleIds + ',' + $(this).prev().val();
+    			}
+    		});
+    		return articleIds;
+    	
+    	}
+    	function publishActicle(){
+    		var articleIds = getCheckedList();
+			
+    		if (articleIds == '')
+			{
+				banger.page.showMessageBox('请选择你要发布的文章！');
+				return;
+			}
+    		jQuery.post('publishArticle.html',{
+    				'articleIds':articleIds
+    			},function(data){
+    				if(data==0){
+    					refreshForm();
+    				}
+    			});
+    	
+    	}
+    	
+    	function classifyArticle(){
+    		var articleIds = getCheckedList(); 
+    		if(articleIds == '')
+			{
+				banger.page.showMessageBox('请选择你要修改目标分类的文章！');
+				return;
+			}
+    			
+			var val = window.showModalDialog('/finance/toClassifyArticlePage.html?random='+Math.random()*1000000, { window: window }, 'dialogWidth=320px;dialogHeight=320px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+			if(val){
+				jQuery.post('classifyArticle.html',{
+    				'articleIds':articleIds,'columnId':val
+    			},function(data){
+    				if(data==0){
+    					refreshForm();
+    				}
+    			});
+			}
+		}
+		
+    	function deleteFeArticle(articleId,obj){
+    		if(confirm("您要删除文章"+'"'+obj.parentNode.parentNode.childNodes[1].innerText+'"'+"吗?")){
+				jQuery.post('deleteFeArticle.html',{
+    				'feArticle.articleId':articleId
+    			},function(data){
+					if(data == -2){
+						banger.page.showMessageBox("文章"+'"'+obj.parentNode.parentNode.childNodes[1].innerText+'"'+"已经被客户经理阅读，不能够删除！");
+					}else if(data==0){
+    					refreshForm();
+    				}
+    			});
+			}
+    	}
+    	
+    	function searchStartDateFun(obj){
+			var mytable = $(obj).closest("table .celltbl");
+			var startDate=mytable.find("input").eq(0).val();
+			var endDate=mytable.find("input").eq(1).val();
+			if(endDate.length>0&&startDate.length>0){
+				if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+					$('#endDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		function searchEndDateFun(obj){
+			var mytable = $(obj).closest("table .celltbl");
+			var startDate=mytable.find("input").eq(0).val();
+			var endDate=mytable.find("input").eq(1).val();
+			if(endDate.length>0&&startDate.length>0){
+				if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		
+		function checkAll(obj){
+			var ischecked = $(obj).attr("checked")=="checked";
+			$('input[name=checkboxList]').each(function(obj){
+    			$(this).attr("checked",ischecked);
+    		});
+		}
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl" id="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>标题：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="articleTitle"/>
+                	</div>
+                </td>
+				<td class="field" width="8%">
+                	<label>安排阅读时间：</label>
+                </td>
+                <td colspan="3">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" fun="searchStartDateFun" class="text datepicker" id="articleReadtimeBegin"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" fun="searchEndDateFun" class="text datepicker" id="articleReadtimeEnd"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+                <td  width="34%" colspan="2">
+                	<input type="checkbox" id="readrequied" class="checkbox" />
+                	<label for="readrequied">必读</label>
+                </td>
+			</tr>
+			<tr>
+				<td class="field" width="8%">
+                	<label>文章分类：</label>
+                </td>
+                <td width="17%">
+                	<select id="articleColumnId">   
+                		<option value="0"></option> 
+						#foreach($!feColumn in $!articleColumnList)
+							<option value="$!feColumn.columnId">$!feColumn.columnName</option>
+						#end
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>发布时间：</label>
+                </td>
+                <td colspan="3">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datepicker" fun="searchStartDateFun" id="publishDateBegin"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datepicker" fun="searchEndDateFun" id="publishDateEnd"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+			   <td width="34%" colspan="2">
+					<input type="checkbox" id="appendix" class="checkbox" />
+					<label for="appendix">有附件</label>
+			  </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl bold">
+            所有文章(<label id="queryCount" class="green">$!page.totalRowsAmount</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空"  onclick="resetValue()"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="search()"/>
+    </div>
+    
+	<div class="action-bar">
+        <span class="ui-span-btn fl" onclick="newArticle();">
+        	<label>新建文章</label>
+        </span>
+        <span class="ui-span-btn fl ml" onclick="classifyArticle()">
+        	<label>目标分类</label>
+        </span>
+		 <span class="ui-span-btn fl ml" onclick="publishActicle()">
+        	<label>发布</label>
+        </span>
+        <span class="ui-span-btn fr" onclick="refreshForm()">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <div id="grid">
+    	 #parse("/velocity/finance/articleListDiv.vm")
+    </div>
+</body>
+</html>

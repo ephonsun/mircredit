@@ -1,0 +1,101 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>admin桌面</title>
+ 
+    #styleLink("base")
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<style type="text/css">
+		h4.legend { border-bottom: 1px solid #ccc; margin-top: 20px; margin-bottom: 8px; line-height: 30px; font-size: 12px; font-weight: normal; }
+		ul li { height: 24px; line-height: 24px; }
+	</style>
+</head>
+ <script>
+ 	function forbidBackSpace(e) {
+            var ev = e || window.event; //获取event对象    
+            var obj = ev.target || ev.srcElement; //获取事件源    
+            var t = obj.type || obj.getAttribute('type'); //获取事件源类型    
+            //获取作为判断条件的事件类型    
+            var vReadOnly = obj.readOnly;
+            var vDisabled = obj.disabled;
+            //处理undefined值情况    
+            vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+            vDisabled = (vDisabled == undefined) ? true : vDisabled;
+            //当敲Backspace键时，事件源类型为密码或单行、多行文本的，    
+            //并且readOnly属性为true或disabled属性为true的，则退格键失效    
+            var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+            //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效    
+            var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+            //判断    
+            if (flag2 || flag1) return false;
+        }
+		//禁止后退键 作用于Firefox、Opera   
+        document.onkeypress = forbidBackSpace;
+        //禁止后退键  作用于IE、Chrome   
+        document.onkeydown = forbidBackSpace;
+ </script>
+<body>
+	<div class="desk-date">
+    	<label>$!dateString.getNowTimeAndWeek()</label>
+    </div>
+	
+	<div>
+    	<h4 class="legend" style="margin-top: 0;">系统运行状况</h4>
+        <ul>
+        	<li>
+            	<label class="fl">总用户数</label>
+                <label class="fr">$!allUsers 人</label>
+            </li>
+        	<li>
+            	<label class="fl">当前在线用户数</label>
+                <label class="fr">$!onLineUsers 人</label>
+            </li>
+        	<li>
+            	<label class="fl">峰值用户数</label>
+                <label class="fr">$!onlineMax.maxNum 人</label>
+            </li>
+        	<li>
+            	<label class="fl">峰值时间</label>
+                <label class="fr">$!date.format("yyyy-MM-dd HH:mm",$!onlineMax.maxDate)</label>
+            </li>
+        	<li>
+            	<label class="fl">运行天数</label>
+                <label class="fr">$!runTime 天</label>
+            </li>
+        </ul>
+    	<h4 class="legend">系统磁盘使用状况</h4>
+        <ul>
+        	<li>
+            	<label class="fl">应用服务器剩余空间</label>
+                <label class="fr green bold">$!webSize G</label>
+            </li>
+        	<li>
+            	<label class="fl">文件服务器剩余空间</label>
+                <label class="fr green bold">#if($!recordSize!= -1) $!recordSize G #end</label>
+            </li>
+        </ul>
+    	#if($!webSize < 2 || $!recordSize< $!cueSize)
+        <h4 class="legend red">系统警告</h4>
+        <ul>
+    		#if($!webSize < 2)
+        	<li>
+            	<label>应用服务器可用空间低于 2 G，请及时清理，以保证系统正常运行！</label>
+            </li>
+    		#end
+    		#if($!recordSize< $!cueSize && $!recordSize!=-1)
+        	<li>
+            	<label>文件服务器可用空间低于 $!cueSize G，请及时清理，以保证系统正常运行！</label>
+            </li>
+    		#end
+    		#if($!recordSize==-1)
+        	<li>
+            	<label>文件存放目录异常，请尽快处理，以保证系统正常运行！</label>
+            </li>
+    		#end
+        </ul>
+    	#end
+    </div>
+</body>
+</html>

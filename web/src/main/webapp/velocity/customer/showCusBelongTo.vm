@@ -1,0 +1,265 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>分配客户归属</title>
+  
+  	#styleLink("base")
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+    	.b-bomb-box1 { position: relative; display: block; float: left; border: 0; padding: 0; }
+		.b-bomb-box1 .l { height: 314px; }
+		.b-bomb-box1 .r .collist { height: 299px; }
+    	.button { text-align: right; }
+    </style>
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	var flag = "brMine";
+    	var isFirst = true;
+    	$(function(){
+			$('.chk1').click(function(){
+				$('.self').show().siblings('.sub, .agency').hide();
+				changeType('brMine');
+			});
+			$('.chk2').click(function(){
+				$('.sub').show().siblings('.self, .agency').hide();
+				changeType('brUser');
+			});
+			$('.chk3').click(function(){
+				$('.agency').show().siblings('.self, .sub').hide();
+				changeType('brDept');
+			});
+			
+			initTree();
+			changeType('brMine');
+			
+		});
+		//初始化机构树
+		function initTree(){
+			var setting = {
+				view: {
+					showIcon: false,
+					dblClickExpand: false
+				},
+				data: {
+					simpleData: {
+						enable: true
+					}
+				},
+				callback: {
+					onClick: onClick
+				}
+			};
+			jQuery.fn.zTree.init($("#userList"), setting, $deptArray);
+			jQuery.fn.zTree.init($("#deptTree"), setting, $deptArray);
+		}
+		//树 点击事件
+		function onClick(e, treeId, treeNode) {
+			switch(flag){
+				case "brMine":
+					break;
+				case "brUser":
+					searchUser(treeNode.id);
+					break;
+				case "brDept":
+					$('#belongDeptId').val(treeNode.id);
+					$('#belongUserId').val('0');
+					break;
+			}		
+		}
+		//切换页卡 
+		function changeType(type){
+			flag = type;
+			switch(type){
+				case "brMine":
+					$('#belongDeptId').val($belongDeptId);
+					$('#belongUserId').val($belongUserId);
+					break;
+				case "brUser":
+					$('#belongDeptId').val('0');
+					$('#belongUserId').val('0');
+					if(isFirst){
+						var treeObj = jQuery.fn.zTree.getZTreeObj("userList");
+						var nodes = treeObj.getNodes();
+						if (nodes.length>0) {
+							treeObj.selectNode(nodes[0]);
+						}
+                        if(nodes[0])
+						    searchUser(nodes[0].id);
+						isFirst = false;
+					}else{
+						var treeObj = jQuery.fn.zTree.getZTreeObj("userList");
+						var nodes = treeObj.getSelectedNodes();
+                        if (nodes.length > 0) {
+                            $("#belongDeptId").val(nodes[0].id);
+                        }
+					}
+					break;
+				case "brDept":
+					$('#belongDeptId').val('0');
+					$('#belongUserId').val('0');
+					break;
+			}		
+		}
+		//查询用户
+		function searchUser(deptId)
+	    {
+	    	$("#belongDeptId").val(deptId);
+			var postJson = {};
+			postJson['deptId'] = deptId;
+			postJson['isWorkTransfer'] = '$isWorkTransfer';
+			postJson['transferUserid'] = '$!transferUserid';
+			var urlStr = "../customer/searchUser.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(html){
+				  	var elem = $(html);
+					hover(elem);
+					$("#tablelist").empty().append(elem);
+			  }
+			});	
+	    }
+	    function hover(obj){
+	    	/**
+			 * 行单击事件
+			**/
+			$('tbody tr', obj).click(function(){
+				if(!$(this).hasClass('active')){
+					$(this).addClass('active').siblings().removeClass('active');
+				}
+			});
+			/**
+			 * 行划过事件
+			**/
+			$('tbody tr', obj).hover(
+				function(){
+					if(!$(this).hasClass('active')){ $(this).addClass('hover'); }
+				},
+				function(){
+					$(this).removeClass('hover');
+				}
+			);
+	    }
+	    
+	    function userClick(userId){
+	    	$("#belongUserId").val(userId);
+	    }
+	    var cusIds='$!cusIds';
+	    function btnOk(){
+	    	var belongDeptId = $("#belongDeptId").val();
+	    	var belongUserId = $("#belongUserId").val();
+	    	
+	    	if(flag=='brUser'){
+	    		if(belongUserId=='0'){
+		    		banger.page.showMessageBox('请您选择客户的归属用户！');
+		    		return;
+		    	}	
+	    	}else if(flag=='brDept'){
+	    		if(belongDeptId=='0'){
+		    		banger.page.showMessageBox('请您选择客户的归属机构！');
+		    		return;
+		    	}
+	    	}
+	    	
+    		jQuery.post('../customer/isNotEndLoan.html?random='+Math.random(),{
+    			'cusIds':cusIds
+    		},function(data){
+    			if(data=='true'){
+		    		if(!confirm("您确定要将选择的客户重新分配吗？注意：此操作会同时修改客户贷款的负责人！")){return;}
+    			}
+    			var str = belongDeptId + ',' + belongUserId;
+				window.returnValue=str;   
+				window.close();
+    		});
+	    	
+	    }
+    </script>
+</head>
+
+<body>
+	<table class="viewtbl">
+		<input id="belongDeptId" name="belongDeptId" type="hidden" />
+		<input id="belongUserId" name="belongUserId" type="hidden" />
+    	<tbody>
+        	<tr>
+            	<td width="1%" class="field">
+                	<label>
+                    	更改归属：
+                    </label>
+                </td>
+                <td>
+                	<input type="radio" name="attr" class="rdo chk1" checked="checked" />
+                    <label>
+                    	归属给我
+                    </label>
+                    
+                	<input type="radio" name="attr" class="rdo chk2" />
+                    <label>
+                    	归属给下属
+                    </label>
+                    
+                	<input type="radio" name="attr" class="rdo chk3" />
+                    <label>
+                    	归属给机构
+                    </label>
+                </td>
+            </tr>
+            <tr class="self">
+            	<td width="1%" class="field"></td>
+                <td>
+                	<label>$!belongUserName</label>
+                </td>
+            </tr>
+            <tr class="sub hide">
+            	<td width="1%" class="field"></td>
+                <td>
+                	<div class="b-bomb-box1">
+                    	<div class="fl l">
+                           <ul id="userList" class="ztree"></ul>
+                        </div>
+                        <div class="fl r" style="width: 388px;">
+                            <div class="colheader">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th width="180"><label>姓名</label></th>
+                                            <th width="180"><label>用户名</label></th>
+                                            <th width="12"><label>&nbsp;</label></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="collist" id="tablelist">
+                                #parse("/velocity/customer/userTableList.vm")
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr class="agency hide">
+            	<td width="1%" class="field"></td>
+                <td>
+                	<div class="mtree">
+                    	<ul id="deptTree" class="ztree"></ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="确定" onclick="btnOk()"/>
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>

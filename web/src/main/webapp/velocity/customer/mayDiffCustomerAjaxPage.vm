@@ -1,0 +1,123 @@
+#**
+* 该模板显示宝贝底部的分页的
+* @asq					当前的AuctionSearchQuery
+* @maxPage				100 最大显示的页数
+* @ by yuancong 2009-7-27
+**#
+##最多显示100页记录
+#set($maxPage = 100)
+#set($currentPage = $page.currentPage)##int
+#if($currentPage > $page.totalPages)
+	#set($currentPage = $page.totalPages)
+#end
+#set($tPage = $page.totalPages)##int 总页数
+#set($tPage2 = $tPage)
+#if( $tPage > $maxPage  ) #set($tPage = $maxPage) #end
+#set($prePage = $currentPage - 1)
+#set($nextPage = $currentPage + 1)
+
+##--------------循环页码--------------
+#set($leftStart = 1)
+#set($leftEnd = 2)
+#set($mStart = $currentPage - 2)
+#set($mEnd = $currentPage + 2)
+#set($rStart = $tPage - 1)
+#set($rEnd = $tPage)
+
+
+<div class="pagination">
+	#if($page && $!page.totalPages>0)
+		#if ($currentPage <= 1)
+			<span class="page-prev">上一页</span>
+		#else
+			<a href="#2" onclick="javascript:gotoPage($prePage);" class="page-prev" title="上一页">上一页</a>
+		#end
+	
+	   
+		
+	    #if ($currentPage < $tPage || ($tPage2 > $tPage && $currentPage >= $tPage))
+	         <a href="#2" onclick="javascript:gotoPage($nextPage);" title="下一页" class="page-next">下一页</a>
+	    #else
+	        <span class="page-next">下一页</span>
+	    #end
+	    
+		<input type="hidden" name="page.pageSize" value="$!page.pageSize" />
+		<input type="hidden" id="total" name="total" value="$!page.totalRowsAmount" />
+		
+		<span class="page-skip">
+	    	<label>页数: $currentPage / $page.totalPages</label>
+		</span>
+	#else
+		<span>没有找到相关记录</span>
+	#end
+	<input type="hidden" name="page.currentPage" id="page.currentPage" size="2" value="$!currentPage" />
+</div>
+
+<script type="text/javascript">
+    function goto(page, url, json, fn){
+		if(page){
+			document.getElementById('page.currentPage').value = page;
+		}
+		else{
+			if(document.getElementById('page.currentPage').value == 0){
+				document.getElementById('page.currentPage').value = 1;
+			}
+			else{
+				 var p = document.getElementById('page.currentPage').value;
+				 if(checkForm(p)){
+				 	document.getElementById('page.currentPage').value = p;
+				 }
+				 else{
+				 	return;
+				}
+			}
+		}
+		
+		if(json != null){
+			json['page.currentPage'] = document.getElementById('page.currentPage').value;
+		}
+		
+		var postJson = {};
+		
+		if(url==null || url==''){
+			url = '$request.getRequestURL()';
+		}
+		
+		if(json){
+			postJson = json;
+		}
+		else{
+			postJson = getPostJson();
+		}
+		
+		jQuery.post(url, postJson, fn);
+    }
+	
+    function checkForm(fieldCurrentPage){
+        if(isNumber(fieldCurrentPage)){
+			return true;
+        }else{
+           	alert('请输入正确的页数');
+           	return false;
+        }
+    }
+    
+    function keyDown(){
+    	var e = window.event;
+		var key = e.keyCode || e.which;
+		if((key==37 || key==39 || key==8) || (48<=key &&key<=57 && !e.shiftKey) || (96<=key && key<=105)){
+			return true;
+		}
+		return false;
+	}
+    
+	function isNumber(val){
+		var r = new RegExp('^[0-9]+$');
+	   	if(val.search(r) != -1){
+	   		return true;
+	   	}
+	   	else{
+	  		return false;
+	 	}
+	}
+</script>

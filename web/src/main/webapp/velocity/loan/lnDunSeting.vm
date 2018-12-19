@@ -1,0 +1,811 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>催收设置</title>
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .m1{ margin-left:10px; }   
+	    input.tbutton{ width:70px; height:24px; padding:5px 0px 3px 0px; *padding:3px 0px 0px 0px; font-size:13px;}
+        .mleft { margin-left:5px; height:25px;}
+		.mt { margin-top:-10px; margin-bottom:5px; }
+	    .loan-collection-bg{ height:100%; background-color:#F2F2F2; border:1px dashed #b1b1b1;}
+	    .tbl { margin-left:10px; font-weight:bold; border-bottom:1px solid #6c6c6c; padding-bottom:5px; margin-bottom:5px; font-size:13px; }
+		table.htmltbl_timer { border-collapse: collapse; width: 100%; border: 0; background-color: #F2F2F2; margin-top:5px; }
+		table.htmltbl_timer tr td {line-height: 24px;}
+		table.htmltbl_timer tr td.field { background-color: #F2F2F2; text-align: right; white-space: nowrap; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.timer-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			/**
+			 * 加载时间选择控件
+			**/
+			$('#oneTimer').timer({
+				hour:{show:true,id:'oneHour',name:'',value:'00'},
+				mins:{show:true,id:'oneMins',name:'',value:'00'}
+			});
+			$('#twoTimer').timer({
+				hour:{show:true,id:'twoHour',name:'',value:'00'},
+				mins:{show:true,id:'twoMins',name:'',value:'00'}
+			});
+			$('#oneTimerEnd').timer({
+				hour:{show:true,id:'oneHourEnd',name:'',value:'00'},
+				mins:{show:true,id:'oneMinsEnd',name:'',value:'00'}
+			});
+			$('#twoTimerEnd').timer({
+				hour:{show:true,id:'twoHourEnd',name:'',value:'00'},
+				mins:{show:true,id:'twoMinsEnd',name:'',value:'00'}
+			});
+			
+			numInput('#dunDays');
+			numInput('#dunDaysEnd');
+			maxInput("#txtContent",300);
+			maxInput("#txtContentEnd",300);
+			
+			$('#recordFile').change(function(){
+				var fileName = getFileName(file.val(this));
+				upLoadLnRecord("recordFile", "text", fileName);
+			});
+		
+			$('#Voice').click(function(){
+				$('#DunningVoice').show();
+				$('#DunningSms').hide();
+			});
+			$('#message').click(function(){
+				$('#DunningSms').show();
+				$('#DunningVoice').hide();
+			});
+			$('#VoiceEnd').click(function(){
+				$('#DunningVoiceEnd').show();
+				$('#DunningSmsEnd').hide();
+			});
+			$('#messageEnd').click(function(){
+				$('#DunningSmsEnd').show();
+				$('#DunningVoiceEnd').hide();
+			});
+			
+			$('#recordFileEnd').change(function(){
+				var fileName = getFileName(file.val(this));
+				upLoadLnRecord("recordFileEnd", "textEnd", fileName);
+			});
+			
+			$('#isActived').click(function(){
+				if($(this).attr("checked")!=null){
+					$('#activedSeting').removeClass('hide');
+					$("#isActived").val("1");
+				}else{
+					$('#activedSeting').addClass('hide');
+					$("#isActived").val("0");
+				}
+			});
+			$('#isActivedEnd').click(function(){
+				if($(this).attr("checked")!=null){
+					$('#activedSetingEnd').removeClass('hide');
+					$("#isActivedEnd").val("1");
+				}else{
+					$('#activedSetingEnd').addClass('hide');
+					$("#isActivedEnd").val("0");
+				}
+			});
+			
+			$('#btnOk').click(function(){
+				saveLnDunSeting();
+			});
+			
+			//插入称谓
+			$("#btnAddTitles, #btnAddTitlesEnd").click(function(){
+				if($(this).attr("id") == "btnAddTitles"){
+					addSmsTitle("txtContent");
+				}else if($(this).attr("id") == "btnAddTitlesEnd"){
+					addSmsTitle("txtContentEnd");
+				};
+			});
+			
+			//插入称谓
+			$("#btnAddCommonUse, #btnAddCommonUseEnd").click(function(){
+				if($(this).attr("id") == "btnAddCommonUse"){
+					addSmsCommonUse("txtContent");
+				}else if($(this).attr("id") == "btnAddCommonUseEnd"){
+					addSmsCommonUse("txtContentEnd");
+				};
+			});
+			
+			//计算短信文本长度以及拆分条数
+			$("#txtContent").keyup(function(event){
+				var map = {
+					txtContentId: "txtContent",
+					txtSmsLeastLengthId: "txtSmsLeastLength",
+					lblCLengthId: "lblCLength",
+					lblCSplitId: "lblCSplit"
+				};
+				getSmsCount(map);
+			});
+			$("#txtContentEnd").keyup(function(event){
+				var map = {
+					txtContentId: "txtContentEnd",
+					txtSmsLeastLengthId: "txtSmsLeastLengthEnd",
+					lblCLengthId: "lblCLengthEnd",
+					lblCSplitId: "lblCSplitEnd"
+				};
+				getSmsCount(map);
+			});
+			
+			//计算短信文本长度以及拆分条数
+			$("#txtContent").change(function(){
+			    $("#txtContent").trigger("keyup");
+			});
+			$("#txtContentEnd").change(function(){
+			    $("#txtContentEnd").trigger("keyup");
+			});
+			
+			$("#checkAccount").click(function(){
+				var map = {
+					account: jQuery.trim($("#account").val()),
+					passWord: jQuery.trim($("#passWord").val()),
+					smsleastLenId: "txtSmsLeastLength",
+					smsContentId: "smsContentTab",
+					txtContentId: "txtContent"
+				};
+				checkAccount(map);
+			});
+			
+			$("#checkAccountEnd").click(function(){
+				var map = {
+					account: jQuery.trim($("#accountEnd").val()),
+					passWord: jQuery.trim($("#passWordEnd").val()),
+					smsleastLenId: "txtSmsLeastLengthEnd",
+					smsContentId: "smsContentTabEnd",
+					txtContentId: "txtContentEnd"
+				};
+				checkAccount(map);
+			});
+			
+			bindData();
+			bindDataEnd();
+			
+			$("#dunDaysTab").validator();
+			$("#dunVoiceFileTab").validator();
+			$("#smsContentTab").validator();
+			$("#smsAccountTab").validator();
+
+			$("#dunDaysTabEnd").validator();
+			$("#dunVoiceFileTabEnd").validator();
+			$("#smsContentTabEnd").validator();
+			$("#smsAccountTabEnd").validator();
+		});
+
+		function addSmsTitle(id){
+			//称谓占4个长度
+			var content = jQuery("#"+ id);
+			if(content.val().length <= 296){
+			     //IE support
+			     if (document.selection) {
+			         content[0].focus();
+			         sel = document.selection.createRange();
+			         sel.text = "#称谓#";
+			         sel.select();
+			     }else if (content[0].selectionStart || content[0].selectionStart == '0') {
+			         var startPos = content[0].selectionStart;
+			         var endPos = content[0].selectionEnd;
+			         // save scrollTop before insert
+			         var restoreTop = content[0].scrollTop;
+			         content[0].value = content[0].value.substring(0, startPos) + myValue
+			         	+ content[0].value.substring(endPos, content[0].value.length);
+			         if (restoreTop > 0) {
+			         	content[0].scrollTop = restoreTop;
+			         }
+			         content[0].focus();
+			         content[0].selectionStart = startPos + "#称谓#".length;
+			         content[0].selectionEnd = startPos + "#称谓#".length;
+			     } else {
+			         content[0].value += "#称谓#";
+			         content[0].focus();
+			     }
+
+			     //触发计算文本的事件keyup
+			     content.trigger("keyup");
+			 }
+		};
+
+		function addSmsCommonUse(id){
+			var content = jQuery("#"+ id);
+			var url="../smsCommonUse/getSmsCommonUseForSms.html?random="+ Math.random()*10000;
+			var result=banger.page.openDialog(url,"插入常用短语",1000,640);
+			if(result != undefined){
+    			if((content.val().length+result.length) <= 300){
+    				 content.append(result);
+    				 //触发计算文本的事件keyup
+    				 content.trigger("keyup");
+    			}else{
+    				banger.page.showMessageBox("添加失败,因为添加常用语后,短信内容已超出300字");
+    			}
+			}
+		};
+
+		function getSmsCount(map){
+			var contentLen = jQuery("#"+map.txtContentId).val().length,
+			smsLeastLen = jQuery("#"+map.txtSmsLeastLengthId),
+			cLength = jQuery("#"+map.lblCLengthId),
+			cSplit = jQuery("#"+map.lblCSplitId);
+
+			if(contentLen <= 300){
+			 	//获取短信最短拆包长度
+			 	var smsLeastLength = parseInt(smsLeastLen.val());
+			 	cLength.text(contentLen);
+			 	var split = 1;//拆包数量
+			 	if(contentLen % smsLeastLength==0){
+			 		split = parseInt(contentLen / smsLeastLength);
+			 	}else{
+			 		if(contentLen > smsLeastLength){
+			 			split = split + parseInt(contentLen / smsLeastLength);
+			 		}
+			 	}
+			 	cSplit.text(split);
+			 }
+		};
+
+		function checkAccount(map){
+			var bool = false;
+			var postJson = {};
+			postJson['Account'] = map.account;
+			postJson['PassWord'] = map.passWord;
+			var urlStr = "../loan/checkAccount.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  cache: false,
+			  async: false,
+			  success:function(result){
+			  	var obj = jQuery.parseJSON(result);
+				if(obj[0].smsLeastLength){
+			  		$("#"+map.smsleastLenId).val(obj[0].smsLeastLength);
+			  		$("#"+map.txtContentId).trigger("keyup");
+			  	};
+			  	if(obj[0].AccountError){
+			  		banger.page.showMessageBox("增值业务账号配置有误！");
+			  		$('#'+map.smsContentId).hide();
+			  		bool = false;
+			  	}else{
+			  		$('#'+map.smsContentId).show();
+			  		bool = true;
+			  	};
+			  }
+			});
+			return bool;
+		};
+
+		function bindData(){
+			if($!lnDunSeting.isActived){
+				$('#activedSeting').removeClass('hide');
+			};
+			if($!lnDunSeting.dunType==1){
+				$('#Voice').click();
+				var time = "$!date.format('HH:mm',$!lnDunSeting.dunTime)";
+				var hours = time.substring(0,2);
+				var minutes = time.substring(3,5);
+				$("#oneHour").val(hours);
+				$("#oneMins").val(minutes);
+			};
+			if($!lnDunSeting.dunType==2){
+				$('#message').click();
+				if('$!AccountError'){
+					$('#smsContentTab').hide();
+				}else{
+					$('#smsContentTab').show();
+				};
+				var time = '$!date.format('HH:mm',$!lnDunSeting.sendTime)';
+				var hours = time.substring(0,2);
+				var minutes = time.substring(3,5);
+				$("#twoHour").val(hours);
+				$("#twoMins").val(minutes);
+				var map = {
+					txtContentId: "txtContent",
+					txtSmsLeastLengthId: "txtSmsLeastLength",
+					lblCLengthId: "lblCLength",
+					lblCSplitId: "lblCSplit"
+				};
+				getSmsCount(map);
+			};
+		};
+
+		function bindDataEnd(){
+			if($!lnDunSetinglimit.isActived){
+				$('#activedSetingEnd').removeClass('hide');
+			};
+			if($!lnDunSetinglimit.dunType==1){
+				$('#VoiceEnd').click();
+				var time = '$!date.format('HH:mm',$!lnDunSetinglimit.dunTime)';
+				var hours = time.substring(0,2);
+				var minutes = time.substring(3,5);
+				$("#oneHourEnd").val(hours);
+				$("#oneMinsEnd").val(minutes);
+			};
+			if($!lnDunSetinglimit.dunType==2){
+				$('#messageEnd').click();
+				if('$!AccountErrorEnd'){
+					$('#smsContentTabEnd').hide();
+				}else{
+					$('#smsContentTabEnd').show();
+				};
+				var time = "$!date.format('HH:mm',$!lnDunSetinglimit.sendTime)";
+				var hours = time.substring(0,2);
+				var minutes = time.substring(3,5);
+				$("#twoHourEnd").val(hours);
+				$("#twoMinsEnd").val(minutes);
+				var map = {
+					txtContentId: "txtContentEnd",
+					txtSmsLeastLengthId: "txtSmsLeastLengthEnd",
+					lblCLengthId: "lblCLengthEnd",
+					lblCSplitId: "lblCSplitEnd"
+				};
+				getSmsCount(map);
+			};
+		};
+		function saveLnDunSeting(){
+			if(!checkFormPost()){
+				return false;
+			};
+			if(!checkFormPostEnd()){
+				return false;
+			};
+			var postJson = getPostJson();
+			if($('#Voice').attr("checked")!=null){
+				postJson['lnDunSeting.dunTime'] = "0000-00-00 " + $("#oneHour").val()+":"+$("#oneMins").val()+":00";
+			};
+			if($('#message').attr("checked")!=null){
+				postJson['lnDunSeting.sendTime'] = "0000-00-00 " + $("#twoHour").val()+":"+$("#twoMins").val()+":00";
+			};
+			if($('#VoiceEnd').attr("checked")!=null){
+				postJson['lnDunSetinglimit.dunTime'] = "0000-00-00 " + $("#oneHourEnd").val()+":"+$("#oneMinsEnd").val()+":00";
+			};
+			if($('#messageEnd').attr("checked")!=null){
+				postJson['lnDunSetinglimit.sendTime'] = "0000-00-00 " + $("#twoHourEnd").val()+":"+$("#twoMinsEnd").val()+":00";
+			};
+			var urlStr = "../loan/saveLnDunSeting.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(result){
+			  	if(result == "SUCCESS"){
+			  		banger.page.showMessageBox({"type":"success","content":"保存成功！"});
+			  	}else{
+			  		banger.page.showMessageBox(result);
+			  	}
+			  }
+			});
+		};
+
+		function checkDunDays(obj){
+			if($(obj).val()>0){
+				return true;
+			}else{
+				return false;
+			};
+		};
+
+		function checkFormPost(){
+			var bool = jQuery.validator({ form: 'dunDaysTab', extend: false});
+			var bool1 = jQuery.validator({ form: 'dunVoiceFileTab', extend: false});
+			var bool2 = jQuery.validator({ form: 'smsContentTab', extend: false});
+			var bool3 = jQuery.validator({ form: 'smsAccountTab', extend: false});
+			if($('#isActived').attr("checked")==null){
+				return bool;
+			};
+			if($('#Voice').attr("checked")!=null){
+				if(!$('#text').val()){
+                    banger.page.showMessageBox("请选择催讨语音文件!");
+                    return false;
+                }
+                if(bool&&bool1){
+					return true;
+				};
+			};
+			if($('#message').attr("checked")!=null){
+				var map = {
+					account: jQuery.trim($("#account").val()),
+					passWord: jQuery.trim($("#passWord").val()),
+					smsleastLenId: "txtSmsLeastLength",
+					smsContentId: "smsContentTab",
+					txtContentId: "txtContent"
+				};
+				if(checkAccount(map)){
+					if(bool&&bool3&&bool2){
+						return true;
+					};
+				}else{
+					return false;
+				};
+			};
+			return false;
+		};
+
+		function checkFormPostEnd(){
+			var bool = jQuery.validator({ form: 'dunDaysTabEnd', extend: false});
+			var bool1 = jQuery.validator({ form: 'dunVoiceFileTabEnd', extend: false});
+			var bool2 = jQuery.validator({ form: 'smsContentTabEnd', extend: false});
+			var bool3 = jQuery.validator({ form: 'smsAccountTabEnd', extend: false});
+			if($('#isActivedEnd').attr("checked")==null){
+				return bool;
+			};
+			if($('#VoiceEnd').attr("checked")!=null){
+                if(!$('#textEnd').val()){
+                    banger.page.showMessageBox("请选择催讨语音文件!");
+                    return false;
+                }
+				if(bool&&bool1){
+					return true;
+				};
+			};
+			if($('#messageEnd').attr("checked")!=null){
+				var map = {
+					account: jQuery.trim($("#accountEnd").val()),
+					passWord: jQuery.trim($("#passWordEnd").val()),
+					smsleastLenId: "txtSmsLeastLengthEnd",
+					smsContentId: "smsContentTabEnd",
+					txtContentId: "txtContentEnd"
+				};
+				if(checkAccount(map)){
+					if(bool&&bool3&&bool2){
+						return true;
+					};
+				}else{
+					return false;
+				};
+			};
+			return false;
+		};
+
+		function upLoadLnRecord(fileId, textId, fileName){
+			ajaxFileUpload({
+				url:"../loan/upLoadLnRecord.html?fileName="+ encodeURI(encodeURI(fileName)) +"&random="+Math.random()*10000,
+		        id: fileId,
+		        callback:function(){
+		        	var data = this.responseText;
+		        	var json = jQuery.parseJSON(data);
+		        	if(json.error){
+		        		banger.page.showMessageBox(json.error);
+		        	}else{
+						$('#'+ textId).val(json.fileName);
+		        	}
+		        }
+		    });
+		    $("#"+fileId).unbind("change").change(function(){
+		    	var fileName = getFileName(file.val(this));
+		    	upLoadLnRecord(fileId, textId, fileName);
+		    });
+			return false;
+		}
+		
+		function getFileName(path){
+			var pos1 = path.lastIndexOf('/');
+			var pos2 = path.lastIndexOf('\\');
+			var pos  = Math.max(pos1, pos2);
+			if( pos<0 )
+				return path;
+			else
+				return path.substring(pos+1);
+		}
+    </script>    
+</head>
+<body>
+	<input type="hidden" value="$!smsLeastLength" id="txtSmsLeastLength">
+	<input type="hidden" value="$!smsLeastLengthEnd" id="txtSmsLeastLengthEnd">
+	<p class="tbl">贷款催收开始时间配置</p>
+	<div style="padding:0px 15px;">
+        <table class="viewtbl" id="dunDaysTab">
+            <tbody>
+                  <tr>
+                      <td class="field" width="60">
+                          <label>催收日期：</label>
+                      </td>
+                      <td colspan="7">
+                          <label class="fl">设置还款日期到期前&nbsp;</label>
+                          <div class="ui-div-text fl" style="width:100px;">
+                              <input type="text" id="dunDays" maxlength="2" fun="checkDunDays" tips='“催收日期”必须填写且大于0' class="text" name="lnDunSeting.dunDays" value="$!lnDunSeting.dunDays"/>
+                	      </div>
+                          <label class="fl">&nbsp;日提醒（日期必须大于0）</label>
+                      </td>
+                  </tr>        
+            </tbody>
+        </table>
+        <table class="viewtbl mt" style="display:none;">		
+        	<tbody>
+        		<tr>
+                	<td>
+                    	<input type="checkbox" class="checkbox" #if($!lnDunSeting.isActived==1) checked=true value="1" #else value="0" #end id="isActived" name="lnDunSeting.isActived"/>
+    					<label for="isActived">启动还款日期到期前提醒</label>
+                    </td>
+            	</tr>
+            </tbody>
+        </table>
+    </div>	
+    <div class="loan-bg hide" id="activedSeting">
+       <div class="loan-pad">
+          <table class="htmltbl_1">
+              <tbody>
+                  <tr>
+                      <td class="field" width="90">
+                          <label>催收方式：</label>
+                      </td>
+                      <td colspan="7">
+                            <input type="radio" id="Voice" name="lnDunSeting.dunType" class="radio" #if($lnDunSeting.dunType==1) checked="checked" #end value="1"/>
+                            <label for="Voice">语音催收</label>
+                            <!--
+                            <input type="radio" id="message" name="lnDunSeting.dunType" class="radio m1" #if($lnDunSeting.dunType==2) checked="checked" #end value="2"/>
+                            <label for="message">短信催收</label> -->                          
+                      </td>
+                  </tr>				  
+              </tbody>
+          </table>
+          <div class="Voice" id="DunningVoice">
+              <table class="upload-form1 htmltbl_1" id="dunVoiceFileTab">
+                  <tbody>
+                      <tr>
+                          <td class="field" width="90">
+                              <label>催讨语音：</label>
+                          </td>
+                          <td colspan="7">
+                              <div class="ui-div-file">
+                                  <input type="text" id="text" class="text" name="lnDunSeting.dunVoiceFile" value="$!lnDunSeting.dunVoiceFile"/>
+                                  <span class="button">选择上传</span>
+                                  <input type="file" name="recordFile" id="recordFile" class="file" />
+                              </div>
+                          </td>
+                      </tr>                  
+                  </tbody>
+              </table>
+              <table class="htmltbl_timer">
+                  <tbody>
+                      <tr>
+                          <td class="field" width="95">
+                              <label>催讨时间：</label>
+                          </td>
+                          <td colspan="7" style="padding-left:8px;">
+                              <table class="timer" id="oneTimer"></table>
+                          </td>                     
+                      </tr>                   
+                  </tbody>
+              </table>          
+          </div> 
+          <div class="message hide" id="DunningSms">                
+              <table class="htmltbl_1" id="smsAccountTab">
+                  <tbody>
+                      <tr>
+                          <td class="field" width="90">
+                              <label>增值业务账号：</label>
+                          </td>
+                          <td class="field" width="150">
+                              <div class="ui-div-text">
+                                  <input type="text" class="text" rule="\S" tips='“增值业务账号”必须填写' name="lnDunSeting.account" value="$!lnDunSeting.account" id="account"/>
+                              </div>
+                          </td>
+                          <td class="field" width="90">
+                              <label>增值业务密码：</label>
+                          </td>
+                          <td width="150">
+                              <div class="ui-div-text">
+                                  <input type="password" class="text" rule="\S" tips='“增值业务密码”必须填写' name="lnDunSeting.passWord" value="$!lnDunSeting.passWord" id="passWord"/>
+                              </div>
+                          </td>
+                          <td>
+                          	  <input type="button" class="ui-span-btn tbutton" value="测试" id="checkAccount"/>
+                          </td>   
+                          <td colspan="3">
+		              		<label class="gray">必须正确配置增值业务账号，才能使用短信催收！</label>
+			              </td>                                           
+                      </tr> 	
+                      </tbody>
+              		</table>
+              <div class="hide" id="smsContentTab">	
+              	<table class="htmltbl_1">
+                  <tbody>				
+                      <tr>
+                          <td width="70">
+                              <input type="button" class="ui-span-btn tbutton" value="插入称谓" id="btnAddTitles"/>
+                          </td>
+                          <td width="100">
+                              <input type="button" class="ui-span-btn tbutton" style="width:100px;" value="插入常用短语" id="btnAddCommonUse"/>
+                          </td>
+                          <td colspan="6"></td>
+                      </tr>
+                      <tr>
+                          <td colspan="8">
+                              <div class="ui-div-textarea" style="height: 100px;">
+                                  <textarea id="txtContent" rule="\S" tips='“短信内容”必须填写' class="textarea" style="height: 100px; _height:100px;" name="lnDunSeting.smsContent">$!lnDunSeting.smsContent</textarea>
+                              </div>                       
+                          </td>                
+                      </tr>   
+                                                                                                                       
+                  </tbody>
+              </table>
+              <p class="mleft">可输入300字,本次短信共<label id="lblCLength" class="bold green">0</label>字,拆分成 <span id="lblCSplit" class="red">0</span> 条</p>
+              <table class="htmltbl_timer">
+                  <tbody>                                                                      
+                      <tr>
+                          <td class="field" width="65">
+                              <label>发送时间：</label>
+                          </td>
+                          <td colspan="7">
+                              <table class="timer" id="twoTimer"></table>
+                          </td> 
+                      </tr> 				  				  
+                  </tbody>
+              </table>  
+             </div>        
+          </div>                         
+       </div>
+    </div>
+	
+    <div style=" width:100%; height:20px;"></div>
+	<div style="display:none;">
+	<p class="tbl">还款日期到期后催收配置</p>
+	<div style="padding:0px 15px;">
+        <table class="viewtbl" id="dunDaysTabEnd">
+            <tbody>
+                  <tr>
+                      <td class="field" width="60">
+                          <label>催收日期：</label>
+                      </td>
+                      <td colspan="7">
+                          <label class="fl">设置还款日期到期后&nbsp;</label>
+                          <div class="ui-div-text fl" style="width:100px;">
+                              <input type="text" id="dunDaysEnd" maxlength="2" fun="checkDunDays" tips='“催收日期”必须填写且大于0' class="text" name="lnDunSetinglimit.dunDays" value="$!lnDunSetinglimit.dunDays"/>
+                	      </div>
+                          <label class="fl">&nbsp;日提醒（日期必须大于0）</label>
+                      </td>
+                  </tr>        
+            </tbody>
+        </table>
+        <table class="viewtbl mt">		
+        	<tbody>
+        		<tr>
+                	<td>
+                    	<input type="checkbox" class="checkbox" #if($!lnDunSetinglimit.isActived==1) checked=true value="1" #else value="0" #end id="isActivedEnd" name="lnDunSetinglimit.isActived"/>
+    					<label for="isActivedEnd">启动还款日期到期后提醒</label>
+                    </td>
+            	</tr>
+            </tbody>
+        </table>
+    </div>	
+    <div class="loan-bg hide" id="activedSetingEnd">
+       <div class="loan-pad">
+          <table class="htmltbl_1">
+              <tbody>
+                  <tr>
+                      <td class="field" width="90">
+                          <label>催收方式：</label>
+                      </td>
+                      <td colspan="7">
+                            <input type="radio" id="VoiceEnd" name="lnDunSetinglimit.dunType" class="radio" #if($lnDunSetinglimit.dunType==1) checked="checked" #end value="1"/>
+                            <label for="VoiceEnd">语音催收</label>
+                            <!--
+                            <input type="radio" id="messageEnd" name="lnDunSetinglimit.dunType" class="radio m1" #if($lnDunSetinglimit.dunType==2) checked="checked" #end value="2"/>
+                            <label for="messageEnd">短信催收</label> -->                           
+                      </td>
+                  </tr>				  
+              </tbody>
+          </table>
+          <div class="Voice" id="DunningVoiceEnd">
+              <table class="upload-form1 htmltbl_1" id="dunVoiceFileTabEnd">
+                  <tbody>
+                      <tr>
+                          <td class="field" width="90">
+                              <label>催讨语音：</label>
+                          </td>
+                          <td colspan="7">
+                              <div class="ui-div-file">
+                                  <input type="text" id="textEnd" class="text" name="lnDunSetinglimit.dunVoiceFile" value="$!lnDunSetinglimit.dunVoiceFile"/>
+                                  <span class="button">选择上传</span>
+                                  <input type="file" name="recordFile" id="recordFileEnd" class="file" />
+                              </div>
+                          </td>
+                      </tr>                  
+                  </tbody>
+              </table>
+              <table class="htmltbl_timer">
+                  <tbody>
+                      <tr>
+                          <td class="field" width="95">
+                              <label>催讨时间：</label>
+                          </td>
+                          <td colspan="7" style="padding-left:8px;">
+                              <table class="timer" id="oneTimerEnd"></table>
+                          </td>                     
+                      </tr>                   
+                  </tbody>
+              </table>          
+          </div> 
+          <div class="message hide" id="DunningSmsEnd">                
+              <table class="htmltbl_1" id="smsAccountTabEnd">
+                  <tbody>
+                      <tr>
+                          <td class="field" width="90">
+                              <label>增值业务账号：</label>
+                          </td>
+                          <td class="field" width="150">
+                              <div class="ui-div-text">
+                                  <input type="text" class="text" rule="\S" tips='“增值业务账号”必须填写' name="lnDunSetinglimit.account" value="$!lnDunSetinglimit.account" id="accountEnd"/>
+                              </div>
+                          </td>
+                          <td class="field" width="90">
+                              <label>增值业务密码：</label>
+                          </td>
+                          <td width="150">
+                              <div class="ui-div-text">
+                                  <input type="password" class="text" rule="\S" tips='“增值业务密码”必须填写' name="lnDunSetinglimit.passWord" value="$!lnDunSetinglimit.passWord" id="passWordEnd"/>
+                              </div>
+                          </td>
+                          <td>
+                          	  <input type="button" class="ui-span-btn tbutton" value="测试" id="checkAccountEnd"/>
+                          </td>   
+                          <td colspan="3">
+		              		<label class="gray">必须正确配置增值业务账号，才能使用短信催收！</label>
+			              </td>                                           
+                      </tr> 	
+                      </tbody>
+              		</table>
+              <div class="hide" id="smsContentTabEnd">	
+              	<table class="htmltbl_1">
+                  <tbody>				
+                      <tr>
+                          <td width="70">
+                              <input type="button" class="ui-span-btn tbutton" value="插入称谓" id="btnAddTitlesEnd"/>
+                          </td>
+                          <td width="100">
+                              <input type="button" class="ui-span-btn tbutton" style="width:100px;" value="插入常用短语" id="btnAddCommonUseEnd"/>
+                          </td>
+                          <td colspan="6"></td>
+                      </tr>
+                      <tr>
+                          <td colspan="8">
+                              <div class="ui-div-textarea" style="height: 100px;">
+                                  <textarea id="txtContentEnd" rule="\S" tips='“短信内容”必须填写' class="textarea" style="height: 100px; _height:100px;" name="lnDunSetinglimit.smsContent">$!lnDunSetinglimit.smsContent</textarea>
+                              </div>                       
+                          </td>                
+                      </tr>   
+                                                                                                                       
+                  </tbody>
+              </table>
+              <p class="mleft">可输入300字,本次短信共<label id="lblCLengthEnd" class="bold green">0</label>字,拆分成 <span id="lblCSplitEnd" class="red">0</span> 条</p>
+              <table class="htmltbl_timer">
+                  <tbody>                                                                      
+                      <tr>
+                          <td class="field" width="65">
+                              <label>发送时间：</label>
+                          </td>
+                          <td colspan="7">
+                              <table class="timer" id="twoTimerEnd"></table>
+                          </td> 
+                      </tr> 				  				  
+                  </tbody>
+              </table>  
+             </div>        
+          </div>                         
+       </div>
+    </div>
+	</div>
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:tab.close(GetId(), false)"/>
+    </div>
+</body>
+</html>

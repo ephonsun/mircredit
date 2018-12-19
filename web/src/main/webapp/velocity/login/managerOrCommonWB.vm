@@ -1,0 +1,89 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>业务主管/客户经理</title>
+ 
+    #styleLink("base")
+	<style type="text/css">
+		h4.legend { border-bottom: 1px solid #ccc; margin-top: 20px; margin-bottom: 8px; line-height: 30px; font-size: 12px; font-weight: normal; }
+		ul li { height: 24px; line-height: 24px; }
+	</style>
+</head>
+ 
+<body>
+	<div class="desk-date">
+    	<label>$!dateString.getNowTimeAndWeek()</label>
+    </div>
+    
+    <div id="easy-tabs" class="easy-tabs">
+    	<ul class="easy-tabs-header">
+			<li>
+            	<label>贷款提醒 <i class="red" id="loanCount"></i></label>
+            </li>
+			<li>
+            	<label>我的日程提醒 <i class="red" id="agendaCount"></i></label>
+            </li>
+        	<li>
+            	<label>任务提醒 <i class="red" id="taskCount"></i></label>
+            </li>
+        	<li>
+            	<label>生日提醒 <i class="red" id="birthdayCount"></i></label>
+            </li>
+        	<li>
+            	<label>未联系客户提醒 <i class="red" id="cusCount"></i></label>
+            </li>
+        </ul>
+        <div class="easy-tabs-pages">
+			<div id="loanMsg" class="easy-tabs-page"></div>
+            <div id="agendaMsg" class="easy-tabs-page"></div>
+        	<div id="taskMsg" class="easy-tabs-page"></div>
+            <div id="birthday" class="easy-tabs-page"></div>
+        	<div id="unAllocation" class="easy-tabs-page"></div>
+        </div>
+    </div>
+	<div style="height:100px; width:100%;"></div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript">
+	function tabOnclick(h, b){
+		var id = b.attr('id');
+		switch(id){
+			case 'loanMsg':
+				b.load('${ctx}/loan/getLoanToWorkPlace.html?random='+Math.random(),{});
+				break;
+			case 'agendaMsg':
+				b.load('${ctx}/tskSchedule/getAgendaToWorkPlace.html?random='+Math.random(),{});
+				break;
+			case 'taskMsg':
+				b.load('${ctx}/tskMicroTask/getTaskToWorkPlace.html?random='+Math.random(),{});
+				break;
+			case 'birthday':
+				b.load('${ctx}/customer/birthdayRemind.html?random='+Math.random(),{});
+				break;
+			case 'unAllocation':
+				b.load('${ctx}/customer/unAllocationRemindFirst.html?unAllocation=true&&crmCustomer.lastContactDateStr=UnContactMonth&&random='+Math.random(),{});
+				break;
+			default: break;
+		}
+	}
+	
+	jQuery(function(){
+		// 加载内部页卡
+		$('#easy-tabs').easytabs({
+			onclick: tabOnclick
+		});
+		$('#loanMsg').load('${ctx}/loan/getLoanToWorkPlace.html?random='+Math.random(),{});
+		$('#agendaMsg').load('${ctx}/tskSchedule/getAgendaToWorkPlace.html?random='+Math.random(),{});
+		$('#taskMsg').load('${ctx}/tskMicroTask/getTaskToWorkPlace.html?random='+Math.random(),{});
+		$('#birthday').load('${ctx}/customer/birthdayRemind.html?random='+Math.random(),{});
+		$('#unAllocation').load('${ctx}/customer/unAllocationRemindFirst.html?unAllocation=true&crmCustomer.lastContactDateStr=UnContactMonth&random='+Math.random(),{});
+	});
+</script>
+</html>
+

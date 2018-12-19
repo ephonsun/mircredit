@@ -1,0 +1,464 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>移交贷款</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+	
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	
+    <script type="text/javascript">
+	var oldPostJson = {};
+	var containSub = '1';
+    $(function(){
+		$('#customer').tips({
+			msg: "姓名、电话或身份证"
+		});
+		
+	  	$('select').select();
+	  	getQueryJson();
+		initBelongTo();
+		#if($!dataCode == "3" && !$!dataAuth)
+			$('#my').hide();
+		#end
+	});
+    
+    function Query()
+    {
+		var postJson = getQueryJson();
+		refresh();
+    }
+	function getQueryJson(){
+    	if($('#customer').val()=="姓名、电话或身份证"){
+			$('#customer').val("");
+		}	
+    	var postJson = {};
+		postJson['customer'] = jQuery.trim($('#customer').val());
+		postJson['lnLoanStatus']=jQuery.trim($('#lnLoanStatus').val());
+		postJson['isCheckout'] = $('#isCheckout').val();
+		postJson['createDateStart'] = $('#createDateStart').val();
+		postJson['createDateEnd'] = $('#createDateEnd').val();
+		postJson['applyDateStart'] = $('#applyDateStart').val();
+		postJson['applyDateEnd'] = $('#applyDateEnd').val();
+		postJson['managerUserId'] = $!managerUserId;
+		postJson['userIds'] = $('#userIds').val();
+		postJson['deptIds'] = $('#deptIds').val();
+		postJson['BelongToType'] = $('#BelongToType').val();
+		postJson['containSub'] = containSub;
+		oldPostJson = postJson;
+		if($('#customer').val()==''){
+			$("#customer").tips({ msg: "姓名、电话或身份证" });
+		}
+		return postJson;
+    }
+	
+	//复选框选中和取消
+	function selectAll(obj){   
+      var mm=document.getElementsByName("cusCheck");
+	  	for(var i=0;i<mm.length;i++){
+			if(obj.checked==true){
+				mm[i].checked=true;
+			}else{
+				mm[i].checked=false;
+			}
+			if(mm[i].disabled==true){
+				mm[i].checked=false;
+			}
+		}
+    }   
+		
+	//刷新
+ 	function refresh(){
+    	if(oldPostJson){
+    		goto(
+				null,
+				"toLoanTransferPage.html?fenye=1&RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryBack(html, 'cusList');
+			});
+    	}
+    }
+	 //分页跳转
+	function gotoPage(page)
+	{
+		if(oldPostJson){
+			goto(
+				page,
+				"toLoanTransferPage.html?fenye=1&RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryBack(html, 'cusList');
+				});
+		}
+	}
+    function queryBack(html, gridId){
+		$("#cusList").html(html).find('table').table();
+		var total = $('#total').val();
+		if(total!=null){
+			$("#recordCount").text(total);
+		}else {
+			$("#recordCount").text(0);
+		}
+	}
+    function ClearCondition()
+    {
+		$('select').each(function () {
+            this.selectedIndex = 0;
+            $(this).change().select();
+        });
+    	$('#loanTransfer :text').val('');
+		$("#customer").tips({ msg: "姓名、电话或身份证" });
+    }
+	
+	function getCheckLoanIds(obj){
+    	var str = "";
+		obj.each(function(){
+			if(jQuery(this).attr("checked")){
+				if(!str){
+					str = jQuery(this).val();
+				}else{
+					str = str +"," +jQuery(this).val();
+				}}
+		});
+		return str;
+    }
+   
+    //设置贷款移交
+    function setCusBelongTo(temp){
+    	var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+		var str="";
+		var postJson = {};
+		var transferUserid=$('#userId').val();
+		if(temp==1){
+			if(obj.size() == 0){
+				banger.page.showMessageBox("请您选择待移交的贷款！");
+    			return false;
+    		}
+			str=getCheckLoanIds(obj);
+			postJson['loanIds']=str;
+		}else{
+			postJson['transferUserid']=transferUserid;
+		}
+		var url="../customer/showCusBelongTo.html?isWorkTransfer=1&&transferUserid="+transferUserid+"&&notBelong=0&&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,null,720,630);
+		if(result!=undefined){
+			var index = result.indexOf(",");
+			var belongDeptId = result.substring(0, index);
+			var belongUserId = result.substring(index+1, result.length);	
+			postJson['belongDeptId']=belongDeptId;
+			postJson['belongUserId']=belongUserId;
+			jQuery.ajax({
+			  type: 'POST',
+			  url: 'modifyLoanBelongTo.html',
+			  data: postJson,
+			  success:function(data){
+			  		Query();
+			  	}
+			});	
+		}
+    }
+	function browseCustomer(cusId){
+	    	jQuery.ajax({
+				  type: 'POST',
+				  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+				  data: {"cusId":cusId},
+				  success:function(data){
+				  		var obj = jQuery.parseJSON(data);
+				  		if(obj[0].isDel=='1'){
+							banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+				  		}else{
+							window.top.document.getElementById('cusFrame').src = '../customer/browseCustomer.html?actionType=browse&&needLine=0&&isBrowseLayer=1&&crmCustomer.customerId=' + cusId;
+				  			window.top.art.dialog({
+								title: '查看客户',
+								cancelVal: '关闭',
+    							cancel: function(){
+    								window.top.document.getElementById('cusFrame').src = '';
+	    							return true;	
+    							},
+    							content: window.top.document.getElementById('cusFrame'),
+							    width: '100%',
+							    height: '100%',
+							    left: '0%',
+							    top: '0%',
+							    padding: '0px',
+							    fixed: true,
+							    resize: false,
+							    drag: false
+							})
+				  		}
+				  	}
+				});	
+	    }
+		
+		function initBelongTo() {
+            //加载下属树
+            $('#userList').subtree({
+                tid: 'subtree',
+                showIcon: true,
+                url: function () {
+                    return '../customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random();
+                },
+                buttons: [
+                    { text: '确定', callback: onCheckUser },
+                    { text: '取消' }
+                ]
+            });
+            //加载机构树
+            $('#deptList').agetree({
+                tid: 'agetree',
+                url: function () {
+                    return '../customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random();
+                },
+                buttons: [
+                    { text: '确定', callback: onCheckDept },
+                    { text: '取消' }
+                ]
+            });
+            $("#BelongToType").change(function () {
+                changeBelongTo($(this).val());
+            });
+            //changeBelongTo('brAll');
+            }
+            //点击User
+            function onCheckUser(treeId) {
+                var postJson = {};
+                postJson = getCheckJson(treeId, 'U');
+                $('#userIds').val(postJson.ids);
+                $('#userText').val(postJson.names);
+            }
+            //点击Dept
+            function onCheckDept(treeId, checkbox) {
+                var postJson = {};
+                postJson = getCheckJson(treeId, 'D');
+                $('#deptIds').val(postJson.ids);
+                $('#deptText').val(postJson.names);
+                if (checkbox.checked) {
+                    containSub = '1';
+                } else {
+                    containSub = '0';
+                }
+            }
+            function getCheckJson(treeId, flag) {
+                var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+                var nodes = treeObj.getCheckedNodes(true);
+                var len = nodes.length;
+                var uIds = "";
+                var uName = "";
+                for (var i = 0; i < len; i++) {
+                    if (flag == 'U') {
+                        if (nodes[i].flag == flag) {
+                            if (uIds == "") {
+                                uIds = nodes[i].id;
+                                uName = nodes[i].name;
+                            } else {
+                                uIds = uIds + "," + nodes[i].id;
+                                uName = uName + "," + nodes[i].name;
+                            }
+                        }
+                    } else {
+                        if (uIds == "") {
+                            uIds = nodes[i].id;
+                            uName = nodes[i].name;
+                        } else {
+                            uIds = uIds + "," + nodes[i].id;
+                            uName = uName + "," + nodes[i].name;
+                        }
+                    }
+                }
+                var postJson = {};
+                postJson['ids'] = uIds;
+                postJson['names'] = uName;
+                return postJson;
+            }
+            //改变归属
+            function changeBelongTo(val) {
+                $('#userIds').val("");
+                $('#deptIds').val("");
+				$('#userText').val("");
+				$('#deptText').val("");
+                switch (val) {
+                    case "brAll":
+                        $("#my, #userList, #deptList").hide();
+                        break;
+                    case "brMine":
+                        $("#my").show();
+                        $('#showText').text($('#loginUserName').val());
+                        $("#userList, #deptList").hide();
+                        break;
+                    case "brUser":
+                        $("#userList").show();
+                        $("#my, #deptList").hide();
+                        break;
+                    case "brDept":
+                        $("#deptList").show();
+                        $("#my, #userList").hide();
+                        break;
+                    default:
+						$("#my, #userList, #deptList").hide();
+                        break;
+                }
+            }
+    </script>
+</head>
+
+<body style="overflow-x:hidden;width:972px;" >
+<form id="loanTransfer" name="loanTransfer" method="post">
+	<input id="userId" type="hidden" name="userId" value="$!userId"/>
+	<table class="htmltbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+					<td width="7%" class="field">
+                        <label>客户：</label>
+                    </td>
+                    <td width="18%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="customer" name="crmCustomer.customerName" maxlength="20" focusFlag="false"/>
+                        </div>
+                    </td>
+	        		<td width="7%" class="field">
+                        <label>贷款状态：</label>
+                    </td>
+                    <td width="18%">
+						 <select id="lnLoanStatus" name="lnLoanStatus">
+                            <option value=""></option>
+                            #foreach($lnLoanStatus in $lnLoanStatusList)  
+	                    	<option value ="$lnLoanStatus.loanStatusId" >$lnLoanStatus.loanStatusName</option>
+	                    	#end
+                        </select>
+                    </td>
+    				<td width="7%" class="field">
+                        <label>负责人员：</label>
+                    </td>
+                    <td width="18%">
+                        <select id="BelongToType" name="BelongToType">
+    						#if($!dataCode == "3" && !$!dataAuth)
+    							<option value="brAll"></option>
+    						#end
+                            <option value="brMine">我的</option>
+                            #if($!dataCode == "3" && !$!dataAuth)
+                                <option value="brUser">下属的</option>
+                                <option value="brDept">机构的</option>
+                            #end
+                        </select>
+                    </td>
+                    <td >
+                    	<span class="btn2 fl" id="my">
+                    		<input id="myUserId" type="hidden"/>
+                            <label class="btn2-txt" id="showText"></label>
+                        </span>
+                        <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                            <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+                            <input id="userIds" name="userIds" type="hidden"/>
+                            <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                        </div>
+                        <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+                            <input type="text" class="dtxt2-txt" readonly="readonly" id="deptText"/>
+                            <input id="deptIds" name="deptIds" type="hidden"/>
+                            <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                        </div>
+                    </td>
+                </tr>
+				<tr >
+                    <td width="7%" class="field">
+                        <label>贷后状态：</label>
+                    </td>
+                    <td width="18%">
+                        <select id="isCheckout" name="isCheckout">
+                            <option value=""></option>
+							<option value="1">已落实</option>
+							<option value="0">未落实</option>
+                        </select>
+                    </td>
+                    <td width="7%" class="field">创建时间：</td>
+                    <td colspan="4">
+                        <table class="celltbl">
+                            <tr>
+                                <td width="130">
+                                    <div class="dtxt2">
+                                        <input type="text" class="dtxt2-txt datepicker" id="createDateStart" readonly />
+                                        <span class="dtxt2-date">date</span>
+                                    </div>
+                                </td>
+                                <td width="20">
+                                    <label>—</label>
+                                </td>
+                                <td width="130">
+                                    <div class="dtxt2">
+                                        <input type="text" class="dtxt2-txt datepicker" id="createDateEnd" readonly"/>
+                                        <span class="dtxt2-date">date</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+				<tr >
+					<td width="7%" class="field">提交时间：</td>
+                    <td colspan="6">
+                        <table class="celltbl">
+                            <tr>
+                                <td width="130">
+                                    <div class="dtxt2">
+                                        <input type="text" class="dtxt2-txt datepicker" id="applyDateStart" readonly/>
+                                        <span class="dtxt2-date">date</span>
+                                    </div>
+                                </td>
+                                <td width="20">
+                                    <label>—</label>
+                                </td>
+                                <td width="130">
+                                    <div class="dtxt2">
+                                        <input type="text" class="dtxt2-txt datepicker" id="applyDateEnd" readonly/>
+                                        <span class="dtxt2-date">date</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+	        </tbody>
+	    </table>
+    
+    <p class="dataSearch">
+		<span class="fl bold">
+        <label class="dgreen">$!userName</label>
+                     的贷款还有<span class="dgreen" id="recordCount">$!recordCount</span>笔没有移交 </span>
+        <input type="button" value="清 空" class="btn1" onclick="ClearCondition()"/>
+        <input type="button" value="搜 索" class="btn1" onclick="Query()"/>
+    </p>
+</form>
+    
+    <div class="actrow">
+		<span class="btn2 fl"  onclick="setCusBelongTo(2)">
+            <label class="btn2-txt">移交所有贷款</label>
+        </span>
+        <span class="btn2 fl" style="margin-left: -1px;" onclick="setCusBelongTo(1)">
+            <label class="btn2-txt" >移交贷款</label>
+        </span>
+		<span class="btn2 fr" onclick="refresh()">
+            <label> 刷新</label>
+        </span>
+    </div>
+    <div id="cusList">
+    	#parse("/velocity/user/loanTransferList.vm")
+    </div>
+	<input type="hidden" id="loginUserName" value="$!loginUserName"/>
+	<iframe id="cusFrame" name="cusFrame" frameborder="0" style="display: none; width: 970px; height: 600px;"></iframe>
+</body>
+</html>

@@ -1,0 +1,458 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有客户</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	var containSub = '1';
+		$(document).ready(function(){
+			initBelongTo();
+		  	$('select').select();
+		  	getQueryJson();
+		  	$("#customer").tips({ msg: "姓名、编号等" });
+		});
+		function initBelongTo(){
+			if($isInChargeof){
+				$("#BelongToType").val("brAll");
+				//加载下属树
+				$('#userList').subtree({
+					tid: 'subtree',
+					showIcon: true,
+					url: function(){return "../customer/getCusBelongToJson.html?BelongToType=brUser&random="+Math.random()*1000000;},
+					buttons: [
+						{ text: '确定', callback: onCheckUser },
+						{ text: '取消' }
+					]
+				});
+				//加载机构树
+				$('#deptList').agetree({
+					tid: 'agetree',
+					url: function(){return "../customer/getCusBelongToJson.html?BelongToType=brDept&random="+Math.random()*1000000;},
+					buttons: [
+						{ text: '确定', callback: onCheckDept },
+						{ text: '取消' }
+					]
+				});
+				
+				$("#BelongToType").change(function(){
+					changeBelongTo($(this).val());
+				});
+			}
+			changeBelongTo('brAll');
+		}
+		//点击User
+		function onCheckUser(treeId){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'U');
+			$('#userIds').val(postJson.ids);
+			$('#userText').val(postJson.names);
+		}
+		//点击Dept
+		function onCheckDept(treeId, checkbox){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'D');
+			$('#deptIds').val(postJson.ids);
+			$('#deptText').val(postJson.names);
+			if(checkbox.checked){
+				containSub = '1';
+			}else{
+				containSub = '0';
+			}
+		}
+		function getCheckJson(treeId, flag){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getCheckedNodes(true);
+			var len = nodes.length;
+			var uIds = "";
+			var uName = "";
+			for(var i=0; i<len; i++){
+				if(flag=='U'){
+					if(nodes[i].flag==flag){
+						if(uIds==""){
+							uIds = nodes[i].id;
+							uName = nodes[i].name;
+						}else{
+							uIds = uIds + "," + nodes[i].id;
+							uName = uName+ "," +nodes[i].name;
+						}
+					}
+				}else{
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}	
+				}
+			}
+			var postJson = {};
+			postJson['ids'] = uIds;
+			postJson['names'] = uName;
+			return postJson;
+		}	
+		//改变归属
+		function changeBelongTo(val){
+			$('#userIds').val("");
+			$('#deptIds').val("");
+			switch(val){
+				case "brAll":
+					$("#my, #userList, #deptList").hide();	
+					break;
+				case "brMine":
+					$("#my").show();
+					$('#showText').text(window.top.getUn());
+					$("#userList, #deptList").hide();
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#my, #deptList").hide();
+					break;
+				case "brDept":
+					$("#deptList").show();
+					$("#my, #userList").hide();
+					break;
+				case "brUnAllocate":
+					$("#my, #userList, #deptList").hide();	
+					break;
+				default: break;
+			}
+		}
+		function getQueryJson(){
+			if($('#customer').val()=="姓名、编号等"){
+				$('#customer').val("");
+			}	
+			var postJson = {};
+			postJson['shareUserId'] = jQuery.trim($('#shareUserId').val());
+			postJson['crmCustomer.customerTypeId'] = jQuery.trim($('#CustomerType').val());
+			postJson['crmCustomer.customerName'] = jQuery.trim($('#customer').val());
+			if($isInChargeof){
+				postJson['BelongToType']=jQuery.trim($('#BelongToType').val());
+			}else{
+				postJson['BelongToType']="brAll";
+			}
+			postJson['shareFlag']="brShareToOthers";
+			postJson['userIds'] = jQuery.trim($('#userIds').val());
+			postJson['deptIds'] = jQuery.trim($('#deptIds').val());
+			postJson['containSub'] = containSub;
+			postJson['recordCount'] = jQuery.trim($('#recordCount').text());
+			oldPostJson = postJson;
+			if($('#customer').val()==''){
+				$("#customer").tips({ msg: "姓名、编号等" });
+			}
+			return postJson;
+		}
+		function Query(){
+			var postJson = getQueryJson();
+			var urlStr = "../customer/queryShareO.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(html){
+			  	queryBack(html, 'cusList');
+			  	oldPostJson = getQueryJson();
+			  }
+			});	
+	    }
+	    function refresh(){
+	    	if(oldPostJson){
+				goto(
+					null,
+					"../customer/queryShareO.html?RandNum="+ Math.random(),
+					oldPostJson,
+					function(html){
+						queryBack(html, 'cusList');
+				});
+	    	}
+	    }
+	    //分页跳转
+		function gotoPage(page){
+			if(oldPostJson){
+				goto(
+					page,
+					"../customer/queryShareO.html?RandNum="+ Math.random(),
+					oldPostJson,
+					function(html){
+						queryBack(html, 'cusList');
+					});
+			}
+		}
+		
+		var oldPostJson = {};
+		
+		function queryBack(html, gridId){
+			var elem=$(html);
+		  	elem.table();
+			var gridDiv = $("#"+gridId);
+			gridDiv[0].innerHTML="";
+			gridDiv.append(elem);
+			var total = $('#total').val();
+			if(total!=null){
+				$("#recordCount").text(total);
+			}else {
+				$("#recordCount").text(0);
+			}
+		}
+		function ClearCondition(){
+	    	$("#customer").val("");
+	    	$("select").each(function(){
+	    		this.selectedIndex = 0;
+	    		$(this).select();
+	    	}); 
+	    	$("#BelongToType").val("brAll");
+	    	changeBelongTo('brAll');
+	    	$("#userText").val("");
+    		$("#deptText").val("");
+	    	$("#customer").tips({ msg: "姓名、编号等" });
+	    }
+	    //共享客户
+	    function shareCustomer(){
+			var str = getCheckCusIds();
+			if(str == ""){
+				banger.page.showMessageBox("请您选择要共享的客户！");
+				return false;
+			}
+			var url="../customer/showShareCustomer.html?cusIds=" + str + "&actionType=insert&random="+Math.random()*1000;
+			var result=banger.page.openDialog(url,"选择共享",1000,700);
+			if(result!=undefined){
+				Query();
+			}
+	    }
+	    //共享详情
+	    function shareDetail(cusid){
+	    	var url="../customer/showShareCustomer.html?cusIds=" + cusid + "&actionType=modify&random="+Math.random()*1000;
+	    	var result=banger.page.openDialog(url,"共享详情",960,620);
+			if(result!=undefined){
+				Query();
+			}
+	    }
+	    //取消共享客户
+	    function cancelShareCus(){
+	    	var cusids = getCheckCusIds();
+	    	if(cusids==""){
+	    		banger.page.showMessageBox("请您选择要取消共享的客户！");
+	    		return;
+	    	}else{
+	    		if(!confirm("您确定要取消选择客户的所有共享记录吗？")){
+	    			return;
+	    		}
+	    	}
+	    	var postJson = {};
+			postJson['cusIds'] = cusids;
+			var urlStr = "../customer/cancelShareCus.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(html){
+			  	Query();	
+			  }
+			});	
+	    }
+	    //取消共享用户
+	    function cancelShareUser(){
+			var str = getCheckCusIds();
+			if(str==""){
+				banger.page.showMessageBox("请您选择要取消共享的客户！");
+				return false;
+			}
+			var url="../customer/showCancelShareUsers.html?cusIds=" + str + "&random="+Math.random()*1000;
+			
+			var w = 650, h = 400;
+			if(jQuery.browser.msie && jQuery.browser.version<7.0){
+				h = 460;
+			}
+			var result=banger.page.openDialog(url,"取消共享用户",w,h);
+			
+			if(result!=undefined){
+				var postJson = {};
+				postJson['cusIds'] = str;
+				postJson['userIds'] = result;
+				jQuery.ajax({
+				  type: 'POST',
+				  url: "../customer/cancelShareUser.html?random="+Math.random()*1000,
+				  data: postJson,
+				  success:function(html){
+				  	Query();	
+				  }
+				});	
+			}
+	    }
+	    //获得选中的客户ids
+	    function getCheckCusIds(){
+	    	var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+	    	var str = "";
+			obj.each(function(){
+				if(jQuery(this).attr("checked")){
+					if(!str){
+						str = jQuery(this).val();
+					}else{
+						str = str +"," +jQuery(this).val();
+					}}
+			});
+			return str;
+	    }
+		
+	function browseCustomer(cusId){
+    	jQuery.ajax({
+			  type: 'POST',
+			  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+			  data: {"cusId":cusId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+			  		}else{
+			  			var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+						tab.add(options);
+			  		}
+			  	}
+			});	
+    }
+    
+	//导出客户
+	function exportCustomer(){
+		var obj = jQuery(".datatbl tbody tr");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("没有可导出的客户！");
+			return false;
+		}
+		var option = {id: "exportCusToOther", pid: GetId(), title: "导出客户", url: "/customerExport/showExportPage.html?random="+Math.random()*1000, lock: false, confirm: true,refresh:false};
+		tab.add(option);
+			
+    }
+	//导出客户数据组装
+	function getCustPostJson(){
+		oldPostJson['url'] = "../customer/showExportCustomer.html?random="+Math.random()*1000;
+		return oldPostJson;
+	}
+    </script>
+</head>
+
+<body>
+	<form method="post">
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>
+                <td width="7%" class="field">
+                    <label>共享用户：</label>
+                </td>
+                <td width="18%">
+                    <select id="shareUserId" name="shareUserId">
+                        <option value=""></option>
+                        #foreach($user in $shareDropUsers) 
+                        <option value ="$user.userId" >$!user.userName</option>
+                    	#end
+                    </select>
+                </td>
+                <td width="7%" class="field">
+                    <label>客户类型：</label>
+                </td>
+                <td width="18%">
+                     <select id="CustomerType" name="crmCustomer.customerTypeId">
+                        <option value=""></option>
+                        #foreach($cusType in $cusTypelist)  
+                    	<option value ="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+                    	#end
+                     </select>
+                </td>
+                <td width="7%" class="field">
+                    <label>客户：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                    	<input type="text" class="dtxt1-txt" id="customer" name="crmCustomer.customerName" value="$!parameterMap.get("customerName")" maxlength="20" />
+                    </div>
+                </td>
+                <td width="7%" class="field"></td>
+                <td width="18%"></td>
+            </tr>
+            #if($isInChargeof)
+            <tr>
+                <td width="7%" class="field">
+                    <label>客户分类：</label>
+                </td>
+                <td width="18%">
+                        <select id="BelongToType" name="BelongToType">
+	                        <option value="brAll"></option>
+	                    	<option value="brMine">我的</option>
+	                    	<option value="brUser">下属的</option>
+	                    	<option value="brDept">机构的</option>
+	                    	<option value="brUnAllocate">待分配的</option>
+	                    </select>
+                    </td>
+                    <td colspan="6">
+	                	<span class="btn2 fl" id="my">
+	                		<input id="myUserId" type="hidden"/>
+	                        <label class="btn2-txt" id="showText">
+	                        	
+	                        </label>
+	                    </span>
+	                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+	                        <input id="userIds" name="userIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+	                    <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="deptText"/>
+	                        <input id="deptIds" name="deptIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+	                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+    <div class="sz">
+        <label class="fl bold">
+        	共享给别人的客户(<span class="dgreen" id="recordCount">$!recordCount</span>)
+        </label>
+        <input type="button" class="btn1" value="清 空" onclick="ClearCondition()"/>
+        <input type="button" class="btn1" value="搜 索" onclick="Query()"/>
+    </div>
+        
+    <div class="actrow">
+    #if($urlPermitUtil.hasPermission('showShareCustomer'))
+        <a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="shareCustomer()">
+            <label class="btn2-txt" >共享客户</label>
+        </a>
+    #end
+    #if($urlPermitUtil.hasPermission('showExportPage'))
+        <a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="exportCustomer()">
+            <label class="btn2-txt" >导出客户</label>
+        </a>
+	#end
+	#if($urlPermitUtil.hasPermission('showShareCustomer'))
+		<a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="cancelShareCus()">
+            <label class="btn2-txt" >取消共享客户</label>
+        </a>
+        <a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="cancelShareUser()">
+            <label class="btn2-txt" >取消共享用户</label>
+        </a>
+    #end
+    <span class="btn2 fr" onclick="refresh()">
+        <label class="btn2-txt">刷新</label>
+    </span>
+    </div>
+    <div id="cusList">
+    	#parse("/velocity/customer/cusTableShareToOthersList.vm")
+    </div>
+</body>
+</html>

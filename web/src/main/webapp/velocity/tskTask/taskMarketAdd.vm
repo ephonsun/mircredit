@@ -1,0 +1,271 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建营销任务</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	#scriptLink("core")
+	#scriptLink("page")	
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+			floatInput('input[id=\'targetMoney\']',12,4);
+			jQuery("#taskForm").validator();
+			jQuery("#easy-tabs").easytabs({beforeOnclick: fun1});
+			$('#showTExcName').text(window.top.getUn());
+			$("select").each(function(){$(this).select();});
+			$('#schtxt').afilter({
+				url: '/tskTask/initProductJsonMsg.html',
+				click: selectProduct,
+				change:ChangeLimit
+			});
+			$("#mit").hide();
+			$('.formError').bind('click', function(e){
+				$(this).hide();
+				e.stopPropagation();
+			});
+		});
+		function fun1(h, b){
+			banger.page.showMessageBox('请先保存营销任务基本信息！'); 
+			return false;
+		}
+		
+		function selectProduct(node){
+			$("#productId").val(node.productId);
+			$("#productName").val(node.text);
+			$("#mit").show();
+			$("#limit").text(node.raiseUpperLimit);
+			$("#limit2").text(node.moneyUnitName);
+			$("#unit").text(node.moneyUnitName);
+			productFunction($('#productName')[0]);
+		}
+		
+		function blurPor(pName){
+			if(pName.length==0){
+				$("#productId").val("");
+				$("#mit").hide();
+				$("#limit").text("");
+				$("#limit2").text("");
+				$("#unit").text("");
+			}
+		}
+		function trim(str){return str.replace(/(^\s*)|(\s*$)/g, "");}
+		function ChangeLimit(attr){
+			if(attr.length>0){
+				var pname=$('#productName').val();
+				if(trim(pname)==attr[0].text){
+					$("#productId").val(attr[0].productId);
+    				$("#mit").show();
+    				$("#limit").text(attr[0].raiseUpperLimit);
+					$("#limit2").text(attr[0].moneyUnitName);
+					$("#unit").text(attr[0].moneyUnitName);
+				}else{
+					$("#productId").val("");
+    				$("#mit").hide();
+    				$("#limit").text("");
+					$("#limit2").text("");
+					$("#unit").text("");
+				}
+			}else{
+				$("#productId").val("");
+				$("#mit").hide();
+				$("#limit").text("");
+				$("#limit2").text("");
+				$("#unit").text("");
+			}
+			productFunction($('#productName')[0]);
+		}
+		
+		function save(){
+			var bool = jQuery.validator({ form: 'taskForm'});
+			if(bool){
+				var pid=$("#productId").val();
+				jQuery.post('getByTaskProduct.html',{'productId':pid
+				},function(data){
+					if(data=="null"){
+						$("#saveMarketButton").attr("disabled",true);
+						document.taskForm.submit();
+					}else{
+						banger.page.showMessageBox('产品"'+$("#productName").val()+'"已关联营销任务"'+data+'",目前只支持1个产品对应1个营销任务!');
+						return false;
+					}
+				});
+			}
+		}
+		
+		function targetFunction(obj){
+			var limt=$("#limit").text();
+			var targetMoney=$("#targetMoney").val();
+			var unit=$('#limit2').text();
+			if(parseFloat(targetMoney)>parseFloat(limt)){
+				$(obj).attr('tips', '营销任务目标不能够超过理财产品的募集上限"'+limt+'"'+unit); return false;
+			}
+			return true;
+		}
+		
+		function dateFunction(obj){
+			var systemDate=$("#systemTime").val();
+			var startDate=$("#datepicker1").val();
+			var endDate=$("#datepicker2").val();
+			if(endDate.length>0){
+				if(endDate<systemDate){
+    				$(obj).attr('tips', '结束日期不能小于系统日期'); return false;
+    			}else if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期必须大于开始日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');return true;
+				} 
+			}else return true;
+		}
+		
+		function startDateFun(obj){
+			var startDate=$("#datepicker1").val();
+			var endDate=$("#datepicker2").val();
+			if(endDate.length>0&&startDate.length>0){
+				if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');
+					$('#endDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		function productFunction(obj){
+			var pid=$("#productId").val();
+			if(pid.length==0){
+				$(obj).attr('tips', '产品不存在,请选择正确的产品').parent().addClass('v-fails');return false;
+			}else{
+				$(obj).attr('tips', '').parent().removeClass('v-fails');return true
+			}
+		}
+    </script>
+</head>
+
+<body>
+    <div id="easy-tabs" class="easy-tabs">
+        <ul class="easy-tabs-header">
+            <li><label>任务基本信息</label></li>
+            <li><label>分配任务</label></li>
+            <li><label>制定电话任务</label></li>
+        </ul>
+        <div class="easy-tabs-pages">
+			<div class="easy-tabs-page" validate="false">
+            	<form id="taskForm" name="taskForm" method="post" action="saveTskTaskMarket.html">
+                	<table class="htmltbl" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td width="8%" class="field">
+	                            	<label class="red">*</label>
+	                            	<label>任务标题：</label>
+	                            </td>
+                                <td colspan="3">
+    								<input type="hidden" name="tskTask.isNextContact" value="0"/>
+                                    <div class="dtxt1" style="width: 391px;">
+	                                	<input type="text" name="tskTask.taskTitle" class="dtxt1-txt" rule="\S" tips='“任务标题”必须填写' maxlength="200" />
+	                                </div>
+                                </td>
+                            </tr>
+							<tr>
+                                <td width="8%" class="field">
+	                            	<label class="red">*</label>
+	                            	<label>产品名称：</label>
+	                            </td>
+                                <td colspan="3">
+									<div id="schtxt" class="dtxt2" style="width: 391px;">
+                                    	<input type="text" fun="productFunction" id="productName" onblur="blurPor(this.value)" class="dtxt2-txt" rule="\S" tips='“产品名称”必须填写'/>
+										<input type="hidden" name="tskTask.productId" id="productId" />
+										<i class="dtxt2-ddl"></i>
+                                    </div>
+                                </td>
+                            </tr>
+							<tr id="mit">
+                                <td width="8%" class="field">
+	                            	<label>募集上限：</label>
+	                            </td>
+                                <td colspan="3">
+    								 <label id="limit"></label><label id="limit2"></label>
+                                </td>
+                            </tr>
+							<tr>
+                                <td width="8%" class="field">
+	                            	<label class="red">*</label>
+	                            	<label>任务目标：</label>
+	                            </td>
+                                <td colspan="3">
+                                	<div class="dtxt1 fl" style="width: 391px;">
+                                    	<input type="text" fun="targetFunction" class="dtxt1-txt" id="targetMoney" name="tskTask.targetMoney" rule="\S" tips='“任务目标”必须填写' />
+									</div>
+									<label id="unit" style="float: left: margin-left: 5px; line-height: 24px;"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="field">
+	                            	<label class="red">*</label>
+	                            	<label>开始日期：</label>
+	                            </td>
+                                <td width="10%">
+                                    <div class="dtxt2" id="startDiv" style="width: 140px;">
+                                        <input type="text" fun="startDateFun" readonly="readonly" name="tskTask.startDate" id="datepicker1" class="dtxt2-txt" rule="\S" tips='“开始日期”必须填写' />
+                                        <i class="dtxt2-date"></i>
+                                    </div>
+                                </td>
+                                <td width="8%" class="field">
+	                            	<label class="red">*</label>
+	                            	<label>结束日期：</label>
+	                            </td>
+                                <td>
+                                    <div class="dtxt2" id="endDiv" style="width: 140px;">
+                                        <input type="text" fun="dateFunction" readonly="readonly" name="tskTask.endDate" id="datepicker2" class="dtxt2-txt" rule="\S" tips='“结束日期”必须填写' />
+                                        <i class="dtxt2-date"></i>
+                                    </div>
+									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="field">
+	                            	<label>任务备注：</label>
+	                            </td>
+                                <td colspan="3">
+                                	<div class="dtxtarea1" style="width: 391px;">
+                                    	<textarea name="tskTask.remark" class="txtarea" style="border: 0; height: 80px;" data-prompt-position="topLeft" onKeyUp="javascript:var val = this.value;if(val.length>500){this.value=val.substring(0,500)}"></textarea>
+                                	</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="field">
+	                            	<label>分配者：</label>
+	                            </td>
+                                <td colspan="3">
+                                    <label id="showTExcName"></label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+				</form>
+				
+				<hr />
+				
+				<div class="halign">
+					<input type="button" class="btn6 btn6bg1" onclick="save()" id="saveMarketButton" value="保存" />
+                    <input type="button" class="btn6 btn6bg3" onclick="javascript:tab.close(GetId(), false);" value="取消" />
+				</div>
+            </div>
+            <div class="easy-tabs-page">
+            </div>
+            <div class="easy-tabs-page">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

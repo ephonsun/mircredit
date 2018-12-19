@@ -1,0 +1,190 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>营销任务全景展示</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style type="text/css">
+		body { margin: 0; padding: 0; }
+		div.box { font-size: 0; margin:10px; }
+		div.box div.inner { float: left; width: 50%; }
+		div.box div.alltask {}
+		div.box div.owntask { }
+		div.box div.dayplan { }
+		div.tabdata { height: 220px; border: 10px solid #fff; font-size: 12px;}
+		div.tabdata label{}
+		div.tabdata label.tabtitle{ float:left; margin-left:10px; margin-bottom:5px; padding: 0; font-size:14px; font-weight:600;}
+		div.tabdata label.f{ float:right; margin-right:10px; padding:0; font-size:12px;}
+		table.datatbl tbody tr td { height: 28px !important;}
+	</style>
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	
+    <script type="text/javascript">
+        $(function () {
+			$('table.datatbl').table();
+			var auth = $!userAuth;
+			if(auth=='创建者'){
+			
+			}else if(auth=='业务主管'){
+				document.getElementById('myTskMarketing').style.display = 'none';
+			}else if(auth=='客户经理'){
+				document.getElementById('myExecuteTsk').style.display = 'block';
+				document.getElementById('customerManger').style.display = 'block';
+				
+				document.getElementById('allTskMarketing').style.display = 'none';
+				document.getElementById('myTskMarketing').style.display = 'none';
+				document.getElementById('executive').style.display = 'none';
+			}
+		});
+		
+		function showMore(path,title,id){
+			var options = {id:id, pid: GetId(), title: title, url: path+"?random="+Math.random(), lock: false};
+    		tab.add(options);
+		}
+    </script>
+	
+</head>
+
+<body>
+	<div class="box">
+		<div class="inner alltask">
+			<div class="tabdata" id="allTskMarketing" style="display:block;">
+				<label class="tabtitle">所有任务完成情况</label>
+				<label class="ui-link-btn f" title="更多" onclick="showMore('/tskMarketing/showTskMarketingList.html','所有营销任务','allTskMarketing')">更多</label>
+				<table class="datatbl">
+					<thead>
+						<tr>
+							<th>任务标题</th>
+							<th>完成情况</th>
+							<th>分配者</th>
+						</tr>
+					</thead>
+					<tbody>
+						#foreach($!tsk in $!tskMarketingBeanPage.items)
+							#if($velocityCount<=5)
+								<tr>
+                                    <td><label title="$!tsk.marketingTitle">$!tsk.marketingTitle</label></td>
+        							<td>$vmHelper.getPercentDec($!tsk.comPercent)</td>
+        							<td>$!tsk.assignUserName</td>
+								</tr>
+							#end
+						#end
+					</tbody>
+				</table>
+			</div>
+			<div class="tabdata" id="myExecuteTsk" style="display:none;">
+				<label class="tabtitle">我执行的任务完成情况</label>
+				<label class="ui-link-btn f" title="更多" onclick="showMore('/tskMarketing/showTskMarketingListMyExecute.html','我执行的营销任务','myExecuteTskMarketing')">更多</label>
+				<table class="datatbl">
+					<thead>
+						<tr>
+							<th>任务标题</th>
+							<th>完成情况</th>
+							<th>分配者</th>
+						</tr>
+					</thead>
+					<tbody>
+						#foreach($!tsk in $!tskMarketingBeanPage.items)
+							#if($velocityCount<=5)
+								<tr>
+									<td><label title="$!tsk.marketingTitle">$!tsk.marketingTitle</label></td>
+        							<td>$vmHelper.getPercentDec($!tsk.comPercent)</td>
+        							<td>$!tsk.assignUserName</td>
+								</tr>
+							#end
+						#end
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="inner owntask">
+			<div class="tabdata">
+                <div id="myTskMarketing" style="display:block;">
+					<label class="tabtitle">我制定的任务完成情况</label>
+    				<label class="ui-link-btn f" title="更多" onclick="showMore('/tskMarketing/showTskMarketingListMyCreate.html','我制定的营销任务','myCreateTskMarketing')">更多</label>
+    				<table class="datatbl">
+    					<thead>
+    						<tr>
+    							<th>任务标题</th>
+    							<th>完成情况</th>
+    						</tr>
+    					</thead>
+    					<tbody>
+    						#foreach($!myTsk in $!myTskMarketingBeanPage.items)
+    							#if($velocityCount<=5)
+            						<tr>
+										<td><label title="$!myTsk.marketingTitle">$!myTsk.marketingTitle</label></td>
+            							<td>$vmHelper.getPercentDec($!myTsk.comPercent)</td>
+            						</tr>
+    							#end
+    						#end
+    					</tbody>
+    				</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="box">
+		<div class="dayplan">
+			<div class="tabdata">
+				<label class="tabtitle">当天产品营销计划情况</label>
+				<label class="ui-link-btn f" title="更多" onclick="showMore('/tskMarketingPlan/planDetailList.html','当天执行的营销计划','todayTskMarketingPlan')">更多</label>
+				<table class="datatbl" id="executive" style="display:block;">
+					<thead>
+						<tr>
+							<th>客户经理</th>
+							<th>产品编号</th>
+							<th>产品名称</th>
+							<th>拟营销总额</th>
+							<th>实际营销总额</th>
+						</tr>
+					</thead>
+					<tbody>
+						#foreach($!tskPlanDetail in $!tskMarketPlanDetailToday)
+						#if($velocityCount<=5)
+						<tr>
+							<td>$!tskPlanDetail.executeUserName</td>
+							<td>$!tskPlanDetail.productCode</td>
+							<td><label title="$!tskPlanDetail.productName">$!tskPlanDetail.productName</label></td>
+							<td>$vmHelper.getDecimalWanMoney($!tskPlanDetail.planDetailTarget)</td>
+							<td>$vmHelper.getDecimalWanMoney($!tskPlanDetail.todaySaleMoney)</td>
+						</tr>
+						#end
+						#end
+					</tbody>
+				</table>
+				<table class="datatbl" id="customerManger" style="display:none;">
+					<thead>
+						<tr>
+							<th>产品编号</th>
+							<th>产品名称</th>
+							<th>拟营销总额</th>
+							<th>实际营销总额</th>
+						</tr>
+					</thead>
+					<tbody>
+						#foreach($!tskPlanDetail in $!tskMarketPlanDetailToday)
+						#if($velocityCount<=5)
+						<tr>
+							<td>$!tskPlanDetail.productCode</td>
+							<td><label title="$!tskPlanDetail.productName">$!tskPlanDetail.productName</label></td>
+							<td>$vmHelper.getDecimalWanMoney($!tskPlanDetail.planDetailTarget)</td>
+							<td>$vmHelper.getDecimalWanMoney($!tskPlanDetail.saleTotalTarget)</td>
+						</tr>
+						#end
+						#end
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>

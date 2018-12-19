@@ -1,0 +1,32 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <thead>
+    <tr>
+        <th><label title="融资来源">融资来源</label></th>
+        <th><label title="用途">用途</label></th>
+		<th><label title="贷款金额">贷款金额</label></th>
+        <th><label title="放款日期">放款日期</label></th>
+		<th><label title="期限">期限</label></th>
+		<th><label title="月还款额">月还款额</label></th>
+        <th><label title="逾期信息">逾期信息</label></th>
+		<th><label title="余额">余额</label></th>
+		<th><label title="操作">操作</label></th>	
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($lnCreditHistory in $lnCreditHistoryList)
+        <tr>
+            <td><input id="CH1_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.finaceSource"></td>
+            <td><input id="CH2_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanPurpose"></td>
+            <td><input id="CH3_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanMoney"></td>
+            <td><input id="CH4_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanDate"></td>
+            <td><input id="CH5_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanLimitYear"></td>
+            <td><input id="CH6_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.repayMonth"></td>
+            <td><input id="CH7_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.overdueInformation"></td>
+            <td><input id="CH8_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.balanceMoney"></td>
+            <td>
+                <a href="javascript:removeCh($!lnCreditHistory.creditHistoryId,$!lnCreditHistory.loanId)">移除</a>&nbsp;&nbsp;<a href="javascript:editCh($!lnCreditHistory.creditHistoryId,$!lnCreditHistory.loanId)"> 提交修改</a>
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>

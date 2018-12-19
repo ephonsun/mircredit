@@ -1,0 +1,40 @@
+<table id="dataList" class="listtbl" cellpadding="0" cellspacing="0">
+	<thead>
+    	<tr>
+        	<th width="60">序号</th>
+        	<th>名称</th>
+        	<th width="250">操作</th>
+        </tr>
+    </thead>
+	<tbody>
+		#set($pageIndex = ($page.currentPage - 1) * $page.pageSize)
+		#foreach($query in $!queryList.items)
+			#set($pageIndex = $pageIndex+1)
+        	<tr data="$!query.userQueryId" dataName="$!query.queryName" >
+            	<td width="60">$pageIndex</td>
+            	<td><a class="slink" href="javascript:void(0)" onclick="showResult('$!query.userQueryId','$!jsUtil.escapeJs($!query.queryName)')" >$!query.queryName</a></td>
+            	<td width="250">
+            		<a class="slink" href="javascript:void(0)" onclick="editResult('$!query.userQueryId','$!jsUtil.escapeJs($!query.queryName)')" >编辑</a>
+            		#if($pageIndex>1)
+						<a class="slink" href="javascript:void(0)" onclick="upResult('$!query.userQueryId',$pageIndex,$page.pageSize)" >上移</a>
+					#else
+						<span style="color:gray">上移</span>
+					#end
+					#if($pageIndex<$page.totalRowsAmount)
+                		<a class="slink" href="javascript:void(0)" onclick="downResult('$!query.userQueryId',$pageIndex,$page.pageSize)" >下移</a>
+                	#else
+                		<span style="color:gray">下移</span>
+                	#end
+                	<a class="slink" href="javascript:void(0)" onclick="delResult('$!query.userQueryId','$!query.queryName',this)" >删除</a>
+                </td>
+            </tr>
+        #end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="3">
+            	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

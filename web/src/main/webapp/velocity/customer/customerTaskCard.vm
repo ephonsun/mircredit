@@ -1,0 +1,131 @@
+﻿	<script>
+		var autoLogin = "$!autoLogin";
+		$(function(){
+    		$('select').select();
+    	});	
+		$(".datatbl").table();
+		function qkCus(){
+			$('select[name=taskSituId]').each(function(){
+				this.selectedIndex = 0;
+				$(this).select();
+			});
+		}
+		//查询
+		function search(){
+			var taskSituId=$("#taskSituId").val();
+			var treeType=$("#treeType").val();
+			jQuery.post("../tskContact/customerTaskCard.html?"+autoLogin+"random="+Math.random(),{
+					"target.customerId":$!target.customerId,
+					"taskSituId":taskSituId,
+					"treeType":treeType
+				},function(html){
+					refreshGridTask('taskMsg',html);
+    			});
+		}
+		//刷新taskMsg
+		function refreshGridTask(gridId,html)
+		{
+			var elem = $(html);
+			var grid = $("#"+gridId);
+			grid[0].innerHTML="";
+			grid.append(elem);
+		}
+		//分页跳转
+		function gotoPageTask(page)
+		{
+			var taskSituId=$("#taskSituId").val();
+			var treeType='$!treeType';
+			gotoTask(page,"../tskContact/customerTaskCard.html?"+autoLogin+"random="+Math.random(),{
+				"target.customerId":$!target.customerId,
+				"taskSituId":taskSituId,
+				"treeType":treeType,
+				"page.currentPage":page
+			},function(html){refreshGridTask('taskMsg',html);});
+		}
+		//查看任务
+		function detailTsk(taskId,taskFlag,isNext){
+			if(isNext==1){
+				var url="../tskContact/detailTask.html?tskTask.taskId="+taskId+"&tskTask.taskType=3&random="+Math.random();
+				window.showModalDialog(url, window, 'dialogWidth=470px;dialogHeight=320px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+			}else{
+				var title="";
+    			var id="";
+				var url="";
+    			if(taskFlag==1){
+    				title="查看联系任务";
+    				id="TaskContactDetailPage";
+					url="../tskContact/toTskContactDetail.html?tskContact.contactId="+taskId+"&actionType=detail&random="+Math.random()*1000;
+    			}else{
+    				title="查看营销任务";
+    				id="TaskMarketDetailPage";
+					url="../tskContact/getByTaskMarket.html?tskTask.taskId="+taskId+"&marketType=3";
+    			}
+    			var options = {id: id, pid: GetId(), title: title, url: url, lock: false};
+    			tab.add(options);
+			}
+		}
+		//下次联系
+		function nextTask(customerId){
+			var url="../tskContact/initTaskNext.html?target.customerId="+customerId+"&random="+Math.random();
+			var result=window.showModalDialog(url, window, 'dialogWidth=530px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+			if(result==1&&result!=undefined){
+				qkCus();
+				gotoPageTask(1);
+			}
+		}
+		function getCustomerName(){
+			return $("#cusTomName").val();
+		}
+	</script>
+	
+<div>
+	#if(!$!treeType.equals("Detail"))
+	<div class="actrow">
+       <span class="btn2 fl" onclick="nextTask($!target.customerId)">
+                <label class="btn2-txt">安排新日程</label>
+       </span>
+    </div>
+	#end
+	<table class="datatbl" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="25%">任务名称</th>
+            	<th width="8%">分配者</th>
+            	<th width="10%">开始日期</th>
+				<th width="10%">结束日期</th>
+				<th width="8%">完成情况</th>
+				<th>任务备注</th>
+            </tr>
+        </thead>
+		
+    	<tbody>
+			#foreach($task in $!custTskTaskPage.items)
+				#set($execDate=$date.format("yyyy-MM-dd",$!task.endDate))
+				#set($result=$!dateString.getSystemDate($execDate))
+				#set($classtxt='')
+				#if($result==1) 
+					#set($classtxt='class=yellow') 
+				#else
+    				#if($task.isEmergency==1) 
+    					#set($classtxt='class=red') 
+    				#end 
+				#end 
+				<tr $!classtxt>
+                <td><label title="$!task.taskName">$!task.contactTitle</label></td>
+            	<td><label title="$!task.assignName">$!task.assignName</label></td>
+            	<td><label title="$date.format("yyyy-MM-dd",$!task.startDate)">$date.format("yyyy-MM-dd",$!task.startDate)</label></td>
+				<td><label title="$date.format("yyyy-MM-dd",$!task.endDate)">$date.format("yyyy-MM-dd",$!task.endDate)</label></td>
+				<td><label title="$!task.hasfinishedTask/$!task.totalTask">$moneyUtil.decimePercent($!task.percent)%</label></td>
+				<td><label title="$!subString.replaceRemark($!task.remark)">$!task.remark</label></td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="6">
+					<div class="floatR">#pageSize($page,'Task')</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

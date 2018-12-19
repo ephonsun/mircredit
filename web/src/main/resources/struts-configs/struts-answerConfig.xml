@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="answerConfig" extends="default" namespace="/answerConfig" >
+	
+		 <!--  答录配置参数 -->
+		<action name="showAnswerConfigPage" class="answerConfigAction" method="showAnswerConfigPage">
+			<result name="success">/velocity/answerConfig/answerConfig.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 <!--  答录配置参数 -->
+		<action name="updateAnswerConfig" class="answerConfigAction" method="updateAnswerConfig">
+			<result name="success" type="redirect-action">showAnswerConfigPage</result>
+			<result name="error">/velocity/error.vm</result>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		
+		<!-- 上传答录音及提示音 -->
+		<action name="doUpload" class="answerConfigAction" method="doUpload">
+		</action>
+	  
+	  	<!-- 验证播放文件是否存在与服务器上 -->
+	  	<action name="isFile" class="answerConfigAction" method="isFile"></action>
+	  	
+	</package>
+
+</struts>

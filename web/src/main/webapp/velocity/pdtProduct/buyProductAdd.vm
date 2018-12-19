@@ -1,0 +1,431 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>添加购买客户</title>
+	<base target="_self" />
+	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+		.cusno { position: absolute; display: none; width: 340px; height: 200px; background-color: #fff; overflow: auto; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+		var postJson = {};
+    	jQuery(document).ready(function(){
+        	$('select').select();
+    		$('#f').validator();
+    		$('#schtxt').dfilter({
+        		url: '../pdtProduct/initFindCustomerByNo.html',
+        		data: params,
+        		thead: [
+        			{ text : '客户编号', field : 'customerNo', width : 100, align : 'center' },
+        			{ text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+        			{ text : '身份证号', field : 'idCard', width : 150, align : 'center' }
+        		],
+        		click: click
+    		});
+    		initBelongToTree();		//下属机构树
+			changeBelongTo($('#BelongToType').val());		//初始化加载
+			numInput("input[intFlag$='true']");
+			numInput('#phone');
+			floatInput('input[id=\'buyMoney\']',10,4);
+    	});
+    	function params(){
+    		return 'customerNo=' + $('#customerNo_txt').val();
+    	}
+    	
+    	
+    	function click(node){
+    		$('#schtxt :text').val(node['customerNo']);
+    		$('#customerName').val(node['customerName']);
+    		$('#idCard').val(node['idCard']);
+    		$('#phone').val(node['phone']);
+    		$('#defaultPhoneType').val(node['defaultPhoneType']);
+    		$('#customerId').val(node['customerId']);
+    		$('#customerNo_txt').focus();
+    		$('#idCard').focus();
+    	}
+    	
+    	var setting = {
+    		callback:{
+    			onClick:treeOnclick
+    		},
+    		data: {
+    			simpleData: {
+    				enable: true
+    			}
+    		},
+    		view: {
+    			showIcon: !showIconForTree
+    		}
+    	};
+    	
+    	//不显示节点图标
+    	function showIconForTree(treeId, treeNode) {
+    		return treeNode;
+    	};
+    
+    	function treeOnclick(event, treeId, treeNode) {
+    		initDeptUser(treeNode.id);
+    	};
+		
+		function insertChar(index,text,oldText){
+			if(index> oldText.length-1) 
+		      index=oldText.length-1; 
+		    if(index <0) 
+		      index=0; 
+		    return  oldText.substring(0,index)+text+oldText.substring(index); 	
+		}
+		 
+		 //根据身份证生成生日 年龄
+		function iDCardExitEvent(id){
+			var iDCardStr = $("#"+id).val();
+			if((!iDCardStr)&&(iDCardStr.length!=15)&&(iDCardStr.length!=18)){
+				return;
+			}
+			if(checkIDCard(iDCardStr)){
+				//如果是15位身份证 先转换成18位
+				if(iDCardStr.length==15){
+					iDCardStr=insertChar(6,'19',iDCardStr);
+				}
+				var newBirthday = iDCardStr.substring(6,14);
+				var year = newBirthday.substring(0,4);
+				var month = newBirthday.substring(4,6);
+				var day = newBirthday.substring(6,9);
+				newBirthday = year+'-'+month+'-'+day;
+				var dd = new Date();
+				$("#birthday").val(newBirthday);
+				$("#age").val(dd.getFullYear()-year);
+			}
+		}
+		
+		//封装json数据
+		function getQueryJson(){
+    		postJson['productId'] = $('#productId').val();
+    		postJson['productName'] = $('#productName').val();
+    		postJson['customerId'] = $('#customerId').val();
+    		postJson['birthday'] = $('#birthday').val();
+    		postJson['age'] = $('#age').val();
+    		postJson['userId'] = $('#userIds').val();
+    		postJson['usertype'] = $('#usertype').val();
+			postJson['bcustomer.customerNo'] = $('#customerNo_txt').val();
+			postJson['bcustomer.customerName'] = $('#customerName').val();
+			postJson['bcustomer.idCard'] = $('#idCard').val();
+			postJson['defaultPhoneType'] = $('#defaultPhoneType').val();
+			postJson['bcustomer.phone'] = $('#phone').val();
+			postJson['bcustomer.buyDate'] = $('#datepicker1').val();
+			postJson['bcustomer.buyMoney'] = $('#buyMoney').val();
+			postJson['bcustomer.bankAccount'] = $('#bankAccount').val();
+			postJson['BelongToType'] = $('#BelongToType').val();
+    		return postJson;
+		}
+		
+		function yzUser(){
+			var bool=true;
+			if($('#BelongToType').val()=='brUser'&&$('#userTree').val()==''){
+				$('#userTree').parent().addClass('v-fails');
+				$('#userTree').attr("tips","“营销人员”必须填写");
+				bool=false;
+			}else{
+				$('#userTree').parent().removeClass('v-fails');
+			}
+			return bool;
+		}
+		
+		 //提交
+		function sub(){
+		 	var bool = jQuery.validator({ form: 'f', extend: false});
+			if(!bool){
+				return false;
+			}
+			var name;
+			var uid;
+			if($('#BelongToType').val()=='brMine'){
+				name = $('#showText').text();
+				uid = $('#uid').val();
+			}else if($('#BelongToType').val()=='brUser'){
+				name = $('#userTree').val();
+				uid = $('#userIds').val();
+			}
+			jQuery.post("queryBuyCustomerByAll.html", {"buyCustomer.customerNo":$('#customerNo_txt').val(),
+			"buyCustomer.customerName":$('#customerName').val(),"buyCustomer.customerId":$('#customerId').val(),
+			"buyCustomer.buyMoney":$('#buyMoney').val(),
+			"buyCustomer.userId":uid,"buyCustomer.buyDate":$('#datepicker1').val(),"buyCustomer.productId":$('#productId').val()}, function(result){
+				//根据身份证生成生日birthday
+    			iDCardExitEvent("idCard");
+				var postJson=getQueryJson();
+				if(result==1){
+					if(confirm("系统中已经存在一笔“"+$('#customerName').val()+"”客户，向营销人员“"+name+"”购买了"+$('#buyMoney').val()+"的记录，您确定这是两笔不同的购买记录吗？")){
+						jQuery.post("addBuyProduct.html?random="+Math.random()*1000000,postJson,
+            				function(res){
+                				window.returnValue = 1;
+                				window.close(); 
+            				});
+					}else{
+						return;
+					}
+				}else{
+					//根据身份证生成生日birthday
+					jQuery.post("addBuyProduct.html?random="+Math.random()*1000000,postJson,
+        				function(res){
+            				window.returnValue = 1;
+        					window.close(); 
+        				});
+				}
+			});
+		}
+		 
+		function checkDate(obj){
+	    	var date=$("#systemTime").val();
+        	var inputDate=obj.value;
+			var startDate = $("#startDate").val();
+			var endDate = $("#endDate").val();
+    		if(date<inputDate){
+    			$("#datepicker1").parent().addClass('v-fails');
+    			$(obj).attr('tips', '购买日期不能够大于今天'); 
+				return false;
+    		}else{
+    			$("#datepicker1").parent().removeClass('v-fails');
+    		}
+			if(inputDate < startDate||inputDate > endDate){
+				$("#datepicker1").parent().addClass('v-fails');
+    			$(obj).attr('tips', '购买日期不在产品的上架日期范围内'); 
+				return false;
+			}else{
+    			$("#datepicker1").parent().removeClass('v-fails');
+				return true;
+    		}
+	    }	
+		
+		//--构造树
+		//机构树
+		function initBelongToTree(){
+			var type = "$parameterMap.get('BelongTo')";
+			var urlUser = "";
+			var urlDept = "";
+			urlUser = function(){return "getCusBelongToJson.html?random="+Math.random()*1000000;};
+			switch(type){
+				case "brUser":
+					urlUser = function(){return "getCusBelongToJson.html?BelongToType=brUser&belongDeptId="+$crmCustomer.belongDeptId +
+						"&belongUserId="+ $crmCustomer.belongUserId +"&random="+Math.random()*1000000;};	
+					$('#userTree').val("$!crmCustomer.userName");
+					break;
+				default: break;
+			}
+			$('#userList').atree({
+				setting: {
+					check: {
+						enable: true,
+						chkboxType: { "Y": "s", "N": "s" }
+					},
+					view: {
+						showIcon: true,
+						dblClickExpand: false
+					},
+					data: {
+						simpleData: {
+							enable: true
+						}
+					},
+					callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: null,
+						onCheck: null
+					}
+				},
+				url: urlUser,
+				beforeClick: beforeClickUser,
+				okHandler: onClickUser
+			});
+			
+			$("#BelongToType").change(function(){
+				changeBelongTo($(this).val());
+			});
+		}
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			if(!treeObj){
+				return;
+			}
+			var nodes = treeObj.getSelectedNodes();
+			if(nodes!=''){
+    			$('#userTree').val(nodes[0].name);
+    			$('#userIds').val(nodes[0].id);
+    			$('#userName').text("("+nodes[0].name+")");
+    			$('#userTree').parent().removeClass('v-fails');
+			}
+		}
+		//改变归属
+		function changeBelongTo(val){
+			switch(val){
+				case "brMine":
+					$("#my").show();
+					$("#userList").hide();
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#my").hide();
+					$('#belongUserId').val("0");
+					break;
+				default: break;
+			}
+		}
+    </script>
+</head>
+ 
+<body>
+	<form id="f" name="f" method="post" action="addBuyProduct.html">
+    	<table class="htmltbl" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+            <tbody>
+                <tr>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>客户编号：</label>
+						<input type="hidden" id="productId" name="productId" value="$!productId"/>
+						<input type="hidden" id="productName" value="$!productName"/>
+						<input type="hidden" id="customerId" name="customerId"/>
+						<input type="hidden" id="birthday" name="birthday"/>
+						<input type="hidden" id="age" name="age"/>
+						<input type="hidden" id="usertype" name="usertype" #if($!isManager==0) value="1" #end/>
+						<input type="hidden" id="systemTime" value="$!dateString.getSystemTimes()"/>
+						<input type="hidden" id="startDate" value="$date.format("yyyy-MM-dd",$!startDate)"/>
+						<input type="hidden" id="endDate" value="$date.format("yyyy-MM-dd",$!endDate)"/>
+                    </td>
+                    <td width="35%">
+						<div id="schtxt" class="dtxt1">
+							<input type="text" class="dtxt1-txt" maxlength="20" id="customerNo_txt" name="bcustomer.customerNo" rule="\S" tips="“客户编号”必须填写"/>
+						</div>
+                    </td>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>客户姓名：</label>
+                    </td>
+                    <td width="35%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" maxlength="20" id="customerName" name="bcustomer.customerName" rule="\S" tips="“客户姓名”必须填写"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>身份证：</label>
+                    </td>
+                    <td colspan="3">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" maxlength="20" id="idCard" name="bcustomer.idCard" rule="\S" tips="“身份证”必须填写"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>联系电话：</label><input type="hidden" id="defaultPhoneType" name="defaultPhoneType"/>
+                    </td>
+                    <td width="35%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" maxlength="20" id="phone" name="bcustomer.phone" rule="\S" tips="“联系电话”必须填写"  maxlength="20" onkeyup="value=value.replace(/[^\d]/g,'')" />
+                        </div>
+                    </td>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>购买日期：</label>
+                    </td>
+                    <td width="35%">
+                        <div class="dtxt2">
+                            <input type="text" class="dtxt2-txt" maxlength="20" readonly id="datepicker1" name="bcustomer.buyDate" fun="checkDate" rule="\S" tips="“购买日期”必须填写"/>
+                            <span class="dtxt2-date"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>销售额：</label>
+                    </td>
+                    <td colspan="3">
+                        <table class="celltbl">
+                        	<tr>
+                            	<td width="120" style="text-align: left;">
+                                	<div class="dtxt1">
+                                        <input type="text" class="dtxt1-txt" id="buyMoney" name="bcustomer.buyMoney" onkeyup="if(this.value==this.value2)return;if(this.value.search(/^\d{0,9}(?:\.\d{0,4})?$/)==-1)this.value=(this.value2)?this.value2:'';else this.value2=this.value;" rule="\S" tips="“销售额”必须填写"/>
+                                    </div>
+                                </td>
+								<td width="150" style="text-align: left; text-indent: 5px;">
+                                	<label>万元</label>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>账号：</label>
+                    </td>
+                    <td colspan="3">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" maxlength="20" name="bcustomer.bankAccount" id="bankAccount" rule="\S" tips="“账号”必须填写"/>
+                        </div>
+                    </td>
+                </tr>
+				<tr>
+                    <td width="15%" class="field">
+                    	<label class="red">*</label>
+                        <label>营销人员：</label>
+                    </td>
+					<td width="30%">
+                        <select id="BelongToType" name="BelongToType">
+							<option value="brMine" >我的</option>
+							#if($!isManager==1)
+							<option value="brUser" >下属的</option>
+							#end
+                        </select>
+                    </td>
+                    <td colspan="2">
+                    	<span id="my" class="btn2">
+							<label id="showText" name="uname" class="btn2-txt">$!userName</label>
+							<input type="hidden" name="uid" value="$!userId" id="uid"/>
+						</span>
+                        <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                            <input type="text" class="dtxt2-txt" readonly="readonly" id="userTree" fun="yzUser"/>
+	                        <input id="userIds" name="userIds" type="hidden" />
+                            <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+		
+        <hr />
+		
+        <div class="halign">
+            <input type="button" class="btn6 btn6bg1" value="确认" onclick="sub();"/>
+            <input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close();"/>
+        </div>
+    </form>
+	
+</body>
+</html>
+

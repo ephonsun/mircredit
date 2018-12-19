@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="templateField" extends="default" namespace="/templateField" > 	 
+		<!--  业务模板字段列表页面 -->
+		<action name="showTemplateFieldList" class="crmTemplateFieldAction" method="showCrmTemplateFieldByTemplateId">
+			<result name="success">/velocity/templateField/showTemplateFieldList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  跳转到新增业务模板字段列表页面 -->
+		<action name="toAddTemplateFieldPage" class="crmTemplateFieldAction" method="toAddTemplateFieldPage">
+			<result name="success">/velocity/templateField/addTemplateField.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  新增业务模板字段列表 -->
+		<action name="addCrmTemplateField" class="crmTemplateFieldAction" method="addCrmTemplateField">
+			<result name="success" type="redirectAction">showTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  编辑业务模板字段列表 -->
+		<action name="updateCrmTemplateField" class="crmTemplateFieldAction" method="updateCrmTemplateField">
+			<result name="success" type="redirectAction">showTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  编辑业务模板字段列表 -->
+		<action name="updateCrmTemplateFieldIsPopup" class="crmTemplateFieldAction" method="updateCrmTemplateFieldIsPopup">
+			<result name="success" type="redirectAction">showTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 移动模版字段页面（上移和下移） -->
+		<action name="moveFieldItems" class="crmTemplateFieldAction"
+			method="moveFieldItems">
+			<result name="success" type="redirectAction">showTemplateFieldList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  删除业务模板字段列表 -->
+		<action name="delTemplateField" class="crmTemplateFieldAction" method="deleteCrmTemplateField">
+			<result name="success" type="redirectAction">showTemplateFieldList</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  跳转到编辑业务模板字段列表页面 -->
+		<action name="toUpdateTemplateFieldPage" class="crmTemplateFieldAction" method="toUpdateTemplateFieldPage">
+			<result name="success">/velocity/templateField/updateTemplateField.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	</package>
+</struts>

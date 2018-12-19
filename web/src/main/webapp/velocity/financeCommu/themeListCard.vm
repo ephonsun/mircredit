@@ -1,0 +1,396 @@
+<table class="ui-exchangearea-search" cellpadding="0" cellspacing="0">
+<tbody>
+	<tr>
+		<td>
+			<span class="ui-span-btn-m toPost fl">
+				<label>发帖</label>
+				<i class="ddl"></i>
+			</span>
+			<div name="pcont" class="postOpt" style="display:none;">
+				<ul>
+					<li onclick="addCommTheme(1)">
+						<i class="icon none">&nbsp;</i>
+						<label>发新主题</label>
+					</li>
+					<li onclick="addCommTheme(2)">
+						<i class="icon">&nbsp;</i>
+						<label>发布投票</label>
+					</li>
+				</ul>
+			</div>
+		</td>
+		<td width="70"><label>主题名称:</label></td>
+		<td width="200">
+			<div class="ui-div-text">
+				<input type="text" class="text" id="titleSearch_$!templateId" value="$!theme.themeTitle" />
+				<input type="hidden" id="themeTypeSearch_$!templateId" value="$!theme.themeType" />
+				<input type="hidden" id="themeDateSearch_$!templateId" value="$!dateFlag" />
+			</div>
+		</td>
+		<td width="56">
+			<span class="ui-span-btn fr" onclick="search(0)">
+				<label>搜索</label>
+			</span>
+		</td>
+	</tr>
+</tbody>
+</table>
+<div class="ui-exchangearea-footer">
+<!--//统计-->
+<div class="count">
+	<span>今日：<label class="red">$!dateThemeCount</label></span>
+	<span class="delimiter">|</span>
+	<span>主题：<label class="red">$!commThemeCount</label></span>
+</div>
+</div>
+
+<table class="list">
+<thead>
+	<tr>
+		<th class="title">
+			<div>
+				<label>筛选:</label>
+				<a href="javascript:void(0);" class="screentheme" hideFocus="true">
+					#if($!theme.themeType==2)投票#else全部主题#end
+				<i class="ico-screening">&nbsp;</i>
+				</a>
+				<div class="stheme" name="sthcont" style="display:none;">
+					<ul>
+						<li onclick="search(1)">
+							<label>全部主题</label>
+						</li>
+						<li onclick="search(2)">
+							<label>投票</label>
+						</li>
+					</ul>
+				</div>
+				<a href="javascript:void(0);" class="screentime" hideFocus="true" title="全部时间">
+					#if($!dateFlag==3)一天#elseif($!dateFlag==4)二天#elseif($!dateFlag==5)一周#elseif($!dateFlag==6)一个月#elseif($!dateFlag==7)三个月#else全部时间#end
+				<i class="ico-screening">&nbsp;</i>
+				</a>
+				<div class="stime" name="sticont" style="display:none;">
+					<ul>
+						<li onclick="search(10)">
+							<label>全部时间</label>
+						</li>
+						<li onclick="search(3)">
+							<label>一天</label>
+						</li>
+						<li onclick="search(4)">
+							<label>二天</label>
+						</li>
+						<li onclick="search(5)">
+							<label>一周</label>
+						</li>
+						<li onclick="search(6)">
+							<label>一个月</label>
+						</li>
+						<li onclick="search(7)">
+							<label>三个月</label>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</th>
+		<th class="name">
+			<label>作者</label>
+		</th>
+		<th class="number">
+			<label>回复</label>
+			<br />
+			<label>查看</label>
+		</th>
+		<th class="date">
+			<label>发布时间</label>
+			<br />
+			<label>最后发表</label>
+		</th>
+	</tr>
+</thead>
+<tbody>
+	#foreach($tList in $!topThemeList)
+	 <tr>
+		<td class="title">
+			<div>
+				<i class="hot">顶</i>
+				#if($!tList.themeType==1)
+					<i class="icon none">&nbsp;</i>
+				#else
+					<i class="icon">&nbsp;</i>
+				#end
+				<a href="javascript:void(0);"  onclick="themeDetail($!tList.themeType,$!tList.themeId,'$!templateUserId')" title="$!tList.themeTitle">$!tList.themeTitle</a>
+			</div>
+		</td>
+		<td class="name">
+			<label>$!tList.userName</label>
+		</td>
+		<td class="number">
+			<label>$!tList.themeReplyCount</label>
+			<br />
+			<label>$!tList.themeReadCount</label>
+		</td>
+		<td class="date">
+			<label>$date.format("yyyy-MM-dd HH:mm:ss",$!tList.createDate)</label>
+			<br />
+			<label>#if($!tList.lastReplyDate)$date.format("yyyy-MM-dd HH:mm:ss",$!tList.lastReplyDate)#end</label>
+		</td>
+	</tr>
+	#end
+	<tr>
+		<td class="section-title" colspan="4">
+			<label>版块主题</label>
+			<i class="icon-retu hand" onclick="search(0)" title="刷新">&nbsp;</i>
+		</td>
+	</tr>
+	#foreach($tPage in $!themePage.items)
+	<tr>
+		<tr>
+		<td class="title">
+			<div>
+				#if($!tPage.themeType==1)
+					<i class="icon none">&nbsp;</i>
+				#else
+					<i class="icon">&nbsp;</i>
+				#end
+				<a href="javascript:void(0);" onclick="themeDetail($!tPage.themeType,$!tPage.themeId,'$!templateUserId')" title="$!tPage.themeTitle">$!tPage.themeTitle</a>
+			</div>
+		</td>
+		<td class="name">
+			<label>$!tPage.userName</label>
+		</td>
+		<td class="number">
+			<label>$!tPage.themeReplyCount</label>
+			<br />
+			<label>$!tPage.themeReadCount</label>
+		</td>
+		<td class="date">
+			<label>$date.format("yyyy-MM-dd HH:mm:ss",$!tPage.createDate)</label>
+			<br />
+			<label>#if($!tPage.lastReplyDate)$date.format("yyyy-MM-dd HH:mm:ss",$!tPage.lastReplyDate)#end</label>
+		</td>
+	</tr>
+	</tr>
+	#end
+</tbody>
+</table>
+<div class="ui-exchangearea-footer">
+<!--//发帖-->
+<span class="ui-span-btn-m toPost fl">
+	<label>发帖</label>
+	<i class="ddl"></i>
+</span>
+<div name="pcont" class="postOpt" style="display:none;">
+	<ul>
+		<li onclick="addCommTheme(1)">
+			<i class="icon none">&nbsp;</i>
+			<label>发新主题</label>
+		</li>
+		<li onclick="addCommTheme(2)">
+			<i class="icon">&nbsp;</i>
+			<label>发布投票</label>
+		</li>
+	</ul>
+</div>
+<!--//分页-->
+<div class="pagination">
+	<div class="floatR">#pageSize($page,'ThemeCard')</div>
+</div>
+</div>
+<form id="themeForm_$!templateId" name="themeForm_$!templateId">
+<div class="ui-exchangearea-post">
+<div class="post">
+	<p>快速发帖</p>
+</div>
+<div class="post-theme">
+	<div class="ui-div-text fl" style="width:34%">
+		<input type="text" class="text" id="themeTitle_$!templateId" onkeyup="writeText(this.value)" maxlength="80" rule="\S" tips='“标题”必须填写'/>
+		<input style="display:none">
+	</div>
+	<label>(还可以输入<span id="sz_$!templateId">80</span>个字)</label>
+</div>
+<div class="post-content">
+	<div class="ui-div-textarea" style="height:80px;" id="ctA_$!templateId">
+		<textarea fun="initContent" class="textarea" style="height:80px;" id="content_$!templateId" tips=""></textarea>
+	</div>
+</div>
+<hr />
+<div class="ui-exchangearea-footer-btn">
+	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="发表帖子" onclick="subTheme()"/>
+</div>
+</div>
+</form>
+<script type="text/javascript">
+	var partitionId='$!partitionId';
+	var templateId='$!templateId';
+	var templateUserId='$!templateUserId';
+	$(function(){
+		jQuery("#themeForm_"+templateId).validator();
+		$('table.list tr').hover(function(){
+			$(this).addClass('bg');
+		},function(){
+			$(this).removeClass('bg');
+		});
+		
+		/**
+		 * 发帖
+		**/
+		$('.toPost').hover(function(e){
+			$('.stheme,.stime').hide();
+			var showDiv = $(this).next('.postOpt');
+			var divName = showDiv.attr('name');
+			$("div[name='" + divName + "']").hide();    
+			showDiv.show();             
+			showDiv.css({
+					top: $(this).offset().top + $(this).outerHeight(true) - 1 + 'px',
+					left: $(this).offset().left + 'px'
+			});
+			$(this).next('.postOpt').hover(function(){
+					$(this).show();
+			
+			},function(){
+					$('.postOpt').hide();
+			
+			});
+			e.stopPropagation();
+		},function(){
+			$('.postOpt').hide();
+		});
+		
+		/*筛选全部主题*/
+		$('.screentheme').hover(function(e){
+			$('.postOpt,.stime').hide();
+			var showDiv = $(this).next('.stheme');
+			var divName = showDiv.attr('name'); 
+			$("div[name='" + divName + "']").hide();    
+			showDiv.show();           
+			showDiv.css({
+				top: $(this).offset().top + $(this).outerHeight(true) - 1 + 'px',
+				left: $(this).offset().left + 'px'
+			});
+			$(this).next('.stheme').hover(function(){
+				$(this).show();
+			},function(){
+				$('.stheme').hide();
+			});
+			e.stopPropagation();                   
+		},function(){
+			$('.stheme').hide();
+		});
+		 
+		/*筛选全部时间*/
+		$('.screentime').hover(function(e){
+			$('.postOpt,.stheme').hide();
+			var showDiv = $(this).next('.stime');     
+			var divName = showDiv.attr('name');  
+			$("div[name='" + divName + "']").hide();    
+			showDiv.show();             
+			showDiv.css({
+				top: $(this).offset().top + $(this).outerHeight(true) - 1 + 'px',
+				left: $(this).offset().left + 'px'
+			});
+			$(this).next('.stime').hover(function(){
+				$(this).show();
+			},function(){
+				$('.stime').hide();
+			});
+			e.stopPropagation();                     
+		},function(){
+			$('.stime').hide();
+		});
+	});
+	function addCommTheme(flag){
+		var url="";
+		var title="发帖";
+		var id="";
+		if(flag==1){//主题
+			title="发表帖子";
+			var partitionId='$!partitionId';
+			var templateId='$!templateId';
+			url="../commTheme/insertTheme.html?partitionId="+partitionId+"&templateId="+templateId+"&random="+Math.random();
+			id="commThemePage_add";
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false});
+		}else{
+			var partitionId='$!partitionId';
+			var templateId='$!templateId';
+			url="../commTheme/insertOption.html?partitionId="+partitionId+"&templateId="+templateId+"&random="+Math.random();
+			id="commThemePage_detail_addOption";
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false});		
+		}
+	}
+</script>
+<script>
+	function subTheme(){
+		var bool = jQuery.validator({ form: 'themeForm_'+templateId, extend: true,extendhandler:initContent});
+		if(bool){
+			jQuery.post('insertTheme.html',{
+				'theme.themeTitle':$("#themeTitle_"+templateId).val(),
+				'theme.themeContent':$("#content_"+templateId).text(),
+				'theme.partitionId':partitionId,
+				'theme.templateId':templateId,
+				'theme.themeType':1
+			},function(date){
+				if(date>0){
+					search(0);
+				}else{
+					banger.page.showMessageBox("发布帖子失败!");
+				}
+			});
+		}
+	}
+	function initContent(obj){
+		var value= jQuery.trim($("#content_"+templateId).text());
+		//	var reg=new RegExp("&nbsp;","g");
+		//	var p1=new RegExp("<P>","g");
+		//	var p2=new RegExp("</P>","g");
+		//	value=value.replace(reg,"").replace(/^\s+|\s+$/g,"");
+		if(value.length==0){
+			$('#ctA_'+templateId).addClass('v-fails');
+			$("#content_"+templateId).attr('tips', '帖子内容必须填写!'); return false;
+		}else if(value.length<2){
+			$('#ctA_'+templateId).addClass('v-fails');
+			$("#content_"+templateId).attr('tips', '帖子内容字数不能够小于2个字!'); return false;
+		}else{$("#content_"+templateId).text(value);return true;} 
+	}
+	function writeText(value){
+		var le=value.length;
+		$("#sz_"+templateId).text(80-parseInt(le));
+	}
+	
+	function search(themeType){
+		var tType=""
+		var date="";
+		if(themeType==0){
+			tType=$("#themeTypeSearch_"+templateId).val();
+			date=$("#themeDateSearch_"+templateId).val();
+		}else{
+			if(themeType!=1 && themeType!=2){
+				date=themeType;
+				tType=$("#themeTypeSearch_"+templateId).val();
+			}else{
+				tType=themeType;
+				date=$("#themeDateSearch_"+templateId).val();
+			}
+		}
+		jQuery.post('getCommThemeListPage.html?random='+Math.random(),{
+			'theme.themeTitle':$("#titleSearch_"+templateId).val(),
+			'theme.themeType':tType,
+    		'partitionId':partitionId,
+    		'templateId':templateId,
+			'templateUserId':templateUserId,
+			'dateFlag':date
+		},function(html){$("#themtCard_"+templateId).html(html);});
+	}
+	//分页跳转
+    function gotoPageThemeCard(page)
+    {
+    	gotoThemeCard(page,"getCommThemeListPage.html?random="+Math.random(),{
+    		'theme.themeTitle':$("#titleSearch_"+templateId).val(),
+			'theme.themeType':$("#themeTypeSearch_"+templateId).val(),
+			'dateFlag':$("#themeDateSearch_"+templateId).val(),
+    		'partitionId':partitionId,
+    		'templateId':templateId,
+			'templateUserId':templateUserId,
+    		'page.currentPage':page
+    	},function(html){$("#themtCard_"+templateId).html(html);});
+    }
+</script>

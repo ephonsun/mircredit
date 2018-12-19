@@ -1,0 +1,112 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>审批登入</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+	      body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script >
+	
+		$(function(){
+		
+			$("#submit").click(function(){
+					
+					var name = $("#name").val();
+					if(name == ""){
+						alert("请输入用户名！");
+						return;
+					}
+					var password = $("#password").val();
+					if(password == ""){
+						alert("请输入密码！");
+						return;
+					}
+					var postJson = {};
+                	postJson['name'] = name;
+					postJson['password'] = password;
+                	postJson['loanId'] = $("#loanId").val();
+                	var urlStr = "../loan/centerUserTogetherApproveSubmit.html" + "?random=" + Math.random() * 1000;
+                	jQuery.ajax({
+                		type : 'POST',
+                		url : urlStr,
+                		data : postJson,
+                		success : function(data) {
+							if(data != "success"){
+								alert(data);
+								return;
+							}
+							window.returnValue="success";
+                        	window.close();
+						}
+					});
+			});
+			
+			$("#cancel").click(function(){
+				if(confirm("是否要取消登入！")){
+					 window.close();
+				}
+			
+			});
+		
+		
+		});
+    </script>
+</head>
+<body>
+    <input type="hidden" id="loanId" value="$!loanId"/>
+
+    <p class="bold loan-ttlbg">请使用姓名：$!userName 账号进行登入审批</p>
+    <div class="loan-add-box">
+      <table class="viewtbl" style="table-layout: auto;" id="coLoanPerson">
+          <tbody>
+              <tr>
+                  <td class="field" width="8%">
+                      <label>用户名：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtname">
+                          <input type="text" class="text" id="name" maxlength="20" />
+                      </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label>密码：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtnum">
+                          <input type="password"  class="text" id="password" maxlength="20" />
+                      </div>
+                  </td>
+              </tr>
+             
+          </tbody>
+      </table>
+      </div>
+      <hr />
+      <div class="center">
+          <input type="button" id="submit" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+          <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+      </div>
+</body>
+</html>

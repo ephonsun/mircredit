@@ -1,0 +1,173 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑贷款</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <!--
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    -->
+
+    <style type="text/css">
+        .m1{ margin-left:15px;}
+        .m2{ margin-top:-1px;}
+        .m3 { margin-bottom:3px; }
+        .w1 { width:100px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+//            $('div.etabs').etabs({
+//                'head': 'etabs-items',
+//                'body': 'etabs-body',
+//                'bar': 'etabs-bar',
+//                'beforeOnclick': fun1,
+//                'onclick': fun2
+//            });
+           maxTextArea("textarea[maxlength]");
+           var url = "../loan/vLoanView.html?isAllotLoan=true&isUpload=false&isEdit=false&RandNum="+ Math.random()+"&loanId="+$!loanId;
+            $('#viewLoan').load(url,{},function(){
+
+            });
+        });
+
+
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+
+        //分配贷款
+        function allotLoan(loanId,cusId){
+            var loanIdCusId = loanId+"@"+cusId;
+            var url = "${ctx}/loan/allotLoanPage.html?loanId="+loanId+"&loans="+loanIdCusId+"&RandNum="+Math.random();
+            var result = banger.page.openDialog(url,"分配贷款",700,480);
+            if(result != undefined){
+//                var index = result.indexOf(",");
+                var resultArr = result.split(",");
+                var postJson = {};
+                postJson['loans'] = loanIdCusId;
+//                postJson['belongDeptId'] = result.substring(0,index);
+//                postJson['belongUserId'] = result.substring(index+1,result.length);
+                postJson['belongDeptId'] = resultArr[0];
+                postJson['belongUserId'] = resultArr[1];
+                postJson['belongUserName'] = resultArr[2];
+                postJson['assignRemark'] = jQuery.trim($('#assignRemark').val());
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/allotLoan.html?RandNum='+Math.random(),
+                    data:postJson,
+                    success:function(html){
+                        tab.close(GetId(), true);
+                    }
+                });
+            }
+        }
+
+        //申请撤销贷款
+        function localCancelLoan(loanId,loanStatusId){
+            var assignRemark = jQuery.trim($('#assignRemark').val());
+            var radioValue = refuseAllotLoan();
+            if(radioValue){
+                radioValue['remark'] = assignRemark;
+                radioValue['loanId'] = loanId;
+                radioValue['beforeStatusId'] = loanStatusId;
+                radioValue['customerId'] = $!customerId;
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/cancelLoan.html?RandNum='+Math.random(),
+                    data:radioValue,
+                    success:function(){
+                        tab.close(GetId(), true);
+                        jQuery.ajax({
+                            type:'POST',
+                            url:'../loan/allotingLoanListQuery.html?RandNum='+Math.random(),
+                            data:{},
+                            success:function(html){
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        //拒绝贷款
+        function refuseAllotLoan(){
+            var url = "../loan/cancelLoanPage.html?RandNum="+Math.random();
+            var result = window.showModalDialog(url,{window: window},'dialogWidth=550px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            return result;
+        }
+
+        //判断贷款状态
+        function queryLoanStatusById(loanId,cusId,flag,loanStatusId){
+			if(!confirm("是否已经保存分配备注！")){
+				return;
+			}
+            var url = "${ctx}/loan/queryLoanStatusById.html?loanId="+loanId+"&loanStatusId="+loanStatusId+"&RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:url,
+                data:{},
+                success:function(value){
+                    if(value == "true"){
+                        if(flag == "allot"){
+                            //点击“分配贷款”
+                            allotLoan(loanId,cusId);
+                        }else if(flag == "refuse"){
+                            //点击”撤销贷款“
+                            localCancelLoan(loanId,loanStatusId);
+                        }
+                    }else if(value == "false") {
+                        //当前贷款状态已不是待分配(可能数据库当中的状态已经被其他用户所更改)，必须重新刷新页面
+                        banger.page.showMessageBox("贷款列表数据已被人更改，请重新刷新列表!");
+                        tab.close(GetId());
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+
+<p class="bold loan-lheight">贷款状态：贷款分配</p>
+<!--贷款基本信息-->
+###parse("/velocity/loan/baseLoanInfo.vm")
+<div id="viewLoan">
+	
+	
+</div>
+</body>
+</html>

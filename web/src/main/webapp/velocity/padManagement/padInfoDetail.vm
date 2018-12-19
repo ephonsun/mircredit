@@ -1,0 +1,392 @@
+#parse("/velocity/taglibs.vm")
+#set($mapIp=$mapIp)
+#set($mapKey=$mapKey)
+#set($mapVersion=$mapVersion)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">   
+<html xmlns="http://www.w3.org/1999/xhtml">   
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看pad信息</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script language="javascript" src="http://${mapIp}/apis?t=javascriptmap&v=${mapVersion}&key=${mapKey}"></script>
+    #scriptLink("page")
+	<script type="text/javascript">
+    var oldPostJson = {};
+    var padId="$!padInfo.padInfoId";
+    var userId="$!padInfo.userId";
+    $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            //配置只显示日期
+            $('.dateonlypicker').datetimeReset({
+                showTimepicker: false
+            });
+            //配置只显示时间
+            $('.timepicker').datetimeReset({
+                timeOnly:true,
+                timeFormat:'HH:mm:ss',
+                currentText: '现在'
+            });
+
+            //加载pad使用记录
+            $("#padLog").load('padUseLog.html?padInfo.padInfoId='+padId+'&random='+Math.random());
+			
+            //地图
+        	//$("#iCenterMap").load('../map/toActivityLocusPage.html?userId='+userId);
+
+            //点击 活动轨迹 页卡时加载地图
+            $('#mapTrajectory').click(function(e){
+                if(!mapObj){//如果地图对象不存在则加载地图
+                    mapInit(); //初始化地图
+                    var userId=$("#userId").val();
+                    if($("#polyline01"))
+                        mapObj.removeOverlays("polyline01");
+                    var array = ajaxQuery("../map/initActivityLocus.html?userId="+userId);
+                    if(array){
+                        addPolyline(array);
+                    }
+                }
+                $("#beginTime").val(getDateStr());
+                e.stopPropagation();
+            });
+            $("input").blur();
+        });
+
+    function getDateStr(){
+        var d = new Date(), vYear = d.getFullYear();
+        var vMon = d.getMonth() + 1;
+        var vDay = d.getDate();
+        var str="";
+        str=vYear+"-"+(vMon<10 ? "0" + vMon : vMon)+"-"+(vDay<10 ?  "0"+ vDay : vDay );
+        return str;
+    }
+    function doclick(obj){
+
+    }
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+        
+        function clearLog(){
+	$("#startDate").val("");
+	$("#endDate").val("");
+}
+function searchLog(){
+	var postJson = getQueryJson();
+	jQuery.ajax({
+    	type: "post",
+    	url: "padUseLog.html?padInfo.padInfoId="+padId+"&random="+Math.random(),
+    	data: postJson,
+    	success: function(data){
+    		$("#padLog").html(data);
+    	}
+	});
+}
+function refreshLog(){
+	jQuery.ajax({
+    	type: "post",
+    	url: "padUseLog.html?padInfo.padInfoId="+padId+"&random="+Math.random(),
+    	data: oldPostJson,
+    	success: function(data){
+    		$("#padLog").html(data);
+    	}
+	});
+}
+function getQueryJson(){
+	var postJson = {};
+	postJson['startDate'] = jQuery.trim($('#startDate').val());
+	postJson['endDate']=jQuery.trim($('#endDate').val());
+	//postJson['padInfo.padInfoId']=padId;
+	oldPostJson = postJson;
+	return postJson;
+}
+</script>
+</head>
+
+<body>
+	<table class="htmltbl">
+        <tbody>
+            <tr>
+                <td colspan="2">
+                    <label>
+                    	#if($!padInfo.logType==1)
+			        		$!padInfo.usePersonnel 已登录
+			        	#else
+			        		未连接服务端
+			        	#end
+                    </label>
+                </td>
+                <td class="field" width="80">
+                    <label>上传总量：</label>
+                </td>
+                <td>
+                    <label>$!dateString.PadFormetFileSize("$!padInfo.countUpload")</label>
+                </td>
+                <td class="field" width="80">
+                    <label>下载总量：</label>
+                </td>
+                <td>
+                    <label>$!dateString.PadFormetFileSize("$!padInfo.countDownLoad")</label>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="etabs" style="margin-top:10px;">
+        <div class="etabs-head">
+            <div class="etabs-head-items">
+                <ul id="etabs-items">
+                    <li><label>pad信息</label></li>
+                    <li><label>使用记录</label></li>
+                    <li id="mapTrajectory"><label>活动轨迹</label></li>
+                </ul>
+            </div>
+        </div>
+        <div id="etabs-body" class="etabs-body">
+            <div class="etabs-body-child">
+                <table class="htmltbl">
+                    <tbody>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>编号:</label>
+                            </td>
+                            <td colspan="7">
+                                <label>$!padInfo.padCode</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>序列号:</label>
+                            </td>
+                            <td colspan="7">
+                                <label>$!padInfo.serialNumber</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>品牌:</label>
+                            </td>
+                            <td width="17%">
+                                <label>$!padInfo.brandTypeName</label>
+                            </td>
+                            <td class="field" width="8%">
+                                <label>型号:</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!padInfo.padSubTypeName</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>状态:</label>
+                            </td>
+                            <td colspan="7">
+                                <label>
+                                	#if($!padInfo.useStatus==1)
+						        		启用
+						        	#elseif($!padInfo.useStatus==2)
+						        		禁用
+						        	#elseif($!padInfo.useStatus==3)
+						        		停用
+						        	#end
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>使用人员:</label>
+                            </td>
+                            <td colspan="7">
+                                <label>$!padInfo.usePersonnel</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="etabs-body-child" id="padLog">
+            </div>
+            <div class="etabs-body-child">
+            	<table class="htmltbl">
+				    <tbody>
+				    <tr>
+				        <td class="field" width="8%">
+				            <label>日期:</label>
+				        </td>
+				        <td colspan="2">
+				            <table class="celltbl">
+				                <tbody>
+				                <tr>
+				                    <td>
+				                        <div class="ui-div-text" style="width: 150px;">
+				                            <input type="text" class="text dateonlypicker"  readonly="true" id="beginTime" focusFlag='false'/>
+				                            <i class="date"></i>
+				                        </div>
+				                    </td>
+				                </tr>
+				                </tbody>
+				            </table>
+				        </td>
+                        <td class="field" width="8%">
+                            <label>时间:</label>
+                        </td>
+                        <td colspan="2">
+                            <table class="celltbl">
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="ui-div-text" style="width: 150px;">
+                                            <input type="text" class="text timepicker" id="startTime"  readonly="true"/>
+                                            <i class="date"></i>
+                                        </div>
+                                    </td>
+                                    <td width="20"><label style="width: 20px;">-</label></td>
+                                    <td>
+                                        <div class="ui-div-text" style="width: 150px;">
+                                            <input type="text" class="text timepicker" id="endTime" readonly="true"/>
+                                            <i class="date"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+				        <td colspan="2"></td>
+				    </tr>
+				    </tbody>
+				</table>
+				<div class="search-bar">
+				    <input type="button" class="ui-input-btn" value="清空" onclick="qingkong();"/>
+				    <input type="button" class="ui-input-btn" value="搜索" onclick="postQuery()"/>
+				</div>
+				<input type="hidden" name="userId" id="userId" value="$!padInfo.userId">
+				<div class="action-bar">
+				    <span class="ui-span-btn fr">
+				        <label onclick="refresh()">刷新</label>
+				    </span>
+				</div>
+				<div class="pad-map-box">
+				    <div class="pad-map-content" id="iCenter"></div>
+				</div>
+            </div>
+        </div>
+    </div> 
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+ <script type="text/javascript">
+    ////////////////////取地图城市，经纬度begin//////////////////////////
+    var cityCoding = '$!cityCoding', cityLngLat = '$!cityLngLat';
+    var cityLng = cityLngLat.split(",")[0], cityLat = cityLngLat.split(",")[1];
+    ////////////////////取地图城市，经纬度end//////////////////////////
+    var postJson = {},oldJson={};
+    var mapObj,toolbar,overview,scale;
+    function mapInit(){
+        var opt = {
+            level:13,//初始地图视野级别
+            center: new MMap.LngLat(cityLng, cityLat),//设置地图中心点
+            doubleClickZoom:true,//双击放大地图
+            scrollWheel:true//鼠标滚轮缩放地图
+        }
+        mapObj = new MMap.Map("iCenter",opt);
+        mapObj.plugin(["MMap.ToolBar","MMap.OverView","MMap.Scale"],function()
+        {
+            toolbar = new MMap.ToolBar();
+            toolbar.autoPosition=false; //加载工具条
+            mapObj.addControl(toolbar);
+            overview = new MMap.OverView(); //加载鹰眼
+            mapObj.addControl(overview);
+            scale = new MMap.Scale(); //加载比例尺
+            mapObj.addControl(scale);
+        });
+       // mapObj.bind(mapObj,"click",function(e){
+       //     banger.page.showMessageBox("X:"+e.lnglat.lng+" Y:"+e.lnglat.lat);
+       // });
+    }
+
+    function refresh(){
+
+
+    }
+
+    function postQuery() {          //查询
+        queryJson();
+        if($("#polyline01"))
+            mapObj.removeOverlays("polyline01");
+        var url = "";
+        if (postJson['beginTime'] == "" ) {
+            banger.page.showMessageBox("请先选择日期!");
+            return false;
+        } else {
+            url = "../map/queryActivityLocus.html";
+        }
+        var array = ajaxQuery(url);
+        if (array&&array!="") {
+            addPolyline(array);
+        }else{
+            banger.page.showMessageBox("未查到相关轨迹信息!");
+        }
+
+    }
+    function addPolyline(array){//添加线
+        var arr=new Array();//经纬度坐标数组
+        if (array.length > 0) {
+            for (var i = 0; i < array.length; i++) {
+                arr.push(new MMap.LngLat(array[i]["gpsLng"], array[i]["gpsLat"]));
+            }
+        }
+        var polyline=new MMap.Polyline({
+            id:"polyline01",
+            path:arr,
+            strokeColor:"#F00",
+            strokeOpacity:1,
+            strokeWeight:3,
+            strokeStyle:"dashed",
+            strokeDasharray:[10,5]
+        });
+        mapObj.addOverlays(polyline);
+    }
+    function queryJson() {//组装数据
+        postJson={};
+        postJson['beginTime'] =$("#beginTime").val();
+        postJson["endTime"]=$("#endTime").val();
+        postJson["startTime"]=$("#startTime").val();
+        postJson["userId"]=$("#userId").val();
+    }
+    function ajaxQuery(urlStr) {//公用ajax请求
+        var array =null;
+        jQuery.ajax({
+            type: "post", //请求方式
+            async: false,
+            url: urlStr, //发送请求地址
+            data: postJson,
+            success: function (html) {
+                array = eval(html);
+            }
+        });
+        return  array;
+    }
+    function qingkong() {            //清空查询条件
+        $("input[type$='text']").val("");
+        $("#beginTime").val(getDateStr());
+        if($("#polyline01"))
+            mapObj.removeOverlays("polyline01");
+    }
+</script>   
+</body>
+</html>

@@ -1,0 +1,124 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>贷款审计</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .tl p { margin-left:15px; margin-top:15px; font-size:14px; }
+        .loan-bg { padding-bottom:20px; }
+        .loan-bg-one { padding-bottom:20px; }
+        .m1{ margin-left:15px;}
+        .m2 { margin-top:-1px; }
+        .m3 { margin-bottom:3px; }
+    </style>
+
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+            var url = "../loan/vLoanView.html?loanVerifyView=true&RandNum="+ Math.random()+"&loanId="+$!loanId +"&isVerify=isVerify";
+            $('#vLoanView').load(url,{},function(){
+
+            });
+
+        });
+
+        /*
+        function addVerifyRemark(loanId){
+            var verifyRemark= $('#verifyRemark').val();
+            if(verifyRemark){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/addVerifyRemark.html?RandNum='+Math.random()+"&loanId="+$!loanId,
+                    data:{
+                        'verifyRemark' : verifyRemark
+                    },
+                    success:function(html){
+                        banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+                        window.location.reload();
+                    }
+                });
+            }else{
+                banger.page.showMessageBox("请填写备注信息！");
+            }
+        }
+          */
+        function LoanVerifyPass(loanId){
+            var verifyRemark= $('#verifyRemark').val();
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/LoanVerifyPass.html?RandNum='+Math.random()+"&loanId="+$!loanId,
+                    data:{
+                        'verifyRemark' : verifyRemark
+                    },
+                    success:function(html){
+                        banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+                        tab.close(GetId(),true);
+                    }
+                });
+        }
+
+        /*
+        function LoanVerifyNotPass(loanId){
+            var verifyRemark= jQuery.trim($('#verifyRemark').val());
+            var approveRemark = $('#verifyRemark');
+            approveRemark.attr("rule","\\S");
+            approveRemark.attr("tips",'"驳回原因"必须填写');
+            var bool = jQuery.validator({form:'remark'});
+            if(!bool){
+                return false;
+            }
+            if(verifyRemark){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/LoanVerifyNotPass.html?RandNum='+Math.random()+"&loanId="+$!loanId,
+                    data:{
+                        'verifyRemark' : verifyRemark
+                    },
+                    success:function(html){
+                        banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+                        tab.close(GetId(),true);
+                    }
+                });
+            }else{
+                banger.page.showMessageBox("不合规贷款必须填写备注信息，请填写后再提交！");
+            }
+        } */
+
+        function fun1(h, b){
+            return true;
+        }
+
+        function fun2(h, b){
+        }
+    </script>
+</head>
+<body>
+<div id="vLoanView">
+</div>
+</body>
+</html>

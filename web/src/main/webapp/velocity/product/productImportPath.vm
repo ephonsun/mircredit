@@ -1,0 +1,115 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>导入购买记录</title>
+    <link type="text/css" rel="stylesheet" href="../../css/base.css" />
+    <link type="text/css" rel="stylesheet" href="../../css/common.css" />
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/dialog4.1.6/artDialog.source.js?skin=default"></script>
+    <script type="text/javascript" src="${ctx}/js/dialog4.1.6/_doc/highlight/highlight.pack.js"></script>
+    <script type="text/javascript" src="${ctx}/js/dialog4.1.6/_doc/highlight/languages/javascript.js"></script>
+</head>
+<script>
+ 	function cfirm(){
+			return true;
+    }
+	function exportExcel(){
+		document.location.href="exportExcel.html?random="+Math.random()*100000;
+	}
+	function cheackPage(){
+	var changObj=document.getElementById("failureMsg");
+		if(changObj.value!=""){
+			art.dialog({
+				 ok: function () {
+                    return true;
+                 },
+			 	 icon: 'warning',
+                content: changObj.value
+            });
+		}
+	}
+
+</script>
+<body>
+	<form name="importForm"  id ="importForm"  enctype="multipart/form-data" action="importExcel.html" onsubmit="return check();"  method="post" >
+	<input type="hidden" name="failureMsg" id="failureMsg" value="$!failureMsg">
+	<table class="step1" width="100%" border="0" cellpadding="2" cellspacing="2">
+    	<tr>
+        	<td class="executed">第 1 步</td>
+        	<td>第 2 步</td>
+        	<td>第 3 步</td>
+        	<td>完成</td>
+        </tr>
+    </table>
+    <h4 class="step-title">第 1 步：选择导入文件路径</h4>
+    <table width="100%" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+				<td width="10%" height="60" nowrap="nowrap">文件路径:</td>
+            	<td width="90%">
+            		<div id="uploadSpan" class="dtxt1" style="border: 0;">
+                        <input type="file" class="file" name="file" id="filePath" style="width: 100%;" onkeydown="return false;" onpaste="return false;" onchange='checkFileType(this.value);' />
+                    </div>
+				</td>
+            </tr>
+            <tr>
+            	<td height="60" colspan="2">为了能更好的导入你的购买客户记录，请使用我们提供的模板，以下为Excel模板</td>
+            </tr>
+			<tr>
+            	<td height="60" colspan="2">
+            		<input type="button" value="Excel模板下载" class="btn1" onclick="exportExcel()" />
+        		</td>
+            </tr>
+            <tr>
+            	<td height="60" align="center" colspan="2">
+                	<input type="submit" value="下 一 步" class="btn1" >
+                    <input type="button" value="取    消" class="btn1" onclick="javascript:tab.close(GetId(), true);" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	</form>
+	<script>
+function check() 
+{ 
+   if(importForm.file.value == "") {
+          art.dialog({
+				 ok: function () {
+                    return true;
+                 },
+			 	 icon: 'warning',
+                content: "请选择文件路径"
+            });
+           return false;
+   }else{
+   		return true;
+   }
+}
+var html=document.getElementById('uploadSpan').innerHTML; 
+
+function resetFile(){ 
+document.getElementById('uploadSpan').innerHTML=html; 
+}
+
+function checkFileType(str){
+	var pos = str.lastIndexOf(".");
+	var lastname = str.substring(pos,str.length);
+	var resultName=lastname.toLowerCase();
+	if ('.xls'!=resultName.toString()&&'.xlsx'!=resultName.toString()){
+	   art.dialog({
+			 ok: function () {
+                return true;
+             },
+		 	 icon: 'warning',
+            content: '只能上传xls/xlsx文件，您上传的文件类型为'+lastname+'，请重新上传'
+        });
+		resetFile();
+	}
+}
+cheackPage();
+</script>
+</body>
+</html>

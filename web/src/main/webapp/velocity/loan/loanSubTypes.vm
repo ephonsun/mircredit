@@ -1,0 +1,176 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>贷款类型</title>
+    #styleLink("base")
+	#scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    #scriptLink("page")	
+    <script type="text/javascript">
+		//设置第一行 上移 按钮禁用；最后一行 下移 按钮禁用
+		function setstate(){
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+		}	
+	    
+	    $(function(){
+	    $('select').select();
+			jQuery("#loanSubTypeForm").validator();
+	        setstate();
+	     });
+	    
+		function add(){
+			var bool = jQuery.validator({ form: 'loanSubTypeForm', extend: false});
+			if(bool){
+			    var vat=$("#selLoanType").find("option:selected").text();
+		    	var postJson={};
+		    	var d=$("#loanSubTypeName").val();
+		    	postJson['lnLoanSubType.loanSubTypeName']=jQuery.trim(d);   
+                postJson['lnLoanSubType.loanTypeId']=$('#selLoanType').val();  
+                jQuery.ajax({
+        			type: 'POST',
+        			url:'insLoanTypeSub.html',
+        			data:postJson,
+        			success:function(data){
+        			if(data!=""){
+            				banger.page.showMessageBox("已存在相同的选项！");
+            				bool=false;
+            			}else{
+            				bool=true;
+            				$("#loanSubTypeName").val("");
+            				selectOnChange();
+            			}
+        			}
+        	   });
+    	   }
+    	    setstate();
+		}
+    	
+    	
+		
+		//通过id删除贷款子类型
+		function deleteType(id,obj){
+		  if(confirm('您确定要删除选项“'+obj.parentNode.parentNode.childNodes[0].innerText+'”吗？')){
+		     //location.href="delLoanTypeSub.html?lnLoanSubType.loanSubTypeId="+id;
+		     jQuery.ajax({
+	           type:'POST',
+	           url:'delLoanTypeSub.html',
+	           data:{'lnLoanSubType.loanSubTypeId':id},
+	           success:function(){
+	            selectOnChange();
+	        }});
+		  }
+		}
+		
+		//更新贷款子类型
+		function updateA(code){
+		 var id=$('#selLoanType').val();
+		 var url="toUpdatePage.html?lnLoanSubType.loanSubTypeId="+code
+		 +"&lnLoanType.loanTypeId="+id+"&random="+Math.random()*10000;
+		 var result=banger.page.openDialog(url,"编辑贷款类型",600,220);
+		  if(result==1){
+		   selectOnChange();
+		  }
+		}
+	
+	//上下移动
+		function upOrdown(code,flag){
+		    var id=$('#loanTypeId').val();
+			jQuery.post('upOrDown.html',{
+				'lnLoanSubType.loanSubTypeId':code,
+				'lnLoanSubType.loanTypeId':id,
+				'moveFlag':flag
+			},function(html){
+				if(html!=null){
+				  var loanSub=$("#loanSubTypeTable");
+	              loanSub.html(html);
+				  setstate();
+					return ;
+				}
+				
+			});
+			setstate();
+		}
+		
+		function selectOnChange(){
+	          var vUrl="typeSelSubList.html?random="+Math.random();
+	          var postJson={};
+	          postJson['lnLoanSubType.loanTypeId']=$('#selLoanType').val();
+	        jQuery.ajax({
+	           type:'POST',
+	           url:vUrl,
+	           data:postJson,
+	           success:function(html){
+	           $("#loanTypeId").val($('#selLoanType').val());
+	           var loanSub=$("#loanSubTypeTable");
+	               loanSub.html(html);
+	            setstate();
+	        }});
+		}
+		
+		function valBizType(){
+			var value=$("#loanSubTypeName").val();
+			if(value.replace(/\ /g,"")==""){
+				$("#bizTypeName").attr('tips', '“贷款类型”必须填写');
+				return false;
+			}
+			return true;
+		}
+	</script>
+	
+</head>
+
+<body>
+	<form name="loanSubTypeForm"  id ="loanSubTypeForm" action=""  method="post">
+	<table class="viewtbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="70" class="field"><label>名称：</label></td>
+            	<td><label>贷款子类型</label></td>
+            	<td width="70" class="field"><label>字段类型：</label></td>
+            	<td><label>系统级</label></td>
+            	<td width="70" class="field"><label>数据类型：</label></td>
+            	<td><label>单选下拉框</label></td>
+            </tr>
+            <tr>
+            	<td width="70"  class="field"><label>贷款类型：</label></td>
+            	<td colspan="5">
+	            	<select style="width: 170px; float:left;" id="selLoanType" value=this.value+'tt' onchange="selectOnChange()">
+			       #foreach($ln in $!lnLoanTypes)
+			            <option value='$!ln.loanTypeId'>$!ln.loanTypeName</option>
+			       #end
+			     </select>
+		     </td>
+            </tr>
+        </tbody>
+    </table>
+	<div style="margin: 10px 0px;"><label>选项列表</label>
+	</div>
+	<div style="border: 1px solid #ccc; padding: 10px;"  >
+    		<div class="sz" style="text-align: left;">
+	        	<label class="fl red">*</label>
+            	<label class="fl">新选项：</label>
+				<div class="dtxt2 fl" id="recDiv" style="width: 150px; margin-right: 5px;">
+					<input type="text" fun="valBizType" name="lnLoanSubType.loanSubTypeName" id="loanSubTypeName" class="dtxt2-txt" maxlength="20" rule="\S" tips="“贷款子类型”必须填写"/>
+                </div>
+                <input type="text" style="display:none">
+				<input type="button" value="添 加" class="btn1 fl" onclick="add()"/>
+            </div>
+		<table class="listtbl" cellpadding="0" cellspacing="0" id="loanSubTypeTable">
+              #parse("/velocity/loan/loanSubTypesTable.vm")
+        </table>
+    </div>
+	<div class="halign" style="margin-top: 20px;">
+       <input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+    </div>
+	</form>
+     <td type="hidden" id="loanTypeId" name="loanTypeId" value="$!lnLoanType.loanTypeId"></td>
+</body>
+</html>

@@ -1,0 +1,31 @@
+##代款意向表
+<table class="datatbl" id="datatbl">
+    <thead>
+    <tr>
+        <th><label title="意向产品">意向产品</label></th>
+        <th><label title="意向说明">意向说明</label></th>
+        <th><label title="添加人员">添加人员</label></th>
+        <th><label title="添加时间">添加时间</label></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($schedule in $scheduleList)
+        <tr>
+            <td><label title="$!schedule.productName" id="productName">$!schedule.productName</label></td>
+            <td><label title="$!subString.replaceRemark($!schedule.remark)" id="remark">$!schedule.remark</label></td>
+            <td><label title="$!schedule.userName" id="userName">$!schedule.userName</label></td>
+            <td><label title="$!date.format('yyyy-MM-dd',$!schedule.createDate)" id="createDate">$!date.format('yyyy-MM-dd',$!schedule.createDate)</label>
+            </td>
+        </tr>
+        #end
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4">
+                <div class="fr">
+                    #parse("/velocity/ajaxPage.vm")
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

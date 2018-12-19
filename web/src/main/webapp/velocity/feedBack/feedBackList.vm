@@ -1,0 +1,143 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>在线反馈</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    #styleLink("base")
+   <style type="text/css">
+		.Agency-right {min-height: 704px; height: auto !important; height: 534px; margin-left: 180px; }
+    </style>
+
+    #scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+    <script type="text/javascript">
+        var postJson={};
+        var oldPostJson={};
+        //下载文件
+        function downFile(fileUrl){
+            document.location.href ="../feedBack/downFeedBackFile.html?fileUrl="+fileUrl;
+        }
+        //处理
+        function chuli(feedBackId){
+            getQueryJson();
+            postJson['feedBackId']=feedBackId;
+            postJson['ischuli']=1;
+            jQuery.ajax({
+                type:"post",
+                url:"updateFeedBack.html",
+                data:postJson,
+                success:function(html){
+                    $("#deptGrid").html(html).find('table').table();
+                }
+            });
+        }
+		//清空
+		function qingkong(){
+			var length = document.forms[0].length
+			for(i=0;i<length;i++)
+			{
+				 var type = document.forms[0].elements[i].type;
+				 if(type!="button"){
+					 document.forms[0].elements[i].value = "";
+				 }
+			}
+		}
+
+        function postUserQuery(){
+                jQuery.ajax({
+                    type:"post",
+                    url:"getFeedBackGrid.html",
+                    data:getQueryJson(),
+                    success:function(html){
+                        $("#deptGrid").html(html).find('table').table();
+                    }
+                });
+            }
+
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "${ctx}/feedBack/getFeedBackGrid.html?RandNum="+Math.random(),
+                        oldPostJson,
+                        function(html){
+                            $("#deptGrid").html(html).find('table').table();
+                        }
+                );
+            }
+        }
+		//组装数据
+		function getQueryJson(){
+    		postJson['titleName']=jQuery.trim($('#titleName').val());
+			postJson['modular']=jQuery.trim($('#modular').val());
+            postJson['createUser']=jQuery.trim($('#createUser').val());
+			postJson['status']=jQuery.trim($('#status').val());
+            oldPostJson = postJson;
+    		return postJson;
+    	}
+
+	</script>
+</head>
+ 
+<body>
+		<form name="deptList" id="deptList" style="width: 100%;">
+			<table class="htmltbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                        <td width="6%" class="field" style="text-align: left;">
+                        	<label>标题:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt2">
+								<input type="text" id="titleName" class="dtxt2-txt" name="titleName" maxlength="20" />
+                            </div>
+                        </td>
+                        <td width="6%" class="field" style="text-align: left;">
+                        	<label>模块:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt2">
+								<input type="text" id="modular" class="dtxt2-txt" name="modular" maxlength="20" />
+                            </div>
+                        </td>
+                        <td width="6%" class="field" style="text-align: left;">
+                            <label>用户:</label>
+                        </td>
+                        <td width="20%">
+                            <div class="dtxt2">
+                                <input type="text" id="createUser" class="dtxt2-txt" name="createUser" maxlength="20" />
+                            </div>
+                        </td>
+						 <td width="6%" class="field" style="text-align: left;">
+                        	<label>状态:</label>
+                        </td>
+                        <td width="20%">
+                        	<select id="status" name="status" render="select">
+								 <option value="0">未处理</option>
+                                <option value="1">已处理</option>
+                                <option value="">全部</option>
+							</select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+	     </form>
+		 
+		 <div class="sz">
+            <input type="button" value="清 空" onclick="qingkong()" class="btn1" />
+            <input type="button" value="搜 索" onclick="postUserQuery()" class="btn1" />
+		</div>
+		
+		<div id="deptGrid">#parse("/velocity/feedBack/feedBackGrid.vm")</div>
+</body>
+</html>
+

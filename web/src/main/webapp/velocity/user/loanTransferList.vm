@@ -1,0 +1,64 @@
+<table id="datatbl" class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+            <tr>
+                <th width="30"><input type="checkbox" nm="chkall" name="cusCheckAll" id="cusCheckAll"  onclick="selectAll(this)" /></th>
+                <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+                <th ><label title="身份证">身份证</label></th>
+				<th ><label title="创建时间">创建时间</label></th>
+                <th ><label title="提交时间">提交时间</label></th>
+				<th ><label title="申请金额(元)">申请金额(元)</label></th>
+				<th ><label title="贷款状态">贷款状态</label></th>
+				<th ><label title="是否落实">是否落实</label></th>
+				<th ><label title="申请人员">申请人员</label></th>
+				<th ><label title="负责人员">负责人员</label></th>
+            </tr>
+        </thead>
+        <tbody>
+        	#foreach($lnLoan in $!lnLoanList.items)
+            <tr id="$!lnLoan.loanId">
+                <td><input type="checkbox" nm="chkone" name="cusCheck" id="cusCheck" value="$!lnLoan.loanId"/></td>
+                <td>
+                	<div class="datacus">
+                		#if($!lnLoan.crmCustomer.defaultPhoneType=='1')
+                        	<a href="#2" class="slink nm" ><label title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone1）" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')" >$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone1）</label></a>
+                        #elseif($!lnLoan.crmCustomer.defaultPhoneType=='2')
+                        	<a href="#2" class="slink nm" ><label title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone2）" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone2）</label></a>
+                        #elseif($!lnLoan.crmCustomer.defaultPhoneType=='3')
+                        	<a href="#2" class="slink nm"><label title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.phone）" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.phone）</label></a>
+                        #elseif($!lnLoan.crmCustomer.defaultPhoneType=='4')
+                        	<a href="#2" class="slink nm"><label title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.fax）" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.fax）</label></a>
+                        #end
+                        <div class="other">
+                        	<label class="item cusTitle" title="$!lnLoan.crmCustomer.customerTitle">
+                            	$!lnLoan.crmCustomer.customerTitle
+                            </label>
+                            <label class="item">
+                            	$!lnLoan.crmCustomer.sex
+                            </label>
+                            <label class="item">
+                            	$!lnLoan.crmCustomer.age
+                            </label>
+                        </div>
+                    </div>
+                </td>
+                <td><label title="$vmHelper.getHideIdCard($!lnLoan.crmCustomer.idCard)">$vmHelper.getHideIdCard($!lnLoan.crmCustomer.idCard)</label></td>
+				<td><label title="$!date.format('yyyy-MM-dd HH:mm',$!lnLoan.createDate)">$!date.format('yyyy-MM-dd HH:mm',$!lnLoan.createDate)</label></td>
+				<td><label title="$!date.format('yyyy-MM-dd HH:mm',$!lnLoan.applyDate)">$!date.format('yyyy-MM-dd HH:mm',$!lnLoan.applyDate)</label></td>
+				<td><label title="$vmHelper.getUnityDecimalMoney($!lnLoan.loanMoney)">$vmHelper.getUnityDecimalMoney($!lnLoan.loanMoney)</label></td>
+				<td><label title="$!lnLoan.LnLoanStatus.loanStatusName">$!lnLoan.LnLoanStatus.loanStatusName</label></td>
+				<td><label title="#if($!lnLoan.isCheckout == 1)已落实#else未落实#end">#if($!lnLoan.isCheckout == 1)已落实#else未落实#end</label></td>
+				<td><label title="$!lnLoan.sysUser.applyUserName">$!lnLoan.sysUser.applyUserName</label></td>
+				<td><label title="$!lnLoan.sysUser.chargeUserName">$!lnLoan.sysUser.chargeUserName</label></td>
+            </tr>
+            #end
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="10">
+                    <div class="fr">
+						<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

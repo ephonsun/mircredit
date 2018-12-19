@@ -1,0 +1,301 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>消息提醒配置</title>
+    #styleLink("base")
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript">
+    	$(function(){
+			if($("#isCallRemind").val()==1){//未接来电提醒
+				$("#isCallRemindCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isCallRemindCheckBox").attr("checked", false);
+			}
+			
+			if($("#isMessageRemind").val()==1){//未读信息提醒
+				$("#isMessageRemindCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isMessageRemindCheckBox").attr("checked", false);
+			}
+			
+			if($("#isSmsRemind").val()==1){//未读短信提醒
+				$("#isSmsRemindCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isSmsRemindCheckBox").attr("checked", false);
+			}
+			if($("#isSendSms").val()==1){//已发短信提醒
+				$("#isSendSmsCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isSendSmsCheckBox").attr("checked", false);
+			}
+			if($("#isSendMms").val()==1){//已发彩信提醒
+				$("#isSendMmsCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isSendMmsCheckBox").attr("checked", false);
+			}
+			
+			
+			
+			
+			if($("#isVisitRemind").val()==1){//未读座谈提醒
+				$("#isVisitRemindCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isVisitRemindCheckBox").attr("checked", false);
+			}
+			if($("#isVerifySms").val()==1){//待审核短信提醒
+				$("#isVerifySmsCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isVerifySmsCheckBox").attr("checked", false);
+			}
+			if($("#isSendBackSms").val()==1){//被退回短信提醒
+				$("#isSendBackSmsCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isSendBackSmsCheckBox").attr("checked", false);
+			}
+			if($("#isVerifyMms").val()==1){//待审核彩信提醒
+				$("#isVerifyMmsCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isVerifyMmsCheckBox").attr("checked", false);
+			}
+			if($("#isSendBackMms").val()==1){//被退回彩信提醒
+				$("#isSendBackMmsCheckBox").attr("checked", true);
+			}
+			else{
+				$("#isSendBackMmsCheckBox").attr("checked", false);
+			}
+			
+    		
+    		//设置未接来电提醒
+			$("#isCallRemindCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isCallRemind").val(1);
+				}
+				else{
+					$("#isCallRemind").val(0);
+				}
+			});
+			//设置未读留言提醒
+			$("#isMessageRemindCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isMessageRemind").val(1);
+				}
+				else{
+					$("#isMessageRemind").val(0);
+				}
+			});
+			
+			//设置未读短信提醒
+			$("#isSmsRemindCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isSmsRemind").val(1);
+				}
+				else{
+					$("#isSmsRemind").val(0);
+				}
+			});
+			//设置已发短信提醒
+			$("#isSendSmsCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isSendSms").val(1);
+				}
+				else{
+					$("#isSendSms").val(0);
+				}
+			});
+			//设置已发彩信提醒
+			$("#isSendMmsCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isSendMms").val(1);
+				}
+				else{
+					$("#isSendMms").val(0);
+				}
+			});
+			
+			
+			//设置未读座谈提醒
+			$("#isVisitRemindCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isVisitRemind").val(1);
+				}
+				else{
+					$("#isVisitRemind").val(0);
+				}
+			});
+			//设置待审核短信提醒
+			$("#isVerifySmsCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isVerifySms").val(1);
+				}
+				else{
+					$("#isVerifySms").val(0);
+				}
+			});
+			//设置待被退回短信提醒
+			$("#isSendBackSmsCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isSendBackSms").val(1);
+				}
+				else{
+					$("#isSendBackSms").val(0);
+				}
+			});
+			//设置待审核彩信提醒
+			$("#isVerifyMmsCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isVerifyMms").val(1);
+				}
+				else{
+					$("#isVerifyMms").val(0);
+				}
+			});
+			//设置待被退回彩信提醒
+			$("#isSendBackMmsCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isSendBackMms").val(1);
+				}
+				else{
+					$("#isSendBackMms").val(0);
+				}
+			});
+		})
+		function sub(){
+	    	var f=$("#remindConfigForm");
+	    	f.action="updateRemindConfig.html";
+			f.submit();
+			banger.page.showMessageBox({"type":"success","content":"保存成功"});
+		}
+		function forbidBackSpace(e) {
+            var ev = e || window.event; //获取event对象    
+            var obj = ev.target || ev.srcElement; //获取事件源    
+            var t = obj.type || obj.getAttribute('type'); //获取事件源类型    
+            //获取作为判断条件的事件类型    
+            var vReadOnly = obj.readOnly;
+            var vDisabled = obj.disabled;
+            //处理undefined值情况    
+            vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+            vDisabled = (vDisabled == undefined) ? true : vDisabled;
+            //当敲Backspace键时，事件源类型为密码或单行、多行文本的，    
+            //并且readOnly属性为true或disabled属性为true的，则退格键失效    
+            var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+            //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效    
+            var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+            //判断    
+            if (flag2 || flag1) return false;
+        }
+		//禁止后退键 作用于Firefox、Opera   
+        document.onkeypress = forbidBackSpace;
+        //禁止后退键  作用于IE、Chrome   
+        document.onkeydown = forbidBackSpace;
+	</script>
+</head>
+<body>
+	<h4 class="size12">您可以设置开启不同类型的消息提醒框，点击"提醒"。以下的提醒，将在操作系统托盘区，闪动提醒。</h4>
+	<form id="remindConfigForm"  name="remindConfigForm" action="updateRemindConfig.html" method="post">
+		<table class="datatbl" style="margin: 15px 0px;" width="100%" border="0" cellpadding="0" cellspacing="0">
+	        <thead>
+	            <tr>
+	                <th width="140">类型</th>
+	                <th width="60">提醒</th>
+	                <th align="left">描述</th>
+	            </tr>
+	        </thead>
+	        <tbody>
+				<tr>
+	                <td width="140"><label>未接来电</label></td>
+	                <td width="60"><input type="checkbox" id="isCallRemindCheckBox" class="chk" /></td>
+	                <td align="left"><label>未浏览过的未接来电</label></td>
+	            </tr>
+	            <tr>
+	                <td width="140"><label>未读留言</label></td>
+	                <td width="60"><input type="checkbox" id="isMessageRemindCheckBox" class="chk" /></td>
+	                <td align="left"><label>未浏览过的未读留言</label></td>
+	            </tr>
+	            <!--
+	             <tr>
+	                <td width="140"><label>未读短信</label></td>
+	                <td width="60"><input type="checkbox" id="isSmsRemindCheckBox" class="chk" /></td>
+	                <td align="left"><label>未浏览过的未读短信</label></td>
+	            </tr>
+	             <tr>
+	                <td width="140"><label>已发短信</label></td>
+	                <td width="60"><input type="checkbox" id="isSendSmsCheckBox" class="chk" /></td>
+	                <td align="left"><label>未确认过的已发短信结果</label></td>
+	            </tr>
+	             <tr>
+	                <td width="140"><label>已发彩信</label></td>
+	                <td width="60"><input type="checkbox" id="isSendMmsCheckBox" class="chk" /></td>
+	                <td align="left"><label>未确认过的已发彩信结果</label></td>
+	            </tr>
+				-->
+	            <tr>
+	                <td width="140"><label>未读座谈</label></td>
+	                <td width="60"><input type="checkbox" id="isVisitRemindCheckBox" class="chk" /></td>
+	                <td align="left"><label>未浏览过的未读座谈</label></td>
+	            </tr>
+	            <!--
+	            <tr>
+	                <td width="140"><label>待审核短信</label></td>
+	                <td width="60"><input type="checkbox" id="isVerifySmsCheckBox" class="chk" /></td>
+	                <td align="left"><label>未确认过的待审核短信结果</label></td>
+	            </tr>
+	            <tr>
+	                <td width="140"><label>被退回短信</label></td>
+	                <td width="60"><input type="checkbox" id="isSendBackSmsCheckBox" class="chk" /></td>
+	                <td align="left"><label>未确认过的被退回短信结果</label></td>
+	            </tr>
+	            <tr>
+	                <td width="140"><label>待审核彩信</label></td>
+	                <td width="60"><input type="checkbox" id="isVerifyMmsCheckBox" class="chk" /></td>
+	                <td align="left"><label>未确认过的待审核彩信结果</label></td>
+	            </tr>
+	            <tr>
+	                <td width="140"><label>被退回彩信</label></td>
+	                <td width="60"><input type="checkbox" id="isSendBackMmsCheckBox" class="chk" /></td>
+	                <td align="left"><label>未确认过的被退回彩信结果</label></td>
+	            </tr>
+				-->
+	        </tbody>
+	       
+	    </table>
+	    <p class="halign"><input type="button" value="保 存" class="btn1" onclick="sub()" /></p>
+		<input type="hidden" id="isCallRemind" name="remindConfig.isCallRemind" value="$!remindConfig.isCallRemind"/>
+		<input type="hidden" id="isMessageRemind" name="remindConfig.isMessageRemind" value="$!remindConfig.isMessageRemind"/>
+		<input type="hidden" id="isSmsRemind" name="remindConfig.isSmsRemind" value="$!remindConfig.isSmsRemind"/>
+		<input type="hidden" id="isSendSms" name="remindConfig.isSendSms" value="$!remindConfig.isSendSms"/>
+		<input type="hidden" id="isSendMms" name="remindConfig.isSendMms" value="$!remindConfig.isSendMms"/>
+		<input type="hidden" id="isVisitRemind" name="remindConfig.isVisitRemind" value="$!remindConfig.isVisitRemind"/>
+		<input type="hidden" id="isVerifySms" name="remindConfig.isVerifySms" value="$!remindConfig.isVerifySms"/>
+		<input type="hidden" id="isSendBackSms" name="remindConfig.isSendBackSms" value="$!remindConfig.isSendBackSms"/>
+		<input type="hidden" id="isVerifyMms" name="remindConfig.isVerifyMms" value="$!remindConfig.isVerifyMms"/>
+		<input type="hidden" id="isSendBackMms" name="remindConfig.isSendBackMms" value="$!remindConfig.isSendBackMms"/>
+		
+		<input type="hidden" id="isOverDueTask" name="remindConfig.isOverDueTask" value="0"/>
+		<input type="hidden" id="isAssignTask" name="remindConfig.isAssignTask" value="0"/>
+		
+    </form>
+</body>
+</html>
+

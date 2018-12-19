@@ -1,0 +1,418 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>营销任务</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+		.b-bomb-box1 { z-index: 1000; }
+		.b-bomb-box1 .l { width: 150px; overflow: auto;}
+	</style>
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.calculator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.tabletree-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript">
+		var mType='$!marketType';
+		var index=0;
+		if(mType!=""&&mType==0){index=1}
+    	jQuery(function(){
+			tab.title(tab.self,'编辑营销任务-'+'$!tskTask.taskTitle');
+			jQuery("#easy-tabs").easytabs({index: index,onclick: tabOnclick});
+			jQuery('select').select();
+			
+			jQuery('#schtxt').afilter({
+				url: '/tskTask/initProductJsonMsg.html',
+				click: selectProduct,
+				change:ChangeLimit
+			});
+			
+			jQuery('.formError').bind('click', function(e){
+				$(this).hide();
+				e.stopPropagation();
+			});
+			$('#phoneTaskCard').html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待…</div></div>');
+			//加载制定电话任务
+			jQuery("#phoneTaskCard").load('/tskTask/phontTasks.html?taskId=$!tskTask.taskId&random='+Math.random());
+			
+			jQuery("#clean").click(function(){
+				changeBelongTo("brAll");
+    			var length = document.f.length;
+        		for(i=0;i<length;i++){
+        			var type = document.f.elements[i].type;
+        			if(type!="button"&&type!="hidden"){
+        				document.f.elements[i].value = "";
+        			}
+        		}
+    		});
+    		jQuery("#search").click(function(){gotoPage(1);});
+			$('#userList').subtree({
+				tid: 'subtree',
+    			showIcon: true,
+    			url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+    			buttons: [
+    				{ text: '确定', callback: onCheckUser },
+    				{ text: '取消' }
+    			]
+    		});
+			
+			$("#BelongToType").change(function(){
+				changeBelongTo($(this).val());
+    		});
+		});
+		function tabOnclick(h, b){
+			var id = b.attr('id');
+			if(id=="assignTask"){
+				if($("#assignTask").html()==""){
+    				$('#assignTask').html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待…</div></div>');
+    				b.load('/tskTask/assignTaskMarket.html?taskId=$!tskTask.taskId&marketType=$!marketType&random='+Math.random());
+    			}
+			}
+		}
+		//点击User
+    	function onCheckUser(treeId){
+    		var postJson = {};
+    		postJson = getCheckJson(treeId, 'U');
+    		$('#userIds').val(postJson.ids);
+    		$('#userText').val(postJson.names);
+			$("#userText").focus().blur();
+    	}
+		function getCheckJson(treeId, flag){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+    		var nodes = treeObj.getCheckedNodes(true);
+    		var len = nodes.length;
+    		var uIds = "";
+    		var uName = "";
+    		for(var i=0; i<len; i++){
+    			if(flag=='U'){
+    				if(nodes[i].flag==flag){
+    					if(uIds==""){
+    						uIds = nodes[i].id;
+    						uName = nodes[i].name;
+    					}else{
+    						uIds = uIds + "," + nodes[i].id;
+    						uName = uName+ "," +nodes[i].name;
+    					}
+    				}
+    			}else{
+    				if(uIds==""){
+    					uIds = nodes[i].id;
+    					uName = nodes[i].name;
+    				}else{
+    					uIds = uIds + "," + nodes[i].id;
+    					uName = uName+ "," +nodes[i].name;
+    				}	
+    			}
+    		}
+    		var postJson = {};
+    		postJson['ids'] = uIds;
+    		postJson['names'] = uName;
+    		return postJson;
+    	}
+		
+		function changeBelongTo(val){
+        	switch(val){
+				case "brAll":
+					$("#my, #userList").hide();
+					break;
+        		case "brMine":
+        			$("#my").show();
+        			$("#userList").hide();
+        			break;
+        		case "brUser":
+        			$("#userList").show();
+        			$("#my").hide();
+        			break;
+        		default: break;
+        	}
+        }
+		function selectProduct(node){
+			$("#productId").val(node.productId);
+			$("#productName").val(node.text);
+			$("#mit").show();
+			$("#limit").text(node.raiseUpperLimit);
+			$("#limit2").text(node.moneyUnitName);
+			$("#unit").text(node.moneyUnitName);
+		}
+		
+		function blurPor(pName){
+			if(pName.length==0){
+				$("#productId").val("");
+				$("#mit").hide();
+				$("#limit").text("");
+				$("#limit2").text("");
+				$("#unit").text("");
+			}
+		}
+		function trim(str){return str.replace(/(^\s*)|(\s*$)/g, "");}
+		function ChangeLimit(attr){
+			if(attr.length>0){
+				var pname=$('#productName').val();
+				if(trim(pname)==attr[0].text){
+					$("#productId").val(attr[0].productId);
+    				$("#mit").show();
+    				$("#limit").text(attr[0].raiseUpperLimit);
+					$("#limit2").text(attr[0].moneyUnitName);
+					$("#unit").text(attr[0].moneyUnitName);
+				}else{
+					$("#productId").val("");
+    				$("#mit").hide();
+    				$("#limit").text("");
+					$("#limit2").text("");
+					$("#unit").text("");
+				}
+			}else{
+				$("#productId").val("");
+				$("#mit").hide();
+				$("#limit").text("");
+				$("#limit2").text("");
+				$("#unit").text("");
+			}
+		}
+		
+		function toRefreshPhoneTask(){
+			$("#phoneTaskCard").load('/tskTask/phontTasks.html?taskId=$!tskTask.taskId&random='+Math.random());
+		}
+ 
+		//刷新
+		function refreshGrid(gridId,html){$("#"+gridId).html(html);}
+		//分页跳转
+		function gotoPage(page)
+		{
+			var taskId=$("#tskTaskId").val();
+			var bt=$("#BelongToType").val();
+			var uIds="";
+			if(bt=="brMine"){
+				uIds=$("#myUserId").val();
+			}else if(bt=="brUser"){
+				var text=$("#userText").val();
+				if(text.length>0){
+					uIds=$("#userIds").val();
+				}
+			}
+			goto(page,"/tskTask/phontTasks.html?random="+Math.random(),{
+				"taskId":taskId,
+				'customerMsg':$("#customer").val(),
+				'managerId':uIds,
+				'commProssId':$("#commPorss").val(),
+				"page.currentPage":page
+			},function(html){refreshGrid('phoneTaskCard',html);});
+		}
+    </script>
+</head>
+
+<body>
+    <div id="easy-tabs" class="easy-tabs">
+        <ul class="easy-tabs-header">
+            <li><label>任务基本信息</label></li>
+			#if($!roleType==0)
+            <li><label>分配任务</label></li>
+			#end
+            <li><label>制定电话任务</label></li>
+        </ul>
+        <div class="easy-tabs-pages">
+			<div class="easy-tabs-page" validate="false">
+            <form id="taskForm" name="taskForm" method="post" action="updateTaskMarket.html">
+                	<table class="viewtbl" width="100%" border="0" cellpadding="2" cellspacing="2">
+                        <tbody>
+                            <tr>
+                                <td width="100" align="right"><span class="red">*</span>任务标题：</td>
+                                <td colspan="3">
+    								<input type="hidden" name="tskTask.taskId" id="tskTaskId" value="$!tskTask.taskId"/>
+									<input type="hidden" id="pId" value="$!tskTask.productId"/>
+									#if(!$!marketType.equals("0"))
+										<input type="hidden" value="toUp" name="jumpType" id="jType"/>
+									#else
+									<input type="hidden" value="toAdd" name="jumpType" id="jType"/>
+									#end
+									<label title="$!tskTask.taskTitle">$!tskTask.taskTitle</label>
+                                    <input type="hidden" value="$!tskTask.taskTitle" style="width: 440px;" name="tskTask.taskTitle" class="validate[required,maxSize[200]] txt" data-prompt-position="topLeft" maxlength="200"/>
+                                </td>
+                            </tr>
+							<tr>
+                                <td width="100" align="right"><span class="red">*</span>产品名称：</td>
+                                <td colspan="2">
+									$!tskTask.productName
+									<input type="hidden" name="tskTask.productId" id="productId" value="$!tskTask.productId"/>
+                                </td>
+                            </tr>
+							<tr id="mit">
+                                <td width="100" align="right">募集上限：</td>
+                                <td colspan="3">
+    								 <label id="limit">
+										$moneyUtil.decimeMoney($typeUtil.changeType($!tskTask.raiseUpperLimit))
+                                    </label>
+									<label id="limit2">$!tskTask.moneyUnitName</label>
+                                </td>
+                            </tr>
+							<tr>
+                                <td width="100" align="right"><span class="red">*</span>任务目标：</td>
+                                <td colspan="3">
+									  <label>$moneyUtil.decimeMoney($typeUtil.changeType($!tskTask.targetMoney)) $!tskTask.moneyUnitName</label>
+                                      <input type="hidden" value="$!tskTask.targetMoney" style="width: 440px;" class="validate[required] txt" name="tskTask.targetMoney" id="targetMoney"/>
+									  #if(!$!marketType.equals("0"))
+									  <label style="margin-left: 20px;">
+											已完成销售<label id="finishCount">$moneyUtil.decimeMoney($typeUtil.changeType($!tskTask.finishCount))</label>$!tskTask.moneyUnitName(完成进度 $!tskTask.finishRate%)
+                                      </label>
+									  #end
+									  <input type="hidden" id="totalMoney" value="$!totalMoney"/>
+								</td>
+                            </tr>
+							<tr>
+                                <td align="right"><span class="red">*</span>开始日期：</td>
+                                <td colspan="3">
+									<table class="celltbl">
+										<tr>
+											<td>
+												$date.format("yyyy-MM-dd",$!tskTask.startDate)
+												<input type="hidden" value="$date.format("yyyy-MM-dd",$!tskTask.startDate)" name="tskTask.startDate" id="datepicker1"/>
+											</td>
+											<td width="100"><span class="red">*</span>结束日期：</td>
+											<td>
+												$date.format("yyyy-MM-dd",$!tskTask.endDate)
+												<input type="hidden" value="$date.format("yyyy-MM-dd",$!tskTask.endDate)" name="tskTask.endDate" id="datepicker2" />
+											</td>
+										</tr>
+									</table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">任务备注：</td>
+                                <td colspan="3">
+									<label title="$!subString.replaceRemark($!tskTask.remark)">$!tskTask.remark</label>
+									<input type="hidden" name="tskTask.remark" value="$!tskTask.remark"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">分配者：</td>
+                                <td colspan="3">
+                                    <label>
+                                        $!tskTask.assignName
+    								</label>
+                                </td>
+                            </tr>
+							#if(!$!marketType.equals("0"))
+							<tr>
+                                <td align="right">任务状态：</td>
+                                <td colspan="3">
+									#if($!roleType==0)
+                                        #if($!tskTask.taskStatus==2)
+    										已中止
+    									#else
+    										<input type="checkbox" #if($!tskTask.taskStatus==1) checked="checked" title="已完成" #end disabled=true/>
+										#end
+                                        <label style="margin-left: 20px;">
+											其中分配给我的任务完成情况：
+											目标营销额
+										    $moneyUtil.decimeMoney($typeUtil.changeType($!tskTask.userFinishCount))
+											$!tskTask.moneyUnitName，已完成销售
+											$moneyUtil.decimeMoney($typeUtil.changeType($!finishMoney))
+											$!tskTask.moneyUnitName（完成进度 $!tskTask.userFinishRate%）
+                                        </label>
+									#else
+										分配给我的任务完成情况<input type="checkbox" disabled="disabled" onclick="changeStatus($!tskTask.taskId)" id="authTskStatus" #if($!parentTaskStatus==1) checked="checked" title="已完成" #end/>
+									#end
+                                </td>
+                            </tr>
+							#end
+                        </tbody>
+                    </table>
+    				<div>
+                		<table class="ediTable" width="100%" border="0" cellpadding="2" cellspacing="2">
+                			<tbody>
+        						<tr>
+                                    <td align="center" colspan="2">
+										<!--
+                                        <input type="button" value="保 存" onclick="upTask()" class="btn1" />-->
+                                        <input type="button" value="取 消" onclick="javascript:tab.close(GetId(), true);" class="btn1" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+				</form>
+            </div>
+			#if($!roleType==0)
+            <div class="easy-tabs-page" id="assignTask">
+            </div>
+			#end
+			<!-- 指定电话任务 -->
+            <div class="easy-tabs-page">
+            	<form id="f" name="f">
+                    <table class="htmltbl" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td width="80px;" class="field">
+                    				<input type="hidden" id="tskTaskId" value="$!tskTask.taskId"/>
+                                    <label>客户：</label>
+                                </td>
+                                <td width="200px;">
+                                    <div class="dtxt1">
+                                        <input type="text" class="dtxt1-txt" id="customer"/>
+                                    </div>
+                                </td>
+                                <td width="100px;" class="field">
+                                    <label>沟通进度：</label>
+                                </td>
+                                <td width="150px;">
+                    				<select id="commPorss">
+                    					<option value=""></option>
+                    					#foreach($progress in $!commProgressList)
+                    						<option value="$!progress.commProgressId">$!progress.commProgressName</option>
+                    					#end
+                    				</select>
+                                </td>
+								#if($!roleType==0)
+                                <td width="100px;" class="field">
+                                    <label>归属人员：</label>
+                                </td>
+                                <td>
+									<select id="BelongToType" name="BelongToType" render="select" style="width: 120px;">
+                                        <option value="brAll" selected=true></option>
+										<option value="brMine">我的</option>
+                                        <option value="brUser">下属的</option>
+                                    </select>
+                    				<span id="my" class="btn2 fl" style="display: none; margin-left: 5px;">
+                    	                   <label class="btn2-txt" id="showText">$!userLoginName</label>
+                    					   <input type="hidden" id="myUserId" value="$!userLoginUserId"/>
+                    	            </span>
+                    	            <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;margin-left: 5px;">
+                    	                   <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+                    	                   <input id="userIds" name="userIds" type="hidden" />
+                    	                   <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                    	            </div>
+                                </td>
+								#else
+									<td width="100px;" class="field"></td>
+									<td></td>
+								#end
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+                <div class="sz">
+                    <input type="button" class="btn1" id="clean" value="清空" />
+                    <input type="button" class="btn1" id="search" value="搜索" />
+                </div>
+                <div class="actrow">
+                    <span class="btn2 fl" onclick="toInitCustomer($!tskTask.taskId)">
+                       <label>添加客户</label>
+                    </span>
+                </div>
+				<div id="phoneTaskCard"><div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看任务</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/template.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script>
+		jQuery(document).ready(function(){
+			$("#tabs").easytabs();
+    	});
+		
+		function isUndefined(data){
+			var exp ="";   
+            if (typeof data != "undefined"){   
+				exp=data;
+            }
+			return exp;
+		}
+		function showFinish(customerId,flag,index){
+			var finish="";
+			if(flag==1){
+				finish="checked=true";
+			}
+			return "<input "+finish+" disabled=true type=checkbox value="+customerId+" id=isFinsh"+index+" />";
+		}
+		function initCustomer(){
+			var url="addCustomerMsg.html?"+Math.random();
+			jQuery.getJSON(url,{'isUsed':$("#isUsed").val(),'task.taskId':$('#taskId').val()},function(data){
+				jQuery.each(data,function(index, value){
+					$("#cusTab").find("tbody").append("<tr><td>"+isUndefined(value.customerName)+"("+isUndefined(value.mobilePhone)+")</td><td>"+isUndefined(value.customerTypeName)+"</td><td>"+isUndefined(value.deptName)+"</td><td>"+isUndefined(value.userName)+"</td><td>"+showFinish(value.customerId,value.isFinish,index)+" </td><td class='td-last'><a href='#' onclick=customerDetail("+value.customerId+")>查看客户</a></td></tr>");
+				})
+			});
+		}
+		//查看客户
+		function customerDetail(customerId){
+			var options = {id: "task_Customer_detail", pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+customerId, lock: false};
+			tab.add(options);
+		}
+		
+		function goBack(){
+			document.location.href="/task/showTaskPage.html?taskFlag=${taskFlag}";
+		}
+	</script>
+</head>
+
+<body>
+	<div id="tabs" class="easy-tabs">
+    	<ul class="easy-tabs-header">
+        	<li><label>任务基本信息</label></li>
+        	<li><label>联系客户列表</label></li>
+        </ul>
+        <div class="easy-tabs-pages">
+			<form id="taskForm" name="taskForm" method="post" action="">
+        	<div class="easy-tabs-page">
+            	<table class="ediTable" width="100%" border="0" cellpadding="2" cellspacing="2">
+                    <tbody>
+                        <tr>
+                            <td width="70" align="right">任务标题:
+								<input type="hidden" name="task.taskId" id="taskId" value="$!task.taskId"/>
+								<input type="hidden" id="isUsed" value="$!isUsed"/></td>
+                            <td colspan="3">
+								<label title="$!task.taskTitle">$!task.taskTitle</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="70" align="right">执行日期:</td>
+                            <td width="190">$date.format("yyyy-MM-dd",$!task.executeDate)</td>
+                            <td width="70" align="right">执行者:</td>
+                            <td>$!task.executeName</td>
+                        </tr>
+                        <tr>
+                            <td width="70" align="right">任务备注:</td>
+                            <td colspan="3">
+								<label title="$!subString.replaceRemark($!task.remark)">$!task.remark</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="70" align="right">分配者:</td>
+                            <td colspan="3">
+                                $!task.assignName
+                            </td>
+                        </tr>
+                        <tr  id="finshState">
+                            <td width="70" align="right">完成情况:</td>
+                            <td colspan="3">
+                                <input type="checkbox" name="task.isFinish" #if($!task.isFinish==1) checked=true #end value="$!task.isFinish" class="chk" disabled=true/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="easy-tabs-page">
+                <table id="cusTab" class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="220">客户姓名（电话）</th>
+                            <th width="110">客户类型</th>
+                            <th>归属机构</th>
+                            <th width="90">归属人员</th>
+                            <th width="90">联系情况</th>
+            				<th width="150" class="th-last">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+		<div>
+        		<table class="ediTable" width="100%" border="0" cellpadding="2" cellspacing="2">
+        			<tbody>
+						<tr>
+                            <td align="center" colspan="4">
+                                <input type="button" value="关闭" onclick="javascript:tab.close(GetId(), false);" class="btn1" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+		</form>
+    </div>
+	<script>
+		if($('#isUsed').val()!=""){
+			initCustomer();
+		}
+    </script>
+</body>
+</html>

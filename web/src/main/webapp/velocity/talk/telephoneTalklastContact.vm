@@ -1,0 +1,127 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>上次联系信息</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<style type="text/css">
+		div.infor { margin-bottom: 10px; }
+		div.center { text-align: center; }
+		div.confirm { margin: 10px 0px; text-indent: 5px; }
+		.indent { text-indent: 5px; }
+		.size { font-size: 14px; }
+		table.viewtbl tr td { border: 1px solid #fff; padding: 5px; line-height: 24px; vertical-align: top; word-break:normal;}
+    </style>
+	<script>
+		function btnOk(){
+			window.returnValue="ok";
+			window.close();
+		}
+	</script>
+</head>
+
+<body style="font-family: Microsoft Yahei;">
+	<div class="infor indent">
+		<label>人员：</label>
+		<label class="bold size">$!recordDetail.userName</label>
+		<label>，上次与客户</label>
+	</div>
+	
+	<div class="infor center">
+		#if($!recordDetail.customerId!='' && $!recordDetail.customerId>0)
+			<label class="bold size">$!recordDetail.customerName</label>
+			#if($recordDetail.customerTitle!="")
+				<label>（$!recordDetail.customerTitle）</label>
+			#end
+		#else
+			<label class="bold size">$!recordDetail.remotePhone</label>
+		#end
+	</div>
+	
+	<table class="viewtbl" cellpadding="0" cellspacing="0">
+		<tbody>
+			<tr>
+				<td class="field" style="width:60px;">
+					<label>联系方式：</label>
+				</td>
+				<td style="width:70px;">
+					<label>$!recordDetail.callTypeName</label>
+				</td>
+				<td class="field" style="width:60px;">
+					<label>联系时间：</label>
+				</td>
+				<td style="width:150px;">
+					<label>$!date.format('yyyy-MM-dd HH:mm:ss',$!recordDetail.startDate)</label>
+				</td>
+				<td class="field" style="width:60px;">
+					<label>通话时长：</label>
+				</td>
+				<td>
+					<label>$!recordDetail.callTime</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="field" width="60">
+					<label>业务类型：</label>
+				</td>
+				<td colspan="5">
+					<label>$!recordDetail.bizType</label>
+				</td>
+			</tr>
+			#if($hasPerssion==1)
+			<tr>
+				<td class="field" width="60" valign="top">
+					<label>联系备注：</label>
+				</td>
+				<td colspan="5">
+					<div class="dtxtarea1">
+						<textarea class="textarea" disabled="false" >$!recordDetail.remark</textarea>
+					</div>
+				</td>
+			</tr>
+			#else
+			<tr>
+				<td colspan="6">
+    				<div class="warning center">
+    					<label class="orange">您无此客户的权限</label>
+    				</div>
+				</td>
+			</tr>
+			#end
+			<!--
+			#if($tskTask)
+			<tr>
+				<td class="field" width="60">
+					<label>下次联系：</label>
+				</td>
+				<td colspan="5">
+					<label>（与"$!recordDetail.customerName"客户拜访确认下次联系</label>
+					<label class="liblue">
+					[
+						#if($!tskTask.taskStatus==0) 未完成 
+						#elseif($!tskTask.taskStatus==1) 已完成
+						#else 已中止
+						#end 
+					]</label>
+					<label>$!date.format('yyyy-MM-dd',$!tskTask.startDate)）</label>
+				</td>
+			</tr>
+			#end
+			-->
+		</tbody>
+	</table>
+	
+	<div class="confirm">
+		<label>您确认需要拨打吗？</label>
+	</div>
+	
+	<hr />
+	
+	<div class="center">
+		<input type="button" class="btn6 btn6bg1" value="确定" onclick="javascript:btnOk()"/>
+		<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close()"/>
+	</div>
+</body>
+</html>

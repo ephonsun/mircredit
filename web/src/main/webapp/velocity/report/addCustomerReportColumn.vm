@@ -1,0 +1,48 @@
+<script type="text/javascript">
+ var chart;
+$(document).ready(function() {
+    chart = new Highcharts.Chart({
+        chart: {
+            renderTo: 'container',
+            type: 'column'
+        },
+        title: {
+            text: '新增客户柱状图'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: $!categories
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: ''
+            }
+        },
+        legend: {
+            backgroundColor: '#fff',
+			borderColor: '#fff'
+        },
+        tooltip: {
+            formatter: function() {
+                return ''+
+                    this.x +': '+ this.y +' mm';
+            }
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: $!jsonSeries
+    });
+});
+</script>
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+<p class="recenter-footnote" style="text-align: right;">
+	制表人：$!userName &nbsp; &nbsp; 制表时间：$!reportTime
+</p>
+<input type="hidden" id="idType" value="$!condition.belongTo" />

@@ -1,0 +1,37 @@
+<h3 class="recenter-ttl" style="text-align: center;">
+	        	新增客户统计表
+</h3>
+<div style="width: 100%; overflow-x: auto; padding-bottom:16px;">
+<table class="recenter-tbl">
+	<thead>
+    	<tr>
+    		#foreach($col in $table.getColumns())
+	        	<th><label title="$!table.getRow(0).get($col.name)">$!table.getRow(0).get($col.name)</label></th>
+        	#end
+        </tr>
+    </thead>
+    <tbody>
+    	#foreach($row in $table.getRows())
+    		#if($row.index>0)
+            	<tr>
+                	#foreach($col in $table.getColumns())
+                		#if($col.name!="name"&&$col.name!="deptName")
+                			#if($!row.get($col.name).get(0)!=''&&$!row.get($col.name).get(0)!='0')
+                			<td><a class="slink" href="javascript:void(0)" onclick="showDetail('$!row.get($col.name).get(1)','$!row.get($col.name).get(2)','$!row.get($col.name).get(3)','$!row.get($col.name).get(4)','$!row.get($col.name).get(5)')" >$!row.get($col.name).get(0)</a></td>
+                			#else
+                				<td><span>0</span></td>
+                			#end
+                		#else
+                			<td><span>$row.get($col.name)</span></td>
+                		#end
+                	#end
+                </tr>
+            #end
+        #end
+    </tbody>
+</table>
+</div>
+<p class="recenter-footnote" style="text-align: right;">
+	制表人：$!userName &nbsp; &nbsp; 制表时间：$!reportTime
+</p>
+<input type="hidden" id="idType" value="$!condition.belongTo" />

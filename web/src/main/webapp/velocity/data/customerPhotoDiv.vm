@@ -1,0 +1,367 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户照片资料</title>  
+	 #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style type="text/css">
+    	body{padding:0; margin:0;}
+    </style>
+	
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/photoView/taskprocess_image.js"></script>
+	<script type="text/javascript" src="${ctx}/js/photoView/jquery.rotate.1.1.js"></script>
+
+	<script type="text/javascript">
+		var postJson = {};//存放查询数据
+		var pid;
+		var win;
+		$(function(){
+        	pid = $("#pid").val();
+        	win = window.top.ExportIframeWin(pid);
+			if(win && win.getQueryJson){
+        		postJson = win.getQueryJson();
+				$('#numRow').val(postJson['numRow']);
+			}
+			$('.photo-close').click(function(){
+				window.top.aui.close();
+			});
+			
+            $('.ui-artZoom-left').click(function(){
+                rotateLeftClick();
+            });
+
+            $('.ui-artZoom-right').click(function(){
+                rotateRightClick();
+            });
+
+            $('.ui-artZoom-zoomout').click(function(){
+                zoomoutClick();
+            });
+
+            $('.ui-artZoom-zoomin').click(function(){
+                zoominClick();
+            });
+
+            $('.ui-artZoom-source').click(function(){
+                realSizeClick();
+            });
+
+            defaultZoom();
+        });
+		
+		function lxfLast(){
+			if($('#numRow').val()-1 == 0){//最前一张
+				return;
+			}
+			postJson['numRow'] = (parseInt($('#numRow').val())-parseInt(1));
+			$('#numRow').val((parseInt($('#numRow').val())-parseInt(1)));//设置点击向左后的当前列数
+			if($('#oldRemark').val() == $('#remark').text()){
+				jQuery.post("changePhoto.html", postJson, function(data){
+					var json=jQuery.parseJSON(data);
+					$('#photoId').val(json['photoId']);
+					$('#oldRemark').val(json['remark']);
+					$('#remark').val(json['remark']);
+					
+                    // ---> 每次点击前一张后一张，还原图片原始设置，防止前一张旋转后，后一张也跟着保持旋转
+                    $("#imageDiv").empty();
+                    var html ="<img name='img' id='img' src='"+ "../Records/"+json['photoPath'] +"' width='640px' height='480px'/>";
+                    $("#imageDiv").html(html);
+                    angleValue = 0; //for rotate
+                    scale = 0.5;  //for zoom
+                    defaultZoom();
+                    // <----
+
+					$('#photoName').text(json['photoName']);
+					$('#uploadUserName').text(json['uploadUserName']);
+					$('#uploadDate').text(json['uploadDateStr']);
+					if(json['recordDateStr'] != ''){
+						$('#recordDate').text(json['recordDateStr']);
+						$('#rdtr').show();
+					}else{
+						$('#rdtr').hide();
+					}
+				});
+			}else{
+				if(confirm("放弃修改？")){
+    				jQuery.post("changePhoto.html", postJson, function(data){
+    					var json=jQuery.parseJSON(data);
+    					$('#photoId').val(json['photoId']);
+    					$('#oldRemark').val(json['remark']);
+						$('#remark').val(json['remark']);
+    					
+                        // ---> 每次点击前一张后一张，还原图片原始设置，防止前一张旋转后，后一张也跟着保持旋转
+                        $("#imageDiv").empty();
+                        var html ="<img name='img' id='img' src='"+ "../Records/"+json['photoPath'] +"' width='640px' height='480px'/>";
+                        $("#imageDiv").html(html);
+                        angleValue = 0; //for rotate
+                        scale = 0.5;  //for zoom
+                        defaultZoom();
+                        // <----
+
+						$('#photoName').text(json['photoName']);
+						$('#uploadUserName').text(json['uploadUserName']);
+						$('#uploadDate').text(json['uploadDateStr']);
+						if(json['recordDateStr'] != ''){
+    						$('#recordDate').text(json['recordDateStr']);
+    						$('#rdtr').show();
+    					}else{
+    						$('#rdtr').hide();
+    					}
+    				});
+    			}
+			}
+		}
+		function lxfNext2(){
+		alert($('#photoCount').val());
+			if($('#numRow').val() == $('#photoCount').val()){//最后一张
+				return;
+			}
+			postJson['numRow'] = (parseInt($('#numRow').val())+parseInt(1));
+			$('#numRow').val(parseInt($('#numRow').val())+parseInt(1));//设置点击向右后的当前列数
+			if($('#oldRemark').val() == $('#remark').text()){
+				jQuery.post("changePhoto.html", postJson, function(data){
+					var json=jQuery.parseJSON(data);
+					$('#photoId').val(json['photoId']);
+					$('#oldRemark').val(json['remark']);
+					$('#remark').val(json['remark']);
+					
+                    // ---> 每次点击前一张后一张，还原图片原始设置，防止前一张旋转后，后一张也跟着保持旋转
+                    $("#imageDiv").empty();
+                    var html ="<img name='img' id='img' src='"+ "../Records/"+json['photoPath'] +"' width='640px' height='480px'/>";
+                    $("#imageDiv").html(html);
+                    angleValue = 0; //for rotate
+                    scale = 0.5;  //for zoom
+                    defaultZoom();
+                    // <---
+
+					$('#photoName').text(json['photoName']);
+					$('#uploadUserName').text(json['uploadUserName']);
+					$('#uploadDate').text(json['uploadDateStr']);
+					if(json['recordDateStr'] != ''){
+						$('#recordDate').text(json['recordDateStr']);
+						$('#rdtr').show();
+					}else{
+						$('#rdtr').hide();
+					}
+				});
+			}else{
+				if(confirm("放弃修改？")){
+    				jQuery.post("changePhoto.html", postJson, function(data){
+    					var json=jQuery.parseJSON(data);
+    					$('#photoId').val(json['photoId']);
+    					$('#oldRemark').val(json['remark']);
+						$('#remark').val(json['remark']);
+    					
+                        // ---> 每次点击前一张后一张，还原图片原始设置，防止前一张旋转后，后一张也跟着保持旋转
+                        $("#imageDiv").empty();
+                        var html ="<img name='img' id='img' src='"+ "../Records/"+json['photoPath'] +"' width='640px' height='480px'/>";
+                        $("#imageDiv").html(html);
+                        angleValue = 0; //for rotate
+                        scale = 0.5;  //for zoom
+                        defaultZoom();
+                        // <----
+
+						$('#photoName').text(json['photoName']);
+						$('#uploadUserName').text(json['uploadUserName']);
+						$('#uploadDate').text(json['uploadDateStr']);
+						if(json['recordDateStr'] != ''){
+    						$('#recordDate').text(json['recordDateStr']);
+    						$('#rdtr').show();
+    					}else{
+    						$('#rdtr').hide();
+    					}
+    				});
+    			}
+			}
+		} 
+		function lxfNext(){
+			if($('#numRow').val() == $('#photoCount').val()){//最后一张
+				return;
+			}
+			postJson['numRow'] = (parseInt($('#numRow').val())+parseInt(1));
+			$('#numRow').val(parseInt($('#numRow').val())+parseInt(1));//设置点击向右后的当前列数
+			if($('#oldRemark').val() == $('#remark').text()){
+				jQuery.post("changePhoto.html", postJson, function(data){
+					var json=jQuery.parseJSON(data);
+					$('#photoId').val(json['photoId']);
+					$('#oldRemark').val(json['remark']);
+					$('#remark').val(json['remark']);
+					
+                    // ---> 每次点击前一张后一张，还原图片原始设置，防止前一张旋转后，后一张也跟着保持旋转
+                    $("#imageDiv").empty();
+                    var html ="<img name='img' id='img' src='"+ "../Records/"+json['photoPath'] +"' width='640px' height='480px'/>";
+                    $("#imageDiv").html(html);
+                    angleValue = 0; //for rotate
+                    scale = 0.5;  //for zoom
+                    defaultZoom();
+                    // <---
+
+					$('#photoName').text(json['photoName']);
+					$('#uploadUserName').text(json['uploadUserName']);
+					$('#uploadDate').text(json['uploadDateStr']);
+					if(json['recordDateStr'] != ''){
+						$('#recordDate').text(json['recordDateStr']);
+						$('#rdtr').show();
+					}else{
+						$('#rdtr').hide();
+					}
+				});
+			}else{
+				if(confirm("放弃修改？")){
+    				jQuery.post("changePhoto.html", postJson, function(data){
+    					var json=jQuery.parseJSON(data);
+    					$('#photoId').val(json['photoId']);
+    					$('#oldRemark').val(json['remark']);
+						$('#remark').val(json['remark']);
+    					
+                        // ---> 每次点击前一张后一张，还原图片原始设置，防止前一张旋转后，后一张也跟着保持旋转
+                        $("#imageDiv").empty();
+                        var html ="<img name='img' id='img' src='"+ "../Records/"+json['photoPath'] +"' width='640px' height='480px'/>";
+                        $("#imageDiv").html(html);
+                        angleValue = 0; //for rotate
+                        scale = 0.5;  //for zoom
+                        defaultZoom();
+                        // <----
+
+						$('#photoName').text(json['photoName']);
+						$('#uploadUserName').text(json['uploadUserName']);
+						$('#uploadDate').text(json['uploadDateStr']);
+						if(json['recordDateStr'] != ''){
+    						$('#recordDate').text(json['recordDateStr']);
+    						$('#rdtr').show();
+    					}else{
+    						$('#rdtr').hide();
+    					}
+    				});
+    			}
+			}
+		} 	
+		function closePhotoDiv(){//关闭、取消时调用
+			if($('#oldRemark').val() == $('#remark').text()){
+				if(win && win.refresh)	win.refresh();//回调查看页面的刷新方法
+    			window.top.aui.close();
+			}else{
+				if(confirm("放弃修改？")){
+					if(win && win.refresh)	win.refresh();//回调查看页面的刷新方法
+    				window.top.aui.close();
+				}
+			}
+		}
+		
+		function savePhotoDiv(){//保存图片备注
+    			var postJson = {};
+            	postJson['id']=$('#photoId').val();
+				postJson['remark'] = $("#remark").val();
+				 jQuery.ajax({
+                    type: 'POST',
+                    url: "savePhotoRemark.html",
+                    data: postJson,
+                    success:function(html){
+					if(win && win.refresh)	win.refresh();//回调查看页面的刷新方法
+					 	banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+						window.location.reload();
+                    }
+                });
+				window.top.aui.close();
+		}
+
+        var angleValue = 0; //for rotate
+        var scale = 0.5;  //for zoom	
+    </script>
+</head>
+<body>
+	<input type="hidden" id="numRow" value="$!photo.numRow"/>
+	<input type="hidden" id="photoId" value="$!photo.photoId"/>
+	<input type="hidden" id="oldRemark" value="$!photo.remark"/>
+	<input type="hidden" id="pid" value="$!pid"/>
+	<input type="hidden" id="photoCount" value="$!photoCount"/>
+	
+	<div id="popDiv" class="photo-mydiv">
+      <p class="photo-ttl-width">$!customerName&nbsp;-&nbsp;照片<a href="#2" onClick="closePhotoDiv();" class="close">close</a></p>
+	  <div class="photo-mydiv-box">
+		#if($!photoCount!=1)
+          <div class="photo-img-btn"><a href="#2" class="prev" onClick="lxfLast()" hidefocus="false">Previous</a></div>
+          #end
+		   <div class="img-position">
+               <div id="imageDiv" style="width:640px;height:480px; overflow:auto; border:0px solid #DCDCDC; z-index:1">
+                   <img name="img" id="img" src="../Records/$!photoPath" width="640px" height="480px"/>
+               </div>
+               <div style="padding-top: 0px;padding-bottom: 0px;text-align: center">
+                   <span>
+                        <a href="#" class="ui-artZoom-source"><img src="../images/public/real_size.png" /></a>
+                        <a href="#" class="ui-artZoom-zoomin"><img src="../images/public/zoomin.png" /></a>
+                        <a href="#" class="ui-artZoom-zoomout"><img src="../images/public/zoomout.png" /></a>
+                        <a href="#" class="ui-artZoom-left"><img src="../images/public/rotate_left.png" /> </a>
+                        <a href="#" class="ui-artZoom-right"><img src="../images/public/rotate_right.png" /></a>
+                   </span>
+               </div>
+           </div>
+		   #if($!photoCount!=1)
+          <div  class="photo-img-btn"><a href="#2" class="next" onClick="lxfNext2()" hidefocus="false">Next</a></div>
+		  #end
+      </div>
+	  
+      <div class="photo-mydiv-info">
+          <table class="viewtbl">
+            <thead>
+              <tr>
+                <th colspan="2" style="text-align: left;border-bottom:1px solid #ccc; height:48px;">
+                	<label class="photo-mydiv-info-title" id="photoName" title="$!photo.photoName">$!photo.photoName</label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr id="rdtr" #if(!$!photo.recordDate)style="display:none;"#end>
+                    <td colspan="2">
+						<label>创建时间：<br/></label> <label id="recordDate">#if($!photo.recordDate)$date.format("yyyy-MM-dd HH:mm:ss",$!photo.recordDate)#end</label>
+					</td>
+                </tr>
+				<tr>
+                    <td colspan="2">
+                        <label>提交时间：<br/></label> <label id="uploadDate">#if($!photo.uploadDate)$date.format("yyyy-MM-dd HH:mm:ss",$!photo.uploadDate)#end</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <label>提交人员：</label><label id="uploadUserName">$!photo.uploadUserName</label>
+                    </td>
+                </tr>
+                 <tr>
+                    <td colspan="2">
+                       <div class="ui-div-textarea" style="height:100px;">
+                          <textarea class="textarea" id="remark" style="height:100px;" onKeyUp="javascript:var val = this.value;if(val.length>250){this.value=val.substring(0,250)}">$!photo.remark</textarea>
+                       </div>
+                    </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="text-align: center;">
+                    <span class="ui-footer-btn2 ui-footer-btn2-save" style="margin-right:10px;" onClick="savePhotoDiv();">
+                      <label>保存</label>
+                    </span>                
+                    <span class="ui-footer-btn2 ui-footer-btn2-cancel" onClick="closePhotoDiv();">
+                      <label>取消</label>
+                    </span>
+                  </td>
+                </tr>
+            </tbody>
+          </table>
+      </div>
+    </div>
+</body>
+</html>
+
+
+

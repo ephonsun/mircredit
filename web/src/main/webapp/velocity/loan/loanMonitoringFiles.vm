@@ -1,0 +1,142 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>查看资料</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    <style type="text/css">
+        body{padding:0; margin:0;}
+    div.photo-mydiv { margin:0; padding:0; position: absolute; top: 0; left: 0;z-index:150; border:1px solid #ccc;width: 1284px; }
+    div.photo-mydiv p.photo-ttl-width  {background-color: #E4E4E4; border-bottom: 1px solid #b1b1b1;font-weight: bold;line-height: 40px;font-size: 14px;padding-left: 13px;}
+    div.photo-mydiv p.photo-ttl-width label.photo-ttl-width-title{width:1160px; height:40px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    div.photo-mydiv div.photo-mydiv-box{ height:540px; float:left;padding:10px 0px; }
+    div.photo-mydiv div.photo-mydiv-box div.photo-img-btn{ height:380px;width: 60px;float: left; }
+    div.photo-mydiv div.photo-mydiv-box div.photo-img-btn a.prev { width:30px; height:48px; background:url(../images/public/feature_left.gif) no-repeat center top; position:relative; top:210px; left:15px; text-indent:-9999px; display:block;}
+    div.photo-mydiv div.photo-mydiv-box div.photo-img-btn a.next { width:30px; height:48px; background: url(../images/public/feature_right.gif) no-repeat center top; position:relative; top:210px; left:15px;  text-indent:-9999px; display:block; }
+    div.photo-mydiv div.photo-mydiv-box div.photo-img-btn .prev:hover, .prev-hover { background-position: 0px -48px; }
+    div.photo-mydiv div.photo-mydiv-box div.photo-img-btn .next:hover, .next-hover { background-position: 0px -48px; }
+    div.photo-mydiv div.photo-mydiv-box div.img-position {border: 1px solid #ddd; width:960px; height:540px;float: left; font-size:0;}
+    div.photo-mydiv div.photo-mydiv-info{ border-left:1px solid #ccc; height:540px; width:180px; float:left;padding:10px; }
+    div.photo-mydiv div.photo-mydiv-info label.photo-mydiv-info-title{ line-height:1.5;white-space:normal; word-break: break-all; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+
+
+
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.photo-layer.js"></script>
+
+    <input type="hidden" id="toUnionLMUrl" value="${ctx}/data/queryFileByFileId.html" />
+
+    <script type="text/javascript">
+        function closePage(){
+            window.close();
+        }
+        function downFileImage(fileId,fileName){
+
+            var index1=fileName.lastIndexOf(".");
+            var index2=fileName.length;
+            var suffix=fileName.substring(index1+1,index2);//后缀名
+            var tp ="jpg,gif,bmp,JPG,GIF,BMP";
+            var rs=-1;
+            rs=tp.indexOf(suffix);//判断是否包含这些类型
+            if (rs>=0){
+                showPhotoDiv(fileId);
+                return;
+            }
+            else
+            {
+                jQuery.post("../data/queryFileByFileId.html", {"fileId": fileId}, function(result){
+                    if(result == "0"){
+                        banger.page.showMessageBox({"type":"error","content":"文件不存在！"});
+                        return;
+                    }else{
+                        location.href = '../loan/downloadFormAttachment.html?fileId=' + fileId;
+                    }
+                });
+            }
+        }
+
+        function showPhotoDiv(fileId){
+           /* window.top.aui.builder1({
+                url: '../loan/queryAfterImageDetail.html?fileId=' + fileId
+
+                var result = banger.page.openDialog(url, "图片详情", 600, 480);
+                //url: '../loan/changeLoanPhoto.html?photoLoanId=' + loanId + '&photoEventId=' + eventId + '&photoTypeId=' + $("#photoTypeId").val() + '&customerId=' + customerId + '&photoRowNum=' + photoRowNum+ '&pid=' + GetId()
+            });*/
+
+        var url =  "../loan/queryAfterImageDetail.html?fileId=" + fileId
+        var result = banger.page.openDialog(url, "图片详情", 1300,600);
+            if (result != undefined) {
+                if (null != document.getElementById("player")) {
+                    document.getElementById("player").Stop();
+                }
+            }
+        }
+
+
+
+
+    </script>
+</head>
+<body>
+##<div id="tape" class="tapeVideo-mydiv" style="width: 600px;left:500px;top:400px; ">
+<p class="tapeVideo-ttl-width" onmousedown="beginDrag(this.parentNode,event);">
+    #if($dataType && $!dataType == "2")
+        $!{title}&nbsp;&nbsp;录音
+    #elseif($dataType && $!dataType == "3")
+        $!{title}&nbsp;&nbsp;视频
+    #elseif($dataType && $!dataType == "4")
+        $!{title}&nbsp;&nbsp;附件
+    #end
+##    <a href="#2" onClick="closeDiv();" class="close" >close</a></p>
+<div class="tapeVideo-mydiv-box">
+    <div class="tbl-scorll-div">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th><label title="文件名称">文件名称</label></th>
+                <th width="60"><label title="提交人">提交人</label></th>
+                <th width="80"><label title="提交时间">提交时间</label></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($audio in $!files)
+                    <tr>
+                        <td><label title="$!audio.audioName">
+                            <a class="attrFile" href="#2"  onclick="downFileImage($!audio.fileId,'$!audio.fileName')">$!audio.uploadFileName</a>
+                        </label></td>
+
+                        <td><label title="$!audio.recordTime">$!audio.userName</label></td>
+                        <td><label class="break-line" title="$!date.format('yyyy-MM-dd HH:mm:ss',$!audio.createDate)">
+                            $!date.format('yyyy-MM-dd HH:mm:ss',$!audio.createDate)</label></td>
+                    </tr>
+                #end
+               
+            </tbody>
+        </table>
+    </div>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="closePage();"/>
+    </div>
+</div>
+</body>
+</html>

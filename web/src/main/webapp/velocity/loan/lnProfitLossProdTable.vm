@@ -1,0 +1,96 @@
+#if($!flag=="prod1")
+
+        <span class="bold" style="line-height:40px;font-size:14px;width:100px">$!pagename（合计：<label class="$!div">$!totalAmount</label>）</span>
+
+##    #if("$!isSurvey"=="true" && "$!isLend" == "")
+    #if("$!write" == "1")
+        <span  class="ui-span-btn fr" onclick="saveProfitPage('$!flag','$!type','$!div','')" style="margin-top:10px;margin-right:10px">
+        	<label>新增</label>
+        </span>
+    #end
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="项目">项目</label></th>
+            <th><label title="总金额（元）">总金额（元）</label></th>
+            <th><label title="平均值">平均值</label></th>
+            <th><label title="备注">备注</label></th>
+            <th><label title="操作">操作</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($lnProfitLossItem in $lnProfitLossItemList)
+##                #set($totalAmount = $!totalAmount+$!balance.amount)
+                <tr>
+                    <td><label title="$!lnProfitLossItem.itemName">$!lnProfitLossItem.itemName</label></td>
+                    <td><label title="$!lnProfitLossItem.totalAmount">$!lnProfitLossItem.totalAmount</label></td>
+                    <td><label title="$!lnProfitLossItem.averageAmount">$!lnProfitLossItem.averageAmount</label></td>
+                    <td><label title="$!lnProfitLossItem.remark">$!lnProfitLossItem.remark</label></td>
+                    <td>
+                    #if("$!write" == "1")
+                            <a href="javascript:removeProfit('$!flag','$!type','$!div','$!lnProfitLossItem.itemId')">移除</a>&nbsp;<a href="javascript:saveProfitPage('$!flag','$!type','$!div','$!lnProfitLossItem.itemId')">编辑</a>&nbsp;
+                            <a href="javascript:showIetmIfo('$!flag','$!type','$!div','$!lnProfitLossItem.itemId','$!year','$!month','$!monthNumber')">明细</a>
+                    #end
+                    </td>
+                </tr>
+            #end
+        </tbody>
+    </table>
+
+#end
+
+#if($!flag=="prod2")
+
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">$!pagename（合计：<label class="$!div">$!totalAmount</label>）</span>
+
+    #if("$!write" == "1")
+    <span  class="ui-span-btn fr" onclick="saveProfitPage('$!flag','$!type','$!div','')" style="margin-top:10px;margin-right:10px">
+        <label>新增</label>
+    </span>
+    #end
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+##            <th><label #if($!type=="1"||$!type=="4") title="客户名称" #else title="供应商" #end >#if($!type=="1"||$!type=="4") 客户名称 #else 供应商 #end</label></th>
+            <th><label title="项目">项目</label></th>
+            <th><label title="上年度">上年度</label></th>
+            <th><label title="本年度">本年度</label></th>
+            <th><label title="总金额（元）">总金额（元）</label></th>
+            <th><label title="平均值（元）">平均值（元）</label></th>
+            <th><label title="备注">备注</label></th>
+            <th><label title="操作列">操作列</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($lnProfitLossItem in $lnProfitLossItemList)
+            ##                #set($totalAmount = $!totalAmount+$!balance.amount)
+            <tr>
+                <td><label title="$!lnProfitLossItem.itemName">$!lnProfitLossItem.itemName</label></td>
+                <td><label title="$!lnProfitLossItem.lastYearAmount">$!lnProfitLossItem.lastYearAmount</label></td>
+##                <td><label title="#if($!balance.settlingType=="1")现结#elseif($!balance.settlingType=="2")月结算#end">#if($!balance.settlingType=="1")现结#elseif($!balance.settlingType=="2")月结算#end</label></td>
+                <td><label title="$!lnProfitLossItem.currYearAmount">$!lnProfitLossItem.currYearAmount</label></td>
+##                <td><label title="#if($!balance.bizRenew=="1")是#elseif($!balance.bizRenew=="0")否#end">#if($!balance.bizRenew=="1")是#elseif($!balance.bizRenew=="0")否#end</label></td>
+                <td><label title="$!lnProfitLossItem.totalAmount">$!lnProfitLossItem.totalAmount</label></td>
+                <td><label title="$!lnProfitLossItem.averageAmount">$!lnProfitLossItem.averageAmount</label></td>
+                <td><label title="$!lnProfitLossItem.remark">$!lnProfitLossItem.remark</label></td>
+                <td>
+                    #if("$!write" == "1")
+                    <a href="javascript:removeProfit('$!flag','$!type','$!div','$!lnProfitLossItem.itemId')">移除</a>&nbsp;&nbsp;<a href="javascript:saveProfitPage('$!flag','$!type','$!div','$!lnProfitLossItem.itemId')">编辑</a>
+                    <a href="javascript:showDetailIfo('$!flag','$!type','$!div','$!lnProfitLossItem.itemId','$!xfdNum')">明细</a>
+                    #end
+                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+#end
+
+
+
+
+
+
+
+

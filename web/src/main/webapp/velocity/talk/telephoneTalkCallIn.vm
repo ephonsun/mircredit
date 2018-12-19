@@ -1,0 +1,107 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>来电窗口</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.phone.js"></script>
+    #scriptLink("page")
+	<style type="text/css">
+		body { margin: 0; padding: 0;border:0px;overflow: hidden;}
+	</style>
+	<script>
+	jQuery(document).ready(function(){
+		$("#pick").bind({					//拨号
+			"click":function(e){
+				pickup();
+			}
+		});
+	});
+	
+	window.onbeforeunload = function() { 
+				sp.destory();
+	}
+	
+	function pickup(){			//拨号
+		if(sp)
+		{
+			var phone = sp.getCurrent();
+			if(phone)
+			{
+				phone.pickup();
+			}
+			else
+			{
+				banger.page.showMessageBox("无可用的智能话机，无法使用来电弹屏、软件拨号、电话录音等智能语音功能!");
+			}
+		}
+	}
+	var sp = smartPhone.create();
+	
+</script>
+</head>
+
+<body>
+	<div class="call-win-border">
+		<div class="call-win-ttl">
+	    	<i>icon</i>
+	    	<input type="button" id="closeInput" class="aclose" />
+	    </div>
+	    #if($phoneAreaName !="" )
+			#set($areaName = "("+$phoneAreaName+")" )
+		#else
+			#set($areaName = "" )
+		#end
+		#if($crmCustomer.customerId>0)
+			#if($crmCustomer.customerTitle!="")
+				#set($nameTitle = "("+$crmCustomer.customerTitle+")" )
+			#else
+				#set($nameTitle = "" )
+			#end
+			#if($crmCustomer.company!="")
+				#set($company = "单位 "+$crmCustomer.company)
+			#else
+				#set($company = "" )
+			#end
+			<p class="marginp"><label>电话呼入中，请处理···</label></p>
+		    <ul class="call-win-ul halign blue2">
+		    	<li><label class="bold">$!crmCustomer.customerName</label><label>$nameTitle</label></li>
+		        <li><label class="bold">$!record.incomingNumber</label><label>$areaName</label></li>
+		        <li><label>$company</label></li>
+		    </ul>
+		#else
+			<ul class="call-win-ul halign blue2">
+				<li><label></label></li>
+		        <li><label>$!record.incomingNumber</label><label>$areaName</label></li>
+		        <li><label></label></li>
+		    </ul>
+		#end
+		<hr />
+	    <div class="autoh">
+		    	<ul class="call-win-ul fl">
+		    		#if($crmCustomer.customerId>0)
+		            	<li><label>客户类型：</label><label>$!crmCustomer.customerTypeName</label></li>
+		            #end
+		            #if($hasPerssion>0 || $shareCus)
+			            #if($!exField.customerId && $!exField.customerId>0)
+				            #foreach($field in $temp.getCallInFields())
+				            	<li><label>$field.templateFieldName：</label><label style="width:120px;overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">$refUtil.getPropertyStringValue($exField,$field.fieldName) $!field.measurement</label></li>
+							#end
+						#end
+					#else
+						<li class="call-warning red"><label>您无此客户的权限</label></li>
+	        		#end
+		        </ul>
+	        <input type="button" id="pick" value="接 听" class="call-win-btn1 fr" />
+	    </div>
+	    <div class="call-win-footer"></div>
+        <span class="topl">topl</span>
+        <span class="topr">topr</span>
+        <span class="bottoml">bottoml</span>
+        <span class="bottomr">bottomr</span>
+    </div>
+</body>
+</html>

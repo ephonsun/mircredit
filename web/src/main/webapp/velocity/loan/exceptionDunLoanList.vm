@@ -1,0 +1,310 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>催收贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+     <style type="text/css">
+     .Edit-button { background:url(${ctx}/images/public/Edit-button.gif) no-repeat; float:right; width:19px; height:23px; position:relative; top:0px; }
+     </style>
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('select').select();
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+            $('table.datatbl').table();
+
+            $("#clear").click(function(){
+                $('.text').val('');
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+                $("select").each(function(){
+                    this.selectedIndex = 0;
+                    $(this).select();
+                });
+            });
+
+            getQueryJson();
+
+            $("#query").click(function(){
+                var postJson = getQueryJson();
+                var urlStr = "${ctx}/loan/exceptionDunLoanListQuery.html?RandNum="+ Math.random();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+                        queryBack(html, 'dataList');
+                        oldPostJson = getQueryJson();
+                    }
+                });
+            });
+
+
+
+            $("#refresh").click(function(){
+                if(oldPostJson){
+                    goto(
+                            null,
+                            "${ctx}/loan/exceptionDunLoanListQuery.html?RandNum="+ Math.random(),
+                            oldPostJson,
+                            function(html){
+                                queryBack(html, 'dataList');
+                            });
+                }
+            });
+
+
+
+        });
+
+        function query(){
+            var postJson = getQueryJson();
+            var urlStr = "${ctx}/loan/exceptionDunLoanListQuery.html?RandNum="+ Math.random();
+            jQuery.ajax({
+                type: 'POST',
+                url: urlStr,
+                data: postJson,
+                success:function(html){
+                    queryBack(html, 'dataList');
+                    oldPostJson = getQueryJson();
+                }
+            });
+        }
+
+        function editSortWindow(loanId){
+        var urlStr =  'editExceptionPlanPage.html?loanId='+loanId ;
+          var val = window.showModalDialog( urlStr , { window: window }, 'dialogWidth=450px;dialogHeight=420px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+          return  val;
+        }
+
+        function editSort(loanId){
+        var result = editSortWindow(loanId);
+                    if(result){
+                      var postJson = getQueryJson();
+                                 var urlStr = "${ctx}/loan/exceptionDunLoanListQuery.html?RandNum="+ Math.random();
+                                 jQuery.ajax({
+                                     type: 'POST',
+                                     url: urlStr,
+                                     data: postJson,
+                                     success:function(html){
+                                         queryBack(html, 'dataList');
+                                         oldPostJson = getQueryJson();
+                                     }
+                                 });
+                    }
+        }
+
+
+        var oldPostJson = {};
+
+        function getQueryJson(){
+            if($('#customer').val()=="姓名、电话或身份证"){
+                $('#customer').val("");
+            }
+
+            var postJson = {};
+            postJson['customer']=jQuery.trim($('#customer').val());
+            postJson['loanType'] = jQuery.trim($('#loanType').val());
+            postJson['repaymentStartDate'] = jQuery.trim($('#repaymentStartDate').val());
+            postJson['repaymentEndDate']=jQuery.trim($('#repaymentEndDate').val());
+            postJson['status'] = jQuery.trim($('#status').val());
+
+
+            oldPostJson = postJson;
+
+            if($('#customer').val()==''){
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+            }
+
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "${ctx}/loan/exceptionDunLoanListQuery.html?RandNum="+ Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryBack(html, 'dataList');
+                        });
+            }
+        }
+
+        function queryBack(html, gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+
+            var total = $('#total').val();
+            if(total!=null){
+                $("#recordCount").text(total);
+            }else {
+                $("#recordCount").text(0);
+            }
+        }
+
+
+        //编辑异常贷款催收
+        function exceptionDunLoanEdit(loanId)
+        {
+            var options = {id: "exceptionDunLoanEdit-"+loanId, pid: GetId(), title: "编辑贷款", url: "${ctx}/loan/exceptionDunLoanEdit.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+                                         tab.add(options);
+        }
+
+        //得到被选择的选择框的值
+        function getCheckedLoan(obj){
+            var str = "";
+            obj.each(function(){
+                if(jQuery(this).attr("checked")){
+                    if(!str){
+                        str = jQuery(this).val();
+                    }else{
+                        str = str + "," + jQuery(this).val();
+                    }
+                }
+            })
+            return str;
+        }
+
+        //分配异常贷款页面
+        function allotExceptionLoanPage(){
+            var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+            if(obj.size() == 0){
+                banger.page.showMessageBox("您没有选择要分配的贷款，请先选择贷款！");
+                return false;
+            }
+            var loanIds = getCheckedLoan(obj);
+            //验证选择的贷款是否已经被分配
+            var url = "${ctx}/loan/checkExceptionDunLoan.html?RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:url,
+                data:{
+                    'loanIds':loanIds
+                },
+                success:function(resultVal){
+                    if(resultVal == "true_single"){
+                        //所选择的贷款已经成功分配了
+                        if(confirm("您选择的贷款已分配，您确定要重新分配吗？")) {
+                            assignExceptionPage(true,loanIds);
+                        }
+                    }else if(resultVal == "false"){
+                        //没有被分配的
+                        assignExceptionPage(false,loanIds);
+                    }else if(resultVal == "true_multi"){
+                        //所选择的贷款有部分已经成功分配
+                        if(confirm("您选择的贷款部分已经分配，您确定重新分配贷款吗？")){
+                            assignExceptionPage(true,loanIds);
+                        }
+                    }
+                }
+            });
+        }
+
+    function assignExceptionPage(reAssign,loanIds){
+        var url = "${ctx}/loan/allotExceptionLoanPage.html?BelongToType=brUser&RandNum="+Math.random();
+        var result = banger.page.openDialog(url,'分配贷款',600,630);
+        if(result != undefined){
+            var resultArr = result.split("&");
+            var postJson = {};
+            postJson['loanIds'] = loanIds;
+            postJson['assignUserIds'] = resultArr[0];
+            postJson['assignUserNames'] = resultArr[1];
+            postJson['reAssign'] = reAssign;
+            jQuery.ajax({
+                type:'POST',
+                url:'../loan/allotExceptionLoan.html?RandNum='+Math.random(),
+                data:postJson,
+                success:function(html){
+                    query();
+                }
+            });
+        }
+    }
+
+</script>
+</head>
+
+<body>
+<table class="htmltbl" >
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input id="customer" type="text" class="text" />
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>贷款类型：</label>
+        </td>
+        <td width="17%">
+            <select id="loanType">
+                <option></option>
+                #foreach($!dklx in $!checkBoxMessage.get("DKLX"))
+					<option value ="$!dklx.dictionaryKey" >&nbsp;$!dklx.dictionaryValue</option>
+				#end
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>还款日期：</label>
+        </td>
+        <td colspan="2">
+            <table class="celltbl">
+                <tbody>
+                <tr>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input id="repaymentStartDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="20"><label>-</label></td>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input id="repaymentEndDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+		<td width="17%"></td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+            异常贷款(<label id="recordCount" class="green">$!recordCount</label>)
+        </span>
+    <input id="clear" type="button" class="ui-input-btn" value="清空" />
+    <input id="query" type="button" class="ui-input-btn" value="搜索" />
+</div>
+<div class="action-bar">
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+</div>
+<table id="dataList" class="datatbl">
+    #parse("/velocity/loan/exceptionDunLoanListTable.vm")
+</table>
+</body>
+
+</html>

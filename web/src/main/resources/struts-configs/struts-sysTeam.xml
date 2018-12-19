@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="systeam" extends="default" namespace="/team">
+
+		<!--  角色列表页面 -->
+		<action name="showSysTeamPage" class="sysTeamAction"
+			method="showSysTeamPage">
+			<result name="success">/velocity/team/sysTeam_list.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  角色列表分页 -->
+		<action name="getSysTeamPage" class="sysTeamAction" method="getSysTeamPage">
+			<result name="success">/velocity/team/sysTeam_listTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  添加团队  -->
+		<action name="saveSysTeam" class="sysTeamAction"
+			method="saveSysTeam">
+			<result name="toAddPage">/velocity/team/sysTeam_add.vm</result>
+			<result name="saveTeam">/velocity/team/refreshPage.vm</result>
+			<result name="saveCreateRole" type="redirectAction">saveSysTeam.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="saveSysTeamUser" class="sysTeamAction" method="saveSysTeamUser"></action>
+		<!-- 编辑角色 -->
+		<action name="updateSysTeam" class="sysTeamAction"
+			method="updateSysTeam">
+			<result name="toUpdataPage">/velocity/team/sysTeam_update.vm</result>
+			<result name="success">/velocity/team/refreshPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+			<!-- 删除验证是否在使用,执行删除 -->
+		<action name="validateDel" class="sysTeamAction"
+			method="validateDel">
+		</action>
+		<!-- 删除团队成员,执行删除 -->
+		<action name="validateDelTeamUser" class="sysTeamAction"
+			method="validateDelTeamUser">
+		</action>
+		 <!--显示部门用户列表页面 -->
+		<action name="showDeptList" class="sysTeamAction" method="showDeptList">
+			<result name="success">/velocity/team/deptList.vm</result>
+		</action>
+		<!--用户列表 -->
+		<action name="getUserPageList" class="sysTeamAction" method="getUserPageList">
+			<result name="success">/velocity/team/deptUserList.vm</result>
+		</action>
+		<action name="getTeamUserPageList" class="sysTeamAction" method="getTeamUserPageList">
+			<result name="success">/velocity/team/deptTeamUserList.vm</result>
+		</action>
+		 <!--显示选中的部门用户列表页面 -->
+		<action name="showUserDeptList" class="sysTeamAction" method="showUserDeptList">
+			<result name="success">/velocity/team/sysTeam_add.vm</result>
+		</action>
+		<!-- 验证团队是否存在 -->
+		<action name="validateTeam" class="sysTeamAction"
+			method="validateTeam">
+		</action>
+	</package>
+</struts>

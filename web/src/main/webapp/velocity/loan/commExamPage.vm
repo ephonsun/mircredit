@@ -1,0 +1,210 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑贷款</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+        .m1{ margin-left:15px;}
+        .m2{ margin-top:-1px }
+        .w1 { width:100px; }
+        table.datatbl{ margin-bottom:20px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+	
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+##	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+            maxTextArea("textarea[maxlength]");
+            var url = "../loan/vLoanView.html?isSurvey=true&isUpload=true&isEdit=true&RandNum="+Math.random()+"&loanId="+$!loanId;
+            jQuery.ajax({
+                type: 'post',
+                url: url,
+                async:false,
+                data: { },
+                success: function (data) {
+                    $('#viewLoan').html(data);
+                }
+            });
+            /*
+            var configObj = {
+                'action': '../loan/uploadAttachment.html?loanId=$!loanId&customerId=$!customerId',
+                'queueId':'fileQueue',
+                'auto':true
+            } */
+            var loanId = '$!loanId';
+            var customerId = '$!customerId';
+            var loanCusId = loanId+","+customerId+","+3;
+            var configObj = {
+                'action': '../loan/autoUploadAttachment.html?loanCusId='+loanCusId,
+                'queueId':'fileQueue',
+                'loanId':loanId,
+                'customerId':customerId,
+                'loanStatusId':3,
+                'auto':true
+            }
+            setFileUploadByParams(configObj);//渲染附件上传功能
+//            setFileUpload('../loan/uploadAttachment.html');
+        });
+
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+
+        //判断贷款状态是否被改变
+        function queryLoanStatusById(loanId,isReject,flag,loanStatusId,customerId){
+            var url = "${ctx}/loan/unExamLoanStatusChanged.html?loanId="+loanId+"&RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:url,
+                data:{},
+                success:function(retVal){
+                    if(retVal == 0){
+                        if(flag == "submit"){
+                            //点击“提交审批”
+                            var submitRemark = jQuery.trim($('#remark').val());
+                            //var approveUserId1=showModalDialog("${ctx}/loan/getApprovers.html?RandNum="+Math.random(),window,"dialogWidth:400px;dialogHeight:500px;status:no");
+//                            if(approveUserId1.length<=0){
+//                                alert("审批人不能为空！")
+//                                return;
+//                            }
+                            submitExam(loanId,customerId,submitRemark,GetId());
+                        }else if(flag == "cancel"){
+                            //点击“撤销”
+                            cancelUnExamLoan(loanId,loanStatusId,customerId);
+                        }else if(flag == "changeLoanPerson"){
+                            //更换贷款人
+                            changeLoanPerson(loanId,customerId);
+                        }
+                    }else if(retVal > 0){
+                        //当前贷款状态已经改变
+                        //当前贷款状态已不是待分配(可能数据库当中的状态已经被其他用户所更改)，必须重新刷新页面
+                        banger.page.showMessageBox("贷款列表数据已被人更改，请重新刷新列表!");
+                    }
+                }
+            });
+        }
+
+        //撤销贷款
+        function cancelUnExamLoan(loanId,loanStatusId,customerId){
+            var submitRemark = jQuery.trim($('#remark').val());
+            var radioValue = refuseExamLoan();
+            if(radioValue){
+                radioValue['remark'] = submitRemark;
+                radioValue['loanId'] = loanId;
+                radioValue['beforeStatusId'] = loanStatusId;
+                radioValue['customerId'] = customerId;
+                //拒绝贷款
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/cancelLoan.html?RandNum='+Math.random(),
+                    data:radioValue,
+                    success:function(){
+                        tab.close(GetId(), true);
+                        jQuery.ajax({
+                            type:'post',
+                            url:'saveFileAttachments.html',
+                            data:{
+                                'loanId':loanId,
+                                'customerId':customerId
+                            }
+                        });
+                        jQuery.ajax({
+                            type:'POST',
+                            url:'../loan/unExamLoanListQuery.html?RandNum='+Math.random(),
+                            data:{},
+                            success:function(html){
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        //调查拒绝
+        function refuseExamLoan(){
+            var url = "../loan/cancelLoanPage.html?RandNum="+Math.random();
+            var result = window.showModalDialog(url,{window: window},'dialogWidth=550px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            return result;
+        }
+
+        //更换贷款人
+        function changeLoanPerson(loanId,customerId){
+            var url="${ctx}/loan/changeLoanPersonPage.html?loanId="+loanId+"&customerId="+customerId+"&random="+Math.random()*1000;
+            var result=banger.page.openDialog(url,"更换贷款人",600,400);
+            if(result){
+                tab.close(GetId(),true);
+            }
+        }
+
+    </script>
+</head>
+<body id="commExamLoanEdit">
+<p class="bold loan-lheight">贷款状态：贷款调查</p>
+##parse("/velocity/loan/baseLoanInfo.vm")
+    <!--添加附件部分-->
+   #*  <p class="loan-exam-attachment">
+    #if($urlPermitUtil.hasPermission('lnResearchUpload'))
+        <input type="file" name="fileInput" id="fileInput"/>
+    #end
+        <div id="attachmentList" class="datatbl" style="text-align:left;padding-left:10px;">
+            #parse("/velocity/loan/attachmentList.vm")
+        </div>
+        <div id="fileQueue"></div>
+    </p>
+    <!--添加附件部分-->
+
+    <p class="loan-lheight dashed">调查备注</p>
+    <table class="htmltbl_2" style="table-layout: auto;">
+        <tbody>
+        <tr>
+            <td width="0.5%"></td>
+            <td align="center" width="99%">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+                    <textarea maxlength="250" id="remark" class="textarea" style="height: 100px; _height:100px;"></textarea>
+                </div>
+            </td>
+            <td width="0.5%"></td>
+        </tr>
+        </tbody>
+    </table>
+    #if($urlPermitUtil.hasPermission('lnResearchCommit'))
+    <input type="button" class="ui-span-btn button-table" value="提交审批" onclick="queryLoanStatusById($!loanId,null,'submit',3,$!customerId);" />
+    #end
+    #if($urlPermitUtil.hasPermission('lnResearchReject'))
+    <input type="button" class="ui-span-btn button-table" value="调查拒绝" onclick="queryLoanStatusById($!loanId,null,'cancel',3,$!customerId);"/>
+    #end
+    #if($urlPermitUtil.hasPermission('lnChangeCustomer'))
+    <input type="button" class="ui-span-btn button-table" value="更换贷款人" onclick="queryLoanStatusById($!loanId,null,'changeLoanPerson',3,$!customerId);"/>
+	#end
+	*#
+<div id="viewLoan"></div>
+</body>
+</html>

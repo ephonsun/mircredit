@@ -1,0 +1,132 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>录音设置</title>
+    
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <style type="text/css">
+		table { line-height: 24px; }
+		.halign { margin-top: 50px; }
+		.gray_self { color:#999999; }
+    </style>
+    <script type="text/javascript">
+    	$(function(){
+    		if($("#isAutoRecord").val()==1){
+    			$("#isAutoRecordBox").attr("checked",true);
+    		}else{
+    			$("#isAutoRecordBox").attr("checked",false);
+    		}
+    		$("#isAutoRecordBox").click(function(){
+    			var flag=$(this).attr("checked");
+    			if(flag){
+    				$("#isAutoRecord").val(1);
+    			}else{
+    				$("#isAutoRecord").val(0);
+    			}
+    		});
+    		
+    		if($("#isAutoPlay").val()==1){
+    			$("#isAutoPlayBox").attr("checked",true);
+    		}else{
+    			$("#isAutoPlayBox").attr("checked",false);
+    		}
+    		$("#isAutoPlayBox").click(function(){
+    			var flag=$(this).attr("checked");
+    			if(flag){
+    				$("#isAutoPlay").val(1);
+    			}else{
+    				$("#isAutoPlay").val(0);
+    			}
+    		});
+    	})
+    	function submitCrmRs(){
+    		setPhoneRecord();
+    		var f=$("#crmRecordSettingForm");
+	    	f.action="updateCrmRecordSetting.html";
+			f.submit();
+			banger.page.showMessageBox({"type":"success","content":"保存成功"});
+    	}
+    	$(function(){
+    		if($("#isAutoRecordByAdmin").val()==1){
+    			$("#isAutoRecordDiv").css("display","block");
+    			$("#isAutoRecordBox").attr("disabled","disabled");
+    			$("#isAutoRecordBox").attr("checked",true);
+    		}
+    		if($("#isPlayRecordByAdmin").val()==1){
+    			$("#isPlayRecordDiv").css("display","block");
+    			$("#isAutoPlayBox").attr("disabled","disabled");
+    			$("#isAutoPlayBox").attr("checked",true);
+    		}
+    	});
+    	
+    	function setPhoneRecord()
+    	{
+    		var ap = $("#isAutoPlayBox").attr("checked");
+    		var ar = $("#isAutoRecordBox").attr("checked");
+    		
+    		var phone = window.parent.sp.getCurrent();
+			if(phone)
+			{
+				phone.setAutoRecord((ar=="checked")?true:false);
+				phone.setRecordTipSwitch((ap=="checked")?true:false);
+			}
+    	}
+    </script>
+</head>
+
+<body>
+<form id="crmRecordSettingForm" name="crmRecordSettingForm" method="post" action="updateCrmRecordSetting.html">
+	<table>
+    	<tbody>
+        	<tr>
+            	<td width="200">
+                	<input type="checkbox" class="chk" id="isAutoRecordBox"/>
+                    <label>
+                    	通话过程自动录音
+                    </label>
+                </td>
+            	<td>
+            		<div id="isAutoRecordDiv" style="display:none">
+                	<label class="gray_self">
+                    	注：已被管理员强制为"通话过程自动录音"，不能更改
+                    </label>
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="200">
+                	<input type="checkbox" class="chk" id="isAutoPlayBox"/>
+                    <label>
+                    	来电时自动播放录音提示音
+                    </label>
+                </td>
+            	<td>
+            		<div id="isPlayRecordDiv" style="display:none">
+                	<label class="gray_self">
+                    	注：已被管理员强制为"来电时自动插放录音提示音"，不能更改
+                    </label>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="保存" onclick="submitCrmRs()"/>
+    </div>
+    <input type="hidden" id="isAutoRecord" name="crmRecordSetting.isAutoRecord" value="$!crmRecordSetting.isAutoRecord"/>
+    <input type="hidden" id="isAutoPlay"  name="crmRecordSetting.isAutoPlay" value="$!crmRecordSetting.isAutoPlay"/>
+</form>
+<input type="hidden" id="isAutoRecordByAdmin" value="$!isAutoRecordByAdmin"/>
+<input type="hidden" id="isPlayRecordByAdmin" value="$!isPlayRecordByAdmin"/>   
+</body>
+</html>

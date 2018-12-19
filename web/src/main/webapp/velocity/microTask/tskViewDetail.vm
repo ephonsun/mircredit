@@ -1,0 +1,265 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>日程详情</title>
+
+    #styleLink('base')
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        div.ztree-box { height: 300px; border: 1px solid #ccc; padding: 2px; overflow: auto; }
+        .viewtbl{ margin-bottom: 20px; }
+        .line { border-bottom:1px solid #b1b1b1; line-height:30px; font-size:14px;}
+        .m1{ margin-bottom:20px; margin-top:15px; }
+        .m2{ width:74px;}
+        .left { text-align: left !important; }
+            /* 头像 */
+        .avatar { border: 1px solid #ccc; width: 96px; height: 96px; margin-bottom: 5px; }
+        .avatar img { width: 100%; height: 100%; border: 0; }
+        .img-head{background:url(${ctx}/images/public/img-head.gif) no-repeat 10px -5px; text-indent:35px;  }
+    </style>
+
+
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <!--
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    -->
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+    <script type="text/javascript">
+
+        var oldPostJson = {};
+        //自动绑定Select标签数据
+        function autoSelect(){
+            $(".autoSelected").each(function (){
+                var v = $(this).find("input").first().val();
+                if(v){
+                    $(this).find("select").val(v);
+                }
+            });
+        }
+
+        //修改客户日程信息
+        function alterCustomerInfo(){
+            var urlStr = "${ctx}/tskSchedule/editSchedule.html?RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:urlStr,
+                data:{
+                    'tskSchedule.contactType':jQuery.trim($('#contactType').val()),
+                    'tskSchedule.contactDate':jQuery.trim($('#contactDate').val()),
+                    'tskSchedule.remark':jQuery.trim($('#remark').val()),
+                    'tskSchedule.scheduleId':jQuery.trim($('#scheduleId').val())
+                },
+                success:function(html){
+                    refreshTab(html,'tskViewDetail');
+                    autoSelect();
+                }
+            });
+        }
+
+        //刷新tab
+        function refreshTab(html,gridId){
+            $("#"+gridId).html(html).table();
+        }
+
+        //add code
+        function getQueryJson(){
+            var postJson = {};
+            postJson['tskSchedule.productName']=jQuery.trim($('#productName').val());
+            postJson['tskSchedule.remark'] = jQuery.trim($('#remark').val());
+            postJson['tskSchedule.userName'] = jQuery.trim($('#userName').val());
+            postJson['tskSchedule.createDate'] = jQuery.trim($('#createDate').text());
+            postJson['tskSchedule.scheduleId'] = jQuery.trim($('#scheduleId').text());
+            postJson['tskSchedule.customerId'] = jQuery.trim($('#customerId').text());
+            oldPostJson = postJson;
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPage(page)
+        {
+            var currentPage = jQuery.trim(document.getElementById('page.currentPage').value);
+
+            if(currentPage == "0" || currentPage == 0){
+                document.getElementById('page.currentPage').value = 1;
+            }
+            if(oldPostJson){
+                goto(
+                        page,
+                        "${ctx}/tskSchedule/queryLoanIntentionList.html?customerId="+jQuery.trim($('#customerId').val())+"&RandNum="+ Math.random(),
+                        getQueryJson(),
+                        function(html){
+                            refreshTab(html, 'tskLoanIntentionTable');
+                            autoSelect();
+                            $('select').select();
+                        });
+            }
+        }
+
+        //关闭当前页面
+        function closeForm(){
+            tab.close(GetId(),false);
+        }
+
+    </script>
+</head>
+
+<body>
+<input type="hidden" id="scheduleId" value="$!tskSchedule.scheduleId"/>
+<input type="hidden" id="customerId" value="$!tskSchedule.customerId"/>
+<table class="viewtbl">
+    <tbody>
+    <tr>
+        <td width="8%" class="field">
+            <label>客户姓名：</label>
+        </td>
+        <td colspan="7">
+            <label class="fl">$!tskSchedule.pdtProductCustomerBean.customerName</label>
+            #if($urlPermitUtil.hasPermission('browseCustomer'))
+            <div class="img-head fl" onclick="newTab('browse', '$!tskSchedule.customerId')">
+                <a href="#">详情</a>
+            </div>
+                #end
+        </td>
+    </tr>
+    <tr>
+        <td width="8%" class="field">
+            <label>联系时间：</label>
+        </td>
+        <td width="25%">
+            <label>$!date.format('yyyy-MM-dd HH:mm',$!tskSchedule.contactDate)</label>
+            <!--
+                                <div class="ui-div-text">
+##                                    #if($!tskSchedule.status == 0)
+                                        未完成状态-->
+            <!--
+                                        <input type="text" id="contactDate" class="text datepicker" name="conds" render="date" value="$!date.format('yyyy-MM-dd HH:mm',$!tskSchedule.contactDate)">
+                                        <i class="date"></i>
+##                                    #else
+                                        <input readonly="true" type="text" id="contactDate" class="text datepicker" name="conds" render="date" value="$!date.format('yyyy-MM-dd HH:mm',$!tskSchedule.contactDate)">
+                                        <i class="date"></i>
+##                                    #end
+                                </div>
+                                -->
+        </td>
+        <td width="8%" class="field">
+            <label>联系方式：</label>
+        </td>
+        <td width="25%" class="autoSelected">
+            <input type="hidden" value="$!tskSchedule.contactType"/>
+            <label>
+                #if($!tskSchedule.contactType == 1)
+                    电话联系
+                #elseif($!tskSchedule.contactType == 2)
+                    上门拜访
+                #end
+            </label>
+        ##                                #if($!tskSchedule.status == 0)
+            <!--未完成状态
+                                    <select id="contactType" style="width: 100%">
+##                                #else
+                                    <select id="contactType" style="width: 100%" disabled="true">
+##                                #end
+                                    <option value="1">电话联系</option>
+                                    <option value="2">上门拜访</option>
+                                </select>
+                                -->
+        </td>
+        <td class="field" width="8%">
+            <label>添加时间：</label>
+        </td>
+        <td  colspan="3">
+            <p>$!date.format('yyyy-MM-dd HH:mm',$!tskSchedule.addDate)</p>
+        </td>
+    </tr>
+    <tr>
+        <td width="8%"  class="field">
+            <label>沟通进度：</label>
+        </td>
+        <td width="25%" class="autoSelected">
+            <input type="hidden" value="$!tskSchedule.commProgressId"/>
+            <label>
+                #foreach($cp in $commProgressList)
+                                        #if($!tskSchedule.commProgressId == $cp.COMM_PROGRESS_ID)
+                    $cp.COMM_PROGRESS_NAME
+                #end
+                                    #end
+            </label>
+            <!--
+                                <select style="width:100%" disabled="true">
+##                                    #foreach($cp in $commProgressList)
+                                        <option value="##$cp.COMM_PROGRESS_ID">&nbsp;$cp.COMM_PROGRESS_NAME</option>
+##                                    #end
+                                </select>
+                                -->
+        </td>
+        <td width="8%" class="field">
+            <label>完成情况：</label>
+        </td>
+        <td width="25%" class="autoSelected">
+            <input type="hidden" value="$!tskSchedule.status"/>
+            <label>
+                #if($!tskSchedule.status == 0)
+                    未完成
+                #elseif($!tskSchedule.status == 1)
+                    已完成
+                #elseif($!tskSchedule.status == 2)
+                    已作废
+                #end
+            </label>
+            <!--
+            <select style="width: 100%" disabled="true">
+                <option value="0">未完成</option>
+                <option value="1">已完成</option>
+                <option value="2">已作废</option>
+            </select>
+            -->
+        </td>
+        <td colspan="4"></td>
+    </tr>
+    <tr>
+        <td width="8%"  class="field">
+            <label>日程备注：</label>
+        </td>
+        <td colspan="7">
+            <div>
+                $!tskSchedule.remark
+            ##                                    #if($!tskSchedule.status == 0)
+                <!--未完成状态
+                                        <textarea id="remark" rows="2" style="width: 100%">$!tskSchedule.remark</textarea>
+##                                    #else
+                                        <textarea readonly="true" id="remark" rows="2" style="width: 100%">$!tskSchedule.remark</textarea>
+                                        -->
+            ##                                    #end
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="bold line m1">客户意向</div>
+<div id="tskLoanIntentionTable">
+    #parse("/velocity/microTask/tskLoanIntentionTable.vm")
+</div>
+   <hr/>
+<div class="halign">
+    <input type="button" class="btn6 btn6bg3" onclick="closeForm();" value="关 闭"/>
+</div>
+</body>
+</html>

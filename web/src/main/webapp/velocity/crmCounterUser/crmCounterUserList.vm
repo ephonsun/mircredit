@@ -1,0 +1,29 @@
+<table class="datatbl">
+    <thead>
+        <tr>
+            <th width="45%">用户名</th>
+            <th width="45%">人员姓名</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($counueruser in $!crmCounterUserList.items)
+        <tr>
+            <td width="45%"><label>$!counueruser.counterUserAccount</label></td>
+            <td width="45%"><label>$!counueruser.counterUserName</label></td>
+            <td>
+				<a class="slink" href="javascript:void(0);" onclick="updateCrmCuser('$!counueruser.counterUserId')">编辑</a>
+                <a class="slink" href="javascript:void(0);" onclick="delSysUserById('$!counueruser.counterUserId','$!counueruser.counterUserName')">删除</a>
+            </td>
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="3">
+				<div class="fr">#parse("/velocity/deptPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<input type="hidden" id="totalAmount" name="totalAmount" value="$!totalAmount" />

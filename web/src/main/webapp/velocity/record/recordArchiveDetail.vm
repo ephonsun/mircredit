@@ -1,0 +1,126 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>录音详情</title>
+    
+    #styleLink("base")
+	#scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript">
+	function play(obj,id,name,path,fileSize){
+		if(fileSize==0||fileSize==""){
+			banger.page.showMessageBox("对不起,录音在上传时损坏,无法播放！");
+			return;
+    	}
+		jQuery.post("playVideo.html", {"recordInfo.fileName":name,"recordInfo.filePath":path}, function(result){
+			new window.video.create(id, 310, 60,"../Records/"+result, obj);
+		});
+	}
+	</script>
+</head>
+ 
+<body>
+	<p style="text-align: right;">
+		#if($urlPermitUtil.hasPermission('recordPlayVideo'))
+			#if($!recordDetail.fileName==''||$!recordDetail.filePath=='')<a href="#2" style="color:gray;cursor: default;; text-decoration:none;" disable="true">播放</a> 
+			#else<a class="slink" href="#2" onclick='play(this,$!recordDetail.recordInfoId,"$!recordDetail.fileName","$!recordDetail.filePath","$!recordDetail.fileSize")'>播放</a>
+			#end
+		#end
+    </p>
+    <table style="margin-top: 10px;" width="100%" cellpadding="2" cellspacing="2">
+    	<tbody>
+        	<tr>
+            	<td width="66" height="30" align="right">流水号：<input type="hidden"  id="type" name="type" value="$!type"/></td>
+            	<td width="300">
+                	<label>$!recordDetail.recordNo</label>
+                </td>
+            	<td width="66" align="right">记录来源：</td>
+            	<td>
+                	<label class="blue bold">#if($!recordDetail.recordSource==1)话机 #end#if($!recordDetail.recordSource==2)PAD #end</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right">客户：</td>
+            	<td width="300"><label>
+					$!recordDetail.customerName
+						#if($!recordInfo.remotePhone!='')
+							#if($!recordInfo.remotePhone!=''&&$!recordDetail.customerName=='')$!recordInfo.remotePhone #else ($!recordInfo.remotePhone)#end
+						#end
+                   </label>
+                </td>
+            	<td width="66" align="right">状态：</td>
+            	<td>
+					#if($!recordDetail.isCanceled==0)<label>有效</label>#end
+					#if($!recordDetail.isCanceled==1)<label class="red bold">作废</label>#end
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right">类型：</td>
+            	<td width="300" colspan="3">
+                	<label>$!recordDetail.callTypeName</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right">客户经理：</td>
+            	<td width="300" colspan="3">
+                	<label>$!recordDetail.userName</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right">开始时间：</td>
+            	<td width="300">
+                	<label>$date.format("yyyy-MM-dd HH:mm:ss",$!recordDetail.startDate)</label>
+                </td>
+            	<td width="66" align="right">时长：</td>
+            	<td>
+                	<label>$!recordDetail.callTime</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right">业务类型：</td>
+            	<td width="300">
+                	<label>$!recordDetail.bizType</label>
+                </td>
+            	<td width="66" align="right">沟通进度：</td>
+            	<td>
+                	<label>$!recordDetail.commProgress</label>
+                </td>
+            </tr>
+        	<tr style="display:none">
+            	<td width="66" height="30" align="right">身份证号：</td>
+            	<td width="300">
+                	<label>$!recordDetail.idCard</label>
+                </td>
+            	<td width="66" align="right">信用卡号：</td>
+            	<td>
+                	<label>$!recordDetail.creditCard</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right" valign="top">
+					<label style="line-height: 25px;">备注：</label>
+				</td>
+            	<td width="300" colspan="3">
+                	<label style="display: block; width: 300px; word-break: break-all; line-height: 20px;">$!recordDetail.remark</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="66" height="30" align="right"></td>
+				<td width="300" colspan="3">
+                	<input type="button" value="返 回" class="btn1" onclick='location.href="showArchiveRecordInfoListPage.html"'/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+

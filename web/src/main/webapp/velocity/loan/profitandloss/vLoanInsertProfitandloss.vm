@@ -1,0 +1,151 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>基础信息设置</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style tyle="text/css">
+		html, body{ overflow:hidden !important; }
+	</style>
+    #scriptLink("core")
+    #scriptLink("page")
+	
+	
+   
+  
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+ 	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+   <script type="text/javascript">
+  
+     jQuery(document).ready(function () {
+	
+		  jQuery('#asset').validator();
+			jQuery("#btnOk").click(function () {
+              
+                var bool = jQuery.validator({form:'asset',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                   return false;
+                }
+				
+				var endMonth=$("#endMonth").val();  //结束月份
+				var beginMonth=$("#beginMonth").val();//开始月份
+				
+				var endMonthHidden=$("#endMonthHidden").val();
+				var beginMonthHidden=$("#beginMonthHidden").val();
+				var par= window.dialogArguments.window
+				
+				var flage=par.dynamicTable(beginMonth+"--"+endMonth)
+				if(!flage){
+					return
+				}
+				var flage1
+				if(beginMonth!=beginMonthHidden){
+					
+					 if(!confirm("改变开始月份，将删除以前月份中的数据？")){
+						
+						return;
+					 }else{
+					 
+						flage1=true;
+					 }
+				}
+				
+				if(endMonth!=endMonthHidden&&!flage1){
+					
+					if(!confirm("改变结束月份，将删除以前月份中的数据？")){
+					     
+						return;
+					}else{
+					
+						flage1=true;
+					}
+								
+				}
+				
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",
+                    url: "${ctx}/loan/updateProfitandlossBaseInfo.html?lnLoanProfitandloss.flage="+flage1,
+                    data: $("#asset").serialize(),
+                    success: function (data) {
+                        var json = eval( "(" + data + ")" );
+						if(json.success){
+							window.close();
+						//var id=$("#loanBalanceId").val();
+						  //par.document.getElementById("yfqj").innerHTML=
+						 // par.document.getElementById("zhbfb").innerHTML=$("#endRate").val()
+							//window.dialogArguments.iframeAsset("","","${ctx}/loan/jyDetaiList.html?lnLoanProfitandlossJyDetail.loanProfitandlossId="+$!asset.loanProfitandlossId,"jyDetail")
+							// par.document.getElementById("endRate").innerHTML=
+							 var yfqj = beginMonth+"--"+endMonth;
+							 var str = yfqj + ',' + $("#endRate").val();
+                                window.returnValue=str;
+                               
+						}
+                    }
+                });
+            });
+
+        });
+			  //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+     </script>	 
+    
+</head>
+
+<body style="height:220px;">
+  <form id="asset" method="post">
+  	 <input type="hidden" value="$!asset.loanProfitandlossId" name="lnLoanProfitandloss.loanProfitandlossId">
+	 <input  type="hidden" value="$!loanId" name="lnLoanProfitandloss.loanId"/>
+		<table class="htmltbl" style="table-layout:auto;width:100%">
+          <tbody>
+             <tr>
+                  <td class="field" width="8%">
+                      <label>开始月份：</label>
+                  </td>
+                    <td>
+                     <div class="ui-div-text">
+                            <input type="text" id="beginMonth" value="$!asset.beginMonth" class="text datepicker" name="lnLoanProfitandloss.beginMonth" rule="^[1-9][0-9]{3}年[0-9]{2}月$" tips="格式：2014年05月"/>
+                            <input type="hidden" id="beginMonthHidden" value="$!asset.beginMonth"/>
+                            
+                        </div>
+                  </td>       
+              </tr>
+				<tr>
+                  <td class="field" width="8%">
+                      <label>结束月份：</label>
+                  </td>
+                    <td>
+                     <div class="ui-div-text">
+                            <input type="text" id="endMonth" value="$!asset.endMonth" class="text datepicker" name="lnLoanProfitandloss.endMonth" rule="^[1-9][0-9]{3}年[0-9]{2}月$" tips="格式：2014年5月份"/>
+                            <input type="hidden" id="endMonthHidden" value="$!asset.endMonth"/>
+
+                        </div>
+                  </td>       
+              </tr>
+			  <tr>
+                  <td class="field" width="8%" >
+                      <label>最后百分比(%)：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text" id="endRate"  name="lnLoanProfitandloss.endRate" value="$!asset.endRate" rule="^([1-9][0-9]{0,1}|100)$" tips='必须填数字' />
+                      </div>
+                  </td>              
+              </tr>
+              
+          </tbody>
+      </table> 
+    </form> 
+   <hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>

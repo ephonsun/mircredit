@@ -1,0 +1,159 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>投资偏好列表</title>
+    
+    #styleLink("base")
+     <style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	//设置第一行 上移 按钮禁用；最后一行 下移 按钮禁用
+		function setstate(){
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+		}
+    	jQuery(function(){
+    		$('#tabs').easytabs();
+			jQuery("#rskIntervalType").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		setstate();
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		
+		function addData(){
+			var bool = jQuery.validator({ form: 'rskIntervalType', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			jQuery.ajax({
+			    type: "post",
+			    url: "addRskIntervalType.html",
+			    data: {rskIntervalTypeName:$("#rskIntervalTypeName").val()},
+			    //请求成功后的回调函数有两个参数
+			    success: function(data, textStatus){
+			 		addResult(data);
+			    }
+			});
+		}
+		function addResult(msg){
+			if(msg != "SUCCESS"){
+				banger.page.showMessageBox(msg);
+			}
+			else{
+				document.location.href = "showRskIntervalTypeList.html?random=" + Math.random();
+			}
+		}
+		
+		function moveData(vid, vmoveType){
+			jQuery.ajax({
+				type: "post",
+				url: "moveRskIntervalType.html",
+				data: {id: vid, moveType: vmoveType},
+				success: function(data, textStatus){
+					moveResult(data);
+				}
+			});
+		}
+		function moveResult(msg){
+			if(msg != "SUCCESS"){
+				return false;
+			}
+			else{
+				document.location.href = "showRskIntervalTypeList.html?random=" + Math.random();
+			}
+		}
+		
+		function updateData(code){
+			var url = "goToUpdateRskIntervalTypePage.html?id=" + code + "&random=" + Math.random();
+			var result=banger.page.openDialog(url,"编辑投资偏好",600,220);
+			if(result == 1){
+				location.reload();
+			}
+		}
+		//启用停用
+		function actived(typeCode,state){
+			var str="启用";
+			if(state==0){
+				str="停用";
+			}
+			if(confirm("您确定要"+str+"该选择项吗？")){
+				location.href="changeIntervalTypeState.html?rskIntervalType.typeId="+typeCode+"&rskIntervalType.isActive="+state;
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<form id="rskIntervalType" name="rskIntervalType" action="" method="post">
+		<table class="viewtbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" class="field"><label>名称：</label></td>
+	            	<td><label>投资偏好</label></td>
+	            	<td width="70" class="field"><label>字段类型：</label></td>
+	            	<td><label>系统级</label></td>
+	            	<td width="70" class="field"><label>数据类型：</label></td>
+	            	<td><label>单选下拉框</label></td>
+	            </tr>
+	        </tbody>
+	    </table>
+		<div style="margin: 10px 0px;"><label>选项列表</label></div>
+		<div style="border: 1px solid #ccc; padding: 10px;">
+	    	<div class="sz" style="text-align: left;">
+	        	<label class="fl">新选项：</label>
+	        	<div class="dtxt2 fl" style="width: 150px; margin-right: 5px;">
+	            	<input type="text" name="rskIntervalTypeName" id="rskIntervalTypeName" class="dtxt2-txt" maxlength="20" rule="\S" tips="“投资偏好”必须填写" focusFlag="false"/>
+	            </div>
+	            <input type="button" value="添 加" class="btn1" onclick="addData();" />
+	        </div>
+	    	<table class="listtbl" cellpadding="0" cellspacing="0">
+	            <thead>
+	                <tr>
+	                    <th>选项名称</th>
+	                    <th width="150">操作</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	            	#foreach($rskIntervalType in $!rskIntervalTypeList)
+	                <tr>
+	                    <td><label>$!rskIntervalType.typeName</label></td>
+	                    <td width="150">
+	                        <a class="slink" href="javascript:void(0);" onclick="updateData('$!rskIntervalType.typeId')">编辑</a>
+	                        <a class="slink" href="deleteRskIntervalType.html?id=$!rskIntervalType.typeId" onclick="return confirm('您确定要删除选项“$!rskIntervalType.typeName”吗?删除后，相关客户投资偏好将为空');">删除</a>
+	                        <a href="javascript:void(0);" class="slink up" onclick="moveData('$!rskIntervalType.typeId','Up')">上移</a>
+	                        <a href="javascript:void(0);" class="slink down" onclick="moveData('$!rskIntervalType.typeId','Down')">下移</a>
+	                        #if($!rskIntervalType.isActive.equals(1))
+    						<a class="slink" href="#" onclick="actived('$!rskIntervalType.typeId',0)">停用</a>
+    						#else
+    							<a class="slink" href="#" onclick="actived('$!rskIntervalType.typeId',1)">启用</a>
+    					#end
+	                    </td>
+	                </tr>
+	                #end
+	            </tbody>
+	        </table>
+	    </div>
+	    <div class="halign" style="margin-top: 20px;">
+	       <input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+	    </div>
+	</form>
+</body>
+</html>
+

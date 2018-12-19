@@ -1,0 +1,359 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有文章</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+		.gray_self { color:#999999; }
+    </style>
+    
+</head>
+
+<body>
+<form id="articleForm" name="articleForm" method="post" action="">
+      <table class="htmltbl">
+    	<tbody>
+			<tr>
+				<input type="hidden" value="$!feArticle.isPublish" name="feArticle.isPublish">
+				<input type="hidden" value="$!feArticle.articleId" name="feArticle.articleId">
+				<td class="field" width="8%">
+					<label class="red">*</label>
+                	<label>文章分类：</label>
+                </td>
+                <td colspan="7">
+                	  <select id="articleColumnId" style="width:150px;" name="feArticle.articleColumnId" tips='“文章分类”必须填写'>
+											
+											#foreach($!feColumn in $!articleColumnList)
+												<option value="$!feColumn.columnId" #if($!feColumn.columnId==$!feArticle.articleColumnId) selected="selected" #end>$!feColumn.columnName</option>
+											#end
+                                 </select>
+                </td>
+			</tr>
+			<tr>
+				<td class="field" width="8%">
+					<label class="red">*</label>
+                	<label>标题：</label>
+                </td>
+                <td colspan="7">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" rule="\S" tips='“文章标题”必须填写' name="feArticle.articleTitle" value="$!feArticle.articleTitle" maxlength="50"/>
+                	</div>
+                </td>
+			</tr>
+			<tr>
+				<td class="field" width="8%">
+                	<label>来源：</label>
+                </td>
+                <td width="42%" colspan="3">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" name="feArticle.articleSource" value="$!feArticle.articleSource" value="$!feArticle.articleSource" maxlength="30"/>
+                	</div>
+                </td>
+				<td class="field" width="8%">
+                	<label>来源链接地址：</label>
+                </td>
+                <td width="42%" colspan="3">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" name="feArticle.articleAddress" value="$!feArticle.articleAddress" maxlength="200"/>
+                	</div>
+                </td>
+			</tr>
+    		<tr>
+				<td class="field" width="8%">
+                	<label>安排阅读时间：</label>
+                </td>
+				<td colspan="7">
+					#set($startDate=$date.format("yyyy-MM-dd",$!feArticle.articleReadtimeBegin))
+					#set($endDate=$date.format("yyyy-MM-dd",$!feArticle.articleReadtimeEnd))
+					<input type="radio" name="readTime" id="today" class="radio" value="today" #if($!readTime=='today') checked="checked" #end/>
+					<label for="today">今天</label>
+					<input type="radio" name="readTime" id="tom" class="radio" value="tom" #if($!readTime=='tom') checked="checked" #end />
+					<label for="tom">明天</label>
+					<input type="radio" name="readTime" id="default" class="radio" value="default" #if($!readTime=='default') checked="checked" #end/>
+					<label for="default">自定义</label>
+                </td>
+              
+             </tr>
+    		<tr id="defaultCell">
+				<td class="field" width="8%">
+                	<label></label>
+                </td>
+				<td colspan="7">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datepicker" id="readTimeBegin" fun="searchStartDateFun" value="$startDate"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datepicker" id="readTimeEnd" fun="searchEndDateFun" value="$endDate"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+             </tr>
+			 <tr>
+			 	<td colspan="8">
+                	<input type="checkbox" id="chk" class="checkbox" onclick="mustread()" #if($!feArticle.isMastread ==1)  checked="checked" #end/>
+					<label for="chk" class="red">必读(打勾表示在规定的时间内，客户经理必须阅读此消息)</label>
+					<input type="hidden" name="feArticle.isMastread" value="1"/>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="8">
+                	<div class="ui-div-textarea" >
+                	<TEXTAREA style="display:none" id="content">$!feArticle.articleContent</TEXTAREA>  
+					<IFRAME ID="eWebEditor1" name="content_html" src="$request.contextPath/eWebEditor/eWebEditor.jsp?id=content&style=standard" frameborder="0" scrolling="no" width="100%" height="600"></IFRAME> 
+                    	
+                    </div>
+                </td>
+            </tr>
+			<tr>
+				<td class="field" width="8%">
+					<label class="red">*</label>
+                	<label>创建时间：</label>
+                </td>
+				<td colspan="7">
+					<div class="ui-div-text" style="width: 150px;">
+					#set($createDate=$date.format("yyyy-MM-dd",$!feArticle.createDate))
+						<input type="text" class="text" readonly="true" disabled name="feArticle.createDate" id="createdatepicker1" rule="\S" tips='“创建时间”必须填写' value="$createDate"/>
+						<i class="date"></i>
+					</div>
+                </td>
+			</tr>
+			<tr>
+				<td class="field" width="8%">
+					<label>上传附件：</label>
+				</td>
+				<td colspan="7">
+				<input type="file" name="fileInput" id="fileInput" />
+                <label class="gray_self" title="添加附件">(*单个文件不能超过100M)</label>
+                 	#foreach($attr in $!attrList)
+					   <div id="attr_$velocityCount" class="uploadifyQueueItem">
+    						<div class="cancel">
+    							<a href="#" onclick="delAttr($!feArticle.articleId,$!attr.attachmentId,$velocityCount)"><img src="${ctx}/uploadify/cancel.png" border="0" /></a>
+    						</div>
+                            <span class="fileName"><a href="#" onclick="downFile($attr.attachmentId)" class="attrFile">$!attr.fileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label></span><span class="percentage"></span>
+    				   </div>
+					#end
+				<div id="fileQueue"></div>
+				</td>
+			</tr>
+        </tbody>
+    </table>
+	<hr />
+	<div class="center">
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="updateArticle()" value="保存" />
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="javascript:tab.close(GetId(), false);" value="取消" />
+    </div>
+     </form>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js "></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>		
+    <script type="text/javascript">
+    	var f = {};
+		f.change = function(val){
+		switch(val){
+			case 'today':
+				$('#defaultCell').hide().find('input[type=\'text\']').val('');
+				break;
+			case 'tom':
+				$('#defaultCell').hide().find('input[type=\'text\']').val('');
+				break;
+			case 'default':
+				$('#defaultCell').show();
+				break;
+			default:
+				break;
+		}
+	};
+	
+	$(function(){
+		setUpload();
+		$('select').select({ scroll:5 });
+		f.change($(':radio:checked').val());
+		$('.radio').change(function(){
+			f.change($(this).val());
+		});
+		jQuery("#articleForm").validator();
+	});
+	
+	function updateArticle(){
+		var bool = jQuery.validator({ form: 'articleForm'});
+			if(bool){
+    			var isUpload = false;
+				//是否有上传文件
+				var fileUpload = $('input[name=fileInput]');
+				//是否已经上传完成
+				var fileNameTask = $('input[name=fileNameTask]');
+				if(fileUpload!=undefined && fileNameTask.length == 0){
+					$('input[name=fileInput]').each(function(){
+						var fileQueue = $('#fileQueue')[0].innerText;
+						if(fileQueue!=""){
+							$(this).uploadifyUpload();
+							isUpload = true;
+						}
+					});
+				}
+				if(!isUpload){
+					submitMessage();
+				}
+			}
+		}
+
+	function submitMessage(){
+		var postJson=getPostJson();
+		var fileNameTask = [];
+		var fileSize =[];
+		var fileNameOld = [];
+		$('input[name=fileNameTask]').each(function(){
+					fileNameTask.push($(this).val());	
+		});
+		$('input[name=fileNameOld]').each(function(){
+					fileNameOld.push($(this).val());	
+		});
+		$('input[name=fileSize]').each(function(){
+					fileSize.push($(this).val());	
+		});
+		postJson["fileNameTask"]= fileNameTask.join(",");
+		postJson["fileNameOld"]= fileNameOld.join(",");
+		postJson["fileSize"]= fileSize.join(",");
+		getData(postJson);
+		jQuery.post("updateFeArticle.html?random="+Math.random()*1000000,postJson,
+		function(msg){
+			if(msg=='0'){
+				tab.close(GetId(), true);
+			}else if(msg == '-2'){
+				banger.page.showMessageBox('已存在相同的文章标题名，请重新输入!');
+			}
+			else{
+				banger.page.showMessageBox('编辑文章失败!');
+			}
+			
+		});
+	}
+	
+	function cfirm(){
+		if(sccCount!=count){
+			if(confirm('正在上传文章相关的文件，您确认要关闭编辑文章页卡吗？')) return true;
+		}else{
+			if(confirm('放弃编辑文章并关闭选项卡？')) return true;
+		}
+	}
+	
+	function mustread(){
+		if($("#chk").attr('checked')==undefined){
+			$('input[name="feArticle.isMastread"]').val("0");
+		
+		}else{
+			$('input[name="feArticle.isMastread"]').val("1");
+		}
+	}
+	function getData(postJson){	
+		postJson["feArticle.articleContent"]=window.content_html.getHTML();
+		var item = $("input:[name=readTime]:radio:checked").val();
+		var articleReadtimeBegin,articleReadtimeEnd;
+		if(item=='today'){
+			articleReadtimeBegin = GetDateStr(0);
+			articleReadtimeEnd = GetDateStr(0);
+		}else if(item=='tom'){
+			articleReadtimeBegin = GetDateStr(1);
+			articleReadtimeEnd = GetDateStr(1);
+		}
+		else{
+			articleReadtimeBegin = $('#readTimeBegin').val();
+			articleReadtimeEnd = $('#readTimeEnd').val();
+		}
+		postJson["feArticle.articleReadtimeBegin"]=articleReadtimeBegin;
+		postJson["feArticle.articleReadtimeEnd"]=articleReadtimeEnd;
+		
+	}
+	function GetDateStr(AddDayCount) 
+	{ 
+		var toadyDate  = Date.parse("$!toadyDate".replace(/-/g, "/"))
+		var dd = new Date(toadyDate);  
+		dd.setDate(dd.getDate()+AddDayCount);//获取AddDayCount天后的日期 
+		var y = dd.getYear(); 
+		var m = dd.getMonth()+1;//获取当前月份的日期 
+		var d = dd.getDate(); 
+		return y+"-"+m+"-"+d; 
+	} 
+	
+	//删除附件
+	function delAttr(articleId,attrId,index){
+		if(confirm("确定移除附件吗?")){
+			jQuery.post('removeAttr.html',{'feArticle.articleId':articleId,'articleAttr.attachmentId':attrId},function(date){
+				if(date>0){
+					$("#attr_"+index).remove();
+				}
+			});
+		}
+	}
+	
+	function downFile(attrId){
+		location.href="downArticleFile.html?articleAttr.attachmentId="+attrId;
+		return false;
+	}
+	
+	function searchStartDateFun(obj){
+			var mytable = $(obj).closest("table .celltbl");
+			var startDate=mytable.find("input").eq(0).val();
+			var endDate=mytable.find("input").eq(1).val();
+			var d1 = new Date(startDate.replace(/-/g, "/")); 
+			var d2 = new Date(GetDateStr(0).replace(/-/g, "/")); 
+			if (Date.parse(d1) - Date.parse(d2) < 0) { 
+				$(obj).attr('tips', '安排阅读时间不能够晚于今天'); return false;
+			}
+			if(endDate.length>0&&startDate.length>0){
+				if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+					$('#endDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		function searchEndDateFun(obj){
+			var mytable = $(obj).closest("table .celltbl");
+			var startDate=mytable.find("input").eq(0).val();
+			var endDate=mytable.find("input").eq(1).val();
+			var d1 = new Date(endDate.replace(/-/g, "/")); 
+			var d2 = new Date(GetDateStr(0).replace(/-/g, "/")); 
+			if (Date.parse(d1) - Date.parse(d2) < 0) { 
+				$(obj).attr('tips', '安排阅读时间不能够晚于今天'); return false;
+			}
+			
+			if(endDate.length>0&&startDate.length>0){
+				if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+    </script>
+</html>

@@ -1,0 +1,135 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>导入客户</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style>
+		#intercustom{ }
+		#outercustom{ margin: 0px 0px 0px 10px;}
+	</style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+		
+	function cheackPage(){
+		var changObj=document.getElementById("failureMsg");
+		if(changObj.value!=""){
+			banger.page.showMessageBox(changObj.value);
+		}
+	}
+ 	function cfirm(){
+		return true;
+	}
+    </script>
+</head>
+ 
+<body>
+	<form name="importForm"  id ="importForm"  enctype="multipart/form-data" action="tskImportExcel.html" onsubmit="return check();"  method="post" >
+    	<input type="hidden" name="failureMsg" id="failureMsg" value="$!failureMsg">
+		<input type="hidden" name="type" id="type" value="inner">
+    	<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td>第 2 步</td>
+            	<td>第 3 步</td>
+            	<td>完成</td>
+            </tr>
+        </table>
+        <h4 class="steptxt">
+        	选择导入文件路径
+        </h4>
+        
+        <table width="100%" style="line-height:40px;">
+    		<tr>
+            	<td width="60">
+                	<label>选择类别：</label>
+                </td>
+            	<td>
+    				<input type="radio" class="radio" name="radio" id="intercustom" checked="true" onclick="changeValue('inner')"/>
+    				<label for="intercustom">内部客户</label>
+                	<input type="radio" class="radio" name="radio" id="outercustom" onclick="changeValue('outer')"/>
+    				<label for="outercustom">外部客户</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="10%">
+                	<label>文件路径：</label>
+                </td>
+            	<td width="90%">
+                	<div id="uploadSpan" class="dfile">
+                        <input type="file" id="file" name="file" class="dfile-fl" style="width: 100%;" onkeydown="return false;" onpaste="return false;" onchange='checkFileType(this.value);' />
+                    </div>
+                </td>
+            </tr>
+        </table>
+        
+        <div style="margin-top: 40px;">
+        	为了能更好的上传你的客户资料，请使用我们提供的模板，以下为
+            Excel模版:
+        </div>
+       <table width="70%" style="margin: 10px 0px 40px 0px; text-align:center; line-height:35px;">
+        	<tr>
+            	<td width="8%">
+    				<p>导入<label class="red">内部</label>客户模版</p>
+    				<input type="button" class="btn1" value="下载" onclick="exportModelExcel('inner')" />
+    			</td>
+            	<td width="8%">
+    				<p>导入<label class="red">外部</label>客户模版</p>
+    				<input type="button" class="btn1" value="下载" onclick="exportModelExcel('outer')"/>
+    			</td>
+            </tr>
+        </table>
+        <hr />
+        
+        <div class="halign">
+        	<input type="submit" class="btn6 btn6bg1" value="下一步" />
+        	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+        </div>
+	</form>
+</body>
+<script type="text/javascript">
+	function changeValue(src){
+		$('#type').val(src);
+	}
+    function check() 
+    { 
+       if(importForm.file.value == "") {
+	  	 	banger.page.showMessageBox("请选择文件路径");
+            return false;
+       }else{
+       		return true;
+       }
+    }
+	
+	//下载客户模板
+	function exportModelExcel(type){
+		document.location.href="exportModelExcel.html?type="+type+"&random="+Math.random()*100000;
+	}
+
+	var html=document.getElementById('uploadSpan').innerHTML; 
+
+    function resetFile(){ 
+    	document.getElementById('uploadSpan').innerHTML=html; 
+    }
+	
+    function checkFileType(str){
+    	var pos = str.lastIndexOf(".");
+    	var lastname = str.substring(pos,str.length);
+    	var resultName=lastname.toLowerCase();
+    	if ('.xls'!=resultName.toString()&&'.xlsx'!=resultName.toString()&&'.et'!=resultName.toString()&&'.ett'!=resultName.toString()){
+    		banger.page.showMessageBox('只能上传xls/xlsx,et/ett文件，您上传的文件类型为'+lastname+'，请重新上传');
+    		resetFile();
+    	}
+    }
+    cheackPage();
+	
+</script>
+
+</html>
+

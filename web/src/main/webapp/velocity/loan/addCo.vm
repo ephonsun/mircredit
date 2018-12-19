@@ -1,0 +1,404 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加借贷人</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+	      body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+
+        /**
+         * 上传图片
+         */
+        function upLoadLogoFile(ptype){
+            ajaxFileUpload({
+                url:"../loan/upLoadLoanPhotoFile.html?ptype="+ptype+"&random="+Math.random()*10000,
+                id:'logoImage'+ptype,
+                callback:function(){
+                    var data = this.responseText;
+                    var json = jQuery.parseJSON(data);
+                    if(json.error){
+                        banger.page.showMessageBox(json.error);
+                    }else{
+                        var fileId = json.fileId;
+                        var filePathAndId = json.fullPath + "@" + fileId;
+                        jQuery("#txtPhoto"+ptype).val(json.fullPath);
+                        jQuery("#imgPLogo"+ptype).attr("src","../showImage?fullPath=" + json.fullPath);
+                    }
+                }
+            });
+            return false;
+        }
+
+        $(function(){
+            jQuery('#coLoanPerson').validator();
+            telInput("#txtCphNumber");
+//            idInput('#txtIDCard');
+            jQuery('#schtxtname').dfilter({
+                url: '${ctx}/loan/initFindCustomerByConds.html?random="+Math.random()*10000',
+                data: paramsName,
+                thead: [
+                    { text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+                    { text : '联系电话', field : 'replaceNumber', width : 150, align : 'center' },
+                    { text : '身份证', field : 'replaceIDCard', width : 150, align : 'center' }
+                ],
+                click: clickCus
+            });
+
+            jQuery('#schtxtnum').dfilter({
+                url: '${ctx}/loan/initFindCustomerByConds.html',
+                data: paramsNum,
+                thead: [
+                    { text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+                    { text : '联系电话', field : 'replaceNumber', width : 150, align : 'center' },
+                    { text : '身份证', field : 'replaceIDCard', width : 150, align : 'center' }
+                ],
+                click: clickCus
+            });
+
+            jQuery('#schtxtidcard').dfilter({
+                url: '${ctx}/loan/initFindCustomerByConds.html',
+                data: paramsAddr,
+                thead: [
+                    { text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+                    { text : '联系电话', field : 'replaceNumber', width : 150, align : 'center' },
+                    { text : '身份证', field : 'replaceIDCard', width : 150, align : 'center' }
+                ],
+                click: clickCus
+            });
+
+            //上传照片
+
+            $('div.apply-upload-photo-btn .upload-photo .file1').change(function () {
+                ajaxFileUpload({
+                    url:"../loan/upLoadLoanPhotoFile.html?random="+Math.random()*10000,
+                    id:'logoImage',
+                    callback:function(){
+                        var data = this.responseText;
+                        var json = jQuery.parseJSON(data);
+                        if(json.error){
+                            banger.page.showMessageBox(json.error);
+                            return;
+                        }else{
+//						jQuery("#txtPhoto"+ptype).val(json.fullPath);
+//						jQuery("#imgPLogo"+ptype).attr("src","../showImage?fullPath=" + json.fullPath);
+                            var fileId = json.fileId;
+                            var filePathAndId = json.fullPath + "@" + fileId;
+                            var photoUrl = "../showImage?fullPath=" + json.fullPath;
+                            var divHtml = '<div class="apply-upload-photo">'
+                                    + '<img src="'+photoUrl+'"/>'
+                                    + '<a href="#2" class="del">X</a>'
+                                    + '<input type="hidden" class="txtPhoto" value="'+filePathAndId+'"/>'
+                                    + '</div>';
+
+                            $('div.apply-upload-photo-btn .upload-photo').parent().next('.apply-upload-photo-div').append(divHtml);
+
+                            $('div.apply-upload-photo').hover(function () {
+                                $('a.del', this).show().click(function () {
+                                    $(this).parents('div.apply-upload-photo').remove();
+                                    //以下写删除操作
+
+                                });
+                            }, function () {
+                                $('a.del', this).hide();
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('div.apply-upload-photo').hover(function(){
+                $('a.del',this).show().click(function(){
+                    $(this).parents('div.apply-upload-photo').remove();
+                });
+            },function(){
+                $('a.del',this).hide();
+            });
+
+//            /**
+//             * 上传贷款资料图片
+//             */
+//            jQuery('#logoImage1').change(function(){
+//                //jQuery('#text').val(file.val(this));
+//                upLoadLogoFile(1);
+//            });
+//
+//            /**
+//             * 上传贷款资料图片
+//             */
+//            jQuery('#logoImage2').change(function(){
+//                //jQuery('#text').val(file.val(this));
+//                upLoadLogoFile(2);
+//            });
+//
+//            /**
+//             * 上传贷款资料图片
+//             */
+//            jQuery('#logoImage3').change(function(){
+//                //jQuery('#text').val(file.val(this));
+//                upLoadLogoFile(3);
+//            });
+
+            //确定
+            jQuery('.ui-footer-btn1-save').click(function(){
+                var bool = jQuery.validator({form:'coLoanPerson',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+                var isOk = saveBaseInfo(2);
+                if (!isOk) {
+                    return false;
+                }
+                var postJson = {};
+                postJson['loanId']=$("#txtLoanIdId").val();
+                postJson['customerId']=$("#txtCustomerId").val();
+				postJson['companyAddress'] = $("#txtCompanyAddress").val();
+				postJson['petitionerRelate'] = $("#txtPetitionerRelate").val();
+                var txtPhotos = "";
+                $('.txtPhoto').each(function(){
+                    txtPhotos += $(this).val() + ",";
+                });
+                if(txtPhotos.length > 0){
+                    txtPhotos = txtPhotos.substr(0,txtPhotos.length - 1);
+                }
+                postJson['txtPhotos'] = txtPhotos;
+//                postJson['photo1']=$("#txtPhoto1").val();
+//                postJson['photo2']=$("#txtPhoto2").val();
+//                postJson['photo3']=$("#txtPhoto3").val();
+                var urlStr = "../loan/addCo.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+						if(data == "success"){
+                            window.returnValue="success";
+                            window.close();
+						}else{
+							alert(data);
+						}
+                    }
+                });
+
+            });
+
+            jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+        });
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+
+        function paramsName(){
+		 	return 'customerName=' + jQuery('#txtCustomerName').val()+ "&customerIds="+$("#customerIds").val();
+			//var postJson = {};
+			//postJson['customerName'] = $("#txtCustomerName").val();
+			//postJson['customerIds'] = $("#customerIds").val();
+			//return postJson;
+        }
+
+        function paramsNum(){
+            return 'cphNumber=' + jQuery('#txtCphNumber').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function paramsAddr(){
+            return 'idCard=' + jQuery('#txtIDCard').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function clickCus(node){
+//            jQuery("#txtCustomerName").val(node['customerName']);
+//            jQuery("#txtCphNumber").val(node['replaceNumber']);
+//            jQuery("#txtIDCard").val(node['replaceIDCard']);
+
+			jQuery("#txtCustomerName").val(node['customerName']);
+            jQuery("#txtCphNumber").val(node['cphNumber']);
+            jQuery("#txtIDCard").val(node['idCard']);
+			$("#txtCompany").val(node['company']);
+            //保存原始的客户信息
+            jQuery("#txtCustomerId").val(node['customerId']);
+            jQuery("#txtOldCustomerName").val(node['customerName']);
+            jQuery("#txtOldCphNumber").val(node['cphNumber']);
+            jQuery("#txtOldIDCard").val(node['idCard']);
+            jQuery("#txtReplaceCphNumber").val(node['replaceNumber']);
+            jQuery("#txtReplaceIDCard").val(node['replaceIDCard']);
+			
+            var bool = jQuery.validator({form:'coLoanPerson',extend:true,extendhandler:extendvalidator});
+            if(!bool){
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+    <input type="hidden" id="applyCusIdCard" value="$!applyCusIdCard"/>
+    <input type="hidden" id="guCusIdCards" value="$!guCusIdCards"/>
+    <input type="hidden" id="txtLoanIdId" value="$!loanId"/>
+    <input type="hidden" id="customerIds" value="$!customerIds"/>
+    <input type="hidden" id="txtCustomerId"/>
+    <input type="hidden" id="txtOldCustomerName" value=""/>
+    <input type="hidden" id="txtOldCphNumber" value=""/>
+    <input type="hidden" id="txtReplaceCphNumber" value=""/>
+    <input type="hidden" id="txtOldIDCard" value=""/>
+    <input type="hidden" id="txtReplaceIDCard" value=""/>
+    <input type="hidden" id="txtPhoto1" value="" />
+    <input type="hidden" id="txtPhoto2" value="" />
+    <input type="hidden" id="txtPhoto3" value="" />
+
+    <p class="bold loan-ttlbg">添加借贷人</p>
+    <div class="loan-add-box">
+      <table class="viewtbl" style="table-layout: auto;" id="coLoanPerson">
+          <tbody>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>借贷人：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtname">
+                          <input type="text" class="text" id="txtCustomerName" maxlength="20" rule="\S" tips='"借贷人"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>联系电话：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtnum">
+                          <input type="text" class="text" id="txtCphNumber" maxlength="20" rule="\S" tips='"联系电话"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>身份证：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtidcard">
+                          <input type="text" class="text" id="txtIDCard" maxlength="20" rule="\S" tips='"身份证"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+			  <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>企业/工作单位：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtidcard">
+                          <input type="text" class="text" id="txtCompany" maxlength="20" rule="\S" tips='"企业/工作单位"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+			  <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>经营/单位地址：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtidcard">
+                          <input type="text" class="text" id="txtCompanyAddress" maxlength="20" rule="\S" tips='"经营/单位地址"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+			  <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>与申请人关系：</label>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text" id="schtxtidcard">
+                          <input type="text" class="text" id="txtPetitionerRelate" maxlength="20" rule="\S" tips='"与申请人关系"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+              <!--
+              <tr>
+                  <td class="field" valign="top" width="8%">
+                      <label>添加照片：</label>
+                  </td>
+
+                  <td valign="top" align="center" width="10%">
+                      <div class="avatar">
+                          <img src="${ctx}/images/loan/head.png" id="imgPLogo1" title="头像照片" alt="头像照片"  />
+                      </div>
+                      <div class="ui-div-file-btn">
+	                       <label>更 换</label>
+	                       <input type="file" name=logoImage id="logoImage1" class="file" />
+	                   </div>
+                  </td>
+                  <td valign="top" align="center" width="10%">
+                      <div class="avatar">
+                          <img src="${ctx}/images/loan/idcard_z.png" id="imgPLogo2" title="身份证正面" alt="身份证正面"  />
+                      </div>
+                      <div class="ui-div-file-btn">
+	                       <label>更 换</label>
+	                       <input type="file" name=logoImage id="logoImage2" class="file" />
+	                   </div>
+                  </td>
+                  <td valign="top" align="center" width="10%">
+                      <div class="avatar">
+                          <img src="${ctx}/images/loan/idcard_f.png" id="imgPLogo3" title="身份证反面" alt="身份证反面"  />
+                      </div>
+                      <div class="ui-div-file-btn">
+	                       <label>更 换</label>
+	                       <input type="file" name=logoImage id="logoImage3" class="file" />
+	                   </div>
+                  </td>
+
+                  <td colspan="4"></td>
+              </tr>
+              -->
+          </tbody>
+      </table>
+        
+    #*     <div class="loan-add-photo-box">
+            <p class="bold loan-lheight">添加照片</p>
+            <div class="apply-upload-photo-btn">
+            <span class="ui-div-file1 upload-photo">
+                  <input type="button" class="btn1 hard-wid" value="上传照片" />
+                  <input type="file" id="logoImage" name="logoImage" class="file1" />
+            </span>
+            </div>
+            <div class="apply-upload-photo-div">
+
+            </div>
+
+        </div>
+        *#
+      </div>
+      <hr />
+      <div class="center">
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+      </div>
+</body>
+</html>

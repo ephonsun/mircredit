@@ -1,0 +1,151 @@
+<input type="hidden" id="count" value="$!count"/>
+<table class="ui-desk-reminders" style="clear:both;">
+    <thead>
+        <tr>
+            <th width="240"><label>客户（电话）</label></th>
+            <th><label>申请金额（元）</label></th>
+            <th><label>贷款状态</label></th>
+			<th><label>贷款类型</label></th>
+			<th><label>贷款负责人</label></th>
+			<th><label>操作</label></th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($lnLoan in $!lnLoans)
+        <tr #if(($!lnLoan.loanStatusId != 6 && $lnLoan.isWillPast && $!lnLoan.isWillPast == 1) ||
+        ($!lnLoan.loanStatusId == 6 && $lnLoan.isWillPast && $!lnLoan.isWillPast == 1
+        && (!$lnLoan.isFull || $!lnLoan.isFull !=1)) && $lnLoan.repaymentStatus && $!lnLoan.repaymentStatus == 1) class="orange" #end>
+            <td>
+				<div class="customer-infor">
+						#if($urlPermitUtil.hasPermission('browseCustomer') && $!status != '3')
+                            #if($!lnLoan.crmCustomer.defaultPhoneType=='1')
+        		            	<span class="ui-link-btn" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')" title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone1）">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone1）</span>
+        		            #elseif($!lnLoan.crmCustomer.defaultPhoneType=='2')
+        		            	<span class="ui-link-btn" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')" title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone2）">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone2）</span>
+        		            #elseif($!lnLoan.crmCustomer.defaultPhoneType=='3')
+        		            	<span class="ui-link-btn" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')" title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.phone）">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.phone）</span>
+        		            #elseif($!lnLoan.crmCustomer.defaultPhoneType=='4')
+        		            	<span class="ui-link-btn" onclick="browseCustomer('$!lnLoan.crmCustomer.customerId')" title="$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.fax）">$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.fax）</span>
+							#end
+						#else
+							 #if($!lnLoan.crmCustomer.defaultPhoneType=='1')
+        		            	<span>$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone1）</span>
+        		            #elseif($!lnLoan.crmCustomer.defaultPhoneType=='2')
+        		            	<span>$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.mobilePhone2）</span>
+        		            #elseif($!lnLoan.crmCustomer.defaultPhoneType=='3')
+        		            	<span>$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.phone）</span>
+        		            #elseif($!lnLoan.crmCustomer.defaultPhoneType=='4')
+        		            	<span>$!lnLoan.crmCustomer.customerName（$!lnLoan.crmCustomer.fax）</span>
+							#end
+						#end
+						#if($!status != '3')
+                        <div class="icon">
+                            #if($!lnLoan.crmCustomer.defaultPhoneType=='1')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+									<i class="i phone" title="拨号" onclick="dial('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+									<i class="i dsc" title="座谈" onclick="tape('$!lnLoan.crmCustomer.customerId')">dsc</i>
+								#end
+    		                	#if($urlPermitUtil.hasPermission('toAddSms'))
+    		                	<i class="i sms" title="短信" onclick="sendSms('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">sms</i>
+    		                	#end
+    		                	#if($urlPermitUtil.hasPermission('toAddMms'))
+    		                	<i class="i mms" title="彩信" onclick="sendMms('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">mms</i>
+    		                	#end
+    		                #elseif($!lnLoan.crmCustomer.defaultPhoneType=='2')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+    		                	<i class="i phone" title="拨号" onclick="dial('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+    		                	<i class="i dsc" title="座谈" onclick="tape('$!lnLoan.crmCustomer.customerId')">dsc</i>
+								#end
+    		                	#if($urlPermitUtil.hasPermission('toAddSms'))
+    		                	<i class="i sms" title="短信" onclick="sendSms('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">sms</i>
+    		                	#end
+    		                	#if($urlPermitUtil.hasPermission('toAddMms'))
+    		                	<i class="i mms" title="彩信" onclick="sendMms('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">mms</i>
+    		                	#end
+    		                #elseif($!lnLoan.crmCustomer.defaultPhoneType=='3')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+    		                	<i class="i phone" title="拨号" onclick="dial('$!lnLoan.crmCustomer.phone','$!lnLoan.crmCustomer.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+    		                	<i class="i dsc" title="座谈" onclick="tape('$!lnLoan.crmCustomer.customerId')">dsc</i>
+								#end
+    		                	#if($!lnLoan.crmCustomer.mobilePhone1)
+    		                		#if($urlPermitUtil.hasPermission('toAddSms'))
+    		                		<i class="i sms" title="短信" onclick="sendSms('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">sms</i>	
+    		                		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+    		                		<i class="i mms" title="彩信" onclick="sendMms('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">mms</i>
+    		                		#end
+    		                	#elseif($!lnLoan.crmCustomer.mobilePhone2)
+    		                		#if($urlPermitUtil.hasPermission('toAddSms'))
+    		                		<i class="i sms" title="短信" onclick="sendSms('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">sms</i>
+    		                		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+    		                		<i class="i mms" title="彩信" onclick="sendMms('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">mms</i>
+    		                		#end
+    		                	#end
+    		                #elseif($!lnLoan.crmCustomer.defaultPhoneType=='4')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+    		                	<i class="i phone" title="拨号" onclick="dial('$!lnLoan.crmCustomer.fax','$!lnLoan.crmCustomer.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+    		                	<i class="i dsc" title="座谈" onclick="tape('$!lnLoan.crmCustomer.customerId')">dsc</i>
+								#end
+    		                	#if($!lnLoan.crmCustomer.mobilePhone1)
+    		                		#if($urlPermitUtil.hasPermission('toAddSms'))
+    		                		<i class="i sms" title="短信" onclick="sendSms('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">sms</i>	
+    		                		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+    		                		<i class="i mms" title="彩信" onclick="sendMms('$!lnLoan.crmCustomer.mobilePhone1','$!lnLoan.crmCustomer.customerId')">mms</i>
+    		                		#end
+    		                	#elseif($!lnLoan.crmCustomer.mobilePhone2)
+    		                		#if($urlPermitUtil.hasPermission('toAddSms'))
+    		                		<i class="i sms" title="短信" onclick="sendSms('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">sms</i>
+    		                		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+    		                		<i class="i mms" title="彩信" onclick="sendMms('$!lnLoan.crmCustomer.mobilePhone2','$!lnLoan.crmCustomer.customerId')">mms</i>
+    		                		#end
+    		                	#end
+    		                #end
+                        </div>
+						#end
+                        <div class="other">
+                            <label class="item cusTitle" title="$!lnLoan.crmCustomer.customerTitle">$!lnLoan.crmCustomer.customerTitle</label>
+                            <label class="item">$!lnLoan.crmCustomer.sex</label>
+                            <label class="item">#if($!lnLoan.crmCustomer.age) $!lnLoan.crmCustomer.age岁 #end</label>
+                            #if($!lnLoan.crmCustomer.isNoGood==1)
+	                        <label class="item red">
+	                        	（不良客户）
+	                        </label>
+	                        #end
+                        </div>
+                    </div>
+			</td>
+            <td><label title="$!lnLoan.lnLoanInfoBean.appMoney">$!lnLoan.lnLoanInfoBean.appMoney</label></td>
+             <td><label title="$!lnLoan.loanStatusId">#if($!lnLoan.loanStatusId==1)申请 #elseif($!lnLoan.loanStatusId==2) 分配 #elseif($!lnLoan.loanStatusId==3)调查 #elseif($!lnLoan.loanStatusId==4)审批 #elseif($!lnLoan.loanStatusId==5)放贷   #elseif($!lnLoan.loanStatusId==6)催收 #elseif($!lnLoan.loanStatusId==7)结清 #elseif($!lnLoan.loanStatusId==12)分配拒绝  #elseif($!lnLoan.loanStatusId==13)调查拒绝 #elseif($!lnLoan.loanStatusId==14)审批拒绝 #elseif($!lnLoan.loanStatusId==15)放贷#end</label></td>
+			<td><label title="$!lnLoan.lnLoanInfoBean.appLoanTypeId">#if($!lnLoan.lnLoanInfoBean.appLoanTypeId==1) 经营贷  #else 消费贷 #end</label></td> 
+			<td><label title="#if($!lnLoan.sysUser.surveyUserName)$!lnLoan.sysUser.surveyUserName#else $!lnLoan.sysUser.applyUserName#end">#if($!lnLoan.sysUser.surveyUserName)$!lnLoan.sysUser.surveyUserName#else $!lnLoan.sysUser.applyUserName#end</label></td> 
+			<td><label>
+				##if($urlPermitUtil.hasPermission('backLoan') && ($!status == '1' || $!status == '5'))
+					##<a href="#2" onclick="editViewLoanByPhase($!lnLoan.loanId,0);">编辑贷款</a>
+				##elseif($urlPermitUtil.hasPermission('lnViewLoanDetail'))
+					<a href="#2" onclick="viewLoan($!lnLoan.loanId);">查看贷款</a>
+				##end
+			</label></td> 
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+        <tr>
+            #if($!lnLoans.size()==10)
+				<td colspan="6">
+					<a href="#2" onclick="queryMoveLoan();">查看更多</a>
+				</td>
+			#end
+        </tr>
+    </tfoot>
+</table>

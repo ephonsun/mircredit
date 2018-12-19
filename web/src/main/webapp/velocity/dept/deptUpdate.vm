@@ -1,0 +1,247 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑机构</title>
+	<base target="_self" />
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+		.ttl { border-bottom: 1px solid #b1b1b1; margin-bottom: 10px; padding-bottom: 7px; font-weight: bold; }
+	</style>
+	
+	#scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+ 	<script type="text/javascript">
+		var setting = {
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				beforeClick: beforeClick,
+				onClick: onClick
+			},
+
+			view: {
+				dblClickExpand: false,
+				showIcon: showIconForTree
+			}
+		
+		};
+ 		
+		var zNodes = $!deptJson; 
+		
+		function beforeClick(treeId, treeNode) {
+			var check = (treeNode);
+			return check;
+		}
+		
+		function onClick(e, treeId, treeNode) {
+			var zTree = jQuery.fn.zTree.getZTreeObj("deptTree");
+			var nodes = zTree.getSelectedNodes();
+			var v = "";
+			nodes.sort(function compare(a,b){return a.id-b.id;});
+			for (var i=0, l=nodes.length; i<l; i++) {
+				v += nodes[i].name + ",";
+			}
+			if (v.length > 0 ) v = v.substring(0, v.length-1);
+			var cityObj = $("#deptParentName");
+			cityObj.attr("value", v);
+			$("#dept").attr("value",treeNode.id);
+		}
+
+		//不显示节点图标
+		function showIconForTree(treeId, treeNode) {
+			return !treeNode;
+		};
+		
+		function showMenu() {
+			var cityObj = $("#deptParentName");
+			var cityOffset = $("#deptParentName").offset();
+			$("#menuContent").css({left:cityOffset.left + "px", top:cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+ 
+			$("body").bind("mousedown", onBodyDown);
+		}
+		function hideMenu() {
+			$("#menuContent").fadeOut("fast");
+			$("body").unbind("mousedown", onBodyDown);
+		}
+		function onBodyDown(event) {
+			if (!(event.target.id == "menuBtn" || event.target.id == "deptParentName" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+				hideMenu();
+			}
+		}
+
+ 		//机构树加载
+		$(function(){
+			//escapeInput('#deptName');
+			maxInput('#remark',200);
+			jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+			jQuery("#deptUpdate").validator();
+		});
+	
+		function addsubmit(){
+			var bool = jQuery.validator({ form: 'deptUpdate', extend: false});
+			if(!bool){
+				return false;
+			}
+			var postData;
+			var a = $("#rootId").val();
+			if(a == 1) postData= 1; 
+			else{
+				if($('#dept').val()) postData = $('#dept').val();
+				else  postData=0;
+			}
+			var deptname_isexist="";
+			var deptcode_isexist="";
+			var belongdept_error="";
+			
+    		jQuery.ajax({
+						type:'post',
+						url:'updateDept.html',
+    					data:{'dept.deptId':$!deptId,
+        					 'deptParentName':$('#deptParentName').val().replace(/(^\s*)|(\s*$)/g,""),
+        					 'dept.deptName':$('#deptName').val().replace(/(^\s*)|(\s*$)/g,""),
+        					 'dept.deptCode':$('#deptCode').val().replace(/(^\s*)|(\s*$)/g,""),
+        					 'dept.remark':$('#remark').val().replace(/(^\s*)|(\s*$)/g,""),
+    						 'deptParentId':postData
+        					},
+						cache: false,
+						async: false,
+                		success:function(data){
+							var json=jQuery.parseJSON(data);
+							if(json['deptname_isexist'])deptname_isexist=json['deptname_isexist'];
+							if(json['deptcode_isexist']) deptcode_isexist = json['deptcode_isexist'];
+							if(json['belongdept_error'])belongdept_error=json['belongdept_error'];
+							
+							if(deptname_isexist!= ""){
+								$('#d1').addClass('v-fails');
+    	  						$('#deptName').attr('tips', deptname_isexist); 
+            				}else{
+								$('#d1').removeClass('v-fails');
+							}
+        					if(deptcode_isexist!= ""){
+								$('#d2').addClass('v-fails');
+    	  						$('#deptCode').attr('tips', deptcode_isexist); 
+        					}else{
+								$('#d2').removeClass('v-fails');
+							}
+							if(belongdept_error!= ""){
+								$('#d3').addClass('v-fails');
+    	  						$('#deptParentName').attr('tips', belongdept_error); 
+        					}else{
+								$('#d3').removeClass('v-fails');
+							}
+							
+                			if(deptname_isexist=="" && deptcode_isexist=="" && belongdept_error==""){
+                				window.returnValue=1;
+                				window.close();
+                				document.deptUpdate.submit();
+                			}
+						}
+                	});
+	    	  
+		}
+    	function checkUnique(obj){
+    		if(obj.value == "") obj.tips = obj.tipworn;
+    	}
+		
+		function validateDeptName(obj){
+    		var deptName=$("#deptName").val();
+    		if(deptName == ""){ 
+    			$(obj).attr('tips', '“机构名称”必须填写'); return false;
+    		}else{
+    			var dname=deptName.toLowerCase().replace(/\s+/g,"");
+    			if(dname=='null'){
+    				$(obj).attr('tips', '“机构名称”不合法'); return false;
+    			}else{
+    				$('#d1').removeClass('v-fails');
+    				return true;
+    			}
+    		}
+    	}
+	</script>
+</head>
+
+<body>
+	<form name="deptUpdate"  id ="deptUpdate" action="updateDept.html"  method="post" >
+		<input type="hidden" id="rootId" name="root" value="$!root" />
+		<input type="hidden" id="dept" name="deptId"/>
+		<input type="hidden" name="dept.deptId" value="$!dept.deptId"/>
+		
+		<div class="ttl">编辑机构</div>
+		<table class="htmltbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	                <td width="70" class="field">
+	                	<label class="red">*</label><label>机构名称：</label>
+	                </td>
+	            	<td>
+	            		<div id="d1" class="dtxt1" style="width: 200px;">
+	            			<input type="text" maxLength="20" id="deptName" fun="validateDeptName" name="dept.deptName" class="dtxt1-txt" value="$!dept.deptName" rule="\S" onkeyup="checkUnique(this)" tips='“机构名称”必须填写' tipworn='“机构名称”必须填写' />
+	            		</div>
+	            	</td>
+	            </tr>
+	        	<tr>
+	                <td width="70" class="field">
+	                	<label class="red">*</label><label>机构编号：</label>
+	                </td>
+	            	<td>
+	            		<div id="d2" class="dtxt1" style="width: 200px;">
+	            			<input type="text" maxLength="20" id="deptCode" name="dept.deptCode" class="dtxt1-txt" value="$!dept.deptCode" rule="\S" onkeyup="checkUnique(this)" tips='“机构编号”必须填写' tipworn='“机构编号”必须填写' />
+	            		</div>
+	            	</td>
+	            </tr>
+				#if(!$!deptParentName.equals("yes"))
+    	            <tr>
+    	                <td width="70" class="field">
+    	                	<label class="red">*</label><label>归属机构：</label>
+    	                </td>
+    	            	<td>
+    						#if($!root == 1)
+    	            		<div id="d3" class="dtxt1" style="width: 200px;">
+    	                    	<input id="deptParentName" name="deptParentName" class="dtxt1-txt" value="$!deptParentName" disabled="disabled" tips=""/>
+    	                    </div>
+    						#else
+    						<div id="d3" class="dtxt2" style="width: 200px;">
+    	                    	<input type="text" id="deptParentName" name="deptParentName" readonly="readonly" class="dtxt2-txt" value="$!deptParentName" tips=""/>
+    	                        <i class="dtxt2-ddl" onclick="showMenu();"></i>
+    	                    </div>
+    						#end
+    	                </td>
+    	            </tr>
+				#else
+					<input id="deptParentName" type="hidden" />
+				#end
+	            <tr>
+	                <td width="70" class="field">
+	                	<label>机构备注：</label>
+	                </td>
+	            	<td>
+	                	<div class="dtxtarea1">
+	                		<textarea id="remark" name="dept.remark" class="dtxtarea1" style="height: 80px; border: 0;">$!dept.remark</textarea>
+	                	</div>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+	    
+	    <hr />
+	    
+	    <div class="halign">
+	    	<input type="button"  class="btn6 btn6bg1" onclick="addsubmit()" value="保存" />
+        	<input type="button"  class="btn6 btn6bg3" onclick="javascript:window.close();" value="取消" />
+	    </div>
+	    
+	    <div id="menuContent" class="menuContent" style="display:none; position: absolute; overflow-x: hidden; border: 1px solid #ccc; background-color: #fff;">
+			<ul id="deptTree" class="ztree" style="margin-top:0; width:160px;"></ul>
+		</div>
+    </form>
+</body>
+</html>

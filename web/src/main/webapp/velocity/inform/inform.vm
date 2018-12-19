@@ -1,0 +1,58 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>通告设置</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    #styleLink("base")
+   <style type="text/css">
+		.Agency-right {min-height: 704px; height: auto !important; height: 534px; margin-left: 180px; }
+    </style>
+
+    #scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+</head>
+ 
+<body>
+<form action="updateInform.html" method="post">
+    <input type="hidden" name="inform.informId" value="$!inform.informId"/>
+    <table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td width="70" class="field">
+                <label>是否开启通告：</label>
+                <input type="radio" id="isOpen1"  name="inform.isOpen" value="1" #if(1==$!inform.isOpen) checked="checked"
+                #end /> <label for="isOpen1">开启</label>
+                <input type="radio" id="isOpen2" name="inform.isOpen" value="0" #if(0==$!inform.isOpen) checked="checked"
+                #end/> <label for="isOpen2">关闭</label>
+            </td>
+        </tr>
+        <tr>
+            <td width="70" class="field">
+                <label>描述：</label>
+            </td>
+            <td>
+                <div class="dtxtarea1" style="width: 400px">
+                    <textarea style="height: 80px; border: 0;" name="inform.text" maxlength="200">$!inform.text</textarea>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr />
+
+    <div class="halign">
+        <input type="submit" class="btn6 btn6bg1"  value="保存" />
+        <input type="button" class="btn6 btn6bg3" onclick="javascript:tab.close(GetId(), true);" value="取消" />
+    </div>
+</form>
+</body>
+</html>
+

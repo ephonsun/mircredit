@@ -1,0 +1,341 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑知识</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+		div.mt { margin-top: 20px; }
+		.clear {
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+<form id="form1" name="form1">
+	<input type="hidden" id="txtLibraryId" value="$!pdtLibrary.libraryId"/>
+	<input type="hidden" id="txtSNodeId" value="$!pPdtLibrary.libraryId"/>
+	<input type="hidden" id="txtSNodeName" value="$!pPdtLibrary.libTitle"/>
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                    <label class="red">*</label>
+                	<label>知识标题：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="hidden" id="oldTxtLibTitle" value="$!pdtLibrary.libTitle"/>
+                		<input type="text" class="text" id="txtLibTitle" value="$!pdtLibrary.libTitle" maxlength="60" rule="\S" tips='"知识标题"必须填写'/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                    <label class="red">*</label>
+                	<label>知识编号：</label>
+                </td>
+                <td width="17%">
+                	<label id="lblLibNo">$!pdtLibrary.libNo</label>
+                </td>
+            	<td class="field" width="8%">
+                	<label>创建时间：</label>
+                </td>
+                <td  width="17%">
+                    <label>$date.format("yyyy-MM-dd",$!pdtLibrary.createDate)</label>  
+                </td>
+				<td colspan="2"></td>
+    		<tr>
+            <tr>				
+            	<td class="field" width="8%">
+                	<label>更新时间：</label>
+                </td>
+                <td width="17%">
+                    <label>$date.format("yyyy-MM-dd",$!pdtLibrary.updateDate)</label> 
+                </td>
+
+            	<td class="field" width="8%">
+                    <label class="red">*</label>
+                	<label>所属分类：</label>
+                </td>
+                <td width="17%">
+                	<div id="class" class="ui-div-text">
+                		<input type="text" class="text" value="$!pPdtLibrary.libTitle"/>
+                		<i class="ddl">&nbsp;</i>
+                	</div>
+                </td>
+				<td colspan="4"></td>
+    		<tr>
+        </tbody>
+    </table>
+    <div class="bold" style="border-bottom:1px solid #b1b1b1; line-height:30px;">
+        <label class="red">*</label>
+        知识内容
+    </div>
+    <input type="hidden" id="content" value='$!pdtLibrary.libContent'>
+    <div class="mt" id="libContentTxt" >
+    	<script type="text/plain" id="txtLibContent" >
+		</script>
+    </div>
+    <div class="clear"></div>
+    
+    <table class="viewtbl">
+    	<tbody>
+          <tr>
+              <td width="80">
+                  <label>上传附件：</label>
+              </td>
+              <td colspan="3">
+              		<input type="file" name="fileInput" id="fileInput" />
+					#foreach($attr in $!attrList)
+					   <div id="attr_$velocityCount" class="uploadifyQueueItem">
+     						<div class="cancel">
+     							<a href="#" onclick="delAttr($!attr.libraryAttachmentId,$velocityCount)"><img src="${ctx}/uploadify/cancel.png" border="0" /></a>
+     						</div>
+                            <span class="fileName"><a href="#" onclick="downFileAttr($attr.libraryAttachmentId)" class="attrFile">$!attr.sysUploadFile.uploadFileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.sysUploadFile.fileSize"))</label></span><span class="percentage"></span>
+	         		   </div>
+					#end
+					<div id="fileQueue"></div>
+              </td>
+          </tr>
+        </tbody>
+    </table> 
+    <hr />
+    
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" id="btnSave"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+</form>
+</body>
+
+
+<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.ddmenuSelect-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="${ctx}/js/ueditor/ueditor.all.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+
+
+<script type="text/javascript">
+    //获取当前url根节点(micro)
+    var urlRef = (window.location.href).replace('http://', '');
+    var urlStr = urlRef.substring(urlRef.indexOf('/'), urlRef.indexOf('/pdtLibrary'));
+
+    /**
+	 * 加载ue编辑器
+	 */
+	var ue=new UE.ui.Editor({
+		minFrameHeight:343,
+        wordCount:true,
+        maximumWords:5000,
+        imageUrl: urlStr+"/imageUpload",
+        imagePath: urlStr+"/showImage?fullPath=",
+        imageManagerUrl: urlStr+"/imageManager",
+        imageManagerPath: urlStr+"/showImage?fullPath=",
+        wordOverFlowMsg:'<span style="color:red;">你输入的字符个数已经超出最大允许值，服务器可能会拒绝保存！</span>',
+        initialContent:$("#content").val()
+    });
+    ue.render('txtLibContent');
+    
+    ue.addListener("selectionchange", function () {
+	     var state = ue.queryCommandState( "source" );
+	     var btndiv = document.getElementById( "btns" );
+	     if ( btndiv && state == -1 ) {
+	         disableBtn( "enable" );
+	     }
+        //操作编辑器时，隐藏所属分类下拉框
+        if(jQuery('.ui-ddmenuSelect') && jQuery('.ui-ddmenuSelect').is(':visible')){
+            jQuery('.ui-ddmenuSelect').css({'display':'none'});
+        }
+    });
+    
+	/**
+	 * 下载知识附件
+	 */
+	function downFileAttr(libraryAttachmentId){
+		location.href="downloadPdtLibraryAttachment.html?libraryAttachmentId="+libraryAttachmentId;
+		return false;
+	}
+		
+	/**
+	 * 删除知识附件
+	 */
+	function delAttr(libraryAttachmentId,index){
+		if(confirm("确定移除附件吗?")){
+			//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "delPdtLibraryAttachment.html",
+		    	data: {'libraryAttachmentId': libraryAttachmentId
+		    	},
+		    	success: function(data){
+		 	  		delResult(data,libraryAttachmentId,index);
+		    	}
+			});
+		}
+	}
+	function delResult(msg,libraryAttachmentId,index){
+		if(msg == 'Success'){
+			jQuery("#attr_"+index).remove();
+		}else{
+			banger.page.showMessageBox(msg);
+		}
+	}
+		
+		
+	/**
+	 * 关闭页卡确认框
+	 */
+	function cfirm(){
+		if(sccCount!=count){
+			if(confirm('正在上传知识附件，您确认要关闭新建知识页卡吗？')) return true;
+		}else return true;
+	}
+	
+	/**
+	 * 上传附件
+	 */
+	function uploadAttachment(){
+		var fileUpload = jQuery('input[name=fileInput]');
+		var isUpload = false;
+		if(fileUpload!=undefined){
+			jQuery('input[name=fileInput]').each(function(){
+				var fileQueue = jQuery('#fileQueue').text();
+				if(fileQueue!=""){
+					jQuery(this).uploadifyUpload();
+					isUpload = true;
+				}
+			});
+		}
+		//如果没有附件需要上传
+		if(!isUpload){
+			saveData();
+		}	
+	}
+	
+	/**
+	 * ajax验证知识数据
+	 */
+	function verifyData(){
+		var libraryId = jQuery("#txtSNodeId").val();
+		//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+		jQuery.ajax({
+	    	type: "post",
+	    	url: "verifyLeafPdtLibrary.html",
+	    	data: {'pdtLibrary.libraryId': jQuery("#txtLibraryId").val(),
+			       'pdtLibrary.parentId': libraryId,
+			       'pdtLibrary.isLeaf': 1,
+			       'pdtLibrary.isDel': 0,
+			       'pdtLibrary.libContent': ue.getContent(),
+			       'pdtLibrary.libNo': jQuery("#lblLibNo").text(),
+			       'pdtLibrary.libTitle': jQuery.trim(jQuery("#txtLibTitle").val()),
+			       'pdtLibrary.remark': '',
+			       'oldTxtLibTitle':jQuery("#oldTxtLibTitle").val()
+	    	},
+	    	success: function(data){
+	 	  		verifyResult(data);
+	    	}
+		});
+	}
+	function verifyResult(msg){
+		if(msg == 'SUCCESS'){
+			//验证数据是否正确，通过才上传附件
+			uploadAttachment();
+		}else{
+			banger.page.showMessageBox(msg);
+		}
+	}
+	
+	/**
+	 * 保存知识数据
+	 */
+	function saveData(){
+		var libraryId = jQuery("#txtSNodeId").val();
+		var arr = [];
+		jQuery("input[name='fileAttachment']").each(function(i){
+			arr[i] = jQuery(this).val();
+		});
+		fileAttachments = arr.join(":");
+		//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+		jQuery.ajax({
+	    	type: "post",
+	    	url: "saveLeafPdtLibrary.html",
+	    	data: {'pdtLibrary.libraryId': jQuery("#txtLibraryId").val(),
+			       'pdtLibrary.parentId': libraryId,
+			       'pdtLibrary.isLeaf': 1,
+			       'pdtLibrary.isDel': 0,
+			       'pdtLibrary.libContent': ue.getContent(),
+			       'pdtLibrary.libNo': jQuery("#lblLibNo").text(),
+			       'pdtLibrary.libTitle': jQuery.trim(jQuery("#txtLibTitle").val()),
+			       'pdtLibrary.remark': '',
+			       'fileAttachments':fileAttachments
+	    	},
+	    	success: function(data){
+	 	  		saveResult(data);
+	    	}
+		});
+	}
+	function saveResult(msg){
+		if(msg == 'SUCCESS'){
+			tab.close(GetId(), true);
+		}else{
+			banger.page.showMessageBox(msg);
+		}
+	}
+
+    function saveNext() {
+        saveData();
+    }
+
+
+	
+	jQuery(function(){
+        jQuery('#form1').validator();
+
+		jQuery('#class').ddMenuSelect({
+			id: 'ztree',
+			url: 'loadPdtLibraryTreeJson.html',
+			onClick: function(e, treeId, treeNode){
+				jQuery('#class input[type=\'text\']').val(treeNode.name);
+				jQuery("#txtSNodeId").val(treeNode.id);
+				jQuery("#txtSNodeName").val(treeNode.name);
+			}
+		});
+		
+		jQuery("#btnSave").click(function(){
+            var bool = jQuery.validator({form : 'form1'});
+            var reg = new RegExp("[\r\t\n]", "g");
+            if(!bool){
+                return false;
+            }
+            if(!ue){
+            	return false;
+            }
+            if(ue.getContentTxt().replace(reg,"").length >5000){
+                return false;
+            }
+            if(ue.getContentTxt().length <1 && ue.hasContents()!=true){
+                banger.page.showMessageBox('"知识内容"必须填写');
+                return false;
+            }
+			verifyData();
+		});
+		
+		setFileUpload('../pdtLibrary/uploadPdtLibraryAttachment.html');//渲染附件上传功能
+	});
+</script>
+</html>

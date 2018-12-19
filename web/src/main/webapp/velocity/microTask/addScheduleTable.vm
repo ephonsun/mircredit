@@ -1,0 +1,118 @@
+<thead>
+    <tr>
+        <th width="20"><input type="checkbox" nm="chkall" name="tskCheckAll" id="tskCheckAll"  onclick="selectAll(this)" /></th>
+        <th width="240"><label title="客户信息">客户(电话)</label></th>
+        <th><label title="客户类型">客户类型</label></th>
+        <th><label title="客户意向">客户意向</label></th>
+        <th><label title="日程">日程</label></th>                                  
+        <th><label title="日程备注">日程备注</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($schedule in $scheduleList)
+	<tr>
+        <td><input type="checkbox" nm="chkone" name="tskCheck" id="tskCheck" value="$!schedule.pdtProductCustomerBean.customerId"/></td>
+        <td>
+            <div class="customer-infor">
+                #if($urlPermitUtil.hasPermission('browseCustomer'))
+                    #if($!schedule.pdtProductCustomerBean.defaultPhoneType=='1')
+                        <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone1)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone1
+                            )
+                    </span>
+                    #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='2')
+                        <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone2)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone2
+                            )
+                    </span>
+                    #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='3')
+                        <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.phone)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.phone )
+                    </span>
+                    #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='4')
+                        <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.fax)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.fax )
+                    </span>
+                    #end
+                #else
+                    #if($!schedule.pdtProductCustomerBean.defaultPhoneType=='1')
+                        <span  style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone1)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone1
+                            )
+                    </span>
+                    #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='2')
+                        <span  style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone2)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone2
+                            )
+                    </span>
+                    #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='3')
+                        <span  style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.phone)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.phone )
+                    </span>
+                    #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='4')
+                        <span  style="width:150px;"
+                              title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.fax)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.fax )
+                    </span>
+                    #end
+                #end
+                <div class="icon">
+                    #if($urlPermitUtil.hasPermission('dialPhone'))
+                        <i class="i phone" onclick="dial('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.pdtProductCustomerBean.customerId')" title="拨号">phone</i>
+                    #end
+                    <!--
+                    #if($!schedule.pdtProductCustomerBean.cphNumber.length()==11&&$!schedule.pdtProductCustomerBean.cphNumber.substring(0, 1)=="1")
+                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                            <i class="i sms" onclick="sendSms('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.pdtProductCustomerBean.customerId')" title="短信">sms</i>
+                        #end
+                        #if($urlPermitUtil.hasPermission('toAddMms'))
+                            <i class="i mms" onclick="sendMms('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.pdtProductCustomerBean.customerId')" title="彩信">mms</i>
+                        #end
+                    #end
+                    -->
+                </div>
+                <div class="other">
+                    <label class="item cusTitle" title="$!schedule.pdtProductCustomerBean.customerTitle">
+                        $!schedule.pdtProductCustomerBean.customerTitle
+                    </label>
+                    <label class="item">$!schedule.pdtProductCustomerBean.sex</label>
+                    <label class="item">#if($schedule.pdtProductCustomerBean.age) $!{schedule.pdtProductCustomerBean.age}岁 #end</label>
+                    #if($!schedule.pdtProductCustomerBean.isNoGood==1)
+                        <label class="item red">
+                            （不良客户）
+                        </label>
+                    #end
+                </div>
+            </div>
+        </td>
+        <td><label title="$!schedule.pdtProductCustomerBean.customerTypeName">$!schedule.pdtProductCustomerBean.customerTypeName</label></td>
+        <td><label title="$!schedule.pdtProductCustomerBean.productName $!schedule.pdtProductCustomerBean.remark">
+				$!schedule.pdtProductCustomerBean.productName<br>
+				$!schedule.pdtProductCustomerBean.remark
+			</label></td>
+        <td><label title="#if($schedule.contactType && $!schedule.contactType==1)电话联系#elseif($schedule.contactType && $!schedule.contactType==2)上门拜访#end $!date.format('yyyy-MM-dd',$!schedule.contactDate)&nbsp;$!date.format('HH:mm',$!schedule.contactDate)">
+				#if($schedule.contactType && $!schedule.contactType==1)
+				电话联系<br>
+					#elseif($schedule.contactType && $!schedule.contactType==2)
+						上门拜访<br>
+							#end
+				$!date.format('yyyy-MM-dd',$!schedule.contactDate)&nbsp;$!date.format('HH:mm',$!schedule.contactDate)
+		</label></td>
+        <td><label title="$!subString.replaceRemark($!schedule.remark)">$!schedule.remark</label></td>
+    </tr>
+		#end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="6">
+           #parse("/velocity/ajaxPage.vm")
+        </td>
+    </tr>
+</tfoot>

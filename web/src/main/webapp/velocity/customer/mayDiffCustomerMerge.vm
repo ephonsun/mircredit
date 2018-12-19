@@ -1,0 +1,1240 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>合并客户</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+	.gray_self { color:#999999; }
+    </style>
+	<style type="text/css">
+		/* merge customer */
+    	#ui-Merge-Customer { }
+		#ui-Merge-Customer table { width:100%; border-collapse:collapse; }
+		#ui-Merge-Customer th, #ui-Merge-Customer td { border:1px solid #b1b1b1; padding:5px; line-height:16px; }
+		#ui-Merge-Customer thead th, #ui-Merge-Customer tfoot td { background:url(${ctx}/images/public/colheader.gif) repeat-x 0 0; overflow:hidden; white-space:nowrap; line-height:16px; text-align:center; font-weight:400; }
+		#ui-Merge-Customer tbody tr.bgcolor, #ui-Merge-Customer tbody tr td.bgcolor { background-color:#f00; }
+		#ui-Merge-Customer tbody tr.hover, #ui-Merge-Customer tbody tr:hover { background-color:#E3EAF4; }
+		#ui-Merge-Customer table.celltbl td { border:0; padding:0; }
+		#ui-Merge-Customer table.celltbl td.left { padding-left:5px; }
+		#ui-Merge-Customer ul.other-infor { line-height:20px; }
+		
+		/* reminder */
+		ul.reminder { margin-top:10px; line-height:24px; color:#f60; }
+    </style>
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+    		initDate('birthday', { maxDate: new Date() });
+			if(jQuery.browser.msie && jQuery.browser.version<7.0){
+				jQuery('#mergeCustomer tr').hover(
+    				function(){
+    					if(!jQuery(this).hasClass('bgcolor')){
+    						jQuery(this).addClass('hover');
+    					}
+    				},
+    				function(){
+    					jQuery(this).removeClass('hover');
+    				}
+    			);
+				
+				//IE6:Set the height of the textarea
+				$('div.ui-div-textarea').each(function(){
+        			$('textarea', this).height($(this).height() - 2);
+        		});
+			}
+			
+			jQuery('[name=\'crmCustomer.defaultPhoneType\']').click(function(){
+				extendvalidator();
+			});
+			
+			$("#isReceiveSms").click(function(){
+		    	if($(this).attr("checked")!=null)
+		    		$("#isReceiveSms").val(1);
+		    	else
+		    		$("#isReceiveSms").val(0);
+			});
+		});
+		
+		//初始化省份城市
+		function initProvince(val){
+			var pSel=$("#province");
+			pSel.bind("change",function(e){
+				if(this.value){
+					buildCity(this.value);
+				}else{
+					var cSel=$("#city");
+					cSel.empty();
+					var op=$("<OPTION></option>");
+					cSel.append(op);
+					cSel.select();
+				}
+			});
+			if(val){
+				buildCity(val);
+				pSel.val(val);
+			}
+		}
+		
+		function buildCity(val){
+			jQuery.post('../advancedCustomer/getCityJson.html?provCode='+val,{},
+				function(json){
+					var ds=jQuery.parseJSON(json);
+					var cSel=$("#city");
+					var cityVal = cSel.attr("city");
+					cSel.empty();
+					var op=$("<OPTION></option>");
+					cSel.append(op);
+					for(var i=0;i<ds.length;i++)
+					{
+						var d=ds[i];
+						var selStr = (d["code"]==cityVal)?"selected":"";
+						var op=$("<OPTION VALUE='"+d["code"]+"' "+selStr+" >"+d["name"]+"</option>");
+						cSel.append(op);
+					}
+					cSel.select();
+			});
+		}
+		
+		function Merge() {
+			var bool = jQuery.validator({ form: 'mergeCustomer', extend: true, extendhandler: extendvalidator });
+			
+			if (bool){
+				var confirmMsg = checkMergeCustomer();
+    			var answer = confirm(confirmMsg)
+    			if (answer){
+    				var json = getPostJson();
+    				json['crmCustomer.isReceiveSms']=jQuery.trim($("#isReceiveSms").val());
+    				var urlStr = "../mayDiffCustomer/doMergeCustomer.html?RandNum="+ Math.random();
+    				jQuery.ajax({
+        			  type: 'POST',
+        			  url: urlStr,
+        			  data: json,
+    				  dataType:"json",
+        			  success:function(data){
+    				  	 if (data && data == "1"){
+    				  	 } else {
+    				  	 	banger.page.showMessageBox({"type":"error","content":"合并客户出错！"});
+    				  	 }
+        			  	tab.close(GetId(), true);
+        			  }
+        			});	
+                }
+			}
+		}
+		
+		function checkMergeCustomer(){
+			var	backData = "";
+			var postJson = {};
+			postJson["customerIds"] = $("#customer1Id").val()+","+$("#customer2Id").val();
+			var urlStr = "../mayDiffCustomer/checkMergeCustomer.html?RandNum="+ Math.random();
+			jQuery.ajax({
+				type: "POST",
+				url: urlStr,
+				data: postJson,
+				cache: false,
+				async: false,
+				success: function(data){
+					backData = data;
+				}
+			});
+			return backData;
+		};
+    </script>
+	
+	<script type="text/javascript">
+    	$(document).ready(function(){
+    		jQuery("#mergeCustomer").validator();
+			//$("#tabs").tabs({
+			//	parentForm: "addCustomer",
+			//	validate: true
+			//});
+			//$("#box, #userTable, #deptTree").bgIframe();
+			initEvent();
+			initDate('birthday');
+			initDate('datepicker');
+			initProvince('$!crmCustomer.province');
+			initControlState();		//初始化默认号码状态
+			initBelongToTree();		//下属机构树
+			initDropDownList();		//初始化下拉多选项
+			
+			if('$actionType'=='modify'){
+				bindData();	
+			}else{
+				if($!crmCustomer.belongDeptId > 0){
+					$("#BelongToType").val("$!parameterMap.get('BelongTo')");
+					var type=$('#BelongToType').val();	
+					changeBelongTo(type);
+					$('#belongDeptId').val("$!crmCustomer.belongDeptId");
+					$('#belongUserId').val("$!crmCustomer.belongUserId");
+					switch(type){
+						case "brUser":
+							var usertext = '$!username';
+							$('#userTree').val(usertext.substring(1,usertext.length-1));
+							$('#deptName').text('$!deptname');
+							$('#userName').text('$!username');
+							break;
+						case "brDept":
+							$('#deptTree').val('$!deptname');
+							$('#deptName').text('$!deptname');
+							$('#userName').text("");
+							break;
+						default: break;
+					}
+				}
+			}
+			$('select').select();
+		});
+		
+		function initEvent(){
+			mobileInput('#mobilePhone1');
+			mobileInput('#mobilePhone2');
+			numInput('#phone');
+			telInput('#phoneExt');
+			numInput('#fax');
+			telInput('#faxExt');
+			//idInput('#idCard');
+			emailInput('#email');
+			//$("#allow").click(function(){
+		    //	if($(this).attr("checked")!=null)
+		    //		$("#allow").val(0);
+		    //	else
+		    //		$("#allow").val(1);
+			//});
+		}
+
+		//初始化下拉多选项
+		function initDropDownList(){
+			$("input[dateFlag$='true']").each(function(i){
+				initDate(this.id);
+			});
+			$("div[comboFlag$='true']").each(function(i){
+	 			var codes = $(this).attr("codes");
+	 			var list = codes.split(",");
+	   			jQuery(this).combobox({"allcheck":true,"clear":true,"rev":true,"array":list});
+	 		});
+		}
+
+		//初始化默认号码状态
+		function initControlState()
+		{
+			$("#rdo1").attr("disabled",true);
+			$("#rdo2").attr("disabled",true);
+			$("#rdo3").attr("disabled",true);
+			$("#rdo4").attr("disabled",true);
+			$("#phoneExt").attr("disabled",true);
+			$("#faxExt").attr("disabled",true);
+			
+			if($!crmCustomer.defaultPhoneType==1){
+				$("#rdo1").attr("disabled",false);
+				$("#rdo1").attr("checked",true);
+			}else if($!crmCustomer.defaultPhoneType==2){
+				$("#rdo2").attr("disabled",false);
+				$("#rdo2").attr("checked",true);
+			}else if($!crmCustomer.defaultPhoneType==3){
+				$("#rdo3").attr("disabled",false);
+				$("#rdo3").attr("checked",true);
+			}else if($!crmCustomer.defaultPhoneType==4){
+				$("#rdo4").attr("disabled",false);
+				$("#rdo4").attr("checked",true);
+			}
+			
+			if($("#mobilePhone1").val()!=''){
+				$("#rdo1").attr("disabled",false);	
+			}
+			if($("#mobilePhone2").val()!=''){
+				$("#rdo2").attr("disabled",false);	
+			}
+			if($("#phone").val()!=''){
+				$("#rdo3").attr("disabled",false);
+				$("#phoneExt").attr("disabled",false);
+			}
+			if($("#fax").val()!=''){
+				$("#rdo4").attr("disabled",false);
+				$("#faxExt").attr("disabled",false);
+			}
+		}
+		
+		//绑定数据
+		function bindData(){
+			$("#BelongToType").val("$!parameterMap.get('BelongTo')");
+			var type=$('#BelongToType').val();	
+			changeBelongTo(type);
+			$('#belongDeptId').val("$!crmCustomer.belongDeptId");
+			$('#belongUserId').val("$!crmCustomer.belongUserId");
+			
+			if('$!crmCustomer.sex'){
+				$("#cusSex").val('$!crmCustomer.sex');
+			}
+			if('$!crmCustomer.customerTypeId'){
+				$("#customerTypeId").val('$!crmCustomer.customerTypeId');
+			}
+			if('$!crmCustomer.customerIndustryId'){
+				$("#customerIndustryId").val('$!crmCustomer.customerIndustryId');
+			}
+			if('$!crmCustomer.defaultPhoneType'){
+				$("#defaultPhoneType").val('$!crmCustomer.defaultPhoneType');
+			}
+		}
+		//机构树
+		function initBelongToTree(){	
+			if($isInChargeof){
+				var type = "$parameterMap.get('BelongTo')";
+				var urlUser = "";
+				var urlDept = "";
+				urlUser = function(){return "../customer/getCusBelongToJson.html?BelongToType=brUser&random="+Math.random()*1000000;};
+				urlDept = function(){return "../customer/getCusBelongToJson.html?BelongToType=brDept&random="+Math.random()*1000000;};
+				switch(type){
+					case "brUser":
+						if('$actionType'=='modify'||$!crmCustomer.belongDeptId > 0){
+							urlUser = function(){return "../customer/getCusBelongToJson.html?BelongToType=brUser&belongDeptId="+$!crmCustomer.belongDeptId +
+								"&belongUserId="+ $!crmCustomer.belongUserId +"&random="+Math.random()*1000000;};	
+							$('#userTree').val("$!crmCustomer.userName");
+						}
+						break;
+					case "brDept":
+						if('$actionType'=='modify'||$!crmCustomer.belongDeptId > 0){
+							urlDept = function(){return "../customer/getCusBelongToJson.html?BelongToType=brDept&belongDeptId="+$!crmCustomer.belongDeptId +
+								"&belongUserId="+ $!crmCustomer.belongUserId +"&random="+Math.random()*1000000;}	
+							$('#deptTree').val("$!crmCustomer.deptName");
+						}
+						break;
+					default: break;
+				}
+				$('#userList').atree({
+					setting: {
+						check: {
+							enable: true,
+							chkboxType: { "Y": "s", "N": "s" }
+						},
+						view: {
+							showIcon: true,
+							dblClickExpand: false
+						},
+						data: {
+							simpleData: {
+								enable: true
+							}
+						},
+						callback: {
+							beforeClick: null,
+							onClick: null,
+							beforeCheck: null,
+							onCheck: null
+						}
+					},
+					url: urlUser,
+					beforeClick: beforeClickUser,
+					okHandler: onClickUser
+				});
+			  	$("#deptList").atree({
+					url: urlDept,
+					okHandler: onClickDept
+				});
+				
+				$("#BelongToType").change(function(){
+					changeBelongTo($(this).val());
+				});
+			}
+			if('$actionType'=='insert'){
+				changeBelongTo('brMine');	
+			}
+		}
+		
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#userTree').val(nodes[0].name);
+			$('#belongUserId').val(nodes[0].id);
+			$('#belongDeptId').val(nodes[0].pId);
+			$('#deptName').text(nodes[0].deptName);
+			$('#userName').text("("+nodes[0].name+")");
+			
+			checkBelongTo();
+		}
+		//点击Dept
+		function onClickDept(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(nodes.length>0){
+				$('#deptTree').val(nodes[0].name);
+				$('#belongUserId').val("0");
+				$('#belongDeptId').val(nodes[0].id);
+				$('#deptName').text(nodes[0].name);
+				$('#userName').text("");
+			}
+			checkBelongTo();
+		}
+		//改变归属
+		function changeBelongTo(val){
+			switch(val){
+				case "brMine":
+					$("#my").show();
+					$('#showText').text(window.top.getUn());
+					$("#userList, #deptList").hide();
+					$('#belongDeptId').val("$!parameterMap.get('currentDeptId')");
+					$('#belongUserId').val("$!parameterMap.get('currentUserId')");
+					$('#deptName').text("$!parameterMap.get('currentDeptName')");
+					$('#userName').text("("+"$!parameterMap.get('currentUserName')"+")");
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#my, #deptList").hide();
+					$('#belongDeptId').val("0");
+					$('#belongUserId').val("0");
+					break;
+				case "brDept":
+					$("#deptList").show();
+					$("#my, #userList").hide();
+					$('#belongDeptId').val("0");
+					$('#belongUserId').val("0");
+					break;
+				default: break;
+			}
+		}
+		
+		function Cancel(){
+			tab.close(GetId(), true);
+		}
+		
+		function insertChar(index,text,oldText){
+			if(index> oldText.length-1) 
+		      index=oldText.length-1; 
+		    if(index <0) 
+		      index=0; 
+
+		    return  oldText.substring(0,index)+text+oldText.substring(index); 	
+		}
+		
+		//根据身份证生成生日 年龄
+		function iDCardExitEvent(id){
+			var iDCardStr = $("#"+id).val();
+			if((!iDCardStr)&&(iDCardStr.length!=15)&&(iDCardStr.length!=18)){
+				return;
+			}
+			if(checkIDCard(iDCardStr)){
+				//如果是15位身份证 先转换成18位
+				if(iDCardStr.length==15){
+					iDCardStr=insertChar(6,'19',iDCardStr);
+				}
+				var newBirthday = iDCardStr.substring(6,14);
+				var year = newBirthday.substring(0,4);
+				var month = newBirthday.substring(4,6);
+				var day = newBirthday.substring(6,9);
+				newBirthday = year+'-'+month+'-'+day;
+				var dd = new Date();
+				if(($("#birthday").val())&&($("#birthday").val()!=newBirthday)){
+					if(confirm('根据身份证，建议生日从'+$("#birthday").val()+'修改为 '+newBirthday+'。您确定要修改吗？')){
+						 $("#birthday").val(newBirthday);
+						 //$("#age").text(dd.getFullYear()-year);
+						 var age = dd.getFullYear()-year;
+						 if(age<=120&&age>0){
+							$("#age").text(dd.getFullYear()-year + " 周岁");
+						 }else{
+							$("#age").text("");
+						 }
+					}
+				}else{
+					$("#birthday").val(newBirthday);
+					//$("#age").text(dd.getFullYear()-year);
+					var age = dd.getFullYear()-year;
+					 if(age<=120&&age>0){
+						$("#age").text(dd.getFullYear()-year + " 周岁");
+					 }else{
+						$("#age").text("");
+					 }
+				}
+			}
+		}
+		
+		//生成称谓事件
+		function onSexblur(flag){
+			if($("#customerName").val()!=''){
+				if($("#cusSex").val()!=''){
+					//获取百家姓  返回称谓
+					jQuery.ajax({
+					  type: 'POST',
+					  url: "../customer/getNickName.html",
+					  data: {'cusName':jQuery.trim($("#customerName").val()),'cusSex':jQuery.trim($("#cusSex").val())},
+					  success:function(nickName){
+					  	if($("#customerTitle").val()==''){
+					  		$("#customerTitle").val(nickName);	
+					  	}else{
+					  		if($("#customerTitle").val()!=nickName){
+					  			if(confirm("根据姓名和性别，建议称谓从"+ $("#customerTitle").val()+"修改为 "+nickName+"。您确定要修改吗？")){
+						  			$("#customerTitle").val(nickName);
+					}}}}});
+				}
+			}
+		}
+		
+		//根据生日生成年龄		
+		function onBirthdayExit(){
+			if($("#birthday").val()){
+				var year = $("#birthday").val().substring(0,4);
+				var dd = new Date();
+				var age = dd.getFullYear()-year;
+				if(age<=120&&age>0){
+					$("#age").text(dd.getFullYear()-year + " 周岁");
+				 }else{
+					$("#age").text("");
+				 }
+			}
+		}
+		
+		//校验客户编号是否唯一
+		function checkCustomerNo(){
+			var bool = true;
+			if($("#customerNo").val()){
+				if ($("#customerNo1").val() == $("#customerNo").val() || $("#customerNo2").val() == $("#customerNo").val()){
+					return bool;
+				}
+				
+				var postJson = {};
+				postJson['customerNo']=$("#customerNo").val();
+				postJson['customerId']=$("#customerId").val();
+				jQuery.ajax({
+				  type: 'POST',
+				  url: "../customer/checkCustomerNo.html",
+				  data: postJson,
+				  cache: false, 
+				  async: false,
+				  success:function(data){
+				  	if(data==''||data==null){
+				  		bool = true;
+				  	}else{
+				  		$("#customerNo").attr('tips', data); 
+				  		bool = false;
+				  	}
+				  }
+				});		
+			}
+			return bool;
+		}
+		
+		function copyValue(needCopy,copyValue,obj,ext){
+			if (needCopy == "bgcolor"){
+				//自定义字段
+				if (ext){
+					$("#"+obj).val($("#" + copyValue).val());
+				} else{
+					//客户简介特殊处理下
+					if (obj == "remark"){
+						$("#"+obj).val($("#" + copyValue).val());
+					} else {
+						$("#"+obj).val("" + copyValue);
+					}
+				}
+				
+				
+				if ($("#"+obj).is("select")){
+					$("#"+obj).select();
+				}	
+				if ($("#"+obj).is(":checkbox")){
+					if (copyValue=="1"){
+						$("#"+obj).attr("checked", true);
+					} else {
+						$("#"+obj).attr("checked", false);
+					}
+				}
+				if (obj == "birthday"){
+					onBirthdayExit();
+				}	
+				
+				if (obj == "mobilePhone1"){
+					ctrlDefaultNumberState('mobilePhone1','rdo1');
+				}
+				if (obj == "mobilePhone2"){
+					ctrlDefaultNumberState('mobilePhone2','rdo2');
+				}
+				if (obj == "phone"){
+					ctrlPhoneExt('phone','rdo3','phoneExt');
+				}
+				if (obj == "fax"){
+					ctrlPhoneExt('fax','rdo4','faxExt');
+				}
+				if(obj == "province"){
+					initProvince(copyValue);
+				}
+			}
+		}
+		
+		function extendvalidator(){
+			var bool = true;
+			
+			if(checkCustomerNo()){
+				$('#divCustomerNo').removeClass('v-fails');
+			}else{
+				$('#divCustomerNo').addClass('v-fails');
+				bool = false;
+			}
+			
+			if(checkPhoneType()){
+				$('[phoneType=\'divGroup\']').removeClass('v-fails');
+				if($("#mobilePhone1").val().length>0&&$("#mobilePhone1").val().length<11){
+					$('#divMobilePhone1').addClass('v-fails');
+					$('#mobilePhone1').attr('tips', '手机格式必须是1开头，11位');
+				}
+				if($("#mobilePhone2").val().length>0&&$("#mobilePhone2").val().length<11){
+					$('#divMobilePhone2').addClass('v-fails');
+					$('#mobilePhone2').attr('tips', '手机格式必须是1开头，11位');
+				}
+			}
+			else{
+				$('[phoneType=\'divGroup\']').addClass('v-fails');
+				$('[phoneType=\'group\']').attr('tips', '请至少填写一个联系电话');
+				bool = false;
+			}
+			
+			if($('[name=\'crmCustomer.defaultPhoneType\']:checked').length < 1){
+				$('[name=\'crmCustomer.defaultPhoneType\']').addClass('v-fails');
+				bool = false;
+			} else{
+				$('[name=\'crmCustomer.defaultPhoneType\']').removeClass('v-fails');
+			}
+			
+			return bool;
+		}
+		
+		//控制默认号码
+		function ctrlDefaultNumberState(textid, rdoid){
+			if(checkPhoneType()){
+				$('[phoneType=\'divGroup\']').removeClass('v-fails');
+			}
+			else{
+				$('[phoneType=\'divGroup\']').addClass('v-fails');
+				$('[phoneType=\'group\']').attr('tips', '请至少填写一个联系电话');
+			}
+			if ($('#'+textid).val()==""){
+				if($("#"+rdoid).attr("checked")){
+					$("#"+rdoid).attr("checked",false);		
+				}
+				$("#"+rdoid).attr("disabled",true);
+				
+				if(!raidoHaschecked()){
+					if($("#mobilePhone1").val()!=''){
+						$("#rdo1").attr("checked",true);	
+					}else if($("#mobilePhone2").val()!=''){
+						$("#rdo2").attr("checked",true);
+					}else if($("#phone").val()!=''){
+						$("#rdo3").attr("checked",true);
+					}else if($("#fax").val()!=''){
+						$("#rdo4").attr("checked",true);
+					}
+				}
+			}else{
+				$("#"+rdoid).attr("disabled",false);
+			    if(!raidoHaschecked()){
+			    	$("#"+rdoid).attr("checked",true);	
+			    }
+			}
+			if($('[name=\'crmCustomer.defaultPhoneType\']:checked').length < 1){
+				$('[name=\'crmCustomer.defaultPhoneType\']').addClass('v-fails');
+				bool = false;
+			} else{
+				$('[name=\'crmCustomer.defaultPhoneType\']').removeClass('v-fails');
+			}
+		}
+		function raidoHaschecked(){
+			if((!$("#rdo1").attr("checked"))
+				&&(!$("#rdo2").attr("checked"))
+				&&(!$("#rdo3").attr("checked"))
+				&&(!$("#rdo4").attr("checked"))){
+				return false
+			}else{
+				return true;
+			}
+		}
+		//控制固话分机
+		function ctrlPhoneExt(textid, rdoid, extId){
+			ctrlDefaultNumberState(textid, rdoid)
+			if($("#"+textid).val()){
+				//$("#"+extId).val("");
+				$("#"+extId).attr("disabled",false);
+			}else{
+				$("#"+extId).val("");
+				$("#"+extId).attr("disabled",true);
+			}
+		}
+    </script>
+</head>
+
+<body id="mergeCustomer">
+	<form id="mergeCustomer" class="formular" method="post">
+    	<div id="ui-Merge-Customer">
+            <table>
+            	<thead>
+            		<tr>
+            			<th colspan="3">合并之前的客户信息</th>
+                        <th colspan="2">合并后的客户信息</th>
+            		</tr>
+            	</thead>
+                <tbody>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('BelongUserId')">客户归属</td>
+                        <td width="20%" class="$!diffColorMap.get('BelongUserId')">
+    						$!customer1.deptName
+    						#if($customer1.userName)
+    							($!customer1.userName)
+    						#end
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('BelongUserId')">
+    						$!customer2.deptName
+    						#if($customer2.userName)
+    							($!customer2.userName)
+    						#end
+    					</td>
+                        <td width="10%">客户归属</td>
+                        <td>
+                        	<table class="celltbl">
+    							<tbody>
+    								<tr id="modifyBelongto">
+    									<td width="120">
+											<input type="hidden" name="crmCustomer.belongDeptId" value="$!crmCustomer.belongDeptId" id="belongDeptId"/>
+                                        	<input type="hidden" name="crmCustomer.belongUserId" value="$!crmCustomer.belongUserId" id="belongUserId"/>
+                        					<input type="hidden" name="crmCustomer.customerId" value="$!crmCustomer.customerId" id="customerId"/>
+                        					<input type="hidden" name="recId" value="$!recId" id="recId"/>
+                        					<input type="hidden" name="typeList" value="$!typeList" id="typeList"/>
+											
+											<select id="BelongToType" name="BelongToType" style="text-align:left !important;">
+                                                <option value="brMine">归属给我</option>
+                                                #if($!isInChargeof)
+                                                <option value="brUser">归属给下属</option>
+                                                <option value="brDept">归属给机构</option>
+                                                #end
+                                            </select>
+    									</td>
+    									<td class="left">
+    										<span class="btn2" id="my">
+                                        		<input id="myUserId" type="hidden"/>
+                                                <label class="btn2-txt" id="showText"></label>
+                                            </span>
+                                            <div id="userList" class="dtxt2" style="display: none;">
+                                                <input type="text" class="dtxt2-txt" fun="checkBelongToEmpty" readonly="readonly" id="userTree" tips="“客户归属”必须填写！"/>
+                                                <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                                            </div>
+                                            <div id="deptList" class="dtxt2" style="display: none;">
+                                                <input type="text" class="dtxt2-txt" fun="checkBelongToEmpty" readonly="readonly" id="deptTree" tips="“客户归属“必须填写！"/>
+                                                <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                                            </div>
+    									</td>
+    								</tr>
+    							</tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('CustomerName')">客户姓名</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerName')" ondblclick="copyValue('$!diffColorMap.get('CustomerName')','$!jsUtil.escapeJs($!customer1.customerName)','customerName')">
+    						$!customer1.customerName
+    						<input type="hidden" name="customer1.customerId" value="$!customer1.customerId" id="customer1Id"/>
+    						<input type="hidden" name="customer1.templateIds" value="$!customer1.templateIds" />
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerName')" ondblclick="copyValue('$!diffColorMap.get('CustomerName')','$!jsUtil.escapeJs($!customer2.customerName)','customerName')">
+    						$!customer2.customerName
+    						<input type="hidden" name="customer2.customerId" value="$!customer2.customerId" id="customer2Id"/>
+    						<input type="hidden" name="customer2.templateIds" value="$!customer2.templateIds" />
+    					</td>
+                        <td width="10%">客户姓名</td>
+                        <td>
+                        	<div class="ui-div-text">
+                        		<input type="text" name="crmCustomer.customerName" id="customerName" class="text" value="$!crmCustomer.customerName" maxlength="20" rule="\S" tips='“客户姓名”必须填写' onchange="onSexblur('cus')" />
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Sex')">性别</td>
+                        <td width="20%" class="$!diffColorMap.get('Sex')" ondblclick="copyValue('$!diffColorMap.get('Sex')','$!customer1.sex','cusSex')">$!customer1.sex</td>
+                        <td width="20%" class="$!diffColorMap.get('Sex')" ondblclick="copyValue('$!diffColorMap.get('Sex')','$!customer2.sex','cusSex')">$!customer2.sex</td>
+                        <td width="10%">性别</td>
+                        <td>
+    						<select name="crmCustomer.sex" id="cusSex" onchange="onSexblur('sex')">
+                                <option value=""></option>
+                            	<option value="男">男</option>
+                            	<option value="女">女</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('CustomerTitle')">称谓</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerTitle')" ondblclick="copyValue('$!diffColorMap.get('CustomerTitle')','$!customer1.customerTitle','customerTitle')">$!customer1.customerTitle</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerTitle')" ondblclick="copyValue('$!diffColorMap.get('CustomerTitle')','$!customer2.customerTitle','customerTitle')">$!customer2.customerTitle</td>
+                        <td width="10%">称谓</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.customerTitle" id="customerTitle" class="text" value="$!crmCustomer.customerTitle" />
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('CustomerNo')">客户编号</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerNo')" ondblclick="copyValue('$!diffColorMap.get('CustomerNo')','$!jsUtil.escapeJs($!customer1.customerNo)','customerNo')">
+    						$!customer1.customerNo
+    						<input type="hidden" id="customerNo1" value="$!customer1.customerNo" />
+                    		<input type="hidden" id="customerNo2" value="$!customer2.customerNo" />
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerNo')" ondblclick="copyValue('$!diffColorMap.get('CustomerNo')','$!jsUtil.escapeJs($!customer2.customerNo)','customerNo')">
+    						$!customer2.customerNo
+    					</td>
+                        <td width="10%">客户编号</td>
+                        <td>
+                        	<div id="divCustomerNo" class="ui-div-text">
+    							<input type="text" tips="" name="crmCustomer.customerNo" id="customerNo" class="text" value="$!crmCustomer.customerNo" maxlength="20"/>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('CustomerTypeName')">客户类型</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerTypeName')" ondblclick="copyValue('$!diffColorMap.get('CustomerTypeName')','$!customer1.customerTypeId','customerTypeId')">
+    						$!customer1.customerTypeName
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerTypeName')" ondblclick="copyValue('$!diffColorMap.get('CustomerTypeName')','$!customer2.customerTypeId','customerTypeId')">
+    						$!customer2.customerTypeName
+    					</td>
+                        <td width="10%">客户类型</td>
+                        <td>
+    						<select name="crmCustomer.customerTypeId" id="customerTypeId">
+                                <option value=""></option>
+                                #foreach($cusType in $codetableService.getCusTypes())  
+                            	<option value="$cusType.customerTypeId">$cusType.customerTypeName</option>
+                            	#end
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('CustomerIndustryName')">所处行业</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerIndustryName')" ondblclick="copyValue('$!diffColorMap.get('CustomerIndustryName')','$!customer1.customerIndustryId','customerIndustryId')">
+    						$!customer1.customerIndustryName
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('CustomerIndustryName')" ondblclick="copyValue('$!diffColorMap.get('CustomerIndustryName')','$!customer2.customerIndustryId','customerIndustryId')">
+    						$!customer2.customerIndustryName
+    					</td>
+                        <td width="10%">所处行业</td>
+                        <td>
+    						<select id="customerIndustryId" name="crmCustomer.customerIndustryId">
+                                <option value=""></option>
+                                #foreach($cusIndustry in $codetableService.getCusIndustry())  
+                            	<option value="$cusIndustry.customerIndustryId">$cusIndustry.customerIndustryName</option>
+                            	#end
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('IdCard')">身份证</td>
+                        <td width="20%" class="$!diffColorMap.get('IdCard')" ondblclick="copyValue('$!diffColorMap.get('IdCard')','$!customer1.idCard','idCard')">
+    						$!customer1.idCard
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('IdCard')" ondblclick="copyValue('$!diffColorMap.get('IdCard')','$!customer2.idCard','idCard')">
+    						$!customer2.idCard
+    					</td>
+                        <td width="10%">身份证</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.idCard" id="idCard" class="text" value="$!crmCustomer.idCard" onBlur="iDCardExitEvent('idCard')" maxlength="20"/>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Birthday')">生日</td>
+                        <td width="20%" class="$!diffColorMap.get('Birthday')" ondblclick="copyValue('$!diffColorMap.get('Birthday')','$!date.format('yyyy-MM-dd',$!customer1.birthday)','birthday')">
+    						$!date.format('yyyy-MM-dd',$!customer1.birthday)
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Birthday')" ondblclick="copyValue('$!diffColorMap.get('Birthday')','$!date.format('yyyy-MM-dd',$!customer2.birthday)','birthday')">
+    						$!date.format('yyyy-MM-dd',$!customer2.birthday)
+    					</td>
+                        <td width="10%">生日</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.birthday" id="birthday" class="validate[custom[date]] text" readonly="readonly" value="$!date.format('yyyy-MM-dd',$!crmCustomer.birthday)" onblur="onBirthdayExit()" />
+                        		<i class="date">&nbsp;</i>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Company')">单位</td>
+                        <td width="20%" class="$!diffColorMap.get('Company')" ondblclick="copyValue('$!diffColorMap.get('Company')','$!jsUtil.escapeJs($!customer1.company)','company')">
+    						$!customer1.company
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Company')" ondblclick="copyValue('$!diffColorMap.get('Company')','$!jsUtil.escapeJs($!customer2.company)','company')">
+    						$!customer2.company
+    					</td>
+                        <td width="10%">单位</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.company" id="company" class="text" value="$!crmCustomer.company" maxlength="50"/>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Age')">年龄</td>
+                        <td width="20%" class="$!diffColorMap.get('Age')" ondblclick="copyValue('$!diffColorMap.get('Age')','$!customer1.age','age')">
+    						#if(($!customer1.age)&&($!customer1.age>0)&&($!customer1.age<=120))
+                            	$!customer1.age<label>周岁</label>
+                            #end
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Age')" ondblclick="copyValue('$!diffColorMap.get('Age')','$!customer2.age','age')">
+    						#if(($!customer2.age)&&($!customer2.age>0)&&($!customer2.age<=120))
+                            	$!customer2.age<label>周岁</label>
+                            #end
+    					</td>
+                        <td width="10%">年龄</td>
+                        <td>
+    						<label name="crmCustomer.age" value="$!crmCustomer.age" id="age" intFlag="true">
+                            #if(($!crmCustomer.age)&&($!crmCustomer.age>0)&&($!crmCustomer.age<=120))
+                            	$!crmCustomer.age<label>周岁</label>
+                            #end
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Remark')">客户简介</td>
+                        <td width="20%" class="$!diffColorMap.get('Remark')" ondblclick="copyValue('$!diffColorMap.get('Remark')','remark1','remark')">
+                        	<div class="wrap" style="height:80px; overflow:auto;">$!customer1.remark</div>
+                        	<input type="hidden" id="remark1" value="$!customer1.remark" />
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Remark')" ondblclick="copyValue('$!diffColorMap.get('Remark')','remark2','remark')">
+    						<div class="wrap" style="height:80px; overflow:auto;">$!customer2.remark</div>
+                        	<input type="hidden" id="remark2" value="$!customer2.remark" />
+    					</td>
+                        <td width="10%">客户简介</td>
+                        <td>
+                        	<div class="ui-div-textarea" style="height:80px;">
+                        		<textarea name="crmCustomer.remark" id="remark" class="textarea" maxlength="2000">$!crmCustomer.remark</textarea>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Province')">省份</td>
+                        <td width="20%" class="$!diffColorMap.get('Province')" ondblclick="copyValue('$!diffColorMap.get('Province')','$!customer1.province','province')">
+    						$!provinceName1
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Province')" ondblclick="copyValue('$!diffColorMap.get('Province')','$!customer2.province','province')">
+    						$!provinceName2
+    					</td>
+                        <td width="10%">省份</td>
+                        <td>
+    						<select name="crmCustomer.province" id="province">
+                                <option value=""></option>
+                                #foreach($provinces in $codetableService.getProvinces())  
+                            	<option value ="$provinces.code" >$provinces.shortName</option>
+                            	#end
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('City')">城市</td>
+                        <td width="20%" class="$!diffColorMap.get('City')" ondblclick="copyValue('$!diffColorMap.get('City')','$!customer1.city','city')">
+    						$!cityName1
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('City')" ondblclick="copyValue('$!diffColorMap.get('City')','$!customer2.city','city')">
+    						$!cityName2
+    					</td>
+                        <td width="10%">城市</td>
+                        <td>
+                        	<select name="crmCustomer.city" id="city" city="$!crmCustomer.city">
+                                <option value=""></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Address')">联系地址</td>
+                        <td width="20%" class="$!diffColorMap.get('Address')" ondblclick="copyValue('$!diffColorMap.get('Address')','addr1','address','addr1')">
+    						<div class="wrap" style="height:80px; overflow:auto;">$!customer1.address</div>
+    						<input type="hidden" id="addr1" value="$!customer1.address"/>
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Address')" ondblclick="copyValue('$!diffColorMap.get('Address')','addr2','address','addr2')">
+    						<div class="wrap" style="height:80px; overflow:auto;">$!customer2.address</div>
+    						<input type="hidden" id="addr2" value="$!customer2.address"/>
+    					</td>
+                        <td width="10%">联系地址</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.address" id="address" class="text" value="$!crmCustomer.address" />
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('MobilePhone1')">手机一</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone1')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone1')','$!customer1.mobilePhone1','mobilePhone1')">
+    						$!customer1.mobilePhone1
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone1')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone1')','$!customer2.mobilePhone1','mobilePhone1')">
+    						$!customer2.mobilePhone1
+    					</td>
+                        <td width="10%">手机一</td>
+                        <td>
+    						<input type="hidden" name="crmCustomer.headshow" value="$!customer1.headshow" />
+                        	<table class="celltbl">
+                        		<tbody>
+                        			<tr>
+                        				<td>
+                        					<div class="ui-div-text" id="divMobilePhone1" phoneType="divGroup">
+    				                    		<input type="text" class="text" name="crmCustomer.mobilePhone1" id="mobilePhone1" value="$!crmCustomer.mobilePhone1" maxLength="11" phoneType="group" fun="checkMobilePhone" tips="请至少填写一个联系电话" onKeyUp="ctrlDefaultNumberState('mobilePhone1','rdo1')" />
+    				                    	</div>
+                        				</td>
+                        				<td width="100" class="left">
+                        					<input type="radio" name="crmCustomer.defaultPhoneType" id="rdo1" class="radio" value="1" tips="默认号码必须选择" />
+                        					<label>默认</label>
+                        				</td>
+                        			</tr>
+                        		</tbody>
+                        	</table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('MobilePhone1Remark')">手机一备注</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone1Remark')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone1Remark')','$!jsUtil.escapeJs($!customer1.mobilePhone1Remark)','mobilePhone1Remark')">
+    						$!customer1.mobilePhone1Remark
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone1Remark')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone1Remark')','$!jsUtil.escapeJs($!customer2.mobilePhone1Remark)','mobilePhone1Remark')">
+    						$!customer2.mobilePhone1Remark
+    					</td>
+                        <td width="10%">手机一备注</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" id="mobilePhone1Remark" class="text" name="crmCustomer.mobilePhone1Remark" value="$!crmCustomer.mobilePhone1Remark" maxlength="20"/>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('MobilePhone2')">手机二</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone2')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone2')','$!customer1.mobilePhone2','mobilePhone2')">
+    						$!customer1.mobilePhone2
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone2')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone2')','$!customer2.mobilePhone2','mobilePhone2')">
+    						$!customer2.mobilePhone2
+    					</td>
+                        <td width="10%">手机二</td>
+                        <td>
+                        	<table class="celltbl">
+                        		<tbody>
+                        			<tr>
+                        				<td>
+                        					<div class="ui-div-text" phoneType="divGroup" id="divMobilePhone2">
+    											<input type="text" name="crmCustomer.mobilePhone2" id="mobilePhone2" class="text" value="$!crmCustomer.mobilePhone2" maxLength="11" phoneType="group" fun="checkMobilePhone" tips="请至少填写一个联系电话" onKeyUp="ctrlDefaultNumberState('mobilePhone2','rdo2')" />
+    				                    	</div>
+                        				</td>
+                        				<td width="100" class="left">
+    										<input type="radio" name="crmCustomer.defaultPhoneType" id="rdo2" class="radio" value="2" tips="默认号码必须选择" />
+                        					<label>默认</label>
+                        				</td>
+                        			</tr>
+                        		</tbody>
+                        	</table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('MobilePhone2Remark')">手机二备注</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone2Remark')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone2Remark')','$!jsUtil.escapeJs($!customer1.mobilePhone2Remark)','mobilePhone2Remark')">
+    						$!customer1.mobilePhone2Remark
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('MobilePhone2Remark')" ondblclick="copyValue('$!diffColorMap.get('MobilePhone2Remark')','$!jsUtil.escapeJs($!customer2.mobilePhone2Remark)','mobilePhone2Remark')">
+    						$!customer2.mobilePhone2Remark
+    					</td>
+                        <td width="10%">手机二备注</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.mobilePhone2Remark" id="mobilePhone2Remark" class="text" value="$!crmCustomer.mobilePhone2Remark" maxlength="20"/>
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Phone')">固话</td>
+                        <td width="20%" class="$!diffColorMap.get('Phone')"  ondblclick="copyValue('$!diffColorMap.get('Phone')','$!customer1.phone','phone')">
+    						$!customer1.phone
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Phone')"  ondblclick="copyValue('$!diffColorMap.get('Phone')','$!customer2.phone','phone')">
+    						$!customer2.phone
+    					</td>
+                        <td width="10%">固话</td>
+                        <td>
+                        	<table class="celltbl">
+                        		<tbody>
+                        			<tr>
+                        				<td>
+                        					<div class="ui-div-text" phoneType="divGroup">
+    											<input type="text" name="crmCustomer.phone" id="phone" class="text" value="$!crmCustomer.phone" maxLength="20" phoneType="group" tips="请至少填写一个联系电话" onKeyUp="ctrlPhoneExt('phone','rdo3','phoneExt')" />
+    				                    	</div>
+                        				</td>
+                        				<td width="100" class="left">
+    										<input type="radio" name="crmCustomer.defaultPhoneType" id="rdo3" class="radio" value="3" tips="默认号码必须选择" />
+                        					<label>默认</label>
+                        				</td>
+                        			</tr>
+                        		</tbody>
+                        	</table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('PhoneExt')">固话分机</td>
+                        <td width="20%" class="$!diffColorMap.get('PhoneExt')" ondblclick="copyValue('$!diffColorMap.get('PhoneExt')','$!customer1.phoneExt','phoneExt')">
+    						$!customer1.phoneExt
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('PhoneExt')" ondblclick="copyValue('$!diffColorMap.get('PhoneExt')','$!customer2.phoneExt','phoneExt')">
+    						$!customer2.phoneExt
+    					</td>
+                        <td width="10%">固话分机</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.phoneExt" id="phoneExt" class="text" value="$!crmCustomer.phoneExt" maxLength="10" />
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Fax')">传真</td>
+                        <td width="20%" class="$!diffColorMap.get('Fax')" ondblclick="copyValue('$!diffColorMap.get('Fax')','$!customer1.fax','fax')">
+    						$!customer1.fax
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Fax')" ondblclick="copyValue('$!diffColorMap.get('Fax')','$!customer2.fax','fax')">
+    						$!customer2.fax
+    					</td>
+                        <td width="10%">传真</td>
+                        <td>
+                        	<table class="celltbl">
+                        		<tbody>
+                        			<tr>
+                        				<td>
+                        					<div class="ui-div-text" phoneType="divGroup">
+    											<input type="text" name="crmCustomer.fax" id="fax" class="text" value="$!crmCustomer.fax" maxLength="20" phoneType="group" tips="请至少填写一个联系电话" onKeyUp="ctrlPhoneExt('fax','rdo4','faxExt')"/>
+    				                    	</div>
+                        				</td>
+                        				<td width="100" class="left">
+    										<input type="radio" name="crmCustomer.defaultPhoneType" id="rdo4" class="radio" value="4" tips="默认号码必须选择" />
+                        					<label>默认</label>
+                        				</td>
+                        			</tr>
+                        		</tbody>
+                        	</table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('FaxExt')">传真分机</td>
+                        <td width="20%" class="$!diffColorMap.get('FaxExt')" ondblclick="copyValue('$!diffColorMap.get('FaxExt')','$!customer1.faxExt','faxExt')">
+    						$!customer1.faxExt
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('FaxExt')" ondblclick="copyValue('$!diffColorMap.get('FaxExt')','$!customer2.faxExt','faxExt')">
+    						$!customer2.faxExt
+    					</td>
+                        <td width="10%">传真分机</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" name="crmCustomer.faxExt" id="faxExt" class="text" value="$!crmCustomer.faxExt" maxLength="10" />
+                        	</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('Email')">邮箱</td>
+                        <td width="20%" class="$!diffColorMap.get('Email')" ondblclick="copyValue('$!diffColorMap.get('Email')','$!customer1.email','email')">
+    						<div class="wrap" style="height:80px; overflow:auto;">$!customer1.email</div>
+    					</td>
+                        <td width="20%" class="$!diffColorMap.get('Email')" ondblclick="copyValue('$!diffColorMap.get('Email')','$!customer2.email','email')">
+    						<div class="wrap" style="height:80px; overflow:auto;">$!customer2.email</div>
+    					</td>
+                        <td width="10%">邮箱</td>
+                        <td>
+                        	<div class="ui-div-text">
+    							<input type="text" fun="checkEmail" tips="“邮箱”的格式必须是xxx@xxx.xxx" name="crmCustomer.email" id="email" class="text" value="$!crmCustomer.email" maxLength="50"/>
+                        	</div>
+                        </td>
+                    </tr>
+    				
+    				
+    				
+    				<input type="hidden" name="crmCustomer.lastContactDateStr" value="$!date.format('yyyy-MM-dd HH:mm:ss',$!crmCustomer.lastContactDate)" class="dtxt1-txt" />
+    				
+    				
+    				<!--
+                    <tr>
+                        <td width="10%" class="$!diffColorMap.get('IsReceiveSms')">不愿意接受短信/彩信</td>
+                        <td width="20%" class="$!diffColorMap.get('IsReceiveSms')" ondblclick="copyValue('$!diffColorMap.get('IsReceiveSms')','$!customer1.isReceiveSms','isReceiveSms')">
+    						<input type="checkbox" name="customer2Sms" id="allow" class="checkbox" disabled #if($!customer1.isReceiveSms==1) checked #end />
+                        </td>
+                        <td width="20%" class="$!diffColorMap.get('IsReceiveSms')" ondblclick="copyValue('$!diffColorMap.get('IsReceiveSms')','$!customer2.isReceiveSms','isReceiveSms')">
+    						<input type="checkbox" name="customer1Sms" id="allow" class="checkbox" disabled #if($!customer2.isReceiveSms==1) checked #end />
+                        </td>
+                        <td width="10%">不愿意接受短信/彩信</td>
+                        <td>
+    						<input type="checkbox" name="crmCustomer.isReceiveSms" id="isReceiveSms" class="checkbox" #if($!crmCustomer.isReceiveSms==1) checked=true value="1" #else value="0" #end/>
+                        </td>
+                    </tr>
+    				-->
+    				
+    				
+                    <tr>
+                        <td width="10%">其他信息</td>
+                        <td width="20%">
+                        	<ul class="other-infor">
+                        		<li>联系记录(<label>$!recNum1</label>)</li>
+                        		<li>任务安排(<label>$!tskNum1</label>)</li>
+                        		<li>亲友信息(<label>$!relNum1</label>)</li>
+                        		<li>贷款信息(<label>$!loanNum1</label>)</li>
+                        		<li>日程信息(<label>$!scheduleNum1</label>)</li>
+                        	</ul>
+                        </td>
+                        <td width="20%">
+                        	<ul class="other-infor">
+                        		<li>联系记录(<label>$!recNum2</label>)</li>
+                        		<li>任务安排(<label>$!tskNum2</label>)</li>
+                        		<li>亲友信息(<label>$!relNum2</label>)</li>
+                        		<li>贷款信息(<label>$!loanNum2</label>)</li>
+                        		<li>日程信息(<label>$!scheduleNum2</label>)</li>
+                        	</ul>
+                        </td>
+                        <td width="10%">其他信息</td>
+                        <td>
+                        	<ul class="other-infor">
+                        		<li>合并后的联系记录数(<label>$!recNum3</label>)</li>
+                        		<li>合并后的任务安排数(<label>$!tskNum3</label>)</li>
+                        		<li>合并后的亲友信息数(<label>$!relNum3</label>)</li>
+                        		<li>合并后的贷款信息数(<label>$!loanNum3</label>)</li>
+                        		<li>合并后的日程信息数(<label>$!scheduleNum3</label>)</li>
+                        	</ul>
+                        </td>
+                    </tr>
+                </tbody>
+            	<tfoot>
+            		<tr>
+            			<td colspan="3">合并之前的客户信息</td>
+                        <td colspan="2">合并后的客户信息</td>
+            		</tr>
+            	</tfoot>
+            </table>
+        </div>
+        
+        <ul class="gray_self">
+        	<li>1、执行合并后，不仅客户基本信息进行合并，而且与客户相关的联系记录、任务安排、亲友信息也进行合并。</li>
+            <li>2、执行合并操作不可恢复！请在执行前检查确定是否为同一个客户。</li>
+        </ul>
+        
+        <hr class="line" />
+        
+        <div class="center">
+        	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="合并客户" onclick="Merge()" />
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="Cancel()" />
+        </div>
+    </form>
+</body>
+</html>

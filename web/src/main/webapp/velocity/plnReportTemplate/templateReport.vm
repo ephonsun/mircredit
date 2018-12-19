@@ -1,0 +1,47 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta name=vs_targetSchema content="http://schemas.microsoft.com/intellisense/ie5"> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+	
+    #styleLink("base")
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<script type="text/javascript">
+	jQuery(function(){
+		$('#print').click(function(){
+			window.print();
+		});
+	});
+	</script>
+	<style media=print> 
+        .Noprint{display:none;} 
+        .PageNext{page-break-after: always;} 
+    </style> 
+	<style> 
+        .NOPRINT { 
+            font-family: "宋体"; 
+            font-size: 9pt; 
+		} 
+    </style> 
+</head>
+<body>
+	
+    <div class="Noprint">
+		<div class="btn-box">
+			#if($urlPermitUtil.hasPermission('addPlnReport'))
+        	<input type="button" class="btn1" value="打 印" id="print"/>
+        	#end
+        	<input type="button" class="btn1" onclick="window.close();" value="关 闭" />
+        </div>
+    </div>
+    <div id="mylable">
+    	$!templateReplaceContent
+    </div>
+    <input type="hidden" value="$!fastPlanId" id="fastId" />
+</body>
+</html>
+

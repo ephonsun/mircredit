@@ -1,0 +1,60 @@
+<thead>
+	<tr>
+    	<th width="240" title="客户姓名（电话）">客户姓名（电话）</th>
+		<th title="联系类型">联系类型</th> 
+		<th width="140" title="联系时间">联系时间</th>
+		<th title="录音时长">录音时长</th>		
+    	<th title="业务类型">业务类型</th>
+		<th width="240" title="备注">备注</th>
+    	<th title="操作者">操作者</th>
+		#if($urlPermitUtil.hasPermission('recordPlayVideo'))
+			<th  width="100" title="操作">操作</th>
+		#end
+    </tr>
+</thead>
+
+<tbody>
+	#foreach($recordInfo in $!recordInfoList.items)
+      <tr align="center" id="fontChange$!recordInfo.recordInfoId">
+        <td>
+			<div align="center" class="datacus" id="customer$!recordInfo.recordInfoId" title="#if(!$!recordInfo.customerId||$!recordInfo.customerId!=0)$!recordInfo.customerName#if($!recordInfo.defaultPhone!='')#if($!recordInfo.customerName!=''||!$!recordInfo.customerName)($!recordInfo.defaultPhone)#else$!recordInfo.defaultPhone#end#end#elseif($!recordInfo.defaultPhone!='')$!recordInfo.defaultPhone#else 未知#end">
+				#if(!$!recordInfo.customerId||$!recordInfo.customerId!=0)
+					<label title="$!recordInfo.customerName">$!recordInfo.customerName</label>					
+					#if($!recordInfo.defaultPhone!='') 
+						#if($!recordInfo.customerName!=''||!$!recordInfo.customerName)
+							($!recordInfo.defaultPhone)
+						#else
+						$!recordInfo.defaultPhone
+						#end
+					#end
+					</a>
+				#elseif($!recordInfo.remotePhone!='')
+					<label title="$!recordInfo.defaultPhone">$!recordInfo.defaultPhone</label>
+				#else
+					<label title="未知">未知</label>
+				#end
+            </div>				
+		</td>
+		<td><label title="$!recordInfo.callTypeName">$!recordInfo.callTypeName</label></td>
+        <td><label title="#if($!recordInfo.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!recordInfo.startDate)#end">#if($!recordInfo.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!recordInfo.startDate)#end</label></td>
+		<td><label title="$!recordInfo.callTime">$!recordInfo.callTime</label></td>
+    	<td><label title="$!recordInfo.bizType">$!recordInfo.bizType</label></td>
+		<td><label title="$!subString.replaceRemark($!recordInfo.remark)">$!recordInfo.remark</label></td>
+        <td><label title="$!recordInfo.userName">$!recordInfo.userName</label></td>
+		#if($urlPermitUtil.hasPermission('recordPlayVideo'))
+        <td style="font-weight: normal;">			
+			#if($!recordInfo.callTypeName=='彩信'||$!recordInfo.callTypeName=='短信'||$!recordInfo.callTypeName=='拜访'||$!recordInfo.fileName==''||$!recordInfo.filePath==''||!$!recordInfo.fileName||!$!recordInfo.filePath)<a href="#2" style="color:gray; text-decoration:none; cursor: default;" disable="true">播放</a> 
+        	#else<a class="link" href="#2" onclick='play(this,$!recordInfo.recordInfoId,"$!recordInfo.fileName","$!recordInfo.filePath","$!recordInfo.fileSize","$!recordInfo.fileId")'>播放</a>
+			#end			
+		</td>
+		#end
+      </tr>
+    #end
+</tbody>
+<tfoot>
+	<tr>
+		<td #if($urlPermitUtil.hasPermission('recordPlayVideo')) colspan="8" #else colspan="7" #end>
+        	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+        </td>
+    </tr>
+</tfoot>

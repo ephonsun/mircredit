@@ -1,0 +1,91 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>更新进度</title>
+    
+    #styleLink("base")
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			initExecute();
+			var proId;
+			proId=setInterval("showBar()", 1000);
+		});
+		function initExecute(){
+		
+		 jQuery.post('initExecute.html?random='+Math.random()*10000,{}, 
+		 				function(data){
+		 					if(data=="back") document.location.href="showFailResult.html?random="+Math.random()*100000;
+		 				
+		 				});
+		
+		}
+		//休眠
+		function sleep(numberMillis) {    
+        	var now = new Date();    
+       	 	var exitTime = now.getTime() + numberMillis;   
+        	while (true) { 
+        		now = new Date();       
+        		if (now.getTime() > exitTime) 
+      	  		return;    
+        		} 
+    	} 
+    	//显示进度
+		function showBar(){
+			var totalAmount=$("#sumRecord").text();
+			 jQuery.post('showProgress.html?random='+Math.random()*10000,
+						{},
+						function(json){
+							var curr;
+							var p;
+							var ds=jQuery.parseJSON(json);
+							if(ds["curr"]) {
+								curr = ds["curr"];
+							}
+							if(typeof(curr)=='undefined') curr = 0;
+							if(totalAmount==0) p = "100%";
+                			else p = Math.round(parseInt(curr) * 100 /parseInt(totalAmount))+'%';
+                			$("#percent").text(p);
+                			$("#porgressBar").css("width",p);
+                			if(p == "100%"){
+								sleep(1000); 
+								document.location.href="showResult.html?random="+Math.random()*100000;
+                			}
+						}
+			);
+		}
+    </script>
+</head>
+
+<body>
+	<table class="bartbl">
+    	<tr>
+        	<td class="over">第 1 步</td>
+        	<td class="over">第 2 步</td>
+        	<td>完 成</td>
+        </tr>
+    </table>
+    <h4 class="steptxt">
+    	第2步：更新进度
+    </h4>
+    
+    <div class="pgrbar">
+    	<div class="ppt">
+            <span class="fl">
+                正在更新数据，共
+                <label id="sumRecord" class="dgreen bold">$!total</label>
+                条数据…
+            </span>
+            <span class="fr">
+               <div id="percent"></div>
+            </span>
+        </div>
+        <div class="bar" >
+           <div id="porgressBar"></div>
+        </div>
+    </div>
+</body>
+</html>

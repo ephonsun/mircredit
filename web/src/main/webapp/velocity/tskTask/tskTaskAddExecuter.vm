@@ -1,0 +1,154 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建联系任务</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	div.ztree-box { height: 300px; border: 1px solid #ccc; padding: 2px; overflow: auto; }
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+    </style>
+</head>
+
+<body>
+    <div class="etabs">
+		<form id="excuterForm" name="excuterForm" action="/tskContact/saveTaskContactExecuter.html" method="post">
+        	<div class="etabs-head">			
+        		<div class="etabs-head-items">
+        			<ul id="etabs-items">
+    		        	<li><label>任务基本信息</label></li>
+    		        	<li><label>选择执行者</label></li>
+    		        </ul>
+        		</div>
+        	</div>
+            <div id="etabs-body" class="etabs-body">
+    			<div class="etabs-body-child">
+				</div>
+    			<div class="etabs-body-child">
+					<input type="hidden" name="tskContact.contactId" value="$!tskContact.contactId" />
+					<input id="excUserIds" name="excUserIds" type="hidden"/>
+                	<div class="ztree-box">
+                    	<ul id="executerTree" class="ztree"></ul>
+                    </div>
+    					
+                    <hr />
+                    
+                    <div class="center">
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="saveExecuter();" value="下一步" />
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="deleteTaskAndClose($!tskContact.contactId);"  value="取消" />
+                    </div>
+                </div>
+            </div>
+		</form>
+    </div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript">
+	function cfirm(){
+		var title;
+		if($!roleType!=0){
+			title='新建日程';
+		}else{
+			title='新建联系任务';
+		}
+		if(confirm('放弃'+title+'并关闭选项卡？')){
+    		deleteTask($!tskContact.contactId);
+    		return true;
+		}
+	}
+	var setting = {
+		check: {
+			enable: true,
+			chkStyle: "checkbox",
+			chkboxType: { "Y": "ps", "N": "ps" }
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			showIcon: true
+		}
+    };
+ 
+	//var zNodes = $!deptJson;
+	
+	//添加执行者
+	function saveExecuter(flag){
+		var bool = jQuery.validator({ form: 'excuterForm', extend: false});
+		if(!bool){
+			return false;
+		}
+		var treeObj = jQuery.fn.zTree.getZTreeObj("executerTree");
+		var nodes = treeObj.getCheckedNodes(true);
+		var excUserIds = new Array();
+		
+		var j=0;
+		var k=0;
+		for(var i=0;i<nodes.length;i++){
+			if(nodes[i].type=='U'){
+				excUserIds[j++] = nodes[i].id;
+			}
+		}
+		var userIds=excUserIds.toString();
+		if(userIds == ""){
+			banger.page.showMessageBox("执行者不能为空！");
+			return;
+		}else{
+			$("#excUserIds").val(userIds);
+			document.excuterForm.submit();
+		}
+	}
+    			
+	jQuery(function(){
+		//加载内部页卡
+		$('div.etabs').etabs({
+			'head': 'etabs-items',
+			'body': 'etabs-body',
+			'bar': 'etabs-bar',
+			'index': 1,
+			'beforeOnclick': function(){ return false; }
+		});
+		
+		//加载机构用户树
+		jQuery.post('/tskContact/showAllExecuterList.html?&random='+Math.random(),{
+		},function(data){
+			data = jQuery.parseJSON(data);
+			jQuery.fn.zTree.init($("#executerTree"),setting,data);
+		});
+		
+		//加载验证控件
+		jQuery("#excuterForm").validator();
+	});	
+		
+	function deleteTask(contactId){
+    	jQuery.post('delTaskComplete.html',{
+    			'tskContact.contactId':contactId
+    		},function(data){
+		});
+	}
+	function deleteTaskAndClose(taskId){
+		if (cfirm()){
+			closeTab();
+		} 
+	}
+	 
+	function closeTab(){
+		tab.close(GetId(), true);
+	}
+</script>
+</html>

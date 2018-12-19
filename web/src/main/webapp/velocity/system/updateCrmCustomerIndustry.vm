@@ -1,0 +1,88 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑行业类型</title>
+	<base target="_self" />
+	
+    #styleLink("base")
+    <style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+        .dtxt2 .dtxt2-txt{ width:98% !important; }
+    </style>
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+			$('#tabs').easytabs();
+			jQuery("#updateCrmCusIndustryForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		function updateData(){
+			var bool = jQuery.validator({ form: 'updateCrmCusIndustryForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+	    	jQuery.ajax({
+			    type: "post",
+			    url: "updateCrmCustomerIndustry.html",
+			    data:{customerIndustryName: $("#customerIndustryName").val(), id: $("#id").val()},
+			    //请求成功后的回调函数有两个参数
+			    success: function(data, textStatus){
+			 		updateResult(data);
+			    }
+			});
+		}
+		function updateResult(msg){
+			if(msg != "SUCCESS"){
+				banger.page.showMessageBox(msg);
+			}
+			else{
+				window.returnValue = 1; 
+				window.close(); 
+			}
+			
+		}
+	</script>
+</head>
+
+<body>
+	<form name="updateCrmCusIndustryForm" id="updateCrmCusIndustryForm" action="" method="post">
+		<b>编辑行业类型</b>
+		<hr />
+		<table class="htmltbl" cellspacing="0" cellpadding="0">
+			<tbody>
+			    <tr>
+			        <td width="80" class="field">
+			        	<span class="red">*</span>选项名称：
+			        </td>
+			        <td>
+			        	<div class="dtxt2 fl" style="width: 200px;">
+			        		<input type="text" name="customerIndustryName" id="customerIndustryName" class="dtxt2-txt" maxlength="20" value="$!customerIndustryName"  rule="\S" tips="“行业类型”必须填写" />
+			        	</div>
+                        <input type="text" style="display:none">
+			        </td>
+			    </tr>
+			</tbody>
+		</table>
+		<div class="halign" style="margin-top: 20px;">
+			<input type="button" value="保 存" class="btn6 btn6bg1" onclick="updateData();" />
+			<input type="button" value="取 消" class="btn6 btn6bg3" onclick="javascript:window.returnValue=0;window.close();" />
+			<input type="hidden" id="id" value="$!id"/>
+		</div>
+	</form>
+</body>
+</html>

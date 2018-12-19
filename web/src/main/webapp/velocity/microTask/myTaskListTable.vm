@@ -1,0 +1,128 @@
+<thead>
+    <tr>
+        <th><label title="任务类型">任务类型</label></th>
+        <th><label title="任务名称">任务名称</label></th>
+        <th><label title="创建者">创建者</label></th>
+        <th><label title="开始日期">开始日期</label></th>
+        <th><label title="结束日期">结束日期</label></th>
+        <th><label title="任务备注">任务备注</label></th>
+        <th><label title="任务状态">任务状态</label></th>
+        <th><label title="完成进度">完成进度</label></th>
+        <th width="150"><label title="操作">操作</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($data in $dataList)
+	#if($!data.isOutDate == 1 && $!data.comPercent < 1 ) 
+	<tr class="orange" >
+	#else
+	<tr>
+	#end
+        <td>
+        #if ($data.taskType == 1) 
+        <label title="贷款任务">贷款任务</label>
+        #end
+        #if ($data.taskType == 2) 
+        <label title="营销任务-电话营销">营销任务-电话营销</label>
+        #end
+        #if ($data.taskType == 3) 
+        <label title="营销任务-实地营销">营销任务-实地营销</label>
+        #end
+        </td>
+        <td>
+        #if($urlPermitUtil.hasPermission('detailMicroTask'))
+            #if ($data.taskType == 1)
+                <label class="link" id="taskTitle_$!data.taskId" title="$!data.taskTitle"
+                       onclick="viewTask('$!data.taskId')">$!data.taskTitle</label>
+            #else
+                <label class="link" id="taskTitle_$!data.taskId" title="$!data.taskTitle"
+                       onclick="viewTaskMarketing('$!data.taskId','$data.taskType')">$!data.taskTitle</label>
+            #end
+        #else
+                <label  title="$!data.taskTitle">$!data.taskTitle</label>
+        #end
+        </td>
+        <td><label title="$!data.userName">$!data.userName</label></td>
+        <td><label title="$!date.format('yyyy-MM-dd',$!data.startDate)">$!date.format('yyyy-MM-dd',$!data.startDate)</label></td>
+        <td><label title="$!date.format('yyyy-MM-dd',$!data.endDate)">$!date.format('yyyy-MM-dd',$!data.endDate)</label></td>
+        <td><label title="$!subString.replaceRemark($!data.remark)">$!data.remark</label></td>
+        
+        #if ($data.comPercent >= 1) 
+        <td><label title="已完成">已完成</label></td>
+        #else
+        <td><label title="未完成">未完成</label></td>
+        #end
+        <td><label title="$vmHelper.getPercentDec($!data.comPercent)">$vmHelper.getPercentDec($!data.comPercent)</label></td>
+        <td>
+            #if($urlPermitUtil.hasPermission('execMicroTask'))
+            	#if($!dateString.getSystemDate("$!date.format('yyyy-MM-dd',$!data.startDate)")== -1)
+            		<span disabled="true" style="cursor: default;">执行</span>
+            	#else
+            		#if($!data.isOutDate == 1 && $!data.comPercent < 1 ) 
+	            		<span disabled="true" style="cursor: default;">执行</span>
+	            	#else
+		                #if ($data.taskType == 2)
+		                    <span class="link" onclick="execTask($!data.taskId)">执行</span>
+		                #else
+		                    <span disabled="true" style="cursor: default;">执行</span>
+		                #end
+	                #end
+            	#end
+            #end
+            #if($urlPermitUtil.hasPermission('editMicroTask'))
+            	#if ($data.comPercent >= 1) 
+            		<span disabled="true" style="cursor: default;">编辑</span>
+            	#else
+            		#if ($data.taskType == 1)
+	                    #if ($data.assignUserId == $loginUserId)
+	                        <span class="link" onclick="editTaskByAssign('$!data.taskId')">编辑</span>
+	                    #else
+	                        #if ($isInChargeOf == 1 && $!subString.isManger("$!data.roleIds") == 1 && $!subString.isTaskEditor("$!data.assignSubDept","$!data.loginManageDeptId") == 1)
+	                            <span class="link" onclick="editTaskByExecutor('$!data.taskId')">编辑</span>
+	                        #else
+	                            <span disabled="true" style="cursor: default;">编辑</span>
+	                        #end
+	                    #end
+	                #else
+	                    #if ($data.assignUserId == $loginUserId)
+	                        <span class="link" onclick="editTaskMarketingByAssign('$!data.taskId')">编辑</span>
+	                    #else
+	                        #if ($isInChargeOf == 1 && $!subString.isManger("$!data.roleIds") == 1 && $!subString.isTaskEditor("$!data.assignSubDept","$!data.loginManageDeptId") == 1)
+	                            <span class="link" onclick="editTaskMarketingByExecutor('$!data.taskId')">编辑</span>
+	                        #else
+	                            <span disabled="true" style="cursor: default;">编辑</span>
+	                        #end
+	                    #end
+	                #end
+            	#end
+            #end
+            #if ($data.assignUserId == $loginUserId)
+                #if($urlPermitUtil.hasPermission('stopMicroTask'))
+                	#if ($data.comPercent >= 1) 
+                		<span disabled="true" style="cursor: default;">中止</span>
+                	#else
+                		<span class="link" onclick="stopTask($!data.taskId)">中止</span>
+                	#end
+                #end
+                #if($urlPermitUtil.hasPermission('delMicroTask'))
+                    <span class="link" onclick="delTask($!data.taskId)">删除</span>
+                #end
+            #else
+                #if($urlPermitUtil.hasPermission('stopMicroTask'))
+                    <span disabled="true" style="cursor: default;">中止</span>
+                #end
+                #if($urlPermitUtil.hasPermission('delMicroTask'))
+                    <span disabled="true" style="cursor: default;">删除</span>
+                #end
+            #end
+        </td>
+    </tr>
+    #end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="9">
+            #parse("/velocity/ajaxPage.vm")
+        </td>
+    </tr>
+</tfoot>

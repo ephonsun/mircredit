@@ -1,0 +1,123 @@
+﻿﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>执行跑批程序</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css"/>
+    <style type="text/css">
+        h4.legend {
+            border-bottom: 1px solid #ccc;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            line-height: 30px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        ul li {
+            height: 24px;
+            line-height: 24px;
+        }
+
+        .Agency-left {
+            float: left;
+            width: 170px;
+        }
+
+        .Agency-left h4 {
+            height: 30px;
+            border: 1px solid #ccc;
+            padding: 0px 5px;
+            line-height: 30px;
+            font-size: 12px;
+            font-family: Microsoft Yahei;
+        }
+
+        .Agency-left h4 label {
+            float: left;
+        }
+
+        .Agency-left h4 p {
+            float: right;
+        }
+
+        .Agency-left h4 p a {
+            float: left;
+            width: 20px;
+            overflow: hidden;
+            text-indent: -1000px;
+        }
+
+        .Agency-left h4 p a.edi-add {
+            background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent;
+        }
+
+        .Agency-left h4 p a.edi-up {
+            background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent;
+        }
+
+        .Agency-left h4 p a.edi-down {
+            background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent;
+        }
+
+        .Agency-left h4 p a.edi-del {
+            background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent;
+        }
+
+        .Agency-left h4 p a.edi-edi {
+            background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent;
+        }
+
+        .Agency-left .Agency-tree {
+            width: 99%;
+            display: block;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin-top: 2px;
+            overflow: auto;
+        }
+
+        .Agency-right {
+            min-height: 534px;
+            height: auto !important;
+            height: 534px;
+            margin-left: 180px;
+        }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript">
+        function execTimeTask(){
+            $('#execTimeTask').attr("disabled","disabled");
+            var urlStr = "${ctx}/loan/execAllTimeTask.html?RanNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:urlStr,
+                data:{},
+                success:function(ret){
+                    $('#execTimeTask').attr("disabled","false");
+                    if(ret == "ok"){
+                        banger.page.showMessageBox({"type":"success","content":"执行跑批成功！"});
+                    }else{
+                        banger.page.showMessageBox({"type":"error","content":"执行跑批失败！"});
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+<div class="center">
+    <input type="button" id="execTimeTask" class="ui-footer-btn1 ui-footer-btn1-save button" value="执行跑批任务" onclick="execTimeTask();"/>
+</div>
+</body>
+</html>

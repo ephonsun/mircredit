@@ -1,0 +1,305 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加意向客户</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style tyle="text/css">
+		html, body{ overflow:hidden !important; }
+	</style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <!--保存校验  Zhangfp-->
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+
+    <script type="text/javascript">
+        jQuery(function () {
+            jQuery('select').select({
+            	scroll:8
+            });
+
+            jQuery('#f').validator();
+
+            maxTextArea("textarea[maxlength]");
+            numInput("input[intFlag$='true']");
+        });
+        var postJson = {};
+        jQuery(document).ready(function () {
+            jQuery('#schtxtname').dfilter({
+                url: '../pdtProductCustomer/initFindCustomerByConds.html',
+                data: paramsName,
+                thead: [
+                    { text: '客户姓名', field: 'customerName', width: 100, align: 'center' },
+                    { text: '称谓', field: 'customerTitle', width: 100, align: 'center' },
+                    { text: '联系电话', field: 'replaceNumber', width: 150, align: 'center' },
+                    { text: '身份证', field: 'idCard', width: 150, align: 'center' },
+                    { text: '联系地址', field: 'address', width: 140, align: 'center' }
+                ],
+                click: clickCus
+            });
+
+            jQuery('#schtxtnum').dfilter({
+                url: '../pdtProductCustomer/initFindCustomerByConds.html',
+                data: paramsNum,
+                thead: [
+                    { text: '客户姓名', field: 'customerName', width: 100, align: 'center' },
+                    { text: '称谓', field: 'customerTitle', width: 100, align: 'center' },
+                    { text: '联系电话', field: 'replaceNumber', width: 150, align: 'center' },
+                    { text: '身份证', field: 'idCard', width: 150, align: 'center' },
+                    { text: '联系地址', field: 'address', width: 140, align: 'center' }
+                ],
+                click: clickCus
+            });
+
+            jQuery('#schtxtaddr').dfilter({
+                url: '../pdtProductCustomer/initFindCustomerByConds.html',
+                data: paramsAddr,
+                thead: [
+                    { text: '客户姓名', field: 'customerName', width: 100, align: 'center' },
+                    { text: '称谓', field: 'customerTitle', width: 100, align: 'center' },
+                    { text: '联系电话', field: 'replaceNumber', width: 150, align: 'center' },
+                    { text: '身份证', field: 'idCard', width: 150, align: 'center' },
+                    { text: '联系地址', field: 'address', width: 140, align: 'center' }
+                ],
+                click: clickCus
+            });
+
+            jQuery("#btnOk").click(function () {
+                var bool = jQuery.validator({form:'f',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+
+                var productId = jQuery("#selProduct").val();
+                var productName = jQuery("#selProduct").find("option:selected").text();
+                var customerId = jQuery.trim(jQuery("#txtCustomerId").val());
+                var remark = jQuery.trim(jQuery("#txtRemark").val());
+                var customerName = jQuery.trim(jQuery("#txtCustomerName").val());
+                var cphNumber = jQuery.trim(jQuery("#txtCphNumber").val());
+                var address = jQuery.trim(jQuery("#txtAddress").val());
+                var isUpdate = false;
+                //判断选取出来的数据是否发生改变，改变则更新客户
+                if (customerId != 0) {
+                    if ((customerName != jQuery("#txtOldCustomerName").val()) || (cphNumber != jQuery("#txtReplaceCphNumber").val()) ||
+                            (address != jQuery("#txtOldAddress").val())) {
+
+//                        var cusCustomerName = jQuery.trim(jQuery('#txtCustomerName').val());
+//                        var cusCphNumber = jQuery.trim(jQuery('#txtCphNumber').val());
+//                        var cusAddress = jQuery.trim(jQuery('#txtAddress').val());
+                        var replaceCphNumber = jQuery.trim(jQuery("#txtReplaceCphNumber").val());
+                        if(cphNumber != replaceCphNumber){
+                            if(cphNumber.indexOf("*") > 0){
+                                banger.page.showMessageBox("联系电话填写不正确，不能创建客户！");
+                                $('#txtCphNumber').focus();
+                                return false;
+                            }
+                        }else if(cphNumber == replaceCphNumber){
+                            cphNumber = jQuery('#txtOldCphNumber').val();
+                        }
+
+                        //选择更新还是新增客户
+                        var url = "../pdtProductCustomer/toChooseAddUpdate.html?Random="+Math.random()*1000;
+                        var result = banger.page.openDialog(url,"客户信息已变更，是否更新原客户信息？",600,200);
+                        if(result == undefined){
+                            return false;
+                        }
+
+                        if(result == "add"){
+                            customerId = 0;  //新增
+                        }else if(result == "update"){
+                            //更新原客户
+                            isUpdate = true;
+                        }
+                    }
+                }
+
+                //如果是新增客户，则校验数据
+                if (customerId == 0) {
+                    //联系电话是否变更，如果没有变更，则用之前的号码
+                    var phone2 = jQuery.trim($('#txtCphNumber').val());
+                    var phone2Hide = jQuery.trim($('#txtReplaceCphNumber').val());
+                    if(phone2 == phone2Hide){
+                        cphNumber = jQuery.trim($('#txtOldCphNumber').val());
+                    }else {
+                        if (!(/\d$/.test(cphNumber))) {
+                            banger.page.showMessageBox("联系电话填写不正确，不能创建客户！");
+                            return false;
+                        }
+                    }
+                }
+                var postData = {'pdtProductCustomer.productCustomerId': 0,
+                    'pdtProductCustomer.productId': productId,
+                    'pdtProductCustomer.customerId': customerId,
+                    'pdtProductCustomer.remark': remark,
+                    'customerName': customerName,
+                    'cphNumber': cphNumber,
+                    'address': address,
+                    'productName': productName,
+                    'isUpdate':isUpdate
+                };
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",
+                    url: "../pdtProductCustomer/savePdtProductCustomer.html",
+                    data: postData,
+                    success: function (data) {
+                        saveResult(data);
+                    }
+                });
+            });
+
+        });
+
+        //验证搜索条件
+        function checkQueryCondition(){
+            var bool = false;
+            var objs = $('[phoneType=\'group\']');
+            for(var i = 0; i < objs.length; i++){
+                if(jQuery.trim($(objs[i]).val())){
+                    bool = true;
+                    break;
+                }
+            }
+            return bool;
+        }
+
+        function extendvalidator(){
+            var bool = true;
+            if(checkQueryCondition()){
+                $('[phoneType=\'group\']').parent().removeClass('v-fails');
+            }else{
+                $('[phoneType=\'group\']').parent().addClass('v-fails');
+                $('[phoneType=\'group\']').attr('tips', '您必须选择一个意向产品或填写意向说明！');
+                bool = false;
+            }
+            return bool;
+        }
+
+        function paramsName() {
+            //return 'customerName=' + escape(encodeURIComponent(jQuery('#txtCustomerName').val()));
+            return 'customerName=' + jQuery('#txtCustomerName').val();
+        }
+
+        function paramsNum() {
+            return 'cphNumber=' + jQuery('#txtCphNumber').val();
+        }
+
+        function paramsAddr() {
+            return 'address=' + jQuery('#txtAddress').val();
+        }
+
+        function clickCus(node) {
+            jQuery("#txtCustomerName").val(node['customerName']);
+            jQuery("#txtCphNumber").val(node['replaceNumber']);
+            jQuery("#txtAddress").val(node['address']);
+
+            //保存原始的客户信息
+            jQuery("#txtCustomerId").val(node['customerId']);
+            jQuery("#txtOldCustomerName").val(node['customerName']);
+            jQuery("#txtOldCphNumber").val(node['cphNumber']);
+            jQuery("#txtOldAddress").val(node['address']);
+            jQuery("#txtReplaceCphNumber").val(node['replaceNumber']);
+        }
+
+        function saveResult(msg) {
+            //当返回值为"kicked"时，表示用户在另一处登录，当前用户被踢出来
+            if (msg == 'SUCCESS' || msg == "kicked") {
+                window.returnValue = msg;
+                window.close();
+            } else {
+                banger.page.showMessageBox(msg);
+            }
+        }
+
+    </script>	  
+    
+</head>
+
+<body style="height:320px;">
+  <form id="f" method="post">
+  	  <input type="hidden" id="txtCustomerId" value="0"/>
+  	  <input type="hidden" id="txtOldCustomerName" value=""/>
+  	  <input type="hidden" id="txtOldCphNumber" value=""/>
+  	  <input type="hidden" id="txtReplaceCphNumber" value=""/>
+  	  <input type="hidden" id="txtOldAddress" value=""/>
+      <table class="htmltbl" style="table-layout:auto;width:100%">
+          <tbody>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>                  
+                      <label>客户姓名：</label>
+                  </td>
+                  <td>
+                      <div id="schtxtname" class="ui-div-text">
+                          <input type="text" class="text" maxlength="20" id="txtCustomerName" rule="\S" tips='"客户姓名"必须填写'/>
+                      </div>
+                  </td>              
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>                  
+                      <label>联系电话：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtnum">
+                          <input type="text" maxlength="20" intFlag="true" class="text" id="txtCphNumber" rule="\S" tips='"联系电话"必须填写'/>
+                      </div>
+                  </td>              
+              </tr>
+              <tr>
+                  <td class="field" width="8%" >
+                      <label>联系地址：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text" id="txtAddress" maxlength="50"/>
+                      </div>
+                  </td>              
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label>意向产品：</label>
+                  </td>
+                  <td phoneType="divGroup">
+                      <select onblur="extendvalidator();" id="selProduct" phoneType="group" tips="您必须选择一个意向产品或填写意向说明！">
+                    	<option value="" ></option>
+                    	#foreach($pdtProduct in $!pdtProductList)
+                    		#if($!pdtProduct.productId==$!productId)
+                    		<option value="$!pdtProduct.productId" selected>$!pdtProduct.productCode|$!pdtProduct.productName</option>
+                    		#else
+                    		<option value="$!pdtProduct.productId" >$!pdtProduct.productCode|$!pdtProduct.productName</option>
+                    		#end
+                    		
+                    	#end
+                      </select>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%" valign="top">
+                      <label>意向说明：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-textarea" style="height: 100px;" phoneType="divGroup">
+                          <textarea onblur="extendvalidator();" phoneType="group" tips="您必须选择一个意向产品或填写意向说明！" class="textarea" maxlength="300" id="txtRemark" style="height: 100px; _height:100px;"></textarea>
+                      </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table> 
+    </form> 
+   <hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>
+

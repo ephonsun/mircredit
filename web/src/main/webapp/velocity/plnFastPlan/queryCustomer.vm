@@ -1,0 +1,127 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>确认目标客户</title>
+    
+    #styleLink("base")
+    
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+			$('#reset').click(function(){
+				$(':text', $('form')).val('');
+			});
+		});
+		function doQuery(){
+			var f=$("#queryCus");
+	    	f.action="queryOnlineCustomer.html";
+			f.submit();
+		}
+		function doFastPlan(id){
+			location.href="/plnFastPlan/doFastPlan.html?customerId="+id;
+		}
+		
+		function ClearCondition(){
+			$(':text').val('');
+   	 	}
+    </script>
+</head>
+
+<body>
+	<table class="step2" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td align="center">第一步：选择客户类别</td>
+                <td class="bar" align="center">第二步：确认目标客户</td>
+                <td align="center">第三步：进行快速规划</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <form id="queryCus" name="queryCus" action="queryOnlineCustomer.html" method="post">
+    	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td width="7%" class="field">
+                        <label>客户编号：</label>
+                    </td>
+                    <td width="25%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="customerNo" name="customerNo" value="$!customerNo" maxLength="20" />
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>客户姓名：</label>
+                    </td>
+                    <td width="25%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="customerName" name="customerName" value="$!customerName" maxLength="20" />
+                        </div>
+                    </td>
+                    <td align="right">
+                        <input type="button" id="reset" class="btn1" value="清 空" />
+                        <input type="button" class="btn1" value="搜 索" onclick="doQuery()"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+    #foreach($customerInfo in $!customerList.items)
+    <dl class="target-customers">
+    	<dt>
+        	<div class="fl cusno">
+            	客户编号：
+                <label class="dgreen" title="$!customerInfo.customerNo">$!customerInfo.customerNo</label>
+            </div>
+        	<div class="fl">
+                客户姓名：
+                <label class="dgreen" title="$!customerInfo.customerName">$!customerInfo.customerName
+                #if($!customerInfo.isShare==1)
+						（共享客户）
+				#end
+				</label>
+            </div>
+            <input type="button" class="btn1 fr" value="规 划" onclick="doFastPlan($!customerInfo.customerId)"/>
+        </dt>
+        <dd>
+        	<table class="viewtbl" cellpadding="0" cellspacing="0">
+            	<tbody>
+                	<tr>
+                    	<td width="5%" class="field halr"><label>电话：</label></td>
+                    	
+                    	#if($!customerInfo.defaultPhoneType=='1')
+                		<td width="30%"><label title="$!customerInfo.mobilePhone1">$!customerInfo.mobilePhone1</label></td>
+                    	#elseif($!customerInfo.defaultPhoneType=='2')
+                    	<td width="30%"><label title="$!customerInfo.mobilePhone2">$!customerInfo.mobilePhone2</label></td>
+                    	#elseif($!customerInfo.defaultPhoneType=='3')
+                    	<td width="30%"><label title="$!customerInfo.phone">$!customerInfo.phone</label></td>
+                    	#elseif($!customerInfo.defaultPhoneType=='4')
+                    	<td width="30%"><label title="$!customerInfo.fax">$!customerInfo.fax</label></td>
+                   		 #end
+                    
+                    	<td width="7%" class="field halr"><label>性别：</label></td>
+                    	<td width="30%"><label title="$!customerInfo.sex">$!customerInfo.sex</label></td>
+                    	<td width="5%" class="field halr"><label>年龄：</label></td>
+                    	<td width="25%"><label title="$!customerInfo.age">$!customerInfo.age</label></td>
+                    </tr>
+                	<tr>
+                    	<td width="5%" class="field halr"><label>证件类型：</label></td>
+                    	<td width="30%"><label>身份证</label></td>
+                    	<td width="7%" class="field halr"><label>证件号码：</label></td>
+                    	<td colspan="3"><label title="$!customerInfo.idCard">$!customerInfo.idCard</label></td>
+                    </tr>
+                </tbody>
+                 <tfoot>
+        </tfoot>
+            </table>
+        </dd>
+    </dl>
+    #end
+    <div style="margin-top: 10px;">
+    	<div class="fr" align="right">#parse("/velocity/page.vm")</div>
+    </div>
+</body>
+</html>

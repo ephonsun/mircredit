@@ -1,0 +1,228 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>关联营销任务</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};	//上一个搜索条件
+    	
+    	/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			goto(
+				page,
+				"/pdtProduct/queryPdtProductList.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".green").text(total);
+			}else {
+				jQuery(".green").text("0");
+			}
+		}
+		
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var postJson={
+				'tskMarketingBean.gradeId': -1,
+				'tskMarketingBean.assignUserId': -1,
+			  	'completion': 'execing',
+			  	'complete': ''
+				};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+		$(function(){
+			$('select').select();
+			$('table.datatbl').table();
+			$('#compl').hide();
+			$('#execuCompl').change(function(){
+				var v=$(this).val();
+				switch(v){
+					case 'unStart':
+					$('#compl').hide();
+					break;
+					case 'execing':
+					$('#compl').show();
+					break;
+					case 'end':
+					$('#compl').show();
+					break;
+					case 'suspend':
+					$('#compl').hide();
+					break;
+					default :
+					$('#compl').hide();
+					break;
+				};
+				$('#comp').attr("checked",false);
+			});
+			
+			$('#execuCompl').change();
+			jQuery("#btnClear").click(function(){
+				jQuery("input[name='conds']").each(function(){
+					jQuery(this).val("");
+				});
+				$('#selTskGrade')[0].selectedIndex = 0;
+				$('#selTskGrade').select();
+				
+				$('#execuCompl')[0].selectedIndex = 1;
+				$('#execuCompl').select();
+				
+				$('#selAssign')[0].selectedIndex = 0;
+				$('#selAssign').select();
+				
+				$('#comp').attr("checked",false);
+				
+			});
+			
+			jQuery("#btnSearch").click(function(){
+				var marketingTitle = jQuery.trim(jQuery("#txtMarketingTitle").val());
+				var productTarget = jQuery.trim(jQuery("#txtProductTarget").val());
+				var createStartDate = jQuery.trim(jQuery("#txtCreateStartDate").val());
+				var createEndDate = jQuery.trim(jQuery("#txtCreateEndDate").val());
+				var selTskGrade = jQuery("#selTskGrade").val();
+				var selAssign = jQuery("#selAssign").val();
+				var execuCompl = jQuery("#execuCompl").val();
+				var complete = "";
+				if($('#comp').attr("checked")){
+					complete = true;
+				}
+				var postJson={'tskMarketingBean.marketingTitle': marketingTitle,
+							  'tskMarketingBean.productTarget': productTarget,
+							  'createStartDate': createStartDate,
+						  	  'createEndDate': createEndDate,
+						  	  'tskMarketingBean.gradeId': selTskGrade,
+						  	  'tskMarketingBean.assignUserId': selAssign,
+						  	  'completion': execuCompl,
+						  	  'complete': complete
+				};
+				oldPostJson = postJson;  //记录OldPostJson
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "queryTskMarketingList.html",
+			    	data: postJson,
+			    	success: function(data){
+			 	  		queryResult(data);
+			    	}
+				});
+			});
+			
+			jQuery("#btnAdd").click(function(){
+				var urls="/tskMarketing/toAddTskMarketingPage.html?&random="+Math.random()*10000;
+				var options = {id: "tsk_add", pid: GetId(), title: "新建营销任务", url: urls, lock: false,confirm: true};
+				tab.add(options);
+			});
+			
+			jQuery("#btnRefresh").click(function(){
+				goto(null,"/tskMarketing/queryTskMarketingList.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html);});
+			});
+			
+			initQueryJson();
+			
+			jQuery('#tblList').table();
+		});
+		//jQuery("#btnRefresh").trigger("click");//执行刷新操作
+		
+		//刷新tab
+		function refreshTab(gridId,html){
+			$('#' + gridId).html(html).table();
+			setstate();
+		}
+		
+		//删除
+		function delTskMarketing(marketingId){
+			jQuery.post(
+				'delTskMarketing.html',
+				{'tskMarketing.marketingId':marketingId},
+				function(html){
+					refreshTab('marketingTab',html);
+				}
+			);
+		}
+		
+		function viewTskMarketing(marketingId,marketingTitle,mrole){
+			var urls="/tskMarketing/toViewTskMarketingPage.html?tskMarketing.marketingId="+marketingId+"&random="+Math.random()*10000;
+				var options = {id: "tsk_view_"+marketingId, pid: GetId(), title: "查看营销任务-"+marketingTitle, url: urls, lock: false};
+				tab.add(options);
+		}
+		
+	 </script>
+</head>
+
+<body>
+    <div class="search-bar">
+        <span class="fl bold">
+            关联营销任务(<label class="green">$!count</label>)
+        </span>
+        
+    </div>
+    
+
+    <table class="datatbl" id="tblList">
+		<thead>
+    <tr>
+        <th><label title="任务等级">任务等级</label></th>
+        <th><label title="任务标题">任务标题</label></th>
+        <th><label title="开始日期">开始日期</label></th>
+		<th><label title="结束日期">结束日期</label></th>
+        <th><label title="产品指标">产品指标</label></th>
+        <th><label title="任务目标(万元)">任务目标(万元)</label></th>
+        <th><label title="完成情况">完成情况</label></th>
+        <th><label title="分配者">分配者</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($tskMarkting in $!tskMarketingBeanPage.items)
+	<tr>
+		<td><label title="">$!tskMarkting.marketingGradeName</label></td>
+        <td><label title="$!tskMarkting.marketingTitle"><a  class="ui-link-btn" href="javascript:void(0);" onclick="viewTskMarketing('$!tskMarkting.marketingId','$!tskMarkting.marketingTitle','assign')">$!tskMarkting.marketingTitle</a></label></td>
+		<td><label title="$date.format("yyyy-MM-dd",$!tskMarkting.startDate)"></label>$date.format("yyyy-MM-dd",$!tskMarkting.startDate)</td>
+        <td><label title="$date.format("yyyy-MM-dd",$!tskMarkting.endDate)"></label>$date.format("yyyy-MM-dd",$!tskMarkting.endDate)</td>
+        <td><label title=""></label>$!tskMarkting.productTarget</td>
+        <td><label title=""></label>$moneyUtil.decimeMoney($typeUtil.changeType($!tskMarkting.taskTarget))</td>
+        <td><label title=""></label>$!tskMarkting.comPercent%</td>
+        <td><label title=""></label>$!tskMarkting.assignUserName</td>
+    </tr>
+	#end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="8">
+           <div class="pagination">
+				#parse("/velocity/ajaxPage.vm")
+			</div>
+        </td>
+    </tr>
+</tfoot>
+    </table>
+</body>
+</html>

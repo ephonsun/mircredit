@@ -1,0 +1,79 @@
+<div class="header">
+	<table>
+    	<thead>
+        	<tr>
+            	<th width="150"><label>客户姓名</label></th>
+            	<th width="80"><label>号码类型</label></th>
+            	<th width="150"><label>联系号码</label></th>
+            	<th width="60"><label>性别</label></th>
+            	<th width="80"><label>称谓</label></th>
+            	<th width="60"><label>操作</label></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+<div class="body">
+	<table width="100">
+    	<tbody>
+    		#foreach($customer in $!recentCustomers)
+    			#set($name = $!customer.customerName)
+    			#if($customer.mobilePhone1!='')
+		        	<tr>
+		            	<td width="150" style="text-align: left;">
+		            	#if($customer.firstNotNullPhoneType==1)
+		            		<a class="ui-link-btn" href="#2" onclick="showCust('$!customer.customerId')" title="$!name" class="hand">$!name</a>
+		            	#end
+		            	</td>
+		            	<td width="80"><label title="手机一">手机一</label></td>
+		            	<td width="150"><label titel="$!customer.mobilePhone1">$!customer.mobilePhone1</label></td>
+		            	<td width="60"><label title="$!customer.sex">$!customer.sex</label></td>
+		            	<td width="80"><label title="$!customer.customerTitle">$!customer.customerTitle</label></td>
+		            	<td width="60"><i class="phone" onclick="javascript:selPostDial('$!customer.mobilePhone1','$!customer.customerId')" title="拨号">&nbsp;</i></td>
+		            </tr>
+	            #end
+	            #if($customer.mobilePhone2!='')
+		        	<tr>
+		            	<td width="150" style="text-align: left;">
+		            	#if($customer.firstNotNullPhoneType==2)
+		            		<a class="ui-link-btn" href="#2" onclick="showCust('$!customer.customerId')" title="$!name" class="hand">$!name</a>
+		            	#end
+		            	</td>
+		            	<td width="80"><label title="手机二">手机二</label></td>
+		            	<td width="150"><label titel="$!customer.mobilePhone2" >$!customer.mobilePhone2</label></td>
+		            	<td width="60"><label title="$!customer.sex">$!customer.sex</label></td>
+		            	<td width="80"><label title="$!customer.customerTitle">$!customer.customerTitle</label></td>
+		            	<td width="60"><i class="phone" onclick="javascript:selPostDial('$!customer.mobilePhone2','$!customer.customerId')" title="拨号">&nbsp;</i></td>
+		            </tr>
+	            #end
+	            #if($customer.phone!='')
+		        	<tr>
+		            	<td width="150" style="text-align: left;">
+		            	#if($customer.firstNotNullPhoneType==3)
+		            		<a class="ui-link-btn" href="#2" onclick="showCust('$!customer.customerId')" title="$!name" class="hand">$!name</a>
+		            	#end
+		            	</td>
+		            	<td width="80"><label title="固话">固话</label></td>
+		            	<td width="150"><label titel="$!customer.phone" >$!customer.phone</label></td>
+		            	<td width="60"><label title="$!customer.sex">$!customer.sex</label></td>
+		            	<td width="80"><label title="$!customer.customerTitle">$!customer.customerTitle</label></td>
+		            	<td width="60"><i class="phone" onclick="javascript:selPostDial('$!customer.phone','$!customer.customerId')" title="拨号">&nbsp;</i></td>
+		            </tr>
+	            #end
+	            #if($customer.fax!='')
+		        	<tr>
+		            	<td width="150" style="text-align: left;">
+		            	#if($customer.firstNotNullPhoneType==4)
+		            		<a class="ui-link-btn" href="#2" onclick="showCust('$!customer.customerId')" title="$!name" class="hand">$!name</a>
+		            	#end
+		            	</td>
+		            	<td width="80"><label title="传真">传真</label></td>
+		            	<td width="150"><label titel="$!customer.fax" >$!customer.fax</label></td>
+		            	<td width="60"><label title="$!customer.sex">$!customer.sex</label></td>
+		            	<td width="80"><label title="$!customer.customerTitle">$!customer.customerTitle</label></td>
+		            	<td width="60"><i class="phone" onclick="javascript:selPostDial('$!customer.fax','$!customer.customerId')" title="拨号">&nbsp;</i></td>
+		            </tr>
+	            #end
+            #end
+        </tbody>
+    </table>
+</div>

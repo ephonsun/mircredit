@@ -1,0 +1,49 @@
+<table class="datatbl">
+	<thead>
+		<tr>
+			<th width="20"><input type="checkbox" rel="all" onclick="selectAll(this)" /></th>
+			<th width="240"><label title="客户（电话）">客户（电话）</label></th>
+			<th><label title="客户归属">客户归属</label></th>
+			<th><label title="关联任务">关联任务</label></th>
+			<th><label title="计划联系日期">计划联系日期</label></th>
+		</tr>
+	</thead>
+	<tbody>
+		#foreach($plan in $!tskSelectCustBeanList.items)
+    		<tr>
+    			<td><input type="checkbox" rel="row" name="taskTargetId" value="$!plan.targetIds" /></td>
+    			<td>
+					#if($!plan.customerId ==0)
+						<span title="$!plan.taskCustomerName（$!plan.phoneNo）">$!plan.taskCustomerName（$!plan.phoneNo）</span>
+					#else	
+    					#if($!plan.defaultPhoneType=='1')
+    						<span class="link" onclick="browseCustomer('$!plan.customerId')" title="$!plan.customerName（$!plan.mobilePhone1）">$!plan.customerName（$!plan.mobilePhone1）</span>
+                        #elseif($!plan.defaultPhoneType=='2')
+                        	<span class="link" onclick="browseCustomer('$!plan.customerId')" title="$!plan.customerName（$!plan.mobilePhone2）">$!plan.customerName（$!plan.mobilePhone2）</span>
+                        #elseif($!plan.defaultPhoneType=='3')
+                        	<span class="link" onclick="browseCustomer('$!plan.customerId')" title="$!plan.customerName（$!plan.phone）">$!plan.customerName（$!plan.phone）</span>
+                        #elseif($!plan.defaultPhoneType=='4')
+                        	<span class="link" onclick="browseCustomer('$!plan.customerId')" title="$!plan.customerName（$!plan.fax）">$!plan.customerName（$!plan.fax）</span>
+						#end
+				
+						
+					#end
+    			</td>
+    			<td><label title="$!plan.belongUserName">$!plan.belongUserName</label></td>
+    			<td><label #if(!$!plan.relativeTsks.equals(0)&& $!plan.relativeTsks)class="ui-link-btn" onclick="customerContactRecDetail('$!plan.customerId')" #end title="$!plan.relativeTsks">#if($!plan.relativeTsks) $!plan.relativeTsks #else 0 #end</label></td>
+    			<td><label title="$!date.format("yyyy-MM-dd",$!plan.planDate)">$!date.format("yyyy-MM-dd",$!plan.planDate)</label></td>
+			</tr>
+		#end
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan="5">
+				 #parse("/velocity/ajaxPage.vm")
+			</td>
+		</tr>
+	</tfoot>
+</table>
+<input type="hidden" id="totalConn" name="totalConn" value="$!totalConn" />
+<input type="hidden" id="totalRemain" name="totalRemain" value="$!totalRemain" />
+<input type="hidden" id="everyDayRemain" name="everyDayRemain" value="$!everyDayRemain" />
+

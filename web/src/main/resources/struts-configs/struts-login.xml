@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="login" extends="default" namespace="/login" >
+	
+		<!-- 登录页面初始化-->
+		<action name="showLogin" class="userLoginAction" method="getLoginPage">
+			<result name="success">/velocity/login/login.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 超时登录页面初始化-->
+		<action name="showTimeOutLogin" class="userLoginAction" method="showTimeOutLogin">
+			<result name="success">/velocity/login/timeOutLogin.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 登录业务处理-->
+		<action name="userLogin" class="userLoginAction" method="login">
+			<result name="success">/velocity/login/login.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 登录主界面 -->
+		<action name="getMainPage" class="userLoginAction" method="getMainPage">
+			<result name="success">/velocity/login/main.vm</result>
+			<result name="error">/velocity/error.vm</result>
+			<!-- 未授权直接跳转止授权页 -->
+			<result name="noAuth" type="redirect">/authorize/authorizeIndex.html</result>
+			<!-- 系统是试用版已过期 -->
+			<result name="systemExpired">/velocity/systemExpired.vm</result>
+			<!-- 超出系统授权的用户数 -->
+			<result name="exceedUserCount">/velocity/exceedUserCount.vm</result>
+		</action>
+		
+		<!-- 获得未读留言，未接电话 -->
+		<action name="getCallMessage" class="userLoginAction" method="getCallMessage">
+			<result name="success">/velocity/login/main.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 登录主界面 -->
+		<action name="initMessage" class="userLoginAction" method="initMessage">
+			<result name="success">/velocity/login/unreadMessage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 用户状态改变-->
+		<action name="changeUserStatus" class="userLoginAction" method="changeUserStatus">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		
+		<!-- 首次登录密码初始化-->
+		<action name="pwdConfirm" class="userLoginAction" method="pwdConfirm">
+			<result name="success">/velocity/login/passWordReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+			<!-- 三个月超时密码初始化-->
+		<action name="lastPwdConfirm" class="userLoginAction" method="lastPwdConfirm">
+			<result name="success">/velocity/login/passWordReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		<!-- 用户登出 -->
+		<action name="userLogOut" class="userLoginAction" method="logout">
+			<result name="success">/velocity/login/login.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 点击关闭按钮用户登出 -->
+		<action name="closeLogOut" class="userLoginAction" method="closeLogOut">
+		</action>
+	
+		<!-- 初始化密码-->
+		<action name="showconfirmPwd" class="userLoginAction" method="showconfirmPwd">
+			<result name="success">/velocity/login/passWordReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		<!-- 三个月未修改密码-->
+		<action name="showTimeOutPwdSuccessPage" class="userLoginAction" method="showTimeOutPwdSuccessPage">
+			<result name="success">/velocity/login/timeOutPassWordReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		<!-- 首次登录密码初始化成功-->
+		<action name="setPwdSuccess" class="userLoginAction" method="showPwdSuccessPage">
+			<result name="success">/velocity/login/setPwdSuccess.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 系统桌面 -->
+		<action name="getWorkBench" class="userLoginAction" method="getWorkBench">
+			<result name="admin">/velocity/login/adminWB.vm</result>
+			<result name="deptAdmin">/velocity/login/DeptAdminWB.vm</result>
+			<result name="managerOrCommon">/velocity/login/managerOrCommonWB.vm</result>
+			<result name="deptAdminAndManager">/velocity/login/deptAdminAndManagerWB.vm</result>
+			<!-- <result name="comprehensiveAndManagement">/velocity/login/comprehensiveAndManagement.vm</result> -->
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 系统提示 -->
+		<action name="getSystemRemind" class="userLoginAction" method="getSystemRemind">
+			<result name="success">/velocity/login/systemRmiCard.vm</result>
+		</action>
+		<!-- 获取服务端时间 -->
+		<action name="getServiceTime" class="userLoginAction" method="getServiceTime">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- sql注入跳转页面-->
+		<action name="checkSql" class="userLoginAction" method="getCheckSqlPage">
+			<result name="success">/velocity/checkSql.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 获取当前用户的余额-->
+		<action name="changedMoney" class="userLoginAction" method="changedMoney"></action>
+	</package>
+
+</struts>

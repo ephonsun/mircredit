@@ -1,0 +1,32 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <thead>
+    <tr>
+        <th><label title="借贷人">借贷人</label></th>
+        <th><label title="身份证">身份证</label></th>
+		<th><label title="联系电话">联系电话</label></th>
+        <th><label title="企业/工作单位">企业/工作单位</label></th>
+		<th><label title="经营/单位地址">经营/单位地址</label></th>
+		<th><label title="与申请人关系">与申请人关系</label></th>
+        <th><label title="操作">操作</label></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($loanCoBorrower in $loanCoBorrowerList)
+        <input type="hidden" name="customerCoGu" id="cus_$!loanCoBorrower.customerId" value="$!loanCoBorrower.customerId" />
+        <input type="hidden" name="customerCoIdCard" id="cus_$!loanCoBorrower.idCard" value="$!loanCoBorrower.idCard" />
+        <tr>
+            <td><label title="$!loanCoBorrower.customerName">$!loanCoBorrower.customerName</label></td>
+            <td><label title="$!loanCoBorrower.idCard">$!loanCoBorrower.idCard</label></td>
+            <td><label title="$!loanCoBorrower.cphNumber">$!loanCoBorrower.cphNumber</label></td>
+            <td><input type="text" id="$!loanCoBorrower.loanCoBorrowerId"  value="$!loanCoBorrower.company"></td>
+            <td><input type="text" id="cus_$!loanCoBorrower.loanCoBorrowerId" value="$!loanCoBorrower.companyAddress"></td>
+            <td><input type="text" id="$!loanCoBorrower.customerId" value="$!loanCoBorrower.petitionerRelate"></td>
+            <td>
+            	##if($urlPermitUtil.hasPermission('lnDeleteCo'))
+                <a href="javascript:removeCo($!loanCoBorrower.loanCoBorrowerId,$!loanCoBorrower.loanId,$!loanCoBorrower.customerId)">移除</a>&nbsp;&nbsp;<a href="javascript:editCo($!loanCoBorrower.loanCoBorrowerId,$!loanCoBorrower.loanId,$!loanCoBorrower.customerId)">提交修改</a>
+            	##end
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>

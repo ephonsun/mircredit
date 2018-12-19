@@ -1,0 +1,36 @@
+<thead>
+    <tr>
+        <th><label title="产品代码">产品代码</label></th>
+        <th><label title="产品名称">产品名称</label></th>
+        <th><label title="贷款期限">简要说明</label></th>
+        <th><label title="创建时间">创建时间</label></th>
+        <th><label title="更新时间">更新时间</label></th>
+        <th><label title="操作">操作</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($pdtProduct in $!pdtProductPage.items)
+	    <tr>
+	        <td><label title="$!pdtProduct.productCode">$!pdtProduct.productCode</label></td>
+	        <td><label class="link" onclick="viewPdtProduct('$!pdtProduct.productId','$!jsUtil.escapeJs($!pdtProduct.productName)')" title="$!pdtProduct.productName">$!pdtProduct.productName</label></td>
+	        <td><label title="$!subString.replaceQuotation($!pdtProduct.remark)">$!pdtProduct.remark</label></td>
+	        <td><label title="$date.format("yyyy-MM-dd",$!pdtProduct.createDate)">$date.format("yyyy-MM-dd",$!pdtProduct.createDate)</label></td>
+	        <td><label title="$date.format("yyyy-MM-dd",$!pdtProduct.updateDate)">$date.format("yyyy-MM-dd",$!pdtProduct.updateDate)</label></td>
+	        <td>
+	        	
+                <label class="link" onclick="editPdtProduct('$!pdtProduct.productId','$!jsUtil.escapeJs($!pdtProduct.productName)')">编辑</label>
+
+                
+                <label class="link" onclick="delPdtProduct('$!pdtProduct.productId','$!jsUtil.escapeJs($!pdtProduct.productName)')">删除</label>
+
+	        </td>
+	    </tr>
+    #end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="6">
+             #parse("/velocity/ajaxPage.vm")
+        </td>
+    </tr>
+</tfoot>

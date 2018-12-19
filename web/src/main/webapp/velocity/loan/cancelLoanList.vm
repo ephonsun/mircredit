@@ -1,0 +1,275 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>撤销贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('select').select();
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+            $('table.datatbl').table();
+
+            $("#clear").click(function(){
+                $('.text').val('');
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+                $("select").each(function(){
+                    this.selectedIndex = 0;
+                    $(this).select();
+                });
+            });
+
+            getQueryJson();
+
+            $("#query").click(function(){
+                var postJson = getQueryJson();
+                var urlStr = "${ctx}/loan/cancelLoanListQuery.html?RandNum="+ Math.random();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+                        queryBack(html, 'dataList');
+                        oldPostJson = getQueryJson();
+                    }
+                });
+            });
+
+
+
+            $("#refresh").click(function(){
+                if(oldPostJson){
+                    goto(
+                            null,
+                            "../loan/cancelLoanListQuery.html?RandNum="+ Math.random(),
+                            oldPostJson,
+                            function(html){
+                                queryBack(html, 'dataList');
+                            });
+                }
+            });
+
+            $("#allCancel").click(function(){
+                var loanCheck="";
+                $("input[name='loanCheck']:checkbox").each(function(){
+                    if($(this).attr("checked")){
+                        loanCheck += $(this).val()+","
+                    }
+                })
+                if(loanCheck){
+                    if(confirm("您确定要撤销贷款吗？")){
+                        jQuery.ajax({
+                            type:'POST',
+                            url:'../loan/cancelSubmit.html?RandNum='+Math.random(),
+                            data:{
+                               'loanCheck' :loanCheck
+                            },
+                            success:function(html){
+                                banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+                                $("#refresh").click();
+                            }
+                        });
+                        window.close();
+                    }
+                }
+                else{
+                    banger.page.showMessageBox("请选择要撤销的贷款申请！");
+                    return false;
+                }
+            })
+
+        });
+
+        var oldPostJson = {};
+
+        function getQueryJson(){
+            if($('#customer').val()=="姓名、电话或身份证"){
+                $('#customer').val("");
+            }
+
+            var postJson = {};
+            postJson['customer']=jQuery.trim($('#customer').val());
+            postJson['loanType'] = jQuery.trim($('#loanType').val());
+            postJson['startCreateDate'] = jQuery.trim($('#startCreateDate').val());
+            postJson['endCreateDate']=jQuery.trim($('#endCreateDate').val());
+            postJson['cancelStartDate']=jQuery.trim($('#cancelStartDate').val());
+            postJson['cancelEndDate'] = jQuery.trim($('#cancelEndDate').val());
+            postJson['loanStatus'] = jQuery.trim($('#loanStatus').val());
+
+
+            oldPostJson = postJson;
+
+            if($('#customer').val()==''){
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+            }
+
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "../loan/cancelLoanListQuery.html?RandNum="+ Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryBack(html, 'dataList');
+                        });
+            }
+        }
+
+        function queryBack(html, gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+
+            var total = $('#total').val();
+            if(total!=null){
+                $("#recordCount").text(total);
+            }else {
+                $("#recordCount").text(0);
+            }
+        }
+
+        //编辑待撤销贷款
+        function confirmLoanEdit(loanId)
+        {
+            var options = {id: "confirmLoanEdit-"+loanId, pid: GetId(), title: "编辑贷款", url: "/loan/cancelLoanEdit.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+            tab.add(options);
+        }
+
+        //查看成功撤销贷款
+        function confirmLoanView(loanId)
+        {
+            var options = {id: "confirmLoanView-"+loanId, pid: GetId(), title: "查看贷款", url: "/loan/cancelLoanView.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+            tab.add(options);
+        }
+
+    </script>
+</head>
+
+<body>
+<table class="htmltbl" >
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input id="customer" type="text" class="text" />
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>贷款类型：</label>
+        </td>
+        <td width="17%">
+            <select id="loanType">
+                <option></option>
+                #foreach($loanType in $typeList)
+                    <option value ="$loanType.loanTypeId" >&nbsp;$loanType.loanTypeName</option>
+                #end
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>申请撤销时间：</label>
+        </td>
+        <td colspan="2">
+            <table class="celltbl">
+                <tbody>
+                <tr>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input id="cancelStartDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="20"><label>-</label></td>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input id="cancelEndDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+		<td width="17%"></td>
+    </tr>
+    <tr>
+        <td class="field" width="8%">
+            <label>贷款状态：</label>
+        </td>
+        <td width="17%">
+            <select id="loanStatus">
+                <option></option>
+                <option value ="8" >&nbsp;待撤销</option>
+                <option value ="9" >&nbsp;撤销成功</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>贷款提交时间：</label>
+        </td>
+        <td colspan="2">
+            <table class="celltbl">
+                <tbody>
+                <tr>
+                    <td width="155">
+                        <div class="ui-div-text">
+                            <input id="startCreateDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="20"><label>-</label></td>
+                    <td width="155">
+                        <div class="ui-div-text">
+                            <input id="endCreateDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+        <td colspan="3"></td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+           贷款撤销(<label id="recordCount" class="green">$!recordCount</label>)
+        </span>
+    <input id="clear" type="button" class="ui-input-btn" value="清空" />
+    <input id="query" type="button" class="ui-input-btn" value="搜索" />
+</div>
+<div class="action-bar">
+    <span id="allCancel" class="ui-span-btn fl">
+        	<label>撤  销</label>
+        </span>
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+</div>
+<table id="dataList" class="datatbl">
+    #parse("/velocity/loan/cancelLoanListTable.vm")
+</table>
+</body>
+
+
+</html>

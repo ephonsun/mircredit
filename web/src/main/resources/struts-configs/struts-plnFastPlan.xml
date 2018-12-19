@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="plnFastPlan" extends="default" namespace="/plnFastPlan" >
+	
+		<!--  快速规划列表页面 -->
+		<action name="getAllPlnFastPlanInfo" class="plnFastPlanAction" method="getAllPlnFastPlanInfo">
+			<result name="success">/velocity/plnFastPlan/plnFastPlanList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="getAllPlnFastPlanInfoForQuery" class="plnFastPlanAction" method="getAllPlnFastPlanInfoForQuery">
+			<result name="success">/velocity/plnFastPlan/plnFastPlanListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		 <!--  删除快速规划 -->
+		<action name="deletePlnFastPlan" class="plnFastPlanAction" method="deletePlnFastPlan">
+			<result name="success" type="redirectAction">getAllPlnFastPlanInfo</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  选择客户类型 -->
+		<action name="chooseCusType" class="plnFastPlanAction" method="chooseCusType">
+			<result name="success">/velocity/plnFastPlan/chooseCusType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  第二步 -->
+		<action name="nextPage" class="plnFastPlanAction" method="nextPage">
+			<result name="online">/velocity/plnFastPlan/queryCustomer.vm</result>
+			<result name="unline">/velocity/plnFastPlan/addFastPlan.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	   <!--  查询在行客户 -->
+		<action name="queryOnlineCustomer" class="plnFastPlanAction" method="queryOnlineCustomer">
+			<result name="success">/velocity/plnFastPlan/queryCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  第三步，进行快速规划 -->
+		<action name="doFastPlan" class="plnFastPlanAction" method="doFastPlan">
+			<result name="success">/velocity/plnFastPlan/addFastPlan.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  保存快速规划 -->
+		<action name="addPlnFastPlan" class="plnFastPlanAction" method="addPlnFastPlan">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  编辑跳转页面 -->
+		<action name="goToUpdatePage" class="plnFastPlanAction" method="goToUpdatePage">
+			<result name="success">/velocity/plnFastPlan/updateFastPlan.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  更新快速规划 -->
+		<action name="updateFastPlan" class="plnFastPlanAction" method="updateFastPlan">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	  
+	</package>
+
+</struts>

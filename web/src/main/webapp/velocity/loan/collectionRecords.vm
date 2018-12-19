@@ -1,0 +1,85 @@
+<div class="loan-bg">
+<p class="bold loan-lheight">催收记录</p>
+    
+        <div class="loan-pad">
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="还款日期">催收日期</label></th>
+            <th><label title="应还本金(元)">催收方式</label></th>
+            <th><label title="应还利息(元)">通话</label></th>
+			<th><label title="应还利息(元)">照片</label></th>
+			<th><label title="应还利息(元)">录音</label></th>
+			<th><label title="应还利息(元)">视频</label></th>
+			<th><label title="应还利息(元)">备注</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #if($lnRepaymentPlanList)
+                #foreach($lnDunLog in $lnDunLogList)
+                <tr>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!lnDunLog.dunDate)">$!date.format('yyyy-MM-dd',$!lnDunLog.dunDate)</label></td>
+                    <td><label title="">
+					#foreach($!csfs in $!checkBoxMessage.get("CSFS"))
+						 #if($!lnDunLog.dunType == $!csfs.dictionaryKey) $!csfs.dictionaryValue #end 
+					#end
+					</label></td>
+                    <td><label title="">$lnDunLog.daCount</label></td>
+					<td><label title=""></label>$lnDunLog.dpCount</td>
+					<td><label title=""></label>$lnDunLog.dvCount</td>
+					<td><label title=""></label>$lnDunLog.daCount</td>
+					<td><label title="">$lnDunLog.remark</label></td>
+                </tr>
+				#end
+			#else
+				 #foreach($lnDunLog in $lnDunLogList)
+                <tr>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!lnDunLog.dunDate)">$!date.format('yyyy-MM-dd',$!lnDunLog.dunDate)</label></td>
+                    <td><label title="">
+					#foreach($!csfs in $!checkBoxMessage.get("CSFS"))
+						 #if($!lnDunLog.dunType == $!csfs.dictionaryKey) $!csfs.dictionaryValue #end 
+					#end
+					</label></td>
+                    <td><label title="">$lnDunLog.daCount</label></td>
+					<td><label title=""></label>$lnDunLog.dpCount</td>
+					<td><label title=""></label>$lnDunLog.dvCount</td>
+					<td><label title=""></label>$lnDunLog.daCount</td>
+					<td><label title="">$lnDunLog.remark</label></td>
+                </tr>
+                #end
+            #end
+        </tbody>
+    </table>
+</div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $("#remainFull").click(function(){
+            var remainFull=$(this);
+            var isChecked=remainFull.attr('checked');
+            if(isChecked=="checked"){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':1
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已标记为余额已足');
+                    }
+                });
+            }else{
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':0
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已取消标记为余额已足');
+                    }
+                });
+            }
+        });
+    });
+</script>

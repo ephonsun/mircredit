@@ -1,0 +1,369 @@
+#parse("/velocity/taglibs.vm")
+#set($mapIp=$mapIp)
+#set($mapKey=$mapKey)
+#set($mapVersion=$mapVersion)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    <style type="text/css">
+        body { margin:0; padding: 0px 10px; border:0; overflow:hidden; font-size:12px;}
+        .ml {margin-left: 15px;width: 70px;}
+    </style>
+    #scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <!--<script language="javascript" src="http://${mapIp}/apis?t=javascriptmap&v=${mapVersion}&key=${mapKey}"></script>-->
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/map/RMap5.js"></script>
+    #scriptLink("page")
+</head>
+<body onload="initScaningPage();">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="background:#fff;">
+    <tr>
+        <td style="width:auto;height:100%;">
+            <div class="map-box" id="mapObj" style="margin-right:10px;">
+                <div class="map-tips-streetInfo"></div>
+            </div>
+        </td>
+        <td style="width:260px;border:1px solid #ccc;" valign="top">
+            <div style="font-size:12px;height:550px;">
+                <div style="height:182px;">
+                    <p class="search-ttl-width">搜索</p>
+                    <table class="viewtbl" style="font-size:12px;">
+                        <tbody>
+                        <!--<tr>
+                            <td width="80" class="field">
+                                <label>街道地址：</label>
+                            </td>
+                            <td width="180">
+                                <div class="ui-div-text">
+                                    <input type="text" class="text" id="address" name="address"/>
+                                </div>
+                            </td>
+                        </tr>-->
+                        <tr>
+                            <td class="field" width="10%">
+                                <label>贷款状态:</label>
+                            </td>
+                            <td width="180">
+                                <div class="ui-div-text">
+                                    <select id="loanStatus" name="loanStatus" maxlength="5000" style="width:184px;height:24px " >
+                                        <option ></option>
+                                        <option value="营销阶段">营销阶段</option>
+                                        <option value="尚在贷款阶段">尚在贷款阶段</option>
+                                        <option value="存量放款客户">存量放款客户</option>
+                                        <option value="结清客户">结清客户</option>
+                                        <option value="拒绝客户">拒绝客户</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="right">
+                                <input type="button" class="ui-input-btn ml" value="清空" onclick="qingkong()"/>
+                                <input type="button" class="ui-input-btn ml" value="搜索" onclick="postQuery()"/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="search-bar">
+                <span class="fl">
+			        所有客户(<label class="green" id="customerTotalnew">0</label>)<!--，所有录音(<label class="green" id="recordTotal">0</label>)-->
+                </span>
+                </div>
+                <div id="tabs" class="easy-tabs" style="margin-top: 10px;">
+                    <ul class="easy-tabs-header">
+                        <li onclick="showDiffTab(1);return false;"><label id="tab1">客户</label></li>
+                        <!--<li onclick="showDiffTab(2);return false;"><label id="tab2">录音</label></li>-->
+                    </ul>
+                    <div class="easy-tabs-pages">
+                        <div class="easy-tabs-page">
+                            #parse("/velocity/map/scaningCustomerTable.vm")
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div id="content" class="div_content">
+    <div class="map-ttl-width">
+        <!--<input type="button" class="ui-span-btn button-table mt" value="重新标注"/>-->
+        <a href="#2" class="map-close" onclick="closeContent()">close</a>
+    </div>
+</div>
+<script type="text/javascript" src="${ctx}/js/biz/banger.map.js"></script>
+<script type="text/javascript">
+
+var cityLngLat = '$!cityLngLat';
+var cityLng = cityLngLat.split(",")[0], cityLat = cityLngLat.split(",")[1];
+var mapIp = '$!mapIp';
+var postJson = {};
+var mapObj,inforWindow, markers = [], geo, tempAddress = "";
+var urlStr = '', obj = '';
+
+RMapConstant.MapRoot = "http://"+mapIp+"/PathUrl.ashx?path=/";
+window.map = new RMap(document.getElementById("mapObj"), cityLng, cityLat, 10, $('#mapObj').width(), $('#mapObj').height());
+mapObj = window.map;
+mapObj.show();
+//为地图添加移动事件
+mapObj.addEventListener(RMapEvent.Moved,function(){
+    $("#customerTotalnew").text(0);        //设置查询到的客户数
+    $("#recordTotal").text(0);          //设置查询到的用户数
+	mapObj.removeAllMarker();
+	initScaningPage();
+});
+//为地图添加切换等级事件
+mapObj.addEventListener(RMapEvent.LevelChange,function(){
+    $("#customerTotalnew").text(0);        //设置查询到的客户数
+    $("#recordTotal").text(0);          //设置查询到的用户数
+	mapObj.removeAllMarker();
+	initScaningPage();
+});
+
+
+
+$(function () {
+    $("#tabs").easytabs();
+});
+
+function showDiffTab(num, lnglat) {//页卡切换
+    if (lnglat != "")
+        postJson["lnglat"] = lnglat;
+    else
+        postJson["lnglat"] = "";
+
+    if (num == 1) {
+        urlStr = 'getCustomerList.html?random=' + Math.random();
+        obj = ".easy-tabs-page:eq(0)";
+        $('#tabs').easytabs({"index": 0});
+        if (postJson["address"] != "" || postJson["beginGpsLng"] != "") {
+			getCustomerList(urlStr);
+        }
+    } else {
+        urlStr = 'getRecordList.html?random=' + Math.random();
+        obj = ".easy-tabs-page:eq(1)";
+        $('#tabs').easytabs({"index": 1});
+        if (postJson["address"] != "" || postJson["beginGpsLng"] != "") {
+            getRecordList(urlStr);
+        }
+    }
+}
+
+function getCustomerList(urlStr) {
+    jQuery.ajax({
+        type: 'POST',
+        async: false,
+        url: urlStr,
+        data: postJson,
+        success: function (html) {
+            $(".easy-tabs-page:eq(0)").html("");
+            $(".easy-tabs-page:eq(0)").html(html);
+        }
+    });
+}
+
+function getRecordList(urlStr) {
+    jQuery.ajax({
+        type: 'POST',
+        async: false,
+        url: urlStr,
+        data: postJson,
+        success: function (html) {
+            $(".easy-tabs-page:eq(1)").html("");
+            $(".easy-tabs-page:eq(1)").html(html);
+        }
+    });
+}
+
+function gotoPage(page) {  //分页跳转
+    goto(
+            page,
+            urlStr,
+            postJson,
+            function (html) {
+                $(obj).html("");
+                $(obj).html(html);
+            });
+}
+
+
+//var mapObj, overview, scale, inforWindow, markers = [], geo, tempAddress = "";
+
+//var opt = {
+//    level: 13,//初始地图视野级别
+//    center: new MMap.LngLat(cityLng, cityLat),//设置地图中心点 //mapObj.setCity("杭州")
+//    doubleClickZoom: true,//双击放大地图
+//    scrollwheel: true//鼠标滚轮缩放地图
+//}
+//var GeocoderOption = {
+//    range: 3000,//范围
+//    crossnum: 2,//道路交叉口数
+//    roadnum: 3,//路线记录数
+//    poinum: 2//POI点数
+//};
+//geo = new MMap.Geocoder(GeocoderOption);
+//mapObj = new MMap.Map("mapObj", opt);
+
+//mapObj.bind(mapObj, "dragend", function (e) {//拖动后执行
+//    $("#customerTotalnew").text(0);
+//    $("#recordTotal").text(0);
+//    mapObj.clearOverlaysByType('marker');
+//    mapObj.clearInfoWindow();
+//    initScaningPage();
+//});
+
+
+//var timer = null;
+//mapObj.bind(mapObj, "mousewheel", function (e) {//滚动缩放
+//    e = e || window.event;
+//    clearTimeout(timer);
+//    if (e.wheelDelta < 0) {
+//        setTimeout(initScaningPage, 2000);
+//    } else {
+//        getQueryJson(1);
+//        showDiffTab(1, "");
+//    }
+//});
+
+//组装数据
+function getQueryJson(type) {
+    if (type == 1) { //获取地图视野内西南，东北方向坐标
+        var bounds = mapObj.getBounds();
+		postJson["beginGpsLng"] = bounds.MinCoordinates.Cx.toString();
+		postJson["beginGpsLat"] = bounds.MinCoordinates.Cy.toString();
+		postJson["endGpsLng"] = bounds.MaxCoordinates.Cx.toString();
+		postJson["endGpsLat"] = bounds.MaxCoordinates.Cy.toString();
+        postJson["loanStatus"] = document.getElementById("loanStatus").value;
+    } else {
+        postJson['address'] = jQuery.trim($('#address').val());
+    }
+    return postJson;
+}
+
+function cleanParam() {//清空坐标，列表结果，统计个数
+    $("#customerTotalnew").text(0);        //设置查询到的客户数
+    $("#recordTotal").text(0);                //设置查询到的用户数
+	mapObj.removeAllMarker();
+    //mapObj.clearOverlaysByType('marker');
+    //mapObj.clearInfoWindow();
+}
+
+function postQuery() {          //根据地址查询
+    closeWin();
+    resetTab();
+    cleanParam();
+    getQueryJson(2);
+    if (postJson['address'] == "") {
+        //mapObj.setCenter(new MMap.LngLat(cityLng, cityLat));
+       	//mapObj.setZoom(15);
+        //mapObj.clearOverlaysByType('marker');
+        //mapObj.clearInfoWindow();
+        getQueryJson(1);
+        var array = ajaxQuery("getCustomerOrRecordGps.html");
+        showDiffTab(1, "");
+        analyzeResultScan(array);
+    } else {
+        addressIsNotNull();
+    }
+}
+
+function QueryRecordOrCustomer() {
+    var array = ajaxQuery("getCustomerOrRecordGps.html");
+    showDiffTab(1, "");
+    analyzeResultScan(array);
+}
+
+
+function addressIsNotNull() {
+	/*
+    var PoiSearchOption = {
+        srctype: "POI",//数据来源
+        type: "",//数据类别
+        number: 10,//每页数量,默认10
+        batch: 1,//请求页数，默认1
+        range: 100000,	//查询范围，默认3000米
+        ext: ""//扩展字段
+    };
+    var MSearch = new MMap.PoiSearch(PoiSearchOption);
+    MSearch.byCenKeywords(postJson['address'], postJson['address'], cityCoding, addressSearch_CallBack);
+	*/
+}
+
+function addressSearch_CallBack(data) {
+    if (data.status == 'E0') {
+        if (data.bounds) {
+            var a = data.bounds.split(';');
+            var b = a[0].split(',')
+            if (a.length > 1) {
+                var c = a[1].split(',');
+                mapObj.setBounds(new MMap.Bounds(new MMap.LngLat(b[0], b[1]), new MMap.LngLat(c[0], c[1])));
+            } else {
+                //mapObj.setCenter(new MMap.LngLat(b[0], b[1]));
+				mapObj.setCenter(b[0], b[1]);
+            }
+        }
+        var bounds = mapObj.getBounds();//获取地图矩形视野bounds对象
+		postJson["beginGpsLng"] = bounds.MinCoordinates.Cx.toString();
+		postJson["beginGpsLat"] = bounds.MinCoordinates.Cy.toString();
+		postJson["endGpsLng"] = bounds.MaxCoordinates.Cx.toString();
+		postJson["endGpsLat"] = bounds.MaxCoordinates.Cy.toString();		
+        QueryRecordOrCustomer();
+    } else {
+        banger.page.showMessageBox("输入“地址”未查询到相关信息！");
+    }
+}
+
+
+function getMarker(gpsId, type) {//得到标记的信息
+    if (type == "1") {
+        gpsId = "record," + gpsId;
+    } else {
+        gpsId = "customer," + gpsId;
+    }
+    jQuery.ajax({
+        type: "post", //请求方式
+        async: false,
+        url: "getMarkerInfo.html", //发送请求地址
+        data: {"gpsId": gpsId},
+        success: function (html) {
+            var bean = eval(html);
+            if (type == "1") {
+                var resultStr;
+                var iconPath="../images/icon/map_record.png";
+                var html = newRecordPlan(bean,resultStr);
+                var wnd = {width:100,height:100,detaX:-100,detaY:-200,html:html};
+                var pointMarker = new RSelfMarker(bean[0]["gpsLng"],bean[0]["gpsLat"],wnd,iconPath,2,2,25,25);
+            } else {
+                var resultStr;
+                var iconPath;
+                var html = newCustomerPlan(bean,resultStr);
+                if (bean[0]["loanFlat"] == 2){ //有贷款状态的用户为蓝色，无贷款为绿色
+                    iconPath = "../images/icon/map_blue.png";
+                }else{
+                    iconPath = "../images/icon/map_green.png";
+                }
+                var wnd = {width:100,height:100,detaX:-100,detaY:-200,html:html};
+                var pointMarker = new RSelfMarker(bean[0]["gpsLng"],bean[0]["gpsLat"],wnd,iconPath,2,2,25,25);
+            }
+
+        }
+    });
+}
+
+
+</script>
+</body>
+</html>

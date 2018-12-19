@@ -1,0 +1,34 @@
+<input type="hidden" id="newCount" value="$!count"/>
+<table class="ui-desk-reminders" style="clear:both;">
+    <thead>
+        <tr>
+            <th width="120" class="left"><label>任务类型</label></th>
+            <th width="240"><label>任务名称</label></th>
+            <th><label>开始日期</label></th>
+            <th><label>结束日期</label></th>
+            <th><label>任务状态</label></th>
+            <th><label>完成进度</label></th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($tskMicroTask in $!tskMicroTaskPage.items)
+        <tr #if($!nowDate.after($!tskMicroTask.endDate))style="color:#f60;"#end>
+			<td width="120" class="left"><label>
+				#if($!tskMicroTask.taskType == 1)贷款任务 #elseif($!tskMicroTask.taskType == 2)营销任务-电话营销 #elseif($!tskMicroTask.taskType == 3)营销任务-实地营销 #end
+			</label></td>
+            <td width="240"><span class="slink" href="#2" title="$!tskMicroTask.taskTitle" onclick="viewTask('$!tskMicroTask.taskId','$!jsUtil.escapeJs($!tskMicroTask.taskTitle)',$!tskMicroTask.taskType)">$!tskMicroTask.taskTitle</span></td>
+            <td><label>$!date.format('yyyy-MM-dd',$!tskMicroTask.startDate)</label></td>
+			<td><label>$!date.format('yyyy-MM-dd',$!tskMicroTask.endDate)</label></td>
+            <td><label>#if($!tskMicroTask.comPercent >= 1)已完成#else未完成#end</label></td>
+            <td><label>$vmHelper.getPercentDec($!tskMicroTask.comPercent)</label></td>
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+        <tr>
+			#if($tskMicroTaskPage.items && $!tskMicroTaskPage.items.size()==10)
+				<td colspan="6"><a href="#2" onclick="showMoveTask();">查看更多</a></td>
+			#end
+        </tr>
+    </tfoot>
+</table>

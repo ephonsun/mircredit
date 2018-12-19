@@ -1,0 +1,135 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+
+    <script type="text/javascript">
+        $(function () {
+
+            if($!appLoanTypeId=="1"){
+                $(".jyd").show();
+                $(".jyd").each(function(){
+                    var flag = $(this).attr("flag");
+                    var type = $(this).attr("type");
+                    var div = $(this).attr("id");
+                    getValidationTable(flag,type,div);
+                })
+
+            }else if($!appLoanTypeId=="2"){
+                $(".xfd").show();
+                $(".xfd").each(function(){
+                    var flag = $(this).attr("flag");
+                    var type = $(this).attr("type");
+                    var div = $(this).attr("id");
+                    getValidationTable(flag,type,div);
+                })
+            }
+
+        });
+
+
+        //table
+        function getValidationTable(flag,type,div) {
+            var postJson = {};
+            postJson['loanId'] = $("#loanId").val();
+            postJson['flag'] = flag;
+            postJson['type'] = type;
+            postJson['div'] = div;
+            jQuery.ajax({
+                type: 'post',
+                url: '${ctx}/loan/getBalanceTable.html',
+                data: postJson,
+                success: function (data) {
+                    $("#" + div).html(data);
+                }
+            });
+        }
+
+        function saveBalancePage(flag,type,div,id){
+            var url = '${ctx}/loan/getSaveBalancePage.html' + "?loanId=" + $("#loanId").val()
+                    + "&flag=" + flag
+                    + "&type=" + type
+                    + "&id=" + id
+                    + "&random=" + Math.random() * 1000;
+            var result = banger.page.openDialog(url, "添加权益验证", 500,500);
+            if (result != undefined) {
+                getValidationTable(flag,type,div);
+            }
+        }
+
+
+        //table
+        function removeBalance(flag,type,div,id) {
+            var postJson = {};
+            postJson['id'] = id;
+            postJson['flag'] = flag;
+            jQuery.ajax({
+                type: 'post',
+                url: '${ctx}/loan/removeBalance.html',
+                data: postJson,
+                success: function (data) {
+                    getValidationTable(flag,type,div);
+                }
+            });
+        }
+
+
+    </script>
+
+</head>
+<body>
+    <input type="hidden" id="loanId" name="loanId" value="$!loanId"/>
+    <input type="hidden" id="appLoanTypeId" name="appLoanTypeId" value="$!appLoanTypeId"/>
+
+    <div class="jyd" style="display: none;">
+        <span class="bold" style="line-height:40px;font-size:14px;width:100px">销售额检验（总销售额：<label>$!totalSalesAmount</label>）</span>
+        #if("$!write"=="1" )
+            <span  class="ui-span-btn fr" onclick="saveBalancePage('validation','1','itemList1','')" style="margin-top:10px;margin-right:20%">
+                <label>新增</label>
+            </span>
+        #end
+    </div>
+    ##1销售额检验
+    <div id="itemList1" flag="validation" type="1" class="ln-bg-validation jyd" style="display: none; width: 80%">
+    </div>
+
+    <div class="jyd" style="display: none;">
+        <span class="bold" style="line-height:40px;font-size:14px;width:100px">毛利检验（毛利率：<label>$!totalGrossRate%</label>）</span>
+    #if("$!write"=="1" )
+        <span  class="ui-span-btn fr" onclick="saveBalancePage('validation','2','itemList2','')" style="margin-top:10px;margin-right:20%">
+            <label>新增</label>
+        </span>
+    #end
+    </div>
+    ##2毛利检验
+    <div id="itemList2" flag="validation" type="2" class="ln-bg-validation jyd" style="display: none; width: 80%">
+    </div>
+
+    <div class="jyd" style="display: none;">
+        <span class="bold" style="line-height:40px;font-size:14px;width:100px">净利检验（净利率：<label>$!totalNetRate%</label>）</span>
+        #if("$!write"=="1" )
+            <span  class="ui-span-btn fr" onclick="saveBalancePage('validation','3','itemList3','')" style="margin-top:10px;margin-right:20%">
+                <label>新增</label>
+            </span>
+        #end
+    </div>
+    ##3净利检验
+    <div id="itemList3" flag="validation" type="3" class="ln-bg-validation jyd" style="display: none; width: 80%">
+    </div>
+
+    <div class="xfd" style="display: none;">
+        <span class="bold" style="line-height:40px;font-size:14px;width:100px">收入检验（总收入：<label>$!totalIncomeAmount</label>）</span>
+        #if("$!write"=="1" )
+            <span  class="ui-span-btn fr" onclick="saveBalancePage('validation','4','itemList4','')" style="margin-top:10px;margin-right:20%">
+                <label>新增</label>
+            </span>
+        #end
+    </div>
+    ##4收入检验
+    <div id="itemList4" flag="validation" type="4" class="ln-bg-validation xfd" style="display: none; width: 80%">
+    </div>
+
+</body>
+</html>

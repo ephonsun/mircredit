@@ -1,0 +1,130 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>自定义搜索</title>
+    #styleLink("base")
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+</head>
+<script>
+function showResult(queryId,queryTitle)
+{
+	var options = {id:"advanceSearch"+queryId, pid: GetId(), title:queryTitle, url: "${ctx}/advancedCustomer/showCustomerPage.html?queryId="+queryId, lock: false};
+	tab.add(options);
+}
+
+//查询
+function search(){
+	jQuery.post("../advancedCustomer/getUserQueryListGrid.html?random="+Math.random()*1000000,{},
+		function(html){
+		 refreshGrid('grid',html);
+		});
+}
+	
+$(document).ready(function(){
+		$('#grid table').table();
+});	
+		
+//刷新Grid
+function refreshGrid(gridId,html)
+{
+	$("#grid").html(html).find('table').table();
+	var total = $('#total').val();
+	if(total!=null){
+		$('#queryCount').text(total);
+	}
+	else {
+		$('#queryCount').text("0");
+	}
+	refreshMenuItem();
+}
+
+//分页跳转
+function gotoPage(page)
+{
+	goto(page,"../advancedCustomer/getUserQueryListGrid.html?random="+Math.random()*1000000,null,function(html){refreshGrid('grid',html);});
+}
+
+function delResult(queryId,name,index)
+{
+	var flag = confirm("您确定要删除搜索“"+name+"”吗？");
+	var menuId = parseInt(queryId)+1000;
+	if(flag)
+	{
+		jQuery.post("delAdvancedQueryResult.html?queryId="+queryId+"&random="+Math.random()*1000000,{},
+			function(msg){
+				if(window.parent.menu.closeTabs)window.parent.menu.closeTabs(menuId);
+				search();
+				
+		});
+	}
+}
+
+function editResult(queryId,name)			//编辑
+{
+	var options = {id: "editCondition"+queryId, pid: GetId(), title: name, url: "../advancedCustomer/showCustomerPage.html?target=edit&queryId="+queryId+"&random="+Math.random(), lock: false};
+	tab.add(options);
+}
+
+function upResult(queryId,index,size)
+{
+	if(index==1)return;
+	var pageNum = (index%size==1)?parseInt(index/size):((index%size==0)?parseInt(index/size):parseInt(index/size)+1);
+	jQuery.post("upAdvancedQueryResult.html?queryId="+queryId+"&random="+Math.random()*1000000,{},
+		function(msg){
+			gotoPage(pageNum);
+	});
+}
+
+function downResult(queryId,index,size)
+{
+	if(index>$page.totalRowsAmount)return;
+	var pageNum = parseInt(index/size)+1;
+	jQuery.post("downAdvancedQueryResult.html?queryId="+queryId+"&random="+Math.random()*1000000,{},
+		function(msg){
+			gotoPage(pageNum);
+	});
+}
+
+function clearMenuItem(){
+	window.top.menu.reset('29',[]);
+}
+
+function refreshMenuItem()
+{
+	var trs = $("#dataList")[0].rows;
+	var len = (trs.length>20)?20:trs.length;
+	var newItems = [];
+	for(var i=0;i<len;i++)
+	{
+		var tr = trs[i+1];
+		var queryId = $(tr).attr("data");
+		if(queryId)
+		{
+			var menuId = parseInt(queryId)+1000;
+			var queryName = $(tr).attr("dataName");
+			newItems.push({sort:'custom',modelname:queryName,id:menuId,pid:'',title:queryName, url:"../advancedCustomer/showCustomerPage.html?queryId="+queryId,lock: false});
+		}
+	}
+	window.top.menu.reset('29',newItems);
+}
+
+function delMenuItem(queryId)
+{
+	var id = parseInt(queryId)+1000;
+	window.top.menu.del(id+"");
+}
+</script>
+<body>
+    <div class="bold" style="margin-bottom: 10px; font-size: 12px;">
+    	<span>自定义搜索(<label id="queryCount" class="dgreen">$!page.totalRowsAmount</label>)</span>
+    </div>
+    <div id="grid">
+	    #parse("/velocity/customer/advancedSearchResultGrid.vm")
+    </div>
+</body>
+</html>
+

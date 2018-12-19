@@ -1,0 +1,56 @@
+#parse("/velocity/taglibs.vm")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $('table.datatbl').table();
+            getQueryJson();
+        });
+
+        var oldPostJson = {};
+
+        function getQueryJson(){
+            var postJson = {};
+            postJson['customerId']=$("#loanCustomerId").val();
+			postJson['needLine']='$!needLine';
+            oldPostJson = postJson;
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPageLoan(page){
+            var customerId = $("#loanCustomerId").val();
+            var needLine='$!needLine';
+            if(oldPostJson){
+                gotoLoan(
+                        page,
+                        "../loan/queryAllLoanByCusId.html?RandNum="+ Math.random()*10000,
+                        {
+                            'customerId':customerId,
+                            'needLine':needLine
+                        },
+                        function(html){
+                            queryBack(html, 'loanDataList');
+                        });
+            }
+        }
+
+        function queryBack(html, gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+
+//            var total = $('#total').val();
+//            if(total!=null){
+//                $("#recordCount").text(total);
+//            }else {
+//                $("#recordCount").text(0);
+//            }
+        }
+    </script>
+<input type="hidden" id="loanCustomerId" value="$!customerId"/>
+<table class="datatbl" id="loanDataList">
+    #parse("/velocity/loan/loanInfoTableCard.vm")
+</table>

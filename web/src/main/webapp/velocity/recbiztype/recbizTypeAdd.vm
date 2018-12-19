@@ -1,0 +1,86 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建业务类型</title>
+	<base target="_self" />
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    #scriptLink("page")	
+</head>
+<script>
+	jQuery(document).ready(function(){
+		jQuery("#recTypeForm").validationEngine();
+	});
+	function addSubmit(){
+		if(jQuery("#recTypeForm").validationEngine('validate')){
+			jQuery.post('valationType.html',{
+    			'recbizType.bizTypeCode':$('#bizTypeCode').val(),
+    			'recbizType.bizTypeName':$('#bizTypeName').val()
+    		},function(data){
+    			if(data!=""){
+					banger.page.showMessageBox(data);
+    			}else{
+    				document.recTypeForm.submit();
+    				window.returnValue=1;    
+    				window.close(); 
+    			}
+    		});
+		}
+	}
+</script>
+<body>
+	<form name="recTypeForm"  id ="recTypeForm" action="addRecbizType.html"  method="post">
+	<table class="htmltbl" cellspacing="2" cellpadding="2">
+    	<thead>
+        	<tr>
+            	<th height="20" align="left" colspan="4">新建业务类型<hr /></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="80" height="30" align="right">
+                	<span class="red">*</span>业务编号：
+                </td>
+                <td width="200">
+                	<input type="text" maxlength="20" class="txt" data-prompt-position="topLeft" id="bizTypeCode" name="recbizType.bizTypeCode" style="width: 150px; ime-mode: disabled;" onkeyup="value=value.replace(/[^\w\\/]/ig,'')" onpaste="return false" oncontextmenu="return false;"/>
+            	</td>
+                <td width="80" align="right">
+                	<span class="red">*</span>业务名称：
+                </td>
+                <td>
+                	<input type="text" maxlength="20" class="txt" data-prompt-position="topLeft" id="bizTypeName" name="recbizType.bizTypeName" style="width: 150px;" />
+            	</td>
+            </tr>
+            <tr>
+                <td width="80" height="30" align="right">
+                	业务描述：
+                </td>
+                <td colspan="3">
+					<textarea name="recbizType.remark" onKeyUp="javascript:var val = this.value;if(val.length>200){this.value=val.substring(0,200)}" class="txtarea" style="width: 445px; height: 80px;" data-prompt-position="topLeft"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td width="80" height="30" align="right">
+                	<span class="red">*</span>业务状态：
+                </td>
+                <td colspan="3">
+					#sradio("list=activedMap" "value=1" "name=recbizType.isActived" "cssClass=rdo")
+                </td>
+            </tr>
+			
+        </tbody>
+        <tbody>
+            <tr>
+                <td colspan="4" align="center">
+                	<input type="button" value="保 存" onclick="addSubmit()" class="btn5 btn5bg1" />
+                	<input type="button" value="取 消" onclick="javascript:window.close();" class="btn5 btn5bg3" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

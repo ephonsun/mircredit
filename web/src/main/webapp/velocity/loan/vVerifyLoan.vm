@@ -1,0 +1,680 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .m1{ margin-left:15px;}
+    </style>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            $(".ui-footer-btn1-cancel").click(function(){
+                tab.close(GetId(), false);
+            });
+
+            //初始化显示当前事件下的资料
+            var eventId = "$!loan.eventId";
+            $(".event").hide();
+            $("#event"+eventId).show();
+        });
+
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+
+        function showDiv(div,eventId){
+            $(".event").hide();
+            $(".line-round-orange.orange.fl").attr("class","line-round-black gray fl");
+            $(div).attr("class","line-round-orange orange fl");
+            $("#"+eventId).show();
+        }
+    </script>
+</head>
+
+<body>
+<div class="etabs">
+<div class="etabs-head">
+    <div class="etabs-head-items">
+        <ul id="etabs-items">
+            <li><label>贷款信息</label></li>
+            <li><label>贷款资料</label></li>
+            <li><label>贷款历史操作</label></li>
+            <li><label>审计历史记录</label></li>
+        </ul>
+    </div>
+</div>
+<div id="etabs-body" class="etabs-body">
+<div class="etabs-body-child">
+    <div class="loan-bg">
+        <p class="bold loan-lheight">基本信息</p>
+        <table class="htmltbl_1" >
+            <tbody>
+            <tr>
+                <td class="field" width="8%">
+                    <label>客户姓名：</label>
+                </td>
+                <td width="17%">
+                    <label>$!loan.crmCustomer.customerName</label>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label>联系电话：</label>
+                </td>
+                <td width="17%">
+                    <label>$vmHelper.getHidePhoneNumber($!loan.cphNumber)</label>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label>身份证：</label>
+                </td>
+                <td colspan="2" width="34%">
+                    <label>$vmHelper.getHideIdCard($!loan.crmCustomer.idCard)</label>
+                </td>
+                <td colspan="5"></td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label>贷款类型：</label>
+                </td>
+                <td width="17%">
+                    <label>
+                        $!loan.lnLoanTypeBean.loanTypeName
+                        #if ($!loan.lnLoanSubTypeBean.loanSubTypeName != "")
+                            （$!loan.lnLoanSubTypeBean.loanSubTypeName）
+                        #end
+                    </label>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label>申请金额：</label>
+                </td>
+                <td width="17%">
+                    <label>$vmHelper.getDecimalWanMoney($!loan.loanMoney)元</label>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="loan-bg loan-inner fl">
+        <div class="loan-pad">
+            <div class="action-bar1">
+                           <span class="fl tabttl-size">
+                               共同借贷人
+                           </span>
+            </div>
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th><label title="借贷人">借贷人</label></th>
+                    <th><label title="联系电话">联系电话</label></th>
+                    <th><label title="身份证">身份证</label></th>
+                    <th><label title="照片">照片</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                    #foreach($loanCoBorrower in $loanCoBorrowerList)
+                    <tr>
+                        <td><label title="$!loanCoBorrower.customerName">$!loanCoBorrower.customerName</label></td>
+                        <td><label title="$vmHelper.getHidePhoneNumber($!loanCoBorrower.cphNumber)">$vmHelper.getHidePhoneNumber($!loanCoBorrower.cphNumber)</label></td>
+                        <td><label title="$vmHelper.getHideIdCard($!loanCoBorrower.idCard)">$vmHelper.getHideIdCard($!loanCoBorrower.idCard)</label></td>
+                        <td>
+                            <p #if ($loanCoBorrower.hasHeadP == 1) class="bsquare fl" #else class="wsquare fl" #end></p>
+                            <p #if ($loanCoBorrower.hasIdCardZmP == 1) class="bsquare fl" #else class="wsquare fl" #end></p>
+                            <p #if ($loanCoBorrower.hasIdCardFmP == 1) class="bsquare fl" #else class="wsquare fl" #end></p>
+                        </td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="loan-bg loan-inner fr">
+        <div class="loan-pad">
+            <div class="action-bar1">
+                          <span class="fl tabttl-size">
+                              担保人
+                          </span>
+            </div>
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th><label title="担保人">担保人</label></th>
+                    <th><label title="联系电话">联系电话</label></th>
+                    <th><label title="身份证">身份证</label></th>
+                    <th><label title="照片">照片</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                    #foreach($loanGuarantor in $loanGuarantorList)
+                    <tr>
+                        <td><label title="$!loanGuarantor.customerName">$!loanGuarantor.customerName</label></td>
+                        <td><label title="$vmHelper.getHidePhoneNumber($!loanGuarantor.cphNumber)">$vmHelper.getHidePhoneNumber($!loanGuarantor.cphNumber)</label></td>
+                        <td><label title="$vmHelper.getHideIdCard($!loanGuarantor.idCard)">$vmHelper.getHideIdCard($!loanGuarantor.idCard)</label></td>
+                        <td>
+                            <p #if ($loanGuarantor.hasHeadP == 1) class="bsquare fl" #else class="wsquare fl" #end></p>
+                            <p #if ($loanGuarantor.hasIdCardZmP == 1) class="bsquare fl" #else class="wsquare fl" #end></p>
+                            <p #if ($loanGuarantor.hasIdCardFmP == 1) class="bsquare fl" #else class="wsquare fl" #end></p>
+                        </td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr style="clear:both;" />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" />
+    </div>
+</div>
+<div class="etabs-body-child">
+<div class="line-arrow-size">
+    <p class="line-round-orange orange fl" onclick="showDiv(this,'event1')">
+        申请贷款
+    </p>
+    <p class="fl line-round-arrow"></p>
+    <p class="line-round-black gray fl" onclick="showDiv(this,'event2')">
+        调查贷款
+    </p>
+    <p class="fl line-round-arrow"></p>
+    <p class="line-round-black gray fl" onclick="showDiv(this,'event3')">
+        审批贷款
+    </p>
+    <p class="fl line-round-arrow"></p>
+    <p class="line-round-black gray fl" onclick="showDiv(this,'event4')">
+        落实贷款
+    </p>
+    <p class="fl line-round-arrow"></p>
+    <p class="line-round-black gray fl" onclick="showDiv(this,'event5')">
+        催收贷款
+    </p>
+</div>
+<div class="loan-view-bg event" id="event1" style="clear:both;">
+    <div class="loan-pad">
+        <span class="tabtitle">申请贷款</span>
+        <p class="loan-p-two">贷款人($!loan.crmCustomer.customerName)</p>
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th width="34"><label title="类型">类型</label></th>
+                <th><label title="资料名称">资料名称</label></th>
+                <th><label title="提交时间">提交时间</label></th>
+                <th><label title="提交人员">提交人员</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($data in $eventList1Self)
+                <tr>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                        #end
+                        #if ($data.dataType == 2)
+                            <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                        #end
+                        #if ($data.dataType == 3)
+                            <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                        #end
+                        #if ($data.dataType == 4)
+                            <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                        #end
+                    </td>
+                    <td><label title="$!data.dataName">$!data.dataName</label></td>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                    <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                        #end
+                        #if ($data.dataType == 2)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 3)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 4)
+                            <a href="#">查看</a>
+                        #end
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+        #foreach($eventList1Co in $eventList1CoList)
+            <p class="loan-p-two">共同借贷人($!eventList1Co.customerName)</p>
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th width="34"><label title="类型">类型</label></th>
+                    <th><label title="资料名称">资料名称</label></th>
+                    <th><label title="提交时间">提交时间</label></th>
+                    <th><label title="提交人员">提交人员</label></th>
+                    <th width="100"><label title="操作">操作</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                    #foreach($data in $eventList1Co.loanDataList)
+                    <tr>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                            #end
+                            #if ($data.dataType == 2)
+                                <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                            #end
+                            #if ($data.dataType == 3)
+                                <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                            #end
+                            #if ($data.dataType == 4)
+                                <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                            #end
+                        </td>
+                        <td><label title="$!data.dataName">$!data.dataName</label></td>
+                        <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                        <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                            #end
+                            #if ($data.dataType == 2)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 3)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 4)
+                                <a href="#">查看</a>
+                            #end
+                        </td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        #end
+        #foreach($eventList1Gu in $eventList1GuList)
+            <p class="loan-p-two">担保人($!eventList1Gu.customerName)</p>
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th width="34"><label title="类型">类型</label></th>
+                    <th><label title="资料名称">资料名称</label></th>
+                    <th><label title="提交时间">提交时间</label></th>
+                    <th><label title="提交人员">提交人员</label></th>
+                    <th width="100"><label title="操作">操作</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                    #foreach($data in $eventList1Gu.loanDataList)
+                    <tr>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                            #end
+                            #if ($data.dataType == 2)
+                                <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                            #end
+                            #if ($data.dataType == 3)
+                                <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                            #end
+                            #if ($data.dataType == 4)
+                                <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                            #end
+                        </td>
+                        <td><label title="$!data.dataName">$!data.dataName</label></td>
+                        <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                        <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                            #end
+                            #if ($data.dataType == 2)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 3)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 4)
+                                <a href="#">查看</a>
+                            #end
+                        </td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        #end
+    </div>
+</div>
+<div class="loan-view-bg event" id="event2" style="clear:both;">
+    <div class="loan-pad">
+        <span class="tabtitle">调查贷款</span>
+        <p class="loan-p-two">贷款人($!loan.crmCustomer.customerName)</p>
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th width="34"><label title="类型">类型</label></th>
+                <th><label title="资料名称">资料名称</label></th>
+                <th><label title="提交时间">提交时间</label></th>
+                <th><label title="提交人员">提交人员</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($data in $eventList2Self)
+                <tr>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                        #end
+                        #if ($data.dataType == 2)
+                            <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                        #end
+                        #if ($data.dataType == 3)
+                            <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                        #end
+                        #if ($data.dataType == 4)
+                            <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                        #end
+                    </td>
+                    <td><label title="$!data.dataName">$!data.dataName</label></td>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                    <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                        #end
+                        #if ($data.dataType == 2)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 3)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 4)
+                            <a href="#">查看</a>
+                        #end
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+        #foreach($eventList2Co in $eventList2CoList)
+            <p class="loan-p-two">共同借贷人($!eventList2Co.customerName)</p>
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th width="34"><label title="类型">类型</label></th>
+                    <th><label title="资料名称">资料名称</label></th>
+                    <th><label title="提交时间">提交时间</label></th>
+                    <th><label title="提交人员">提交人员</label></th>
+                    <th width="100"><label title="操作">操作</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                    #foreach($data in $eventList2Co.loanDataList)
+                    <tr>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                            #end
+                            #if ($data.dataType == 2)
+                                <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                            #end
+                            #if ($data.dataType == 3)
+                                <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                            #end
+                            #if ($data.dataType == 4)
+                                <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                            #end
+                        </td>
+                        <td><label title="$!data.dataName">$!data.dataName</label></td>
+                        <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                        <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                            #end
+                            #if ($data.dataType == 2)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 3)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 4)
+                                <a href="#">查看</a>
+                            #end
+                        </td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        #end
+        #foreach($eventList2Gu in $eventList2GuList)
+            <p class="loan-p-two">担保人($!eventList2Gu.customerName)</p>
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th width="34"><label title="类型">类型</label></th>
+                    <th><label title="资料名称">资料名称</label></th>
+                    <th><label title="提交时间">提交时间</label></th>
+                    <th><label title="提交人员">提交人员</label></th>
+                    <th width="100"><label title="操作">操作</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                    #foreach($data in $eventList2Gu.loanDataList)
+                    <tr>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                            #end
+                            #if ($data.dataType == 2)
+                                <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                            #end
+                            #if ($data.dataType == 3)
+                                <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                            #end
+                            #if ($data.dataType == 4)
+                                <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                            #end
+                        </td>
+                        <td><label title="$!data.dataName">$!data.dataName</label></td>
+                        <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                        <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                        <td>
+                            #if ($data.dataType == 1)
+                                <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                            #end
+                            #if ($data.dataType == 2)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 3)
+                                <a href="#">播放</a>
+                            #end
+                            #if ($data.dataType == 4)
+                                <a href="#">查看</a>
+                            #end
+                        </td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        #end
+    </div>
+</div>
+<div class="loan-view-bg event" id="event3" style="clear:both;">
+    <div class="loan-pad">
+        <span class="tabtitle">审批贷款</span>
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th width="34"><label title="类型">类型</label></th>
+                <th><label title="资料名称">资料名称</label></th>
+                <th><label title="提交时间">提交时间</label></th>
+                <th><label title="提交人员">提交人员</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($data in $eventList3Self)
+                <tr>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                        #end
+                        #if ($data.dataType == 2)
+                            <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                        #end
+                        #if ($data.dataType == 3)
+                            <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                        #end
+                        #if ($data.dataType == 4)
+                            <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                        #end
+                    </td>
+                    <td><label title="$!data.dataName">$!data.dataName</label></td>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                    <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                        #end
+                        #if ($data.dataType == 2)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 3)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 4)
+                            <a href="#">查看</a>
+                        #end
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="loan-view-bg event" id="event4" style="clear:both;">
+    <div class="loan-pad">
+        <span class="tabtitle">审批贷款</span>
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th width="34"><label title="类型">类型</label></th>
+                <th><label title="资料名称">资料名称</label></th>
+                <th><label title="提交时间">提交时间</label></th>
+                <th><label title="提交人员">提交人员</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($data in $eventList4Self)
+                <tr>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <img src="../images/public/photo.png" width="33" height="30" alt="照片">
+                        #end
+                        #if ($data.dataType == 2)
+                            <img src="../images/public/audio.png" width="33" height="30" alt="录音">
+                        #end
+                        #if ($data.dataType == 3)
+                            <img src="../images/public/video.png" width="33" height="30" alt="视频">
+                        #end
+                        #if ($data.dataType == 4)
+                            <img src="../images/public/form.png" width="33" height="30" alt="表单">
+                        #end
+                    </td>
+                    <td><label title="$!data.dataName">$!data.dataName</label></td>
+                    <td><label title="$!date.format('yyyy-MM-dd',$!data.uploadDate)">$!date.format('yyyy-MM-dd',$!data.uploadDate)</label></td>
+                    <td><label title="$!data.uploadUserName">$!data.uploadUserName</label></td>
+                    <td>
+                        #if ($data.dataType == 1)
+                            <a href="javascript:window.top.pic('$!data.dataName', '/showImage?fullPath=$!data.filePath/$!data.fileName');">预览</a>
+                        #end
+                        #if ($data.dataType == 2)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 3)
+                            <a href="#">播放</a>
+                        #end
+                        #if ($data.dataType == 4)
+                            <a href="#">查看</a>
+                        #end
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+</div>
+<hr style="clear:both;" />
+<div class="center">
+    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" />
+</div>
+</div>
+<div class="etabs-body-child">
+    #foreach($his in $hisList)
+        <div class="spacing">
+            <p class="fl m3">$!date.format('yyyy-MM-dd',$!his.opHistoryDate)<span class="m1">$!his.userName（$!his.account）</span></p>
+            <p class=" #if($!his.beforeStatusName != '') line-arrow #end green bold fr">$!his.afterStatusName</p>
+            #if($!his.beforeStatusName != "")
+                <p class="fr">$!his.beforeStatusName</p>
+            #end
+            <p class="loan-p-three">操作内容：$!his.content</p>
+            #if ($!his.remark != "")
+                <p class="loan-p-three">备注：$!his.remark</p>
+            #end
+        </div>
+    #end
+    <hr style="clear:both;" />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" />
+    </div>
+</div>
+<div class="etabs-body-child">
+    #foreach($vHis in $vhisList)
+        <div class="spacing">
+            <p class="fl m3">$!date.format('yyyy-MM-dd HH:mm',$!vHis.verifyHistoryIdDate)<span class="m1">$!vHis.userName（$!vHis.account）</span></p>
+            <p class="loan-p-three">操作内容：$!vHis.content</p>
+            #if ($!vHis.remark != "")
+                <p class="loan-p-three">备注：$!vHis.remark</p>
+            #end
+        </div>
+    #end
+    <hr style="clear:both;" />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" />
+    </div>
+</div>
+</div>
+</div>
+</body>
+</html>

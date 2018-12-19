@@ -1,0 +1,405 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>查看产品</title>
+		<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+		<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+		<style type="text/css">
+			 div.m1 { margin-top:20px;}
+			 div.mt { margin-top: 20px; margin-bottom:20px; height:auto; }
+			 .line { border-bottom:1px solid #b1b1b1; line-height:30px; }
+			 .clear {
+	            clear: both;
+	         }
+	         /* 头像 */
+	    	 .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; overflow:hidden; margin-bottom: 5px; }
+			 .avatar img { width: 100%; height: 100%; border: 0; }
+			 .m2{ width:74px;}
+
+             /*设置编辑器边框*/
+            .edui-editor{ border:none !important;}
+		</style>
+
+        #scriptLink("core")
+		<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+		<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+		<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+		<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+		<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+		<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+        <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.config.js"></script>
+        <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.all.js"></script>
+        <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+        <script type="text/javascript">
+		var oldPostJson={};	//上一个搜索条件
+
+    	/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			goto(
+				page,
+				"../pdtProductCustomer/queryChildViewPdtProductCustomerList.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".green").text(total);
+			}else {
+				jQuery(".green").text("0");
+			}
+		}
+
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var productId = jQuery("#txtProductId").val();
+			var postJson={'pdtProductCustomerBean.productId':productId};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+
+		function fun1(h, b){
+
+			return true;
+		}
+
+		function fun2(h, b){
+		}
+
+		//查看客户
+		function browseCustomer(cusId){
+        	jQuery.ajax({
+    			  type: 'POST',
+    			  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+    			  data: {"cusId":cusId},
+    			  success:function(data){
+    			  		var obj = jQuery.parseJSON(data);
+    			  		if(obj[0].isDel=='1'){
+    			  			banger.page.showMessageBox('客户"'+obj[0].customerName+'"被删除，无法查看具体资料！');
+    			  		}else{
+    			  			var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+    						tab.add(options);
+    			  		}
+    			  	}
+    			});
+        }
+
+		jQuery(function(){
+			tab.title(tab.self,'查看产品-'+'$!jsUtil.escapeJs($pdtProduct.productName)');
+            //jQuery("#feature").html($("#featureHidden").val());
+            //jQuery("#suitableUser").html($("#suitableUserHidden").val());
+            //jQuery("#applyNeedData").html($("#applyNeedDataHidden").val());
+
+			jQuery('select').select();
+
+			jQuery('div.etabs').etabs({
+				'head': 'etabs-items',
+				'body': 'etabs-body',
+				'bar': 'etabs-bar',
+				'beforeOnclick': fun1,
+				'onclick': fun2
+			});
+
+			jQuery("#btnClear").click(function(){
+				jQuery("input[name='conds']").each(function(){
+					jQuery(this).val("");
+				});
+			});
+
+			jQuery("#btnSearch").click(function(){
+				var productId = jQuery("#txtProductId").val();
+				var customerName = jQuery.trim(jQuery("#txtCustomerName").val());
+				var cphNumber = jQuery.trim(jQuery("#txtCPhNomber").val());
+				var remark = jQuery.trim(jQuery("#txtPurposeRemark").val());
+				var userName = jQuery.trim(jQuery("#txtUserName").val());
+				var belongUserName = jQuery.trim(jQuery("#txtBelongUserName").val());
+
+				var postJson={'pdtProductCustomerBean.productId':productId,
+							  'pdtProductCustomerBean.customerName': customerName,
+							  'pdtProductCustomerBean.cphNumber': cphNumber,
+						  	  'pdtProductCustomerBean.remark': remark,
+						  	  'pdtProductCustomerBean.userName': userName,
+						  	  'pdtProductCustomerBean.belongUserName': belongUserName
+				};
+				oldPostJson = postJson;  //记录OldPostJson
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "../pdtProductCustomer/queryChildViewPdtProductCustomerList.html",
+			    	data: postJson,
+			    	success: function(data){
+			 	  		queryResult(data);
+			    	}
+				});
+			});
+
+			jQuery("#btnRefresh").click(function(){
+				goto(null,"../pdtProductCustomer/queryChildViewPdtProductCustomerList.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html);});
+			});
+
+			initQueryJson();
+
+			jQuery('#tblList').table();
+		});
+	</script>
+	</head>
+	<body>
+		<input type="hidden" class="text" id="txtProductId"
+			value="$!pdtProduct.productId" />
+
+		<div class="etabs">
+			<div class="etabs-head">
+				<div class="etabs-head-items">
+					<ul id="etabs-items">
+						<li>
+							<label>产品基本信息</label>
+						</li>
+						<li>
+							<label>意向客户</label>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div id="etabs-body" class="etabs-body">
+				<div class="etabs-body-child">
+					<table class="htmltbl">
+						<tbody>
+							<tr>
+								<td width="15%" class="field">
+									<label>产品代码：</label>
+								</td>
+								<td width="35%">
+									<label>$!pdtProduct.productCode</label>
+								</td>
+								<td width="15%" class="field"></td>
+								<td width="35%" valign="top" rowspan="5" align="center">
+									<div class="avatar">
+			                      		#if($!pdtProduct.productCoverImage == "")
+										<img src="${ctx}/images/productImage/p_logo.bmp" id="imgPLogo"
+											title="产品logo" alt="产品logo" />
+										#else
+										<img src="../showImage?fullPath=$!pdtProduct.productCoverImage"
+											id="imgPLogo" title="产品logo" alt="产品logo" />
+										#end
+				                   </div>
+								</td>
+							</tr>
+							<tr>
+								<td width="15%" class="field">
+									<label>
+										&nbsp;
+									</label>
+								</td>
+								<td width="35%">
+									<label>
+										&nbsp;
+									</label>
+								</td>
+								<td width="15%" class="field"></td>
+							</tr>
+							<tr>
+								<td width="15%" class="field">
+									<label>产品名称：</label>
+								</td>
+								<td width="35%">
+									<label>$!pdtProduct.productName</label>
+								</td>
+								<td width="15%" class="field"></td>
+							</tr>
+							<tr>
+								<td width="15%" class="field">
+									<label>
+										&nbsp;
+									</label>
+								</td>
+								<td width="35%">
+									<label>
+										&nbsp;
+									</label>
+								</td>
+								<td width="15%" class="field"></td>
+							</tr>
+							<tr>
+								<td width="15%" class="field">
+									<label>
+										&nbsp;
+									</label>
+								</td>
+								<td width="35%">
+									<label>
+										&nbsp;
+									</label>
+								</td>
+								<td width="15%" class="field"></td>
+							</tr>
+						</tbody>
+					</table>
+					<div class="bold m1"
+						style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+						简要说明
+					</div>
+					<div class="mt" style="padding:10px 15px 20px 10px;">
+						<p>$!pdtProduct.remark</p>
+					</div>
+					<div class="bold"
+						style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+						产品特点
+					</div>
+                    <input type="hidden" id="featureHidden" value='$!pdtProduct.feature'>
+                    <div class="mt">
+                        <script type="text/plain" id="txtFeature">
+                        </script>
+                    </div>
+					<div class="clear"></div>
+
+					<div class="bold"
+						style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+						适用对象
+					</div>
+                    <input type="hidden" id="suitableUserHidden" value='$!pdtProduct.suitableUser'>
+                    <div class="mt">
+                        <script type="text/plain" id="txtSuitableUser">
+                        </script>
+                    </div>
+                    <div class="clear"></div>
+
+					<div class="bold"
+						style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+						申请资料
+					</div>
+                    <input type="hidden" id="applyNeedDataHidden" value='$!pdtProduct.applyNeedData'>
+                    <div class="mt">
+                        <script type="text/plain" id="txtApplyNeedData">
+                        </script>
+                    </div>
+					<div class="clear"></div>
+
+
+				</div>
+				<div class="etabs-body-child">
+					<table class="htmltbl">
+						<tbody>
+							<tr>
+								<td class="field" width="8%">
+									<label>客户姓名：</label>
+								</td>
+								<td width="17%">
+									<div class="ui-div-text">
+										<input type="text" class="text" name="conds" id="txtCustomerName"/>
+									</div>
+								</td width="17%">
+								<td class="field" width="8%">
+									<label>联系电话：</label>
+								</td>
+								<td width="17%">
+									<div class="ui-div-text">
+										<input type="text" class="text" name="conds" id="txtCPhNomber"/>
+									</div>
+								</td>
+								<td class="field" width="8%">
+									<label>意向说明：</label>
+								</td>
+								<td width="17%">
+									<div class="ui-div-text">
+										<input type="text" class="text" name="conds" id="txtPurposeRemark"/>
+									</div>
+								</td>
+								<td colspan="2"></td>
+							</tr>
+							<tr>
+								<td class="field" width="8%">
+									<label>归属人员：</label>
+								</td>
+								<td width="17%">
+									<div class="ui-div-text">
+										<input type="text" class="text" name="conds" id="txtBelongUserName"/>
+									</div>
+								</td>
+								<td class="field" width="8%">
+									<label>添加人员：</label>
+								</td>
+								<td width="17%">
+									<div class="ui-div-text">
+										<input type="text" class="text" name="conds" id="txtUserName"/>
+									</div>
+								</td>
+								<td colspan="4"></td>
+							</tr>
+						</tbody>
+					</table>
+					<div class="search-bar">
+						<span class="fl">意向客户(<label class="green">$!count</label>) </span>
+						<input type="button" class="ui-input-btn" value="清空" id="btnClear"/>
+						<input type="button" class="ui-input-btn" value="搜索" id="btnSearch"/>
+					</div>
+					<div class="action-bar">
+						<span class="ui-span-btn fr" id="btnRefresh"> <label>
+								刷新
+							</label> </span>
+					</div>
+					<table id="tblList" class="datatbl">
+				        #parse("/velocity/microProduct/childViewPdtProductCustomerList.vm")
+				    </table>
+				</div>
+			</div>
+		</div>
+		<hr />
+		<div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+		</div>
+
+        <script type="text/javascript">
+            //加载ue编辑器 产品特点
+            var ueFeature=new UE.ui.Editor({
+                toolbars:[],
+                wordCount:false,
+                initialFrameHeight:80,
+                initialContent: $("#featureHidden").val(),
+                autoHeightEnabled:true
+            });
+            ueFeature.render('txtFeature');
+            ueFeature.addListener('ready',function(){
+                this.disable('selectall');
+            });
+
+            //加载ue编辑器 适用对象
+            var suitableUser=new UE.ui.Editor({
+                toolbars:[],
+                wordCount:false,
+                initialFrameHeight:80,
+                initialContent: $("#suitableUserHidden").val(),
+                autoHeightEnabled:true
+            });
+            suitableUser.render('txtSuitableUser');
+            suitableUser.addListener('ready',function(){
+                this.disable('selectall');
+            });
+
+            //加载ue编辑器 申请资料
+            var applyNeedData=new UE.ui.Editor({
+                toolbars:[],
+                wordCount:false,
+                initialFrameHeight:80,
+                initialContent: $("#applyNeedDataHidden").val(),
+                autoHeightEnabled:true
+            });
+            applyNeedData.render('txtApplyNeedData');
+            applyNeedData.addListener('ready',function(){
+                this.disable('selectall');
+            });
+        </script>
+	</body>
+</html>

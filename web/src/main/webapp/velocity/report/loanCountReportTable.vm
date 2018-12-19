@@ -1,0 +1,52 @@
+<h3 class="recenter-ttl" style="text-align: center;">
+    #if($timeBucket)
+        $!timeBucket
+    #end 贷款量统计表
+</h3>
+<table class="recenter-tbl">
+	<thead>
+    	<tr>
+            #if($isDept)
+                <th><label title="机构名称">机构名称</label></th>
+            #end
+            #if(!$isDept)
+                <th><label title="人员姓名">人员姓名</label></th>
+            #end
+            <th><label title="贷款总数(笔)">贷款总数(笔)</label></th>
+            <th><label title="申请(笔)">申请(笔)</label></th>
+            <th><label title="分配(笔)">分配(笔)</label></th>
+            <th><label title="调查(笔)">调查(笔)</label></th>
+            <th><label title="审批(笔)">审批(笔)</label></th>
+            <th><label title="放贷(笔)">放贷(笔)</label></th>
+            <th><label title="贷后(笔)">贷后(笔)</label></th>
+            <th><label title="已结清(笔)">已结清(笔)</label></th>
+            <th><label title="审批拒绝(笔)">审批拒绝(笔)</label></th>
+            <th><label title="其他拒绝(笔)">其他拒绝(笔)</label></th>
+        </tr>
+    </thead>
+    <tbody>
+    #foreach($data in $!loanStatusCountReportList)
+        <tr>
+            #if($isDept)
+                <td>$!data.deptName</td>
+            #end
+            #if(!$isDept)
+                <td>$!data.userName</td>
+            #end
+            <td>$!data.allLoanCount</td>
+            <td>$!data.applyLoanCount</td>
+            <td>$!data.assignLoanCount</td>
+            <td>$!data.examLoanCount</td>
+            <td>$!data.approveLoanCount</td>
+            <td>$!data.makeLoanCount</td>
+            <td>$!data.loanedLoanCount</td>
+            <td>$!data.successLoanCount</td>
+            <td>$!data.approveRefusedLoanCount</td>
+            <td>$!data.otherRefusedLoanCount</td>
+        </tr>
+    #end
+    </tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+	制表人：$!userName &nbsp; &nbsp; 制表时间：$!reportTime
+</p>

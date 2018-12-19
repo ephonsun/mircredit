@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="crmRingSetting" extends="default" namespace="/crmRingSetting" >
+	
+		 <!--  铃声设置参数 -->
+		<action name="showCrmRingSettingPage" class="crmRingSettingAction" method="showCrmRingSettingPage">
+			<result name="success">/velocity/crmRingSetting/crmRingSetting.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 <!--  更新 -->
+		<action name="updateRingSetting" class="crmRingSettingAction" method="updateRingSetting">
+			<result name="success" type="redirect-action">showCrmRingSettingPage</result>
+			<result name="error">/velocity/error.vm</result>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		
+		<!-- 上传 -->
+		<action name="doUpload" class="crmRingSettingAction" method="doUpload"></action>
+	  
+	  	<!-- 验证播放文件是否存在与服务器上 -->
+	  	<action name="isFile" class="crmRingSettingAction" method="isFile"></action>
+	  	
+	</package>
+
+</struts>

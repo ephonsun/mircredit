@@ -1,0 +1,445 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>知识库</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	.ui-fe-list { font-family: 'Microsoft Yahei'; }
+    </style>
+</head>
+
+<body style="_height:auto !important;">
+    <div class="ui-panel-box2">
+        <div class="l">
+            <h4>
+                <label>知识库</label>
+                <div>
+					<input id="typeId" type="hidden" name="typeId" />
+                    <span id="add" class="editor-add" onclick="operation(1);">&nbsp;</span>
+                    <span id="up" class="editor-up" onclick="operation(2)">&nbsp;</span>
+                    <span id="down" class="editor-down" onclick="operation(3)">&nbsp;</span>
+                    <span id="del" class="editor-del" onclick="operation(4)">&nbsp;</span>
+                    <span id="edi" class="editor-edi" onclick="operation(5)">&nbsp;</span>
+                </div>
+            </h4>
+            <div class="l-inner">
+                <ul id="klTree" class="ztree"></ul>
+            </div>
+        </div>
+        <div class="r">
+			<form id="contentForm" name="contentForm">
+                <table class="htmltbl">
+                    <tbody>
+                        <tr>
+                            <td width="7%" class="field">
+                                <label>标题：</label>
+                            </td>
+                            <td width="18%">
+                                <div class="ui-div-text">
+                                    <input type="text" class="text" id="title" />
+                                </div>
+                            </td>
+                            <td width="7%" class="field">
+                                <label>备注：</label>
+                            </td>
+                            <td width="18%">
+                                <div class="ui-div-text">
+                                    <input type="text" class="text" id="note" />
+                                </div>
+                            </td>
+                            <td width="7%" class="field">
+                                <label>收藏时间：</label>
+                            </td>
+                            <td>
+                                <table class="celltbl">
+                                    <tbody>
+                                        <tr>
+                                            <td width="120">
+                                                <div class="ui-div-text" style="width: 120px;">
+                                                    <input type="text" fun="dateFunction" class="text datepicker"  readonly="readonly" id="startDate"/>
+                                                    <i class="date"></i>
+                                                </div>
+                                            </td>
+                                            <td width="20"><label>-</label></td>
+                                            <td width="120">
+                                                <div class="ui-div-text" style="width: 120px;">
+                                                    <input type="text" class="text datepicker"  readonly="readonly" id="endDate"/>
+                                                    <i class="date"></i>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+            <div class="search-bar">
+                <span class="fl bold">
+					<label>[<span id="tName">个人知识库</span>]</label>
+                    <label>分类下的收藏记录</label>(<label id="queryCount" class="green">0</label>)
+                </span>
+                <input type="button" class="ui-input-btn" onclick="resetValue();" value="清空" />
+                <input type="button" class="ui-input-btn" onclick="search();" value="搜索" />
+            </div>
+            
+            <div class="action-bar">
+                <span class="ui-span-btn fr">
+                    <label onclick="refreshForm();">刷新</label>
+                </span>
+            </div>
+			<div id="grid">
+				#parse("/velocity/finance/knowLedgeBaseContent.vm")
+            </div>
+        </div>
+    </div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js "></script>	
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+
+<script type="text/javascript">
+	var oldPostJson={};
+	var setting = {
+		callback:{
+			onClick:treeOnclick
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			showIcon: false
+		}			
+	};
+	//json树数据
+	var zNodes = $!typeJson; 
+	//初始化
+	$(function(){
+		//加载验证控件
+		jQuery("#contentForm").validator();
+		jQuery.fn.zTree.init($("#klTree"), setting, zNodes);			
+		initNodeSelect();
+	});
+	//树点击事件
+	function treeOnclick(event, treeId, treeNode) {
+		$("#typeId").val(treeNode.id);
+		$("#tName").text(subNameStr(treeNode.name));		
+		changeActive(treeNode);	
+		search();
+	}
+	
+	//分页跳转
+	function gotoPage(page)
+	{
+		var oldPostJson=getQueryJson();
+		goto(page,"/finance/showKnowledgeBaseList.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	
+	//刷新
+	function refreshForm(){
+		var oldPostJson=getQueryJson();
+		goto(null,"/finance/showKnowledgeBaseList.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	
+	//清空搜索条件
+    function resetValue(){
+    	$("#title").val('');
+		$("#note").val('');
+		$("#startDate").val('');
+		$("#endDate").val('');
+    }
+  	//搜索
+    function search(){
+		var bool = jQuery.validator({form: 'contentForm'});
+		if(bool){	
+        	var postJson=getQueryJson();
+    		oldPostJson = postJson;
+    		jQuery.post("/finance/showKnowledgeBaseList.html?random="+Math.random()*1000000,postJson,function(html){
+        		refreshGrid('grid',html);
+        	});
+		}
+    }
+	
+	 //刷新Grid
+	function refreshGrid(gridId,html)
+	{
+		$("#" + gridId).html(html);	
+		$("#queryCount").text($("#total").val());
+	}
+	
+	//表单数据
+    function getQueryJson(){
+    	var postJson = {};
+		postJson['knowContent.knowledgebaseTypeId']= parseInt(jQuery.trim($("#typeId").val()));
+		postJson['knowContent.knowledgebaseTitle']=jQuery.trim($('#title').val().replace(/(^\s*)|(\s*$)/g,""));
+		postJson['knowContent.knowledgebaseNote']=jQuery.trim($('#note').val().replace(/(^\s*)|(\s*$)/g,""));
+		postJson['startDate']=jQuery.trim($('#startDate').val());
+		postJson['endDate']=jQuery.trim($('#endDate').val());		
+		oldPostJson = postJson;
+		return postJson;
+	}
+	
+	//改变新建上移下移编辑，删除按钮可用
+	function changeActive(treeNode){
+		if(!treeNode.pId){
+			delNoStyle();
+			ediNoStyle();
+			upNoStyle();
+			downNoStyle();
+		}else{
+			delStyle();
+			ediStyle();
+			var parentNode = treeNode.getParentNode();
+			var pnodes = parentNode.children;
+			if(treeNode.id == pnodes[0].id){
+				upNoStyle();
+			}else{
+				upStyle();
+			}				
+			if (treeNode.id ==pnodes[pnodes.length-1].id){
+				downNoStyle();
+			}else{
+				downStyle();
+			}
+		}			
+	}
+	
+	//模拟点击第一个节点
+	function initNodeSelect(){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+		var nodes = treeObj.getNodes();
+		if (nodes.length>0) {
+			treeObj.selectNode(nodes[0]);
+			$("#typeId").val(nodes[0].id);
+			$("#tName").text(subNameStr(nodes[0].name));
+			treeOnclick(event, nodes[0].id, nodes[0]);
+		}
+	}	
+	
+	//新建知识库分类
+	function addKn(pid){			
+		var url="addKnowledgeType.html?parentId="+pid+"&random="+Math.random();
+    	var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=320px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){
+			refreshTree();        		
+		}
+	}
+	
+	//刷新分类树
+	function refreshTree(){
+		var url = window.url('/finance/showKnowledgeBaseType.html', "random", Math.random());
+    	window.location.href = url;
+		initNodeSelect();
+	}
+	
+	//操作
+	function operation(type){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+    	var node = treeObj.getSelectedNodes()[0];
+		if(type==1){
+			addKn(node.id);
+		}else if(type==2){
+			moveKnow(node,treeObj,"up");			
+		}else if(type==3){
+			moveKnow(node,treeObj,"down");	
+		}else if(type==4){
+			delKnow(node);			
+		}else if(type==5){
+			updateKnow(node.id);			
+		}
+	}
+	
+	//上移下移
+	function moveKnow(node,treeObj,moveType){
+		if(node.pId){
+			var parentNode = node.getParentNode();
+    		var nodes = parentNode.children;				
+			if(moveType=="up"){
+        		if(node.id != nodes[0].id){
+        			var prevNode = node.getPreNode();
+        			treeObj.moveNode(prevNode, node, "prev");
+            		var typeid = node.id;
+            		jQuery.post('moveUpKnowledgeType.html',
+            						{'knowledgeType.knowledgebaseTypeId':typeid},
+            				function(data){
+								changeActive(node);
+            				});
+				}
+			}				
+			if(moveType=="down"){
+				if(node.id != nodes[nodes.length-1].id){
+					var nextNode = node.getNextNode();
+        			treeObj.moveNode(nextNode, node, "next");
+            		var typeid = node.id;
+            		jQuery.post('moveDownknowledgeType.html',
+    						{'knowledgeType.knowledgebaseTypeId':typeid},
+    						function(data){		
+								changeActive(node);
+    						});
+				}
+			}
+		}
+	}
+	
+	//删除
+	function delKnow(node){
+		var subName= subNameStr(node.name);
+		var cNodes = node.children;
+		var count = $('#queryCount').text();
+		if(cNodes||count!=0){
+			banger.page.showMessageBox("知识库分类“"+subName+"”下还有子分类或收藏的数据，不能够删除！");
+			return;
+		}
+		if(confirm("您确定要删除知识库分类“"+subName+"”吗？")){
+			jQuery.post('deleteKnowType.html',
+				{'knowledgeType.knowledgebaseTypeId':node.id},
+				function(data){		
+					refreshTree();
+			});	
+		}
+	}
+	
+	function dateFunction(obj){
+		var startDate=$("#startDate").val();
+		var endDate=$("#endDate").val();
+		if(endDate.length>0){
+			if(startDate>endDate){
+				$(obj).attr('tips', '开始时间必须小于等于结束时间'); return false;
+			}else return true;
+		}else return true;
+	}
+	
+	function subNameStr(name){
+		var subName = name;
+		if(subName.length>10){
+			subName = name.substring(0,10)+'...';
+		}
+		return subName;
+	}
+	
+	//编辑知识库分类
+	function updateKnow(id){
+		var url="toUpdateKnowType.html?knowledgeType.knowledgebaseTypeId="+id+"&random="+Math.random();
+		var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){	
+			refreshTree();
+		}			
+	}
+	
+	//编辑收藏内容
+	function editContent(id){
+		var url="toEditKnowContent.html?knowContent.knowledgebaseContentId="+id+"&random="+Math.random();
+		var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){	
+			refreshForm();
+		}	
+	}
+	
+	//删除收藏内容
+	function delContent(id,name,articleId){
+		if(confirm("您确定要删除收藏“"+subNameStr(name)+"”吗？")){
+			jQuery.post('deleteKnowContent.html',
+				{'knowContent.knowledgebaseContentId':id,
+				 'knowContent.articleId':articleId},
+				function(data){		
+					refreshForm();
+			});	
+		}
+	}
+	
+	//查看收藏内容
+	function contentDetail(id){
+		var url="knowContentDetail.html?knowContent.knowledgebaseContentId="+id+"&random="+Math.random();
+		var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){	
+			
+		}	
+	}
+	
+	//查看收藏文章的内容
+	function content(id){
+	    var url='/finance/readFeArticle.html?articleId='+id+'&random='+Math.random();
+		var id="FeArticle_readFeArticle"+id;
+		var options = {id: id, pid: GetId(), title: "阅读文章", url:url , lock: false};
+		tab.add(options);
+	}
+	
+	//新增取消
+	function addNoStyle(){
+		$("#add").attr("disabled",true);
+		$("#add").css({filter:"gray"});
+		$("#add").css({cursor:"default"});
+	}
+	//新增样式
+	function addStyle(){
+		$("#add").attr("disabled",false);
+		$("#add").css({filter:""});
+		$("#add").css({cursor:"hand"});
+	}
+	//删除取消
+	function delNoStyle(){
+		$("#del").attr("disabled",true);
+		$("#del").css({filter:"gray"});
+		$("#del").css({cursor:"default"});
+	}
+	//删除样式
+	function delStyle(){
+		$("#del").attr("disabled",false);
+		$("#del").css({filter:""});
+		$("#del").css({cursor:"hand"});
+	}
+	
+	//编辑取消
+	function ediNoStyle(){
+		$("#edi").attr("disabled",true);
+		$("#edi").css({filter:"gray"});
+		$("#edi").css({cursor:"default"});
+	}
+	//编辑样式
+	function ediStyle(){
+		$("#edi").attr("disabled",false);
+		$("#edi").css({filter:""});
+		$("#edi").css({cursor:"hand"});
+	}
+	//上移取消
+	function upNoStyle(){
+		$("#up").attr("disabled",true);
+		$("#up").css({filter:"gray"});
+		$("#up").css({cursor:"default"});
+	}
+	//上移样式
+	function upStyle(){
+		$("#up").attr("disabled",false);
+		$("#up").css({filter:""});
+		$("#up").css({cursor:"hand"});
+	}
+	//下移取消
+	function downNoStyle(){
+		$("#down").attr("disabled",true);
+		$("#down").css({filter:"gray"});
+		$("#down").css({cursor:"default"});
+	}
+	//下移样式
+	function downStyle(){
+		$("#down").attr("disabled",false);
+		$("#down").css({filter:""});
+		$("#down").css({cursor:"hand"});
+	}
+</script>
+</html>

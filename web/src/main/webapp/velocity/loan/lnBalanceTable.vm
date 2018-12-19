@@ -1,0 +1,251 @@
+#if($!flag=="cash")
+
+        <span class="bold" style="line-height:40px;font-size:14px;width:100px">$!pagename（合计：<label class="$!div">$!totalAmount</label>）</span>
+
+    #if("$!write" == "1")
+        <span  class="ui-span-btn fr" onclick="saveBalancePage('$!flag','$!type','$!div','')" style="margin-top:10px;margin-right:10px">
+        	<label>新增</label>
+        </span>
+    #end
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="项目">项目</label></th>
+            <th><label title="金额（元）">金额（元）</label></th>
+            <th><label title="备注">备注</label></th>
+            <th><label title="操作">操作</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($balance in $balanceList)
+##                #set($totalAmount = $!totalAmount+$!balance.amount)
+                <tr>
+                    <td><label title="$!balance.itemName">
+                        #if($!type=="1"||$!type=="2"||$!type=="3"||$!type=="6")
+                            #foreach($!item in $!checkBoxMessage.get("$!flag$!type"))
+                                #if( $!balance.itemName == $!item.dictionaryKey) $!item.dictionaryValue #end
+                            #end
+                        #else
+                            $!balance.itemName
+                        #end
+
+                    </label></td>
+                    <td><label title="$!balance.amount">$!balance.amount</label></td>
+                    <td><label title="$!balance.remark">$!balance.remark</label></td>
+                    <td>
+                    #if("$!write" == "1")
+                        <a href="javascript:removeBalance('$!flag','$!type','$!div','$!balance.id')">移除</a>&nbsp;&nbsp;<a href="javascript:saveBalancePage('$!flag','$!type','$!div','$!balance.id')">编辑</a>
+                    #end
+                    </td>
+                </tr>
+            #end
+        </tbody>
+    </table>
+
+#end
+
+#if($!flag=="account")
+
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">$!pagename（合计：<label class="$!div">$!totalAmount</label>）</span>
+
+    #if("$!write" == "1")
+        <span  class="ui-span-btn fr" onclick="saveBalancePage('$!flag','$!type','$!div','')" style="margin-top:10px;margin-right:10px">
+            <label>新增</label>
+        </span>
+    #end
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label #if($!type=="1"||$!type=="4") title="客户名称" #else title="供应商" #end >#if($!type=="1"||$!type=="4") 客户名称 #else 供应商 #end</label></th>
+            <th><label title="金额（元）">金额（元）</label></th>
+            <th><label title="结算方式">结算方式</label></th>
+            <th><label title="账龄">账龄</label></th>
+            <th><label title="业务关系存续">业务关系存续</label></th>
+            <th><label title="付款方式">付款方式</label></th>
+            <th><label title="备注">备注</label></th>
+            <th><label title="操作">操作</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($balance in $balanceList)
+            ##                #set($totalAmount = $!totalAmount+$!balance.amount)
+            <tr>
+                <td><label title="$!balance.itemName">$!balance.itemName</label></td>
+                <td><label title="$!balance.amount">$!balance.amount</label></td>
+                <td><label title="#if($!balance.settlingType=="1")现结#elseif($!balance.settlingType=="2")月结算#end">#if($!balance.settlingType=="1")现结#elseif($!balance.settlingType=="2")月结算#end</label></td>
+                <td><label title="$!balance.accountAge">$!balance.accountAge</label></td>
+                <td><label title="#if($!balance.bizRenew=="1")是#elseif($!balance.bizRenew=="0")否#end">#if($!balance.bizRenew=="1")是#elseif($!balance.bizRenew=="0")否#end</label></td>
+                <td><label title="$!balance.payMethod">$!balance.payMethod</label></td>
+                <td><label title="$!balance.remark">$!balance.remark</label></td>
+                <td>
+                #if("$!write" == "1")
+                    <a href="javascript:removeBalance('$!flag','$!type','$!div','$!balance.id')">移除</a>&nbsp;&nbsp;<a href="javascript:saveBalancePage('$!flag','$!type','$!div','$!balance.id')">编辑</a>
+                #end
+                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+
+#end
+
+
+#if($!flag=="fixed")
+
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">$!pagename（合计：<label class="$!div">$!totalAmount</label>）</span>
+
+    #if("$!write" == "1")
+        <span  class="ui-span-btn fr" onclick="saveBalancePage('$!flag','$!type','$!div','')" style="margin-top:10px;margin-right:10px">
+            <label>新增</label>
+        </span>
+    #end
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label  title="类型" >类型</label></th>
+            <th><label title="名称">名称</label></th>
+            <th><label title="数量">数量</label></th>
+            #if($!type=="2")
+                <th><label title="价格">价格</label></th>
+                <th><label title="金额（元）">金额（元）</label></th>
+            #else
+                <th><label title="原值">原值</label></th>
+                <th><label title="折旧金额">折旧金额</label></th>
+                <th><label title="现值">现值</label></th>
+                <th><label title="金额（元）">金额（元）</label></th>
+                <th><label title="折旧率(%)">折旧率(%)</label></th>
+            #end
+            <th><label title="备注">备注</label></th>
+            <th><label title="操作">操作</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($balance in $balanceList)
+            ##                #set($totalAmount = $!totalAmount+$!balance.amount)
+            <tr>
+                <td><label title="$!balance.itemType">
+                #if($!type=="1"||$!type=="2")
+                    #foreach($!item in $!checkBoxMessage.get("$!flag$!type$!appLoanTypeId"))
+                        #if( $!balance.itemType == $!item.dictionaryKey) $!item.dictionaryValue #end
+                    #end
+                #else
+                    $!balance.itemType
+                #end
+                </label></td>
+                <td><label title="$!balance.itemName">$!balance.itemName</label></td>
+                <td><label title="$!balance.itemNum">$!balance.itemNum</label></td>
+                #if($!type=="2")
+                    <td><label title="$!balance.presentValue">$!balance.presentValue</label></td>
+                    <td><label title="$!balance.presentAmount">$!balance.presentAmount</label></td>
+                #else
+                    <td><label title="$!balance.originalValue">$!balance.originalValue</label></td>
+                    <td><label title="$!balance.depreciationValue">$!balance.depreciationValue</label></td>
+                    <td><label title="$!balance.presentValue">$!balance.presentValue</label></td>
+                    <td><label title="$!balance.presentAmount">$!balance.presentAmount</label></td>
+                    <td><label title="$!balance.depreciationRate">$!balance.depreciationRate</label></td>
+                #end
+                <td><label title="$!balance.remark">$!balance.remark</label></td>
+                <td>
+                #if("$!write" == "1")
+                    <a href="javascript:removeBalance('$!flag','$!type','$!div','$!balance.id')">移除</a>&nbsp;&nbsp;<a href="javascript:saveBalancePage('$!flag','$!type','$!div','$!balance.id')">编辑</a>
+                #end
+                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+
+#end
+
+
+#if($!flag=="debt")
+
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">$!pagename（合计：<label class="$!div">$!totalAmount</label>）</span>
+
+    #if("$!write" == "1")
+        <span  class="ui-span-btn fr" onclick="saveBalancePage('$!flag','$!type','$!div','')" style="margin-top:10px;margin-right:10px">
+            <label>新增</label>
+        </span>
+    #end
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="来源">来源</label></th>
+            <th><label title="金额（元）">金额（元）</label></th>
+            <th><label title="期限">期限</label></th>
+            <th><label title="用途">用途</label></th>
+            <th><label title="发放日期">发放日期</label></th>
+            <th><label title="余额（元）">余额（元）</label></th>
+            <th><label title="保证方式">保证方式</label></th>
+            <th><label title="备注">备注</label></th>
+            <th><label title="操作">操作</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($balance in $balanceList)
+            ##                #set($totalAmount = $!totalAmount+$!balance.amount)
+            <tr>
+                <td><label title="$!balance.debtSource">
+                    #if($!type=="5")
+                        #foreach($!item in $!checkBoxMessage.get("$!flag$!type"))
+                            #if($!balance.debtSource == $!item.dictionaryKey) $!item.dictionaryValue #end
+                        #end
+                    #else
+                        $!balance.debtSource
+                    #end
+                </label></td>
+                <td><label title="$!balance.amount">$!balance.amount</label></td>
+                <td><label title="$!balance.limitYear">$!balance.limitYear</label></td>
+                <td><label title="$!balance.loanPurpose">$!balance.loanPurpose</label></td>
+                <td><label title="$!date.format('yyyy-MM-dd',$!balance.beginDate)">$!date.format('yyyy-MM-dd',$!balance.beginDate)</label></td>
+                <td><label title="$!balance.loanBalance">$!balance.loanBalance</label></td>
+                <td><label title="#if($!balance.guarantyType=="1")担保#elseif($!balance.guarantyType=="2")信用#end">#if($!balance.guarantyType=="1")担保#elseif($!balance.guarantyType=="2")信用#end</label></td>
+                <td><label title="$!balance.remark">$!balance.remark</label></td>
+                <td>
+                #if("$!write" == "1")
+                    <a href="javascript:removeBalance('$!flag','$!type','$!div','$!balance.id')">移除</a>&nbsp;&nbsp;<a href="javascript:saveBalancePage('$!flag','$!type','$!div','$!balance.id')">编辑</a>
+                #end
+                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+
+#end
+
+#if($!flag=="validation")
+
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+##        <thead>
+##            <tr>
+##                <th><label title="项目">项目</label></th>
+##                <th><label title="金额（元）">金额（元）</label></th>
+##                <th><label title="备注">备注</label></th>
+##                <th><label title="操作">操作</label></th>
+##            </tr>
+##        </thead>
+        <tbody>
+            #foreach($item in $validationList)
+            ##                #set($totalAmount = $!totalAmount+$!balance.amount)
+            <tr>
+                <td style="width:20%;"><label title="$!item.itemName"><strong style="font-size: 12px">$!item.itemName</strong></label></td>
+                <td style="background: white;width:30%;"><label title="$!item.itemRemark">$!item.itemRemark</label></td>
+                <td style="width:15%;"><label title="偏差率"><strong style="font-size: 12px">偏差率</strong></label></td>
+                <td style="background: white;width:15%;"><label title="$!item.itemRate %">$!item.itemRate %</label></td>
+                <td style="width:20%;">
+                #if("$!write" == "1")
+                    <a href="javascript:removeBalance('$!flag','$!type','$!div','$!item.id')">移除</a>&nbsp;&nbsp;<a href="javascript:saveBalancePage('$!flag','$!type','$!div','$!item.id')">编辑</a>
+                #end
+                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+
+#end
+
+

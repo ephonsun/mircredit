@@ -1,0 +1,231 @@
+<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody>
+    	<tr>
+        	<td width="10%" align="right" nowrap="nowrap">客户姓名：</td>
+        	<td width="15%">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.customerName" value="$!condition.customerName" maxLength="20" id="customerName" class="dtxt1-txt" />
+                </div>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">称谓：</td>
+        	<td width="15%">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.customerTitle" value="$!condition.customerTitle" maxLength="20" id="customerTitle" class="dtxt1-txt" />
+                </div>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">性别：</td>
+        	<td width="15%">
+                <select name="condition.sex" id="sex" render="sel">
+                    <option value=""></option>
+                	#foreach($sex in $cd.getSex())
+                		#if($sex.sexCode==$condition.sex)
+                			<option value ="$sex.sexCode" selected >$sex.sexName</option>
+                		#else
+                			<option value ="$sex.sexCode">$sex.sexName</option>
+                		#end
+                	#end
+                </select>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">客户编号：</td>
+        	<td width="15%">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.customerNo" value="$!condition.customerNo" maxLength="20" id="customerNo" class="dtxt1-txt" />
+                </div>
+            </td>
+        </tr>
+    	<tr>
+        	<td width="10%" align="right" nowrap="nowrap">客户类型：</td>
+        	<td width="15%">
+                <select name="condition.customerTypeId" id="customerTypeId" render="sel" >
+                    <option value=""></option>
+                	#foreach($cusType in $cd.getCusTypes())
+                		#if($cusType.customerTypeId==$condition.customerTypeId)
+                			<option value ="$cusType.customerTypeId" selected >$cusType.customerTypeName</option>
+                		#else
+                			<option value ="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+                		#end
+                	#end
+                </select>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">所处行业：</td>
+        	<td width="15%">
+                <select name="condition.customerIndustryId" id="customerIndustryId" render="sel" >
+                    <option value=""></option>
+                	#foreach($indust in $cd.getCusIndustry())
+                		#if($indust.customerIndustryId==$condition.customerIndustryId)
+            				<option value ="$indust.customerIndustryId" selected >$indust.customerIndustryName</option>
+            			#else
+            				<option value ="$indust.customerIndustryId" >$indust.customerIndustryName</option>
+            			#end
+                	#end
+                </select>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">身份证：</td>
+        	<td colspan="3">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.idCard" value="$!condition.idCard" maxLength="20" id="idCard" class="dtxt1-txt" />
+                </div>
+            </td>
+        </tr>
+    	<tr>
+        	<td width="10%" align="right" nowrap="nowrap" >年龄：</td>
+        	<td colspan="3">
+        		<input type="text" name="condition.ageBegin" value="$!condition.ageBegin" maxLength="3" id="ageBegin" intFlag="true" class="validate[custom[integer]] txt" style="width: 45px;" />
+                <label>—</label>
+            	<input type="text" name="condition.ageEnd" value="$!condition.ageEnd" maxLength="3" id="ageEnd" intFlag="true" class="validate[custom[integer]] txt" style="width: 45px;" />
+            	<label>周岁</label>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap" >生日：</td>
+        	<td colspan="3">
+        		<table class="celltbl">
+                	<tr>
+                    	<td width="60">
+                            <select name="condition.month" id="month" render="sel" >
+		                    <option value=""></option>
+							<option value="1">1月</option>
+							<option value="2">2月</option>
+							<option value="3">3月</option>
+							<option value="4">4月</option>
+					        <option value="5">5月</option>
+							<option value="6">6月</option>
+							<option value="7">7月</option>
+							<option value="8">8月</option>
+							<option value="9">9月</option>
+							<option value="10">10月</option>
+							<option value="11">11月</option>
+							<option value="12">12月</option>
+		                </select>
+                        </td>
+                        <td width="5"></td>
+                    	<td width="60">
+                            <select name="condition.day" id="day" render="sel" >
+                			</select>
+                        </td>
+                    	<td width="20"><label>—</label></td>
+                    	<td width="60">
+                            <select name="condition.monthEnd" id="monthEnd" render="sel" >
+			                    <option value=""></option>
+								<option value="1">1月</option>
+								<option value="2">2月</option>
+								<option value="3">3月</option>
+								<option value="4">4月</option>
+						        <option value="5">5月</option>
+								<option value="6">6月</option>
+								<option value="7">7月</option>
+								<option value="8">8月</option>
+								<option value="9">9月</option>
+								<option value="10">10月</option>
+								<option value="11">11月</option>
+								<option value="12">12月</option>
+			                </select>
+                        </td>
+                        <td width="5"></td>
+                    	<td width="60">
+                            <select name="condition.dayEnd" id="dayEnd" render="sel" >
+                			</select>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    	<tr>
+        	<td width="10%" align="right" nowrap="nowrap">单位：</td>
+        	<td colspan="3">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.company" value="$!condition.company" maxLength="20" id="company" class="dtxt1-txt" />
+                </div>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">客户简介：</td>
+        	<td colspan="3">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.remark" value="$!condition.remark" maxLength="2000" id="remark" class="dtxt1-txt" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+        	<td colspan="8"><hr /> </td>
+        </tr>
+    	<tr>
+        	<td width="10%" align="right" nowrap="nowrap">电话：</td>
+        	<td width="15%">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.tel" value="$!condition.tel" maxLength="20" id="tel" class="dtxt1-txt" />
+                </div>
+            </td>
+            <td colspan="2">
+            	<input type="button" class="btn1" id="numberRule" value="号 码 规 则" />
+            	<input type="hidden" id="numberRules" name="condition.numberRules" value="$!condition.numberRules" />
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">邮箱：</td>
+        	<td width="15%">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.email" value="$!condition.email" maxLength="20" id="email" class="dtxt1-txt" />
+                </div>
+            </td>
+            <td colspan="2">
+            </td>
+        </tr>
+    	<tr>
+    		<td width="10%" align="right" nowrap="nowrap">省份：</td>
+        	<td width="15%">
+                <select name="condition.province" id="province" render="sel" >
+                    <option value=""></option>
+                	#foreach($prov in $cd.getProvinces())
+                		#if($prov.shortName==$condition.province)
+            				<option value ="$prov.code" selected >$prov.shortName</option>
+            			#else
+            				<option value ="$prov.code" >$prov.shortName</option>
+            			#end
+                	#end
+                </select>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">城市：</td>
+        	<td width="15%">
+                <select name="condition.city" id="city" render="sel" city="$!condition.city" >
+                    <option value=""></option>
+                </select>
+            </td>
+        	<td width="10%" align="right" nowrap="nowrap">联系地址：</td>
+        	<td colspan="3">
+            	<div class="dtxt1">
+                    <input type="text" name="condition.address" value="$!condition.address" maxLength="50" id="address" class="dtxt1-txt" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+        	<td width="10%" align="right" nowrap="nowrap">最近联系时间：</td>
+        	<td colspan="3">
+                <div class="dtxt2 floatL" style="width: 100px;" >
+                	<input id="lastTime" name="condition.lastTime" value="$!condition.lastTime" readonly=true type="text" maxLength=10 dateFlag="true" class="validate[custom[date]] dtxt2-txt" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+                <label class="dash">—</label>
+                <div class="dtxt2 floatL" style="width: 100px;" >
+                	<input id="lastTimeEnd" name="condition.lastTimeEnd" value="$!condition.lastTimeEnd" readonly=true type="text" maxLength=10 dateFlag="true" class="validate[custom[date]] dtxt2-txt" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </td>
+            <!--<td width="10%" align="right" nowrap="nowrap"></td>
+        	<td >
+                <select name="condition.isReceiveSms" id="isReceiveSms" render="sel" value="$!condition.isReceiveSms">
+                    <option value=""></option>
+                    #if($condition.isReceiveSms==1)
+                		<option value="1" selected >愿意接收短信</option>
+                	#else
+                		<option value="1" >愿意接收短信</option>
+                	#end
+                	#if($condition.isReceiveSms==0)
+                		<option value="0" selected >不愿意接收短信</option>
+                	#else
+                		<option value="0" >不愿意接收短信</option>
+                	#end
+                </select>
+            </td> -->
+        	<td colspan="4">
+            </td>
+        </tr>
+        <tr>
+        	<td colspan="8"><hr /></td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="user" extends="default" namespace="/user" >
+		<!--用户信息 -->
+		<action name="userInfo" class="sysUserAction" method="getUserInfo">
+			<result name="success">/velocity/user/userInfo.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--密码重置 -->
+		<action name="userPwdConfirm" class="sysUserAction" method="userPwdConfirm">
+			<result name="success">/velocity/user/userPwdReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--密码修改-->
+		<action name="userPwdUpdate" class="sysUserAction" method="userPwdUpdate">
+			<result name="success">/velocity/user/userPwdReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--密码验证-->
+		<action name="checkPassWord" class="sysUserAction" method="checkPassWord">
+		</action>
+		<!--旧密码验证-->
+		<action name="checkOldPassWord" class="sysUserAction" method="checkOldPassWord">
+		</action>
+		<!--初始化密码修改-->
+		<action name="userPwdUpdatePage" class="sysUserAction" method="userPwdUpdatePage">
+			<result name="success">/velocity/user/userPwdReset.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--用户新增初始化-->
+		<action name="toAddSysUserPage" class="sysUserAction" method="toAddSysUserPage">
+			<result name="success">/velocity/user/userInsert.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--用户新增初始化-->
+		<action name="addSysUser" class="sysUserAction" method="addSysUser">
+			<result name="saveUser">/velocity/role/refreshPage.vm</result>
+			<result name="saveCreateUser" type="redirectAction">toAddSysUserPage.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--用户修改初始化-->
+		<action name="toUpdateSysUserPage" class="sysUserAction" method="toUpdateSysUserPage">
+			<result name="success">/velocity/user/userUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--用户详情初始化-->
+		<action name="toDetailSysUserPage" class="sysUserAction" method="toDetailSysUserPage">
+			<result name="success">/velocity/user/userDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--用户删除-->
+		<action name="delSysUserById" class="sysUserAction" method="delSysUserById">
+			<result name="success">/velocity/user/userInsert.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--用户修改-->
+		<action name="sysUserUpdate" class="sysUserAction" method="sysUserUpdate">
+			<result name="success">/velocity/role/refreshPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+			<!--用户删除集合-->
+		<action name="delSysUserList" class="sysUserAction" method="delSysUserList">
+			<result name="success">/velocity/user/userInsert.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+			<!--用户停用，启用-->
+		<action name="checkUserActived" class="sysUserAction" method="checkUserActived">
+			<result name="success">/velocity/user/userInsert.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 查询当前授权用户数是否超出当前用户数 -->
+		<action name="checkUserCount" class="sysUserAction" method="checkUserCount">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--判断用户编号和用户名是否存在-->
+		<action name="valationAOrUserCode" class="sysUserAction" method="valationAOrUserCode">
+			<result name="success">/velocity/user/userInsert.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+	</package>
+
+</struts>

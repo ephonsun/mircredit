@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="data" extends="default" namespace="/data">
+
+		<!-- 资料管理，点击菜单打开 -->
+		<action name="dataList" class="dataAction" method="firstLoadDataList">
+			<result name="success">/velocity/data/dataList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料管理，查询 -->
+		<action name="queryDataList" class="dataAction" method="queryDataList">
+			<result name="success">/velocity/data/dataListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料管理，视频 -->
+		<!-- 视频  ，获取视频资料 -->
+		<action name="videoList" class="videoAction" method="firstLoadVideoList">
+			<result name="success">/velocity/data/videoList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 视频  ，根据查询条件查找视频资料-->
+		<action name="queryVideoList" class="videoAction" method="queryDataList">
+			<result name="success">/velocity/data/videoListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 视频  ，获得老的视频备注信息 ， 打开视频修改页面-->
+		<action name="loadOldVideoRemark" class="videoAction" method="loadOldRemark">
+			<result name="success">/velocity/data/videoRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 视频  ，修改视频备注信息-->
+		<action name="upDateVideoRemark" class="videoAction" method="updateRemark">
+			<result name="success">/velocity/data/videoRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 视频 ，播放视频 -->
+		<action name="playVideo" class="videoAction" method="playVideo" >
+			<result name="success"></result>
+			<result name="error"></result>
+		</action>
+		
+		<!-- 资料管理，录音 -->
+		<!-- 录音 ，获取录音资料 -->
+		<action name="audioList" class="audioAction" method="firstLoadAudioList">
+			<result name="success">/velocity/data/audioList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 录音 ，根据查询条件查找录音资料-->
+		<action name="queryAudioList" class="audioAction" method="queryDataList">
+			<result name="success">/velocity/data/audioListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 录音 ，获得老的录音备注信息 ， 打开录音修改页面-->
+		<action name="loadOldAudioRemark" class="audioAction" method="loadOldRemark">
+			<result name="success">/velocity/data/audioRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 录音 ，修改录音备注信息-->
+		<action name="upDateAudioRemark" class="audioAction" method="updateRemark">
+			<result name="success">/velocity/data/audioRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料管理，照片 -->
+		<!-- 照片 ，获取照片资料 -->
+		<action name="photoList" class="photoAction" method="firstLoadPhotoList">
+			<result name="success">/velocity/data/photoList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 照片 ，根据查询条件查找照片资料-->
+		<action name="queryPhotoList" class="photoAction" method="queryDataList">
+			<result name="success">/velocity/data/photoListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 照片，获得老的照片备注信息 ， 打开照片修改页面-->
+		<action name="loadOldPhotoRemark" class="photoAction" method="loadOldRemark">
+			<result name="success">/velocity/data/photoRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 照片，修改照片备注信息-->
+		<action name="upDatePhotoRemark" class="photoAction" method="updateRemark">
+			<result name="success">/velocity/data/photoRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		<!-- 照片 ，查看照片-->
+		<action name="showPhoto" class="photoAction" method="showPhoto">
+			<result name="success"></result>
+			<result name="error"></result>
+		</action>
+		<!-- 照片 ，分类照片-->
+		<action name="showPhotosClassification" class="photoAction" method="showPhotosClassification">
+			<result name="success">/velocity/data/photosClassification.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 分类照片列表-->
+		<action name="showPhotosList" class="photoAction" method="showPhotosList">
+			<result name="success">/velocity/data/photosList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 分类照片类型列表-->
+		<action name="choosePhotosType" class="photoAction" method="choosePhotosType">
+			<result name="success">/velocity/data/photoType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 分类照片-->
+		<action name="updatePhotosType" class="photoAction" method="updatePhotosType">
+		</action>
+		<!-- 删除照片-->
+		<action name="deletePhotos" class="photoAction" method="deletePhotos">
+		</action>
+		<!-- 资料管理，资料表 -->
+		<!-- 资料表 ，获取资料表资料 -->
+		<action name="formList" class="formAction" method="firstLoadFormList">
+			<result name="success">/velocity/data/formList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料表 ，根据查询条件查找资料表资料-->
+		<action name="queryFormList" class="formAction" method="queryDataList">
+			<result name="success">/velocity/data/formListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料表，获得老的资料表备注信息 ， 打开资料表修改页面-->
+		<action name="loadOldFormRemark" class="formAction" method="loadOldRemark">
+			<result name="success">/velocity/data/formRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料表，修改资料表备注信息-->
+		<action name="upDateFormRemark" class="formAction" method="updateRemark">
+			<result name="success">/velocity/data/formRemark.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 以下为新资源管理功能 -->
+		<!-- 列表 -->
+		<action name="getAllCustomerDataPage" class="dataAction" method="getAllCustomerDataPage">
+			<result name="success">/velocity/data/allCustomerData.vm</result>
+			<result name="toPage">/velocity/data/allCustomerDataList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+
+		<!-- 查看贷款详情 查看图片 -->
+		<action name="queryAfterPhotoDetail" class="allLoanAction" method="queryAfterPhotoDetail">
+			<result name="success">/velocity/loan/vAfterLoanPhotoDiv.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		
+		<!-- 查看客户的资料详情 -->
+		<action name="queryDataByCusId" class="dataAction" method="queryDataByCusId">
+			<result name="success">/velocity/data/customerData.vm</result>
+			<result name="toPage1">/velocity/data/customerAudioDataList.vm</result>
+			<result name="toPage2">/velocity/data/customerPhotoDataList.vm</result>
+			<result name="toPage3">/velocity/data/customerVideoDataList.vm</result>
+			<result name="toPage4">/velocity/data/customerSmsDataList.vm</result>
+			<result name="toPage5">/velocity/data/customerMmsDataList.vm</result>
+			<result name="toPage6">/velocity/data/customerFormDataList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 保存录音备注 -->
+		<action name="saveAudioRemark" class="dataAction" method="saveAudioRemark"></action>
+		
+		<!-- 保存视频备注 -->
+		<action name="saveVideoRemark" class="dataAction" method="saveVideoRemark"></action>
+		
+		<!-- 客户管理打开资料页卡 -->
+		<action name="showDataByCusId" class="dataAction" method="showDataByCusId">
+			<result name="success">/velocity/data/cusDataCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 资料管理查看照片详情 -->
+		<action name="queryPhotoDetail" class="dataAction" method="queryPhotoDetail">
+			<result name="success">/velocity/data/customerPhotoDiv.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 保存照片备注 -->
+		<action name="savePhotoRemark" class="dataAction" method="savePhotoRemark"></action>
+		
+		<!-- 照片切换 -->
+		<action name="changePhoto" class="dataAction" method="changePhoto"></action>
+		
+		<!-- 文件读取 -->
+		<action name="readFile" class="dataAction" method="readFile"></action>
+		
+		<!-- 根据文件id获取文件路径及名称 -->
+		<action name="queryFileByFileId" class="dataAction" method="queryFileByFileId"></action>
+		
+		<!-- 根据id和类型获取remark -->
+		<action name="queryDataRemark" class="dataAction" method="queryDataRemark"></action>
+		
+		<!-- 修改文件名称 -->
+		<action name="reNameToFile" class="dataAction" method="reNameToFile"></action>
+		
+	  	<!-- 根据fileId验证文件是否存在 -->
+	  	<action name="isExistFileById" class="dataAction" method="isExistFileById"></action>
+		
+        <!-- 播放录音前将录音放到临时播放目录下并转码 -->
+	  	<action name="transcoding" class="dataAction" method="transcoding"></action>
+	  	
+	  	 <!-- 下载附件 -->
+	  	<action name="downForm" class="formAction" method="downForm"></action>
+	</package>
+	
+
+</struts>

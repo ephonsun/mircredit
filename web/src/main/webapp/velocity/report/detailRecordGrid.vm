@@ -1,0 +1,48 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+	<thead>
+    	<tr>
+        	<th width="30%"><label title="客户（电话）">客户（电话）</label></th>
+        	<th width="10%"><label title="联系类型">联系类型</label></th>
+        	<th width="20%"><label title="开始时间">开始时间</label></th>
+        	<th width="10%"><label title="时长">时长</label></th>
+        	<th width="10%"><label title="操作者">操作者</label></th>
+        	<th width="10%"><label title="业务类型">业务类型</label></th>
+        	<th width="10%"><label title="沟通进度">沟通进度</label></th>
+        </tr>
+    </thead>
+	<tbody>
+		#foreach($record in $!recordList.items)
+	    	<tr>
+	    		<td>
+	    			<div class="datacus">
+	    				#if($record.customerId>0 || $record.customerName!='')
+	    				<span class="slink" onclick="browseCustomer('$!record.customerId')" title="$!record.customerName">$!record.customerName</span>
+	    				<div class="other">
+	    					<span class="slink" onclick="browseCustomer('$!record.customerId')" title="（$!record.defaultPhone）">（$!record.defaultPhone）</span>
+	                    </div>
+                        #else
+                        	#if($!record.defaultPhone=='')
+                        		<span class="slink" onclick="" title="未知">未知</span>
+                        	#else
+                        		<span class="slink" onclick="" title="$!record.defaultPhone">$!record.defaultPhone</span>
+                        	#end
+                        #end
+	    			</div>
+	    		</td>
+	    		<td><label title="$!record.callTypeName">$!record.callTypeName</label></td>
+	    		<td><label title="#if($!record.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!record.startDate)#end">#if($!record.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!record.startDate)#end</label></td>
+	    		<td><label title="$!record.formatCallTime">#if($!record.formatCallTime == '') 00:00:00 #else $!record.formatCallTime #end</label></td>
+	    		<td><label title="$!record.userName">$!record.userName</label></td>
+	    		<td><label title="$!record.bizTypeName">$!record.bizTypeName</label></td>
+	    		<td><label title="$!record.commProgressName">$!record.commProgressName</label></td>
+	        </tr>
+        #end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="10">
+            	#parse("/velocity/ajaxPage.vm")
+            </td>
+        </tr>
+    </tfoot>
+</table>

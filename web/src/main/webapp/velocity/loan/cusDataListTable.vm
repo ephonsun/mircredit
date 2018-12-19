@@ -1,0 +1,120 @@
+#parse("/velocity/taglibs.vm")
+<div id="tape" class="tapeVideo-mydiv" style="width: 600px;left:500px;top:400px; ">
+<p class="tapeVideo-ttl-width" onmousedown="beginDrag(this.parentNode,event);">
+    #if($dataType && $!dataType == "2")
+        $!{title}&nbsp;&nbsp;录音
+    #elseif($dataType && $!dataType == "3")
+        $!{title}&nbsp;&nbsp;视频
+    #elseif($dataType && $!dataType == "4")
+        $!{title}&nbsp;&nbsp;附件
+    #end
+    <a href="#2" onClick="closeDiv();" class="close" >close</a></p>
+<div class="tapeVideo-mydiv-box">
+    <div class="tbl-scorll-div">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th><label title="资料名称">资料名称</label></th>
+                #if($dataType && $!dataType != "4")
+                    <th width="60"><label title="时长">时长</label></th>
+                    <th width="80"><label title="创建时间">创建时间</label></th>
+                #end
+                <th width="80"><label title="提交时间">提交时间</label></th>
+                <th><label title="提交人员">提交人员</label></th>
+                #if($dataType && $!dataType != "4")
+                    <th><label title="备注">备注</label></th>
+                #end
+                <th width="40"><label title="操作">操作</label></th>
+            </tr>
+            </thead>
+            <tbody>
+                #if($dataType && $dataType == "2")
+                #foreach($audio in $!dataList)
+                    <tr>
+                        <td><label title="$!audio.audioName">$!audio.audioName</label></td>
+                        <td><label title="$!audio.recordTime">$!audio.recordTime</label></td>
+                        <td><label class="break-line" title="$!date.format('yyyy-MM-dd HH:mm:ss',$!audio.recordDate)">
+                            $!date.format('yyyy-MM-dd HH:mm:ss',$!audio.recordDate)</label></td>
+                        <td><label class="break-line" title="$!date.format('yyyy-MM-dd HH:mm:ss',$!audio.uploadDate)">
+                            $!date.format('yyyy-MM-dd HH:mm:ss',$!audio.uploadDate)</label></td>
+                        <td><label title="$!audio.uploadUser">$!audio.uploadUser</label></td>
+                        <td><label title="$!subString.replaceRemark($!audio.remark)" id="$!audio.audioId">$!audio.remark</label></td>
+                        <td>
+                            <!--
+                            <a class="ui-link-btn" href="#2" onclick='audioPlay("$!{title}","$audio.audioName","$audio.fileName","$audio.filePath",
+                                    "$!audio.remark","$!audio.audioId");'>播放</a> -->
+                            <a class="ui-link-btn" href="#2" onclick='audioObj("$!{title}","$audio.audioName","$audio.fileId","$!audio.audioId");'>播放</a>
+                        </td>
+                    </tr>
+                #end
+                #elseif($dataType && $!dataType == "3")
+                    #foreach($video in $!dataList)
+                        <tr>
+                            <td><label title="$video.videoName">$video.videoName</label></td>
+                            <td><label title="$!video.recordTime">$!video.recordTime</label></td>
+                            <td><label class="break-line" title="$!date.format('yyyy-MM-dd HH:mm:ss',$video.recordDate)">
+                                $!date.format('yyyy-MM-dd HH:mm:ss',$video.recordDate)</label></td>
+                            <td><label class="break-line" title="$!date.format('yyyy-MM-dd HH:mm:ss',$video.uploadDate)">
+                                $!date.format('yyyy-MM-dd HH:mm:ss',$video.uploadDate)</label></td>
+                            <td><label title="$video.uploadUser">$video.uploadUser</label></td>
+                            <td><label title="$!subString.replaceRemark($!video.remark)" id="$!video.videoId">$!video.remark</label></td>
+                            <td>
+                                <a class="ui-link-btn" href="#2" onclick='videoObj("$!{title}","$video.videoName","$video.fileId","$!video.videoId");'>播放</a>
+                            </td>
+                        </tr>
+                    #end
+                #elseif($dataType && $!dataType == "4")
+                #foreach($form in $!dataList)
+                <tr>
+                    <td><label title="$!form.formName">$!form.formName</label></td>
+                    <td><label class="break-line" title="$!date.format('yyyy-MM-dd HH:mm:ss',$form.uploadDate)">
+                        $!date.format('yyyy-MM-dd HH:mm:ss',$!form.uploadDate)</label></td>
+                    <td><label title="$!form.uploadUser">$!form.uploadUser</label></td>
+                    <td>
+                        <a class="ui-link-btn" href="#2" onclick="downFileAttr($!form.fileId);">下载</a>
+                    </td>
+                </tr>
+                #end
+                #end
+            </tbody>
+        </table>
+    </div>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onClick="closeDiv();"/>
+    </div>
+</div>
+</div>
+<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+<script type="text/javascript">
+	//录音
+	function audioPlay(customerName,audioDataName,fileId,id){ 
+    	jQuery.post("../data/isExistFileById.html", {"fileId": fileId}, function(result){
+			if(result == "0"){
+				banger.page.showMessageBox({"type":"error","content":"文件不存在！"});
+				return;
+			}else{
+				window.parent.showPopAudioDiv(customerName,audioDataName,fileId,id,GetId(),"loan");
+			}
+		});
+	}
+	
+	//视频
+	function videoPlay(customerName,videoDataName,fileId,id){
+		jQuery.post("../data/readFile.html", {"fileId": fileId}, function(result){
+			if(result == "0"){
+				banger.page.showMessageBox({"type":"error","content":"文件不存在！"});
+				return;
+			}else{
+				window.parent.showPopVideoDiv(customerName,videoDataName,result,id,GetId(),"loan");
+			}
+		});       
+	}
+
+    function closeDiv() {
+        $('#tapeVideoDiv').hide();
+        if (null != document.getElementById("player")) {
+            document.getElementById("player").Stop();
+        }
+    }
+</script>

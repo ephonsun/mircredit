@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="map" extends="default" namespace="/map" >
+	
+		<!--扫街页面初始化-->
+		<action name="toScaningInfoPage" class="scaningInfoAction" method="toScaningInfoPage">
+			<result name="success">/velocity/map/scaningInfo.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+        <!--OCX代理中转页面初始化-->
+        <action name="toScaningInfo" class="scaningInfoAction" method="toScaningInfo">
+            <result name="success">/velocity/map/toScaningInfo.vm</result>
+            <result name="notproxy">/velocity/map/scaningInfo.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--活动轨迹页面初始化-->
+        <action name="toActivityLocusPage" class="scaningInfoAction" method="toActivityLocusPage">
+            <result name="success">/velocity/map/activityLocus.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--活动轨迹页面初始化-->
+        <action name="initActivityLocus" class="scaningInfoAction" method="initActivityLocus">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--查询活动轨迹数据-->
+        <action name="queryActivityLocus" class="scaningInfoAction" method="queryActivityLocus">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--扫街客户录音查询-->
+        <action name="getCustomerOrRecordGps" class="scaningInfoAction" method="getCustomerOrRecordGps">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--标记信息查询-->
+        <action name="getMarkerInfo" class="scaningInfoAction" method="getMarkerInfo">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--标记多客户信息查询-->
+        <action name="getMapCustomerGpsList" class="scaningInfoAction" method="getMapCustomerGpsList">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--显示客户列表信息-->
+        <action name="getCustomerList" class="scaningInfoAction" method="getCustomerList">
+            <result name="success">/velocity/map/scaningCustomerTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--显示用户列表信息-->
+        <action name="getRecordList" class="scaningInfoAction" method="getRecordList">
+            <result name="success">/velocity/map/recordTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+	</package>
+
+</struts>

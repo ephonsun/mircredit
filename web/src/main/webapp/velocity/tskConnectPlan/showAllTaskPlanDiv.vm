@@ -1,0 +1,52 @@
+<table class="datatbl">
+        <thead>
+            <tr>
+            	#if($!isManager==1)
+                <th width="20%"><label title="表名">表名</label></th>
+                <th width="20%"><label title="计划联系量">计划联系量</label></th>
+                <th width="20%"><label title="有效联系量">有效联系量</label></th>
+                <th width="20%"><label title="执行者">执行者</label></th>
+                <th width="20%"><label title="操作">操作</label></th>
+                #else
+                <th width="25%"><label title="表名">表名</label></th>
+                <th width="25%"><label title="计划联系量">计划联系量</label></th>
+                <th width="25%"><label title="有效联系量">有效联系量</label></th>
+                <th width="25%"><label title="执行者">执行者</label></th>
+                #end
+            </tr>
+        </thead>
+        <tbody>
+          #foreach($!TskPlanListBean in $!tskPlanList.items)
+          		#set($execDate=$date.format("yyyy-MM-dd",$!TskPlanListBean.taskPlanDate))
+				#set($result=$!dateString.getSystemDate($execDate))
+            <tr>
+                <td><label class="ui-link-btn" onclick="detailTaskPlan('$!TskPlanListBean.tableName')" title="$!TskPlanListBean.tableName">$!TskPlanListBean.tableName</label></td>
+                <td><label title="$!TskPlanListBean.totalConnect">$!TskPlanListBean.totalConnect</label></td>
+                <td><label title="$!TskPlanListBean.finishConnect">$!TskPlanListBean.finishConnect</label></td>
+                <td><label title="$!TskPlanListBean.executeUser">$!TskPlanListBean.executeUser</label></td>
+                #if($!isManager==1)
+                <td>
+					#if($result==1||$!loginUserId!=$!TskPlanListBean.execUserId)
+						<span href="#" disabled="true" style="cursor: default;">编辑</span>
+					#else
+						<span class="link" onclick="updateTaskPlan('$!TskPlanListBean.tableName')">编辑</span>
+					#end
+                </td>
+                 #end
+            </tr>
+            #end    
+        </tbody>
+         <tfoot align="right">
+        	<tr>
+        		#if($!isManager==1)
+            	<td colspan="5">
+            	#else
+            	<td colspan="4">
+            	#end
+                	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+        <input type="hidden" id="hiddenStartDate" value="$!startDate">
+        <input type="hidden" id="hiddenEndDate" value="$!endDate">
+</table>

@@ -1,0 +1,534 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+		<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+		<title>查看发表帖子内容</title>
+		<style>
+			body{font:12px/1.5 Tahoma, "Microsoft Yahei", "Simsun"; color: #444;}
+		</style>
+		#scriptLink("core")
+		#scriptLink("page")
+		<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+		<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+    	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+		<script>
+			$(function(){
+				tab.title(tab.self,'查看帖子-'+'$!jsUtil.escapeJs($theme.themeTitle)');
+				$('#rep').click(function(){
+                	$('#reptext').focus();
+                });
+				jQuery("#replyForm").validator();
+				/**
+				  * 发帖
+				**/
+				$('.toPost').hover(function(e){
+					$('.stheme,.stime').hide();
+					var showDiv = $(this).next('.postOpt');
+					var divName = showDiv.attr('name');
+					$("div[name='" + divName + "']").hide();    
+					showDiv.show();             
+					showDiv.css({
+							top: $(this).offset().top + $(this).outerHeight(true) - 1 + 'px',
+							left: $(this).offset().left + 'px'
+					});
+					$(this).next('.postOpt').hover(function(){
+							$(this).show();
+					
+					},function(){
+							$('.postOpt').hide();
+					
+					});
+					e.stopPropagation();
+				},function(){
+					$('.postOpt').hide();
+				});
+				
+				$('#addReply').click(function(){
+				    var themeId = $!theme.themeId;
+					var bool = jQuery.validator({ form: 'replyForm', extend: true,extendhandler:initContent});
+					var replyContent = jQuery.trim($("#reptext").text());
+    				if(bool){
+    					jQuery.post('../commTheme/saveThemeReply.html?random='+Math.random(),{
+    						'reply.replyContent':replyContent,
+    						'reply.themeId':themeId
+    					},function(date){
+    						if(date>0){
+								banger.page.showMessageBox({"type":"success","content":"发表回复成功!"});
+    							refresh();
+    						}
+    					});
+    				}
+				});
+				
+				$('.pp img').each(function(){
+						drawImage(this,'.pp');
+				    });
+			});
+			//收藏
+			function collect(themeId,themeType){
+				jQuery.post('isUserRelation.html?random='+Math.random(),{
+					'theme.themeType':themeType,
+					'theme.themeId':themeId
+				},function(date){
+					if(date==1){
+						banger.page.showMessageBox("已收藏过");
+					}else{
+						jQuery.post('insertUserRelation.html?random='+Math.random(),{
+							'relation.commId':themeId,
+							'relation.relationType':themeType,
+							'relation.isCollect':1
+						},function(date){
+							if(date==1){
+								banger.page.showMessageBox({"type":"success","content":"收藏成功!"});
+							}else banger.page.showMessageBox("收藏失败!");
+						});
+					}
+				});
+			}
+			//置顶
+			function themeTop(themeId,isTop){
+				jQuery.post('themeTop.html?random='+Math.random(),{'theme.themeId':themeId,'theme.isTop':isTop},function(date){
+					if(date==1) 
+					banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+					else banger.page.showMessageBox("操作失败!");
+				});
+			}
+			//编辑帖子
+			function updateTheme(themeId,themeType){
+				if(themeType==1){//普通主题
+    				var url="../commTheme/updateCommTheme.html?theme.themeId="+themeId+"&themeFlag=0&random="+Math.random();
+        			var result=banger.page.openDialog(url,"编辑普通主题",820,540);
+					if(result==1&&result!=undefined){
+        				refresh();
+        			}
+				}else if(themeType==2){//投票
+					var isUserVote =  $!isUserVote;
+					if(isUserVote > 0 ){
+						banger.page.showMessageBox('此主题已有人投票,不允许再编辑!');
+						return;
+					}
+					var url="../commTheme/updateCommOption.html?themeId="+themeId+"&random="+Math.random();
+        			var result=banger.page.openDialog(url,"编辑投票主题",820,540);
+					if(result==1&&result!=undefined){
+        				refresh();
+        			}
+				}
+			}
+			//删除帖子
+			function delTheme(themeId,flag,replyId){
+				if(flag==1){//帖子
+					var tit=$("#theTitle").text();
+					if(confirm("您确定要删除“"+tit+"”帖子吗？")){
+    					jQuery.post('../commTheme/deleteCommTheme.html',{'theme.themeId':themeId},function(date){
+        					if(date>0){
+								banger.page.showMessageBox({"type":"success","content":"删除成功!"});
+								tab.close(GetId(), true);
+        					}else banger.page.showMessageBox("删除失败!");
+        				});
+    				}
+				}else if(flag==2){//回复
+					var cont=$("#repCont_"+replyId).text();
+					var str="";
+					if(cont.length<=6){
+						str=cont;
+					}else{str=cont.substr(0,6)+"...";}
+					if(confirm("您确定要删除“"+str+"”回复吗？")){
+    					jQuery.post('../commTheme/deleteThemeReply.html?random='+Math.random(),{
+        					'reply.replyId':replyId,
+        					'reply.themeId':themeId
+        				},function(date){
+        					if(date>0){
+        						refresh();
+        					}
+        				});
+					}
+				}
+			}
+			var themId="$!theme.themeId";
+			function refresh(){
+				var url = window.location.href;
+				window.location.href = cropurl(url+"?theme.themeId="+themId, "random", Math.random());
+				return true;
+			}
+			function addCommTheme(flag){
+        		var url="";
+        		var title="发帖";
+        		var id="";
+				var partitionId='$!theme.partitionId';
+        		var templateId='$!theme.templateId';
+        		if(flag==1){//主题
+        			title="发表帖子";
+        			url="../commTheme/insertTheme.html?partitionId="+partitionId+"&templateId="+templateId+"&random="+Math.random();
+        			id="commThemePage_detail_add";
+        			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false});
+        		}else{
+        			url="../commTheme/insertOption.html?partitionId="+partitionId+"&templateId="+templateId+"&random="+Math.random();
+        			id="commThemePage_detail_addOption";
+        			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false});
+				}
+        	}
+			
+			function initContent(obj){
+        		var value= jQuery.trim($("#reptext").text());
+        		//var reg=new RegExp("&nbsp;","g");
+        		//var p1=new RegExp("<P>","g");
+        		//var p2=new RegExp("</P>","g");
+        		//value=value.replace(p1,"").replace(p2,"").replace(reg,"").replace(/^\s+|\s+$/g,"");
+        		if(value.length==0){
+        			$("#reptext").parent().addClass('v-fails');
+        			$("#reptext").attr('tips', '帖子内容必须填写!'); return false;
+        		}else if(value.length<2){
+        			$("#reptext").parent().addClass('v-fails');
+        			$("#reptext").attr('tips', '帖子内容字数不能够小于2个字!'); return false;
+        		}else{$("#reptext").text(value);return true;} 
+        	}
+	
+			//编辑回复
+			function upReply(replyId){
+				var url="../commTheme/updateThemeReply.html?reply.replyId="+replyId+"&replyFlag=0&random="+Math.random();
+    			var result=banger.page.openDialog(url,"编辑回复",450,200);
+				if(result==1&&result!=undefined){
+    				refresh();
+    			}
+			}
+			
+			//投票
+			function vote(selectOptionCount){
+				var optionList = [];
+				var themeId = $!theme.themeId;
+				$("input[name='optionInput']:checked").each(function(){
+					var option = {};
+					option['optionId'] = $(this).val();
+					option['themeId'] = themeId;
+					optionList.push(option);
+				});
+				if(optionList.length == 0){
+					banger.page.showMessageBox("请选择投票选项!");
+					return;
+				}
+				if(optionList.length > selectOptionCount){
+					banger.page.showMessageBox("最多只能选择"+selectOptionCount+"项");
+					return;
+				}
+				jQuery.post('../commTheme/voteCommTheme.html?random='+Math.random(),
+				{'optionList':jQuery.toJsonString(optionList)},
+				function(data){
+						if(data>0){
+							banger.page.showMessageBox({"type":"success","content":"投票成功!"});
+							refresh();
+						}
+					});
+			}
+			
+			//投票用户列表
+			function showVoteUserPage(themeId){
+				var url="../commTheme/showVoteUserPage.html?theme.themeId="+themeId+"&showVoteFlag=0&random="+Math.random();
+    			banger.page.openDialog(url,"查看参与投票的会员",480,300);
+			}
+			
+			//缩放查看帖子中的图片
+			function drawImage(obj,pclss){
+				var pw=parseInt($(obj).parents(pclss).css('width').split('px')[0]);
+				var wth=$(obj).css('width').split('px')[0];
+				if(wth>pw){
+					drawImg(obj,pw,pw);
+				}
+				
+				$(window).resize(function() {//监听浏览器 窗口大小是否改变
+					var pcw=parseInt($(obj).parents(pclss).css('width').split('px')[0]);
+					 drawImg(obj,pcw,pcw);
+				});
+			}
+			function drawImg(ImgD,w,h){ 
+				var flag=false; 
+				var image=new Image(); 
+				image.src=ImgD.src; 
+				if(image.width>0 && image.height>0){ 
+					flag=true; 
+					if(image.width/image.height>= w/h){ 
+						if(image.width>w){ 
+						  ImgD.width=w; 
+						  ImgD.height=(image.height*w)/image.width; 
+						}else{ 
+						  ImgD.width=image.width; 
+						  ImgD.height=image.height; 
+						} 
+					}else{ 
+						if(image.height>h){ 
+						  ImgD.height=h; 
+						  ImgD.width=(image.width*h)/image.height; 
+						}else{ 
+						  ImgD.width=image.width; 
+						  ImgD.height=image.height; 
+						} 
+					} 
+				} 
+			}
+		</script>
+	</head>
+<body>
+	<div class="viewPost cl">
+		<div class="postbar  cl" style="margin-bottom:10px !important;">
+			<span class="ui-span-btn-m toPost">
+				<label>发帖</label>
+				<i class="ddl"></i>
+			</span>
+			<div name="pcont" class="postOpt" style="display:none;">
+				<ul>
+					<li onclick="addCommTheme(1)">
+						<i class="icon none">&nbsp;</i>
+						<label>发新主题</label>
+					</li>
+					<li onclick="addCommTheme(2)">
+						<i class="icon">&nbsp;</i>
+						<label>发布投票</label>
+					</li>
+				</ul>
+			</div>
+			<span class="ui-span-btn-m" id="rep">
+				<label>回复</label>
+			</span>
+		</div>
+		<div class="postHeadInfo">
+			<table cellpadding="0" cellspacing="0" >
+				<tbody>
+					<tr>
+						<td class="userHead">
+							<div class="uh">
+								<span class="xgl">查看:</span>
+								<span class="xil">$!theme.themeReadCount</span>
+								<span class="pipe">|</span>
+								<span class="xgl">回复:</span>
+								<span class="xil">$!theme.themeReplyCount</span>
+							</div>
+						</td>
+						<td class="postHead">
+							<h1 class="ph">
+								<a href="javascript:void(0);">
+                                <label id="theTitle">$!theme.themeTitle</label>
+								</a>
+							</h1>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="ad" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="pls"></td>
+						<td class="plc"></td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="postContent">
+				<table cellpadding="0" cellspacing="0">
+					<tbody>
+						<tr>
+							<td class="userContent" rowspan="2">
+								<div class="avatar">
+									<a href="javascript:void(0);">
+										<img class="avatarImg" src="../../images/public/exchange%20area/touxiang.png" />
+									</a>
+								</div>
+								<dl class="avatarInfo cl">
+									<dt><label>人员姓名</label></dt>
+									<dd><label>$!theme.userName</label></dd>
+									<dt><label>机构名称</label></dt>
+									<dd><label>$!theme.deptName</label></dd>
+									<dt><label>主题数</label></dt>
+									<dd><label>$!theme.themeUserCount</label></dd>
+									<dt><label>帖子数</label></dt>
+									<dd><label>$!theme.themeUserReplayCount</label></dd>
+								</dl>
+							</td>
+							<td class="postent">
+								#if($!theme.themeType == 1) 
+								<div class="pc">
+									
+									<table cellpadding="0" cellspacing="0">
+										<tbody>
+											<tr>
+												<td class="pp">
+													<p>
+														$!theme.themeContent
+													</p>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								#elseif($!theme.themeType == 2)
+									#parse("/velocity/financeCommu/themeOptionDetail.vm")
+								#end
+							</td>
+						</tr>
+						<tr>
+							<td  class="postcollect">
+								<div class="pcol">
+                                    <span class="ui-span-btn-pcol" onclick="collect($!theme.themeId,$!theme.themeType)">
+                                        <i class="icon fav"></i>
+                                        <label>收藏</label>
+                                    </span>
+                                </div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pls2"></td>
+							<td class="plc2">
+								<div class="pot cl">
+									#if($!theme.createUser==$!userId)
+									<em>
+										<a class="pedit" onclick="updateTheme($!theme.themeId,$!theme.themeType)" charset="fastre" href="javascript:void(0);" hidefocus="true">编辑</a>
+									</em>
+									#end
+									#if($!theme.createUser==$!userId || $!userId==$!templateUserId)
+									<em>
+										<a class="pdel" onclick="delTheme($!theme.themeId,1,0)" charset="fastre" href="javascript:void(0);" hidefocus="true">删除</a>
+									</em>
+									#end
+									#if($!isPartitionManager == 1)
+									<em>
+										#if($!theme.isTop == 0)
+											<a class="ptop" charset="fastre" href="javascript:void(0);" onclick="themeTop($!theme.themeId,1)" hidefocus="true">置顶</a> 
+										#else
+											<a class="ptop" charset="fastre" href="javascript:void(0);" onclick="themeTop($!theme.themeId,0)" hidefocus="true">取消置顶</a>
+										#end
+									
+									</em>
+									#end
+									<p class="ptime">
+										<em>发表于:<label>$date.format("yyyy-MM-dd HH:mm:ss",$!theme.createDate)</label></em>
+									</p>
+								</div>
+							</td>
+						</tr>
+						<tr class="ad">
+							<td class="pls"></td>
+							<td class="plc"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			
+			#foreach($reply in $!replyPage.items)
+			<div class="postContent">
+				<table cellpadding="0" cellspacing="0">
+					<tbody>
+						<tr>
+							<td class="userContent" rowspan="2">
+								<div class="avatar">
+									<a href="javascript:void(0);">
+										<img class="avatarImg" src="../../images/public/exchange%20area/touxiang.png" />
+									</a>
+								</div>
+								<dl class="avatarInfo cl">
+									<dt><label>人员姓名</label></dt>
+									<dd><label>$!reply.userName</label></dd>
+									<dt><label>机构名称</label></dt>
+									<dd><label>$!reply.deptName</label></dd>
+									<dt><label>主题数</label></dt>
+									<dd><label>$!reply.themeUserCount</label></dd>
+									<dt><label>帖子数</label></dt>
+									<dd><label>$!reply.themeUserReplayCount</label></dd>
+								</dl>
+							</td>
+							<td class="postent">
+								<div class="pc">
+									
+									<table cellpadding="0" cellspacing="0">
+										<tbody>
+											<tr>
+												<td class="pp">
+													<p>
+														<label id='repCont_$reply.replyId'>$!reply.replyContent</label>
+													</p>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td  class="poscollect">
+							</td>
+						</tr>
+						<tr>
+							<td class="pls2"></td>
+							<td class="plc2">
+								<div class="pot cl">
+									#if($!reply.createUser==$!userId)
+									<em>
+										<a class="pedit" onclick="upReply($!reply.replyId)" charset="fastre" href="javascript:void(0);" hidefocus="true">编辑</a>
+									</em>
+									#end
+									#if($!reply.createUser==$!userId || $!reply.createUser==$!templateUserId)
+									<em>
+										<a class="pdel" onclick="delTheme($!theme.themeId,2,$!reply.replyId)"  charset="fastre" href="javascript:void(0);" hidefocus="true">删除</a>
+									</em>
+									#end
+									<p class="ptime">
+										<em>发表于:<label>$date.format("yyyy-MM-dd HH:mm:ss",$!reply.createDate)</label></em>
+									</p>
+								</div>
+							</td>
+						</tr>
+						<tr class="ad">
+							<td class="pls"></td>
+							<td class="plc"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			#end
+		</div>
+		
+		<div class="postbar cl" style="margin-bottom:10px !important;">
+			<div>#parse("/velocity/page.vm")</div>
+			<span class="ui-span-btn-m toPost">
+				<label>发帖</label>
+				<i class="ddl"></i>
+			</span>
+			<div name="pcont" class="postOpt" style="display:none;">
+				<ul>
+					<li onclick="addCommTheme(1)">
+						<i class="icon none">&nbsp;</i>
+						<label>发新主题</label>
+					</li>
+					<li onclick="addCommTheme(2)">
+						<i class="icon">&nbsp;</i>
+						<label>发布投票</label>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="postfooter">
+			<form id="replyForm" name="replyForm">
+			<table cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="pls3"></td>
+						<td class="plc3">
+							<div class="ui-div-textarea" style="height: 100px;" id="reptextDiv">
+								<textarea fun="initContent" class="textarea" id="reptext" style="height:100px;" rule="\S" tips='发表内容必须填写'></textarea>
+							</div>
+							<p class="postfooterbtn">
+								<span class="ui-footer-btn2 ui-footer-btn2-save" id="addReply">
+									<label>发表回复</label>
+								</span>
+							</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户照片资料</title>  
+	 #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style type="text/css">
+    	body{padding:0; margin:0; }
+
+
+    </style>
+	
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/photoView/taskprocess_image.js"></script>
+	<script type="text/javascript" src="${ctx}/js/photoView/jquery.rotate.1.1.js"></script>
+
+	<script type="text/javascript">
+		var postJson = {};//存放查询数据
+		var pid;
+		var win;
+		$(function(){
+            $('.ui-artZoom-zoomout').click(function(){
+                zoomoutClick();
+            });
+
+            $('.ui-artZoom-zoomin').click(function(){
+                zoominClick();
+            });
+        	pid = $("#pid").val();
+        	win = window.top.ExportIframeWin(pid);
+			if(win && win.getQueryJson){
+        		postJson = win.getQueryJson();
+			
+			}
+			$('.photo-close').click(function(){
+				window.top.aui.close();
+			});
+            defaultZoom();
+        });
+
+
+		
+		
+		function closePhotoDiv(){//关闭、取消时调用
+			
+    			window.top.aui.close();
+			}
+        var scale = true;  //for zoom	
+    </script>
+</head>
+<body >
+	<input type="hidden" id="photoId" value="$!photo.photoId"/>
+	<div id="popDiv" class="photo-mydiv" style="text-align: center" >
+      <p class="photo-ttl-width">&nbsp;&nbsp;照片</p>
+	  <div class="photo-mydiv-box"  >
+		   <div class="img-position">
+               <div id="imageDiv" style="width:940px;height:480px; overflow:auto; border:0px solid #DCDCDC; z-index:1">
+                 #if($!photoPath==0)
+                  <img name="img" id="img" src="../images/public/u280.png" width="940px" height="480px" />
+                  #else
+				  <input type="hidden" id="pid" value="$!pid"/>
+
+                        <img name="img" id="img" src="../Records/$!photoPath" width="920px" height="460px"/>
+
+                 #end
+               </div>
+
+
+                #if($!photoPath==0)
+					    #else
+               <div style="padding-top: 0px;padding-bottom: 0px;text-align: center">
+                        <span>
+                            <img src="../images/public/zoomin.png" class="ui-artZoom-zoomin"/>
+                        <img src="../images/public/zoomout.png" class="ui-artZoom-zoomout"/>
+                        </span>
+               </div>
+			    #end
+           </div>
+
+      </div>
+
+
+    </div>
+</body>
+</html>
+
+
+

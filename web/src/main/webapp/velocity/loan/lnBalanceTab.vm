@@ -1,0 +1,226 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+
+    <script type="text/javascript">
+        $(function () {
+
+            if($!appLoanTypeId=="1"){
+                $(".jyd").show();
+                $(".jyd").each(function(){
+                    var flag = $(this).attr("flag");
+                    var type = $(this).attr("type");
+                    var div = $(this).attr("id");
+                    getBalanceTable(flag,type,div);
+                })
+
+            }else if($!appLoanTypeId=="2"){
+                $(".xfd").show();
+                $(".xfd").each(function(){
+                    var flag = $(this).attr("flag");
+                    var type = $(this).attr("type");
+                    var div = $(this).attr("id");
+                    getBalanceTable(flag,type,div);
+                })
+            }
+//
+//            getBalanceTable("cash","1","cashList1");
+//            getBalanceTable("cash","2","cashList2");
+//            getBalanceTable("cash","3","cashList3");
+//            getBalanceTable("cash","4","cashList4");
+//            getBalanceTable("cash","5","cashList5");
+//            getBalanceTable("cash","6","cashList6");
+//            getBalanceTable("cash","7","cashList7");
+//            getBalanceTable("cash","8","cashList8");
+//
+//            getBalanceTable("account","1","accountList1");
+//            getBalanceTable("account","2","accountList2");
+//            getBalanceTable("account","3","accountList3");
+//            getBalanceTable("account","4","accountList4");
+//
+//            getBalanceTable("fixed","1","fixedList1");
+//            getBalanceTable("fixed","2","fixedList2");
+//
+//            getBalanceTable("debt","1","debtList1");
+//            getBalanceTable("debt","2","debtList2");
+//            getBalanceTable("debt","3","debtList3");
+//            getBalanceTable("debt","4","debtList4");
+//            getBalanceTable("debt","5","debtList5");
+//            getBalanceTable("debt","6","debtList6");
+
+        });
+
+
+        //table
+        function getBalanceTable(flag,type,div) {
+            var postJson = {};
+            postJson['loanId'] = $("#loanId").val();
+            postJson['flag'] = flag;
+            postJson['type'] = type;
+            postJson['div'] = div;
+            postJson['appLoanTypeId'] = $("#appLoanTypeId").val();
+            postJson['write'] = $("#write").val();
+            jQuery.ajax({
+                type: 'post',
+                url: '${ctx}/loan/getBalanceTable.html',
+                data: postJson,
+                success: function (data) {
+                    $("#" + div).html(data);
+                    getTotalAmount();
+                }
+            });
+        }
+
+        function saveBalancePage(flag,type,div,id){
+            var url = '${ctx}/loan/getSaveBalancePage.html' + "?loanId=" + $("#loanId").val()
+                    + "&flag=" + flag
+                    + "&type=" + type
+                    + "&id=" + id
+                    + "&appLoanTypeId=" + $("#appLoanTypeId").val()
+                    + "&random=" + Math.random() * 1000;
+            var result = banger.page.openDialog(url, "添加资产负债", 500,500);
+            if (result != undefined) {
+                getBalanceTable(flag,type,div);
+            }
+        }
+
+
+        //table
+        function removeBalance(flag,type,div,id) {
+            var postJson = {};
+            postJson['id'] = id;
+            postJson['flag'] = flag;
+            jQuery.ajax({
+                type: 'post',
+                url: '${ctx}/loan/removeBalance.html',
+                data: postJson,
+                success: function (data) {
+                    getBalanceTable(flag,type,div);
+                }
+            });
+        }
+
+        //table
+        function getTotalAmount() {
+            var appLoanTypeId = $("#appLoanTypeId").val();
+            if(appLoanTypeId=="1"){
+                //资产
+                var totalAmount = parseFloat($(".cashList1").text())+parseFloat($(".accountList1").text())+parseFloat($(".accountList2").text())+parseFloat($(".fixedList2").text())
+                        +parseFloat($(".fixedList1").text())+parseFloat($(".cashList2").text())+parseFloat($(".cashList3").text())+parseFloat($(".cashList4").text());
+                //负债
+                var totalDebt = parseFloat($(".accountList3").text())+parseFloat($(".accountList4").text())+parseFloat($(".debtList1").text())+parseFloat($(".debtList2").text())
+                        +parseFloat($(".cashList5").text());
+
+                $("#totalAmount").text(totalAmount);
+                $("#totalDebt").text(totalDebt);
+
+
+            }else if(appLoanTypeId=="2"){
+                //资产
+                var totalAmount = parseFloat($(".cashList1").text())+parseFloat($(".cashList6").text())+parseFloat($(".cashList7").text())+parseFloat($(".cashList8").text())
+                        +parseFloat($(".fixedList1").text())+parseFloat($(".cashList4").text());
+                //负债
+                var totalDebt = parseFloat($(".debtList1").text())+parseFloat($(".debtList2").text())+parseFloat($(".debtList3").text())+parseFloat($(".debtList4").text())
+                        +parseFloat($(".debtList5").text())+parseFloat($(".debtList6").text());
+
+                $("#totalAmount").text(totalAmount);
+                $("#totalDebt").text(totalDebt);
+            }
+
+        }
+
+
+    </script>
+
+</head>
+<body>
+        <input type="hidden" id="loanId" name="loanId" value="$!loanId"/>
+        <input type="hidden" id="write" name="write" value="$!write"/>
+        <input type="hidden" id="appLoanTypeId" name="appLoanTypeId" value="$!appLoanTypeId"/>
+
+        <span class="bold" style="line-height:40px;font-size:16px;width:100px;">资产情况（合计：<label id="totalAmount" style="color:limegreen">0</label>）</span>
+
+        <div class="ln-bg-balance">
+        ##1银行及现金存款
+            <div id="cashList1" flag="cash" type="1" class="jyd xfd" style="display: none">
+            </div>
+
+        ##6投资性资产
+            <div id="cashList6" flag="cash" type="6" class="xfd" style="display: none">
+            </div>
+        ##7对外债权
+            <div id="cashList7" flag="cash" type="7" class="xfd" style="display: none">
+            </div>
+
+        ##8预付款
+            <div id="cashList8" flag="cash" type="8" class="xfd" style="display: none">
+            </div>
+
+        ##1应收账款
+            <div id="accountList1" flag="account" type="1" class="jyd" style="display: none">
+            </div>
+        ##2预付账款
+            <div id="accountList2" flag="account" type="2" class="jyd" style="display: none">
+            </div>
+
+        ##2存货
+            <div id="fixedList2" flag="fixed" type="2" class="jyd" style="display: none">
+            </div>
+        ##1固定资产
+            <div id="fixedList1" flag="fixed" type="1" class="jyd xfd" style="display: none">
+            </div>
+
+
+        ##2其他经营资产
+            <div id="cashList2" flag="cash" type="2" class="jyd" style="display: none">
+            </div>
+        ##3其他非经营资产
+            <div id="cashList3" flag="cash" type="3" class="jyd" style="display: none">
+            </div>
+        ##4其他资产
+            <div id="cashList4" flag="cash" type="4" class="jyd xfd" style="display: none">
+            </div>
+        </div>
+
+
+
+        <span class="bold" style="line-height:40px;font-size:16px;width:100px;">负债情况（合计：<label id="totalDebt" style="color:red">0</label>）</span>
+
+        <div class="ln-bg-balance">
+
+            ##3应付账款
+            <div id="accountList3" flag="account" type="3" class="jyd" style="display: none">
+            </div>
+            ##4预收账款
+            <div id="accountList4" flag="account" type="4" class="jyd" style="display: none">
+            </div>
+
+            ##1短期负债
+            <div id="debtList1" flag="debt" type="1" class="jyd xfd" style="display: none">
+            </div>
+            ##2长期负债
+            <div id="debtList2" flag="debt" type="2" class="jyd xfd" style="display: none">
+            </div>
+            ##3自用性负债
+            <div id="debtList3" flag="debt" type="3" class="xfd" style="display: none">
+            </div>
+            ##4投资性负债
+            <div id="debtList4" flag="debt" type="4" class="xfd" style="display: none">
+            </div>
+            ##5消费性负债
+            <div id="debtList5" flag="debt" type="5" class="xfd" style="display: none">
+            </div>
+            ##6其他负债
+            <div id="debtList6" flag="debt" type="6" class="xfd" style="display: none">
+            </div>
+
+            ##5其他负债
+            <div id="cashList5" flag="cash" type="5" class="jyd" style="display: none">
+            </div>
+        </div>
+
+</body>
+</html>

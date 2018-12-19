@@ -1,0 +1,54 @@
+<div class="map-cus-list">
+    <ul>
+        #set($address = "")
+        #set($customerName = "")
+        #foreach($customerGps in $!customerList)
+            #set($clickStr = "")
+            #if($!customerGps.customerGpsId)
+                #set($clickStr ="onclick='getMarker($!customerGps.customerGpsId,2)'")
+            #end
+            #if($!customerGps.address)
+                #set($address ="$!customerGps.address")
+            #end
+            #if($!customerGps.customerName)
+                #set($customerName ="$!customerGps.customerName")
+            #end
+            <li $clickStr>
+                <p class="cus-name">
+                    <label title="$!customerGps.customerName">$!customerGps.customerName
+                        #if($!customerGps.customerTitle&&!$!customerGps.customerTitle.equals(""))
+                            （$!customerGps.customerTitle）
+                        #end
+                        #if($!customerGps.isNogood.equals(1))
+                            <span style="color:#f00;margin-left:5px;">不良客户</span>
+                        #end
+                    </label>
+                    #if($urlPermitUtil.hasPermission('dialPhone'))
+                        <!--<span class="ico-phone" onclick="dial('$!customerGps.phoneNo',$!customerGps.customerId)"></span>-->
+                    #end
+                </p>
+                <p class="cus-phone">联系电话：$!customerGps.phoneNo</p>
+            </li>
+        #end
+    </ul>
+</div>
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <tfoot>
+    <tr>
+        <td style="border:0;">
+            <div class="fr">
+                #parse("/velocity/map/mapAjaxPage.vm")
+            </div>
+        </td>
+    </tr>
+    </tfoot>
+</table>
+<script type="text/javascript">
+$(function(){
+    $('div.map-cus-list li').hover(function(){
+    	$(this).addClass('hover');
+    },function(){
+    	$(this).removeClass('hover');
+    });
+});
+</script>

@@ -1,0 +1,231 @@
+<thead>
+    <tr>
+        <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+        <!--
+        <th><label title="添加时间">添加时间</label></th>
+        -->
+        <th><label title="沟通进度">沟通进度</label></th>
+        <th><label title="日程">日程</label></th>    
+        <th><label title="日程备注">日程备注</label></th>
+        <th><label title="完成情况">完成情况</label></th>   
+        <th width="160"><label title="操作">操作</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($schedule in $scheduleList)
+        <tr #if($!schedule.status == 0 && ($!schedule.isOutDate == 1)) class="orange" #end >
+        <td>
+            <div class="customer-infor">
+             #if($urlPermitUtil.hasPermission('browseCustomer'))
+                #if($!schedule.pdtProductCustomerBean.defaultPhoneType=='1')
+                    <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;" title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone1)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone1 )
+                    </span>
+                #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='2')
+                    <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;" title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone2)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone2 )
+                    </span>
+                #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='3')
+                    <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;" title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.phone)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.phone )
+                    </span>
+                #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='4')
+                    <span class="slink" onclick="newTab('browse', '$!schedule.customerId')" style="width:150px;" title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.fax)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.fax )
+                    </span>
+                #end
+             #else
+                 #if($!schedule.pdtProductCustomerBean.defaultPhoneType=='1')
+                     <span title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone1)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone1 )
+                    </span>
+                 #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='2')
+                     <span title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.mobilePhone2)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.mobilePhone2 )
+                    </span>
+                 #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='3')
+                     <span title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.phone)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.phone )
+                    </span>
+                 #elseif($!schedule.pdtProductCustomerBean.defaultPhoneType=='4')
+                     <span title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.fax)">
+                        $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.fax )
+                    </span>
+                 #end
+             #end
+                <div class="icon">
+                     #if($urlPermitUtil.hasPermission('dialPhone'))
+			    		<i class="i phone" onclick="dial('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.pdtProductCustomerBean.customerId')" title="拨号">phone</i>
+				    #end
+                    <!--
+						#if($!schedule.pdtProductCustomerBean.cphNumber.length()==11&&$!schedule.pdtProductCustomerBean.cphNumber.substring(0, 1)=="1")
+                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                        <i class="i sms" onclick="sendSms('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.pdtProductCustomerBean.customerId')" title="短信">sms</i>
+        				#end
+        				#if($urlPermitUtil.hasPermission('toAddMms'))
+        				<i class="i mms" onclick="sendMms('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.pdtProductCustomerBean.customerId')" title="彩信">mms</i>
+						#end
+					#end
+					-->
+                </div>
+                <div class="other">
+                    <label class="item cusTitle" title="$!schedule.pdtProductCustomerBean.customerTitle">
+                        $!schedule.pdtProductCustomerBean.customerTitle
+                    </label>
+                    <label class="item">$!schedule.pdtProductCustomerBean.sex</label>
+                    <label class="item">#if($schedule.pdtProductCustomerBean.age) $!{schedule.pdtProductCustomerBean.age}岁 #end</label>
+                    #if($!schedule.pdtProductCustomerBean.isNoGood==1)
+                        <label class="item red">
+                            （不良客户）
+                        </label>
+                    #end
+                    <!--
+                    <label class="item red">(共享客户)</label>
+                    -->
+                </div>
+            </div>
+        </td>
+        <!--
+        <td>
+        	<label title="##$!date.format('yyyy-MM-dd hh:mm',$!schedule.addDate)">
+        	</label>
+        </td>
+        -->
+        <td class="autoSelected black" #if($!schedule.status == 1 || $!schedule.status == 2 || $!schedule.userId != $!sysUserId) style="overflow:hidden;" #else style="overflow:visible;" #end >
+            <!--
+            <input type="hidden"  value="$!schedule.commProgressId"/>
+            -->
+        #if($!schedule.status == 1 || $!schedule.status == 2 || $!schedule.userId != $!sysUserId)
+            #foreach($cp in $commProgressList)
+                #if($cp.COMM_PROGRESS_ID == $!schedule.commProgressId)
+                    <label title="$!cp.COMM_PROGRESS_NAME">
+                        <span>$!cp.COMM_PROGRESS_NAME</span>
+                        <span></span>
+                    </label>
+                #end
+            #end
+        #else
+            <select name="commProgress" onchange="commProgressEdit($!schedule.scheduleId,$(this));">
+                <!--
+				<option value="">&nbsp;</option>
+				-->
+            	#foreach($cp in $commProgressList)
+                    <option value="$cp.COMM_PROGRESS_ID" style="color: black;" #if($!schedule.commProgressId == $cp.COMM_PROGRESS_ID)
+                        selected="true"
+                    #end>&nbsp;$cp.COMM_PROGRESS_NAME</option>
+                #end
+            </select>
+            #end
+        </td>
+        <td>
+        	<label title="#if($schedule.contactType==1)电话联系#elseif($schedule.contactType==2)上门拜访#else #end $!date.format('yyyy-MM-dd',$!schedule.contactDate ) $!date.format('HH:mm',$!schedule.contactDate )" style="height: 50">
+        		
+        		#if($schedule.contactType==1)
+                    电话联系
+        		#elseif($schedule.contactType==2)
+        			上门拜访
+        		#else
+        		#end
+                <br/>
+                $!date.format('yyyy-MM-dd',$!schedule.contactDate )
+                $!date.format('HH:mm',$!schedule.contactDate )
+        	</label>
+        </td>
+        <td>
+        	<label title="$!subString.replaceRemark($!schedule.remark)">
+        		<span>$!schedule.remark</span>
+        		<span></span>
+        	</label>
+        </td>
+        <td class="autoSelected black" style="overflow:visible;">
+
+            #if($!schedule.status == 1)
+                <label title="已完成">
+                    <span>已完成</span>
+                    <span></span>
+                </label>
+            #elseif($!schedule.status == 2)
+                <label title="已作废">
+                    <span>已作废</span>
+                    <span></span>
+                </label>
+            #else
+                #if($!schedule.userId == $!sysUserId)
+                    <select onchange="statusEdit($!schedule.scheduleId,$(this));" id="statusSelect">
+                        <!--
+                        <option value="" >&nbsp;</option>
+                        -->
+                        <option value="0" #if($!schedule.status == 0)
+                                selected="true"
+                        #end>&nbsp;未完成</option>
+                        <option value="1" #if($!schedule.status == 1)
+                                selected="true"
+                        #end>&nbsp;已完成</option>
+                        <option value="2" #if($!schedule.status == 2)
+                                selected="true"
+                        #end>&nbsp;已作废</option>
+                    </select>
+                #else
+                    <label title="未完成">
+                        <span>未完成</span>
+                        <span></span>
+                    </label>
+                #end
+            #end
+        </td>
+        <td>
+        #if($urlPermitUtil.hasPermission('tskViewSchedulePlan'))
+            <span class="slink" onclick="viewDetail('$!schedule.scheduleId','$!schedule.customerId')">查看</span>
+        #end
+        #if($!schedule.status == 1 || $!schedule.status == 2 || $!schedule.userId != $!sysUserId)
+            #if($urlPermitUtil.hasPermission('tskEditSchedulePlan'))
+                <span disabled="true" style="cursor: default;">编辑日程</span>
+            #end
+        #else
+            #if($urlPermitUtil.hasPermission('tskEditSchedulePlan'))
+                <span class="slink" onclick="openScheduleAlterWindow('$!schedule.scheduleId')">编辑日程</span>
+            #end
+        #end
+        #if($schedule.contactType==2)
+            #if($!schedule.status == 1 && $!schedule.userId == $!sysUserId)
+                #if(!$schedule.recordInfoId)
+                    <span class="slink" onclick='addVisitRecord_page($!schedule.customerId,$!schedule.scheduleId);'>新建拜访</span>
+                #else
+                    <span class="slink" onclick='editVisit(this,$!schedule.recordInfoId,"拜访记录",$!schedule.customerId,"$!schedule.pdtProductCustomerBean.customerName",$!schedule.scheduleId);'>编辑拜访</span>
+                #end
+            #end
+        #elseif($!schedule.contactType == 1)
+            #if($!schedule.status == 1 && $!schedule.userId == $!sysUserId)
+                #if(!$schedule.recordInfoId)
+                    <!--
+                <span class="slink" onclick='addVisitRecord_page($!schedule.customerId,$!schedule.scheduleId);'>编辑通话</span>
+                -->
+                    <span disabled="true" style="cursor: default;">编辑通话</span>
+                #else
+                    #if($urlPermitUtil.hasPermission('recordWriteConnect'))
+                        <span class="slink" onclick='writeConnect(this,$!schedule.recordInfoId,$!schedule.scheduleId,"通话记录")'>编辑通话</span>
+                    #else
+                        <span disabled="true" style="cursor: default;">编辑通话</span>
+                    #end
+                #end
+            #end
+        #end
+
+        </td>
+    </tr>
+    #end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="6">
+            <!--
+            <div class="fr">
+            -->
+                #parse("/velocity/ajaxPage.vm")
+            <!--
+            </div>
+            -->
+        </td>
+    </tr>
+</tfoot>
+     

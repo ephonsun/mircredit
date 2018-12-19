@@ -1,0 +1,162 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>评论</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" /> 
+</head>
+<body>
+	<div class="ui-news-comment">
+		<h4 class="ui-news-header">
+			<label>主题:</label>
+			<a href="javascript:void(0);" onclick="toArticle($!feArticle.articleId);return false;">$!feArticle.articleTitle</a>
+		</h4>
+		
+		<hr class="dbline" />
+		
+		<div class="ui-news-details">
+			<label>
+				$!feArticle.articleContent
+			</label>
+			<a href="javascript:void(0);" onclick="toArticle($!feArticle.articleId);return false;">[详细]</a>
+		</div>
+		<div class="ui-news-footer">
+			<div class="post">
+				<a id="post" href="javascript:void(0);">我要发帖</a>
+				<span>(帖子<label class="red" id="totalCount">0</label>条)</span>
+			</div>
+		</div>
+		
+		<div id="forum" class="ui-news-forum" style="display:none;">
+			<div class="bar">
+				<i class="close">&nbsp;</i>
+			</div>
+			<div class="ui-div-textarea" style="height:50px;">
+				<textarea class="textarea" id="discess" maxlength="500" style="height:50px;"></textarea>
+			</div>
+			<div class="footer">
+				<a href="javascript:void(0);" class="button" onclick="discuss();return false;">发表评论</a>
+			</div>
+		</div>
+		
+		<hr />
+		<div id="grid">
+			#parse("/velocity/finance/articleDiscess_tab.vm")
+        </div>
+	</div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript">
+	var f = {};
+	f.switcher = function(d){
+		if(d.is(':hidden')){
+			d.css({ 'display': 'block' });
+			$('textarea', d).focus();
+		}else{
+			d.css({ 'display': 'none' });
+			$('textarea', d).val('');
+		}
+	};
+	
+	$(function(){
+		//注册我要发帖按钮事件
+		$('#post').click(function(){
+			var d = $('#forum');
+			f.switcher(d);
+			
+			return false;
+		});
+		tab.title(tab.self,'评论“'+'$!jsUtil.escapeJs($feArticle.articleTitle)' +'”');
+		initPage();
+	});
+	
+	function initPage(){			
+		//注册回复按钮事件
+		$('a.reply').click(function(){
+			var d = $(this).parent().siblings('div.ui-fe-forum');
+			f.switcher(d);
+			
+			return false;
+		});
+		
+		//注册评论或回复框关闭按钮事件
+		$('.ui-fe-forum i.close').click(function(){
+			var d = $(this).parents('div.ui-fe-forum').first();
+			
+			f.switcher(d);
+		});
+		$('#totalCount').text($('#count').val());
+		maxTextArea("textarea[maxlength]");
+	}
+	
+	//发表评论  提交
+	function discuss(){		
+		if(jQuery.trim($('#discess').val())){
+			jQuery.post('addArticleDiscess.html',
+				{'feArticleDiscess.articleId':$!feArticle.articleId,
+				'feArticleDiscess.discessContent':jQuery.trim($('#discess').val().replace(/(^\s*)|(\s*$)/g,""))},
+				function(data){
+					$('#discess').val("");
+					refreshForm();	
+				});
+		}		
+	}
+	
+	//支持 提交
+	function push(disId){
+		jQuery.post('supportDiscess.html',
+			{'feArticleDiscess.discessId':parseInt(disId)},
+			function(data){
+				refreshForm();					
+			});
+	}
+	
+	//回复 提交
+	function reply(id){
+		var $a = $('#reply_'+id).parent().next("div:has(a)").find("a");
+		if(jQuery.trim($('#reply_'+id).val()) && !$a.attr('disabled')){
+			$a.attr('disabled',true);
+			jQuery.post('replyDiscess.html',
+				{'feArticleReply.discessId':id,
+				'feArticleReply.replyContent':jQuery.trim($('#reply_'+id).val().replace(/(^\s*)|(\s*$)/g,""))},
+				function(data){
+					refreshForm();
+				});
+		}
+	}
+	
+	function toArticle(id){
+		var url = window.url('/finance/readFeArticle.html?articleId='+id, "random", Math.random());
+    	window.location.href = url;
+	}
+	
+		//刷新
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html);
+		initPage();
+	}
+	
+	//刷新
+	function refreshForm(){
+		goto(null,'/finance/showArticleDiscessList.html?random='+Math.random()*1000000,
+		{'feArticle.articleId': $!feArticle.articleId},
+		function(html){refreshGrid('grid',html);});
+		
+	}
+	
+	function gotoPage(page){
+		goto(page,'/finance/showArticleDiscessList.html?random='+Math.random()*1000000,
+		{'feArticle.articleId': $!feArticle.articleId},
+		function(html){refreshGrid('grid',html);});
+	}
+</script>
+</html>

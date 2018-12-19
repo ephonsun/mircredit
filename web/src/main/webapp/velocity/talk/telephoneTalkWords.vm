@@ -1,0 +1,206 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>屏幕取词</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <style type="text/css">
+		body { border: 0; margin: 0; padding: 0; overflow: hidden; }
+	</style>
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/banger/banger.phone.js"></script>
+    <script type="text/javascript" src="${ctx}/js/biz/banger.talk.js"></script>
+    <script type="text/javascript">
+		var d = $!custJson;
+		
+		var w = {};
+		w.init = function(d){
+			var h = jQuery('div.getwords div.header'), b = jQuery('div.getwords div.body');
+			
+			if(d && d.length>0){
+				b.html('<table><tbody></tbody></table>');
+				
+				jQuery.each(d, function(i, node){
+					if(node){
+						var it = jQuery('<tr>'
+								 + '<td width=\'80\'><label title=\'' + node.name + '\'><nobr>' + node.name + '</nobr></label></td>'
+								 + '<td width=\'60\' align=\'center\'><label title=\'' + node.sort + '\'><nobr>' + node.sort + '</nobr></label></td>'
+								 + '<td width=\'110\' align=\'center\'><label title=\'' + node.number + '\'><nobr>' + node.number + '</nobr></label></td>'
+								 + '<td width=\'70\' align=\'center\'><label title=\'' + node.title + '\'><nobr>' + node.title + '</nobr></label></td>'
+								 + '<td width=\'60\' align=\'center\'>'
+								 + '<i class=\'dial\' title=\'拨号\' dialFlag=\'true\' >dial</i>'
+								 + '<i class=\'disc\' title=\'查看客户\'>disc</i>'
+								 + '</td>'
+								 + '</tr>');
+						
+						jQuery('table tbody', b).append(it);
+						
+						jQuery('i.dial', it).click(function(){
+							try{
+								doDail(node);
+							}
+							catch(e){  }
+						});
+						
+						jQuery('i.disc', it).click(function(){
+							try{
+								showCust(node);
+							}
+							catch(e){  }
+						});
+					}
+				});
+				
+				if(jQuery.browser.msie && jQuery.browser.version<7.0){
+					jQuery('table tbody tr', b).hover(
+						function(){ $(this).addClass('hover'); },
+						function(){ $(this).removeAttr('class'); }
+					);
+				}
+				
+				h.css('display', 'block');
+				b.css('display', 'block');
+			}
+			else{
+				h.css('display', 'none');
+				b.empty().css('display', 'none');
+			}
+		};
+		
+		var timeHandler = -1;
+		
+		jQuery(function(){
+			resizeHeight();
+			w.init(d);
+			
+			refreshDialEnable();
+			
+			numInput('#telNum',function(){
+				if(timeHandler>=-1)clearTimeout(timeHandler);
+				timeHandler = setTimeout(function(){postSelCust();},500);
+			});
+		});
+		
+		function postSelCust()
+		{
+			var telNum = $('#telNum').val()+"";
+			var account = $("#account").val();
+			if(telNum)
+			{
+				jQuery.post("/talk/getWordsGrid.html?autoLogin=true&account="+account+"&number="+telNum+"&random="+Math.random()*1000000,{},
+					function(jsonString){
+						var json = jQuery.parseJSON(jsonString);
+						d=json;
+						resizeHeight();
+						w.init(d);
+				});
+			}
+			else
+			{
+				d=[];
+				w.init(d);
+			}
+		}
+
+		function refreshWord(number){
+			if(number!=null)
+			{
+				sp.resizeWordHeight(0);
+				$('#telNum').val(number);
+				postSelCust();
+				refreshDialEnable();
+			}
+		}
+		
+		function doDail(node){			//拨号
+			var account = $("#account").val();
+			var flag = getPhoneEnable();
+			if(flag)postDial(node.number,node.id,account);
+		}
+		
+		function numDial()
+		{
+			var telNum = $("#telNum").val();
+			var account = $("#account").val();
+			var flag = getPhoneEnable();
+			if(flag)postDial(telNum,null,account);
+		}
+		
+		var sp = smartPhone.create();
+		var setting = { events: {onPhoneDeviceChange:phoneDeviceChange} };
+		sp.load(setting);
+		
+		function phoneDeviceChange(){
+			refreshDialEnable();
+		}
+		
+		function refreshDialEnable(){
+			var flag = getPhoneEnable();
+			if(flag){
+				$("i[dialFlag$='true']").css({filter:""});
+				$("i[dialFlag$='true']").attr({title:""});
+			}
+			else{
+				$("i[dialFlag$='true']").css({filter:"gray"});
+				$("i[dialFlag$='true']").attr({title:"话机不可用"});
+			}
+		}
+		
+		function getPhoneEnable(){
+			if(sp.test()){
+				var phone = sp.getCurrent();
+				return phone!=null;
+			}
+			return false;
+		}
+		
+		function resizeHeight()
+		{
+			var rowCount = d.length>14?14:d.length;
+			sp.resizeWordHeight(rowCount);
+		}
+		
+		function showCust(node)			//向主窗口发送回调命令
+		{
+			sp.raiseCommand("showCust",node.id);
+		}
+		
+		window.onbeforeunload = function() {
+			sp.destory();
+		}
+		
+    </script>
+</head>
+
+<body style="margin: 0; padding: 0;">
+    <div class="getwords">
+    	<div class="bar">
+        	<input type="text" id="telNum" value="$!phoneNumber" /><i id="numDial" onclick="numDial()" dialFlag="true" ></i>
+        </div>
+        <div class="header">
+        	<table>
+            	<thead>
+                	<tr>
+                    	<th width="80"><label>客户姓名</label></th>
+                    	<th width="60"><label>号码类型</label></th>
+                    	<th width="110"><label>联系号码</label></th>
+                    	<th width="70"><label>称谓</label></th>
+                    	<th width="60"><label>操作</label></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="body">
+        	<table cellpadding="0" cellspacing="0">
+            	<tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <input type="hidden" id="account" value="$!account" />
+</body>
+</html>
+

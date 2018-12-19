@@ -1,0 +1,142 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>录音提示音设置</title>
+    
+    <style type="text/css">
+    	p { margin-bottom: 10px; }
+		p.halign { margin-top: 20px; }
+
+		table { width: 100%; }
+		table tr td { height: 30px; }
+		.halign { margin-top: 50px; }
+		
+		.choose { position: absolute; top: -1px; right: -1px; -right: -2px; }
+		#file { position: absolute; top: 0; width: 100%; height: 24px; filter: alpha(opacity:0); opacity: 0; }
+    </style>
+    #styleLink("base")
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.file.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			$('#file').change(function(){
+				checkFileType(this);
+			});
+		});
+		
+		//检查文件类型
+		function checkFileType(obj){
+			var str=obj.value;
+        	var pos = str.lastIndexOf(".");
+        	var lastname = str.substring(pos,str.length);
+        	var resultName=lastname.toLowerCase();
+        	$("#localFilename").val('');
+        	$('#text').val('');
+        	if (resultName.toString()!='.wav'){
+        		banger.page.showMessageBox("只能上传.wav音频文件，您上传的文件类型为"+lastname+"，请重新上传");
+    		}else{
+    			var localFilename = file.val(obj);
+				$('#text').val(localFilename);
+				$("#localFilename").val(localFilename);
+    		}
+		}
+		
+		//播放留言
+		function playVoicePath(obj){
+			var filePathOnServer= $("#filePathOnServer").val()+"";
+			var localFilename = $("#localFilename").val()+"";
+			if(localFilename!=""){
+				new window.video.create(1, 310, 60,localFilename, obj);
+			}else if(filePathOnServer!=""){
+				jQuery.post("isFile.html", {"voiceFilePath": filePathOnServer}, function(result){
+    				new window.video.create(1, 310, 60,"../Records/"+result, obj);
+				});
+			}else {
+				banger.page.showMessageBox("服务器无文件，请选取本地文件！");
+				return;
+			}
+		}
+		
+		function setPhoneFile(filename)
+    	{
+    		var phone = window.parent.getPhone();
+			if(phone)
+			{
+				if(filename){
+					return phone.setRecordTipFile(filename);
+				}
+			}
+    	}
+    	
+    	//上传文件
+    	function upLoadFile(){
+    		if($("#text").val()==""){
+    			banger.page.showMessageBox("请先选择提示音文件!");
+    			return;
+    		}
+    		var localFileName = $("#localFilename").val()+"";
+    		if(localFileName!=""){
+    			var error = setPhoneFile(localFileName);
+    			if(error){
+    				var msgError = error+"";
+					banger.page.showMessageBox(msgError);
+    			} else {
+					ajaxFileUpload({
+						url:"../crmRecordRemind/doUpload.html?localFileName="+encodeURI(encodeURI(localFileName))+"&random="+Math.random()*10000,
+			       	 	id:'file',
+			        	callback:function(){
+			        	 	banger.page.showMessageBox({"type":"success","content":"设置提示音成功"});
+			        	 	document.location.replace("../crmRecordRemind/showCrmRecordRemindPage.html?&random="+Math.random()*10000);
+			        	}
+			    	});
+		    	}
+				return false;
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<input type="hidden" id="localFilename" value="" />
+	<input type="hidden" id="filePathOnServer"  value="$!crmRecordRemind.filePath"/>
+	<table border="0" width="100%" cellspacing="2" cellpadding="2">
+		<thead>
+        	<tr>
+            	<th height="50" align="left" colspan="3">录音提示音设置<hr /></th>
+            </tr>
+        </thead>
+    	<tbody>
+        	<tr>
+            	<td width="1%">
+                	<span class="red">*</span>
+                </td>
+            	<td>	                
+	                <div style="position: relative;">
+                    	<div class="dtxt2">
+                            <input type="text" id="text" class="dtxt2-txt" value="$!crmRecordRemind.fileName"/>
+                            <input type="button" class="btn1 choose" value="选择声音" />
+                        </div>
+                        <input type="file" id="file" name="uplodeFile" />
+                    </div>
+                </td>
+                <td width="1%">
+                    <input type="button" class="btn1" value="试听提示音" onclick="playVoicePath(this);"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="halign">
+    	<input type="button" class="btn1" value="保 存" onclick="upLoadFile()" />
+    </div>
+</body>
+</html>

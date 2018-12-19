@@ -1,0 +1,137 @@
+<script type="text/javascript" src="../js/micro/profitandlossCualte.js"></script>
+
+<table id="profitandlossXfTable" class="datatbl" cellpadding="0" cellspacing="0">
+	<thead>
+        <tr>
+            <th><label title="项目">项目</label></th>
+        	<th><label title="项目细分">项目细分</label></th>
+        	<th><label title="上年度">上年度</label></th>
+        	<th><label title="本年度">本年度</label></th>
+        	<th><label title="备注">备注</label></th>
+        	<th><label title="操作">操作</label></th>
+        </tr>
+	</thead>
+	<tbody>
+	#foreach($dic in $!profitandlossXfDetailMap.mainIncome)
+    	<tr>
+    		<td><label title="主要收入">主要收入</label></td>
+    		<td><label title="$!dic.itemDetailName">$!dic.itemDetailName</label></td>
+    		<td><label title="$!dic.priorYear">$!dic.priorYear<input type="hidden" class="mainIncomePriorYear" value="$!dic.priorYear"/></label></td>
+    		<td><label title="$!dic.currentYear">$!dic.currentYear<input type="hidden" class="mainIncomelCurrentYear" value="$!dic.currentYear"/></label></td>
+    		<td><label title="$!dic.note">$!dic.note</label></td>                              
+    		<td>
+    			<a href="#" onclick="editProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">编辑</a>
+    			<a href="#"  onclick="delProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">删除</a>
+    		</td>
+    	</tr>			
+	#end
+	</tbody>
+	<thead>
+    	<tr>
+            <th><label title="收入总额">收入总额</label></th>
+    		<th></th>
+    		<th id="mainIncomePriorYear"></th>
+    		<th id="mainIncomelCurrentYear"></th>
+    		<th></th>
+    		<th></th>
+    	</tr>
+	</thead>
+	<tbody>
+	#foreach($dic in $!profitandlossXfDetailMap.fixedCosts)
+	<tr>
+        <td><label title="固定支出">固定支出</label></td>
+		<td><label title="$!dic.itemDetailName">$!dic.itemDetailName</label></td>
+		<td><label title="$!dic.priorYear">$!dic.priorYear</label><input type="hidden" class="fixedCostsPriorYear" value="$!dic.priorYear"/></td>
+		<td><label title="$!dic.currentYear">$!dic.currentYear</label><input type="hidden" class="fixedCostsCurrentYear" value="$!dic.currentYear"/></td>
+		<td><label title="$!dic.note">$!dic.note</label></td>
+		<td>
+			<a href="#" onclick="editProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">编辑</a>
+			<a href="#"  onclick="delProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">删除</a>
+		</td>
+	</tr>			
+	#end
+	</tbody>
+	<thead>
+	<tr>
+        <th><label title="固定支出">固定支出</label></th>
+		<th></th>
+		<th id="fixedCostsPriorYear"></th>
+		<th id="fixedCostsCurrentYear"></th>
+		<th></th>
+		<th></th>
+	</tr>
+	<tr>
+        <th><label title="税前收入">税前收入</label></th>
+		<th></th>
+		<th id="pretaxPriorYear"></th>
+		<th id="pretaxCurrentYear"></th>
+		<th></th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+	#foreach($dic in $!profitandlossXfDetailMap.taxes)
+	<tr>
+        <td><label title="个人所得税">个人所得税</label></td>
+		<td><label title="$!dic.itemDetailName">$!dic.itemDetailName</label></td>
+		<td><label title="$!dic.priorYear">$!dic.priorYear</label><input type="hidden" class="taxesPriorYear" value="$!dic.priorYear"/></td>
+		<td><label title="$!dic.currentYear">$!dic.currentYear</label><input type="hidden" class="taxesCurrentYear" value="$!dic.currentYear"/></td>
+		<td><label title="$!dic.note">$!dic.note</label></td>
+		<td>
+			<a href="#" onclick="editProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">编辑</a>
+			<a href="#"  onclick="delProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">删除</a>
+		</td>
+	</tr>			
+	#end
+	</tbody>
+	<thead>
+	<tr>
+		<th><label title="净收入">净收入</label></th>
+		<th></th>
+		<th id="netPriorYear"></th>
+		<th id="netCurrentYear"></th>
+		<th></th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+	#foreach($dic in $!profitandlossXfDetailMap.otherCosts)
+	<tr>
+        <td><label title="其他支出">其他支出</label></td>
+		<td><label title="$!dic.itemDetailName">$!dic.itemDetailName</label></td>
+		<td><label title="$!dic.priorYear">$!dic.priorYear</label><input type="hidden" class="otherCostsPriorYear" value="$!dic.priorYear"/></td>
+		<td><label title="$!dic.currentYear">$!dic.currentYear</label><input type="hidden" class="otherCostsCurrentYear" value="$!dic.currentYear"/></td>
+		<td><label title="$!dic.note">$!dic.note</td>
+		<td>
+			<a href="#" onclick="editProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">编辑</a>
+			<a href="#"  onclick="delProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">删除</a>
+		</td>
+	</tr>			
+	#end
+	</tbody>
+	<tbody>
+	#foreach($dic in $!profitandlossXfDetailMap.otherIncome)
+	<tr>
+		<td><label title="其他收入">其他收入</label></td>
+		<td><label title="$!dic.itemDetailName">$!dic.itemDetailName</label></td>
+		<td><label title="$!dic.priorYear">$!dic.priorYear</label><input type="hidden" class="otherIncomePriorYear" value="$!dic.priorYear"/></td>
+		<td><label title="$!dic.currentYear">$!dic.currentYear</label><input type="hidden" class="otherIncomeCurrentYear" value="$!dic.currentYear"/></td>
+		<td><label title="$!dic.note">$!dic.note</label></td>
+		<td>
+			<a href="#" onclick="editProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">编辑</a>
+			<a href="#"  onclick="delProfitandlossXf('$!dic.profitandlossJyDetailId','$!dic.loanProfitandlossId')">删除</a>
+		</td>
+	</tr>			
+	#end
+	</tbody>
+	<thead>
+	<tr>
+        <th><label title="可支配资金">可支配资金</label></th>
+		<th></th>
+		<th id="availablePriorYear"></th>
+		<th id="availableCurrentYear"></th>
+		<th></th>
+		<th></th>
+	</tr>
+	 </thead>
+</table>

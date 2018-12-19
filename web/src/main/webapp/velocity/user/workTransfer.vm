@@ -1,0 +1,312 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>工作转交</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript">
+	var oldPostJson = {};
+    $(function(){
+		$('#customer').tips({
+			msg: "姓名、编号等"
+		});
+		
+	  	$('select').select();
+		
+	  	$('#CustomerType').val('$!parameterMap.get("customerTypeId")');
+	  	$('#UnContactDate').val('$!parameterMap.get("lastContactDateStr")');
+		
+	  	getQueryJson();
+	});
+    
+    function Query()
+    {
+		var postJson = getQueryJson();
+		postJson['userId'] = jQuery.trim($('#userId').val());
+		var urlStr = "queryCustomerList.html?BelongToType=brMine&RandNum="+ Math.random();
+		jQuery.ajax({
+		  type: 'POST',
+		  url: urlStr,
+		  data: postJson,
+		  success:function(html){
+		  	queryBack(html, 'cusList');
+			oldPostJson = getQueryJson();
+		  }
+		});	
+    }
+	function getQueryJson(){
+    	if($('#customer').val()=="姓名、编号等"){
+			$('#customer').val("");
+		}	
+    	var postJson = {};
+		postJson['crmCustomer.lastContactDateStr']=jQuery.trim($('#UnContactDate').val());
+		postJson['crmCustomer.customerTypeId'] = jQuery.trim($('#CustomerType').val());
+		postJson['crmCustomer.customerName'] = jQuery.trim($('#customer').val());
+		postJson['recordCount'] = jQuery.trim($('#recordCount').text());
+		postJson['userId'] = jQuery.trim($('#userId').val());
+		postJson['BelongToType'] = "brMine"; 
+		oldPostJson = postJson;
+		if($('#customer').val()==''){
+			$("#customer").tips({ msg: "姓名、编号等" });
+		}
+		return postJson;
+    }
+	
+	//复选框选中和取消
+		function selectAll(obj){   
+          var mm=document.getElementsByName("cusCheck");
+		  	for(var i=0;i<mm.length;i++){
+    			if(obj.checked==true){
+					mm[i].checked=true;
+    			}else{
+					mm[i].checked=false;
+				}
+				if(mm[i].disabled==true){
+					mm[i].checked=false;
+				}
+    		}
+        }   
+		
+	//刷新
+ 	function refresh(){
+    	if(oldPostJson){
+    		goto(
+				null,
+				"queryCustomerList.html?BelongToType=brMine&RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryBack(html, 'cusList');
+			});
+    	}
+    }
+	 //分页跳转
+	function gotoPage(page)
+	{
+		if(oldPostJson){
+			goto(
+				page,
+				"queryCustomerList.html?BelongToType=brMine&RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryBack(html, 'cusList');
+				});
+		}
+	}
+    function queryBack(html, gridId){
+		$("#cusList").html(html).find('table').table();
+		var total = $('#total').val();
+		if(total!=null){
+			$("#recordCount").text(total);
+		}else {
+			$("#recordCount").text(0);
+		}
+	}
+    function ClearCondition()
+    {
+    	$("input[type$='text']").val("");
+    	$("select").val(""); 
+		$("#customer").tips({ msg: "姓名、编号等" });
+    }
+    
+    //选择客户
+    function getSelectCus(){
+    	var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("请您选择客户！");
+			return false;
+		}
+		var str = "";
+		obj.each(function(){
+			if(jQuery(this).attr("checked")){
+				if(!str){
+					str = jQuery(this).val();
+				}else{
+					str = str +"," +jQuery(this).val();
+				}}	
+		})
+		return str;
+    }
+	
+	function getCheckCusIds(obj){
+    	var str = "";
+		obj.each(function(){
+			if(jQuery(this).attr("checked")){
+				if(!str){
+					str = jQuery(this).val();
+				}else{
+					str = str +"," +jQuery(this).val();
+				}}
+		});
+		return str;
+    }
+    
+	//选择全部客户
+   function	getPageCheckValues(){
+  	 var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]");
+		var str = "";
+		obj.each(function(){
+			if(!str){
+				str = jQuery(this).val();
+			}else{
+				str = str +"," +jQuery(this).val();
+			}	
+		})
+		return str;
+   
+   }
+
+   
+   
+    //设置客户归属
+    function setCusBelongTo(temp){
+    	var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+		var str="";
+		var postJson = {};
+		var transferUserid=$('#userId').val();
+		var urlStr = "../customer/modifyCusBelongTo.html";
+		if(temp==1){
+			if(obj.size() == 0){
+				banger.page.showMessageBox("请您选择要分配的客户！");
+    			return false;
+    		}
+			str=getCheckCusIds(obj);
+			postJson['cusIds']=str;
+		}else{
+			postJson['transferUserid']=transferUserid;
+			urlStr="../customer/modifyCusBelongToAll.html";
+		}
+		var url="../customer/showCusBelongTo.html?isWorkTransfer=1&&transferUserid="+transferUserid+"&&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,null,700,630);
+		if(result!=undefined){
+			var index = result.indexOf(",");
+			var belongDeptId = result.substring(0, index);
+			var belongUserId = result.substring(index+1, result.length);	
+			postJson['belongDeptId']=belongDeptId;
+			postJson['belongUserId']=belongUserId;
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(data){
+			  		Query();
+			  	}
+			});	
+		}
+    }
+	function browseCustomer(cusId){
+	    	jQuery.ajax({
+				  type: 'POST',
+				  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+				  data: {"cusId":cusId},
+				  success:function(data){
+				  		var obj = jQuery.parseJSON(data);
+				  		if(obj[0].isDel=='1'){
+							banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+				  		}else{
+							window.top.document.getElementById('cusFrame').src = '../customer/browseCustomer.html?actionType=browse&&needLine=0&&isBrowseLayer=1&&crmCustomer.customerId=' + cusId;
+				  			window.top.art.dialog({
+								title: '查看客户',
+								cancelVal: '关闭',
+    							cancel: function(){
+    								window.top.document.getElementById('cusFrame').src = '';
+	    							return true;	
+    							},
+    							content: window.top.document.getElementById('cusFrame'),
+							    width: '100%',
+							    height: '100%',
+							    left: '0%',
+							    top: '0%',
+							    padding: '0px',
+							    fixed: true,
+							    resize: false,
+							    drag: false
+							})
+				  		}
+				  	}
+				});	
+	    }
+    </script>
+</head>
+
+<body style="overflow-x:hidden;width:972px;" >
+<form id="CustomerMyList" name="CustomerMyList" action="queryCustomerList.html?BelongToType=brMine"  method="post">
+	<input id="userId" type="hidden" name="userId" value="$!userId"/>
+	<table class="htmltbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	        		<td width="7%" class="field">
+                        <label>未联系时间：</label>
+                    </td>
+                    <td width="18%">
+                        <select id="UnContactDate" name="crmCustomer.lastContactDateStr">
+                            <option value=""></option>
+                            <option value="UnContactAWeek">一周未联系</option>
+	                    	<option value="UnContactTwoWeek">两周未联系</option>
+	                    	<option value="UnContactMonth">一月未联系</option>
+	                    	<option value="UnContactNever">从未联系</option>
+                        </select>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>客户类型：</label>
+                    </td>
+                    <td width="18%">
+                        <select id="CustomerType" name="crmCustomer.customerTypeId">
+                            <option value=""></option>
+                            #foreach($cusType in $cusTypelist)  
+	                    	<option value ="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+	                    	#end
+                        </select>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>客户：</label>
+                    </td>
+                    <td width="18%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="customer" name="crmCustomer.customerName" value="$!parameterMap.get("customerName")" maxlength="20" />
+                        </div>
+                    </td>
+                    <td width="7%" class="field"></td>
+                    <td width="18%"></td>
+                </tr>
+	        </tbody>
+	    </table>
+    
+    <p class="dataSearch">
+		<span class="fl bold">
+        <label class="dgreen">$!userName</label>
+                     的客户还有<span class="dgreen" id="recordCount">$!recordCount</span>位没有移交 </span>
+        <input type="button" value="清 空" class="btn1" onclick="ClearCondition()"/>
+        <input type="button" value="搜 索" class="btn1" onclick="Query()"/>
+    </p>
+</form>
+    
+    <div class="actrow">
+		<span class="btn2 fl"  onclick="setCusBelongTo(2)">
+            <label class="btn2-txt">全部客户分配归属</label>
+        </span>
+        <span class="btn2 fl" style="margin-left: -1px;" onclick="setCusBelongTo(1)">
+            <label class="btn2-txt" >分配归属</label>
+        </span>
+		<span class="btn2 fr" onclick="refresh()">
+            <label> 刷新</label>
+        </span>
+    </div>
+    <div id="cusList">
+    	#parse("/velocity/user/cusTableMyList.vm")
+    </div>
+	<iframe id="cusFrame" name="cusFrame" frameborder="0" style="display: none; width: 970px; height: 600px;"></iframe>
+</body>
+</html>

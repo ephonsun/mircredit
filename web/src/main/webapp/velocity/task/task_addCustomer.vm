@@ -1,0 +1,344 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>添加客户</title>
+	<base target="_self" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link rel="stylesheet" href="../../css/tree/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="../../js/plugins/jquery.ztree.core-3.2.js"></script>
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<script>
+		$(".dataTable").table();
+		var setting = {
+    		view: {
+    			dblClickExpand: false,
+    			showIcon: false,
+    			showLine: true,
+    			selectedMulti: false,
+    			expandSpeed: (jQuery.browser.msie && parseInt(jQuery.browser.version)<=6)?"":"fast"
+    			},
+    		data: {
+    			key: {name: "deptName"},
+    			simpleData: {enable:true, idKey: "deptId", pIdKey: "deptParentId",rootPId: ""}
+    			},
+    		callback: {
+    					onClick: onTreeClick	
+				}
+		};
+			jQuery(document).ready(function(){
+				$("#BelongToType").val("$!map.get("BelongTo")");
+    			BelongToOnChange(0);
+        	  	var rid=$('#recordId').val();
+        	  	if(rid!=""){
+        	  		changeText(rid, $('#recordName').val());
+        	  	}
+        	  	$("#BelongToType").change(function(){//客户归属切换
+        	  		BelongToOnChange(1);
+        	  	}
+    	  	)
+		
+			jQuery("#clean").click(function(){
+				$(".htmlTable input[type$='text']").val("");
+            	$("select").val(""); 
+            	$("#BelongToType").val("brAll");
+            	BelongToOnChange(1);
+			});
+			jQuery("#search").click(function(){
+				document.taskCusForm.submit();
+			});
+			jQuery("#quxiao").click(function(){
+				window.close();
+			});
+			jQuery("#addCustomer").click(function(){
+				var mm=document.getElementsByName("customerId");
+        		var checkFlag=false;
+    			var chestr="";
+        		for(var i=0;i<mm.length;i++){
+        			if(mm[i].checked==true){
+        				checkFlag=true;
+    					chestr+=mm[i].value+",";
+        			}
+        		}
+    			if(checkFlag==false){
+    				banger.page.showMessageBox("请选择你要添加的客户!")
+    				return ;
+    			}
+				var taskIds=$("#taskIds").val();
+				jQuery.post("/tskTask/saveTargetCustomer.html?random="+Math.random(),{
+					'isUsed':chestr,
+					'tskTask.taskId':taskIds
+				},function(data){
+					window.returnValue=1;
+					window.close();
+				});
+			});
+		});
+		function onTreeClick(e, treeId, treeNode) {
+		changeText(treeNode.deptId, treeNode.deptName);
+	}
+		
+    function BelongToOnChange(flag)
+    {
+    	if($('#BelongToType').val()=='brAll' || $('#BelongToType').val()=='brUnAllocate')
+		{
+			//隐藏客户归属选择框 
+			$('#showText').text("");
+			$('#recordId').val("");
+			$('#recordName').val("");
+			$("#Subordinate").hide();
+			$('#ddlchange').hide();
+			$("#deptTree").hide();
+			document.getElementById("Subordinate").onclick=null;
+		}
+		else if($('#BelongToType').val()=='brMine')
+		{
+			//显示当前用户的用户名 隐藏客户归属选择框
+			$('#showText').text(window.parent.dialogArguments.getParentUn());
+			$('#recordId').val("");
+			$('#recordName').val("");
+			$('#Subordinate').show();
+			$('#ddlchange').hide();
+			$("#deptTree").hide();
+			document.getElementById("Subordinate").onclick=null;
+		}
+		else if($('#BelongToType').val()=='brUser')
+		{
+			//弹出下属选择框 提交下属人员Subordinate值
+			$("#Subordinate").show();
+			$('#ddlchange').show();
+			$("#box .dataTable").show();
+			loadData('user',flag,0);
+			document.getElementById("Subordinate").onclick=function(){showBox(this, '#box','user')};
+		}
+		else if($('#BelongToType').val()=='brDept')
+		{
+			//弹出机构选择框 提交下属机构Subordinate值
+			$("#Subordinate").show();
+			$('#ddlchange').show();
+			$("#box .dataTable").hide();
+			loadData('dept',flag,0);
+			document.getElementById("Subordinate").onclick=function(){showBox(this, '#box','dept')};
+		}
+    }
+		
+		function loadData(state,flag, isShowbox)
+        {
+        	$("#deptTree").hide();
+        	if(state == 'user')
+        	{
+        		if(flag==1){
+        			jQuery.getJSON("/task/initCurrentAgentUser.html?random="+Math.random(),{},function(data){
+        				if((isShowbox==0) || ($('#recordId').val()=='')){
+        					changeText(data[0].userId,data[0].userName);
+        				}
+						$(".box-content").find("tbody").text("");
+						var txt=$("#showText").text();
+    					jQuery.each(data,function(index, value){
+    						var account=value.account;
+    						var userName=value.userName;
+    						var deptName=value.deptName;
+							var cssTxt="";
+							if(txt.length>0){
+								if(userName==txt){
+									cssTxt='class=selected';
+								}
+							}
+    						$(".box-content").find("tbody").append("<tr "+cssTxt+" tid="+ value.userId +"><td>"+account+"</td><td><label>"+userName+"</label></td><td>"+deptName+"</td></tr>").find("tr").live("click", function(){
+								$('#showText').text($(this).find("label").text());
+								$('#recordId').val($(this).attr("tid"));
+								$('#recordName').val($(this).find("label").text());
+								$(this).addClass("selected").siblings().removeClass("selected");
+							});
+						});
+    				});
+        		}
+    		}
+    		if(state == 'dept')
+    		{
+    			if(flag==1){
+    				$("#deptTree").show();
+    				jQuery.getJSON("/customer/getInChargeOfDeptJson.html?random="+Math.random(),{},function(data){
+						if(data){
+        					if((isShowbox==0) || ($('#recordId').val()=='')){
+        						changeText(data[0].deptId,data[0].deptName);
+        					}
+						}else{
+							changeText("","");
+						}
+    					jQuery.fn.zTree.init($("#deptTree"), setting, data);
+    				});
+    			}
+    		}
+        }
+		
+		function showBox(obj, box,str) {
+    		var obj = $(obj);
+			if(!$(box).is(":hidden")){
+				return false;
+			}
+    		var offset = $(obj).offset();
+    		$(box).css({display:"block", left:offset.left + "px", top:offset.top + obj.outerHeight() - 1 + "px"}).slideDown("fast");
+    		$("body").bind("mousedown", onBodyDown);
+    		loadData(str,1,1);
+    	}
+    		
+    	function onBodyDown(event) {
+    		if (!(event.target.id=="Subordinate" || event.target.id=="box" || $(event.target).parents("#box").length>0)) {
+    			hidebox();
+    		}
+    	}
+    	
+    	function hidebox() {
+    		$("#box").fadeOut("fast");
+    		$("body").unbind("mousedown", onBodyDown);
+    	}	
+    	
+    	function changeText(recordId,recordName){
+    		$('#showText').text(recordName);
+    		$('#recordId').val(recordId);
+    		$('#recordName').val(recordName);
+    	}
+    </script>
+</head>
+
+<body style="width: 960px; overflow-x: hidden;">
+	<form id="taskCusForm" name="taskCusForm" action="/task/initAddCustomer.html" method="post">
+	<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="70" align="right" class="nowrap">客户类型:</td>
+            	<td>
+            		<div class="dselect">
+                    	<div><input type="hidden" value="$!tskTaskId" id="taskIds"/>
+                            <select name="crmCustomer.customerTypeId" id="customerType" >
+                                <option value=""></option>
+								#foreach($cusType in $cusTypelist)  
+									<option #if($!crmCustomer.customerTypeId==$!cusType.customerTypeId) selected=true #end value="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+		                    	#end
+                            </select>
+                        </div>
+                    </div>
+                </td>
+            	<td width="70" align="right" class="nowrap">客户归属:</td>
+            	<td>
+					<div class="dselect floatL" style="width: 97px;">
+	                    <div>
+                            <select name="belongToType" id="BelongToType">
+                                <option value="brAll"></option>
+								<option value="brMine">我的</option>
+								<option value="brUser">下属的</option>
+								<option value="brDept">机构的</option>
+								<option value="brUnAllocate">待分配的</option>
+                            </select>
+                        </div>
+                    </div>
+                    <a href="javascript:void(0);" id="Subordinate" class="btn2 abtnnonebg floatL" style="margin-left: 5px;">
+                    	<label id="showText" class="btn2-txt">$!recordName</label>
+                        <span id="ddlchange" class="btn2-ddl">ddl</span>
+                    </a>
+					<input type="hidden" name="recordId" value="$!recordId" id="recordId"/>
+					<input type="hidden" name="recordName" value="$!recordName" id="recordName"/>
+					<div id="box" class="box-content">
+						<table class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+                        	<thead>
+                            	<tr>
+                                	<th>用户名</th>
+                                	<th>客户经理</th>
+                                	<th>机构</th>
+                                </tr>
+                            </thead>
+                        	<tbody>
+                        		
+                            </tbody>
+						</table>
+						<ul id="deptTree" class="ztree" style="width:260px; overflow:auto;">aaa</ul>
+					</div>
+                </td>
+				<td width="70" align="right" class="nowrap">客户编号:</td>
+            	<td>
+            		<div class="dtxt1">
+                		<input type="text" name="crmCustomer.customerNo" value="$!crmCustomer.customerNo" class="dtxt1-txt"/>
+                    </div>
+					<input type="hidden" name="isUsed" value="$!isUsed"/>
+                </td>
+				<td width="70" align="right" class="nowrap">客户名称:</td>
+            	<td>
+            		<div class="dtxt1">
+                		<input type="text" name="crmCustomer.customerName" value="$!crmCustomer.customerName" class="dtxt1-txt"/>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p class="dataSearch">
+    	<label class="floatL bold dataSearch-count">
+			客户数<span class="dgreen">（$!page.totalRowsAmount个）</span></label>
+        <input type="button" value="清 空" id="clean" class="btn1" />
+        <input type="button" value="搜 索" id="search" class="btn1" />
+    </p>
+   
+    <table class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+				<th width="20"><input type="checkbox" nm="chkall" class="chk"/></th>
+            	<th width="80">客户编号</th>
+            	<th width="220">客户姓名（电话）</th>
+            	<th width="110">客户类型</th>
+            	<th width="50">性别</th>
+            	<th width="80">称谓</th>
+            	<th>归属机构</th>
+            	<th width="80">客户经理</th>
+            </tr>
+        </thead>
+    	<tbody>
+			#foreach($customerListTemp in $!customerList.items)
+        	<tr>
+				<td><input type="checkbox" name="customerId" nm="chkone" class="chk" value="$!customerListTemp.customerId"/></td>
+            	<td>$!customerListTemp.customerNo</td>
+            	<td>
+					<span style="float: left;">
+					#if($!customerListTemp.defaultPhoneType==1)
+                		$!customerListTemp.customerName ($!customerListTemp.mobilePhone)
+                    #elseif($!customerListTemp.defaultPhoneType==2)
+                    	$!customerListTemp.customerName ($!customerListTemp.phone)
+                    #elseif($!customerListTemp.defaultPhoneType==3)
+                    	$!customerListTemp.customerName ($!customerListTemp.fax)
+					#end
+					</span>
+				</td>
+            	<td>$!customerListTemp.customerTypeName</td>
+            	<td>$!customerListTemp.sex</td>
+            	<td>$!customerListTemp.customerTitle</td>
+            	<td>$!customerListTemp.deptName</td>
+            	<td>$!customerListTemp.userName</td>
+            </tr>
+            #end
+        </tbody>
+		</form>
+        <tfoot>
+        	<tr>
+            	<td colspan="8">
+                	<div class="floatR">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+	<p class="dataSearch">
+		<input type="button" value="添加客户" id="addCustomer" class="btn1"/>
+		<input type="button" value="取消" id="quxiao" class="btn1"/>
+	</p>
+</body>
+</html>

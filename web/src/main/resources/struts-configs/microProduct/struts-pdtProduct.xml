@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="pdtProduct" extends="default"
+		namespace="/pdtProduct">
+
+		<!-- 产品列表页面 -->
+		<!-- 展示产品列表 -->
+		<action name="showPdtProductList" class="pdtProductAction" method="queryPdtProductList">
+			<result name="success">/velocity/microProduct/showPdtProductList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查询产品列表 -->
+		<action name="queryPdtProductList" class="pdtProductAction" method="queryPdtProductList">
+			<result name="success">/velocity/microProduct/pdtProductList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 删除产品 -->
+		<action name="delPdtProduct" class="pdtProductAction" method="delPdtProduct">
+			<result name="success">/velocity/microProduct/showPdtProductList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 跳转到新增页面 -->
+		<action name="toAddPdtProductPage" class="pdtProductAction" method="toAddPdtProductPage">
+			<result name="success">/velocity/microProduct/addPdtProduct.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 跳转到编辑页面 -->
+		<action name="toEditPdtProductPage" class="pdtProductAction" method="toEditPdtProductPage">
+			<result name="success">/velocity/microProduct/editPdtProduct.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 跳转到查看产品页面 -->
+		<action name="toViewPdtProductPage" class="pdtProductAction" method="toViewPdtProductPage">
+			<result name="success">/velocity/microProduct/viewPdtProduct.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 保存产品(新增、编辑) -->
+		<action name="savePdtProduct" class="pdtProductAction" method="savePdtProduct">
+			<result name="success">/velocity/microProduct/showPdtProductList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 上传产品Logo -->
+		<action name="upLoadLogoFile" class="pdtProductAction" method="upLoadLogoFile">
+		</action>
+
+        <!-- 判断产品是否删除 -->
+        <action name="isDelProduct" class="pdtProductAction" method="isDelProduct">
+        </action>
+	</package>
+
+</struts>

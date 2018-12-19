@@ -1,0 +1,58 @@
+
+<h3 class="recenter-ttl" style="text-align: center;">
+	#if($!startDate!=""&&$!endDate!="")
+		$!startDate至$!endDate
+	#elseif($!startDate!=""&&$!endDate=="")
+		$!startDate之后
+	#elseif($!startDate==""&&$!endDate!="")
+		截止至$!endDate
+	#end
+	营销任务完成统计表
+</h3>
+<table class="recenter-tbl">
+    <thead>
+        <tr>
+    		<th><label title="机构">机构</label></th>
+    		#if($!searchType!='brDept')
+    		<th><label title="名称">名称</label></th>
+    		#end
+    		<th><label title="任务类型">任务类型</label></th>
+    		<th><label title="任务名称">任务名称</label></th>
+    		<th><label title="任务目标">任务目标</label></th>
+			<th><label title="已完成">已完成</label></th>
+			<th><label title="已完成占比">已完成占比</label></th>
+    	</tr>
+    </thead>
+    <tbody>
+    	#foreach($data in $tskMarketingList)
+		<tr>
+			<td><label title="$!data.deptName">$!data.deptName</label></td>
+			#if($!searchType!='brDept')
+			<td><label title="$!data.userName">$!data.userName</label></td>
+			#end
+			<td>
+				#if ($!data.taskType == 2) 
+		        <label title="营销任务-电话营销">营销任务-电话营销</label>
+		        #end
+		        #if ($!data.taskType == 3) 
+		        <label title="营销任务-实地营销">营销任务-实地营销</label>
+		        #end
+			</td>
+			<td>
+				<input type="hidden" value="$!data.taskTitle" id="taskTitle_$!data.taskId"/>
+				<label>
+					<a class="slink" href="#2" title="$!data.taskTitle" onclick="detail($!data.taskId,$!data.taskType)">$!data.taskTitle</a>
+				</label>
+			</td>
+			<td><label title="$!data.taskTarget">$!data.taskTarget</label></td>
+			<td><label title="$!data.finishCount">$!data.finishCount</label></td>
+			<td><label title="$!data.comPercent%">$!data.comPercent%</label></td>
+		</tr>
+		#end
+    </tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+    制表人：$!userName
+    &nbsp; &nbsp; 
+    制表时间：$!reportTime
+</p>

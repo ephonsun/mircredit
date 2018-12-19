@@ -1,0 +1,133 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建下次联系计划</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+    </style>
+</head>
+ 
+<body>
+	<form name="nextPlan"  id ="nextPlan" action=""  method="post" >
+        <div class="etabs">
+            <div id="etabs-body" class="etabs-body">
+            	<div class="etabs-body-child">
+                	<table class="htmltbl" style="table-layout: auto;">
+                        <tbody>
+    						<tr>
+                                <td class="field" width="100">
+                                    <label>客户：</label>
+                                </td>
+                                <td>
+                                    <label id="custName">$!customerName</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="100">
+                                	<label class="red">*</label>
+                                    <label>计划联系时间：</label>
+                                </td>
+                                <td width="150">
+                                    <div class="ui-div-text" style="width: 140px;">
+                                        <input type="text" class="text datepicker" readonly="true" id="executeDate" fun="dateFunction" name="taskPlan.planDate" value="$!planDate" rule="\S" tips="“计划联系时间”必须填写"/>
+                                        <i class="date"></i>
+                                    </div>
+									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="100">
+    								<label class="red">*</label>
+                                    <label>联系事项：</label>
+                                </td>
+                                <td>
+                                    <div class="ui-div-textarea" style="height: 100px;width:355px;">
+                                        <textarea class="textarea" style="height:100px;width:355px;" id="remark" rule="\S" name="taskPlan.remark" tips='“联系事项”必须填写'>$!remark</textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+        
+                    <hr />
+                    
+                    <div class="center">
+                        <input type="button" id="sure" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" />
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancel()" value="取消" />
+                    </div>
+                </div>
+    		</div>
+    	</div>
+		<input type="hidden" name="custId" id="custId" value="$!custId"/>
+	</form>
+</body>
+  
+#scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator.dateCheck-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+<script type="text/javascript">
+	var json={};
+	$(function(){
+		$('div.etabs').etabs({
+				'head': 'etabs-items',
+				'body': 'etabs-body',
+				'bar': 'etabs-bar'
+			});
+			
+		json = window.dialogArguments;
+		if(json['taskPlan.planDate']) $('#executeDate').val(json['taskPlan.planDate']);	
+		if(json['taskPlan.remark']) $('#remark').val(json['taskPlan.remark']);
+			
+		maxInput('#remark',200);
+		$('#nextPlan').validator();
+
+		$('#sure').click(function(){
+			addPlan();
+		});
+		
+		window.returnValue=json;
+	});
+	function addPlan(){
+		var bool = jQuery.validator({ form: 'nextPlan', extend: false});
+		if(!bool){
+			return false;
+		}
+		var obj={};
+		obj['taskPlan.planDate']=$('#executeDate').val();
+		obj['taskPlan.remark']=jQuery.trim($('#remark').val());
+		obj['taskPlan.customerId']=$('#custId').val();
+		window.returnValue=obj;
+    	window.close();
+	}
+	
+	function cancel(){
+		//window.returnValue=json;
+    	window.close();
+	}
+
+	//日期验证
+	function dateFunction(obj){				
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#executeDate").val();
+		if(startDate.length>0){
+			if(startDate<systemDate){
+				$(obj).attr('tips', '计划联系时间不能小于今天'); 
+				return false;
+			}else return true;
+		}else return true;
+	}
+</script>
+</html>
+

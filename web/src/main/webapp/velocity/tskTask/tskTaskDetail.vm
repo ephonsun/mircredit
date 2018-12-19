@@ -1,0 +1,158 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看联系任务</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+		label.size { margin-right: 10px; }
+		div.mt { margin-top: 0 !important; }
+		div.contact-amount { border: 1px solid #b1b1b1; margin-bottom: 10px; padding: 10px; }
+    	div.contact-amount label.ml { margin-left: 20px; }
+    </style>
+</head>
+
+<body>
+	<div class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li><label>联系客户列表</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+            	<table class="viewtbl">
+                    <tbody>
+                        <tr>
+                            <td class="field" width="80">								
+                                <label>任务标题：</label>
+                            </td>
+                            <td>
+								<input type="hidden" name="tskContact.contactId" id="tskTaskId" value="$!tskContact.contactId"/>
+                                <label>$!tskContact.contactTitle</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>联系目的：</label>
+                            </td>
+                            <td>
+                                <label>$!tskContact.contactPurposeName</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>执行时间：</label>
+                            </td>
+                            <td>
+                                <label>$!date.format("yyyy-MM-dd",$!tskContact.startDate)</label> 到 <label>$!date.format("yyyy-MM-dd",$!tskContact.endDate)</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>任务概述：</label>
+                            </td>
+                            <td>
+                                <label>$!tskContact.remark</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>是否紧急：</label>
+                            </td>
+                            <td>
+								#if($!tskContact.isEmergency==1)
+                                <label>紧急任务</label>
+								#else
+								<label>非紧急任务</label>
+								#end
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>完成情况：</label>
+                            </td>
+							#if($!tskContact.isSuspend==1)
+    							<td>
+                                    <label title="已中止">已中止</label>
+                                </td>                            
+							#else
+    							<td>
+                                    <label title="$!tskContact.hasFinished/$!tskContact.total">$moneyUtil.decimePercent($!tskContact.percent)%</label>
+									
+                                </td>
+							#end								
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>分配者：</label>
+                            </td>
+                            <td>
+                                <label>$!tskContact.assignUserName</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>任务附件：</label>
+                            </td>
+                            <td>								
+								#foreach($attr in $!attrList)
+								<span class="fileName"><a href="#" onclick="downFile($attr.attachmentId)" class="attrFile">$!attr.fileName</a>&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label>&nbsp;&nbsp;</span><span class="percentage"></span>
+								#end
+                            </td>											
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="etabs-body-child" id="tskDetailCustomer">
+            </div>
+        </div>
+    </div>
+    
+    <hr />
+    
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="javascript:tab.close(GetId(), false);" value="关闭" />
+    </div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.editRemark-v1.0.js"></script>
+<script type="text/javascript">
+	$(function(){
+		//加载内部页卡
+		$('div.etabs').etabs({
+			'head': 'etabs-items',
+			'body': 'etabs-body',
+			'bar': 'etabs-bar',
+			'beforeOnclick': function(){ return true; }
+		});
+		if($!roleType!=0&&$!tskContact.assignUserId==$!loginUserId){
+			tab.title(tab.self,'查看日程-'+'$!jsUtil.escapeJs($tskContact.contactTitle)');
+		}else{
+			tab.title(tab.self,'查看联系任务-'+'$!jsUtil.escapeJs($tskContact.contactTitle)');
+		}
+		//查看联系客户列表
+		$('#tskDetailCustomer').load('/tskContact/initContactCustomerList.html?contactId=$!tskContact.contactId&actionType=detail',{});
+	});
+	
+	function downFile(attrId){
+		location.href = '/tskContact/downTaskFile.html?taskAttr.attachmentId=' + attrId;
+		return false;
+	}
+</script>
+</html>

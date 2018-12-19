@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="finance" extends="default" namespace="/finance" >
+		<!-- 保存知识库分类 -->
+		<action name="saveKnowledgeType" class="feKnowLedgeBaseAction"
+			method="saveKnowledgeType">
+		</action>
+		<!-- 知识库分类树的显示 -->
+		<action name="showKnowledgeBaseType" class="feKnowLedgeBaseAction"
+			method="showKnowledgeBasePage">
+			<result name="success">/velocity/finance/knowLedgeBase.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 知识库分类树的显示 -->
+		<action name="showKnowledgeBaseList" class="feKnowLedgeBaseAction"
+			method="showKnowledgeBaseList">
+			<result name="success">/velocity/finance/knowLedgeBaseContent.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 跳转至新建知识库分类页面 -->
+		<action name="addKnowledgeType" class="feKnowLedgeBaseAction"
+			method="addKnowledgeType">
+			<result name="success">/velocity/finance/addKnowLedgeType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>	
+		
+		<!-- 删除收藏内容 -->
+		<action name="deleteKnowContent" class="feKnowLedgeBaseAction"
+			method="deleteKnowContent">
+		</action>
+		<!-- 跳转到编辑收藏内容页面 -->
+		<action name="toEditKnowContent" class="feKnowLedgeBaseAction"
+			method="toEditKnowContent">
+			<result name="success">/velocity/finance/editknowContent.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 跳转到查看收藏内容页面 -->
+		<action name="knowContentDetail" class="feKnowLedgeBaseAction"
+			method="toEditKnowContent">
+			<result name="success">/velocity/finance/knowContentDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 保存收藏内容 -->
+		<action name="saveKnowContent" class="feKnowLedgeBaseAction"
+			method="saveKnowContent">
+		</action>
+		<!-- 跳转到新增收藏内容 -->
+		<action name="toAddKnowContent" class="feKnowLedgeBaseAction"
+			method="toAddKnowContent">
+			<result name="success">/velocity/finance/addknowContent.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>		
+				
+		<action name="showFeArticlePage" class="feArticleAction"
+			method="showFeArticlePage">
+			<result name="success">/velocity/finance/articleList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="showFeArticlePageBySearch" class="feArticleAction"
+			method="showFeArticlePageBySearch">
+			<result name="success">/velocity/finance/articleListDiv.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 收藏、已读、未阅读列表 -->
+		<action name="showFinanceUsersList" class="feArticleAction"
+			method="showFinanceUsersList">
+			<result name="success">/velocity/finance/financeUser_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 收藏、已读、未阅读页面 -->
+		<action name="showFinanceUsersPage" class="feArticleAction"
+			method="showFinanceUsersPage">
+			<result name="success">/velocity/finance/financeUser.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>		
+
+		<!-- 所有栏目 -->
+		<action name="getAllColumn" class="feColumnAction" method="getAllColumn"> 
+			<result name="success">/velocity/finance/allColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加一个栏目 -->
+		<action name="addColumn" class="feColumnAction" method="addColumn">
+			<result name="success">/velocity/finance/allColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 保存并新建 -->
+		<action name="addAndSave" class="feColumnAction" method="addAndSave">
+		</action>
+		<!-- 跳转到新建栏目 -->
+		<action name="toAddColumn" class="feColumnAction" method="toAddColumn">
+			<result name="success">/velocity/finance/addColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑栏目 -->
+		<action name="editColumn" class="feColumnAction" method="editColumn">
+			<result name="success">/velocity/finance/allColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 跳转到编辑栏目 -->
+		<action name="toEditColumn" class="feColumnAction" method="toEditColumn">
+			<result name="success">/velocity/finance/editColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 刷新栏目 -->
+		<action name="refreshTab" class="feColumnAction" method="refreshTab">
+			<result name="success">/velocity/finance/allColumn_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 显示所有栏目 -->
+		<action name="showAllColumnList" class="feColumnAction" method="showAllColumnList">
+			<result name="success">/velocity/finance/allColumn_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除栏目 -->
+		<action name="delColumn" class="feColumnAction" method="delColumn">
+		</action>
+		<!-- 启用/停用 -->
+		<action name="ssColumn" class="feColumnAction" method="ssColumn">
+			<result name="success">/velocity/finance/allColumn_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 上移栏目 -->
+		<action name="upColumn" class="feColumnAction" method="upColumn">
+			<result name="success">/velocity/finance/allColumn_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 下移栏目 -->
+		<action name="downColumn" class="feColumnAction" method="downColumn">
+			<result name="success">/velocity/finance/allColumn_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 栏目中验证用户名 -->
+		<action name="validatorColumnName" class="feColumnAction" method="validatorColumnName">
+		</action>
+		
+		<!-- 刷新分类树 -->
+		<action name="showTypeTree" class="feKnowLedgeBaseAction"
+			method="showTypeTree">
+		</action>	
+		<!-- 下移知识库分类 -->
+		<action name="moveDownknowledgeType" class="feKnowLedgeBaseAction"
+			method="moveDownknowledgeType">
+		</action>
+		<!-- 上移知识库分类 -->
+		<action name="moveUpKnowledgeType" class="feKnowLedgeBaseAction"
+			method="moveUpKnowledgeType">
+		</action>
+		<!-- 删除知识库分类 -->
+		<action name="deleteKnowType" class="feKnowLedgeBaseAction"
+			method="deleteKnowType">
+		</action>
+		<!-- 跳转到编辑知识库分类 -->
+		<action name="toUpdateKnowType" class="feKnowLedgeBaseAction"
+			method="toUpdateKnowType">
+			<result name="success">/velocity/finance/editKnowledgeType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 新增文章 -->
+		<action name="addFeArticle" class="feArticleAction"
+			method="addFeArticle">
+			<result name="success">/velocity/finance/articleAdd.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 保存文章 -->
+		<action name="saveFeArticle" class="feArticleAction"
+			method="saveFeArticle">
+			<result name="success">/velocity/succPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 文章编辑页面 -->
+		<action name="toArticleUpdatePage" class="feArticleAction"
+			method="toArticleUpdatePage">
+			<result name="success">/velocity/finance/articleUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 文章编辑 -->
+		<action name="updateFeArticle" class="feArticleAction"
+			method="updateFeArticle">
+		</action>
+		<!-- 文章附件下载 -->
+		<action name="downArticleFile" class="feArticleAction"
+			method="downArticleFile">
+		</action>
+		<!-- 移除文章附件 -->
+		<action name="removeAttr" class="feArticleAction"
+			method="removeAttr">
+		</action>
+		<!-- 删除文章 -->
+		<action name="deleteFeArticle" class="feArticleAction"
+			method="deleteFeArticle">
+		</action>
+		
+		<!-- 文章分类 -->
+		<action name="classifyArticle" class="feArticleAction"
+			method="classifyArticle">
+		</action>
+		
+		<!-- 文章发布 -->
+		<action name="publishArticle" class="feArticleAction"
+			method="publishArticle">
+		</action>
+		
+		<!-- 文章分类页面 -->
+		<action name="toClassifyArticlePage" class="feArticleAction"
+			method="toClassifyArticlePage">
+			<result name="success">/velocity/finance/classifyArticle.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 文章 列表-->
+		<action name="showFinanceMainPage" class="feArticleAction"
+			method="showFinanceMainPage">
+			<result name="customerManager">/velocity/finance/customerManagerPage.vm</result>
+			<result name="executivePage">/velocity/finance/executivePage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 文章搜索列表 -->
+		<action name="showFinanceMainPageBySearch" class="feArticleAction"
+			method="showFinanceMainPageBySearch">
+			<result name="customerManager">/velocity/finance/customerManagerPageDiv.vm</result>
+			<result name="executivePage">/velocity/finance/executivePageDiv.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 阅读文章 -->
+		<action name="readFeArticle" class="feArticleAction"
+			method="readFeArticle">
+			<result name="success">/velocity/finance/readFeArticle.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+				
+		<!-- 文章评论分页 -->
+		<action name="showArticleDiscessPage" class="feDiscessAction"
+			method="showArticleDiscessPage">
+			<result name="success">/velocity/finance/articleDiscess.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 文章评论分页列表 -->
+		<action name="showArticleDiscessList" class="feDiscessAction"
+			method="showArticleDiscessList">
+			<result name="success">/velocity/finance/articleDiscess_tab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>	
+		<!-- 发表评论 -->
+		<action name="addArticleDiscess" class="feDiscessAction"
+			method="addArticleDiscess">
+		</action>	
+		
+		<!-- 支持评论 -->
+		<action name="supportDiscess" class="feDiscessAction"
+			method="supportDiscess">
+		</action>	
+		<!-- 回复评论 -->
+		<action name="replyDiscess" class="feDiscessAction"
+			method="replyDiscess">
+		</action>	
+		
+	</package>
+</struts>

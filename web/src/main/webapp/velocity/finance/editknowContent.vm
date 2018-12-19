@@ -1,0 +1,166 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑收藏夹</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+</head>
+
+<body>
+	<form id="contentForm" name="contentForm">
+    	<table class="htmltbl">
+            <tbody>
+                <tr>					
+                    <td class="field" width="80">
+                        <label class="red">*</label>
+                        <label>标题：</label>
+                    </td>
+                    <td>
+                        <div class="ui-div-text">
+                            <input id="title" type="text" class="text" rule="\S" tips="“标题”必须填写" maxlength="100" value="$!knowContent.knowledgebaseTitle"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="80">
+						<label class="red">*</label>
+                        <label>创建位置：</label>
+                    </td>
+                    <td>
+                        <div class="ui-div-text">
+                            <input id="parCel" name="parName"  type="text" class="text" readonly="readonly"  value="$!knowContent.knowTypeName" />
+                            <i class="ddl" onclick="showMenu();">&nbsp;</i>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="80">
+                        <label>备注：</label>
+                    </td>
+                    <td>
+                        <div class="ui-div-textarea" style="height: 100px;">
+                            <textarea id="note" class="textarea" maxlength="500">$!knowContent.knowledgebaseNote</textarea>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+    
+    <hr />
+    
+    <div class="center">
+    	<input type="button" id="ok" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" />
+        <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" />
+    </div>
+	<div id="menuContent" class="menuContent" style="display:none; position: absolute; overflow-x: hidden; border: 1px solid #ccc; background-color: #fff;">
+		<ul id="klTree" class="ztree" style="margin-top:0; width:320px;"></ul>
+	</div>
+	<input type="hidden" id="contentId" name="contentId" value="$!knowContent.knowledgebaseContentId"/>
+	<input type="hidden" id="parentId" name="parentId" value="$!knowContent.knowledgebaseTypeId"/>
+</body>
+#scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript">
+	var setting = {
+		callback:{
+			beforeClick: beforeClick,
+			onClick:treeOnclick
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			dblClickExpand: false,	
+			showIcon: false
+		}			
+	};
+	//json树数据
+	var zNodes = $!typeJson; 
+	function showMenu() {
+		var parObj = $("#parCel");
+		var parOffset = $("#parCel").offset();
+		$("#menuContent").css({left:parOffset.left + "px", top:parOffset.top + parObj.outerHeight() + "px"}).slideDown("fast");
+		$("body").bind("mousedown", onBodyDown);
+	}
+	function hideMenu() {
+		$("#menuContent").fadeOut("fast");
+		$("body").unbind("mousedown", onBodyDown);
+	}
+	function onBodyDown(event) {
+		if (!(event.target.id == "menuBtn" || event.target.id == "parCel" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+			hideMenu();
+		}
+	}
+		
+	function beforeClick(treeId, treeNode) {
+		var check = (treeNode);
+		return check;
+	}
+	
+	function treeOnclick(e, treeId, treeNode) {
+		var zTree = jQuery.fn.zTree.getZTreeObj("klTree");
+		var nodes = zTree.getSelectedNodes();
+		var v = "";
+		nodes.sort(function compare(a,b){return a.id-b.id;});
+		for (var i=0, l=nodes.length; i<l; i++) {
+			v += nodes[i].name + ",";
+		}
+		if (v.length > 0 ) v = v.substring(0, v.length-1);
+		var parObj = $("#parCel");
+		parObj.attr("value", v);
+		$("#parentId").attr("value",treeNode.id);
+	}
+			
+	var fn = {};
+	fn.sure = function(){
+		save();
+	};
+	fn.cancel = function(){
+		window.returnValue = "";
+		window.close();
+	};
+	
+	function save(){
+		var bool = jQuery.validator({ form: 'contentForm', extend: false});
+		if(!bool){
+			return false;
+		}			
+		jQuery.ajax({ 
+			type:'post',
+			url :'saveKnowContent.html',
+			data:{'knowContent.knowledgebaseContentId':$("#contentId").val(),
+    			  'knowContent.knowledgebaseTitle':jQuery.trim($("#title").val().replace(/(^\s*)|(\s*$)/g,"")),
+    			  'knowContent.knowledgebaseNote':jQuery.trim($('#note').text().replace(/(^\s*)|(\s*$)/g,"")),
+			 	  'knowContent.knowledgebaseTypeId':$('#parentId').val().replace(/(^\s*)|(\s*$)/g,"")
+			     },
+			success:function(data){
+				window.returnValue = "1";
+				window.close();
+			}
+		});
+	}
+		
+	$(function(){
+		$('#ok').click(function(){
+			fn.sure()
+		});
+		
+		$('#cancel').click(function(){
+			fn.cancel();
+		});
+		jQuery.fn.zTree.init($("#klTree"), setting, zNodes);			
+		jQuery("#contentForm").validator();
+		maxTextArea("textarea[maxlength]");
+	});
+</script>
+</html>

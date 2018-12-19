@@ -1,0 +1,228 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>日程详情</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+    #scriptLink("page")
+    <script type="text/javascript">
+        $(function(){
+            autoSelect();
+            $('select').select();
+        });
+        //用来保留搜索数据
+        var oldPostJson ={};
+
+        function autoSelect(){
+            $(".autoSelected").each(function (){
+                var v = $(this).find("input").first().val();
+                if(v){
+                    $(this).find("select").val(v);
+                }
+            });
+        }
+
+        //判断添加日程
+        function isAddSchedule(){
+            var customerIdString = "";
+            var checkBoxLength = $("input[type='checkbox']:checked").length;
+            if(checkBoxLength==0){
+                banger.page.showMessageBox("您没有选择要添加的客户，请先选择客户");
+            }else{
+                $("input[type='checkbox']:checked").each(function(){
+                    customerIdString += $(this).val()+",";
+                });
+
+                jQuery.ajax({
+                    type:'POST',
+                    url:"../tskSchedule/judgeCustomerSchedule.html?RandNum="+ Math.random(),
+                    data:{'customerIdString':customerIdString},
+                    success:function(data){
+                        if(data==0){
+                            addSchedule(customerIdString);
+                        }else{
+                            if(confirm("您选择的客户部分已有日程安排，是否重新安排日程？")){
+                                addSchedule(customerIdString);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        //添加日程
+        function addSchedule(customerIdString){
+            var url = "${ctx}/tskSchedule/toTskNewSchedule.html?customerIdString="+customerIdString+"&RandNum="+ Math.random();
+            //var result = window.showModalDialog(url, '新增日程安排', 'dialogWidth=640px;dialogHeight=330px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            var result=banger.page.openDialog(url,"添加日程",640,330);
+            if(result){
+                jQuery.ajax({
+                    type:'POST',
+                    url:"../tskSchedule/tskNewSchedule.html?RandNum="+ Math.random(),
+                    data:{},
+                    success:function(html){
+                        refreshTab(html,'queryScheduleTable');
+                    }
+                });
+            }
+        }
+        //刷新tab
+        function refreshTab(html,gridId){
+            $("#"+gridId).html(html).table();
+        }
+
+        //清空
+        function resetCondition(){
+            $('#customerName').val("");
+            $('#productName').val("");
+
+            $("select").each(function(){
+                this.selectedIndex = 0;
+                $(this).select();
+            });
+        }
+        //获取搜索条件
+        function getQueryJson(){
+            var postJson = {};
+            postJson['tskSchedule.pdtProductCustomerBean.customerName']=jQuery.trim($('#customerName').val());
+            postJson['tskSchedule.pdtProductCustomerBean.customerTypeId']=jQuery.trim($('#customerType').val());
+            postJson['tskSchedule.pdtProductCustomerBean.productName']=jQuery.trim($('#productName').val());
+            return postJson;
+        }
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "../tskSchedule/queryCustomerList.html?RandNum"+Math.random(),
+                        oldPostJson,
+                        function(html){
+                            refreshTab(html, 'queryScheduleTable');
+                        });
+            }
+        }
+
+        //搜索
+        function query(){
+            var optJson = getQueryJson();
+            var urlStr = "${ctx}/tskSchedule/queryCustomerList.html?RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:urlStr,
+                data:optJson,
+                success:function(html){
+                    refreshTab(html ,'queryScheduleTable');
+                    oldPostJson = optJson ;
+                }
+            });
+        }
+
+        //刷新列表
+        function refresh(){
+            if(oldPostJson){
+                goto(null,
+                        "${ctx}/tskSchedule/queryCustomerList.html?RandNum="+Math.random(),
+                        oldPostJson,
+                        function(html){
+                            refreshTab(html,'queryScheduleTable');
+                        });
+            }
+        }
+    </script>
+</head>
+
+<body>
+<table class="htmltbl">
+    <tbody>
+    <tr>
+        <td width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="25%">
+            <label>这是用户名，要读取</label>
+        </td>
+    </tr>
+    <tr>
+        <td width="8%">
+            <label>联系时间：</label>
+        </td>
+        <td width="25%">
+            <div class="ui-div-text">
+                <input type="text" class="text" value="这个时间要设置">
+                <i class="date"></i>
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>联系方式：</label>
+        </td>
+        <td width="25%">
+            <select>
+                <option value="1">电话联系</option>
+                <option value="2">上门拜访</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>添加时间：</label>
+        </td>
+        <td class="field" width="26%">
+            <label>读取当前日程的添加时间</label>
+        </td>
+    </tr>
+    <tr>
+        <td width="8%">
+            <label>沟通进度：</label>
+        </td>
+        <td width="25%">
+            <select>
+                <option value="">这个select要从后台获取</option>
+            </select>
+        </td>
+        <td width="8%">
+            <label>完成情况：</label>
+        </td>
+        <td width="25%">
+            <select>
+                <option value="0">未完成</option>
+                <option value="1">已完成</option>
+                <option value="2">已作废</option>
+            </select>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+            客户列表(<label class="green" id="recordCount">$!scheduleCount</label>)
+        </span>
+    <input type="button" class="ui-input-btn" value="清空" onclick="resetCondition()"/>
+    <input type="button" class="ui-input-btn" value="搜索" onclick="query()"/>
+</div>
+
+<div class="action-bar">
+        #if($urlPermitUtil.hasPermission('tskPlanSchedulePlan'))
+            <span class="ui-span-btn fl">
+                    <label onclick="isAddSchedule()">安排日程</label>
+                </span>
+        #end
+        <span class="ui-span-btn fr">
+        	<label onclick="refresh()">刷新</label>
+        </span>
+</div>
+<table class="datatbl" id="queryScheduleTable">
+    #parse("/velocity/microTask/addScheduleTable.vm")
+</table>
+</body>
+</html>

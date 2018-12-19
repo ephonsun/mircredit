@@ -1,0 +1,173 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>外出拜访客户</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script>
+    $(document).ready(function(){
+	  $("#CustomerType").val("$!parameterMap.get("customerTypeId")");
+	  $("#UnContactDate").val("$!parameterMap.get("lastContactDateStr")");
+	  getQueryJson();
+	});
+    
+    function getQueryJson(){
+    	var postJson = {};
+		postJson['recordCount'] = jQuery.trim($('#recordCount').text());
+		postJson['BelongToType'] = "brMine";
+		postJson['crmCustomer.isVisit'] = 1;
+		oldPostJson = postJson;
+		return postJson;
+    }
+    function Query(){
+		var postJson = getQueryJson();
+		var urlStr = "../customer/DoQueryVisit.html?RandNum="+ Math.random();
+		jQuery.ajax({
+		  type: 'POST',
+		  url: urlStr,
+		  data: postJson,
+		  success:function(html){
+		  	queryBack(html, 'cusList');
+		  	oldPostJson = getQueryJson();
+		  }
+		});	
+		
+    }
+    function refresh(){
+    	if(oldPostJson){
+			goto(
+				null,
+				"../customer/DoQueryVisit.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryBack(html, 'cusList');
+			});
+    	}
+    }
+    var oldPostJson = {};
+    
+    //分页跳转
+	function gotoPage(page){
+		if(oldPostJson){
+			goto(
+				page,
+				"../customer/DoQueryVisit.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryBack(html, 'cusList');
+				});
+		}
+	}
+	
+	function queryBack(html, gridId){
+		var elem=$(html);
+	  	elem.table();
+		var gridDiv = $("#"+gridId);
+		gridDiv[0].innerHTML="";
+		gridDiv.append(elem);
+		var total = $('#total').val();
+		if(total!=null){
+			$("#recordCount").text(total);
+		}
+		else {
+			$("#recordCount").text(0);
+		}
+	}
+	
+    function SetVisitCustomer(cusId,input)
+    {
+    	var vt;
+    	if($(input).attr("checked")!=null)
+    		vt=1
+    	else
+    		vt=0;	
+    	jQuery.ajax({
+		  type: 'POST',
+		  url: "../customer/SetVisitCustomer.html",
+		  data: {'crmCustomer.customerId':cusId, 'crmCustomer.isVisit':vt},
+		  success:function(){
+		  	Query();
+		  }
+		});
+    }
+    
+    function newTab(actionType, cusId){
+    	if(actionType == "insert"){
+    		var options = {id: "cusInsert"+cusId, pid: GetId(), title: "新建客户", url: "${ctx}/customer/addCustomer.html?actionType=insert", lock: false};
+			tab.add(options);
+    	}
+    	else if(actionType == "modify"){
+    		var options = {id: "cusModify"+cusId, pid: GetId(), title: "编辑客户", url: "${ctx}/customer/editCustomer.html?actionType=modify&&crmCustomer.customerId="+cusId, lock: false};
+			tab.add(options);
+    	}
+    	else if(actionType == "browse"){
+    		isDelete(cusId);
+    	}		
+    }
+	function isDelete(cusId){
+    	jQuery.ajax({
+			  type: 'POST',
+			  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+			  data: {"cusId":cusId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+			  		}else{
+			  			var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+			tab.add(options);
+			  		}
+			  	}
+			});	
+    }
+	//导出客户
+	function exportCustomer(){
+		var obj = jQuery(".datatbl tbody tr");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("没有可导出的客户！");
+			return false;
+		}
+    	var option = {id: "exportCusVisit", pid: GetId(), title: "导出客户", url: "${ctx}/customerExport/showExportPage.html?random="+Math.random()*1000, lock: false, confirm: true,refresh:false};
+    	tab.add(option);
+			
+    }
+	//导出客户数据组装
+	function getCustPostJson(){
+		oldPostJson['recordCount'] = jQuery.trim($('#recordCount').text());
+		oldPostJson['url'] = "../customer/showExportCustomer.html?random="+Math.random()*1000;
+		return oldPostJson;
+	}
+    </script>
+</head>
+
+<body>
+	<p class="dataSearch">
+    	<label class="floatL bold dataSearch-count">外出拜访客户(<span class="dgreen" id="recordCount">$!recordCount</span>)</label>
+    </p>
+    
+    <div class="actrow">
+	#if($urlPermitUtil.hasPermission('showExportPage'))
+        <a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="exportCustomer()">
+            <label class="btn2-txt" >导出客户</label>
+        </a>
+	#end
+    <span class="btn2 fr" onclick="refresh()">
+        <label class="btn2-txt">刷新</label>
+    </span>
+    </div>
+    <div id="cusList">#parse("/velocity/customer/cusTableVisitList.vm")</div>
+</body>
+</html>

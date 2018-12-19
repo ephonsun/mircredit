@@ -1,0 +1,77 @@
+
+<h3 class="recenter-ttl" style="text-align: center;">
+	#if($!startDate!=""&&$!endDate!="")
+		$!startDate至$!endDate
+	#elseif($!startDate!=""&&$!endDate=="")
+		$!startDate之后
+	#elseif($!startDate==""&&$!endDate!="")
+		截止至$!endDate
+	#end
+	任务完成情况统计表
+</h3>
+<table class="recenter-tbl">
+    <thead>
+        <tr>
+    		<th rowspan="2">#if($!searchType==1)<label title="执行者">执行者</label> #else <label title="分配者">分配者</label> #end</th>
+    		<th rowspan="2"><label title="任务总量">任务总量</label></th>
+    		<th rowspan="2"><label title="总完成情况">总完成情况</label></th>
+    		<th colspan="4"><label title="完成情况分布">完成情况分布</label></th>
+    	</tr>
+    	 <tr>
+    		<th><label>0%~25%</label></th>
+    		<th><label>25%~50%</label></th>
+    		<th><label>50%~75%</label></th>
+    		<th><label>75%~100%</label></th>
+    	</tr>
+    </thead>
+    <tbody>
+		#foreach($task in $!taskReportList)
+		<tr>
+			<td><label title="$!task.executeUserName">$!task.executeUserName</label></td>
+			<td>
+				<label title="$!task.taskCount">
+					#if($!task.taskCount!=0)
+					<a class="slink" href="#2" title="$!task.taskCount" onclick="detail($!task.executeUserId,'all')">$!task.taskCount</a>
+    				#else
+    					$!task.taskCount
+    				#end
+				</label>
+			</td>
+			<td><label title="$!task.finishRate%">$!task.finishRate%</label></td>
+			<td><label title="$!task.twentyFiveRate">
+					#if($!task.twentyFiveRate!=0)
+					<a class="slink" href="#2" title="$!task.twentyFiveRate" onclick="detail($!task.executeUserId,'twentyFiveRate')">$!task.twentyFiveRate</a>
+    				#else
+    					$!task.twentyFiveRate
+    				#end
+			</label></td>
+			<td><label title="$!task.fiftyRate">
+					#if($!task.fiftyRate!=0)
+					<a class="slink" href="#2" title="$!task.fiftyRate" onclick="detail($!task.executeUserId,'fiftyRate')">$!task.fiftyRate</a>
+    				#else
+    					$!task.fiftyRate
+    				#end
+			</label></td>
+			<td><label title="$!task.seventyFiveRate">
+					#if($!task.seventyFiveRate!=0)
+					<a class="slink" href="#2" title="$!task.seventyFiveRate" onclick="detail($!task.executeUserId,'seventyFiveRate')">$!task.seventyFiveRate</a>
+    				#else
+    					$!task.seventyFiveRate
+    				#end
+			</label></td>
+			<td><label title="$!task.hundredRate">
+					#if($!task.hundredRate!=0)
+					<a class="slink" href="#2" title="$!task.hundredRate" onclick="detail($!task.executeUserId,'hundredRate')">$!task.hundredRate</a>
+    				#else
+    					$!task.hundredRate
+    				#end
+			</label></td>
+		</tr>
+		#end
+    </tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+    制表人：$!userName
+    &nbsp; &nbsp; 
+    制表时间：$!reportTime
+</p>

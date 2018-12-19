@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="tskSchedule" extends="default" namespace="/tskSchedule">
+		<!-- 初始化首页 -->
+		<action name="firstLoadScheduleList" class="tskScheduleAction" method="firstLoadScheduleList">
+			<result name="success">/velocity/microTask/tskScheduleList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 搜索 -->
+		<action name="queryScheduleList" class="tskScheduleAction" method="queryScheduleList" >
+			<result name="success">/velocity/microTask/tskScheduleListTable.vm</result>
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+		<!-- 进入编辑页面 -->
+		<action name="loadOldScheduleInfo" class="tskScheduleAction" method="loadOldScheduleInfo" >
+			<result name="success" >/velocity/microTask/tskScheduleAlter.vm</result>
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+		<!-- 编辑日程 -->
+		<action name="editSchedule" class="tskScheduleAction" method="editSchedule">
+		</action>
+		
+		<action name="toTskNewSchedule" class="tskScheduleAction" method="toTskNewSchedule">
+			<result name="success" >/velocity/microTask/tskNewSchedule.vm</result>
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+		<!-- 新增日程 -->
+		<action name="tskNewSchedule" class="tskScheduleAction" method="addSchedulesByCustomers">
+			<result name="success" >/velocity/microTask/addScheduleTable.vm</result>
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+		<!-- 查看详情 -->
+		<action name="viewDetail" class="tskScheduleAction" method="viewDetail">
+			<result name="success" >/velocity/microTask/tskViewDetail.vm</result>
+			<!--<result name="success" >/velocity/microTask/tskDetailView.vm</result>-->
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+        <!--搜索详情信息-->
+        <action name="queryLoanIntentionList" class="tskScheduleAction" method="queryLoanIntentionList">
+            <result name="success">/velocity/microTask/tskLoanIntentionTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+		<!-- 新增日程安排 -->
+		<action name="tskAddSchedulePlan" class="tskScheduleAction" method="tskAddSchedulePlan">
+			<result name="success" >/velocity/microTask/tskAddSchedulePlan.vm</result>
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+		<!-- 判断是否能够新增日程 -->
+        <!--
+		<action name="judgeCustomerSchedule" class="tskScheduleAction" method="judgeCustomerSchedule">
+		</action>
+		-->
+		<action name="judgeCustomerSchedule" class="tskScheduleAction" method="judgeScheduleByCustomer">
+		</action>
+		<action name="queryCustomerList" class="tskScheduleAction" method="queryCustomerList">
+			<result name="success" >/velocity/microTask/addScheduleTable.vm</result>
+			<result name="error" >/velocity/error.vm</result>
+		</action>
+        <!--新增拜访记录页面转换-->
+        <action name="showAddVisitRecordPage" class="tskScheduleAction" method="showAddVisitRecordPage">
+            <result name="success">/velocity/microTask/newVisitRecord.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--添加拜访记录-->
+        <action name="addVisitRecord" class="tskScheduleAction" method="addVisitRecord">
+            <result name="success" type="redirect">firstLoadScheduleList.html</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--编辑拜访记录页面转换-->
+        <action name="showUpdateVisitRecordPage" class="tskScheduleAction" method="showUpdateVisitRecordPage">
+            <result name="success">/velocity/microTask/editVisitRecord.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--更新拜访记录-->
+        <action name="updateVisitRecord" class="tskScheduleAction" method="updateVisitRecord">
+            <result name="success" type="redirect">firstLoadScheduleList.html</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--新建下次联系任务-->
+        <action name="nextTaskUp" class="tskScheduleAction" method="nextTaskUp">
+            <result name="success">/velocity/microTask/nextTaskUpdate.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--保存新建的下次联系任务-->
+        <action name="updateNextContextTask" class="tskScheduleAction" method="updateNextContextTask">
+        </action>
+        <!--下次联系页面-->
+        <action name="showNextTaskPage" class="tskScheduleAction" method="showNextTaskPage">
+            <result name="success">/velocity/microTask/nextTask.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addNextContextTask" class="tskScheduleAction" method="addNextContextTask">
+        </action>
+        <!--新建下次联系任务-->
+        <!--
+        <action name="newNextContactTask" class="tskScheduleAction" method="newNextContactTask">
+            <result name="success">/velocity/microTask/newNextContactTask.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        -->
+        <!--客户详情小页卡页面-->
+        <action name="getScheduleListCard" class="tskScheduleAction" method="getScheduleListCard">
+            <result name="success">/velocity/microTask/tskScheduleListCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="queryScheduleListCard" class="tskScheduleAction" method="queryScheduleListCard">
+            <result name="success">/velocity/microTask/tskScheduleListTableCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--客户意向小页卡-->
+        <action name="getCustomerPdtProduct" class="tskScheduleAction" method="getCustomerPdtProduct">
+            <result name="success">/velocity/microTask/customerPdtProductListCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="queryCustomerPdtProduct" class="tskScheduleAction" method="queryCustomerPdtProduct">
+            <result name="success">/velocity/microTask/customerPdtProductListTableCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--日程安排——小页卡-->
+        <action name="toTskNewScheduleCard" class="tskScheduleAction" method="toTskNewScheduleCard">
+            <result name="success">/velocity/microTask/toTskNewScheduleCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addScheduleByCusIdCard" class="tskScheduleAction" method="addScheduleByCusIdCard">
+        </action>
+        
+        <!-- 工作台 日程提醒 -->
+        <action name="getAgendaToWorkPlace" class="tskScheduleAction" method="getAgendaToWorkPlace">
+        	<result name="success">/velocity/login/agendaWB.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+	</package>
+</struts>

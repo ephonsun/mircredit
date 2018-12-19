@@ -1,0 +1,481 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>通话窗口</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.phone.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.model-layer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/biz/banger.talk.js"></script>
+	<style type="text/css">
+		body { margin: 0; padding: 0; }
+	</style>
+<script>
+
+var fn = {};
+
+var resetHeightHandler=-1;
+
+//实时更新可见框架的高度
+function resetHeightTimer(){
+	var iframe = jQuery('iframe:visible')[0];
+	
+	try{
+		iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 200 + 'px';
+	}
+	catch(e){
+	}
+};
+
+function clearResetHeightTimer(){
+	if(resetHeightHandler!=-1)clearInterval(resetHeightHandler);
+	resetHeightHandler=-1;
+};
+
+
+
+function setWinKey(){			//屏蔽刷新
+	jQuery(document.body).bind("contextmenu",function(e){
+		return false;
+	});
+	
+	$(document).bind("keydown",function(e){
+		e=window.event || e;
+		if(e.keyCode==116){
+			e.keyCode = 0;
+			return false; //屏蔽F5刷新键   
+		}
+	});
+}
+
+jQuery(document).ready(function(){
+	setWinKey();
+	
+	var args = { tabs: "call-tabs-items", frames: "call-tabs-pages", left: "btnl", right: "btnr", dropdown: "btnd", closeall: "btnc" ,closeFormHandler:closeWindow };
+	window.Tab = InstanceTab.Create(args);
+	
+	loadFirstTalkPage();
+	
+	//实时更新可见框架的高度
+	resetHeightHandler = setInterval(resetHeightTimer,500);
+	
+	//taskManager.initTasks(["sessionTask"]);
+});
+
+window.onbeforeunload = function() { 
+			sp.destory();
+}
+
+//Add Tab
+var add = function(i){
+	Tab.Add(window.options[i]);
+};
+//Close Tab
+var remove = function(){
+	Tab.Close(id);
+}
+
+function renameTab(id, title,status){
+	var it = Tab.Tabs.find('#' + id);
+	if(it.length > 0){
+		var tt = $("<span></span>");
+		tt.text(title);
+		var ss= $(status);
+		$('div', it).empty();
+		$('div', it).append(tt);
+		$('div', it).append(ss);
+		Tab.ResetWidth();
+	}
+}
+
+var enforceClose = false;
+
+function closeTalkWindow()			//判断是否可以关闭通话窗口
+{
+	if(enforceClose)return true;
+	var elems = Tab.Frames.children();
+	for(var i=0;i<elems.length;i++)
+	{
+		var win = $(elems[i]).find("iframe")[0].contentWindow;
+		if(win){
+			if(win.checkHangup)
+			{
+				if(!win.checkHangup(true))
+				{
+					return false;
+				}
+				else
+				{
+					win.closeSave();
+				}
+			}
+		}
+	}
+	enforceClose = true;
+	return false;
+}
+
+function closeTalkPage(frame)
+{
+	if(frame)
+	{
+		var win = frame.contentWindow;
+		if(win){
+			if(win.checkHangup)
+			{
+				if(win.checkHangup(true))win.closeSave();
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+function closeWindow()			//关闭通话窗口
+{
+	enforceClose = true;
+	clearResetHeightTimer();		//关闭重置高度计时器
+	var action = "closeTalkForm";
+	try
+	{
+		sp.ocx.exceuteCmd(action,"");
+	}
+	catch(e)
+	{
+	}
+}
+
+function loadFirstTalkPage()		//加载第一次通话界面
+{
+	var ps = getUrlParams();
+	loadTalkPage(ps);
+}
+
+function openTalkTab(url)
+{
+	var ps = getUrlParams(url);
+	loadTalkPage(ps);
+}
+
+function loadTalkPage(params)
+{
+	var number = params["number"].replace(/[#]/g,"%23").replace(/[*]/g,"%2a");
+	var account = params["account"];
+	var cusId = params["cusId"];
+	var type = params["talktype"];
+	var code = params["code"].replace(/[#]/g,"%23").replace(/[*]/g,"%2a");
+	var taskId = params["taskId"];
+	var tabId = newGuid();
+	var url="";
+	if(cusId)url = "getTelephoneTalkPage.html?autoLogin=true&account="+account+"&number="+number+"&talktype="+type+"&code="+code+"&tabId="+tabId+"&cusId="+cusId+"&taskId="+taskId+"&randNum="+Math.random()*100000;
+	else url = "getTelephoneTalkPage.html?autoLogin=true&account="+account+"&number="+number+"&talktype="+type+"&code="+code+"&tabId="+tabId+"&taskId="+taskId+"&randNum="+Math.random()*100000;
+	if(type=="spotRec")
+	{
+		Tab.Add({"id":tabId,"title":"座谈","url":url,"lock":false,"closeHandler":closeTalkPage});
+	}
+	else
+	{
+		Tab.Add({"id":tabId,"title":params["number"],"url":url,"lock":false,"closeHandler":closeTalkPage});
+		answerAllEnd();
+	}
+}
+
+function talkBegin(args)	//通话开始
+{
+	with(args)
+	{
+		var ps = getUrlParams();
+		var guidId = newGuid();
+		var account = ps["account"];
+		var taskId = ps["taskId"];
+		var timeStr = formatDate(beginTime);
+		var recordNo = (type!="spotRec")?timeStr.replace(".","")+number+deviceid:code;
+		var autoLogin = "autoLogin=true&account="+encodeURI(encodeURI(account));
+		var url = "getTelephoneTalkPage.html?"+autoLogin+"&number="+number+"&code="+recordNo+"&talktype="+type+"&tabId="+guidId+"&taskId="+taskId+"&randNum="+Math.random()*100000;
+		if(type=="incoming")   //来电
+		{
+			Tab.Add({"id":guidId,"title":number,"url":url,"lock":false,"closeHandler":closeTalkPage});
+		}
+		else					//去电
+		{
+			Tab.Add({"id":guidId,"title":number,"url":url,"lock":false,"closeHandler":closeTalkPage});
+		}
+	}
+}
+
+var currentTalk=null;
+
+function talkEnd(args)		//通话结束
+{
+	if(currentTalk)
+	{
+		currentTalk = null;
+		Tab.Frames.children().each(function(){
+			var win = $(this).find("iframe")[0].contentWindow;
+			if(win){
+				if(win.setHangupStatus)win.setHangupStatus();
+				if(win.talkTimeEnd)win.talkTimeEnd();
+				if(win.closeConfirm)win.closeConfirm();
+			}
+		});
+	}
+}
+
+function answerAllEnd(){			//结束所有座谈
+	Tab.Frames.children().each(function(){
+        var win = $(this).find('iframe')[0].contentWindow;
+        if(win){
+        	if(win.isAnswerRunning){
+        	 	if(win.isAnswerRunning()){
+                	if(win.talkTimeEnd)win.talkTimeEnd();
+                	if(win.setHangupStatus)win.setHangupStatus();
+            	}
+            }
+        }
+    });
+}
+
+function hangupEnd()
+{
+	Tab.Frames.children().each(function(){
+		var win = $(this).find("iframe")[0].contentWindow;
+		if(win){
+			if(win.setHangupStatus)win.setHangupStatus();
+			if(win.talkTimeEnd)win.talkTimeEnd();
+			if(win.closeConfirm)win.closeConfirm();
+		}
+		if(currentTalk)currentTalk = null
+	});
+}
+
+function formatDate(t)
+{
+	var date = new Date();
+	date.setTime((t-25569.333333) * 24 * 3600 * 1000);
+	var year = date.getFullYear();
+	var month = padLeft((date.getMonth()+1)+"",2,"0");
+	var day = padLeft(date.getDate()+"",2,"0");
+	var hour = padLeft(date.getHours()+"",2,"0");
+	var minute = padLeft(date.getMinutes()+"",2,"0");
+	var second = padLeft(date.getSeconds()+"",2,"0");
+	return year+month+day+hour+minute+second;
+}
+
+function padLeft(str,len,c)
+{
+	var str1 = str;
+    var bit=len;
+    var n = str1.length;
+    if (n < bit)
+    {
+        var m = bit - n;
+        for (var i = 0; i < m; i++)
+        {
+            str1 =  c + str1;
+        }
+        return str1;
+    }
+    else return str;
+}
+
+function stopScene(){			//结束现场录音
+	var phone = sp.getCurrent();
+	if(phone)
+	{
+		phone.stopScene();
+	}
+	else
+	{
+		banger.page.showMessageBox("无可用的智能话机，无法使用来电弹屏、软件拨号、电话录音等智能语音功能!");
+	}
+}
+
+function dial(num,custId){			//拨号
+	var phone = sp.getCurrent();
+	var id = custId+"";
+	if(phone)
+	{
+		if(num){
+			phone.dial(num);
+			if(id!="" && parseInt(id)>0)sp.setDialCustomerId(custId);
+		}
+		else banger.page.showMessageBox("拨打的电话号码不能为空!");
+	}
+	else
+	{
+		banger.page.showMessageBox("无可用的智能话机，无法使用来电弹屏、软件拨号、电话录音等智能语音功能!");
+	}
+}
+
+function hangup(){			//挂机
+	var phone = sp.getCurrent();
+	if(phone)
+	{
+		phone.handup();
+	}
+	else
+	{
+		currentTalk = null;
+	}
+}
+
+function continuedDial(num){	//继拨分机
+	var phone = sp.getCurrent();
+	if(phone)
+	{
+		if(num)phone.continuedDial(num);
+		else banger.page.showMessageBox("拨打的电话号码不能为空!");
+	}
+	else
+	{
+		banger.page.showMessageBox("无可用的智能话机，无法使用来电弹屏、软件拨号、电话录音等智能语音功能!");
+	}
+}
+
+function dialExt(num){			//继拨分号
+	var phone = sp.getCurrent();
+	if(phone)
+	{
+		if(num)phone.dialExt(num);
+		else banger.page.showMessageBox("拨打的电话号码不能为空!");
+	}
+	else
+	{
+		banger.page.showMessageBox("无可用的智能话机，无法使用来电弹屏、软件拨号、电话录音等智能语音功能!");
+	}
+}
+
+function getPhoneState(){			//得到话机状态
+	var phone = sp.getCurrent();
+	if(phone)
+	{
+		return phone.getStatus();
+	}
+	else
+	{
+		banger.page.showMessageBox("无可用的智能话机，无法使用来电弹屏、软件拨号、电话录音等智能语音功能!");
+	}
+}
+
+function openPhoneRecord(){			//设置录音开始
+	var phone = sp.getCurrent();
+	if(phone)
+	{
+		phone.startRecord();
+	}
+}
+
+function getPhone(){			//得到话机
+	return sp.getCurrent();
+}
+
+function recordListen(talkId,fileName)
+{
+	var vd = new window.video.create(talkId,310,60,fileName,null,400,300);
+}
+
+function fileUploadBefore(args)
+{
+	with(args)
+	{
+		if(Tab)
+		{
+			var elems = Tab.Frames.children();
+			for(var i=0;i<elems.length;i++)
+			{
+				var win = $(elems[i]).find("iframe")[0].contentWindow;
+				if(win){
+					if(win.containTalkId)
+					{
+						if(win.containTalkId(recordId))
+						{
+							if(win.setRecordFileName)win.setRecordFileName(fileName);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+function hookUp(args)
+{
+	var elems = Tab.Frames.children();
+	for(var i=0;i<elems.length;i++)
+	{
+		var win = $(elems[i]).find("iframe")[0].contentWindow;
+		if(win){
+			if(win.setToolBarState)win.setToolBarState();
+		}
+	}
+}
+
+function logout(){    //退出通知
+ 	enforceClose = true;
+ 	var elems = Tab.Frames.children();
+    for(var i=0;i<elems.length;i++){
+    	var win = $(elems[i]).find("iframe")[0].contentWindow;
+        if(win){
+        	win.closeSave();
+        }
+    }
+ }
+
+
+function heartBeatStop()		//必跳停止
+{
+	enforceClose = true;
+	banger.page.showMessageBox("关闭窗口通知:用户已退出系统!");
+	closeWindow();
+}
+
+function phoneDeviceChange()		//插拔话机时
+{
+	var elems = Tab.Frames.children();
+	for(var i=0;i<elems.length;i++)
+	{
+		var win = $(elems[i]).find("iframe")[0].contentWindow;
+		if(win){
+			if(win.setToolBarState)win.setToolBarState();
+			if(win.setPhoneTabName)win.setPhoneTabName();
+		}
+	}
+}
+
+var sp = smartPhone.create();
+var setting = {events:{onHandup:hangupEnd,onTalkEnd:talkEnd,onFileUploadBefore:fileUploadBefore,onLogout:logout,onHeartBeatStop:heartBeatStop,onHookUp:hookUp,onPhoneDeviceChange:phoneDeviceChange}};
+sp.load(setting);
+
+</script>
+</head>
+<body>
+ 	<div class="call-tabs">
+        <div class="call-tabs-header">
+            <div id="call-tabs-items-zone" class="call-tabs-items-zone">
+                <ul id="call-tabs-items" class="call-tabs-items">
+                    
+                </ul>
+            </div>
+            <div class="call-tabs-slider">
+                <span id="btnl" class="call-tabs-slider-l"></span>
+                <span id="btnr" class="call-tabs-slider-r"></span>
+                <span id="btnd" class="call-tabs-slider-d"></span>
+                <span id="btnc" class="call-tabs-slider-c"></span>
+            </div>
+        </div>
+    	<div id="call-tabs-pages" class="call-tabs-pages">
+        </div> 
+   	</div>
+   	<input type="hidden" name="account" value="$!account" id="account" />
+</body>
+</html>

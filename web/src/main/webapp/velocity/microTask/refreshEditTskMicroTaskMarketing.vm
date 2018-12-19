@@ -1,0 +1,27 @@
+<thead>
+     <tr>
+	   <th><label title="分配对象">分配对象</label></th>
+	   <th><label title="任务目标(个)">任务目标(个)</label></th>
+	   <th><label title="已分配任务(个)">已分配任务(个)</label></th>
+	   <th><label title="未分配任务(个)">未分配任务(个)</label></th>
+	   <th><label title="已分配任务比率">已分配任务比率</label></th>
+	   <th><label title="已完成贷款个数(个)">已完成个数(个)</label></th>
+	   <th><label title="完成进度">完成进度</label></th>
+	 </tr>
+</thead>
+<tbody>
+	#foreach($tskAssign in $!tskAssignList)
+		<tr id="$!tskAssign.id" pid="$!tskAssign.pid" mode="$!tskAssign.tMode" epid="$!tskAssign.epid">
+		   <td><label title="$!tskAssign.assignObjName">$!tskAssign.assignObjName</label></td>
+		   <td>
+               <label class="col1" title="$!tskAssign.assignTotalTarget">$!tskAssign.assignTotalTarget</label>
+               <input type="hidden" id="assignTotalTarget" value="$!tskAssign.assignTotalTarget" />
+           </td>
+		   <td><label class="col2" title="$!tskAssign.assignTarget">$!tskAssign.assignTarget</label></td>
+		   <td><label #if($!tskAssign.unAssignTarget!=0) class="col3 red" #else class="col3" #end title="$!tskAssign.unAssignTarget">$!tskAssign.unAssignTarget</label></td>
+		   <td><label class="col4" title="$!tskAssign.assignPc">$!tskAssign.assignPc</label></td>
+		   <td><label class="col5" title="$!tskAssign.comTskNum">$!tskAssign.comTskNum</label></td>
+		   <td><label class="col6" title="$!tskAssign.comPc">$!tskAssign.comPc</label></td>
+		 </tr>
+	 #end
+</tbody>

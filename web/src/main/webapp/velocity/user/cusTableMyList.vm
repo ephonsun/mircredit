@@ -1,0 +1,54 @@
+<table id="datatbl" class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+            <tr>
+                <th width="30"><input type="checkbox" nm="chkall" name="cusCheckAll" id="cusCheckAll"  onclick="selectAll(this)" /></th>
+                <th width="100"><label title="客户类型">客户类型</label></th>
+                <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+                <th width="150"><label title="单位">单位</label></th>
+                <th width="100"><label title="归属人员">归属人员</label></th>
+            </tr>
+        </thead>
+        <tbody>
+        	#foreach($customerListTemp in $!customerList.items)
+            <tr id="$!customerListTemp.customerId">
+                <td><input type="checkbox" nm="chkone" name="cusCheck" id="cusCheck" value="$!customerListTemp.customerId"/></td>
+                <td><label title="$!customerListTemp.customerTypeName">$!customerListTemp.customerTypeName</label></td>
+                <td>
+                	<div class="datacus">
+                		#if($!customerListTemp.defaultPhoneType=='1')
+                        	<a href="#2" class="slink nm" ><label title="$!customerListTemp.customerName（$!customerListTemp.mobilePhone1）" onclick="browseCustomer('$!customerListTemp.customerId')" >$!customerListTemp.customerName（$!customerListTemp.mobilePhone1）</label></a>
+                        #elseif($!customerListTemp.defaultPhoneType=='2')
+                        	<a href="#2" class="slink nm" ><label title="$!customerListTemp.customerName（$!customerListTemp.mobilePhone2）" onclick="browseCustomer('$!customerListTemp.customerId')">$!customerListTemp.customerName（$!customerListTemp.mobilePhone2）</label></a>
+                        #elseif($!customerListTemp.defaultPhoneType=='3')
+                        	<a href="#2" class="slink nm"><label title="$!customerListTemp.customerName（$!customerListTemp.phone）" onclick="browseCustomer('$!customerListTemp.customerId')">$!customerListTemp.customerName（$!customerListTemp.phone）</label></a>
+                        #elseif($!customerListTemp.defaultPhoneType=='4')
+                        	<a href="#2" class="slink nm"><label title="$!customerListTemp.customerName（$!customerListTemp.fax）" onclick="browseCustomer('$!customerListTemp.customerId')">$!customerListTemp.customerName（$!customerListTemp.fax）</label></a>
+                        #end
+                        <div class="other">
+                        	<label class="item cusTitle" title="$!customerListTemp.customerTitle">
+                            	$!customerListTemp.customerTitle
+                            </label>
+                            <label class="item">
+                            	$!customerListTemp.sex
+                            </label>
+                            <label class="item">
+                            	$!customerListTemp.age
+                            </label>
+                        </div>
+                    </div>
+                </td>
+                <td><label title="$!customerListTemp.company">$!customerListTemp.company</label></td>
+                <td><label title="$!customerListTemp.userName">$!customerListTemp.userName</label></td>
+            </tr>
+            #end
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <div class="fr">
+						<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

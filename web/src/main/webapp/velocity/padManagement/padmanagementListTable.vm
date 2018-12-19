@@ -1,0 +1,80 @@
+<thead>
+	<tr>
+    	#*<th>编号</th>*#
+    	<th>序列号</th>
+        <th>品牌</th>
+        <th>型号</th>
+       #* <th width="80">添加时间</th>*#
+        <th>使用人员</th>
+		<th>状态</th>
+        <th width="160">最近登录时间</th>
+		#*<th>使用状态</th>*#
+    	#*<th width="150">操作</th>*#
+    </tr>
+</thead>
+<tbody>
+	#foreach($info in $!padInfoPage.items)
+		<tr>
+	    	#*<td><label title="$!info.padCode">$!info.padCode</label></td>*#
+	    	<td><label title="$!info.serialNumber">$!info.serialNumber</label></td><!--序列号-->
+	        <td><label title="$!info.brandTypeName">$!info.brandType</label></td><!--品牌-->
+	        <td><label title="$!info.padSubTypeName">$!info.brandSubType</label></td><!--型号-->
+	       #* <td class="pad-tbl-datetime"><label title="$!date.format('yyyy-MM-dd HH:mm:ss',$!info.createDate)">$!date.format('yyyy-MM-dd HH:mm:ss',$!info.createDate)</label></td>*#
+	        <td><label title="$!info.usePersonnel">$!info.userName</label></td><!--使用人员-->
+	        #*<td>
+	        	<div class="pad-tbl-status-div">
+                    
+                    #if($!info.logType==1)
+		        		<p>
+                        	$!info.loginName
+	                    </p>
+	                    <p>已登录</p>
+		        	#else
+		        		未连接
+		        	#end
+                </div>
+	        </td>*#
+
+                <td>
+					#if($!info.status==1)
+                       在线
+					#elseif($!info.status==0)
+                        离线
+					#end
+                </td>
+	        <td class="pad-tbl-datetime"><label title="$!date.format('yyyy-MM-dd HH:mm:ss',$!info.loginDate)">$!date.format('yyyy-MM-dd HH:mm:ss',$!info.loginDate)</label></td><!--最近登录时间-->
+
+	   		#*<td width="150">
+	        	<a class="ui-link-btn" href="javascript:void(0);" onclick="padDetail($!info.padInfoId);">查看</a>
+	        	#if($!info.useStatus==3)
+	    			<span href="#" disabled="true" style="cursor: default;">编辑</span>
+	    		#else
+	    			<a class="ui-link-btn" href="javascript:void(0);" onclick="toUpdatePad($!info.padInfoId);">编辑</a>
+	    		#end
+	        	
+	        	#if($!info.useStatus==1)
+	        		<a class="ui-link-btn" href="javascript:void(0);" onclick="changePad($!info.padInfoId,2);">禁用</a>
+	        	#else
+	        		#if($!info.useStatus==3)
+	        			<span href="#" disabled="true" style="cursor: default;">启用</span>
+	        		#else
+	        			<a class="ui-link-btn" href="javascript:void(0);" onclick="changePad($!info.padInfoId,1);">启用</a>
+	        		#end
+	        	#end
+	        	#if($!info.useStatus!=3)
+	            	<a class="ui-link-btn" href="javascript:void(0);" onclick="changePad($!info.padInfoId,3);">停用</a>
+	            #end
+	            <a class="ui-link-btn" href="javascript:void(0);" onclick="delPad($!info.padInfoId,4);">删除</a>
+	        </td>*#
+	    </tr>
+    #end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="6">
+            <div class="pagination">
+				#parse("/velocity/ajaxPage.vm")
+			</div>
+        </td>
+    </tr>
+</tfoot>

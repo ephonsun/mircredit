@@ -1,0 +1,306 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>催收贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('select').select();
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+            $('table.datatbl').table();
+
+            $("#clear").click(function(){
+                $('.text').val('');
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+                $("select").each(function(){
+                    this.selectedIndex = 0;
+                    $(this).select();
+                });
+            });
+
+            getQueryJson();
+
+            reloadRepaymentDate();
+
+            $("#query").click(function(){
+                var postJson = getQueryJson();
+                var urlStr = "../loan/dunLoanListQuery.html?RandNum="+ Math.random();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+                        queryBack(html, 'dataList');
+                        oldPostJson = getQueryJson();
+                        reloadRepaymentDate();
+                    }
+                });
+            });
+
+
+
+            $("#refresh").on('click',function(e){
+                if(oldPostJson){
+                    goto(
+                            null,
+                            "${ctx}/loan/dunLoanListQuery.html?RandNum="+ Math.random(),
+                            oldPostJson,
+                            function(html){
+                                queryBack(html, 'dataList');
+                                reloadRepaymentDate();
+                            });
+                }
+            });
+        });
+
+
+        var oldPostJson = {};
+
+        function getQueryJson(){
+            if($('#customer').val()=="姓名、电话或身份证"){
+                $('#customer').val("");
+            }
+
+            var postJson = {};
+            postJson['customer']=jQuery.trim($('#customer').val());
+            postJson['loanType'] = jQuery.trim($('#loanType').val());
+            postJson['repaymentStartDate'] = jQuery.trim($('#repaymentStartDate').val());
+            postJson['repaymentEndDate']=jQuery.trim($('#repaymentEndDate').val());
+            postJson['status'] = jQuery.trim($('#status').val());
+
+
+            oldPostJson = postJson;
+
+            if($('#customer').val()==''){
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+            }
+
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "${ctx}/loan/dunLoanListQuery.html?RandNum="+ Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryBack(html, 'dataList');
+                            reloadRepaymentDate();
+                        });
+            }
+        }
+
+        function queryBack(html, gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+
+
+            var total = $('#total').val();
+            if(total!=null){
+                $("#recordCount").text(total);
+            }else {
+                $("#recordCount").text(0);
+            }
+        }
+
+        //编辑已落实贷款
+        function dunLoanEdit(loanId)
+        {
+            var options = {id: "dunLoanEdit-"+loanId, pid: GetId(), title: "编辑贷款", url: "${ctx}/loan/dunLoanEdit.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+            tab.add(options);
+        }
+
+        /** 弹出层 **/
+        var target='';//定义全局变量，保存事件源
+        function reloadRepaymentDate(){
+            $('.repaymentDate').on('click',function(e){ //事件源点击事件
+                var rd=$(this);//事件源对象
+                var loanId= rd.attr('id');
+                var lrp= $('#loanRepaymentPlan');//弹出层对象
+
+                jQuery.ajax({
+                    type:'POST',
+                    url:"../loan/loanRepaymentPlan.html?RandNum="+ Math.random(),
+                    data:{"loanId":loanId},
+                    success:function(html){
+                        $("#queryList").html(html);
+                        $('#queryList').table();
+                    }
+                });
+
+                var dbW=document.body.clientWidth;//获取body的宽度
+                var lrpW=lrp.css('width').split('px')[0];//弹出层的宽度
+                var lrpTop=rd.offset().top +  rd.outerHeight(true) - 1 ;//事件源离顶部的距离
+                var lrpLeft=rd.offset().left; //事件源离在边的距离
+                var lrpRight=dbW-lrpLeft - 20;//事件源离右边的距离
+                if(lrpRight<lrpW){ //判断弹出层是否可以全部显示在右侧
+                    lrpLeft=lrpLeft-(lrpW-lrpRight);//如果显示右侧无法全部显示，向左移动相应距离
+                }
+
+                if(target==e.target){//判断事件源是否是多次点击
+                    if(lrp.is(':hidden')){//如果弹出层是隐藏的就显示，否则隐藏
+                        lrp.css({
+                            'top':lrpTop + 'px',
+                            'left':lrpLeft + 'px'
+                        }).show();
+
+                    }else{
+                        lrp.hide();
+                    }
+                }else{//如果事件源是第一次点击，则显示弹出层
+                    lrp.css({
+                        'top':lrpTop + 'px',
+                        'left':lrpLeft + 'px'
+                    }).show();
+                }
+
+                target=e.target;//保存本次事件源
+
+                //e.stopPropagation();//阻止事件冒泡
+
+                if(lrp.is(':visible')){//如果弹出层是显示的则隐藏它
+                    $(window).resize(function(ev) {//监听浏览器 窗口大小是否改变
+                         var dbW=document.body.clientWidth;//获取body的宽度
+                         var lrpW=lrp.css('width').split('px')[0];//弹出层的宽度
+                         var lrpTop=rd.offset().top +  rd.outerHeight(true) - 1 ;//事件源离顶部的距离
+                         var lrpLeft=rd.offset().left; //事件源离在边的距离
+                         var lrpRight=dbW-lrpLeft - 20;//事件源离右边的距离
+                         if(lrpRight<lrpW){ //判断弹出层是否可以全部显示在右侧
+                             lrpLeft=lrpLeft-(lrpW-lrpRight);//如果显示右侧无法全部显示，向左移动相应距离
+                         }
+
+                        lrp.css({
+                            'top':lrpTop + 'px',
+                            'left':lrpLeft + 'px'
+                        });
+                        ev.stopPropagation();//阻止事件冒泡
+                        return false;
+                    });
+                }
+
+                e.stopPropagation();//阻止事件冒泡
+                return false;
+            });
+
+            $(document).click(function(e) {//点击窗口其它地方隐藏弹出层
+                var lrp=$('#loanRepaymentPlan');
+                if(lrp.is(':visible')){
+                    if($(e.target).parents(".repaymentDate").length==0 && $(e.target).parents("#loanRepaymentPlan").length==0){//如果在弹出层显示里面点击则不隐藏
+                        if($(e.target).attr('id')!=='loanRepaymentPlan'){//点击弹出层本身不隐藏弹出层
+                            lrp.hide();
+                        }
+                    }
+                }
+                e.stopPropagation();//阻止事件冒泡
+            });
+            /** 弹出层 **/
+        }
+    </script>
+</head>
+
+<body>
+<table class="htmltbl" >
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input id="customer" type="text" class="text" />
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>贷款类型：</label>
+        </td>
+        <td width="17%">
+            <select id="loanType">
+                <option></option>
+                #foreach($!dklx in $!checkBoxMessage.get("DKLX"))
+					<option value ="$!dklx.dictionaryKey" >&nbsp;$!dklx.dictionaryValue</option>
+				#end
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>还款日期：</label>
+        </td>
+        <td colspan="2">
+            <table class="celltbl">
+                <tbody>
+                <tr>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input id="repaymentStartDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="20"><label>-</label></td>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input id="repaymentEndDate" type="text" readonly="readonly" class="text datepicker" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+		<td width="17%"></td>
+    </tr>
+   #*  <tr>
+        <td class="field" width="8%">
+            <label>还款状态：</label>
+        </td>
+        <td width="17%">
+            <select id="status">
+                <option></option>
+                <option value="1">&nbsp;待催收</option>
+                <option value="2">&nbsp;已还款</option>
+            </select>
+        </td>
+        <td colspan="6"></td>
+    </tr>*#
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+            贷款催收(<label id="recordCount" class="green">$!recordCount</label>)
+        </span>
+    <input id="clear" type="button" class="ui-input-btn" value="清空" />
+    <input id="query" type="button" class="ui-input-btn" value="搜索" />
+</div>
+<div class="action-bar">
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+</div>
+<table id="dataList" class="datatbl">
+    #parse("/velocity/loan/dunLoanListTable.vm")
+</table>
+
+<div id="loanRepaymentPlan" style="border:1px solid #ccc; background:#fff; height:186px; _height:180px; width:420px; padding:4px;position:absolute;display:none;z-index:999;">
+    <table class="datatbl" id="queryList">
+        #parse("/velocity/loan/loanRepaymentPlan.vm")
+    </table>
+</div>
+</body>
+
+</html>

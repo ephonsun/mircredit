@@ -1,0 +1,279 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有产品</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+	<script type="text/javascript">
+		var selectIndex = 0;
+		var oldPostJson={};
+		$(function(){
+			$('select').select();
+			$('table.datatbl').table();
+			getQueryJson();
+		});
+		
+		function sub(){
+			var postJson = getPostJson();
+			postJson['selectIndex']=selectIndex;
+			postJson['tempId']=$('#productState').val();
+    		postJson['productCode']=jQuery.trim($('#productCode').val());
+			postJson['productName']=jQuery.trim($('#productName').val());
+			postJson['productState']=jQuery.trim($('#productState').val());
+			postJson['type']=jQuery.trim($('#type').val());
+			oldPostJson = postJson;
+			jQuery.post("showProduct.html?fenye=1&&random="+Math.random()*1000000,postJson,
+				function(html){
+					refreshGrid('grid',html);
+				});
+		}
+		
+		function getQueryJson(){
+        	var postJson = {};
+			postJson['selectIndex']=selectIndex;
+			postJson['tempId']=$('#productState').val();
+    		postJson['productCode']=jQuery.trim($('#productCode').val());
+			postJson['productName']=jQuery.trim($('#productName').val());
+			postJson['productState']=jQuery.trim($('#productState').val());
+			postJson['type']=jQuery.trim($('#type').val());
+    		return postJson;
+    	}
+		
+		//清空
+		function clean(){
+    		var length = document.forms[0].length
+    		for(i=0;i<length;i++)
+    		{
+    			 var type = document.forms[0].elements[i].type;
+    			 if(type!="button"&&type!="hidden"){
+    				 document.forms[0].elements[i].value = "";
+    			 }
+    		}
+			$('#tempField').html(' ');
+			selectIndex = 0;
+		}
+		
+		//分页跳转
+		function gotoPage(page){
+			if(!oldPostJson['type']){
+    			oldPostJson['type'] = $('#type').val();
+    		}
+			goto(page,"showProduct.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新Grid
+    	function refreshGrid(gridId,html)
+    	{	
+    		$("#" + gridId).html(html);
+    		$('table.datatbl').table();
+    		var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+    	}
+		
+		//刷新
+		function refresh(){
+			if(!oldPostJson['type']){
+    			oldPostJson['type'] = $('#type').val();
+    		}
+    		goto(null,"showProduct.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+				
+		function changeState(id){
+			if(id){
+				selectIndex = 1;
+				jQuery.post('/pdtProduct/onPdtTemplateChange.html',
+				{'tempId':id,
+				 'isSearch':'true',
+				 'flag':1
+				 },function(html){
+					refreshField(html);
+					});
+			}else{
+				selectIndex = 0;
+				$('#tempField').html('');
+			}
+		}
+		
+		//刷新字段
+		function refreshField(html){
+			$('#tempField').html(' ');
+			$('#tempField').html(html);
+			$('select').select();
+			$("input[dateFlag$='true']").each(function(i){
+	   			initDate(this.id);
+	 		});
+			$("div[comboFlag$='true']").each(function(i){
+	 			var codes = $(this).attr("codes");
+	 			var list = codes.split(",");
+	   			jQuery(this).combobox({"array":list});
+	 		});
+			dateInput("input[dateFlag$='true']");
+			numInput("input[intFlag$='true']");
+			floatInput("input[floatFlag$='true']");
+			maxTextArea("textarea[maxlength]");
+		}
+		
+		
+		//编辑产品
+		function editProduct(id){
+			var options = {id: "edit_product"+id, pid: GetId(), title: "编辑产品", url: "/pdtProduct/editProduct.html?pdtProduct.productId="+id+"&actionType=edit&random="+Math.random(), lock: false,confirm: true};
+    		tab.add(options);
+		}
+		
+		//查看产品
+		function detailProduct(id){
+			var options = {id: "detail_product"+id, pid: GetId(), title: "查看产品", url: "/pdtProduct/editProduct.html?pdtProduct.productId="+id+"&actionType=detail&random="+Math.random(), lock: false,confirm: false};
+    		tab.add(options);
+		}
+		
+		//新建产品
+		function addProduct(){
+			var title="新建产品";
+			var url="/pdtProduct/addProduct.html?random="+Math.random();
+			var options = {id: 'add_product', pid: GetId(), title: title, url: url, lock: false,confirm: true};
+			tab.add(options);
+		}
+		
+		
+		//刷新字段
+		function refreshField(html){
+			$('#tempField').html(html);
+			$('select').select();
+			$("input[dateFlag$='true']").each(function(i){
+	   			initDate(this.id);
+	 		});
+			$("div[comboFlag$='true']").each(function(i){
+	 			var codes = $(this).attr("codes");
+	 			var list = codes.split(",");
+	   			jQuery(this).combobox({"array":list});
+	 		});
+			dateInput("input[dateFlag$='true']");
+			numInput("input[intFlag$='true']");
+			floatInput("input[floatFlag$='true']");
+			maxTextArea("textarea[maxlength]");
+		}
+		//停售产品
+		function stopProduct(id,name){
+			if(!confirm('您确定要停售 “'+name+'” 产品吗？')) return;
+			jQuery.post('/pdtProduct/stopPdtProduct.html?random='+Math.random()*1000000,
+			{'pdtProduct.productId':id},
+			function(data){
+				refresh();
+			});
+		}
+		
+		//删除产品
+		function deleteProduct(id,name){
+			if(!confirm('你确定要删除 “'+name+'” 产品吗？')) return;
+			jQuery.post('/pdtProduct/deletePdtProduct.html?random='+Math.random()*1000000,
+			{'pdtProduct.productId':id},
+			function(data){
+				if(data){
+					banger.page.showMessageBox({"content":'“'+name+'”'+data, "width":350});
+				}else{
+					refresh();
+				}
+			});
+		}
+		//导入产品
+		function importProduct(){
+			var urlStr="/productImport/selectImportPath.html?random="+Math.random()*10000;
+			tab.add({id: "prod_imprt_all", pid: GetId(), title: "导入产品", url:urlStr, lock: false, confirm: true,refresh:false});
+		}
+    </script>
+</head>
+
+<body>
+	<form id="form1" method="post">
+    	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="10%">
+                	<label>产品编号：</label>
+					<input type="hidden" id="type" value="$!type">
+                </td>
+                <td width="15%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="productCode"/>
+                	</div>
+                </td>
+            	<td class="field" width="10%">
+                	<label>产品名称：</label>
+                </td>
+                <td width="15%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="productName"/>
+                	</div>
+                </td>
+				#if($!pdtTemplatesSize>0)
+            	<td class="field" width="10%">
+                	<label>产品类型：</label>
+                </td>
+                <td width="15%">
+                	<select id="productState" onchange="changeState(this.value)">
+						<option ></option>
+						#foreach($pdtTemplates in $!tempList)
+							<option value="$!pdtTemplates.templateId" >$!pdtTemplates.templateName</option>
+						#end
+                    </select>
+                </td>
+				#else
+				<td class="field" width="10%">
+                </td>
+                <td width="15%">
+                </td>
+				#end
+				<td width="10%"></td>
+                <td width="15%"></td>
+            </tr>
+        </tbody>
+    </table>
+	<div id="tempField"></div>
+    </form>
+    <div class="search-bar">
+        <span class="fl bold">
+           #if($!type.equals('0'))在售产品#elseif($!type.equals('1'))待上架产品#elseif($!type.equals('2'))已到期产品#elseif($!type.equals('3'))停售产品#end(<label class="green" id="queryCount"">$!count</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空" onclick="clean();"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="sub();"/>
+    </div>
+    
+	<div class="action-bar">
+		#if($urlPermitUtil.hasPermission('openSaveProduct'))
+        <span class="ui-span-btn fl" onclick="addProduct();">
+        	<label>新建产品</label>
+        </span>
+        <span class="ui-span-btn fl ml" onclick="importProduct()">
+        	<label>导入产品</label>
+        </span>
+		#end
+        <span class="ui-span-btn fr" onclick="refresh();">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <div id="grid">
+		 #parse("/velocity/pdtProduct/productListTabel.vm")
+	</div>
+</body>
+</html>

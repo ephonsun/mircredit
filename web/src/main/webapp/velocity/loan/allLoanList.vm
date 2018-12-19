@@ -1,0 +1,585 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>所有贷款</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+    <script type="text/javascript">
+
+    var autoLogin = "$!autoLogin";
+    var containSub = '1';
+    $(function(){
+        initBelongTo();
+        $('select').select();
+        $("#customer").tips({msg:"姓名、电话或身份证"});
+        $('table.datatbl').table();
+
+        getQueryJson();
+
+        //查询
+        $("#query").click(query);
+
+        //清除
+        $('#clear').click(function(){
+            $('.text').val('');
+            $("select").each(function(){
+                this.selectedIndex = 0;
+                $(this).select();
+            });
+            changeBelongTo('brMine');
+            changeBelongTo('brMine');
+            changeBelongTo('brAll');
+            $("#userText").val("");
+            $("#deptText").val("");
+            $("#customer").tips({msg:"姓名、电话或身份证"});
+        })
+
+        //刷新
+        $("#refresh").click(function(){
+            if(oldPostJson){
+                goto(
+                        null,
+                        "../loan/allLoanListQuery.html?RandNum="+Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryBack(html,'dataList');
+                        }
+                );
+            }
+        });
+    });
+
+    var oldPostJson = {};
+    var postJson = {};
+    function getQueryJson(){
+        if($("#customer").val() == "姓名、电话或身份证"){
+            $('#customer').val("");
+        }
+
+
+        postJson['customer'] = jQuery.trim($('#customer').val());
+		postJson['surveyUser'] = jQuery.trim($('#surveyUser').val());
+		postJson['isReject'] = jQuery.trim($('#isReject').val());
+		postJson['loanTypeId'] = jQuery.trim($('#loanTypeId').val());	
+		postJson['teamId'] = jQuery.trim($('#teamId').val());		
+        postJson['loanStatus'] = jQuery.trim($('#loanStatus').val());
+        postJson['startDate'] = jQuery.trim($('#startDate').val());
+        postJson['endDate'] = jQuery.trim($('#endDate').val());
+        postJson['startCreateDate'] = jQuery.trim($('#startCreateDate').val());
+        postJson['endCreateDate'] = jQuery.trim($('#endCreateDate').val());
+        postJson['checkoutStatus'] = jQuery.trim($('#checkoutStatus').val());
+
+        postJson['BelongToType']=jQuery.trim($('#BelongToType').val());
+        postJson['userIds'] = jQuery.trim($('#userIds').val());
+        postJson['deptIds'] = jQuery.trim($('#deptIds').val());
+		postJson['resultRepayDate'] = jQuery.trim($('#resultRepayDate').val());
+        postJson['monitored'] = jQuery.trim($('#monitored').val());
+		postJson['monIsCheck'] = jQuery.trim($('#monIsCheck').val());
+        postJson['nomontype'] = jQuery.trim($('#nomontype').val());
+        oldPostJson = postJson;
+
+        if($('#customer').val() == ''){
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+        }
+
+        return postJson;
+    }
+   //查看已落实贷款
+        function loanNotConfirmEdit(loanId)
+        {
+        var options = {id: "loanNotConfirmEdit-"+loanId, pid: GetId(), title: "编辑贷款", url: "${ctx}/loan/confirmLoanEdit.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+        tab.add(options);
+        }
+
+    //查询
+    function query(){
+        var postJson = getQueryJson();
+        var urlStr = "${ctx}/loan/allLoanListQuery.html?RanNum="+Math.random();
+        jQuery.ajax({
+            type:'POST',
+            url:urlStr,
+            data:postJson,
+            success:function(html){
+                queryBack(html,'dataList');
+                oldPostJson = getQueryJson();
+            }
+        });
+    }
+
+    //分页跳转
+    function gotoPage(page){
+        if(oldPostJson){
+            goto(
+                    page,
+                    "${ctx}/loan/allLoanListQuery.html?RanNum="+Math.random(),
+                    oldPostJson,
+                    function(html){
+                        queryBack(html,'dataList');
+                    }
+            );
+        }
+    }
+
+    function queryBack(html,gridId){
+        $("#"+gridId).html(html);
+        $('table.datatbl').table();
+        var total = $('#total').val();
+        if(total != null){
+            $("#recordCount").text(total);
+        }else{
+            $("#recordCount").text(0);
+        }
+    }
+    ##下载申请表
+    function downRapplyExcel(loanId){
+        var url = "../loan/downRapplyExcel.html?loanId="+loanId;
+        window.location = url;
+    }
+##下载申请表
+    function downLoan(loanId){
+        var url = "../loan/downLoanExcel.html?loanId="+loanId;
+        window.location = url;
+    }
+
+
+
+     ##撤回回滚
+    function forback(loanId){
+        var url = "../loan/backReject.html?loanId=" + loanId + "&random="  + Math.random() * 1000 ;
+        var result = banger.page.openDialog(url, "审批撤回", 600, 480);
+        if (result != undefined) {
+            alert("审批撤回成功！");
+            location.reload();
+
+        }
+    }
+
+   /* $("#rollback").change(function() {
+
+        var selectId = $("#rollback").find("datalist:loanStatusId").val();
+        if (selectId == 4) {
+            $("#rollback").css("display", "");
+        } else {
+            $("#rollback").css("display",  "none");
+        }
+
+    });
+*/
+
+
+    function getCheckedLoan(obj){
+        var str = "";
+        obj.each(function(){
+            if(jQuery(this).attr("checked")){
+                if(!str){
+                    str = jQuery(this).val();
+                }else{
+                    str = str + "," + jQuery(this).val();
+                }
+            }
+        })
+        return str;
+    }
+
+    function initBelongTo(){
+        $("#BelongToType").val("brAll");
+
+        //加载下属树
+        $('#userList').subtree({
+            tid: 'subtree',
+            showIcon: true,
+            url: function(){ return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brUser&random=" + Math.random(); },
+            buttons: [
+                { text: '确定', callback: onCheckUser },
+                { text: '取消' }
+            ]
+        });
+        //加载机构树
+        $('#deptList').agetree({
+            tid: 'agetree',
+            url: function(){ return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brDept&random=" + Math.random(); },
+            buttons: [
+                { text: '确定', callback: onCheckDept },
+                { text: '取消' }
+            ]
+        });
+
+        $("#BelongToType").change(function(){
+            changeBelongTo($(this).val());
+        });
+        changeBelongTo($("#BelongToType").val());
+    }
+    //点击User
+    function onCheckUser(treeId){
+        var postJson = {};
+        postJson = getCheckJson(treeId, 'U');
+        $('#userIds').val(postJson.ids);
+        $('#userText').val(postJson.names);
+    }
+    //点击Dept
+    function onCheckDept(treeId, checkbox){
+        var postJson = {};
+        postJson = getCheckJson(treeId, 'D');
+        $('#deptIds').val(postJson.ids);
+        $('#deptText').val(postJson.names);
+        if(checkbox.checked){
+            containSub = '1';
+        }else{
+            containSub = '0';
+        }
+    }
+    function getCheckJson(treeId, flag){
+        var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+        var nodes = treeObj.getCheckedNodes(true);
+        var len = nodes.length;
+        var uIds = "";
+        var uName = "";
+        for(var i=0; i<len; i++){
+            if(flag=='U'){
+                if(nodes[i].flag==flag){
+                    if(uIds==""){
+                        uIds = nodes[i].id;
+                        uName = nodes[i].name;
+                    }else{
+                        uIds = uIds + "," + nodes[i].id;
+                        uName = uName+ "," +nodes[i].name;
+                    }
+                }
+            }else{
+                if(uIds==""){
+                    uIds = nodes[i].id;
+                    uName = nodes[i].name;
+                }else{
+                    uIds = uIds + "," + nodes[i].id;
+                    uName = uName+ "," +nodes[i].name;
+                }
+            }
+        }
+        var postJson = {};
+        postJson['ids'] = uIds;
+        postJson['names'] = uName;
+        return postJson;
+    }
+
+    //复选框选中和取消
+    function selectAll(obj){
+        var mm=document.getElementsByName("cusCheck");
+        for(var i=0;i<mm.length;i++){
+            if(obj.checked==true){
+                mm[i].checked=true;
+            }else{
+                mm[i].checked=false;
+            }
+            if(mm[i].disabled==true){
+                mm[i].checked=false;
+            }
+        }
+    }
+
+    //设置贷款移交
+    function allotLoanPage(){
+        var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+        var loans = getCheckedLoan(obj);
+
+        if($!roles==5){
+
+            if(obj.size() == 0){
+                banger.page.showMessageBox("您没有选择要调整的贷款，请先选择贷款！");
+                return false;
+            }
+            var url = "../loan/moveLoanPage.html?loans="+loans+"&RandNum="+Math.random();
+            var result = banger.page.openDialog(url,"调整贷款",700,480);
+            if(result != undefined){
+                var resultArr = result.split(",");
+                var postJson = {};
+                postJson['loans'] = loans;
+                postJson['belongDeptId'] = resultArr[0];
+                postJson['belongUserId'] = resultArr[1];
+                postJson['belongUserName'] = resultArr[2];
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/moveLoanDetil.html?RandNum='+Math.random(),
+                    data:postJson,
+                    success:function(html){
+                        query();
+                        alert("调整成功");
+                    }
+                });
+            }
+        }else{
+            if(obj.size() == 0) {
+                banger.page.showMessageBox("您没有选择要移交的贷款，请先选择贷款！");
+                return false;
+            }
+            var url = "../loan/moveLoanPage.html?loans="+loans+"&RandNum="+Math.random();
+            var result = banger.page.openDialog(url,"移交贷款",700,480);
+            if(result != undefined){
+                var resultArr = result.split(",");
+                var postJson = {};
+                postJson['loans'] = loans;
+                postJson['belongDeptId'] = resultArr[0];
+                postJson['belongUserId'] = resultArr[1];
+                postJson['belongUserName'] = resultArr[2];
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/moveLoanDetil.html?RandNum='+Math.random(),
+                    data:postJson,
+                    success:function(html){
+                        query();
+                        alert("移交成功");
+                    }
+                });
+            }
+        }
+
+
+    }
+
+    //改变归属
+    function changeBelongTo(val){
+        $('#userIds').val("");
+        $('#deptIds').val("");
+        switch(val){
+            case "brAll":
+                $("#my, #userList, #deptList").hide();
+                break;
+            case "brMine":
+                $("#my").show();
+                $('#showText').text('$!userName');
+                $("#userList, #deptList").hide();
+                break;
+            case "brUser":
+                $("#userList").show();
+                $("#my, #deptList").hide();
+                break;
+            case "brDept":
+                $("#deptList").show();
+                $("#my, #userList").hide();
+                break;
+            case "brUnAllocate":
+                $("#my, #userList, #deptList").hide();
+                break;
+            default: break;
+        }
+    }
+
+    function exportList() {
+        var postJson = getQueryJson();
+        var result = decodeURIComponent(jQuery.param(postJson));
+        document.location.href = '../loan/exportLoanList.html?' + result;
+    }
+
+
+    </script>
+</head>
+
+<body>
+<input id="userId" type="hidden" name="userId" value="$!userId"/>
+<table class="htmltbl" >
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input type="text" class="text" id="customer" />
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>贷款状态：</label>
+        </td>
+        <td width="17%">
+            <select id="loanStatus">
+                <option value=""></option>
+                #foreach($loanStatus in $statusList)
+                    <option value="$loanStatus.loanStatusId"
+                            #if($isWBApproveLoan && $loanStatus.loanStatusId==4)
+                                selected="selected"
+                            #end
+                            >&nbsp;$loanStatus.loanStatusName</option>
+                #end
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>调查人员：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input type="text" class="text" id="surveyUser" />
+            </div>
+        </td>    
+		
+		<td class="field" width="8%">
+            <label>是否驳回：</label>
+        </td>
+        <td width="17%">
+            <select id="isReject">
+                <option value=""></option>
+                <option value="1">&nbsp;是</option>
+                <option value="0">&nbsp;否</option>
+            </select>
+        </td>  
+		
+    </tr>
+    <tr>
+		<td class="field" width="8%">
+            <label>贷款类型：</label>
+        </td>
+		<td width="17%">
+            <select id="loanTypeId">
+                <option value=""></option>
+                <option value="1">&nbsp;经营贷</option>
+                <option value="2">&nbsp;消费贷</option>
+            </select>
+        </td>  
+		
+		<td class="field" width="8%">
+            <label>团队：</label>
+        </td>
+		<td width="17%">
+			<select id="teamId">
+                <option ></option>
+				#foreach($!sysTeam in $!sysTeamList)
+					<option value="$!sysTeam.teamId">$!sysTeam.teamName</option>
+				#end
+            </select>
+        </td>  
+			
+        <td class="field" width="8%">
+            <label>提交时间：</label>
+        </td>
+        <td width="24%">
+            <table class="celltbl">
+                <tbody>
+                <tr>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input type="text" class="text datepicker" readonly="readonly" id="startDate" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="20"><label>-</label></td>
+                    <td width="120">
+                        <div class="ui-div-text">
+                            <input type="text" class="text datepicker" readonly="readonly" id="endDate" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+		
+                </tr>
+                </tbody>
+				
+            </table>
+			
+        </td>
+ 		<td class="field" width="8%">
+            <label>决议还款日：</label>
+          </td>
+		   <td width="7%">
+			<select id="resultRepayDate">
+                <option ></option>
+				<option value="5">5</option>
+				<option value="10">10</option>	
+				<option value="15">15</option>
+				<option value="20">20</option>
+				<option value="21">21</option>
+				<option value="25">25</option>
+            </select>
+        </td>  
+    </tr>
+	<tr>
+		<td class="field" width="8%">
+            <label>近期已监控：</label>
+        </td>
+		   <td width="17%">
+			<select id="monitored">
+                <option ></option>
+				<option value="1">是</option>
+			    <option value="0">否</option>
+            </select>
+        </td>  
+		
+		<td class="field" width="8%">
+            <label>是否需检查：</label>
+          </td>
+		   <td width="17%">
+			<select id="monIsCheck">
+                <option ></option>
+				<option value="1">是</option>
+			    <option value="0">否</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>未完成监控类型：</label>
+        </td>
+        <td width="17%">
+            <select id="nomontype">
+                <option ></option>
+                <option value="1">首次监控</option>
+                <option value="0">半年监控</option>
+                <option value="2">电话监控</option>
+            </select>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+            所有贷款(<label class="green" id="recordCount">$!recordCount</label>)
+        </span>
+    <input type="button" class="ui-input-btn" value="清空" id="clear"/>
+    <input type="button" class="ui-input-btn" value="搜索" id="query"/>
+</div>
+<div class="action-bar">
+        <span class="ui-span-btn fl" onclick="exportList()">
+        	<label>导出</label>
+        </span>
+        #if($!roles==1)
+        <span class="ui-span-btn fl" onclick="allotLoanPage()">
+        	<label>移交贷款</label>
+        </span>
+        #end
+       #if($!roles==5)
+        <span class="ui-span-btn fl" onclick="allotLoanPage()">
+        	<label>调整贷款</label>
+        </span>
+       #end
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+</div>
+<table class="datatbl" id="dataList">
+        #parse("/velocity/loan/allLoanListTable.vm")
+</table>
+</body>
+</html>

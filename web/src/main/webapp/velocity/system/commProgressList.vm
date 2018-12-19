@@ -1,0 +1,142 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>沟通进度列表</title>
+    
+    #styleLink("base")
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+	function setstate(){
+			$('.listtbl tbody tr:first a.up').unbind();
+			$('.listtbl tbody tr:first a.up').removeAttr("href");
+			$('.listtbl tbody tr:last a.down').unbind();
+			$('.listtbl tbody tr:last a.down').removeAttr("href");
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+	}
+    	
+    	jQuery(function(){
+    		$('#tabs').easytabs();
+			jQuery("#commProgressForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		setstate();
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		
+		function addCommProgress(){
+			if(jQuery.validator({ form: 'commProgressForm'})){
+				jQuery.post(
+					"validateAddCommProgress.html",
+					{commProgressName: jQuery("#commProgressName").val()},
+					function(data){
+						if(data != ""){
+		    				banger.page.showMessageBox(data);
+		    				return false;
+		    			}
+		    			var f = document.getElementById("commProgressForm");
+		    			f.action = "addCommProgress.html";
+			    		f.method = "post";
+						f.submit();
+					}
+				);
+			}
+				
+		}
+		
+		function updateCommProgress(code){
+    		var url = "getUpdateCommProgress.html?id=" + code + "&random=" + Math.random();
+    		var result = banger.page.openDialog(url,"编辑沟通进度",600,220);
+    		if(result == 1){
+    			location.reload();
+    		}
+    	}
+		
+		function moveCommProgress(id, type){
+        	jQuery.ajax({
+    		    type: "post", 
+    		    url: "moveCommProgress.html", 
+    		    data: {id: id, moveType: type},
+    		    success: function(data, textStatus){
+    		 		moveResult(data);
+    		    }
+			});
+		}
+    	function moveResult(msg){
+    		if(msg != "SUCCESS"){
+    			return false;
+    		}
+    		else{
+    			document.location.href = "showCommProList.html?random=" + Math.random();
+    		}		
+    	}
+    </script>
+</head>
+
+<body>
+	<form id="commProgressForm">
+		<table class="viewtbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" class="field"><label>名称：</label></td>
+	            	<td><label>沟通进度</label></td>
+	            	<td width="70" class="field"><label>字段类型：</label></td>
+	            	<td><label>系统级</label></td>
+	            	<td width="70" class="field"><label>数据类型：</label></td>
+	            	<td><label>单选下拉框</label></td>
+	            </tr>
+	        </tbody>
+	    </table>
+		<div style="margin: 10px 0px;"><label>选项列表</label></div>
+		<div style="border: 1px solid #ccc; padding: 10px;">
+	    	<div class="sz" style="text-align: left;">
+	        	<label class="fl red">*</label>
+	        	<label class="fl">新选项：</label>
+	        	<div class="dtxt2 fl" style="width: 150px; margin-right: 5px;">
+	            	<input type="text" name="commProgressName" id="commProgressName" class="dtxt2-txt" maxlength="20" rule="\S" tips="“沟通进度”必须填写" />
+	            </div>
+                <input type="text" style="display:none">
+                <input type="button" value="添 加" class="btn1" onclick="addCommProgress();" />
+	        </div>
+	    	<table class="listtbl" cellpadding="0" cellspacing="0">
+	            <thead>
+	                <tr>
+	                    <th>选项名称</th>
+	                    <th width="150">操作</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	            	#foreach($commPro in $!commProList)
+	                <tr>
+	                    <td id="commProgressName"><label>$!commPro.commProgressName</label></td>
+	                    <td width="150">
+	                        <a class="slink" href="javascript:void(0);" onclick="updateCommProgress('$!commPro.commProgressId')">编辑</a>
+	                        <a class="slink" href="deleteCommProgress.html?id=$!commPro.commProgressId" onclick="return confirm('您确定要删除选项“$!commPro.commProgressName”吗?删除后，相关联系的沟通进度将为空');">删除</a>
+	                        <a href="javascript:void(0);" class="slink up" onclick="moveCommProgress('$!commPro.commProgressId','up')">上移</a>
+	                        <a href="javascript:void(0);" class="slink down" onclick="moveCommProgress('$!commPro.commProgressId','down')">下移</a>
+	                    </td>
+	                </tr>
+	                #end
+	            </tbody>
+	        </table>
+	    </div>
+	    <div class="halign" style="margin-top: 20px;">
+	    	<input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+	    </div>
+</form>
+</body>
+</html>
+

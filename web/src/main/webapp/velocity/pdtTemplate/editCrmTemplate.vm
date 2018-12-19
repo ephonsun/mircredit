@@ -1,0 +1,102 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<title>编辑业务模板</title>
+	
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validationEngine.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validationEngine-zh_CN.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+			jQuery("#crmTemplate").validationEngine();
+		});
+		
+		function editCrmTemplate(){
+			if(jQuery("#crmTemplate").validationEngine('validate')){
+	    		jQuery.post('validatePdtUpdate.html',{
+	    			'template.templateName':$('#templateName').val(),
+	    			'oldName':$('#oldName').val(),
+	    			'template.remark':$('#crmRemark').val(),
+	    			'template.templateTypeId':$('#templateTypeId').val()
+	    		},function(data){
+	    			if(data!=""){
+	    				banger.page.showMessageBox(data);
+	    				return;
+	    			}
+	    			var f=document.getElementById('crmTemplate');
+		    		f.action="editPdtCrmTemplat.html";
+		    		f.method="post";
+					f.submit();
+					tab.close(GetId(), true);
+	    		});
+			}
+		}
+		
+		function editCrmTemplateAndContinue(){
+			if(jQuery("#crmTemplate").validationEngine('validate')){
+	    		jQuery.post('validatePdtUpdate.html',{
+	    			'template.templateName':$('#templateName').val(),
+	    			'oldName':$('#oldName').val(),
+	    			'template.remark':$('#crmRemark').val(),
+	    			'template.templateTypeId':$('#templateTypeId').val()
+	    		},function(data){
+	    			if(data!=""){
+	    				banger.page.showMessageBox(data);
+	    				return;
+	    			}
+	    			var f=document.getElementById('crmTemplate');
+		    		f.action="editPdtCrmTemplateAndContinue.html";
+		    		f.method="post";
+					f.submit();
+	    		});
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<form id="crmTemplate">
+		<input type="hidden" value="$!template.templateId" name="template.templateId" />
+		<input type="hidden" value="2" name="template.templateTypeId" id="templateTypeId" />
+		
+		<table class="htmltbl" cellpadding="0" cellspacing="0">
+	    	<tbody>      
+	        	<tr>
+	            	<td width="70" class="field">
+	            		<label class="red">*</label><label>模板名称：</label>
+	            		<input id="oldName" type="hidden" value="$!template.templateName" />
+	            	</td>
+	            	<td>
+	            		<div class="dtxt1" style="width: 400px;">
+	            			<input type="text" id="templateName" name="template.templateName" class="validate[required] dtxt1-txt" value="$!template.templateName" data-prompt-position="bottomLeft" maxlength="20" />
+	            		</div>
+	            	</td>
+	            </tr>
+	        	<tr>
+	            	<td width="70" class="field">
+	            		<label>描述：</label>
+	            	</td>
+	            	<td>
+	            		<div class="dtxtarea1" style="width: 400px;">
+	                		<textarea style="height: 80px; border: 0;" id="crmRemark" name="template.remark" maxlength="500">$!template.remark</textarea>
+	                	</div>
+	                </td>
+	            </tr>
+	        </tbody>
+		</table>
+		
+		<hr />
+		
+		<div class="halign">
+		   <input type="button" class="btn6 btn6bg1" onclick="editCrmTemplate()" value="保存" />
+		   <input type="button" class="btn6 btn6bg3" onclick="javascript:tab.close(GetId(), true);" value="取消" />
+		</div>
+    </form>
+</body>
+</html>

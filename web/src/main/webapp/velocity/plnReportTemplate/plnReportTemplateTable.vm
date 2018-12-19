@@ -1,0 +1,40 @@
+ <table class="datatbl" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="20"><input type="checkbox" nm="chkall" onclick="selectAll(this)"/></th>
+            	<th width="100"><label title="模板编号">模板编号</label></th>
+            	<th><label title="模板名称">模板名称</label></th>
+            	<th><label title="适合对象">适合对象</label></th>
+            	<th><label title="规划类型">规划类型</label></th>
+            	<th><label title="创建时间">创建时间</label></th>
+            	<th width="60"><label title="状态">状态</label></th>
+            	<th width="120"><label title="用户操作">用户操作</label></th>
+            </tr>
+        </thead>
+    	<tbody>
+			#foreach($temp in $!tempList.items)
+        	<tr>
+            	<td><input type="checkbox" nm="chkone" name="templateId" value="$!temp.templateId"/></td>
+            	<td><label title="$!temp.templateNo">$!temp.templateNo</label></td>
+            	<td><label title="$!temp.templateName">$!temp.templateName</label></td>
+            	<td><label title="$!temp.intervalTypeName">$!temp.intervalTypeName</label></td>
+            	<td><label title="$!temp.planTypeName">$!temp.planTypeName</label></td>
+				<td><label>$!date.format("yyyy-MM-dd",$!temp.createDate)</label></td>
+            	<td><label>#if($!temp.isActived==1)启用</label>#else<label>停用</label>#end</label></td>
+            	<td>
+                	<a class="slink" href="javascript:void(0);" onclick="active($!temp.isActived,$!temp.templateId)">#if($!temp.isActived==0)启用</label>#else<label>停用</label>#end</a>
+                	<a class="slink" href="javascript:void(0);" onclick="addTab('update',$!temp.templateId,'$!temp.templateName')">编辑</a>
+                	<a class="slink" href="javascript:void(0);" onclick="addTab('detail',$!temp.templateId,'$!temp.templateName')">查看</a>
+                </td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="8">
+                	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+	<input id="totalAmount" type="hidden" name="totalAmount" value="$!totalAmount"/>

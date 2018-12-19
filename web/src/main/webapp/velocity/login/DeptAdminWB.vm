@@ -1,0 +1,66 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>机构管理员桌面</title>
+ 
+    #styleLink("base")
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<style type="text/css">
+		h4.legend { border-bottom: 1px solid #ccc; margin-top: 20px; margin-bottom: 8px; line-height: 30px; font-size: 12px; font-weight: normal; }
+		ul li { height: 24px; line-height: 24px; }
+	</style>
+</head>
+ 
+<body>
+	<div class="desk-date">
+    	<label>$!dateString.getNowTimeAndWeek()</label>
+    </div>
+	
+	<div>
+    	<h4 class="legend" style="margin-top: 0;">机构下人员状况</h4>
+        <ul>
+        	<li>
+            	<label class="fl">管理总用户数</label>
+                <label class="fr">$!inChargeOfUsers 人</label>
+            </li>
+        	<li>
+            	<label class="fl">当前在线用户数</label>
+                <label class="fr">$!inChargeOnLineUsers 人</label>
+            </li>
+        </ul>
+    	<h4 class="legend">系统磁盘使用状况</h4>
+        <ul>
+        	<li>
+            	<label class="fl">应用服务器剩余空间</label>
+                <label class="fr green bold">$!webSize G</label>
+            </li>
+        	<li>
+            	<label class="fl">文件服务器剩余空间</label>
+                <label class="fr green bold">#if($!recordSize!= -1) $!recordSize G #end</label>
+            </li>
+        </ul>
+    	#if($!webSize < 2 || $!recordSize< $!cueSize)
+        <h4 class="legend red">系统警告</h4>
+        <ul>
+    		#if($!webSize < 2)
+        	<li>
+            	<label>应用服务器可用空间低于 2 G，请及时清理，以保证系统正常运行！</label>
+            </li>
+    		#end
+    		#if($!recordSize< $!cueSize && $!recordSize!=-1)
+        	<li>
+            	<label>文件服务器可用空间低于 $!cueSize G，请及时清理，以保证系统正常运行！</label>
+            </li>
+    		#end
+    		#if($!recordSize==-1)
+        	<li>
+            	<label>文件存放目录异常，请尽快处理，以保证系统正常运行！</label>
+            </li>
+    		#end
+        </ul>
+    	#end
+    </div>
+</body>
+</html>

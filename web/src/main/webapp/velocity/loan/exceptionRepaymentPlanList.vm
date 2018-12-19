@@ -1,0 +1,68 @@
+<div class="loan-bg">
+<p class="bold loan-lheight">异常还款计划</p>
+    #if(($loan.repaymentStatus && $!loan.repaymentStatus==1) && (!$loan.accountRemaining || $!loan.accountRemaining<$!loan.owedPrincipal) && $loan.isFull &&  $!loan.isFull != 1)
+        <label style="margin-left:15px; color:red;">账户余额： $!vmHelper.getUnityDecimalMoney($!loan.accountRemaining)元</label>
+    #else
+        <label style="margin-left:15px;" >账户余额： $!vmHelper.getUnityDecimalMoney($!loan.accountRemaining)元</label>
+    #end
+    <label style="margin-left:15px; float:right; margin-right:20px; margin-bottom:10px">贷款余额: $!vmHelper.getUnityDecimalMoney($!loan.loanRemaining)元</label>
+    <div class="loan-pad">
+    <table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="还款日期">还款日期</label></th>
+            <th><label title="应还金额(元)">应还金额(元)</label></th>
+            <th><label title="已还金额(元)">已还金额(元)</label></th>
+            <th><label title="还款状态">还款状态</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($eQuery in $exceptionRepaymentPlanList)
+            <tr>
+                <td><label title="$!date.format('yyyy-MM-dd',$!eQuery.planDate)">$!date.format('yyyy-MM-dd',$!eQuery.planDate)</label></td>
+                <td><label title="$!vmHelper.getUnityDecimalMoney($eQuery.owedPrincipal)">$!vmHelper.getUnityDecimalMoney($eQuery.owedPrincipal)</label></td>
+                <td><label title="$!vmHelper.getUnityDecimalMoney($eQuery.paidPrincipal)">$!vmHelper.getUnityDecimalMoney($eQuery.paidPrincipal)</label></td>
+                #if($eQuery.status && $!eQuery.status==1)
+                    <td><label title="待催收">待催收</label></td>
+                #elseif($eQuery.status && $!eQuery.status==2)
+                    <td><label title="已还款">已还款</label></td>
+                #else
+                    <td></td>
+                #end
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $("#remainFull").click(function(){
+            var remainFull=$(this);
+            var isChecked=remainFull.attr('checked');
+            if(isChecked=="checked"){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':1
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已标记为余额已足');
+                    }
+                });
+            }else{
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':0
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已取消标记为余额已足');
+                    }
+                });
+            }
+        });
+    });
+</script>

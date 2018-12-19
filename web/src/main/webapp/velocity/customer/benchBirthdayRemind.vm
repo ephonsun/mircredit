@@ -1,0 +1,164 @@
+﻿<script type="text/javascript">
+	jQuery(function(){
+		$('#birthdayCount').text('(' + $!recordCount + ')');
+	});
+	
+    function browseCustomer(cusId){
+    	jQuery.ajax({
+			  type: 'POST',
+			  url: '../customer/isDeleteCus.html?random='+Math.random(),
+			  data: {'cusId': cusId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+			  		}else{
+			  			var options = {id: 'cusBrowse'+cusId, pid: GetId(), title: '查看客户', url: '../customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId='+cusId, lock: false};
+						tab.add(options);
+			  		}
+			  	}
+			});	
+    }
+    function browseBirthdayMore(){
+    	var options = {id: 'birthdayRemind', pid: GetId(), title: '生日提醒', url: '../customer/birthdayRemindFirstMore.html?random='+Math.random(), lock: false};
+		tab.add(options);
+    }
+</script>
+<table class="ui-desk-reminders">
+	<thead>
+    	<tr>
+        	<th width="120" class="left"><label>生日</label></th>
+        	<th class="left"><label>提醒内容</label></th>
+        	<th width="240"><label>客户（电话）</label></th>
+        </tr>
+    </thead>
+	<tbody>
+    	#foreach($cus in $!cusList.items)
+    		#if($velocityCount<11)
+        	<tr>
+            	<td class="left"><label title="$!cus.birthdayContent">$!cus.birthdayContent</label></td>
+            	<td class="left"><label title="$!cus.remindContent">$!cus.remindContent</label></td>
+            	<td width="240">
+                	<div class="customer-infor">
+						#if($urlPermitUtil.hasPermission('browseCustomer'))
+                            #if($!cus.defaultPhoneType=='1')
+                            	<span class="ui-link-btn" title="$!cus.customerName（$!cus.mobilePhone1）" onclick="browseCustomer('$!cus.customerId')">$!cus.customerName（$!cus.mobilePhone1）</span>
+                            #elseif($!cus.defaultPhoneType=='2')
+                            	<span class="ui-link-btn" title="$!cus.customerName（$!cus.mobilePhone2）" onclick="browseCustomer('$!cus.customerId')">$!cus.customerName（$!cus.mobilePhone2）</span>
+                            #elseif($!cus.defaultPhoneType=='3')
+                            	<span class="ui-link-btn" title="$!cus.customerName（$!cus.phone）" onclick="browseCustomer('$!cus.customerId')">$!cus.customerName（$!cus.phone）</span>
+                            #elseif($!cus.defaultPhoneType=='4')
+                            	<span class="ui-link-btn" title="$!cus.customerName（$!cus.fax）" onclick="browseCustomer('$!cus.customerId')">$!cus.customerName（$!cus.fax）</span>
+    						#end
+						#else
+							#if($!cus.defaultPhoneType=='1')
+                            	<span>$!cus.customerName（$!cus.mobilePhone1）</span>
+                            #elseif($!cus.defaultPhoneType=='2')
+                            	<span>$!cus.customerName（$!cus.mobilePhone2）</span>
+                            #elseif($!cus.defaultPhoneType=='3')
+                            	<span>$!cus.customerName（$!cus.phone）</span>
+                            #elseif($!cus.defaultPhoneType=='4')
+                            	<span>$!cus.customerName（$!cus.fax）</span>
+    						#end
+						#end
+                        <div class="icon">
+                            #if($!cus.defaultPhoneType=='1')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+									<i class="i phone" title="拨号" onclick="dial('$!cus.mobilePhone1','$!cus.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+									<i class="i dsc" title="座谈" onclick="tape('$!cus.customerId')">dsc</i>
+                            	#end
+								#if($urlPermitUtil.hasPermission('toAddSms'))
+                            	<i class="i sms" title="短信" onclick="sendSms('$!cus.mobilePhone1','$!cus.customerId')">sms</i>
+                            	#end
+    		                	#if($urlPermitUtil.hasPermission('toAddMms'))
+                            	<i class="i mms" title="彩信" onclick="sendMms('$!cus.mobilePhone1','$!cus.customerId')">mms</i>
+                            	#end
+                            #elseif($!cus.defaultPhoneType=='2')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+                            	<i class="i phone" onclick="dial('$!cus.mobilePhone2','$!cus.customerId')" title="拨号">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+                            	<i class="i dsc" onclick="tape('$!cus.customerId')" title="座谈" >dsc</i>
+								#end
+                            	#if($urlPermitUtil.hasPermission('toAddSms'))
+                            	<i class="i sms" onclick="sendSms('$!cus.mobilePhone2','$!cus.customerId')" title="短信">sms</i>
+                            	#end
+    		                	#if($urlPermitUtil.hasPermission('toAddMms'))
+                            	<i class="i mms" onclick="sendMms('$!cus.mobilePhone2','$!cus.customerId')" title="彩信">mms</i>
+                            	#end
+                            #elseif($!cus.defaultPhoneType=='3')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+                            	<i class="i phone" title="拨号" onclick="dial('$!cus.phone','$!cus.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+                            	<i class="i dsc" title="座谈" onclick="tape('$!cus.customerId')">dsc</i>
+								#end
+                            	#if($!cus.mobilePhone1 != '')
+                            		#if($urlPermitUtil.hasPermission('toAddSms'))
+                            		<i class="i sms" title="短信" onclick="sendSms('$!cus.mobilePhone1','$!cus.customerId')">sms</i>	
+                            		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                            		<i class="i mms" title="彩信" onclick="sendMms('$!cus.mobilePhone1','$!cus.customerId')">mms</i>
+                            		#end
+                            	#elseif($!cus.mobilePhone2 != '')
+                            		#if($urlPermitUtil.hasPermission('toAddSms'))
+                            		<i class="i sms" title="短信" onclick="sendSms('$!cus.mobilePhone2','$!cus.customerId')">sms</i>
+                            		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                            		<i class="i mms" title="彩信" onclick="sendMms('$!cus.mobilePhone2','$!cus.customerId')">mms</i>
+                            		#end
+                            	#end
+                            #elseif($!cus.defaultPhoneType=='4')
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+                            	<i class="i phone" title="拨号" onclick="dial('$!cus.fax','$!cus.customerId')">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+                            	<i class="i dsc" title="座谈" onclick="tape('$!cus.customerId')">dsc</i>
+								#end
+                            	#if($!cus.mobilePhone1 != '')
+                            		#if($urlPermitUtil.hasPermission('toAddSms'))
+                            		<i class="i sms" title="短信" onclick="sendSms('$!cus.mobilePhone1','$!cus.customerId')">sms</i>	
+                            		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                            		<i class="i mms" title="彩信" onclick="sendMms('$!cus.mobilePhone1','$!cus.customerId')">mms</i>
+                            		#end
+                            	#elseif($!cus.mobilePhone2 != '')
+                            		#if($urlPermitUtil.hasPermission('toAddSms'))
+                            		<i class="i sms" title="短信" onclick="sendSms('$!cus.mobilePhone2','$!cus.customerId')">sms</i>
+                            		#end
+    		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                            		<i class="i mms" title="彩信" onclick="sendMms('$!cus.mobilePhone2','$!cus.customerId')">mms</i>
+                            		#end
+                            	#end
+                            #end
+                        </div>
+						<div class="other">
+                        	<label class="item cusTitle" title="$!cus.customerTitle">
+                            	$!cus.customerTitle
+                            </label>
+                            <label class="item">
+                            	$!cus.sex
+                            </label>
+                            <label class="item">
+                            	#if($!cus.age) $!cus.age岁 #end
+                            </label>
+							 #if($!cus.isNoGood==1)
+                            <label class="item red">
+                            	（不良客户）
+                            </label>
+                            #end
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            #end
+        #end
+    </tbody>
+</table>
+#if($!recordCount>10)
+<div class="ui-desk-reminders-more">
+	<label class="ui-link-btn" onclick="browseBirthdayMore()">查看更多</label>
+</div>
+#end

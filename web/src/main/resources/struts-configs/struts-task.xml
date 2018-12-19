@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="crmtask" extends="default" namespace="/task">
+
+		<!--  任务管理列表页面 -->
+		<action name="showTaskPage" class="crmTaskAction"
+			method="showTaskPage">
+			<result name="success">/velocity/task/taskList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 初始化当前登陆人的下属机构人员 -->
+		<action name="initCurrentAgentUser" class="crmTaskAction"
+			method="initCurrentAgentUser">
+		</action>
+		
+		<!-- 新建任务taskFlag=${taskFlag} -->
+		<action name="saveTask" class="crmTaskAction"
+			method="saveTask">
+			<result name="toAddTask">/velocity/task/taskAdd.vm</result>
+			<result name="save" type="redirect">showTaskPage.html?taskFlag=${taskFlag}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 初始化需添加的客户 -->
+		<action name="initAddCustomer" class="crmTaskAction"
+			method="initAddCustomer">
+			<result name="success">/velocity/task/task_addCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 提交添加的客户数据 -->
+		<action name="addCustomerMsg" class="crmTaskAction"
+			method="addCustomerMsg">
+		</action>
+		
+		<!-- 删除任务taskFlag=${taskFlag} -->
+		<action name="delTask" class="crmTaskAction"
+			method="delTask">
+			<result name="success" type="redirect">showTaskPage.html?taskFlag=${taskFlag}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查看任务  -->
+		<action name="showTaskDetail" class="crmTaskAction"
+			method="showTaskDetail">
+			<result name="success">/velocity/task/taskDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 编辑任务  -->
+		<action name="updateTask" class="crmTaskAction"
+			method="updateTask">
+			<result name="onlyShow">/velocity/task/taskDetail.vm</result>
+			<result name="toUpdateByMy">/velocity/task/taskUpdate_my.vm</result>
+			<result name="toUpdate">/velocity/task/taskUpdate.vm</result>
+			<result name="success" type="redirect">showTaskPage.html?taskFlag=${taskFlag}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更改任务目标的客户联系情况  -->
+		<action name="changeTargetIsFinish" class="crmTaskAction"
+			method="changeTargetIsFinish">
+		</action>
+		
+		<!-- 编辑下次联系任务  -->
+		<action name="updateNextTask" class="crmTaskAction"
+			method="updateNextTask">
+			<result name="toUpdateNext">/velocity/task/taskUpdateNext.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查看下次联系任务  -->
+		<action name="showTaskDetailNext" class="crmTaskAction"
+			method="showTaskDetailNext">
+			<result name="success">/velocity/task/taskDetailNext.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 检查指定任务的联系客户是否都完成  -->
+		<action name="isCheckFinish" class="crmTaskAction"
+			method="isCheckFinish">
+		</action>
+		
+		<!-- 返回客户对应的任务信息 -->
+		<action name="getCustomerTaskList" class="crmTaskAction"
+			method="getCustomerTaskList">
+			<result name="success">/velocity/customer/customerTaskCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 监控联系客户联系情况是否全部完成，如果全部完成任务状态自动改成完成，反之未完成 -->
+		<action name="isCheckTaskFinish" class="crmTaskAction"
+			method="isCheckTaskFinish">
+		</action>
+	</package>
+</struts>

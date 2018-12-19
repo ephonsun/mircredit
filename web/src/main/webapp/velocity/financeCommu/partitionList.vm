@@ -1,0 +1,439 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有交流区</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	.ui-fe-list { font-family: 'Microsoft Yahei'; }
+    	.datatbl a{ text-decoration:underline !important; }
+    </style>
+    
+</head>
+
+<body style="_height:auto !important;">
+    <div class="ui-panel-box2">
+        <div class="l">
+            <h4>
+                <label>交流区树</label>
+                <div>
+					<input id="typeId" type="hidden" name="typeId" />
+					<span id="add" class="editor-add" onclick="operation(1);">&nbsp;</span>
+                    <span id="up" class="editor-up" onclick="operation(2)">&nbsp;</span>
+                    <span id="down" class="editor-down" onclick="operation(3)">&nbsp;</span>
+                    <span id="del" class="editor-del" onclick="operation(4)">&nbsp;</span>
+                    <span id="edi" class="editor-edi" onclick="operation(5)">&nbsp;</span>
+                </div>
+            </h4>
+            <div class="l-inner">
+                <ul class="ztree" id="klTree"></ul>
+            </div>
+        </div>
+        <div class="r" id="contentForm">
+            <table class="htmltbl">
+                <tbody>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label>版块名称：</label>
+                        </td>
+                        <td>
+                            <div class="ui-div-text" style="width:150px;">
+                                <input type="text" id="templateName" class="text" />
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+			<div id="grid">
+           
+			
+				#parse("/velocity/financeCommu/partitionListDiv.vm")
+			</div>
+           
+		</div>
+	</div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js "></script>	
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+
+<script type="text/javascript">
+	var oldPostJson={};
+	
+	function setstate(){
+			$('.datatbl tbody tr:first a.up').unbind();
+			$('.datatbl tbody tr:first a.up').removeAttr("href");
+			$('.datatbl tbody tr:last a.down').unbind();
+			$('.datatbl tbody tr:last a.down').removeAttr("href");
+			$('.datatbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.datatbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.datatbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+	}
+	
+	var setting = {
+		callback:{
+			onClick:treeOnclick
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			showIcon: false
+		}			
+	};
+	//json树数据
+	var zNodes = $!partitionJson; 
+	//初始化
+	$(function(){
+		$('table .datatbl').table();
+		//加载验证控件
+		jQuery("#contentForm").validator();
+		jQuery.fn.zTree.init($("#klTree"), setting, zNodes);
+		
+		initNodeSelect();
+		setstate();
+	});
+	//树点击事件
+	function treeOnclick(event, treeId, treeNode) {
+		$("#typeId").val(treeNode.id);
+		changeActive(treeNode);	
+		search();
+	}
+	
+	//改变新建上移下移编辑，删除按钮可用
+	function changeActive(treeNode){
+		if(!treeNode.pId){
+			addStyle();
+			delNoStyle();
+			ediNoStyle();
+			upNoStyle();
+			downNoStyle();
+		}else{
+			addNoStyle();
+			delStyle();
+			ediStyle();
+			var parentNode = treeNode.getParentNode();
+			var pnodes = parentNode.children;
+			if(treeNode.id == pnodes[0].id){
+				upNoStyle();
+			}else{
+				upStyle();
+			}				
+			if (treeNode.id ==pnodes[pnodes.length-1].id){
+				downNoStyle();
+			}else{
+				downStyle();
+			}
+		}
+		
+		if(treeNode.isBuiltin == 1){
+			delNoStyle();
+		}
+	}
+	
+	//表单数据
+    function getQueryJson(){
+    	var postJson = {};
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+    	var node = treeObj.getSelectedNodes()[0];
+		if(node.pId){
+			postJson['commTemplate.partitionId'] = node.id;
+		}
+		postJson['commTemplate.templateName'] = jQuery.trim($('#templateName').val());
+		oldPostJson = postJson;
+		return postJson;
+	}
+	
+	//搜索
+    function search(){
+		var bool = jQuery.validator({form: 'contentForm'});
+		if(bool){	
+        	var postJson=getQueryJson();
+    		jQuery.post("/commPartition/getPartitionListBySearch.html?random="+Math.random()*1000000,postJson,function(html){
+        		refreshGrid('grid',html);
+        	});
+		}
+    }
+	
+	//分页跳转
+	function gotoPage(page)
+	{
+		var oldPostJson=getQueryJson();
+		goto(page,"/commPartition/getPartitionListBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	//刷新
+	function refreshForm(){
+		var oldPostJson=getQueryJson();
+		goto(null,"/commPartition/getPartitionListBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	//清空搜索条件
+	function resetValue(){
+    	$(':text').val('');
+    }
+	 //刷新Grid
+	function refreshGrid(gridId,html)
+	{
+		
+		$("#" + gridId).html(html);
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+    	var treeNode = treeObj.getSelectedNodes()[0];
+		if(treeNode.pId){
+			var i = treeNode.name.indexOf('(');
+			var name = treeNode.name.substring(0,i);
+			$('#templateNameLabel').text(name);
+		}else{
+			$('#templateNameLabel').text('所有版块');
+		}
+		//$("#queryCount").text($("#total").val());
+		setstate();
+		$('table.datatbl').table();
+	}
+	
+	//模拟点击第一个节点
+	function initNodeSelect(){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+		var nodes = treeObj.getNodes();
+		if (nodes.length>0) {
+			treeObj.selectNode(nodes[0]);
+			$("#typeId").val(nodes[0].id);
+			treeOnclick(event, nodes[0].id, nodes[0]);
+		}
+	}	
+	//操作
+	function operation(type){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+    	var node = treeObj.getSelectedNodes()[0];
+		if(type==1){
+			addPartition(node.id);
+		}else if(type==2){
+			moveKnow(node,treeObj,"up");			
+		}else if(type==3){
+			moveKnow(node,treeObj,"down");	
+		}else if(type==4){
+			delKnow(node);			
+		}else if(type==5){
+			updatePartition(node.id);			
+		}
+	}
+	
+	//新建分区
+	function addPartition(id){
+    	var url="toInsertPartitionPage.html?random="+Math.random();
+    	var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){
+			refreshTree();        		
+		}
+	}
+	//编辑分区
+	function updatePartition(id){
+		var url="toUpdatePartitionPage.html?commPartition.partitionId="+id+"&random="+Math.random();
+		var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){	
+			refreshTree();
+		}			
+	}
+	
+	//上移下移
+	function moveKnow(node,treeObj,moveType){
+		if(node.pId){
+			var parentNode = node.getParentNode();
+    		var nodes = parentNode.children;				
+			if(moveType=="up"){
+        		if(node.id != nodes[0].id){
+        			var prevNode = node.getPreNode();
+        			treeObj.moveNode(prevNode, node, "prev");
+            		var typeid = node.id;
+            		jQuery.post('movePartition.html',
+            						{'commPartition.partitionId':typeid,'moveType':moveType},
+            				function(data){
+								changeActive(node);
+            				});
+				}
+			}				
+			if(moveType=="down"){
+				if(node.id != nodes[nodes.length-1].id){
+					var nextNode = node.getNextNode();
+        			treeObj.moveNode(nextNode, node, "next");
+            		var typeid = node.id;
+            		jQuery.post('movePartition.html',
+            						{'commPartition.partitionId':typeid,'moveType':moveType},
+    						function(data){		
+								changeActive(node);
+    						});
+				}
+			}
+		}
+	}
+	
+	//删除
+	function delKnow(node){
+		var subName= subNameStr(node.name);
+		var count = $('#queryCount').text();
+		if(count!=0){
+			banger.page.showMessageBox("分区“"+subName+"”下还有关联的版块，不能够删除！");
+			return;
+		}
+		if(confirm("您确定要删除分区“"+subName+"”吗？")){
+			jQuery.post('deletePartition.html',
+				{'commPartition.partitionId':node.id},
+				function(data){		
+					refreshTree();
+			});	
+		}
+	}
+	
+	function subNameStr(name){
+		var subName = name;
+		if(subName.length>10){
+			subName = name.substring(0,10)+'...';
+		}
+		return subName;
+	}
+	
+	//刷新分类树
+	function refreshTree(){
+		window.location.reload();
+		initNodeSelect();
+	}
+	//新增取消
+	function addNoStyle(){
+		$("#add").attr("disabled",true);
+		$("#add").css({filter:"gray"});
+		$("#add").css({cursor:"default"});
+	}
+	//新增样式
+	function addStyle(){
+		$("#add").attr("disabled",false);
+		$("#add").css({filter:""});
+		$("#add").css({cursor:"hand"});
+	}
+	//删除取消
+	function delNoStyle(){
+		$("#del").attr("disabled",true);
+		$("#del").css({filter:"gray"});
+		$("#del").css({cursor:"default"});
+	}
+	//删除样式
+	function delStyle(){
+		$("#del").attr("disabled",false);
+		$("#del").css({filter:""});
+		$("#del").css({cursor:"hand"});
+	}
+	
+	//编辑取消
+	function ediNoStyle(){
+		$("#edi").attr("disabled",true);
+		$("#edi").css({filter:"gray"});
+		$("#edi").css({cursor:"default"});
+	}
+	//编辑样式
+	function ediStyle(){
+		$("#edi").attr("disabled",false);
+		$("#edi").css({filter:""});
+		$("#edi").css({cursor:"hand"});
+	}
+	//上移取消
+	function upNoStyle(){
+		$("#up").attr("disabled",true);
+		$("#up").css({filter:"gray"});
+		$("#up").css({cursor:"default"});
+	}
+	//上移样式
+	function upStyle(){
+		$("#up").attr("disabled",false);
+		$("#up").css({filter:""});
+		$("#up").css({cursor:"hand"});
+	}
+	//下移取消
+	function downNoStyle(){
+		$("#down").attr("disabled",true);
+		$("#down").css({filter:"gray"});
+		$("#down").css({cursor:"default"});
+	}
+	//下移样式
+	function downStyle(){
+		$("#down").attr("disabled",false);
+		$("#down").css({filter:""});
+		$("#down").css({cursor:"hand"});
+	}
+	
+	function addNewTemplate(){
+		var url="toInsertTemplatePage.html?random="+Math.random()+"&pId="+$("#typeId").val();
+    	var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){
+			refreshTree();        		
+		}
+	}
+	
+	function updateTemplate(id){
+		var url="toUpdateTemplatePage.html?random="+Math.random()+"&commTemplate.templateId="+id;
+    	var result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=360px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){
+			refreshTree();        		
+		}
+	}
+	
+	function updateCommProgressState(id,state){
+		jQuery.post('updateTemplate.html',
+				{'commTemplate.templateId':id,'commTemplate.templateState':state},
+				function(data){		
+					refreshTree();
+				});	
+	}
+	
+	function deleteTemplate(id,obj){
+		var subName= $(obj).parent().prev().prev().text();
+		if(confirm("您确定要删除版块“"+subName+"”吗？")){
+			jQuery.post('deleteTemplate.html',
+				{'commTemplate.templateId':id},
+				function(data){	
+					if(data =='0'){
+						refreshTree();
+					}else if(data == '-1'){
+						banger.page.showMessageBox("版块“"+subName+"”下还有关联的帖子，不能够删除");
+					}else{
+						banger.page.showMessageBox("删除版块失败!");
+					}
+					
+			});	
+		}
+	}
+	function moveTemplate(id,type){
+		jQuery.ajax({
+    		    type: "post", 
+    		    url: "moveTemplate.html", 
+    		    data: {"commTemplate.templateId":id, "moveType":type},
+    		    success: function(data, textStatus){
+    		 		moveResult(data);
+    		    }
+			});
+	}
+	
+	function moveResult(msg){
+    		if(msg != "SUCCESS"){
+    			return false;
+    		}
+    		else{
+    			refreshTree();
+    		}		
+    	}
+    </script>
+</html>
+

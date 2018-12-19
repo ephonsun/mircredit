@@ -1,0 +1,959 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建客户</title>
+    
+    <style type="text/css">
+    	/* 头像 Begin */
+    	.avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 96px; height: 96px; margin-bottom: 5px; overflow: hidden; }
+		.avatar img { width: 100%; height: 100%; border: 0; }
+		.addavatar { cursor: pointer; position: relative; width: 70px; height: 22px; border: 1px solid #bcbcbc; background: url(${ctx}/images/common/button.gif) repeat-x center center; overflow: hidden; line-height: 24px; }
+		.addavatar label { display: block; }
+		.addavatar .file { cursor: pointer; position: absolute; top: 0; left: 0; width: 80px; height: 22px; margin: 0 0 0 -10px; padding: 0; filter: alpha(opacity:0); opacity: 0; }
+		/* 头像 End */
+
+            /* 滚动按钮小图标  */
+        .x-panel-bar{ position: absolute; top: 0px; right: 75px; }
+        .x-panel-bar .x-panel-action { float: left; cursor: pointer; width: 20px; height: 20px; margin: 3px; text-indent: -1000px; overflow: hidden; }
+        .x-panel-bar div.x-panel-scroller-left { background: url(../images/index/left.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/left.png"); }
+        .x-panel-bar div.x-panel-scroller-right { background: url(../images/index/right.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/right.png"); }
+    </style>
+    <style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+
+        div.tabs-header{ height:auto !important;}
+        div.tabs-items-zone{ white-space:normal;}
+    </style>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+    <script type="text/javascript">
+        function scroll(){
+            if(jQuery.browser.msie && jQuery.browser.version<7.0 && $('html')[0].scrollHeight>$('html').height()){
+                $('html').css('overflow-y','scroll');
+            }
+        }
+
+
+
+        $(function(){
+            $("select").each(function () {
+                $(this).select({scroll: 10});
+            });
+            jQuery('#addCustomer').validator();
+            //$("#tabs").tabs();
+            addTabScroll();
+			initEvent();
+			initDate('birthday', { maxDate: new Date() });
+			initDate('openingDate', { maxDate: new Date() });
+			initDate('datepicker');			
+			initControlState();		//初始化默认号码状态
+			initBelongToTree();		//下属机构树
+			initDropDownList();		//初始化下拉多选项
+			
+			dateInput("input[dateFlag$='true']");
+			numInput("input[intFlag$='true']");
+			floatInput("input[floatFlag$='true']");
+			maxTextArea("textarea[maxlength]");
+
+			if('$actionType'=='modify'){
+				tab.title(tab.self,'编辑客户-'+'$!jsUtil.escapeJs($crmCustomer.customerName)');
+				bindData();
+			}else{
+				if($!crmCustomer.belongDeptId > 0){
+					$("#BelongToType").val("$!parameterMap.get('BelongTo')");
+					var type=$('#BelongToType').val();	
+					changeBelongTo(type);
+					$('#belongDeptId').val("$!crmCustomer.belongDeptId");
+					$('#belongUserId').val("$!crmCustomer.belongUserId");
+					switch(type){
+						case "brUser":
+							var usertext = '$!jsUtil.escapeJs($!username)';
+							$('#userTree').val(usertext.substring(1,usertext.length-1));
+							$('#deptName').text('$!jsUtil.escapeJs($!deptname)');
+							$('#userName').text('$!jsUtil.escapeJs($!username)');
+							break;
+						case "brDept":
+							$('#deptTree').val('$!jsUtil.escapeJs($!deptname)');
+							$('#deptName').text('$!jsUtil.escapeJs($!deptname)');
+							$('#userName').text("");
+							break;
+						default: break;
+					}
+				}
+				initHeadShow();
+			}
+			//任务信息
+            $('#taskMsg').load("${ctx}/tskMicroTaskTarget/taskCustomerCard.html?customerId=$!crmCustomer.customerId",{});
+			//联系记录延时加载，未了防止ie6卡住
+			setTimeout(function(){postRecordMsg();},1000);
+			//亲友信息
+			$('#relativesInfo').load('${ctx}/customerRelatives/relativesInfo.html?customerId=$!crmCustomer.customerId&&actionType=$!actionType',{});
+			//理财产品
+			//$('#productMsg').load('${ctx}/pdtProduct/getCustomerBuyProduct.html?customerId=$!crmCustomer.customerId&needline=0',{});
+            //日程安排
+            $('#taskSchedule').load("${ctx}/tskSchedule/getScheduleListCard.html?customerId=$!crmCustomer.customerId&edit=edit&needLine=$!needLine",{});
+            //贷款信息
+            $('#loanInfo').load("${ctx}/loan/getAllLoanByCusId.html?customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+            //客户意向延时加载，未了防止ie6卡主
+            var timeHandler = setTimeout(function(){postCustomerPdtProduct();},3000);
+			//资料信息
+            $('#dataMsg').load("${ctx}/data/showDataByCusId.html?customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+			$('select').select();
+			jQuery("#addCustomer").validator();
+			
+			//手动让第一个可见的input标签获取焦点
+			//避免IE8下重复打开此页面时偶尔会出现文本框无法获取交单的BUG
+			$('#cusName').focus();
+
+
+            $("#maritalStatusId").change(function(){
+                var maritalStatusId = $("#maritalStatusId").val();
+                if (maritalStatusId=="2"||maritalStatusId=="5"||maritalStatusId=="6"||maritalStatusId=="7") { //
+                    $("#spouseDiv").show();
+                }else{
+                    $("#spouseDiv").hide();
+                }
+            });
+            $("#maritalStatusId").change();
+
+
+        });
+
+        function postCustomerPdtProduct() {
+            //客户意向
+            $('#customerPdtProduct').load("${ctx}/tskSchedule/getCustomerPdtProduct.html?edit=edit&tskSchedule.customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+        }
+        function postRecordMsg(autoLogin){
+        	$('#recordMsg').load('${ctx}/record/queryAllByCustomerId.html?customerId=$!crmCustomer.customerId&actionType=$!actionType&needline=0',{});
+        }
+
+		function initHeadShow(){
+			path = "${ctx}/images/headImage/a.bmp";
+			var html = "<img src='"+path+"'/>";
+			jQuery('.avatar').html(html);
+			$("#headshow").attr("headPath","");
+		}
+		
+		//初始化事件
+		function initEvent(){
+			mobileInput('#mobilePhone1', function(){ctrlDefaultNumberState('mobilePhone1','rdo1')});
+			mobileInput('#mobilePhone2', function(){ctrlDefaultNumberState('mobilePhone2','rdo2')});
+			numInput('#phone', function(){ctrlPhoneExt('phone','rdo3','phoneExt')});
+			telInput('#phoneExt');
+			numInput('#fax', function(){ctrlPhoneExt('fax','rdo4','faxExt')});
+			telInput('#faxExt');
+			//idInput('#idCard');
+			emailInput('#email');
+			$("#allow").click(function(){
+		    	if($(this).attr("checked")!=null)
+		    		$("#allow").val(0);
+		    	else
+		    		$("#allow").val(1);
+			});
+			$("#headImage").change(function () {
+	            upLoadFile();
+	        });
+		}
+		
+		//初始化下拉多选项
+		function initDropDownList(){
+			$("input[dateFlag$='true']").each(function(i){
+				initDate(this.id);
+			});
+			$("div[comboFlag$='true']").each(function(i){
+	 			var codes = $(this).attr("codes");
+	 			var list = codes.split(",");
+	   			jQuery(this).combobox({"button":true,"array":list});
+	 		});
+		}
+		//初始化默认号码状态
+		function initControlState()
+		{
+			$("#rdo1").attr("disabled",true);
+			$("#rdo2").attr("disabled",true);
+			$("#rdo3").attr("disabled",true);
+			$("#rdo4").attr("disabled",true);
+			$("#phoneExt").attr("disabled",true);
+			$("#faxExt").attr("disabled",true);
+			
+			if($!crmCustomer.defaultPhoneType==1){
+				$("#rdo1").attr("disabled",false);
+				$("#rdo1").attr("checked",true);
+			}else if($!crmCustomer.defaultPhoneType==2){
+				$("#rdo2").attr("disabled",false);
+				$("#rdo2").attr("checked",true);
+			}else if($!crmCustomer.defaultPhoneType==3){
+				$("#rdo3").attr("disabled",false);
+				$("#rdo3").attr("checked",true);
+			}else if($!crmCustomer.defaultPhoneType==4){
+				$("#rdo4").attr("disabled",false);
+				$("#rdo4").attr("checked",true);
+			}
+			
+			if($("#mobilePhone1").val()!=''){
+				$("#rdo1").attr("disabled",false);	
+			}
+			if($("#mobilePhone2").val()!=''){
+				$("#rdo2").attr("disabled",false);	
+			}
+			if($("#phone").val()!=''){
+				$("#rdo3").attr("disabled",false);
+				$("#phoneExt").attr("disabled",false);
+			}
+			if($("#fax").val()!=''){
+				$("#rdo4").attr("disabled",false);
+				$("#faxExt").attr("disabled",false);
+			}
+		}
+		
+		//绑定数据
+		function bindData(){
+			$("#BelongToType").val("$!parameterMap.get('BelongTo')");
+			var type=$('#BelongToType').val();	
+			changeBelongTo(type);
+			$('#belongDeptId').val("$!crmCustomer.belongDeptId");
+			$('#belongUserId').val("$!crmCustomer.belongUserId");
+			
+			if('$!crmCustomer.sex'){
+				$("#cusSex").val('$!crmCustomer.sex');
+			}
+            if('$!crmCustomer.spouseSex'){
+                $("#spouseSex").val('$!crmCustomer.spouseSex');
+            }
+			if('$!crmCustomer.customerTypeId'){
+				$("#customerTypeId").val('$!crmCustomer.customerTypeId');
+			}
+			if('$!crmCustomer.customerIndustryId'){
+				$("#customerIndustryId").val('$!crmCustomer.customerIndustryId');
+			}
+			if('$!crmCustomer.credentialTypeId'){
+				$("#credentialTypeId").val($!crmCustomer.credentialTypeId);
+			}
+			if('$!crmCustomer.educationalHistoryId'){
+				$("#educationalHistoryId").val($!crmCustomer.educationalHistoryId);
+			}
+			if('$!crmCustomer.livingConditionId'){
+				$("#livingConditionId").val($!crmCustomer.livingConditionId);
+			}
+			if('$!crmCustomer.maritalStatusId'){
+				$("#maritalStatusId").val($!crmCustomer.maritalStatusId);
+			}
+			if('$!crmCustomer.orgTypeId'){
+				$("#orgTypeId").val($!crmCustomer.orgTypeId);
+			}
+			if('$!crmCustomer.legalFormId'){
+				$("#legalFormId").val($!crmCustomer.legalFormId);
+			}
+			if('$!crmCustomer.isInnerCustomer'){
+				$("#isInnerCustomer").val($!crmCustomer.isInnerCustomer);
+			}
+			
+			if('$!crmCustomer.headshow'){
+				var html = "<img src='${ctx}/showImage?fullPath=$!crmCustomer.headshow'/>";
+				jQuery('.avatar').html(html);
+			}else{
+				var path;
+				switch($("#cusSex").val()){
+					case "":
+						path = "${ctx}/images/headImage/a.bmp";
+						break;
+					case "男":
+						path = "${ctx}/images/headImage/b.bmp";
+						break;
+					case "女":
+						path = "${ctx}/images/headImage/c.bmp";
+						break;
+				} 
+				var html = "<img src='"+path+"'/>";
+				jQuery('.avatar').html(html);
+				$("#headshow").attr("headPath","");
+			}
+		}
+		//机构树
+		function initBelongToTree(){	
+			if($isInChargeof){
+				var type = "$!parameterMap.get('BelongTo')";
+				var urlUser = "";
+				var urlDept = "";
+				urlUser = function(){return "../customer/getCusBelongToJson.html?BelongToType=brUser&random="+Math.random()*1000000;};
+				urlDept = function(){return "../customer/getCusBelongToJson.html?BelongToType=brDept&random="+Math.random()*1000000;};
+				switch(type){
+					case "brUser":
+						if('$actionType'=='modify'||$!crmCustomer.belongDeptId > 0){
+							urlUser = function(){return "../customer/getCusBelongToJson.html?BelongToType=brUser&belongDeptId="+$crmCustomer.belongDeptId +
+								"&belongUserId="+ $crmCustomer.belongUserId +"&random="+Math.random()*1000000;};	
+							$('#userTree').val("$!jsUtil.escapeJs($!crmCustomer.userName)");
+						}
+						break;
+					case "brDept":
+						if('$actionType'=='modify'||$!crmCustomer.belongDeptId > 0){
+							urlDept = function(){return "../customer/getCusBelongToJson.html?BelongToType=brDept&belongDeptId="+$crmCustomer.belongDeptId +
+								"&belongUserId="+ $crmCustomer.belongUserId +"&random="+Math.random()*1000000;}	
+							$('#deptTree').val("$!jsUtil.escapeJs($!crmCustomer.deptName)");
+						}
+						break;
+					default: break;
+				}
+				$('#userList').atree({
+					setting: {
+						check: {
+							enable: true,
+							chkboxType: { "Y": "s", "N": "s" }
+						},
+						view: {
+							showIcon: true,
+							dblClickExpand: false
+						},
+						data: {
+							simpleData: {
+								enable: true
+							}
+						},
+						callback: {
+							beforeClick: null,
+							onClick: null,
+							beforeCheck: null,
+							onCheck: null
+						}
+					},
+					url: urlUser,
+					beforeClick: beforeClickUser,
+					okHandler: onClickUser
+				});
+			  	$("#deptList").atree({
+					url: urlDept,
+					okHandler: onClickDept
+				});
+				
+				$("#BelongToType").change(function(){
+					changeBelongTo($(this).val());
+				});
+			}
+			if('$actionType'=='insert'){
+				changeBelongTo('brMine');	
+			}
+		}
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			return treeNode.flag != 'D';
+		}
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#userTree').val(nodes[0].name);
+			$('#belongUserId').val(nodes[0].id);
+			$('#belongDeptId').val(nodes[0].pId);
+			$('#deptName').text(nodes[0].deptName);
+			$('#userName').text("("+nodes[0].name+")");
+			
+			checkBelongTo();
+		}
+		//点击Dept
+		function onClickDept(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#deptTree').val(nodes[0].name);
+			$('#belongUserId').val("0");
+			$('#belongDeptId').val(nodes[0].id);
+			$('#deptName').text(nodes[0].name);
+			$('#userName').text("");
+			
+			checkBelongTo();
+		}
+		//改变归属
+		function changeBelongTo(val){
+			switch(val){
+				case "brMine":
+					$("#my").show();
+					$('#showText').text(window.top.getUn());
+					$("#userList, #deptList").hide();
+					$('#belongDeptId').val("$!parameterMap.get('currentDeptId')");
+					$('#belongUserId').val("$!parameterMap.get('currentUserId')");
+					$('#deptName').text("$!jsUtil.escapeJs($!parameterMap.get('currentDeptName'))");
+					$('#userName').text("("+"$!jsUtil.escapeJs($!parameterMap.get('currentUserName'))"+")");
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#my, #deptList").hide();
+					$('#belongDeptId').val("0");
+					$('#belongUserId').val("0");
+					$('#userTree').val("");
+					break;
+				case "brDept":
+					$("#deptList").show();
+					$("#my, #userList").hide();
+					$('#belongDeptId').val("0");
+					$('#belongUserId').val("0");
+					$('#deptTree').val("");
+					break;
+				default: break;
+			}
+		}
+		
+		//初始化省份城市
+		function initProvince(val){
+			var pSel=$("#province");
+			pSel.bind("change",function(e){
+				if(this.value){
+					buildCity(this.value);
+				}else{
+					var cSel=$("#city");
+					cSel.empty();
+					var op=$("<OPTION></option>");
+					cSel.append(op);
+					cSel.select();
+				}
+			});
+			if(val){
+				buildCity(val);
+				pSel.val(val);
+			}
+		}
+		
+		function buildCity(val){
+			jQuery.post('../advancedCustomer/getCityJson.html?provCode='+val,{},
+				function(json){
+					var ds=jQuery.parseJSON(json);
+					var cSel=$("#city");
+					var cityVal = cSel.attr("city");
+					cSel.empty();
+					var op=$("<OPTION></option>");
+					cSel.append(op);
+					for(var i=0;i<ds.length;i++)
+					{
+						var d=ds[i];
+						var selStr = (d["code"]==cityVal)?"selected":"";
+						var op=$("<OPTION VALUE='"+d["code"]+"' "+selStr+" >"+d["name"]+"</option>");
+						cSel.append(op);
+					}
+					cSel.select();
+			});
+		}
+		function closeForm(){
+			tab.close(GetId(), false);
+		}
+		function extendvalidator(){
+			var bool = true;
+			if(checkCustomerNo()){
+				$('#divCustomerNo').removeClass('v-fails');
+			}else{
+				$('#divCustomerNo').addClass('v-fails');
+				bool = false;
+			}
+			
+			if(checkPhoneType()){
+				$('[phoneType=\'divGroup\']').removeClass('v-fails');
+				if($("#mobilePhone1").val().length>0&&$("#mobilePhone1").val().length<11){
+					$('#divMobilePhone1').addClass('v-fails');
+					$('#mobilePhone1').attr('tips', '手机格式必须是1开头，11位');
+				}
+				if($("#mobilePhone2").val().length>0&&$("#mobilePhone2").val().length<11){
+					$('#divMobilePhone2').addClass('v-fails');
+					$('#mobilePhone2').attr('tips', '手机格式必须是1开头，11位');
+				}
+			}
+			else{
+				$('[phoneType=\'divGroup\']').addClass('v-fails');
+				$('[phoneType=\'group\']').attr('tips', '请至少填写一个联系电话');
+				bool = false;
+			}
+
+            var txtIDCard = $('#idCard').val();
+			var txtCredentialTypeId = $('#credentialTypeId').val();
+            if (txtIDCard.length > 0 && txtIDCard.indexOf("*") < 0 && txtCredentialTypeId == "1") {
+                bool = IdentityCodeValid(txtIDCard);
+            }
+			
+			return bool;
+		}
+		//保存客户信息
+		function SaveCustomer(actionType, states){
+			var bool = jQuery.validator({ form: 'addCustomer', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				$("#customerBaseInfo").click();
+				return false;
+			}
+			save(actionType, states);
+		}
+		function save(actionType, states){
+
+			var maritalStatusId = $("#maritalStatusId").val();
+            if (maritalStatusId=="2"||maritalStatusId=="5"||maritalStatusId=="6"||maritalStatusId=="7") { //
+                var spouseName = $("#spouseName").val();
+                if (spouseName.replace(/(^\s*)|(\s*$)/g, "") == "") {
+                    alert("请输入配偶姓名");
+                    return false;
+                }
+                var spouseIdCard = $("#spouseIdCard").val();
+                if (spouseName.replace(/(^\s*)|(\s*$)/g, "") == "") {
+                    alert("请输入配偶身份证号码");
+                    return false;
+                }
+                var spousePosition = $("#spousePosition").val();
+                if (spousePosition.replace(/(^\s*)|(\s*$)/g, "") == "") {
+                    alert("请输入配偶工作岗位");
+                    return false;
+                }
+                var spouseRank = $("#spouseRank").val();
+                if (spouseRank.replace(/(^\s*)|(\s*$)/g, "") == "") {
+                    alert("请输入配偶职称");
+                    return false;
+                }
+			}
+
+			$("#saveAndClose").attr("disabled",true);
+			$("#saveAndContinue").attr("disabled",true);
+			var postJson = {};
+			$("input[type$='text']").each(function(i){
+   				postJson[this.name]=jQuery.trim(this.value);
+	 		});
+	 		$("input[type$='hidden']").each(function(i){
+	   			postJson[this.name]=this.value;
+	 		});
+	    	$("select").each(function(i){
+	   			postJson[this.name]=this.value;
+	 		});
+	 		$("textarea").each(function(i){
+	   			postJson[this.name]=jQuery.trim(this.value);
+	 		});
+	 		$("input[type$='radio']").each(function(i){
+	 			if(this.checked){
+	 				postJson[this.name]=this.value;
+	 			}
+	 		});
+	 		$("input[type$='checkbox']").each(function(i){
+	 			if(this.checked){
+	 				postJson[this.name]=this.value;
+	 			}
+	 		});
+	 		postJson['crmCustomer.isReceiveSms']=jQuery.trim($("#allow").val());
+	 		postJson['crmCustomer.headshow']=jQuery.trim($("#headshow").attr("headPath"));
+	 		
+	 		var urlStr;
+	 		if(states=='insert'){
+	 			urlStr = "../customer/addCustomer.html";
+	 		}else{
+	 			urlStr = "../customer/editCustomer.html";
+	 		}
+	 		postJson['actionType']=actionType;
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(data){
+				if(data=="-1"){
+                    $("#saveAndClose").attr("disabled",false);
+                    $("#saveAndContinue").attr("disabled",false);
+                    alert("客户证件号码已存在，请重新输入!");
+					return;
+				}
+			  	if(actionType=='saveAndClose'){
+			  		tab.close(GetId(), true);
+			  	}else if(actionType=='saveAndContinue'){
+			  		$("#saveAndClose").attr("disabled",false);
+					$("#saveAndContinue").attr("disabled",false);
+			  		tab.refresh(GetPid());
+			  		var deptid = $('#belongDeptId').val();
+			  		var userid = $('#belongUserId').val();
+			  		var deptname = $('#deptName').text();
+			  		var username = $('#userName').text();
+			  		location.href="../customer/addCustomer.html?actionType=insert&&deptid="+deptid + "&&userid=" +userid
+			  			+ "&&deptname=" + encodeURI(encodeURI(deptname)) + "&&username=" + encodeURI(encodeURI(username));;
+			  	}
+			  }
+			});	
+		}
+		//校验客户编号是否唯一
+		function checkCustomerNo(){
+			var bool = true;
+			if($("#customerNo").val()){
+				var postJson = {};
+				postJson['customerNo']=$("#customerNo").val();
+				postJson['customerId']=$("#customerId").val();
+				jQuery.ajax({
+				  type: 'POST',
+				  url: "../customer/checkCustomerNo.html",
+				  data: postJson,
+				  cache: false, 
+				  async: false,
+				  success:function(data){
+				  	if(data==''||data==null){
+				  		bool = true;
+				  	}else{
+				  		$("#customerNo").attr('tips', data); 
+				  		bool = false;
+				  	}
+				  }
+				});		
+			}
+			return bool;
+		}
+		//生成称谓事件
+		function onSexblur(flag){
+			if($("#cusName").val()!=''){
+				if($("#cusSex").val()!=''){
+					//获取百家姓  返回称谓
+					jQuery.ajax({
+					  type: 'POST',
+					  url: "../customer/getNickName.html",
+					  data: {'cusName':jQuery.trim($("#cusName").val()),'cusSex':jQuery.trim($("#cusSex").val())},
+					  success:function(nickName){
+					  	if($("#nickName").val()==''){
+					  		$("#nickName").val(nickName);	
+					  	}else{
+					  		if($("#nickName").val()!=nickName){
+					  			if(confirm("根据姓名和性别，建议称谓从“"+ $("#nickName").val()+"”修改为“ "+nickName+"”。您确定要修改吗？")){
+						  			$("#nickName").val(nickName);
+					}}}}});
+				}
+			}
+			if(flag == 'sex'){
+				if('$!crmCustomer.headshow'){
+					return;	
+				}
+				var path;
+				switch($("#cusSex").val()){
+					case "":
+						path = "${ctx}/images/headImage/a.bmp";
+						break;
+					case "男":
+						path = "${ctx}/images/headImage/b.bmp";
+						break;
+					case "女":
+						path = "${ctx}/images/headImage/c.bmp";
+						break;
+				}
+				var html = "<img src='"+path+"'/>";
+				jQuery('.avatar').html(html);
+				$("#headshow").attr("headPath","");
+			}
+		}
+		//控制默认号码
+		function ctrlDefaultNumberState(textid, rdoid){
+			if(checkPhoneType()){
+				$('[phoneType=\'divGroup\']').removeClass('v-fails');
+			}
+			else{
+				$('[phoneType=\'divGroup\']').addClass('v-fails');
+				$('[phoneType=\'group\']').attr('tips', '请至少填写一个联系电话');
+			}
+			if ($('#'+textid).val()==""){
+				if($("#"+rdoid).attr("checked")){
+					$("#"+rdoid).attr("checked",false);		
+				}
+				$("#"+rdoid).attr("disabled",true);
+				
+				if(!raidoHaschecked()){
+					if($("#mobilePhone1").val()!=''){
+						$("#rdo1").attr("checked",true);	
+					}else if($("#mobilePhone2").val()!=''){
+						$("#rdo2").attr("checked",true);
+					}else if($("#phone").val()!=''){
+						$("#rdo3").attr("checked",true);
+					}else if($("#fax").val()!=''){
+						$("#rdo4").attr("checked",true);
+					}
+				}
+			}else{
+				$("#"+rdoid).attr("disabled",false);
+			    if(!raidoHaschecked()){
+			    	$("#"+rdoid).attr("checked",true);	
+			    }
+			}
+		}
+		function raidoHaschecked(){
+			if((!$("#rdo1").attr("checked"))
+				&&(!$("#rdo2").attr("checked"))
+				&&(!$("#rdo3").attr("checked"))
+				&&(!$("#rdo4").attr("checked"))){
+				return false
+			}else{
+				return true;
+			}
+		}
+
+		//控制固话分机
+		function ctrlPhoneExt(textid, rdoid, extId){
+			ctrlDefaultNumberState(textid, rdoid)
+			if($("#"+textid).val()){
+				//$("#"+extId).val("");
+				$("#"+extId).attr("disabled",false);
+			}else{
+				$("#"+extId).val("");
+				$("#"+extId).attr("disabled",true);
+			}
+		}
+		
+		function insertChar(index,text,oldText){
+			if(index> oldText.length-1) 
+		      index=oldText.length-1; 
+		    if(index <0) 
+		      index=0; 
+
+		    return  oldText.substring(0,index)+text+oldText.substring(index); 	
+		}
+		
+		//根据身份证生成生日 年龄
+		function iDCardExitEvent(id){
+			var iDCardStr = $("#"+id).val();
+			if((!iDCardStr)&&(iDCardStr.length!=15)&&(iDCardStr.length!=18)){
+				return;
+			}
+			if(checkIDCard(iDCardStr)){
+				//如果是15位身份证 先转换成18位
+				if(iDCardStr.length==15){
+					iDCardStr=insertChar(6,'19',iDCardStr);
+				}
+				var newBirthday = iDCardStr.substring(6,14);
+				var year = newBirthday.substring(0,4);
+				var month = newBirthday.substring(4,6);
+				var day = newBirthday.substring(6,9);
+				newBirthday = year+'-'+month+'-'+day;
+				var dd = new Date();
+				if(($("#birthday").val())&&($("#birthday").val()!=newBirthday)){
+					if(confirm('根据身份证，建议生日从'+$("#birthday").val()+'修改为 '+newBirthday+'。您确定要修改吗？')){
+						 $("#birthday").val(newBirthday);
+						 //$("#age").text(dd.getFullYear()-year);
+						 var age = dd.getFullYear()-year;
+						 if(age<=120&&age>0){
+							$("#age").text(dd.getFullYear()-year + " 周岁");
+						 }else{
+							$("#age").text("");
+						 }
+					}
+				}else{
+					$("#birthday").val(newBirthday);
+					//$("#age").text(dd.getFullYear()-year);
+					var age = dd.getFullYear()-year;
+					 if(age<=120&&age>0){
+						$("#age").text(dd.getFullYear()-year + " 周岁");
+					 }else{
+						$("#age").text("");
+					 }
+				}
+			}
+		}
+		
+		//根据生日生成年龄		
+		function onBirthdayExit(){
+			if($("#birthday").val()){
+				var year = $("#birthday").val().substring(0,4);
+				var dd = new Date();
+				var age = dd.getFullYear()-year;
+				if(age<=120&&age>0){
+					$("#age").text(dd.getFullYear()-year + " 周岁");
+				 }else{
+					$("#age").text("");
+				 }
+			}
+		}
+		function upLoadHead(){
+			//$("#headImage").click();
+		}
+		function upLoadFile(){
+			ajaxFileUpload({
+				url:"../customer/upLoadHead.html?random="+Math.random()*10000,
+		        id:'headImage',
+		        callback:function(){
+		        	var data = this.responseText;  
+		        	var json = jQuery.parseJSON(data);
+		        	if(json.error){
+		        		banger.page.showMessageBox(json.error);
+		        	}else{
+		        		var html = "<img src='../showImage?fullPath=" + json.fullPath+"'/>";
+						jQuery('.avatar').html(html);
+						$("#headshow").attr("headPath",json.fullPath);
+		        	}
+		        }
+		    });  
+			return false;
+		}
+    </script>
+</head>
+
+<body>
+	<form id="addCustomer" class="formular" method="post">
+	<input type="hidden" id="tid" value="$!tabid">
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        	#if($!crmCustomer.isNoGood && $!crmCustomer.isNoGood==1)
+        	<tr>
+	            <td colspan="3" style="text-indent:10px; line-height:20px;"><span class="bold red">不良客户</span></td>
+            </tr>	
+            #end
+            <tr>
+                <td width="100" class="field">
+                    <label>客户归属：</label>
+                </td>
+                <td colspan="2" style="line-height:20px;">
+                	<input type="hidden" name="crmCustomer.belongDeptId" value="$!crmCustomer.belongDeptId" id="belongDeptId"/>
+                	<input type="hidden" name="crmCustomer.belongUserId" value="$!crmCustomer.belongUserId" id="belongUserId"/>
+					<input type="hidden" name="crmCustomer.customerId" value="$!crmCustomer.customerId" id="customerId"/>
+					<input type="hidden" name="recId" value="$!recId" id="recId"/>
+					<input type="hidden" name="typeList" value="$!typeList" id="typeList"/>
+                	<label name="crmCustomer.belongDeptId" id="deptName">
+                    	$!crmCustomer.deptName
+                    </label>
+                    <label name="crmCustomer.belongUserId" id="userName">
+                    	#if($crmCustomer.belongUserId>0)
+							($!crmCustomer.userName)
+                    	#end
+                    </label>
+                    <input type="hidden" value="$!crmCustomer.customerName" id="cusTomName"/>
+                </td>
+            </tr>
+			<!--
+            #if($isInChargeof&&(!$isShareCus||$hasPerssion==1))
+            <tr id="modifyBelongto">
+                <td width="100" class="field">
+                	<label class="red">*</label>
+                    <label>更改归属：</label>
+                </td>
+                <td width="120">
+                    <select id="BelongToType" name="BelongToType">
+                        <option value="brMine">归属给我</option>
+                        <option value="brUser">归属给下属</option>
+                        <option value="brDept">归属给机构</option>
+                    </select>
+                </td>
+                <td>
+                	<span class="btn2 fl" id="my">
+                		<input id="myUserId" type="hidden"/>
+                        <label class="btn2-txt" id="showText">
+                        </label>
+                    </span>
+                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                        <input type="text" class="dtxt2-txt" fun="checkBelongToEmpty" readonly="readonly" id="userTree" tips="客户归属必须填写！"/>
+                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                    </div>
+                    <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+                        <input type="text" class="dtxt2-txt" fun="checkBelongToEmpty" readonly="readonly" id="deptTree" tips="客户归属必须填写！"/>
+                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                    </div>
+                </td>
+            </tr>
+            #end
+			-->
+        </tbody>
+    </table>
+    <div id="tabs" class="tabs" style="margin-top: 10px;">
+        <div class="tabs-header">
+            <div id="tabs-items-zone" class="tabs-items-zone" style="height:26px; margin-right:140px;">
+                <ul id="tabs-items" class="tabs-items">
+                    <li init="false" id="customerBaseInfo">
+						<label title="基本信息">基本信息</label>
+					</li>
+                    #if($actionType!='insert')
+	                    <li init="false"><label title="联系记录">联系记录</label></li>
+	                    <li init="false"><label title="任务安排">任务安排</label></li>
+	                    <li init="false"><label title="亲友信息">亲友信息</label></li>
+	                    <li init="false"><label title="日程安排">日程安排</label></li>
+	                    <li init="false"><label title="贷款信息">贷款信息</label></li>
+	                    <li init="false"><label title="客户意向">客户意向</label></li>
+						<li init="false"><label title="资料信息">资料信息</label></li>
+                    #end
+                    #foreach($template in $temp.getAllCrmTemplate())
+		        		#if($template.isBasic == 0)
+		        			#if($!subString.existChar("$!crmCustomer.templateIds","$template.templateId"))
+		        				<li init="false"><label title="$template.templateName">$template.templateName</label></li>
+		        			#else
+		        				<li class="hide"><label title="$template.templateName">$template.templateName</label></li>
+		        			#end
+		        		#end
+		        	#end
+                </ul>
+            </div>
+            <!--// .tabs-items-zone-->
+            <div class="x-panel-bar">
+                <div class="x-panel-action x-panel-scroller-left" id="leftBtn"></div>
+                <div class="x-panel-action x-panel-scroller-right" id="rightBtn"></div>
+            </div>
+            <!--// .x-panel-bar-->
+            <div id="tabs-operate" class="tabs-operate">
+                <input type="button" value="添加业务" id="tabs-add" class="tabs-open" />
+                <ul id="tabs-list" class="tabs-list">
+
+                </ul>
+            </div>
+        </div>
+        <div id="tabs-pages" class="tabs-pages">
+        	<div class="tabs-page">
+            #parse("/velocity/customer/customerBaseInfo.vm")
+            #foreach($template in $temp.getTemplates())
+				#if($template.isBasic > 0)
+					<!--#tabOption($template.fields,$exField,0)-->
+					</div>
+					#if($actionType!='insert')
+	            		<div class="tabs-page" id="recordMsg"></div>
+	            		<div class="tabs-page" id="taskMsg"></div>
+	            		<div class="tabs-page" id="relativesInfo"></div>
+	            		<div class="tabs-page" id="taskSchedule"></div>
+	            		<div class="tabs-page" id="loanInfo"></div>
+	            		<div class="tabs-page" id="customerPdtProduct"></div>
+						<div class="tabs-page" id="dataMsg"></div>
+            		#end
+				#else
+					#if($actionType=='insert')
+						<div class="tabs-page">
+					#else
+						<div class="tabs-page">
+					#end
+						<!--#tabOption($template.fields,$exField,0)-->
+					</div>
+				#end
+			#end
+			
+        </div>
+    </div>
+    <hr style="margin: 20px 0px;" />
+    
+    <p class="halign">
+    	<input type="button" value="保 存" id="saveAndClose" class="btn6 btn6bg1" onclick="SaveCustomer('saveAndClose', '$actionType');"/>
+    	#if($actionType=='insert')
+        	<input type="button" value="保存并新建" id="saveAndContinue" class="btn6 btn6bg2" onclick="SaveCustomer('saveAndContinue', 'insert');"/>
+        #end
+        <input type="button" value="取 消" class="btn6 btn6bg3" onclick="closeForm();"/>
+    </p>
+    </form>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<thead>
+<tr>
+    <th width="20"><input type="checkbox" rel="all" nm="chkall" name="CheckAll" id="CheckAll" /></th>
+    <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+    <th><label title="身份证">身份证</label></th>
+    <th><label title="用途">用途</label></th>
+    <th><label title="提交人">提交人</label></th>
+    <th><label title="提交机构">提交机构</label></th>
+    <th><label title="提交时间">提交时间</label></th>
+</tr>
+<tr>
+    <th colspan="7">
+    备注
+    </th>
+</tr>
+</thead>
+<tbody>
+    #foreach($data in $!dataList)
+    <tr #if($data.isWillPast && $data.isWillPast == 1) class="orange"
+    #end>
+        <td><input type="checkbox" rel="row" nm="chkone" name="loanCheck" id="loanCheck" value="$data.rejectCustomerId"/></td>
+        <td>
+            <div class="customer-infor">
+                    <span title="$!data.customerName（$vmHelper.getHidePhoneNumber($!data.mobliePhone)）">$!data.customerName（$vmHelper.getHidePhoneNumber($!data.mobliePhone)）</span>
+            </div>
+        </td>
+        <td><label title="$vmHelper.getHideIdCard($!data.idCard)">$vmHelper.getHideIdCard($!data.idCard)</label></td>
+        <td><label title="$!data.useage">$!data.useage</label></td>
+        <td><label title="$!data.userName">$!data.userName</label></td>
+        <td><label title="$!data.deptName">$!data.deptName</label></td>
+        <td><label title="$!date.format('yyyy-MM-dd HH:mm',$!data.createDate)">$!date.format('yyyy-MM-dd HH:mm',$!data.createDate)</label></td>
+    </tr>
+    <tr>
+        <td colspan="7">$!data.remark</td>
+    </tr>
+    #end
+</tbody>
+<tfoot>
+<tr>
+    <td colspan="7">
+        #parse("/velocity/ajaxPage.vm")
+    </td>
+</tr>
+</tfoot>

@@ -1,0 +1,1065 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看营销任务</title>  
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+		.concreteProType{position:absolute; display: none; border: 1px solid #b1b1b1; background-color: #fff; width:480px; height: auto; overflow: auto; zoom: 1; text-align:center;padding:10px;}
+	</style>
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.tabletree-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+	<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+	
+	<script type="text/javascript">
+		var fn = {};
+		var trObjJson = {}; //保存上一个TrS对象
+		
+    	$(function(){
+			//加载下拉选择框
+			$('select').select();
+			
+    		$('#btnSave').click(function(){
+    			/*
+    			var bool = jQuery.validator({ form: 'form1'});
+    			
+    			if($('#lblProductTarget').text() == ''){
+    				$('#btnSelect').addClass('v-fails');
+    				return false;
+    			}
+				if(bool){
+    				verifyData();//后台验证数据
+    			}*/
+    		});
+    		
+			$('div.etabs').etabs({
+				'head': 'etabs-items',
+				'body': 'etabs-body',
+				'bar': 'etabs-bar',
+				'beforeOnclick': fun1,
+				'onclick': fun2
+			});
+			$('table.datatbl').table();
+			$('table.tabletree').tabletree();
+			/*
+			点击选择按钮
+			*/
+			$('.choProQuota').click(function(e){
+			var box = $('.proQuota');
+				if(box.is(':hidden')){
+					var obj = $(this);
+					box.css({
+						top: obj.offset().top + obj.outerHeight(true) - 1 + 'px',
+						left: obj.offset().left + 'px'
+					}).show();
+					obj = null;
+				}
+				else{
+					box.hide();
+					hideinit();
+				}
+				box = null;
+				e.stopPropagation();
+			});
+			/**
+			 * 窗体大小发生改变时弹框相对位置
+			**/
+			$(window).resize(function(){
+				if(!$('.proQuota').is(':hidden')){
+					var obj = $('.choProQuota');
+					$('.proQuota').css({
+						left: obj.offset().left + 'px'
+					})
+					obj = null;
+				}
+			});
+			/**
+			 * 点击窗体其他区域隐藏请求者层
+			**/
+			$(document).click(function(){
+				$('.proQuota').hide();
+			});
+			/**
+			 * 阻止请求者层中的元素事件冒泡
+			**/
+			$('.proQuota').click(function(e){
+				e.stopPropagation();
+			});
+			
+			/*产品类型树*/
+			var setting = {
+				check: {
+					enable: false
+				},data: {
+					simpleData: {enable: true}
+				},view: {showIcon: false}
+			};
+			var zNodes = $!templatesTrees;//加载模版树
+			
+			jQuery.fn.zTree.init($("#treeDivTree"), setting, zNodes);
+			
+			
+			var setting_d = {
+					check: {
+					enable: false
+				},data: {
+					simpleData: {enable: true}
+				},view: {showIcon: true}
+			}
+			
+			//同步加载机构用户树
+			jQuery.ajax({
+				type: "post",
+				url: '/tskMarketing/showAllExecuterList.html?mid='+$('#txtMarketingId').val()+'&random='+Math.random(),
+				async:false,
+				data: {
+				},
+				success: function(data){
+					data = jQuery.parseJSON(data);
+					jQuery.fn.zTree.init($("#treeDemo"),setting_d,data);
+				}
+			});
+			
+			function getChildNodes(treeId,treeNode) {
+					var zTree = jQuery.fn.zTree.getZTreeObj(treeId);
+					var childNodes = zTree.transformToArray(treeNode); 
+					var nodes = new Array();
+					 for(i = 0; i < childNodes.length; i++) {
+						nodes[i] = childNodes[i].id;
+					 } 
+					return nodes.join(","); 
+			}
+			
+			var datas= $!tskAssignTrees;
+
+			/*编辑时初始化树表格*/
+			function initTableTree(treeId){
+				var zTree = jQuery.fn.zTree.getZTreeObj(treeId);
+				var r=$!roleType;
+				if(zTree != null){
+					var nodes = zTree.getCheckedNodes(true), l = nodes.length, trnode=[];
+					for(var i=0; i<l; i++){
+						trnode[i]=nodes[i].id+','+nodes[i].pId+','+nodes[i].name;
+					}
+					/*初始化*/
+					for(var n=0;n<datas.length;n++){
+						for(var k=0;k<trnode.length;k++){
+							if(trnode[k].split(',')[0]==datas[n].id){
+								trnode[k]+=','+datas[n].mt+','+datas[n].una+','+datas[n].ncm+','+datas[n].ds+','+datas[n].type;
+							}else{
+							}
+						}
+					}
+					var tl=trnode.length;
+					for(var j=0; j<=tl-1;j++){
+						var a=0;
+						var b=0;
+						var c=0;
+						var e="";
+						if(trnode[j].split(',')[3]==undefined){
+							a=0;
+						}else{
+							a=trnode[j].split(',')[3];
+						}
+						if(trnode[j].split(',')[5]==undefined){
+							b=0;
+						}else{
+							b=trnode[j].split(',')[5];
+						}
+						if(trnode[j].split(',')[6]==undefined){
+							c=0;
+						}else{
+							c=trnode[j].split(',')[6];
+						}
+						if(trnode[j].split(',')[7]==undefined){
+							e="d";
+						}else{
+							e=trnode[j].split(',')[7];
+						}
+						$('table.tabletree tbody').append('<tr id="'+ trnode[j].split(',')[0]
+									+'" pid="'+ trnode[j].split(',')[1] +'" type="'+ e +'">'
+									+'<td style="text-align:left;"><label title="' + trnode[j].split(',')[2] + '">'+trnode[j].split(',')[2]+'</label></td>'
+									+'<td class="inpt">'
+									+'<label>'+a+'</label>'
+									+'</td>'
+									+'<td><label>'+trnode[j].split(',')[4]+'</label></td>'
+									+'<td><label>'+b+'</label></td>'
+									+'<td><label>'+c+'</label></td>'
+								+'</tr>');	
+					}
+					$('table.tabletree').tabletree();
+					/*计算营销目标及差额*/
+					var taskTarget=0;
+					var t2=0;
+					if($('table.tabletree tbody').find("tr").length>0){
+						taskTarget=$('table.tabletree tbody').find("tr:first").children("td").eq(1).find("label").text();
+						t2=$('table.tabletree tbody').find("tr:first").children("td").eq(3).find("label").text();
+					}
+					$('#lblTaskTarget').text(taskTarget);
+					var ce=taskTarget-t2;
+					if(ce<0){
+						$('#chae').text(0);
+					}else{
+						$('#chae').text(taskTarget-t2);
+					}
+					$('#wce').text(t2);
+					countChaE();
+					$('.inpt').click(function(){
+						/*var lbl = $('label', this),v = lbl.text(), tr = $(this).parent();
+						var id=tr.attr('id');
+						var pid=tr.attr('pid');
+						$('tr').css({
+								'background':'#fff'
+						});
+						$('tr[id='+id +']').css({
+								'background':'#E3EAF4'
+						});
+						$('tr[id='+pid +']').css({
+								'color':'#00F'
+						});
+						lbl.replaceWith('<div class="ui-div-text" style="border:0 !important;">'
+													+'<input type="text" class="text" value=\'' + v + '\'>'
+												+'</div>');
+						$('input', this).focus(function(){
+							$(this).css({
+							'background':'#FFE8D9'
+							});
+							this.select();
+						}).blur(function(){
+							$('tr[id='+pid +']').css({
+								'color':''
+							});
+							$('div.ui-div-text').replaceWith('<label>' + $(this).val() + '</label>');
+							update(tr,$(this).val());
+							countChaE();
+						}).focus();*/
+					});
+					//countChaE();
+				}else{
+					var uName='$!userName';
+					var str="";
+					if(r==0){
+						str='<td><label>'+datas[0].una+'</label></td>';
+					}
+					$('table.tabletree tbody').append('<tr pid="null" type="'+ datas[0].type +'">'
+								+'<td><label title="' + uName + '">'+uName+'</label></td>'
+								+'<td class="inpt">'
+								+'<label>'+datas[0].mt+'</label>'
+								+'</td>'
+								+str
+								+'<td><label>'+datas[0].ncm+'</label></td>'
+								+'<td><label>'+datas[0].ds+'</label></td>'
+							+'</tr>');	
+					/*计算营销目标及差额*/
+					var taskTarget=0;
+					var t2=0;
+					if($('table.tabletree tbody').find("tr").length>0){
+						taskTarget=$('table.tabletree tbody').find("tr:first").children("td").eq(1).find("label").text();
+						t2=$('table.tabletree tbody').find("tr:first").children("td").eq(2).find("label").text();
+					}
+					$('#lblTaskTarget').text(taskTarget);
+					$('#chae').text(taskTarget-t2);
+					$('#wce').text(t2);
+				}
+			}
+			
+			$('.choConcreteProType').click(function(e){
+				$('.concretePro').hide();
+				var tr=$(this).parents('tr:first');
+				$(tr).find(':radio').attr('checked','checked');
+				
+				var box = $('.concreteProType');
+				if(!$('.proQuota').is(':hidden')){
+					if(box.is(':hidden')){
+						var obj = $(this);
+						box.css({
+							top: obj.offset().top + obj.outerHeight(true) - 1 + 'px',
+							left: obj.offset().left + 'px'
+						}).show();
+						obj = null;
+					}
+					else{
+						box.hide();
+					}
+					box = null;
+					e.stopPropagation();
+				}
+			});
+			$('.ok').click(function(){
+				okCheckedVal('treeDivTree');
+				if($('#lblProductTarget').text() == ''){
+    				$('#btnSelect').addClass('v-fails');
+    			}else{
+    				$('#btnSelect').removeClass('v-fails');
+    			}
+				$('.concreteProType').hide();
+			});
+			$('.close').click(function(){
+				if($('#lblProductTarget').text() == ''){
+    				$('#btnSelect').addClass('v-fails');
+    			}else{
+    				$('#btnSelect').removeClass('v-fails');
+    			}
+				$('.concreteProType').hide();
+			});
+			
+			function okCheckedVal(treeId){
+				var zTree = jQuery.fn.zTree.getZTreeObj(treeId);
+				if(zTree != null){
+					var nodes = zTree.getSelectedNodes(), l = nodes.length, txt = '', val = '';
+					for(var i=0; i<l; i++){
+						if(nodes[i].type != 'D'){
+							txt += nodes[i].name + ',';
+							val += nodes[i].id + ',';
+						}
+					}
+					if(txt.length > 0){
+						txt = txt.substring(0, txt.length-1);
+						val = val.substring(0, val.length-1);
+					}
+					$(':text:first',$('.choConcreteProType')).val(txt);
+					$(':hidden:first',$('.choConcreteProType')).val(val);
+					
+					var pSNode = nodes[0].getParentNode();
+					if(pSNode == null){
+					 	//大类
+					 	$('#txtProductTargetType').val("templateId");  
+					 	$('#txtTemplateId').val(nodes[0].id);
+					 	$('#txtSubTemplateName').val("");
+					 	$('#txtProductId').val(0);
+					 	$('#txtProductTargetVal').val(nodes[0].id); 
+					}else{
+						//小类
+					 	$('#txtProductTargetType').val("subTemplateName");
+					 	$('#txtTemplateId').val(pSNode.id);
+					 	$('#txtSubTemplateName').val(nodes[0].name); //txtProductId
+					 	$('#txtProductId').val(0);
+					 	$('#txtProductTargetVal').val(nodes[0].name); 
+					}
+					
+					$('#lblProductTarget').text(nodes[0].name);
+				}
+			}
+			
+			/**
+			 * 窗体大小发生改变时弹框相对位置
+			**/
+			$(window).resize(function(){
+				if(!$('.concreteProType').is(':hidden')){
+					var obj = $('.choConcreteProType');
+					$('.concreteProType').css({
+						left: obj.offset().left + 'px'
+					})
+					obj = null;
+				}
+			});
+			/**
+			 * 点击窗体其他区域隐藏请求者层
+			**/
+			$(document).click(function(){
+				$('.concreteProType').hide();
+			});
+			/**
+			 * 阻止请求者层中的元素事件冒泡
+			**/
+			$('.concreteProType').click(function(e){
+				e.stopPropagation();
+			});
+			/*选择产品*/
+			$('.choConcretePro').click(function(e){
+				$('.concreteProType').hide();
+				var tr=$(this).parents('tr:first');
+				$(tr).find(':radio').attr('checked','checked');
+				var box = $('.concretePro');
+				if(!$('.proQuota').is(':hidden')){
+					if(box.is(':hidden')){
+						var obj = $(this);
+						box.css({
+							top: obj.offset().top + obj.outerHeight(true) - 1 + 'px',
+							left: obj.offset().left + 'px'
+						}).show();
+						obj = null;
+					}
+					else{
+						box.hide();
+					}
+					box = null;
+					e.stopPropagation();
+				}
+			});
+			
+			$('.searchPro').click(function(){
+				var pNumber=$(':text:first',$('.pNumber')).val();
+				var pName=$(':text:first',$('.pName')).val();
+				jQuery.ajax({
+				    	type: "post",
+				    	url: "queryPdtProductList.html",
+				    	data: {'productName': pName,
+				    		   'productCode': pNumber
+				    	},
+				    	success: function(data, textStatus){
+				 	  		searchProResult(data);
+				    	}
+				});
+				
+			});
+			
+			fn.handler=function(obj){
+				$('tbody tr', obj).click(function(){
+					if(!$(this).hasClass('active')){
+						$(this).addClass('active').siblings().removeClass('active');
+					}
+				});
+				$('tbody tr',obj).hover(
+					function(){
+						if(!$(this).hasClass('active')){ $(this).addClass('hover'); }
+					},
+					function(){
+						$(this).removeClass('hover');
+					}
+				);
+			}
+			fn.handler($('.protable'));
+				
+			$('.ok2').click(function(){
+				var tr = $('.protable  tbody tr.active',$('.concretePro'));
+				if(tr.size() == 0){
+					hideinit();
+					return false;
+				}
+				//产品
+			 	$('#txtProductTargetType').val("productId");
+			 	$('#txtTemplateId').val(0);
+				$('#txtSubTemplateName').val("");
+			 	$('#txtProductId').val(tr.attr("mid")); 
+			 	$('#txtProductTargetVal').val(tr.attr("mid")); 
+				$('#lblProductTarget').text($('td:eq(2)',tr).text());
+				if($('#lblProductTarget').text() == ''){
+    				$('#btnSelect').addClass('v-fails');
+    			}else{
+    				$('#btnSelect').removeClass('v-fails');
+    			}
+				//$('.concretePro').hide();
+				hideinit();
+			});
+			$('.close2').click(function(){
+				if($('#lblProductTarget').text() == ''){
+    				$('#btnSelect').addClass('v-fails');
+    			}else{
+    				$('#btnSelect').removeClass('v-fails');
+    			}
+				$('.concretePro').hide();
+			});
+			
+			
+			$('.ok3').click(function(){
+				
+				hideinit();
+				//$('.proQuota').hide();
+			});
+			$('.close3').click(function(){
+				$('.proQuota').hide();
+			});
+			
+			
+			
+			/**
+			 * 窗体大小发生改变时弹框相对位置
+			**/
+			$(window).resize(function(){
+				if(!$('.concretePro').is(':hidden')){
+					var obj = $('.choConcretePro');
+					$('.concretePro').css({
+						left: obj.offset().left + 'px'
+					})
+					obj = null;
+				}
+			});
+			/**
+			 * 点击窗体其他区域隐藏请求者层
+			**/
+			$(document).click(function(){
+				$('.concretePro').hide();
+			});
+			/**
+			 * 阻止请求者层中的元素事件冒泡
+			**/
+			$('.concretePro').click(function(e){
+				e.stopPropagation();
+			});
+			
+			//渲染附件上传功能
+			setFileUpload('/tskMarketing/uploadTskMarketingAttachment.html');
+			
+
+			/*加载右边树表格*/
+			initTableTree('treeDemo');
+		});
+		function hideinit(){
+			$('.proQuota').hide();
+			$('.concretePro').hide();
+			$('.concreteProType').hide();
+		}
+		function fun1(h, b){
+			return true;
+		}
+		function fun2(h, b){
+			
+		}
+		function countChaE(){
+			$('table.tabletree tbody tr').each(function(){
+				var tr=$(this);
+				var assnum=0;
+				var asscha=0;
+				tr.nextAll().each(function(){
+					if($(this).attr('pid')==tr.attr('id')){
+						assnum+=$(this).find('td').eq(1).text()-0;
+					}
+				});
+				asscha=tr.find('td').eq(1).text()-assnum;
+				if(tr.attr('type')=="u" || tr.attr('type')=="U"){
+					tr.find('td').eq(2).find('label').text('-');
+				}else{
+					tr.find('td').eq(2).find('label').text(asscha);
+				}
+			});
+		}
+		
+		function update(tr,v){
+			var dAverage = (parseFloat(v-0-tr.children("td").eq(3).find("label").text())/parseFloat($('#txtDays').val())).toFixed(2);
+			tr.children("td").eq(4).find("label").text(dAverage);
+			var taskTarget = 0;
+			//计算任务总目标
+			$('table.tabletree tbody').find("tr[pid=0]").each(function(){
+				taskTarget += $(this).children("td").eq(1).find("label").text();
+			});
+			$('#lblTaskTarget').text(taskTarget);
+		}
+		
+		/**
+		 * 搜索产品结果
+		 */
+		function searchProResult(data){
+			var json = jQuery.parseJSON(data); 
+			$('#tblSearchPro').find('tbody').html(" ");
+			jQuery.each(json , function(index, obj){ 
+				$('#tblSearchPro').find('tbody').append("<tr mid="+ obj.productId +"><td>"+ obj.templateName +"</td><td>"+ obj.productCode +"</td><td>"+ obj.productName +"</td></tr>");
+			});
+			
+			$('#tblSearchPro').table();
+			
+			fn.handler($('.protable'));
+		}
+		
+		/**
+		 * 下载任务附件
+		 */
+		function downFileAttr(attachmentId){
+			location.href="downloadAttachment.html?attachmentId="+attachmentId;
+			return false;
+		}
+		
+    </script>
+</head>
+
+<body>
+<form id="form1" name="form1" action="">
+	<input type="hidden" id="txtMarketingId" value="$!tskMarketingBean.marketingId"/>
+	<input type="hidden" id="txtDays" value="$!days"/>
+	<input type="hidden" id="txtProductTargetType" value="$!productTargetType"/>
+	<input type="hidden" id="txtTemplateId" value="$!tskMarketingBean.templateId"/> 
+	<input type="hidden" id="txtSubTemplateName" value="$!tskMarketingBean.subTemplateName"/>
+	<input type="hidden" id="txtProductId" value="$!tskMarketingBean.productId"/>
+	<input type="hidden" id="txtProductTargetVal" value="$!productTargetVal"/>
+	 
+    <div class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li><label>营销目标分配</label></li>
+		        	<li id="li1"><label>产品营销计划</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+            	<table class="viewtbl" style="table-layout: auto;">
+                    <tbody>
+						<tr>
+                            <td class="field" width="80">
+                            	<label class="red">*</label>
+                                <label>任务等级：</label>
+                            </td>
+                            <td colspan="3">
+			                    	#foreach($tskGrade in $!tskGradeList)
+			                    		#if($!tskGrade.marketingGradeId==$!tskMarketingBean.gradeId)
+			                    		   $!tskGrade.marketingGradeName
+			                    		#end
+			                    		
+			                    	#end
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                            	<label class="red">*</label>
+                                <label>任务标题：</label>
+                            </td>
+                            <td colspan="3">
+                                 $!tskMarketingBean.marketingTitle
+                            </td>
+                        </tr>
+                        <tr>
+                           <td class="field" width="80">
+						   		<label class="red">*</label>
+								<label>执行日期：</label>
+							</td>
+							<td colspan="3">
+								$!date.format("yyyy-MM-dd",$!tskMarketingBean.startDate) 至 $!date.format("yyyy-MM-dd",$!tskMarketingBean.endDate)
+							</td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                                <label>任务概述：</label>
+                            </td>
+                            <td colspan="3">
+                                   $!tskMarketingBean.remark
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+                            	<label class="red">*</label>
+                                <label>产品指标：</label>
+                            </td>
+                            <td colspan="3">
+                 				<button class="ui-input-btn choProQuota" id="btnSelect" tips='“产品指标”必须填写' style="display:none">请选择</button> <label id="lblProductTarget">$!tskMarketingBean.productTarget</label>
+							<!--弹框-->
+								<div class="proQuota" style="display:none;">
+									<table>
+										<tbody>
+											<tr>
+												<td width="8%">
+													<input type="radio" name="radio" class="radio" />
+												</td>
+												<td width="17%">
+													<label>选择产品类型:</label>
+												</td>
+												<td>
+													<div class="ui-div-text choConcreteProType">
+														<input type="text" class="text" />
+														<input id="deptIds" type="hidden" />
+														<i class="ddl"></i>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<input type="radio" name="radio" class="radio" />
+												</td>
+												<td>
+													<label>选择具体产品:</label>
+												</td>
+												<td>
+													<div class="ui-div-text choConcretePro">
+														<input type="text" class="text" />
+														<input type="hidden" />
+														<i class="ddl"></i>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="3" style="text-align:right;">
+													<button class="ui-input-btn ok3">确定</button>
+													<button class="ui-input-btn close3">取消</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="concreteProType" style="display:none; z-index:1">
+									<table style="width:100%;">
+										<tbody>
+											<tr>
+												<td>
+													<div id="treeDiv" class="ztree-box" style="width:100%;height:125px; overflow:auto;">
+														<ul id="treeDivTree" class="ztree"></ul>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td style="text-align:right;">
+													<button class="ui-input-btn ok">确定</button>
+													<button class="ui-input-btn close" style="margin-left:10px;">取消</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								
+								<!--选择具体产品-->
+								<div style="display:none; z-index:1;" class="concretePro">
+									<table>
+										<tbody>
+											<tr>
+												<td>产品编号:</td>
+												<td>
+													<div class="ui-div-text pNumber">
+														<input type="text" class="text" />
+													</div>
+												</td>
+												<td>产品名称:</td>
+												<td>
+													<div class="ui-div-text pName">
+														<input type="text" class="text" />
+													</div>
+												</td>
+												<td>
+													<button class="ui-input-btn searchPro">搜索</button>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="5" style="height:125px; vertical-align:top; ">
+													<table class="datatbl protable" style="width:100%; " id="tblSearchPro">
+														<thead>
+															<tr>
+																<th>产品类型</th>
+																<th>产品编号</th>
+																<th>产品名称</th>
+															</tr>
+														</thead>
+														<tbody>
+															
+														</tbody>
+													</table>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="5" style="text-align:right;">
+													<button class="ui-input-btn ok2">确定</button>
+													<button class="ui-input-btn close2">取消</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<!--选择具体产品-->
+							<!--弹框-->
+							</td>
+                        </tr>
+						<tr>
+                            <td class="field" width="80">
+                                <label>完成情况：</label>
+                            </td>
+                            <td colspan="3">
+                 				<label>$vmHelper.getPercentDec($!tskMarketingBean.comPercent)</label>
+                            </td>
+                        </tr>
+						<tr>
+                            <td class="field" width="80">
+                                <label>分配者：</label>
+                            </td>
+                            <td colspan="3">
+                 				<label>$!tskMarketingBean.assignUserName</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="80">
+			                  <label>上传附件：</label>
+				            </td>
+				            <td colspan="3">
+				              	
+				              	#foreach($attr in $!attrList)
+								   <div id="attr_$velocityCount" class="uploadifyQueueItem">
+			                            <span class="fileName"><a href="#" onclick="downFileAttr($attr.attachmentId)" class="attrFile">$!attr.fileNameOld</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label></span><span class="percentage"></span>
+				         		   </div>
+								#end
+								
+				            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="etabs-body-child">
+				<div>
+					#if($!roleType==0)
+					<div class="l" style="display:none;">
+						<h4>
+							<label>选择执行对象</label>
+						</h4>
+						<div class="l-inner">
+							<ul class="ztree" id="treeDemo"></ul>
+						</div>
+					</div>
+					#end
+					<div class="r">
+						<div class="contact-amount">
+									<label>任务目标:</label>
+									<label class="green" id="lblTaskTarget">0</label>
+									<label>万元</label>
+									<label style="margin-left:20px;">差额:</label>
+									<label class="green" id="chae">0</label>
+									<label>万元</label>
+									<label style="margin-left:20px;">完成营销额:</label>
+									<label class="green" id="wce">0</label>
+									<label>万元</label>
+						</div>
+						<table class="datatbl tabletree" id="tblAssign">
+							<thead>
+								<tr>
+									<th><label title="执行对象">执行对象</label></th>
+									<th><label title="营销目标(万元)">营销目标(万元)</label></th>
+									#if($!roleType==0)
+									<th>
+										<label title="未分配(万元)">未分配(万元)</label>
+									</th>
+									#end
+									<th>
+										<label title="完成营销额(万元)">完成营销额(万元)</label>
+									</th>
+									<th>
+										<label title="日均剩余营销量(万元)">日均剩余营销量(万元)</label>
+									</th>
+									
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+            </div>
+            <!-- 产品营销计划 -->
+            <div class="etabs-body-child" id="tab1">
+            	<table class="htmltbl">
+					<tbody>
+						<tr>
+							#if($!roleType==0)
+							<td class="field" width="8%">
+								<label>执行对象：</label>
+							</td>
+							<td width="17%">
+								<div id="userList" class="ui-div-text" style="width: 200px;">
+			                        <input type="text" class="text" readonly="readonly" id="userText"/>
+			                        <input id="userIds" name="userIds" type="hidden" />
+			                        <i class="ddl" id="ddlchange"></i>
+			                    </div>
+							</td>
+							#end
+							<td class="field" width="8%">
+								<label>计划日期：</label>
+							</td>
+							<td colspan="3">
+								<table class="celltbl">
+									<tbody>
+										<tr>
+											<td width="120">
+												<div class="ui-div-text">
+													<input id="planDateFrom" readonly="readonly"  type="text" class="text datepicker" />
+													<i class="date"></i>
+												</div>
+											</td>
+											<td width="20"><label>-</label></td>
+											<td width="120">
+												<div class="ui-div-text">
+													<input id="planDateTo" readonly="readonly"  type="text" class="text datepicker" />
+													<i class="date"></i>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="search-bar">
+					<span class="fl bold">
+						产品营销计划(<label class="green" id="pcount">$!page.totalRowsAmount</label>)
+					</span>
+					<input type="button" id="btnClear" class="ui-input-btn" value="清空" />
+					<input type="button" id="btnSearch" class="ui-input-btn" value="搜索" />
+				</div>
+				<table id="tblList" class="datatbl">
+					#parse("/velocity/marketTask/planListTable.vm")
+				</table>
+            </div>
+        </div>
+		<hr />
+		<div class="center">
+			<input type="button" class="ui-footer-btn1 ui-footer-btn1-save"
+				value="保存" id="btnSave" style="display:none;"/>
+			<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel"
+				value="关闭" onclick="javascript:tab.close(GetId(), false);" />
+		</div>
+	</div>
+</form>
+	<script type="text/javascript">
+    	var oldPostJson={};	//上一个搜索条件
+    	
+    	/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			var selectedUserIds = jQuery.trim($('#userIdsSearch').val());
+			var planDateFrom = jQuery.trim(jQuery("#planDateFromSearch").val());
+			var planDateTo = jQuery.trim(jQuery("#planDateToSearch").val());
+			var marketingId = jQuery.trim(jQuery("#txtMarketingId").val());
+			
+			var postJson = {'selectedUserIds': selectedUserIds,
+						  'planDateFrom': planDateFrom,
+						  'planDateTo': planDateTo,
+						  'marketingId':marketingId};
+			goto(
+				page,
+				"/tskMarketingPlan/queryPlanList.html?RandNum="+ Math.random(),
+				postJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#productCount').val();
+			if(total!=undefined){
+				jQuery("#pcount").text(total);
+			}else {
+				jQuery("#pcount").text("0");
+			}
+		}
+		
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var postJson={};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+    	$(function(){
+			$('table.datatbl').table();
+			$('select').select();
+			
+			jQuery("#btnClear").click(function(){
+				//$(':text').val('');
+				$("#planDateFrom").val('');
+				$("#planDateTo").val('');
+				$("#userText").val('');
+		    	$("#userIds").val('');
+		    	$("select").each(function(){
+		    		this.selectedIndex = 0;
+		    		$(this).select();
+		    	}); 
+			});
+			
+			jQuery("#btnClose").click(function(){
+				tab.close(GetId(), false);
+			});
+			
+			jQuery("#btnSearch").click(function(){	
+				var selectedUserIds = jQuery.trim($('#userIds').val());
+				var planDateFrom = jQuery.trim(jQuery("#planDateFrom").val());
+				var planDateTo = jQuery.trim(jQuery("#planDateTo").val());
+				var marketingId = jQuery.trim(jQuery("#txtMarketingId").val());
+				
+				var postJson = {'selectedUserIds': selectedUserIds,
+							  'planDateFrom': planDateFrom,
+							  'planDateTo': planDateTo,
+							  'marketingId':marketingId};
+				oldPostJson = postJson;  //记录OldPostJson
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "/tskMarketingPlan/queryPlanList.html?RandNum="+ Math.random(),
+			    	data: postJson,
+			    	success: function(data){
+			 	  		queryResult(data);
+			    	}
+				});
+			});
+			
+			//加载下属树
+			$('#userList').subtree({
+				tid: 'subtree',
+				showIcon: true,
+				url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+				buttons: [
+					{ text: '确定', callback: onCheckUser },
+					{ text: '取消' }
+				]
+			});
+			
+			initQueryJson();
+		});
+		
+		//点击User
+		function onCheckUser(treeId){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'U');
+			$('#userIds').val(postJson.ids);
+			$('#userText').val(postJson.names);
+		}
+		 	
+		function getCheckJson(treeId, flag){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getCheckedNodes(true);
+			var len = nodes.length;
+			var uIds = "";
+			var uName = "";
+			for(var i=0; i<len; i++){
+				if(flag=='U'){
+					if(nodes[i].flag==flag){
+						if(uIds==""){
+							uIds = nodes[i].id;
+							uName = nodes[i].name;
+						}else{
+							uIds = uIds + "," + nodes[i].id;
+							uName = uName+ "," +nodes[i].name;
+						}
+					}
+				}else{
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}	
+				}
+			}
+			var postJson = {};
+			postJson['ids'] = uIds;
+			postJson['names'] = uName;
+			return postJson;
+		}	
+		
+		function toDetailList(planId) {
+			var url="/tskMarketingPlan/planListDetail.html?planId="+planId+"&random="+Math.random()*10000;
+			banger.page.openDialog(url,"产品营销计划表",800,600);
+			//window.showModalDialog(url, '产品营销计划表', 'dialogWidth=800px;dialogHeight=600px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		}
+    </script>
+</body>
+</html>

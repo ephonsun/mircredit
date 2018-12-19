@@ -1,0 +1,206 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>修改营销人员</title>
+	<base target="_self" />
+	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+		.cusno { position: absolute; display: none; width: 340px; height: 200px; background-color: #fff; overflow: auto; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+	var setting = {
+		callback:{
+			onClick:treeOnclick
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			showIcon: !showIconForTree
+		}
+	};
+	
+	//不显示节点图标
+	function showIconForTree(treeId, treeNode) {
+		return treeNode;
+	};
+
+	function treeOnclick(event, treeId, treeNode) {
+		initDeptUser(treeNode.id);
+	};
+		
+	$(function(){
+    	/**
+    	* 加载下拉选择框
+    	**/
+    	$('select').select();
+    
+    	/**
+    	* 选择营销人员
+    	**/
+    	
+    	/**
+    	* 行单击事件、行划过事件
+    	**/
+		fn.handler($('.b-bomb-box1 .collist table tbody'));
+		
+    	/**
+    	* 请求者层 确定 按钮事件
+    	**/
+    	$('.ok', $('.b-bomb-box1')).click(function(){
+    		var tr = $('.collist table tbody tr.active', $('.b-bomb-box1'));
+    		if(tr.size() == 0){
+				banger.page.showMessageBox("请选择营销人员！");
+				return;
+    		}
+    		//给userId赋值
+			$('#userId').val($('td:first', tr).attr("id"));
+			$('#userType').val($('#'+$('#userId').val()+$('td:first', tr).text()).val());
+			jQuery.post('../pdtProduct/updateCounterUser.html',{"userId":$('#userId').val(),"ids":$('#ids').val(),"userType":$('#userType').val(),"random":Math.random()},function(data){
+				window.returnValue = 1;
+				window.close();
+        	});
+    	});
+		
+    	/**
+    	* 请求者层 取消 按钮事件
+    	**/
+    	$('.close', $('.b-bomb-box1')).click(function(){
+    		window.close();
+    	});
+		
+    	/**
+    	* 阻止请求者层中的元素事件冒泡
+    	**/
+    	$('.b-bomb-box1').click(function(e){
+    		e.stopPropagation();
+    	});
+    
+    	//加载机构用户树
+    	jQuery.post('../pdtProduct/showDeptNameList.html',{"random":Math.random()},function(data){
+			data = jQuery.parseJSON(data);
+			jQuery.fn.zTree.init($("#deptTree"),setting,data);
+			initNodeSelect();
+    	});
+    });
+	
+	var fn = {};
+	//加载行鼠标事件
+	fn.handler = function(obj){
+		$('tbody tr', obj).click(function(){
+    		if(!$(this).hasClass('active')){
+    			$(this).addClass('active').siblings().removeClass('active');
+    		}
+    	});
+		
+		$('tbody tr', obj).hover(
+    		function(){
+    			if(!$(this).hasClass('active')){ $(this).addClass('hover'); }
+    		},
+    		function(){
+    			$(this).removeClass('hover');
+    		}
+    	);
+	}
+	
+	//默认选择第一个节点
+	function initNodeSelect(){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+		var nodes = treeObj.getNodes();
+		if (nodes.length>0) {
+			treeObj.selectNode(nodes[0]);
+			$("#deptId").val(nodes[0].id);
+			initDeptUser(nodes[0].id);
+		}
+	}
+    
+	//根据节点id请求后台访问
+	function initDeptUser(trId){
+		jQuery.ajax({
+		    type:"post", //请求方式
+		    url:"getDeptUserListPage.html", //发送请求地址
+		    data:{ //发送给数据库的数据
+		  		deptId:trId,
+				flagInt:1
+		    },
+		    //请求成功后的回调函数
+		    success:function(html){
+				$('.b-bomb-box1 .collist table tbody').empty().append(html);
+				fn.handler($('.b-bomb-box1 .collist table'));
+		    }
+		});
+	}
+	
+
+
+		 
+		 //点击text弹出AccountBox
+		 function showAccountBox(){
+		 	$('#accountBox').show();
+		 }
+		 
+		 
+		 function hid(account){
+		 	$('#account').val(account);
+		 	$('#accountBox').hide();
+		 }
+		 
+    </script>
+</head>
+ 
+<body>
+	<form id="f" name="f" method="post" action="addBuyProduct.html">
+        <input type="hidden" id="userId" value=""/>
+		<input type="hidden" id="userType" value=""/>
+		<input type="hidden" id="ids" value="$!ids"/>
+		<div class="b-bomb-box1" style="display:block;">
+    	<div class="fl l">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+		<div class="fl r" id="deptGrid">
+        	<div class="colheader">
+            	<table>
+                    <thead>
+                        <tr>
+                            <th width="80"><label>姓名</label></th>
+                            <th width="80"><label>用户名</label></th>
+                            <th width="12"><label>&nbsp;</label></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="collist">
+                <table>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="clear"></div>
+        <div class="b">
+        	<input type="button" class="btn1 ok" value="确定" />
+        	<input type="button" class="btn1 close" value="取消" />
+        </div>
+    </div>
+    </form>
+</body>
+</html>
+

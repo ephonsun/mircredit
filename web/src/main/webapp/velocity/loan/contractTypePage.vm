@@ -1,0 +1,132 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>合同类型</title>
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <style type="text/css">
+        table.htmltbl_1 { margin-bottom:15px; }
+        .w1 { width:100px; }
+        .mt { margin-top:-5px; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+        #draggable {background-color:#FFF; width:165px; padding:5px 0px 5px 10px; position:absolute; right:12px; top:11px; float:left; z-index:99999; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(function () {//页面初始化
+            $("select").each(function () {
+                $(this).select({scroll: 10});
+            });
+
+        })
+
+        function downContractPage(cont){
+            var contType = $("#contractType").val();
+            if(cont=="5"){
+                contType=1;
+            }
+
+            var loanId =  $("#loanId").val();
+            var url = "../loan/downContractPage.html?loanId=" + loanId + "&code=" + contType+cont + "&random="  + Math.random() * 1000 ;
+            var result = banger.page.openDialog(url, "合同内容", 750, 700);
+//            alert(url);
+//            var name ="hetong";
+//            var width=750;
+//            var height=700;
+//            var top=(window.screen.height-30-height)/2;
+//            var left=(window.screen.width-30-width)/2;
+////            window.open(url,name,'height='+height+',innerHeight='+height+',width='+width+',innerWidth='+width+',top='+top+',left='+left+',toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,status=no');
+//            banger.page.openDialog(url,name, 750, 700);
+        }
+
+
+    </script>
+</head>
+<body>
+
+<input type="hidden" id="loanId" name="lnLoanInfo.loanId" value="$!loanId"/>
+<div class="loan-bg">
+    <p class="bold loan-lheight">合同类型</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>合同类型：</label>
+                </td>
+                <td >
+##                    <div class="ui-div-text"> </div>
+                    <select id="contractType" name="lnLoanInfo.contractType" maxlength="20" style="width: 100px">
+                        #foreach($!htlx in $!checkBoxMessage.get("HTLX"))
+##                            #if($contractType)
+##                                #if($!htlx.dictionaryKey==$!contractType)
+##                                    <option value="$!htlx.dictionaryKey"> $!htlx.dictionaryValue</option>
+##                                #end>
+##                            #else
+                                <option value="$!htlx.dictionaryKey"> $!htlx.dictionaryValue</option>
+##                            #end
+                        #end
+                    </select>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <input type="button" class="ui-span-btn button-table" onclick="downContractPage('1')" value="主合同"/>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <input type="button" class="ui-span-btn button-table" onclick="downContractPage('2')" value="担保合同"/>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <input type="button" class="ui-span-btn button-table" onclick="downContractPage('3')" value="抵押合同"/>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <input type="button" class="ui-span-btn button-table" onclick="downContractPage('4')" value="质押合同"/>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <input type="button" class="ui-span-btn button-table" onclick="downContractPage('5')" value="借据"/>
+                </td>
+            </tr>
+
+            <tr style="height:10px">
+                <td colspan="10"></td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+
+
+</body>
+</html>

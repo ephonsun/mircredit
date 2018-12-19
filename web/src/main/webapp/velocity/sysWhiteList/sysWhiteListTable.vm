@@ -1,0 +1,28 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+            <th><label title="姓名">姓名</label></th>
+            <th><label title="电话">联系电话</label></th>
+            <th width="100"><label title="操作">操作</label></th>
+        </tr>
+    </thead>
+     #foreach($temp in $!list.items)
+    <tbody>
+        <tr>
+            <td><label title="$!temp.whiteListName">$!temp.whiteListName</label></td>
+            <td><label title="$!temp.phoneNo">$!temp.phoneNo</label></td>
+            <td>
+                <a class="slink" href="javascript:void(0);" onclick="updateData($!temp.whiteListId)">编辑</a>
+                <a class="slink" href="javascript:void(0);" onclick="deleteData($!temp.whiteListId,'$!temp.phoneNo')">删除</a>
+            </td>
+        </tr>
+    </tbody>
+    #end
+    <tfoot>
+        <tr>
+            <td colspan="3">
+                <div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

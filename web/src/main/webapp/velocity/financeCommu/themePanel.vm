@@ -1,0 +1,257 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>主题</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+   	<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+		$(function(){
+			$('table.datatbl').table();
+			$('select').select();
+			$("#clean").click(function(){
+				$('select').each(function(){
+                    this.selectedIndex = 0;
+                    $(this).change().select();
+                });
+				$("#themTitle").val("");
+				$("#datepicker1").val("");
+				$("#datepicker2").val("");
+			});
+			$('#panelForm').validator();
+		});
+		
+		function deleteAll(flag){
+			var mm=document.getElementsByName("themeId");
+			var checkFlag=false;
+			var themeIds="";
+			var n=0;
+    		for(var i=0;i<mm.length;i++){
+    			if(mm[i].checked==true){
+    				checkFlag=true;
+					themeIds+=mm[i].value+",";
+					n++;
+    			}
+    		}
+			if(checkFlag==false){
+				banger.page.showMessageBox("请选择您要删除的主题!")
+				return false;
+			}
+			var cStr="";
+			if(flag==0){
+				cStr="您确定要删除选中的"+n+"条的帖子吗？";
+			}else if(flag==3){
+				cStr="您确定要删除被选中的"+n+"条收藏夹数据吗？";
+			}
+			if(confirm(cStr)){
+				jQuery.post('../commTheme/deleteCollect.html?random='+Math.random(),{
+    				'themeIds':themeIds,
+					'panelFlag':flag
+    			},function(date){
+    				refresh();
+    			});
+			}
+		}	
+		function refresh(){
+			document.location.href="../commTheme/getThemePanelPage.html?partitionId=$!partitionId&panelFlag=$!panelFlag&random="+Math.random();
+		}
+		
+		//查看帖子
+		function themeDetail(themeType,themeId,templateUserId){
+			var url="";
+    		var title="";
+    		var id="";
+			jQuery.post('../commTheme/isCommThemeDel.html?random='+Math.random(),{'theme.themeId':themeId},function(date){
+				if(date==0){
+					banger.page.showMessageBox("帖子已被删除!");
+					return false;
+				}else{
+					if(themeType==1){//主题
+        				title="查看帖子";
+            			url="../commTheme/themeDetail.html?theme.themeId="+themeId+"&templateUserId="+templateUserId+"&random="+Math.random();
+            			id="commThemePage_detail_"+themeId;
+            			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false});
+            		}else if(themeType==2){
+					    title="查看帖子";
+						url="../commTheme/themeOptionDetail.html?theme.themeId="+themeId+"&templateUserId="+templateUserId+"&random="+Math.random();
+						id="commThemePage_detail_"+themeId;
+						tab.add({id: id, pid: GetId(), title: title, url: url, lock: false});
+					}
+        			upReadCount(themeId); 
+				}
+			});
+		}
+		function upReadCount(themeId){
+			jQuery.post('../commTheme/updateReadCount.html?random='+Math.random(),{'theme.themeId':themeId},function(){});
+		}
+		function searchPanel(){
+		    var bool = jQuery.validator({ form: 'panelForm', extend: true,extendhandler:themeValidator});
+			if(bool){
+				document.panelForm.submit();
+			}
+			
+		}
+		
+		function themeValidator(){
+			var startDate = $("#datepicker1").val();
+			var endDate = $("#datepicker2").val();
+			if(endDate!= "" && startDate!=""){
+				if(endDate < startDate){
+					jQuery("#datepicker2").parent().addClass('v-fails');
+					jQuery("#datepicker2").attr('tips', '结束时间不允许早于开始时间');
+					return false;
+				}
+			
+			}
+			jQuery("#datepicker1").parent().removeClass('v-fails');
+			return true;
+		}
+    </script>
+</head>
+
+<body>
+	#if($!panelFlag==0)
+	<form action="getThemePanelPage.html?partitionId=$!partitionId&panelFlag=$!panelFlag" method="post" id="panelForm" name="panelForm">
+	<table class="htmltbl">
+		<tbody>
+    		<tr>
+				<td class="field" width="8%">
+                	<label>版块名称：</label>
+                </td>
+                <td width="17%">
+					<select name="theme.templateId" id="tempId">
+						<option value=""></option>
+						#foreach($temp in $!templateList)
+							<option #if($!theme.templateId==$!temp.templateId) selected="selected" #end value="$!temp.templateId">$!temp.templateName</option>
+						#end
+                    </select>
+				</td>
+            	<td class="field" width="8%">
+                	<label>主题名称：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="themTitle" name="theme.themeTitle" value="$!theme.themeTitle"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>发布时间：</label>
+                </td>
+                <td colspan="3">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datepicker" readonly="true" id="datepicker1"   name="startDate" value="$!startDate"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datepicker"  readonly="true" id="datepicker2" tips="" name="endDate" value="$!endDate"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	</form>
+	#end
+    <div class="search-bar">
+        <span class="fl bold">
+		#if($!panelFlag==1)我的主题#elseif($!panelFlag==2)我的帖子#elseif($!panelFlag==3)收藏主题#elseif($!panelFlag==0)满足条件记录#end(<label class="green">$!page.totalRowsAmount</label>)
+        </span>
+		#if($!panelFlag==0)
+		<input type="button" class="ui-input-btn" value="清空" id="clean"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="searchPanel()"/>
+		#end
+    </div>
+	#if($!panelFlag==3 || $!panelFlag==0)
+    <div class="action-bar">
+        <span class="ui-span-btn fl" onclick="deleteAll($!panelFlag)">
+        	<label>删除</label>
+        </span>
+        <span class="ui-span-btn fr" onclick="refresh()">
+        	<label>刷新</label>
+        </span>
+    </div>
+	#end
+    <table class="datatbl">
+        <thead>
+            <tr>
+				#if($!panelFlag==3 || $!panelFlag==0)
+				<th width="20"><input type="checkbox" rel="all" /></th>
+				#end
+                <th><label title="主题">主题</label></th>
+				#if($!panelFlag==3 || $!panelFlag==0)
+				<th><label title="作者">作者</label></th>
+				#end
+                <th><label title="所在版块">所在版块</label></th>
+				#if($!panelFlag==1 || $!panelFlag==0)
+                <th><label title="发布时间">发布时间</label></th>
+				#end
+				#if($!panelFlag!=3)
+                <th><label title="最后发表时间">最后发表时间</label></th>
+				#end
+				#if($!panelFlag==3)
+				<th><label title="收藏时间">收藏时间</label></th>
+				#end
+            </tr>
+        </thead>
+        <tbody>
+			#foreach($panel in $!panelPage.items)
+            <tr>
+				#if($!panelFlag==3 || $!panelFlag==0)
+				<td><input type="checkbox" rel="row" name="themeId" value="$!panel.themeId"/></td>
+				#end
+                <td><label class="ui-link-btn" title="$!panel.themeTitle" onclick="themeDetail($!panel.themeType,$!panel.themeId,$!panel.templateUserId)">$!panel.themeTitle</label></td>
+				#if($!panelFlag==3 || $!panelFlag==0)
+				<td><label title="$!panel.userName">$!panel.userName</label></td>
+				#end
+                <td><label title="$!panel.templateName">$!panel.templateName</label></td>
+				#if($!panelFlag==1 || $!panelFlag==0)
+                <td><label>$date.format("yyyy-MM-dd HH:mm:ss",$!panel.createDate)</label></td>
+				#end
+				#if($!panelFlag!=3)
+				<td><label>#if($!panel.lastReplayDate)$date.format("yyyy-MM-dd HH:mm:ss",$!panel.lastReplayDate)#end</label></td>
+				#end
+				#if($!panelFlag==3)
+				<td><label>#if($!panel.collectDate)$date.format("yyyy-MM-dd HH:mm:ss",$!panel.collectDate)#end</label></td>
+				#end
+			</tr>
+			#end
+        </tbody>
+		<tfoot>
+			<tr>
+				<td colspan="$!cols">
+					<input type="hidden" value="$!panelFlag" name="panelFlag"/>
+					<input type="hidden" value="$!partitionId" name="partitionId"/>
+					<div class="floatR">#parse("/velocity/page.vm")</div>
+				</td>
+			</tr>
+		</tfoot>
+    </table>
+</body>
+</html>

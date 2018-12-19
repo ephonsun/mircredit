@@ -1,0 +1,35 @@
+<thead>
+    <tr>
+        <th><label title="任务等级">任务等级</label></th>
+        <th><label title="任务标题">任务标题</label></th>
+        <th><label title="开始日期">开始日期</label></th>
+		<th><label title="结束日期">结束日期</label></th>
+        <th><label title="产品指标">产品指标</label></th>
+        <th><label title="任务目标(万元)">任务目标(万元)</label></th>
+        <th><label title="完成情况">完成情况</label></th>
+        <th><label title="分配者">分配者</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($tskMarkting in $!tskMarketingBeanPage.items)
+	<tr>
+		<td><label title="">$!tskMarkting.marketingGradeName</label></td>
+		<td><label title="$!tskMarkting.marketingTitle"><a class="ui-link-btn" href="javascript:void(0);" onclick="viewTskMarketing('$!tskMarkting.marketingId','$!tskMarkting.marketingTitle','assign')">$!tskMarkting.marketingTitle</a></label></td>		
+		<td><label title="$date.format("yyyy-MM-dd",$!tskMarkting.startDate)"></label>$date.format("yyyy-MM-dd",$!tskMarkting.startDate)</td>
+        <td><label title="$date.format("yyyy-MM-dd",$!tskMarkting.endDate)"></label>$date.format("yyyy-MM-dd",$!tskMarkting.endDate)</td>
+        <td><label title=""></label>$!tskMarkting.productTarget</td>
+        <td><label title=""></label>$moneyUtil.decimeMoney($typeUtil.changeType($!tskMarkting.taskTarget))</td>
+        <td><label title=""></label>$vmHelper.getPercentDec($!tskMarkting.comPercent)</td>
+        <td><label title=""></label>$!tskMarkting.assignUserName</td>
+    </tr>
+	#end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="8">
+           <div class="pagination">
+				#parse("/velocity/ajaxPage.vm")
+			</div>
+        </td>
+    </tr>
+</tfoot>

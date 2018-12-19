@@ -1,0 +1,130 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>共同审批人</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .viewtbl{ margin-top:20px; margin-bottom:20px; }
+        div.ztree-box { height: 100%; border: 1px solid #ccc; padding: 2px; overflow: auto; margin-top:-1px; padding-bottom:20px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            jQuery('#commApprovePerson').validator();
+        });
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+
+        //确定
+        function sure(){
+            var bool = jQuery.validator({form:'commApprovePerson',extend:true,extendhandler:extendvalidator});
+            if(!bool){
+                return false;
+            }
+            var userAccount = $('#userAccount').val();
+            var userPass = $('#userPass').val();
+            var surveyUserId = '$!surveyUserId';
+            var lastCommApprovePersonId = '$!lastCommApprovePersonId';
+            var isReject = '$!isReject';
+            jQuery.ajax({
+                type:'POST',
+                url:'../loan/validateCommApprovePerson.html?RandNum='+Math.random(),
+                data:{
+                    'userAccount':userAccount,
+                    'userPass':userPass,
+                    'surveyUserId':surveyUserId,
+                    'lastCommApprovePersonId':lastCommApprovePersonId,
+                    'isReject':isReject,
+                    'loanId':$!lnLoan.loanId
+                },
+                success:function(userId){
+                    if(userId == "-1"){
+                        //主审人和共同审批人不能为同一个用户，用户XXX为主审人，请重新填写
+                        var userName = $('#userName').val();
+                        banger.page.showMessageBox("主审人和共同审批人不能为同一个用户，用户"+userName+"为主审人，请重新填写！");
+                    }else if(userId == "-2"){
+                        //提示“密码不正确，请输入正确密码”
+                        banger.page.showMessageBox("密码不正确，请输入正确密码!");
+                    }else if(userId == "-3"){
+                        //提示“用户“XXX”，不存在，请重新输入
+                        banger.page.showMessageBox("用户“"+userAccount+"”不存在，请重新输入！");
+                    }else if(userId == "-4"){
+                        //提示“您已被禁止登录，请联系系统管理员”
+                        banger.page.showMessageBox("您已被禁止登录，请联系系统管理员！");
+                    }else if(userId == "-5"){
+                        //提示“您已被禁止登录，请联系系统管理员”
+                        banger.page.showMessageBox("您不能审批自己负责的贷款！");
+                    }else if(userId == "-6"){
+                        //提示“您已被禁止登录，请联系系统管理员”
+                        banger.page.showMessageBox("您没有审批权限，不能审批贷款！");
+                    }else if(userId == "-7"){
+                        //提示"被驳回的贷款只能由原审批人员审批，您填写的共同审批人与贷款第一次审批的共同审人不一致！"
+                        banger.page.showMessageBox("被驳回或回退的贷款只能由原审批人员审批，您填写的共同审批人与贷款第一次审批的共同审人不一致！");
+                    }else {
+                        //验证通过
+                        var retValue = "1&"+$('#approvePerson1Date').val()+"&"+userId+"&"+userAccount;
+                        window.returnValue = retValue;
+                        window.close();
+                    }
+                }
+            });
+        }
+        //取消
+        function cancel(){
+            window.close();
+        }
+    </script>
+</head>
+<body>
+<input id="approvePerson1Date" type="hidden" value="$date.format('yyyy-MM-dd HH:mm:ss',$!approvePerson1Date)"/>
+<input id="userName" type="hidden" value="$!userName"/>
+<div class="bold loan-ttlbg">共同审批人</div>
+<div class="ztree-box" id="commApprovePerson">
+    <table class="htmltbl" style="table-layout: auto;">
+        <tbody>
+        <tr>
+            <td class="field" width="8%">
+                <label>用户名：</label>
+            </td>
+            <td>
+                <div class="ui-div-text">
+                    <input type="text" class="text" id="userAccount" rule="\S" tips="'用户名'必须填写"/>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="8%">
+                <label>密码：</label>
+            </td>
+            <td>
+                <div class="ui-div-text">
+                    <input type="password" class="text" id="userPass" rule="\S" tips="'密码'必须填写"/>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" onclick="sure()" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" onclick="cancel()" />
+    </div>
+</div>
+</body>
+</html>

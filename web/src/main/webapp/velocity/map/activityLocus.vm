@@ -1,0 +1,104 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script language="javascript" src="http://app.mapabc.com/apis?t=javascriptmap&v=3.1.1&key=b0a7db0b3a30f944a21c3682064dc70ef5b738b062f6479a5eca39725798b1ee300bd8d5de3a4ae3"></script>
+      #scriptLink("page")
+</head>
+<body >
+<script type="text/javascript">
+    $(function(){
+    	mapInit();
+        $("input").blur();
+    });
+    ////////////////////取地图城市，经纬度begin//////////////////////////
+    var cityCoding = '$!cityCoding', cityLngLat = '$!cityLngLat';
+    var cityLng = cityLngLat.split(",")[0], cityLat = cityLngLat.split(",")[1];
+    ////////////////////取地图城市，经纬度end//////////////////////////
+    var postJson = {};
+    var mapObj,toolbar,overview,scale;
+    function mapInit(){
+        var opt = {
+            level:13,//初始地图视野级别
+            center: new MMap.LngLat(cityLng, cityLat),//设置地图中心点
+            doubleClickZoom:true,//双击放大地图
+            scrollWheel:true//鼠标滚轮缩放地图
+        }
+        mapObj = new MMap.Map("iCenter",opt);
+        mapObj.plugin(["MMap.ToolBar","MMap.OverView","MMap.Scale"],function()
+        {
+            toolbar = new MMap.ToolBar();
+            toolbar.autoPosition=false; //加载工具条
+            mapObj.addControl(toolbar);
+            overview = new MMap.OverView(); //加载鹰眼
+            mapObj.addControl(overview);
+            scale = new MMap.Scale(); //加载比例尺
+            mapObj.addControl(scale);
+        });
+       // mapObj.bind(mapObj,"click",function(e){
+       //     banger.page.showMessageBox("X:"+e.lnglat.lng+" Y:"+e.lnglat.lat);
+       // });
+    }
+    function postQuery() {          //查询
+      getQueryJson();
+      if(postJson['beginTime']==""&&postJson['endTime']==""){
+          banger.page.showMessageBox("请输入查询条件");
+      }else{
+          var array = ajaxQuery("../map/queryActivityLocus.html");
+          if(array){
+          	addPolyline(array);
+          }
+      }
+
+    }
+    function addPolyline(array){//添加线
+        var arr=new Array();//经纬度坐标数组
+        if (array.length > 0) {
+            for (var i = 0; i < array.length; i++) {
+                arr.push(new MMap.LngLat(array[i]["gpsLng"], array[i]["gpsLat"]));
+            }
+        }
+        var polyline=new MMap.Polyline({
+            id:"polyline01",
+            path:arr,
+            strokeColor:"#F00",
+            strokeOpacity:0.4,
+            strokeWeight:3,
+            strokeStyle:"dashed",
+            strokeDasharray:[10,5]
+        });
+        mapObj.addOverlays(polyline);
+    }
+    function getQueryJson() {//组装数据
+        postJson={};
+        postJson['beginTime'] =$("#beginTime").val();
+        postJson["endTime"]=$("#endTime").val();
+        postJson["userId"]=$("#userId").val();
+    }
+    function ajaxQuery(urlStr) {//公用ajax请求
+        var array =null;
+        jQuery.ajax({
+            type: "post", //请求方式
+            async: false,
+            url: urlStr, //发送请求地址
+            data: postJson,
+            success: function (html) {
+                array = eval(html);
+            }
+        });
+        return  array;
+    }
+    function qingkong() {            //清空查询条件
+        $("input[type$='text']").val("");
+    }
+</script>
+</body>
+</html>

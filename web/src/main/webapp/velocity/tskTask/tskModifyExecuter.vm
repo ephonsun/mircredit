@@ -1,0 +1,98 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑执行者</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	div.executor { border: 1px solid #ccc; width: 360px; height: 300px; margin: 0 auto; padding: 5px; overflow: auto; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+    <script type="text/javascript">
+    	var setting = {
+    		check: {
+    			enable: true,
+    			chkStyle: "checkbox",
+    			chkboxType: { "Y": "ps", "N": "ps" }
+    		},
+    		data: {
+    			simpleData: {
+    				enable: true
+    			}
+    		},
+    		view: {
+    			showIcon: true
+    		}
+        };
+     
+    	var zNodes = $!deptJson;
+		
+		var fn = {};
+		fn.sure = function(){
+			var userIds = updateExecuter();
+			if(userIds=="") return false;
+			window.returnValue = userIds;
+			window.close();
+		};
+		fn.cancel = function(){
+			window.close();
+		};
+		
+    	$(function(){
+			$('#ok').click(function(){
+				fn.sure();
+			});
+			
+			$('#cancel').click(function(){
+				fn.cancel();
+			});
+			//初始化机构树
+			jQuery.fn.zTree.init($("#executerTree"), setting, zNodes);
+		});
+		
+		function updateExecuter(){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj("executerTree");
+    		var nodes = treeObj.getCheckedNodes(true);
+    		var excUserIds = new Array();			
+    		var j=0;
+    		var k=0;
+    		for(var i=0;i<nodes.length;i++){
+				if(nodes[i].type=='U'){
+					excUserIds[j++] = nodes[i].id;
+				}
+    		}
+    		var userIds=excUserIds.toString();
+			if(userIds == ""){
+				banger.page.showMessageBox("执行者不能为空！");
+				return "";
+			}else{
+				return userIds;
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<div class="executor">
+    	<ul id="executerTree" class="ztree"></ul>
+    </div>
+    
+    <hr />
+    
+    <div class="center">
+    	<input type="button" id="ok" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" />
+        <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" />
+    </div>
+</body>
+</html>

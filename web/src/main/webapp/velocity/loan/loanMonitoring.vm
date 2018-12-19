@@ -1,0 +1,133 @@
+
+<div class="loan-bg" >
+<p class="bold loan-lheight">贷后监控</p>
+       #if($!isCustomerManage == true)  
+			&nbsp;&nbsp;&nbsp;&nbsp;<input id="addlm" type="button"  value="添加"/>
+	   #end 
+       
+	   <a href="${ctx}/data/showPhotosClassification.html"></a>
+        <div class="loan-pad" >
+			<div id="LMList">
+			#parse("/velocity/loan/loanMonitoringTable.vm")
+	        </div>
+         </div>
+
+</div>
+<input type="hidden" id="toUnionLMUrl" value="${ctx}/loan/toUnionLM.html" />
+<input type="hidden" id="toAddLMUrl" value="${ctx}/loan/toAddLM.html" />
+<input type="hidden" id="reloadUrl" value="${ctx}/loan/loanMonitorList.html?loanId=${loanId}" />
+<input type="hidden" id="updateReadTagUrl" value="${ctx}/loan/updateReadTag.html" />
+<input type="hidden" id="loanId" value="${loanId}" />
+
+<script type="text/javascript">
+    $(function(){
+		//添加监控
+		$("#addlm").click(function() {
+			var urlStr =$("#reloadUrl").val();
+				var url = $("#toAddLMUrl").val()+'?RandNum='+Math.random()+'&loanId='+$("#loanId").val();
+				var result = banger.page.openDialog(url, "添加贷后监控", 600, 550);
+				if (result != undefined) {
+					jQuery.ajax({
+						type : 'POST',
+						url : urlStr,
+						data : {loanId:$("#userId").val()},
+						success : function(data) {
+							$("#LMList").html(data);
+						}
+					});
+				}
+			});
+		
+        $("#remainFull").click(function(){
+            var remainFull=$(this);
+            var isChecked=remainFull.attr('checked');
+            if(isChecked=="checked"){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':1
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已标记为余额已足');
+                    }
+                });
+            }else{
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/remainFull.html?RandNum='+Math.random()+"&loanId="+$loanId,
+                    data:{
+                        'flag':0
+                    },
+                    success:function(resultVal){
+                        banger.page.showMessageBox('该贷款已取消标记为余额已足');
+                    }
+                });
+            }
+        });
+
+        $("textarea[class='textarea']").focus(function(){
+            $(this).animate({"width":"300px","height":"200px"})
+        }).blur(function(){
+            $(this).animate({"width":"138px","height":"37px"})
+        });
+    });
+	function updateLm(lmId){
+			var urlStr =$("#reloadUrl").val();
+			var url = $("#toAddLMUrl").val()+"?RandNum='+Math.random()+'&loanLmId="+lmId;
+				var result = banger.page.openDialog(url, "修改贷后监控", 600, 360);
+				if (result != undefined) {
+					jQuery.ajax({
+						type : 'POST',
+						url : urlStr,
+						data : {loanId:$("#userId").val()},
+						success : function(data) {
+							$("#LMList").html(data);
+						}
+					});
+				}
+		}
+		
+	function readLm(lmId){
+		var url = $("#updateReadTagUrl").val();
+        var remak = document.getElementById("remak_"+lmId).value
+		jQuery.ajax({
+    			    type:"post", 
+    			    url: url,
+    			    data:{ loanMonitorId:lmId,remak:remak},
+					success : function(){
+						var urlStr =$("#reloadUrl").val();
+						alert("检查完成！");
+						jQuery.ajax({
+    						type : 'POST',
+    						url : urlStr,
+    						data : {loanId:$("#userId").val()},
+    						success : function(data) {
+    							$("#LMList").html(data);
+                                $("textarea[class='textarea']").focus(function(){
+                                    $(this).animate({"width":"600px","height":"200px"})
+                                }).blur(function(){
+                                    $(this).animate({"width":"138px","height":"37px"})
+                                });
+    						}
+    					});
+					}
+    			});		
+	}
+		function unionLm(lnId,lmId){
+			var urlStr =$("#reloadUrl").val();
+			var url = $("#toUnionLMUrl").val()+"?RandNum='+Math.random()+'&loanId="+lnId+"&loanLmId="+lmId;
+				var result = banger.page.openDialog(url, "贷后附件", 600, 480);
+				if (result != undefined) {
+					jQuery.ajax({
+						type : 'POST',
+						url : urlStr,
+						data : {loanId:$("#userId").val()},
+						success : function(data) {
+							$("#LMList").html(data);
+						}
+					});
+				}
+		}
+
+</script>

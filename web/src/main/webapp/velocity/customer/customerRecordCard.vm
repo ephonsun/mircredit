@@ -1,0 +1,292 @@
+#parse("/velocity/taglibs.vm")
+	<style type="text/css">
+	div.tapeVideo-mydiv{ display:none; position:absolute; background:#FFF; border:1px solid #ccc;z-index:151; }
+	div.tape-mydiv{top:30%; left:35%; width:400px; height:110px;}
+	p.tapeVideo-ttl-width { width: auto; _width:100%; background-color:#E4E4E4; height:30px; line-height:30px; font-weight: bold;  padding-left:13px; }
+    a.tapeVideoClose { width:17px; height:14px; line-height:0px; background:url(../images/public/close.gif) no-repeat;  position:absolute; top:10px; right:10px; text-indent:-9999px;}
+    a.tapeVideoClose:hover { width:17px; height:14px; background:url(../images/public/close-hover.gif) no-repeat; position:absolute; top:10px; right:10px; text-indent:-9999px;}
+	</style>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	
+    <script type="text/javascript" src="${ctx}/js/player/jwplayer.js"></script>
+	
+
+	<script type="text/javascript">
+		var oldPostJson={};
+		var postJson = {};	
+	
+		$(function(){
+    		//
+    		$('select').select();
+			initCombox();
+			getQueryJson();
+    	});
+		
+		//搜索条件封装
+    	function getQueryJson(){
+    		postJson['customerId'] = '$!customerId';
+			postJson['queryBean.callType'] = $("#callType2").val();
+			postJson['queryBean.startDate'] = $("#datepicker1").val();
+			postJson['queryBean.endDate'] = $("#datepicker2").val();
+			postJson['queryBean.remark'] = $("#remarks").val();
+			postJson['actionType'] = '$!actionType';
+    		return postJson;
+    	}
+    	
+    	var autoLogin = "$!autoLogin";
+    	
+		function initCombox(){
+			$('#comBox').combobox({
+    			array:["呼入","呼出","座谈","拜访"]
+    		});
+    	}
+	
+		function clean(){
+    		$('#callType2').val("");
+			$('#datepicker1').val("");
+			$('#datepicker2').val("");
+			$("#remarks").val("");
+		}
+		function addVisitRecord_page(){
+			'location.href="../visitRecord/showAddVisitRecordPage.html?customer.customerId=$!customerId"'
+			var options = {id: "addVisitRecord_page", pid: GetId(), title: "新建拜访记录", url: "../visitRecord/showAddVisitRecordPage.html?customer.customerId="+$!customerId, lock: false};
+			tab.add(options);
+		} 
+		//查询
+		function queryRecord(){
+			var postJson=getQueryJson();
+			postJson['actionType'] = '$!actionType';
+			postJson['queryBean.callType'] = $("#callType2").val();
+			postJson['queryBean.startDate'] = $("#datepicker1").val();
+			postJson['queryBean.endDate'] = $("#datepicker2").val();
+			postJson['queryBean.remark'] = $("#remarks").val();
+			jQuery.post("../record/queryAllByCustomerId.html?"+autoLogin+"random="+Math.random(),postJson,function(html){
+					refreshGridRecord('recordMsg',html);
+    			});
+		}
+		
+		//刷新
+    	function refreshRecord(){
+			oldPostJson = postJson;
+    		gotoRecord(null,"../record/queryAllByCustomerId.html?"+autoLogin+"random="+Math.random(),oldPostJson,function(html){refreshGridRecord('recordMsg',html);});
+    	}
+	
+		//刷新recordMsg
+		function refreshGridRecord(gridId,html)
+		{
+			var elem = $(html);
+			var grid = $("#"+gridId);
+			grid[0].innerHTML="";
+			grid.append(elem);
+		}
+		
+		//分页跳转
+		function gotoPageRecord(page)
+		{
+			oldPostJson = postJson;
+			gotoRecord(page,"../record/queryAllByCustomerId.html?"+autoLogin+"random="+Math.random(),oldPostJson,function(html){refreshGridRecord('recordMsg',html);});
+		}
+		
+		function play(obj,id,fileId,recordSize){
+			if(recordSize=="00:00:00"){
+        		banger.page.showMessageBox("对不起,录音在上传时损坏,无法播放！");
+        		return;
+        	}
+			jQuery.post("../data/isExistFileById.html?"+autoLogin+"random="+Math.random(), {"fileId": fileId}, function(result){
+    			if(result == '0'){
+    				banger.page.showMessageBox({"type":"error","content":"文件不存在！","zIndex":10000});
+    				return;
+    			}else{
+					#if($!actionType!='modify')
+						showAudioNoRemarkDiv(fileId);
+					#else
+    					window.parent.showAudioNoRemarkDiv(fileId);
+					#end
+					//new window.video.create(id, 310, 60,"../Records/"+result, obj);
+    			}
+			});
+    	}
+		
+		//录音播放(无备注)
+		function showAudioNoRemarkDiv(fileId){
+			jQuery.post("../data/transcoding.html?"+autoLogin+"random="+Math.random(), {"fileId":fileId}, function(voidName){
+				voidName = voidName.substring(voidName.lastIndexOf("/")+1,voidName.length);
+				videoPlayer1 = jwplayer("span_Video1").setup({
+                	controls:true,
+                	controlbar: 'bottom',
+                	autostart:true,
+                	flashplayer:"../js/player/player.swf",
+                	file:"../Records/"+voidName,
+                	height:24,
+                	width:388
+                });
+    			$('#shadeLayer').show();
+    			$('#popAudioNoRemarkDiv').show();
+			});
+		}
+		
+		//无备注录音关闭
+		function closeAudioNoRemarkDiv(){
+			$('#popAudioNoRemarkDiv').hide();
+			$('#shadeLayer').hide();
+			videoPlayer1.stop();
+		}
+    </script>
+	<input type="hidden" name="actionType" value="$!actionType"/>
+	<input type="hidden" id="customerId" value="$!customerId"/>
+	<table class="htmltbl">
+    	<tbody>
+        	<tr>
+                <td width="7%" class="field" id="queryType">
+					<label>联系类型：</label>
+				</td>
+            	<td width="16%" >
+					<div id="comBox" class="dtxt2">
+                        <input id="callType2" type="text" class="dtxt2-txt" name="queryBean.callType" value="$!queryBean.callType" readonly="readonly"/>
+                        <i class="dtxt2-ddl"></i>
+                    </div>
+                </td>
+				<td width="7%" class="field">
+					<label>联系时间：</label>
+				</td>
+            	<td colspan="2" width="25%">
+                    <table class="celltbl" width="100%">
+                    	<tr>
+                        	<td>
+                            	<div class="dtxt2">
+									<input type="text" class="dtxt2-txt date" id="datepicker1" readonly name="queryBean.startDate" value="#if($!queryBean.startDate)$date.format("yyyy-MM-dd",$!queryBean.startDate)#end"/>
+                                    <span class="dtxt2-date">date</span>
+                                </div>
+                            </td>
+                        	<td width="20"><label>—</label></td>
+                        	<td>
+								<div class="dtxt2">
+                                    <input type="text" class="dtxt2-txt date" id="datepicker2" readonly name="queryBean.endDate" value="#if($!queryBean.endDate)$date.format("yyyy-MM-dd",$!queryBean.endDate)#end"/>
+                                    <span class="dtxt2-date">date</span>
+								</div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+				<td width="7%" class="field">
+                    <label>备注：</label>
+                </td>
+                <td width="16%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" id="remarks" name="queryBean.remark" value="$!queryBean.remark"/>
+                    </div>
+                </td>
+                <td align="right">
+                	<input type="button" value="清 空" class="btn1" onclick="clean();"/>
+        			<input type="button" value="搜 索" class="btn1" onclick="queryRecord();"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	<br />
+	
+	#if($urlPermitUtil.hasPermission('showAddVisitRecordPage'))
+	#if($!actionType=='modify')
+	<div class="actrow" style="margin-top: 5px;">
+		 <a href="#2" onclick="addVisitRecord_page()" class="btn2 floatL">
+            <label class="btn2-txt">新建拜访记录</label>
+        </a>
+    </div>
+	#end
+	#end
+	<table class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+        	<tr>
+            	<th width="240" title="客户（电话）">客户（电话）</th>
+            	<th width="8%" title="联系类型">联系类型</th>
+            	<th width="15%" title="联系时间">联系时间</th>
+            	<th width="8%" title="录音时长">录音时长</th>
+            	<th width="11%" title="业务类型">业务类型</th>
+            	<th width="7%" title="备注">备注</th>
+            	<th width="8%" title="操作者">操作者</th>
+				<th width="8%" title="操作">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+        	#foreach($recordInfo in $!recordInfoList.items)
+              <tr align="center" id="fontChange$!recordInfo.recordInfoId">
+                <td><div class="datacus" id="customer$!recordInfo.recordInfoId" title="#if(!$!recordInfo.customerId||$!recordInfo.customerId!=0)$!recordInfo.customerName#if($!recordInfo.defaultPhone!='')#if($!recordInfo.customerName!=''||!$!recordInfo.customerName)($!recordInfo.defaultPhone)#else$!recordInfo.defaultPhone#end#end#elseif($!recordInfo.defaultPhone!='')$!recordInfo.defaultPhone#else 未知#end">
+						<span >#if(!$!recordInfo.customerId||$!recordInfo.customerId!=0)
+							$!recordInfo.customerName
+							#if($!recordInfo.defaultPhone!='') 
+								#if($!recordInfo.customerName!=''||!$!recordInfo.customerName)
+									($!recordInfo.defaultPhone)
+								#else
+								$!recordInfo.defaultPhone
+								#end
+							#end
+						#elseif($!recordInfo.remotePhone!='')
+							$!recordInfo.defaultPhone
+						#else
+							未知
+						#end
+                        </span>
+						#if($!actionType!='browse')
+                            <div class="icon">
+    							#if($!recordInfo.defaultPhone!="")
+    								#if($urlPermitUtil.hasPermission('dialPhone'))
+                                    <i class="i phone" onclick="dial('$!recordInfo.defaultPhone','$!recordInfo.customerId')" title="拨号">phone</i>
+    								#end
+    								#if($urlPermitUtil.hasPermission('tapePhone'))
+    								#if($!recordInfo.customerName!="")
+    									<i class="i dsc" onclick="tape('$!recordInfo.customerId')" title="座谈" >dsc</i>
+    								#end
+    								#end
+    								#if($!recordInfo.defaultPhone.length()==11&&$!recordInfo.defaultPhone.substring(0, 1)=="1")
+                                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                                        <i class="i sms" onclick="sendSms('$!recordInfo.defaultPhone','$!recordInfo.customerId')" title="短信">sms</i>
+                        				#end
+                        				#if($urlPermitUtil.hasPermission('toAddMms'))
+                        				<i class="i mms" onclick="sendMms('$!recordInfo.defaultPhone','$!recordInfo.customerId')" title="彩信">mms</i>
+    									#end
+    								#end
+    							#end
+                            </div>
+						#end
+                    </div></td>
+                <td><label title="$!recordInfo.callTypeName">$!recordInfo.callTypeName</label></td>
+                <td><label title="#if($!recordInfo.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!recordInfo.startDate)#end">#if($!recordInfo.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!recordInfo.startDate)#end</label></td>
+                <td><label title="$!recordInfo.callTime">$!recordInfo.callTime</label></td>
+            	<td><label title="$!recordInfo.bizType">$!recordInfo.bizType</label></td>
+            	<td><label title="$!subString.replaceRemark($!recordInfo.remark)">$!recordInfo.remark</label></td>
+            	<td><label title="$!recordInfo.userName">$!recordInfo.userName</label></td>
+				<td>
+					#if($!recordInfo.fileId && $!recordInfo.fileId == ''||!$!recordInfo.fileId)<a href="#2" style="color:gray; text-decoration:none; cursor: default;" disable="true">播放</a> 
+					#else<a class="slink" href="#2" onclick='play(this,$!recordInfo.recordInfoId,"$!recordInfo.fileId","$!recordInfo.callTime");'>播放</a>
+					#end
+				</td>
+              </tr>
+            #end
+            </tr>
+			<!-- 无备注录音播放器 -->
+        	<div id="popAudioNoRemarkDiv" style="height=110px;" class="tapeVideo-mydiv tape-mydiv" >
+        		<p class="tapeVideo-ttl-width">
+        			<a href="#2" onClick="closeAudioNoRemarkDiv();return false;" class="tapeVideoClose">close</a>
+        		</p>
+        		<div style="text-align:center;padding:5px;">
+        			<label id="span_Video1"></label>
+        			<hr />
+        			<div class="center" style="margin-bottom:5px;">
+                         <span class="ui-span-btn ui-span-btn-cancel" onclick="closeAudioNoRemarkDiv();">
+                             <label>关闭</label>
+                         </span>
+        			</div>
+        		</div>
+        	</div>
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="8"><div class="floatR">#pageSize($page,'Record')</div></td>
+            </tr>
+        </tfoot>
+    </table>

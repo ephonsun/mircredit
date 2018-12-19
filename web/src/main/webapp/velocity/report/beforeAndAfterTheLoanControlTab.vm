@@ -1,0 +1,209 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>贷款前后对照统计</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="../css/jquery.ui/base/jquery-ui.css" />
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop64.exe"></embed>
+	</object> 
+
+<style media=print> 
+.Noprint{display:none;} 
+.PageNext{page-break-after: always;} 
+</style> 
+
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000; 
+    border-style: solid; 
+    border-top-width: 2px; 
+    border-right-width: 2px; 
+    border-bottom-width: 1px; 
+    border-left-width: 1px; 
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+
+</style> 
+<script>
+
+	jQuery(function () {
+            // 时间设置
+        $(".reportData").datepicker({
+			
+		}).next('i').click(function(){
+			$(this).prev('input[type=\'text\']').focus();
+		});
+		
+	});
+	function onAfterQuery(){
+
+        $("#cognosIframe").show();
+        cgParentValue();
+  }
+
+  function cgParentValue(){
+    	 //login.action="http://155.101.252.187:9300/p2pd/servlet/dispatch";
+         //login.action="http://155.101.252.187:9300/p2pd/servlet/dispatch";
+		 var startDate=$("#dateBegin").val();
+		 var startDate=startDate.replace("-","");
+	    var startDate=startDate.replace("-","");
+	     var endDate=$("#dateEnd").val();
+		 var endDate=endDate.replace("-","");
+	    var endDate=endDate.replace("-","");
+		 var dateCompare=$("#dateCompare").val();
+		 var dateCompare=dateCompare.replace("-","");
+	    var dateCompare=dateCompare.replace("-","");
+		 /*
+		var flageBegin= searchStartDateFun($("#dateBegin"),startDate,endDate);
+		if(!flageBegin){
+			return;
+		}*/
+	    if($("#queryTeam").html()!=null&&$("#queryTeam").html()!=""){
+    		$(".p_team").remove();
+    		var teamArray= $("#queryTeam").html().split(",")
+    		var count="";
+    		for(var i=0;i<teamArray.length;i++){
+    	
+    			count+='<input type="hidden" id="p_team" class="p_team" name="p_team" value="'+teamArray[i]+'" />'
+    		}
+    		$("#form1").append(count)
+		}
+		 $("#p_dateB").val(startDate);
+	     $("#p_dateA").val(endDate);
+		 //$("#p_Today").val(dateCompare);
+		 if($("#queryUserId").html()!=null&&$("#queryUserId").html()!=""){
+    		 $(".p_userid").remove();
+    	 	var teamArray= $("#queryUserId").html().split(",")
+    		var counte="";
+    		for(var i=0;i<teamArray.length;i++){
+    	
+    			counte+='<input type="hidden" id="p_userid" class="p_userid" name="p_userid" value="'+teamArray[i]+'" />'
+    		}
+    		$("#form1").append(counte)
+		 }
+         $("#form1").submit();
+     }
+
+
+
+var windParam={
+		param:'scroll:YES;dialogWidth:500px;dialogHeight:300px;'
+		
+	}
+//团队弹窗
+function openTeam(){
+	//var result = window.showModelessDialog("scroll:YES;dialogWidth:500px;dialogHeight:200px;");
+	var url='${ctx}/report/getTeam.html'
+			
+           var result = window.showModelessDialog(url+"?type=1&RandNum="+Math.random(),window,windParam.param);
+}
+//客户经理工号
+function openUserId(){
+	//var result = window.showModelessDialog("scroll:YES;dialogWidth:500px;dialogHeight:200px;");
+	var url='${ctx}/report/getTeam.html'
+		   var result = window.showModelessDialog(url+"?type=3&RandNum="+Math.random(),window,windParam.param);
+          
+}
+</script>
+</head>
+<body style="padding-bottom: 100%;">
+	<!--<form id="form1" method="post" action="http://155.101.252.187:9300/p2pd/servlet/dispatch" target="cognosIframe">-->
+	<form id="form1" method="post" action=$reportUrl target="cognosIframe">
+		<input type="hidden" id="b_action" name="b_action" value="cognosViewer" /> 
+		<input type="hidden" id="ui.action" name="ui.action" value="run" /> 
+		<input type="hidden" id="run.outputFormat" name="run.outputFormat" value="" /> 
+		<input type="hidden" id="run.prompt" name="run.prompt" value="true" /> 
+		<input type="hidden" id="cv.toolbar" name="cv.toolbar" value="true" /> 
+		<input type="hidden" id="cv.header" name="cv.header" value="false" /> 
+		<input type="hidden" id="p_dateB" name="p_dateB" value="" />  
+	    <input type="hidden" id="p_dateA" name="p_dateA" value="" />
+		<input type="hidden" id="p_Today" name="p_Today" value="$!beforeDay" /> 
+	   
+		<input type="hidden" id="ui.object" name="ui.object" value="/content/folder[@name='微贷营销管理']/package[@name='微贷-贷款前后对照统计表']/report[@name='贷款前后对照统计']" />
+		##团队           
+			#foreach($team in $!sysTeamList)
+					<input type="hidden" id="p_team" class="p_team" name="p_team" value="$!team.teamName" />		
+			#end
+		##客户经理
+			 #foreach($user in $!sysUserList)
+                    <input type="hidden" id="p_userid" class="p_userid" name="p_userid" value="$!user.account" />
+             #end
+		 
+		 
+		<center class="Noprint" >
+	  	<div class="condi-row">
+            <div class="dtxt2 fl" style="display:none">
+                <input type="text" id="dateCompare"   class="dtxt2-txt reportData" />
+            </div>
+        	<div class="condi-i">
+            	<label class="condi-i-field">比较日期1：</label>
+                <div class="dtxt2 fl" id="startDiv" style="width: 150px;">
+                    <input type="text" id="dateBegin"  fun="searchStartDateFun" readonly="readonly" name="condition.dateBegin" dateFlag="true" class="dtxt2-txt reportData" />
+                     <i class="date"><span class="dtxt2-date">date</span></i>
+                </div>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">比较日期2：</label>
+                <div class="dtxt2 fl" id="endDiv" style="width: 150px;">
+                    <input type="text" id="dateEnd" fun="searchEndDateFun" readonly="readonly" name="condition.dateEnd" dateFlag="true" class="dtxt2-txt reportData" />
+                    <i class="date"><span class="dtxt2-date">date</span></i>
+                </div>
+            </div>
+			#if($!role != "5")
+    			#if($!role != "7")
+    			<div class="condi-i">
+                	<input type="button" value="选择团队名称" class="btn1" style="margin-left: 12px;" onclick="openTeam()">
+    				<span id="queryTeam" >
+    				</span>
+                </div>
+    			#end
+			#end
+			
+			#if($!role != "7")
+			<div class="condi-i">
+            	<input type="button" value="客户经理工号" class="btn1" style="margin-left: 12px;" onclick="openUserId()">
+				<span id="queryUserId" >
+				</span>
+            </div>
+			#end
+        </div>
+		
+	</form>
+	        <div class="sz">
+	            <input id="query" type="button" class="btn1" onclick="onAfterQuery()" value="搜 索" />
+	        </div>
+        </center>
+		<div style="position: absolute; z-index: 10; width: 100%; height: 100%">
+            <iframe id="cognosIframe" name="cognosIframe" style="z-index: 0;" width="100%" height="515" marginheight="0" marginwidth="0" frameborder="no" noResize="no" align="middle"> </iframe>
+	    </div>
+</body>

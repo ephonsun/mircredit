@@ -1,0 +1,44 @@
+<div>
+	<h4 class="legend" style="margin-top: 0;">机构下人员状况</h4>
+    <ul>
+    	<li>
+        	<label class="fl">管理总用户数</label>
+            <label class="fr">$!inChargeOfUsers 人</label>
+        </li>
+    	<li>
+        	<label class="fl">当前在线用户数</label>
+            <label class="fr">$!inChargeOnLineUsers 人</label>
+        </li>
+    </ul>
+	<h4 class="legend">系统磁盘使用状况</h4>
+    <ul>
+    	<li>
+        	<label class="fl">应用服务器剩余空间</label>
+            <label class="fr green bold">$!webSize G</label>
+        </li>
+    	<li>
+        	<label class="fl">文件服务器剩余空间</label>
+            <label class="fr green bold">#if($!recordSize!=-1) $!recordSize G #end</label>
+        </li>
+    </ul>
+	#if($!webSize < 2 || $!recordSize< $!cueSize)
+    <h4 class="legend red">系统警告</h4>
+    <ul>
+		#if($!webSize < 2)
+    	<li>
+        	<label>应用服务器可用空间低于 2 G，请及时清理，以保证系统正常运行！</label>
+        </li>
+		#end
+		#if($!recordSize< $!cueSize && $!recordSize!=-1)
+    	<li>
+        	<label>文件服务器可用空间低于 $!cueSize G，请及时清理，以保证系统正常运行！</label>
+        </li>
+		#end
+		#if($!recordSize==-1)
+    	<li>
+        	<label>文件存放目录异常，请尽快处理，以保证系统正常运行！</label>
+        </li>
+		#end
+    </ul>
+	#end
+</div>

@@ -1,0 +1,266 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑营销任务-任务明细</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		.over { background-color: #E3EAF4; }
+	</style>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.tabletree-v1.0-micro.js"></script>
+    #scriptLink("page")
+	<script type="text/javascript">
+		$(function(){
+			$('div.etabs').etabs({
+				'index': 0,
+				'head': 'etabs-items',
+				'body': 'etabs-body',
+				'bar': 'etabs-bar',
+				'beforeOnclick': fun1,
+				'onclick': fun2
+			});
+			
+			var setting = {afterUpdate:fun3};
+			$('.tabletree').tabletree(setting);
+		});
+		
+		
+		function fun3(trObj){
+			var taskId = jQuery("#txtTaskId").val();
+			var deptId = 0;
+			var userId = 0;
+			var targetUser = 0;
+			var targetDept = 0;
+			var targetDeptUnassign = 0;
+			var rs = parseInt(trObj.attr("mode")) - 3;
+			if(rs < 0){
+				deptId = trObj.attr("id");
+				targetDept = trObj.children("td").eq(1).find("label").text();
+				targetDeptUnassign = trObj.children("td").eq(3).find("label").text();
+			}else{
+				deptId = trObj.attr("epid");
+				userId = trObj.attr("id");
+				targetUser = trObj.children("td").eq(1).find("label").text();
+			}
+			//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "../tskMicroTaskExecute/saveTskMicroTaskExecute.html",
+		    	data: {'tskMicroTaskExecute.taskId': taskId,
+		    		   'tskMicroTaskExecute.deptId': deptId,
+				       'tskMicroTaskExecute.userId': userId,					       
+				       'tskMicroTaskExecute.targetUser': targetUser,
+				       'tskMicroTaskExecute.targetDept': targetDept,
+				       'tskMicroTaskExecute.targetDeptUnassign': targetDeptUnassign
+		    	},
+		    	success: function(data){
+		 	  		editResult(data);
+		    	}
+			});
+		}
+		
+		function editResult(msg){
+			if(msg != 'SUCCESS'){
+				banger.page.showMessageBox(msg);
+			}
+		}
+		
+		function fun1(h, b){
+			return true;
+		}
+		function fun2(h, b){
+		}
+		
+	  <!--跳转到导入页面-->
+     function transTskImportPage(obj){
+            var taskId=$('#txtTaskId').val();
+			var title ='$!tskMicroTask.taskTitle';
+			var options = {id: "transTsk-"+taskId, pid: GetId(), title: "导入任务资料-"+title, url: "${ctx}/taskAssignImport/transTskImportPage.html?taskId="+taskId+"&sysType="+obj, lock: false};
+			tab.add(options);
+		}
+      <!--刷新-->
+     function refresh(){
+       var taskId=$!tskMicroTask.taskId;
+       var url='../tskMicroTask/toEditTskMicroTaskMarketingByExecutorPage.html?random='+Math.random();
+       jQuery.ajax({
+            type:'post',
+             url:url,
+            data:{'tskMicroTask.taskId':taskId,'relax':'relax','isImport':'1'},
+         success:function(html){
+            if(html!=null&&html!=''){
+               $('#table').html(html);
+            }
+             var setting = {afterUpdate:fun3};
+			$('.tabletree').tabletree(setting);
+         }
+       });
+     }
+   </script>
+</head>
+
+<body>
+<input type="hidden" id="txtTaskId" value="$!tskMicroTask.taskId"/>
+<div class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li id="liAssign"><label>任务明细</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+        		<table class="htmltbl" style="table-layout: auto;">
+                    <tbody>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>任务名称：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!tskMicroTask.taskTitle</label>
+                            </td>
+                        </tr>                                           
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>开始日期：</label>
+                            </td>
+                            <td width="13%">
+                                <label>$!date.format("yyyy-MM-dd",$!tskMicroTask.startDate)</label>
+                            </td>
+                            <td class="field" width="8%">
+                                <label>结束日期：</label>
+                            </td>
+                            <td  width="13%">
+                                <label>$!date.format("yyyy-MM-dd",$!tskMicroTask.endDate)</label>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>任务类型：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>
+                                #if($!tskMicroTask.taskType == 2)
+                                	营销任务-电话营销
+                                #else
+                                	营销任务-实地营销
+                                #end
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>任务目标：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!tskMicroTask.taskTarget个</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>新客户比例：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>#if($!tskMicroTask.newCustomerPercent) $!tskMicroTask.newCustomerPercent #else 0 #end &#37;</label>
+                            </td>
+                        </tr>  
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>老客户比例：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>#if($!tskMicroTask.oldCustomerPercent) $!tskMicroTask.oldCustomerPercent #else 0 #end &#37;</label>
+                            </td>
+                        </tr>                        
+                        <tr>
+                            <td class="field" width="8%" valign="top">
+                                <label>任务备注：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!tskMicroTask.remark</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>创建者：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!assignName</label><label class="red">$!assignflag</label>
+                            </td>
+                        </tr>  
+                    </tbody>
+                </table>      
+                <hr />
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+                </div>  
+            </div>
+            <div class="etabs-body-child">
+              <div class="action-bar">
+              #if($!isDeptManger==1)
+                 #if($urlPermitUtil.hasPermission('taskImportDept'))
+			        <span class="ui-span-btn fl" >
+			        	<label onclick='transTskImportPage("sysDept");' >导入机构</label>
+			        </span>
+			     #end
+			     #if($urlPermitUtil.hasPermission('taskImportUser'))   
+			        <span class="ui-span-btn fl">
+			        	<label onclick='transTskImportPage("sysUser");' >导入人员</label>
+			        </span>
+			     #end   
+			   #end
+			        <span class="ui-span-btn fr">
+			        	<label onclick="refresh()">刷新</label>
+			        </span>
+			    </div>
+            	<div class="ztree-box">
+					<table id="table" class="tabletree" cellpadding="0" cellspacing="0">
+						<thead>
+							<tr>
+								<th><label title="分配对象">分配对象</label></th>
+								<th><label title="任务目标(个)">任务目标(个)</label></th>
+								<th><label title="已分配任务(个)">已分配任务(个)</label></th>
+								<th><label title="未分配任务(个)">未分配任务(个)</label></th>
+								<th><label title="已分配任务比率">已分配任务比率</label></th>
+								<th><label title="已完成个数(个)">已完成个数(个)</label></th>
+								<th><label title="完成进度">完成进度</label></th>
+							</tr>
+						</thead>
+						<tbody>
+						#foreach($tskAssign in $!tskAssignList)
+							<tr id="$!tskAssign.id" pid="$!tskAssign.pid" mode="$!tskAssign.tMode" epid="$!tskAssign.epid">
+								<td><label title="$!tskAssign.assignObjName">$!tskAssign.assignObjName</label></td>
+								<td>
+                                    <label class="col1" title="$!tskAssign.assignTotalTarget">$!tskAssign.assignTotalTarget</label>
+                                    <input type="hidden" id="assignTotalTarget" value="$!tskAssign.assignTotalTarget" />
+                                </td>
+								<td><label class="col2" title="$!tskAssign.assignTarget">$!tskAssign.assignTarget</label></td>
+								<td><label #if($!tskAssign.unAssignTarget!=0) class="col3 red" #else class="col3" #end title="$!tskAssign.unAssignTarget">$!tskAssign.unAssignTarget</label></td>
+								<td><label class="col4" title="$!tskAssign.assignPc">$!tskAssign.assignPc</label></td>
+								<td><label class="col5" title="$!tskAssign.comTskNum">$!tskAssign.comTskNum</label></td>
+								<td><label class="col6" title="$!tskAssign.comPc">$!tskAssign.comPc</label></td>
+						   </tr>
+						#end
+						</tbody>
+					</table>
+                </div>
+                <hr />
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+
+    <thead>
+        <tr>
+			##<th width="30"><input type="checkbox" nm="chkall" class="chk" name="userIdsss" onclick="selectAll(this)"/></th>
+            <th>姓名</th>
+            <th>角色</th>
+            <th>归属机构</th>
+			<th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($deptUser in $!checkdeptUserList)
+            <tr id="$!deptUser.userId">
+				##<td><input type="checkbox" #if($!deptUser.userId.equals(1)) disabled="true" #end nm="chkone" class="chk" name="userIds" value="$!deptUser.userId"/></td>
+				<td><label title="$!deptUser.userName" name="userName">$!deptUser.userName</label></td>
+                <td><label title="$!deptUser.roleNames">$!deptUser.roleNames</label></td>
+                <td><label title="$!deptUser.deptName">$!deptUser.deptName</label></td>
+				<td><label >
+						#if($!sysTeam.teamId)
+							<a class="slink" href="javascript:void(0);"onclick="delById($!deptUser.userId,'$!sysTeam.teamId','$!sysTeam.teamName')"> 
+					移除</a></label></td>
+					#else
+				<a class="slink" href="javascript:void(0);"onclick="delById($!deptUser.userId)"> 
+					移除</a></label></td>
+				#end
+            </tr>
+		#end
+    </tbody>
+</table>
+<input id="totalAmount" type="hidden" name="totalAmount" value="$!totalAmount"/>

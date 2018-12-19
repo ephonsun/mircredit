@@ -1,0 +1,188 @@
+#**
+* 该模板显示宝贝底部的分页的
+* @asq					当前的AuctionSearchQuery
+* @maxPage				100 最大显示的页数
+* @ by yuancong 2009-7-27
+**#
+##最多显示100页记录
+#set($maxPage = $page.totalPages)
+#set($currentPage = $page.currentPage)##int
+#if($currentPage > $page.totalPages)
+	#set($currentPage = $page.totalPages)
+#end
+#set($tPage = $page.totalPages)##int 总页数
+#set($tPage2 = $tPage)
+#if( $tPage > $maxPage  ) #set($tPage = $maxPage) #end
+#set($prePage = $currentPage - 1)
+#set($nextPage = $currentPage + 1)
+
+##--------------循环页码--------------
+#set($leftStart = 1)
+#set($leftEnd = 2)
+#set($mStart = $currentPage - 2)
+#set($mEnd = $currentPage + 2)
+#set($rStart = $tPage - 1)
+#set($rEnd = $tPage)
+
+<div class="pagination">
+	#if($page && $!page.totalPages>0)
+		#if($currentPage <= 1)
+			<span class="page-prev">上一页</span>
+		#else
+	   		<a href="javascript:filterPageForm_submit($prePage);" class="page-prev" title="上一页">上一页</a>
+		#end
+		
+	    #if($mStart <= $leftEnd)
+			#set($leftStart = 0)
+			#set($leftEnd = 0)
+			#set($mStart = 1)
+		#end
+		
+		#if($mEnd >= $rStart)
+			#set($rStart = 0)
+			#set($rEnd = 0)
+			#set($mEnd = $tPage)
+		#end
+		
+		#if($leftEnd > $leftStart)
+			#foreach($p in [${leftStart}..${leftEnd}])
+				<a href="javascript:filterPageForm_submit($p);" class="page-no">$p</a>
+			#end
+			#if($mStart>3)
+			<span class="page-break">...</span>
+			#end
+		#end
+		
+	    #if($mStart > $mEnd)
+			#set($mStart = $mEnd)
+		#end
+		
+		#foreach($p in [${mStart}..${mEnd}])
+			#if($p == $currentPage)
+				<span class="page-cur">$p</span>
+			#else
+				<a href="javascript:filterPageForm_submit($p);" class="page-no">$p</a>
+			#end
+		#end
+		#if ($rEnd > $rStart)
+			#if($rEnd>6)
+			<span class="page-break">...</span>
+			#end
+			#foreach($p in [${rStart}..${rEnd}])
+				<a href="javascript:filterPageForm_submit($p);" class="page-no">$p</a>
+			#end
+		#end
+		
+	    #if ($currentPage < $tPage || ($tPage2 > $tPage && $currentPage >= $tPage))
+	         <a href="javascript:filterPageForm_submit($nextPage);" class="page-next" title="下一页">下一页</a>
+	    #else
+	        <span class="page-next">下一页</span>
+	    #end
+		
+	    #foreach ($key in ${request.getParameterNames()})
+			#set($keyword=$!request.getParameter($key))
+			#if("$key"!="page.currentPage" && "$key"!="page.pageSize")
+		  		<input type="hidden" name="$key" id="$key" value="$!keyword" />
+		  	#end
+		#end
+		
+		<input type="hidden" name="page.pageSize" value="$!page.pageSize" />
+		
+		<span class="page-skip">
+	   	 	<label>到第</label>
+	   	 	<input  type="text" name="page.currentPage" id="page.currentPage" class="inp" size="2" value="$!currentPage" style="ime-mode: disabled" onkeydown="return keyDown(this)" onbeforepaste="return textPaste(this)" />
+	   	 	<label>页</label>
+	    	<input type="button" class="button" value="确定" onclick="javascript:filterPageForm_submit()" />
+	    	<label>页数: $currentPage / $page.totalPages</label>
+    	</span>
+	#else
+		<span>没有找到相关记录</span>
+	#end
+</div>
+
+
+<script language="javascript">
+    function filterPageForm_submit(page){
+		if(page)document.getElementById("page.currentPage").value=page;
+		else{
+			page = document.getElementById("page.currentPage").value;
+		}
+
+		var flag=(document.getElementById("deptCheckbox").checked)?1:0;
+		var obj = document.getElementById("searchCode").value;
+		if(flag) obj = "";
+		var deptId=$("#deptId").val();
+		var account=$('#account').val().replace(/(^\s*)|(\s*$)/g,"");
+		var userName=$('#userName').val().replace(/(^\s*)|(\s*$)/g,""); 
+		var isActived=$('#isActived').val().replace(/(^\s*)|(\s*$)/g,""); 
+		var deptData={"deptId":deptId,"flagInt":1,"page.currentPage":page};
+		var queryData={"flagInt":2,"deptId":deptId,"flag":flag,"deptUserBean.account":account,"deptUserBean.userName":userName,"deptUserBean.isActived":isActived,"page.currentPage":page};
+		var rootClick={"flagInt":3,"page.currentPage":page};
+		var rootData={"flagInt":4,"deptUserBean.account":account,"deptUserBean.userName":userName,"deptUserBean.isActived":isActived,"page.currentPage":page};
+		var postData;
+		var disd = document.getElementById("deptCheckbox").disabled;
+		if(obj=="query"){//查询本部门
+			postData = deptData;
+		}else{
+			if($("#selectSearch").val()== "selected"){
+    			if($("#rootData").val()== 1) postData = rootClick;
+    			else if($("#rootData").val()== 2) postData = rootData;
+    			else postData = queryData;
+			}
+			if($("#selectSearch").val()== "noSelected" && disd == false){
+				postData = queryData;
+			}
+			if($("#selectSearch").val()== "noSelected" && disd == true){
+				postData = rootClick;
+			}
+		}
+		jQuery.ajax({
+		    "type":"post", 
+		    "url":"getUserPageList.html",
+		    "data":postData,
+		    "success":function(html){
+				var elem=$(html);
+					var gridDiv = $("#deptGrid");
+					gridDiv[0].innerHTML="";
+					gridDiv.append(elem);
+		    }
+		});
+    }
+    
+    function keyDown(obj){
+    	var e = window.event;
+		var key = e.keyCode || e.which;
+		var flag = (e.shiftKey && jQuery.keyboard.insert==key) || (e.ctrlKey && key==86) || (e.ctrlKey && key==67);
+		if(key==229)
+		{
+			banger.input.fn.imeKeyDown(obj,checkNumber);
+			return true;
+		}
+		else
+		{
+			if(!flag)
+			{
+				return banger.input.fn.textKeyDown(e,obj,checkNumber);
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+	
+	function textPaste(obj){
+		var e = window.event;
+		return banger.input.fn.textPasteNew(e,obj,checkNumber);
+	}
+    
+	function checkNumber(text){
+		if(text=="")return false;
+		if(!inChars(text,"0123456789"))return false;
+		if(text.substr(0,1)=='0')return false;
+		var maxPage = $page.totalPages;
+		if(parseInt(text)>maxPage)return false;
+		return true;
+	}
+</script>
+

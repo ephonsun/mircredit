@@ -1,0 +1,441 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑理财产品</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<style type="text/css">
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+	</style>
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	var postJson = {};
+    	jQuery(function(){
+			getQueryJson();
+			$('select:not([rel])').select();
+			$('#productAddForm').validator();
+		});
+		
+		//效验预期收益率下限
+		function yzProfitRateMin(){
+			var bool=true;
+			if($('#profitRateMin').val()!='' && $('#profitRateMax').val()==''){
+				$('#profitRateMax').parent().addClass('v-fails');
+			}else if($('#profitRateMin').val()=='' && $('#profitRateMax').val()!=''){
+				$('#profitRateMin').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#profitRateMax').parent().removeClass('v-fails');
+			}
+			return bool;
+		}
+		
+		//验证预期收益率上线
+		function yzProfitRateMax(){
+			var bool=true;
+			if($('#profitRateMin').val()=='' && $('#profitRateMax').val()!=''){
+				$('#profitRateMin').parent().addClass('v-fails');
+			}else if($('#profitRateMin').val()!='' && $('#profitRateMax').val()==''){
+				$('#profitRateMax').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#profitRateMin').parent().removeClass('v-fails');
+			}
+			return bool;
+		}
+		
+		//验证发售期开始
+		function yzSaleStartDate(){
+			var bool=true;
+			if($('#datepicker1').val()!='' && $('#datepicker2').val()==''){
+				$('#datepicker2').parent().addClass('v-fails');
+			}else if($('#datepicker1').val()=='' && $('#datepicker2').val()!=''){
+				$('#datepicker2').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#datepicker2').parent().removeClass('v-fails');
+			}
+			return bool;
+		}
+		
+		//验证发售期结束
+		function yzSaleEndDate(){
+			var bool=true;
+			if($('#datepicker1').val()=='' && $('#datepicker2').val()!=''){
+				$('#datepicker1').parent().addClass('v-fails');
+			}else if($('#datepicker1').val()!='' && $('#datepicker2').val()==''){
+				$('#datepicker2').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#datepicker1').parent().removeClass('v-fails');
+			}
+			return bool;
+		}
+		
+		function extendvalidator(){
+			var bool = true;
+			
+			//验证预期收益率
+			if($('#profitRateMin').val()!='' && $('#profitRateMax').val()==''){
+				$('#profitRateMax').parent().addClass('v-fails');
+				bool = false;
+			}else if($('#profitRateMin').val()=='' && $('#profitRateMax').val()!=''){
+				$('#profitRateMin').parent().addClass('v-fails');
+				bool = false;
+			}else{
+				$('#profitRateMax').parent().removeClass('v-fails');
+			}
+			if($('#profitRateMin').val()=='' && $('#profitRateMax').val()!=''){
+				$('#profitRateMin').parent().addClass('v-fails');
+				bool = false;
+			}else if($('#profitRateMin').val()!='' && $('#profitRateMax').val()==''){
+				$('#profitRateMax').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#profitRateMin').parent().removeClass('v-fails');
+			}
+			
+			//验证发售期
+			if($('#datepicker1').val()!='' && $('#datepicker2').val()==''){
+				$('#datepicker2').parent().addClass('v-fails');
+			}else if($('#datepicker1').val()=='' && $('#datepicker2').val()!=''){
+				$('#datepicker2').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#datepicker2').parent().removeClass('v-fails');
+			}
+			if($('#datepicker1').val()=='' && $('#datepicker2').val()!=''){
+				$('#datepicker1').parent().addClass('v-fails');
+			}else if($('#datepicker1').val()!='' && $('#datepicker2').val()==''){
+				$('#datepicker2').parent().addClass('v-fails');
+				bool=false;
+			}else{
+				$('#datepicker1').parent().removeClass('v-fails');
+			}
+			
+			//判断产品名称是否存在
+			jQuery.ajax({
+				type:"post",
+				url:"isExistProduct.html", 
+				data:{"productBean.productName":$('#productName').val(),"productBean.productCode":$('#productCode').val(),"state1":$('#pName').val(),"state2":$('#pCode').val()},
+				cache: false,
+				async: false,
+				success:function(data){
+    				var json=jQuery.parseJSON(data);
+    				if(json['productName']=="1"){
+    					$('#productName').parent().addClass('v-fails');
+    					$('#productName').attr("tips","产品名称已存在,请重新输入!");
+    					bool = false;
+    				}
+    				if(json['productCode']=="1"){
+    					$('#productCode').parent().addClass('v-fails');
+    					$('#productCode').attr("tips","产品编号已存在,请重新输入!");
+    					bool = false;
+    				}
+				}
+			});
+			
+			
+			return bool;
+		}
+		
+		function save(){
+			var bool = jQuery.validator({ form: 'productAddForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return;
+			}else{
+				$("#productAddForm").attr("action", "updateProduct.html"); 
+				$('#productAddForm').submit();
+				tab.close(GetId(), true);
+			}
+		}
+		function deleteBuyCustomer(pcId,userId){
+			if(confirm("您确定要删除选择的购买记录吗？")){
+				location.href="deleteBuyCustomer.html?pcId="+pcId+"&productId="+$('#productId').val()+"&bcustomer.userId="+userId;
+			}
+		}
+		
+		function add(){
+			var url="toAdd.html?productId="+$('#productId').val()+"&unit="+$('#unit').val()+"&random="+Math.random()*10000;
+			var result=banger.page.openDialog(url,"添加购买记录",650,520);
+			if(result==1){
+				//location.reload();
+				location.href="openUpdateProduct.html?productId="+$('#productId').val()+"&random="+Math.random();
+			}
+		}
+		
+		//购买客户导入
+		function importBase(){
+			var productId=$('#productId').val();
+			var urlStr="../productimport/initImportPath.html?productId="+productId+"&random="+Math.random()*10000;
+			tab.add({id: "pro_imprt", pid: GetId(), title: "导入购买记录", url:urlStr, lock: false, confirm: true,refresh:false});
+		}
+		function unitChange(){
+			if($('#isnotRecords').val()=="true"){
+				banger.page.showMessageBox("已经有客户购买产品“"+$('#productName').val()+"”，不能够修改单位！");
+				return false;
+			}
+			else{
+				return true;
+			}
+		}
+		
+    	//进入客户详情
+    	function openCustomer(id){
+    		jQuery.post("../record/getCustomerIsDel.html", {"customerId": id}, function(result){
+    			if(result=="0"){
+    				banger.page.showMessageBox("该客户已删除,无法查看客户！");
+    				return;
+    			}else{
+            		var options = {id: "productUpdate_queryCustomerById"+id, pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+id+"&random="+Math.random(), lock: false};
+            		tab.add(options);
+				}
+			});
+    	}
+		
+		function getQueryJson(){
+    		postJson['productId']=jQuery.trim($('#productId').val());
+    		return postJson;
+    	}
+		
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"openUpdateProduct.html?fenye=1&random="+Math.random()*1000000,postJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新Grid
+    	function refreshGrid(gridId,html)
+    	{
+    		$("#" + gridId).html(html);
+    		$('table.datatbl').table();
+    		var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+    	}
+		
+		//刷新
+		function refresh(){
+    		goto(null,"openUpdateProduct.html?fenye=1&random="+Math.random()*1000000,postJson,function(html){refreshGrid('grid',html);});
+		}
+    </script>
+</head>
+
+<body>
+	<h4 class="size12">
+		基本信息
+    </h4>
+    <hr />
+	<form name="productAddForm"  id ="productAddForm"  method="post">
+    <table class="htmltbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label class="red">*</label>
+                	<label>产品名称：</label>
+					<input type="hidden" id="productId" name="productBean.productId" value="$!productObj.productId"/>
+					<input type="hidden" id="isnotRecords" value="$!isnotRecords"/>
+                </td>
+                <td colspan="7">
+                	<div class="dtxt1" style="width: 180px; margin-right: 5px;">
+                        <input type="text" class="dtxt1-txt" id="productName" name="productBean.productName" value="$!productObj.productName" maxlength="100"  rule="\S" tips="“产品名称”必须填写"/>
+                    </div><input type="hidden" id="pName" value="$!productObj.productName"/>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label class="red">*</label>
+                	<label>产品编号：</label>
+                </td>
+                <td width="17%">
+                	<div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" id="productCode" name="productBean.productCode" value="$!productObj.productCode" maxlength="20" rule="\S" tips="“产品编号”必须填写"/>
+                    </div><input type="hidden" id="pCode" value="$!productObj.productCode"/>
+                </td>
+            	<td width="8%" class="field">
+                	<label>产品类型：</label>
+                </td>
+                <td width="17%">
+                	<select name="productBean.productTypeId">
+                        <option value="0"></option>
+                    	#foreach($productType in $!productTypeList)
+							<option value="$!productType.productTypeId" #if($!productObj.productTypeName.equals($!productType.productTypeName)) selected=true #end>$!productType.productTypeName</option>
+						#end
+                    </select>
+                </td>
+            	<td width="8%" class="field">
+                	<label>收益类型：</label>
+                </td>
+                <td width="17%">
+                	<select name="productBean.profitTypeId">
+                        <option value="0"></option>
+                        </option>
+                    	#foreach($profitType in $!profitTypeList)
+							<option value="$!profitType.profitTypeId" #if($!productObj.profitTypeName.equals($!profitType.profitTypeName)) selected=true #end>$!profitType.profitTypeName</option>
+						#end
+                    </select>
+                </td>
+            	<td width="8%" class="field">
+                	<label>预期收益率：</label>
+                </td>
+                <td width="17%">
+                	<table class="celltbl">
+                    	<tr>
+                        	<td width="50">
+                            	<div class="dtxt2">
+                                    <input type="text" class="dtxt2-txt" id="profitRateMin" name="productBean.profitRateMin" value='#if($!productObj.profitRateMin!="0.0")$!productObj.profitRateMin#end' onkeyup="if(this.value==this.value2)return;if(this.value.search(/^\d{0,4}(?:\.\d{0,2})?$/)==-1)this.value=(this.value2)?this.value2:'';else this.value2=this.value;" fun="yzProfitRateMin" tips="预期收益率下限不能为空!" />
+                                </div>
+                            </td>
+                            <td><label>% ~</label></td>
+                        	<td width="50">
+                            	<div class="dtxt2">
+                                    <input type="text" class="dtxt2-txt" id="profitRateMax" name="productBean.profitRateMax" value='#if($!productObj.profitRateMax!="0.0")$!productObj.profitRateMax#end' onkeyup="if(this.value==this.value2)return;if(this.value.search(/^\d{0,4}(?:\.\d{0,2})?$/)==-1)this.value=(this.value2)?this.value2:'';else this.value2=this.value;" fun="yzProfitRateMax" tips="预期收益率上限不能为空!" />
+                                </div>
+                            </td>
+                            <td><label>%</label></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label>发售期：</label>
+                </td>
+                <td colspan="3" >
+                	<table class="celltbl">
+                        <tr>
+                            <td width="110">
+                                <div class="dtxt2">
+                                    <input type="text" class="dtxt2-txt date" id="datepicker1" readonly name="productBean.saleStartDate" value="#if($!productObj.saleStartDate)$date.format("yyyy-MM-dd",$!productObj.saleStartDate)#end" fun="yzSaleStartDate" tips="发售开始日期不能为空!" />
+                                    <span class="dtxt2-date">date</span>
+                                </div>
+                            </td>
+                            <td width="20">
+                                <label>—</label>
+                            </td>
+                            <td width="110">
+                                <div class="dtxt2">
+                                    <input type="text" class="dtxt2-txt date" id="datepicker2" readonly name="productBean.saleEndDate" value="#if($!productObj.saleEndDate)$date.format("yyyy-MM-dd",$!productObj.saleEndDate)#end" fun="yzSaleEndDate" tips="发售结束日期不能为空!" />
+                                    <span class="dtxt2-date">date</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            	<td width="8%" class="field">
+                	<label>理财时长：</label>
+                </td>
+                <td width="17%">
+                	<table class="celltbl">
+                        <tr>
+                            <td width="80">
+                                <div class="dtxt1">
+                                    <input type="text" class="dtxt1-txt" style="position: static;" name="productBean.duration" value='#if($!productObj.duration!=0)$!productObj.duration#end' onkeyup="value=value.replace(/[^\d]/g,'');if(this.value>36500)this.value=(36500)?36500:''" />
+                                </div>
+                            </td>
+                            <td width="24">
+                                <label>天</label>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            	<td width="8%" class="field">
+                	<label class="red">*</label>
+                	<label>到期日：</label>
+                </td>
+                <td width="17%">
+                	<div class="dtxt2">
+                        <input type="text" class="dtxt2-txt date" render="date" readonly name="productBean.expireDate" data-prompt-position="bottomLeft" value="#if($!productObj.expireDate) $date.format("yyyy-MM-dd",$!productObj.expireDate)#end" rule="\S" tips="“到期日”必须填写"/>
+                        <span class="dtxt2-date">date</span>
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label class="red">*</label>
+                	<label>募集上限：</label>
+                </td>
+                <td colspan="7">
+                	<div class="dtxt1 fl" style="width: 100px; margin-right: 5px;">
+                        <input type="text" class="dtxt1-txt"  name="productBean.raiseUpperLimit" value="$moneyUtil.decimeMoney($typeUtil.changeType($!productObj.raiseUpperLimit))" onkeyup="if(this.value==this.value2)return;if(this.value.search(/^\d{0,12}(?:\.\d{0,4})?$/)==-1)this.value=(this.value2)?this.value2:'';else this.value2=this.value;" rule="\S" tips="“募集上限”必须填写"/>
+                    </div>
+					<input type="hidden" id="unit" value="$!productObj.moneyUnitName" />
+                	<select id="unittxt" style="width: 80px;" name="productBean.moneyUnitId" #if($!isnotRecords=="true") disabled #end>
+						#foreach($moneyUnit in $!moneyUnitList)
+							<option value="$!moneyUnit.moneyUnitId" #if($!productObj.moneyUnitName.equals($!moneyUnit.moneyUnitName)) selected=true #end>$!moneyUnit.moneyUnitName</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label class="red">*</label>
+                	<label>到期提醒设置：</label>
+                </td>
+                <td colspan="7">
+                    <table class="celltbl">
+                    	<tr>
+                        	<td>产品到期提前</td>
+                            <td width="60">
+								<div class="dtxt1" style="width: 60px;">
+									<input type="text" class="dtxt1-txt" name="productBean.remindDays" value="$!productObj.remindDays" onkeyup="value=value.replace(/[^\d]/g,'');if(this.value>365)this.value=(365)?365:''" rule="\S" tips="“到期提醒天数”必须填写"/>
+                                </div>
+							</td>
+                            <td>天自动提醒</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	</form>
+	
+    <h4 class="size12" style="margin-top: 20px;">
+    	购买信息
+    </h4>
+    
+    <hr />
+    
+    <div class="sz">
+        <span class="fl bold">
+            购买客户(<label id="queryCount" class="dgreen">$!count</label>)
+        </span>
+    </div>
+   <div class="actrow">
+		<a href="javascript:void(0);" class="btn2 fl" onclick="add();">
+            <label >添加购买客户</label>
+        </a>
+		<a href="javascript:void(0);" class="btn2 fl" style=" margin-left: -1px;" onclick="importBase();">
+            <label >导入购买客户</label>
+        </a>
+		<a href="javascript:void(0);" class="btn2 fr" style=" margin-left: 5px;" onclick="refresh();">
+            <label class="btn2-txt">刷 新</label>
+        </a>
+    </div>
+	<div id="grid">
+		 #parse("/velocity/product/productUpdateTable.vm")
+	</div>
+	
+	<hr />
+	
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="保存" onclick="save();"/>
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="tab.close(GetId(), false);"/>
+    </div>
+</body>
+</html>

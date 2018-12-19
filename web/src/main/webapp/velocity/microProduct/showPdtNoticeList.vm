@@ -1,0 +1,260 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>通知</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style>
+	   .m1{ margin-left:-1px;}
+    </style>
+    #scriptLink("core")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};	//上一个搜索条件
+    	
+    	/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			goto(
+				page,
+				"../pdtNotice/queryPdtNoticeList.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".green").text(total);
+			}else {
+				jQuery(".green").text("0");
+			}
+		}
+		
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var postJson={};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+	   	
+	   	/**
+		 * 下载知识附件
+		 */
+		function downFileAttr(noticeId){
+			location.href="downloadPdtNoticeAttachment.html?noticeId="+noticeId;
+			return false;
+		}
+		
+		/**
+		 * 修改通知数据结果
+		 */
+		function updateResult(msg){
+			if(msg == 'SUCCESS'){
+				jQuery("#btnRefresh").trigger("click");//执行刷新操作
+			}else{
+				banger.page.showMessageBox(msg);
+			}
+		}
+	
+		jQuery(function(){
+			jQuery('select').select();
+			
+			jQuery("#btnClear").click(function(){
+				jQuery("input[name='conds']").each(function(){
+					jQuery(this).val("");
+				});
+				jQuery('#selReadState')[0].selectedIndex = 0;
+				jQuery('#selReadState').select();
+			});
+			
+			jQuery("#btnSearch").click(function(){
+				var isRead = jQuery("#selReadState").val();
+				var noticeName = jQuery.trim(jQuery("#txtNoticeName").val());
+				var updateStartDate = jQuery.trim(jQuery("#txtCreateStartDate").val());//Notice_Update_date
+				var updateEndDate = jQuery.trim(jQuery("#txtCreateEndDate").val());
+				
+				var postJson={'pdtNotice.isRead': isRead,
+						  	  'pdtNotice.noticeName': noticeName,
+						  	  'createStartDate': updateStartDate,
+						  	  'createEndDate': updateEndDate
+				};
+				oldPostJson = postJson;  //记录OldPostJson
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "queryPdtNoticeList.html",
+			    	data: postJson,
+			    	success: function(data){
+			 	  		queryResult(data);
+			    	}
+				});
+			});
+			
+			
+			jQuery("#btnRefresh").click(function(){
+				goto(null,"../pdtNotice/queryPdtNoticeList.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html);});
+			});
+			
+			initQueryJson();
+			
+			jQuery('.datatbl').table();
+			
+			jQuery("#btnSyncNotice").click(function(){
+				banger.page.showMessageBox("同步通知 完成");
+			});
+			
+			jQuery("#btnReaded").click(function(){
+				var obj = jQuery(".datatbl").find("input[type=checkbox][rel=row]:checked");
+				if(obj.size() == 0){
+					banger.page.showMessageBox("请选择需要标记为已读的通知");
+					return false;
+				}
+				
+				var arr = [];
+				jQuery(".datatbl").find("input[type=checkbox][rel=row]:checked").each(function(i){
+					arr[i] = jQuery(this).attr("nid");
+				});
+				var noticeIds = arr.join(",");
+				
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "editPdtNoticeRead.html",
+			    	data: {'noticeIds':noticeIds,
+			    		   'readState':1
+			    	},
+			    	success: function(data){
+			 	  		updateResult(data);
+			    	}
+				});
+			});
+			
+			jQuery("#btnUnRead").click(function(){
+				var obj = jQuery(".datatbl").find("input[type=checkbox][rel=row]:checked");
+				if(obj.size() == 0){
+					banger.page.showMessageBox("请选择需要标记为未读的通知");
+					return false;
+				}
+				
+				var arr = [];
+				jQuery(".datatbl").find("input[type=checkbox][rel=row]:checked").each(function(i){
+					arr[i] = jQuery(this).attr("nid");
+				});
+				var noticeIds = arr.join(",");
+				
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "editPdtNoticeRead.html",
+			    	data: {'noticeIds':noticeIds,
+			    		   'readState':0
+			    	},
+			    	success: function(data){
+			 	  		updateResult(data);
+			    	}
+				});
+			});
+		});
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>文件名称：</label>
+                </td>
+                <td width="25%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="txtNoticeName" name="conds"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>更新时间：</label>
+                </td>
+                <td width="25%">
+					<table class="celltbl" style="width: 100%;">
+						<tbody>
+							<tr>
+								<td>
+									<div class="ui-div-text">
+										<input type="text" class="text datepicker" name="conds"
+											id="txtCreateStartDate" render="date" readonly="true" />
+										<i class="date"></i>
+									</div>
+								</td>
+								<td width="20">
+									<label>
+										-
+									</label>
+								</td>
+								<td>
+									<div class="ui-div-text">
+										<input type="text" class="text datepicker" name="conds"
+											id="txtCreateEndDate" render="date" readonly="true" />
+										<i class="date"></i>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+            	<td class="field" width="8%">
+                	<label>状态：</label>
+                </td>
+                <td width="26%">
+                    <select id="selReadState">
+                    	<option value="-1">&nbsp;</option>
+                        <option value="1">&nbsp;已读</option>
+                        <option value="0">&nbsp;未读</option>
+                    </select> 
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl">
+            通知(<label class="green">$!count</label>)
+        </span>
+        <input type="button" id="btnClear" class="ui-input-btn" value="清空" />
+        <input type="button" id="btnSearch" class="ui-input-btn" value="搜索" />
+    </div>
+    <div class="action-bar">
+        <span class="ui-span-btn fl" id="btnSyncNotice">
+            <label>同步通知</label>
+        </span>
+        <span class="ui-span-btn fl m1" id="btnReaded">
+            <label>已读</label>
+        </span>
+        <span class="ui-span-btn fl m1" id="btnUnRead">
+            <label>未读</label>
+        </span>
+        <span class="ui-span-btn fr" id="btnRefresh">
+            <label>刷新</label>
+        </span>
+    </div>
+     <table id="tblList" class="datatbl">
+         #parse("/velocity/microProduct/pdtNoticeList.vm")
+     </table>
+</body>
+</html>

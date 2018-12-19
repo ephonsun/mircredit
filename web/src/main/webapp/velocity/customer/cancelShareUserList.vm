@@ -1,0 +1,129 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>取消共享用户</title>
+  
+  	#styleLink("base")
+    <style type="text/css">
+    	.b-bomb-box1 { display: block; }
+		.b-bomb-box1 .l { height: 314px; }
+		.b-bomb-box1 .r .collist { height: 299px; }
+    </style>
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	$(document).ready(function(){
+    		$('.colheader tr:first :checkbox:first').click(function(){
+				if(this.checked){
+					$('.collist :checkbox').attr('checked', 'checked');
+					$('.collist tr').addClass('active');
+				}
+				else{
+					$('.collist :checkbox').removeAttr('checked');
+					$('.collist tr').removeClass('active');
+				}
+			});
+			fn.init($('.collist table tbody'));
+    	})
+    	var fn = {};
+		fn.len = function(obj){
+			return $('tr', obj).size();
+		}
+		fn.checked = function(obj){
+			return $('tr :checkbox:checked', obj).size();
+		}
+		fn.init = function(obj){
+			$('tr', obj).each(function(){
+				$(':checkbox:first', this).click(function(){
+					if(this.checked){
+						$(this).parents('tr').addClass('active');
+					}else{
+						$(this).parents('tr').removeClass('active');
+					}
+					
+					if(fn.len(obj) == fn.checked(obj)){
+						$('.colheader :checkbox').attr('checked', 'checked');
+					}else{
+						$('.colheader :checkbox').removeAttr('checked');
+					}
+				});
+				
+				$(this).hover(
+					function(){
+						if(!$(this).hasClass('active')){
+							$(this).addClass('hover');
+						}
+					},
+					function(){
+						$(this).removeClass('hover');
+					}
+				);
+			});
+		}
+		
+    	function btnOk(){
+    		var obj = jQuery("table").find("input[type=checkbox][nm=chkone]:checked");
+    		var str = "";
+			obj.each(function(){
+				if(jQuery(this).attr("checked")){
+					if(!str){
+						str = jQuery(this).val();
+					}else{
+						str = str +"," +jQuery(this).val();
+					}}
+			});
+			if(str==""){
+				banger.page.showMessageBox("请您选择要取消共享的用户！");
+				return;
+			} 
+    		window.returnValue=str;   
+    		window.close();
+    	}
+    </script>
+</head>
+
+<body>
+	<div class="b-bomb-box1">
+        <div class="fl r">
+        	<div class="colheader">
+            	<table>
+                    <thead>
+                        <tr>
+                            <th width="30"><input type="checkbox" /></th>
+                            <th width="180"><label>用户名</label></th>
+                            <th width="180"><label>人员姓名</label></th>
+                            <th width="180"><label>归属机构</label></th>
+                            <th width="12"><label>&nbsp;</label></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="collist">
+                <table>
+                    <tbody>
+                    	#foreach($user in $cancelUsers)  
+                        <tr>
+                            <td width="30"><input type="checkbox" value="$!user.userId" id="$!user.userId" nm="chkone"/></td>
+                            <td width="180"><label>$!user.account</label></td>
+                            <td width="180"><label>$!user.userName</label></td>
+                            <td width="180"><label>$!user.deptName</label></td>
+                        </tr>
+                        #end
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="clear"></div>
+        <div class="center">
+        	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" onclick="btnOk()"/>
+        	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+        </div>
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,45 @@
+<thead>
+<tr>
+    <th><label title="还款日期">还款日期</label></th>
+    <th><label title="应还本金(元)">应还本金(元)</label></th>
+    <th><label title="应还利息(元)">应还利息(元)</label></th>
+</tr>
+</thead>
+<tbody>
+#foreach($!query in $!queryList)
+#if($query.sortno ==$sortno)
+    <tr style="background-color: yellow">
+#else
+    <tr>
+#end
+    <td><label class="repaymentLoanId" id="$query.loanId" title="$!date.format('yyyy-MM-dd',$!query.planDate)">$!date.format('yyyy-MM-dd',$!query.planDate)</label></td>
+    <td><label title="$!vmHelper.getUnityDecimalMoney($query.principal)">$!vmHelper.getUnityDecimalMoney($query.principal)</label></td>
+    <td><label title="$!vmHelper.getUnityDecimalMoney($query.interest)">$!vmHelper.getUnityDecimalMoney($query.interest)</label></td>
+
+</tr>
+#end
+</tbody>
+<tfoot>
+<tr>
+
+    <td colspan="3">
+        #parse("/velocity/loan/repaymentPlanAjaxPage.vm")
+    </td>
+</tr>
+</tfoot>
+
+<script type="text/javascript">
+    var postJson = {};
+    //分页跳转
+    function gotoPlanPage(page){
+        var loanId =$('.repaymentLoanId').attr('id');
+        gotoPlan(
+            page,
+            "../loan/loanRepaymentPlan.html?RandNum="+ Math.random()+"&loanId="+loanId,
+            postJson,
+            function(html){
+                $("#queryList").html(html);
+                $('#queryList').table();
+            });
+    }
+</script>

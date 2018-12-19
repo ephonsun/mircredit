@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>导入客户</title>
+	#styleLink("base")
+    #scriptLink("core")
+</head>
+<script language="JavaScript"> 
+
+		var proId;
+		
+		proId = setInterval("progressBar()", 1000);
+		
+		//导出进度
+		function progressBar(){
+			var curr = $("#curr").val();
+			var total = $("#total").val();
+			var p = Math.round(parseInt(curr) * 100 /parseInt(total))+'%';
+			if(p == "NaN%") p = "0%";
+			$("#percent").text(p);
+			$("#porgressBar").css("width",p);
+			if(p == "100%"){
+				clearInterval(proId);
+			}
+		}
+</script>
+<body>
+	<input type="hidden" name="total" id="total" />
+	<input type="hidden" name="curr" id="curr" />
+	<table class="step1" width="100%" border="0" cellpadding="2" cellspacing="2">
+    	<tr>
+        	<td class="executed">第 1 步</td>
+        	<td class="executed">第 2 步</td>
+        	<td class="executed">第 3 步</td>
+        	<td>第 4 步</td>
+        </tr>
+    </table>
+    <h4 class="step-title">第 3 步：导入队列进度</h4>
+	
+	 <div class="pgrbar">
+        	<div class="ppt">
+            	<span class="fl">
+                    正在导出数据，共
+                    <label id="totalCount" class="dgreen bold">$!counterOutPintMessage.sumRecord</label>
+                    条数据…
+                </span>
+                <span id="percent" class="fr">
+                </span>
+            </div>
+            <div class="bar" >
+                <div id="porgressBar"></div>
+            </div>
+        </div>
+</body>
+</html>
+

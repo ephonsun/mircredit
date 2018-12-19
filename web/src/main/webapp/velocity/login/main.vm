@@ -1,0 +1,1052 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>移动贷款平台 v2.0.0 - 控制台</title>
+
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/index.css" />
+    <style type="text/css">
+    </style>
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/banger/banger.index.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.phone.js"></script>
+    <script type="text/javascript" src="${ctx}/js/biz/banger.talk.js"></script>
+    <script type="text/javascript" src="${ctx}/js/player/jwplayer.js"></script>
+    <script type="text/javascript" src="${ctx}/js/player/vplayer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.photo-layer.js"></script>
+	
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type=text/javascript>
+		var i_flash;
+		var v_flash;
+		if (navigator.plugins) {
+			for (var i=0; i < navigator.plugins.length; i++) {
+				if (navigator.plugins.name.toLowerCase().indexOf("shockwave flash") >= 0) {
+					i_flash = true;
+					v_flash = navigator.plugins.description.substring(navigator.plugins.description.toLowerCase().lastIndexOf("flash ") + 6, navigator.plugins.description.length);
+				}
+			}
+		}
+	</script>
+	<script type=text/javascript>
+		i_flash = detectFlash();
+        function detectFlash() {
+            //navigator.mimeTypes是MIME类型，包含插件信息
+            if(navigator.mimeTypes.length>0){
+                //application/x-shockwave-flash是flash插件的名字
+                var flashAct = navigator.mimeTypes["application/x-shockwave-flash"];
+                return flashAct != null ? flashAct.enabledPlugin!=null : false;
+            } else if(self.ActiveXObject) {
+                try {
+                    new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+                    return true;
+                } catch (oError) {
+                    return false;
+                }
+            }
+        }
+	</script>
+    <script type="text/javascript">
+    	var kickTimerHandler = -1;			//踢人计时器的句柄
+	 	var passWordDialog;
+		var urlRef = (window.location.href).replace('http://', '');
+		var urlStr = urlRef.substring(urlRef.indexOf('/'), urlRef.indexOf('/login'));
+
+        function getUrl(){
+            var mapUrl="";
+            if(urlStr){
+				mapUrl=urlStr;
+			}else{
+				mapUrl="";
+			}
+			return mapUrl;
+        }
+		$(function(){
+			var workDelegate="$!workDelegate";
+			var workUserId="$!workUserId";
+			var passWordReind="$!passWordReind";
+			var lastChangePassword="$!lastChangePassword";
+			var talkLimitRemind = $!talkLimitRemind;
+			var flag=true;
+			
+			if(!i_flash){
+				var flashPath="${ctx}/flash/install_flash_player_ax.exe";
+				var installHTML = '<div class=\'ui-model-install\'>'
+							+ '<label style=\'line-height: 24px;font-size: 12px; font-weight: normal;\'>检测系统未安装或浏览器禁用了Flash控件,请安装或启用Flash控件，以保证附件上传功能正常使用！</label>'
+							+ '<p style=\'\'><label>控件安装完成后，请重启浏览器！</label></p>'
+							+ '<div style=\'\'><a href=\'' + flashPath + '\' target=\'_self\' style=\'cursor: pointer; color: #0c0cf6; text-decoration: underline;\'>立即下载</a></div>'
+							+ '</div>';
+				art.dialog({
+					id: 'loadFlashActiveX',
+					title: 'Flash控件下载',
+					content: installHTML
+				});
+			}
+			
+			if(workDelegate=="yes"){
+				art.dialog({
+                    content: "您的工作已经托管给“"+workUserId+"”跟进，请您联系业务主管，撤销工作托管！",
+                    ok: function () {
+						if(passWordReind=="yes"){
+            				passWordDialog=art.dialog({
+                                content:"您的密码将在"+lastChangePassword+"到期，为能够正常使用系统，请您及时<a href='#' onclick='callbackPass()'>修改密码</a>",
+                                ok: function () {
+                                    return true;
+                                }
+                            });
+            			}
+                        return true;
+                    }
+                });
+			}else{
+				if(passWordReind=="yes"){
+    				passWordDialog=art.dialog({
+                        content:"您的密码将在"+lastChangePassword+"到期，为能够正常使用系统，请您及时<a href='#' onclick='callbackPass()'>修改密码</a>",
+                        ok: function () {
+                            return true;
+                        }
+                    });
+    			}
+			}
+			if(talkLimitRemind){
+				art.dialog({
+    			   			lock: false,
+    			    		content: '您昨天的通话量不在正常范围内，请注意通话质量',
+    			    		icon: 'warning',
+    			    		ok: true
+    					});
+			}
+			//定时器  每1分钟刷新一次余额
+			//setInterval("changeMoney()",60000);
+
+			kickTimerHandler = setInterval(kickAccount,2000);
+
+			//当没有拨号权限时关掉屏幕取词
+			if(!$urlPermitUtil.hasPermission('dialPhone')){
+				jQuery.post('../phoneConfig/updateIsScreamWord.html?&random=' + Math.random()*1000000,{ 'phoneConfig.isScreamWord': 0 },
+        			function(){
+        				setGetWord(0);
+        		});
+			}
+
+		});
+
+		function changeMoney(){
+			jQuery.post("changedMoney.html",{},
+				function(json){
+					var data=jQuery.parseJSON(json);
+					balance(data);
+				});
+		}
+
+		//转到用户密码修改
+		function callbackPass(){
+			passWordDialog.close();
+			tabs.add({id: "user_pass", pid:"", title: "修改密码", url: "../user/userPwdUpdatePage.html?random="+Math.random(), lock: false});
+		}
+		var tempDeptName="";
+
+    	var d = $!menuJson;
+
+		/**
+		 * 客户端获取当前用户名
+		**/
+		function getUn(){
+			return $('#un').text();
+		}
+
+    	function changePhoneAnswering(args){			//离线状态下，设置成为在线
+    		with(args)
+    		{
+    			if(state)
+    			{
+    				fn.state('leave');
+    			}
+    			else
+    			{
+    				fn.state('online');
+    			}
+    		}
+    	}
+
+    	function repairPhoneAnswering(){
+    		try
+    		{
+				var phone = sp.getCurrent();
+				if(phone)
+				{
+					var status = phone.getStatus();
+					var json = jQuery.parseJSON(status);
+					if(json["ansOn"])fn.state('leave');
+				}
+			}
+			catch(e)
+			{
+			}
+    	}
+
+    	var outting = false;			//正在退出中的标志位
+
+    	function logout(args){					//帐号退出通知
+    		if(!outting)
+    		{
+    			var account = $("#loginAccount").val();
+    			if(account==args.account)
+    			{
+    				window.location.href = 'showLogin.html';
+    			}
+    		}
+    	}
+
+    	function closeMain(){					//关闭窗口通知
+    		if(!outting)
+    		{
+    			var account = $("#loginAccount").val();
+    			outting = true;
+    			jQuery.ajax({
+					type: 'POST',
+					url: 'closeLogOut.html',
+					success: function(data, textStatus){
+					    window.opener=null;
+						window.open('','_self');
+						window.close();
+					}
+				});
+    		}
+    	}
+
+    	function ajaxLogout(msg){
+    		if(!outting)
+    		{
+    			var account = $("#loginAccount").val();
+    			sp.writeLog("ajaxLogout "+msg);
+    			sp.logout(account);
+    		}
+    	}
+
+        function login(args){					//帐号登入通知
+            var account = $("#loginAccount").val();
+            if(account!=args.account)
+            {
+                jQuery.ajax({
+                    type: 'POST',
+                    data:{
+                        userId:$("#userId").val()
+                    },
+                    url: 'closeLogOut.html?line=171',
+                    success: function(data, textStatus){
+                        window.location.href = 'showLogin.html?exitflag=yes';
+                    }
+                });
+            }
+        }
+
+    	function heartBeat(){
+    		var account= $("#loginAccount").val();
+			if(sp)
+			{
+				sp.heartBeat(account);
+			}
+    	}
+
+    	/**
+    	 * 刷新未读消息提醒
+    	**/
+    	function refreshMessageTip(){
+			try{
+				sp.refreshMessageTip();
+			}
+			catch(e){  }
+
+			try{
+				execCallMessage();
+			}
+			catch(e){  }
+		}
+
+		/**
+		 *
+		**/
+		window.onbeforeunload = function(){
+			try{
+				#if($account!="admin")
+				sp.destory();
+				#end
+			}
+			catch(e){  }
+
+			var n = window.event.screenX - window.screenLeft;
+			var b = n > document.documentElement.scrollWidth - 20;
+
+			if(b && window.event.clientY<0 || window.event.altKey){
+				outting = true;
+				#if($account!="admin")
+				sp.writeLog("mainWindowClose "+"点击右上角X按钮登出");
+				sp.logout($("#loginAccount").val());
+				#end
+				jQuery.ajax({
+					type: 'POST',
+					url: 'closeLogOut.html',
+					success: function(data, textStatus){
+
+					}
+				});
+				window.event.returnvalue = '';
+			}
+		}
+
+		function commandCallback(args){
+			var type = args["type"];
+			var context = args["context"];
+			switch(type)
+			{
+				case "unCall":
+					toNotPhone();
+					break;
+				case "unMsg":
+					toNotComments();
+					break;
+				case "unTalkRead":
+					toTalkNoRead();
+					break;
+				case "unSmsRead":
+					toSmsNoRead();
+					break;
+				case "unSmsSend":
+					toSmsSend();
+					break;
+				case "unMmsSend":
+					toMmsSend();
+					break;
+				case "unSmsAuditor":
+					toSmsAuditor();
+					break;
+				case "unSmsBack":
+					toSmsBack();
+					break;
+				case "unMmsAuditor":
+					toMmsAuditor();
+					break;
+				case "unMmsBack":
+					toMmsBack();
+					break;
+				case "showCust":
+					showCust(context);
+					break;
+				case "MessageNotify":
+					refreshTopBarCount(context);
+					break;
+                case "applyLoan":
+                    //refreshTopBarCount(context);
+                    break;
+			}
+		}
+
+		//刷新消息数
+		function refreshTopBarCount(jsonString)
+		{
+			try
+			{
+				var json = jQuery.parseJSON(jsonString);
+				jQuery('#messageRemind').text('(' + json["unMsg"] + ')');
+				jQuery('#callRemind').text('(' + json["unCall"] + ')');
+				jQuery('#smsReceive').text('(' + json["unSmsRead"] + ')');
+				jQuery('#taskExpiredCount').text('(' + json["unTaskPast"] + ')');
+			}
+			catch(e)
+			{
+			}
+		}
+
+		#if($account!="admin")
+		var sp = smartPhone.create();
+		var setting = { events: {onAnsweringChange:changePhoneAnswering,onCommand:commandCallback,onHeartBeat:heartBeat,onLogout:logout,onLogin:login,onUpgrade:closeMain,onTrayAppRun:phoneLoginAgain} };
+		sp.load(setting);
+		#end
+
+		var timeHandler = -1;
+
+		jQuery(function(){
+			/**
+	    	 * 退出系统
+	    	**/
+			jQuery('#logout').click(function(){
+				if(confirm('您确定要退出当前用户吗？')){
+					outting = true;
+					#if($account!="admin")
+					sp.writeLog("userLogout "+"用户点击退出系统按钮");
+					sp.logout($("#loginAccount").val());
+					#end
+					jQuery.ajax({
+						type: 'POST',
+						data:{
+                        userId:$("#userId").val()
+                        },
+						url: 'userLogOut.html',
+						success: function(data, textStatus){
+							window.location.href = 'showLogin.html?exitflag=yes';
+						}
+					});
+				}
+			});
+
+
+			dialInput('#telNum',function(){
+				if(timeHandler>=-1)clearTimeout(timeHandler);
+				timeHandler = setTimeout(function(){postSelCust();},500);
+			});
+
+			$("#telNum").bind({"keydown":function(e){
+					var key = e.keyCode || e.which;
+					if(key==13){
+						var num = jQuery('#telNum').val();
+						if(num){
+							postDial(num);
+							this.blur();
+						}
+						else{
+    						setTimeout(function(){
+                				banger.page.showMessageBox("拨打的电话号码不能为空!");
+                			},100);
+						}
+					}
+				}
+			});
+
+			/**
+			 * 拨号
+			**/
+			jQuery('#call').click(function(){
+				var num = jQuery('#telNum').val();
+				if(num){
+					postDial(num);
+				}
+				else{
+					banger.page.showMessageBox("拨打的电话号码不能为空！");
+				}
+			});
+
+			/**
+			 * 挂断
+			**/
+			jQuery('#hup').click(function(){
+				hangup();
+			});
+
+			#if($account!="admin")
+			var config = getServicePhoneConfig();
+			setup();
+			if(sp.test())setPhoneInfo(config);
+			repairPhoneAnswering();
+			#end
+
+			//taskManager.initTasks(["timerTask","sessionTask","statusTask"]);
+			taskManager.initTasks(["statusTask"]);//心跳
+			$("#telNum").focus(function(){
+				var telNum = $('#telNum').val()+"";
+				if(telNum=="")
+				{
+					jQuery.post("../record/getRecentlyTalkRecord.html?random="+Math.random()*1000000,{},
+					function(html){
+						if(html!="")
+						{
+							fn.tel(html);
+						}
+						else
+						{
+							fn.hidetel();
+						}
+					});
+				}
+				else
+				{
+					fn.hidetel();
+				}
+			})
+		});
+
+		function postSelCust()
+		{
+			var telNum = $('#telNum').val()+"";
+			if(telNum)
+			{
+				jQuery.post("../customer/getRecentlyCustomer.html?random="+Math.random()*1000000,{"telNum":telNum},
+					function(html){
+						if(html!="")
+						{
+							fn.tel(html);
+						}
+						else
+						{
+							fn.hidetel();
+						}
+				});
+			}
+			else
+			{
+				fn.hidetel();
+			}
+		}
+
+		function selPostDial(telNum,custId)
+		{
+			$("#telNum").val(telNum);
+			fn.hidetel();
+			postDial(telNum,custId);
+		}
+
+		//查看客户
+		function showCust(id)
+		{
+			tabs.add({"id":"showCust"+id, pid:'', title: "查看客户", url: "../customer/browseCustomer.html?actionType=browse&random="+Math.random()*1000000+"&crmCustomer.customerId="+id,lock:false});
+		}
+
+		//未读留言
+		function toNotComments(){
+			tabs.add({id: "42", pid: "", title: "通话记录", url: "../record/queryAllNotReadAndNotThrough.html?type=1&toType=1&random="+Math.random(), lock: false});
+		}
+		//未接电话
+		function toNotPhone(){
+			tabs.add({id: "42", pid: "", title: "通话记录", url: "../record/queryAllNotReadAndNotThrough.html?type=1&toType=2&random="+Math.random(), lock: false});
+		}
+		//未读座谈
+		function toTalkNoRead(){
+			tabs.add({id: "43", pid: "", title: "座谈记录", url: "../record/queryAllNotReadAndNotThrough.html?type=2&toType=3&random="+Math.random(), lock: false});
+		}
+		//未读短信
+		function toSmsNoRead(){
+			tabs.add({id: "131", pid: "", title: "已收短信", url: "../sms/showReceiveSmsList.html?random="+Math.random(), lock: false});
+		}
+		//已发短信
+		function toSmsSend(){
+			tabs.add({id: "133", pid: "", title: "已发短信", url: "../sms/showSendedSmsList.html?random="+Math.random(), lock: false});
+		}
+		//已发彩信
+		function toMmsSend(){
+			tabs.add({id: "142", pid: "", title: "已发彩信", url: "../mms/showSendedMmsList.html?random="+Math.random(), lock: false});
+		}
+		//待审核短信
+		function toSmsAuditor(){
+			tabs.add({id: "136", pid: "", title: "待审核短信", url: "../sms/showNeedVerifySmsList.html?random="+Math.random(), lock: false});
+		}
+		//被退回短信
+		function toSmsBack(){
+			tabs.add({id: "137", pid: "", title: "退回短信", url: "../sms/showVerifyFailSmsList.html?random="+Math.random(), lock: false});
+		}
+		//待审核彩信
+		function toMmsAuditor(){
+			tabs.add({id: "145", pid: "", title: "待审核彩信", url: "../mms/showNeedVerifyMmsList.html?random="+Math.random(), lock: false});
+		}
+		//被退回彩信
+		function toMmsBack(){
+			tabs.add({id: "146", pid: "", title: "退回彩信", url: "../mms/showVerifyFailMmsList.html?random="+Math.random(), lock: false});
+		}
+
+	  	function forbidBackSpace(e) {
+            var ev = e || window.event; //获取event对象
+            var obj = ev.target || ev.srcElement; //获取事件源
+            var t = obj.type || obj.getAttribute('type'); //获取事件源类型
+            //获取作为判断条件的事件类型
+            var vReadOnly = obj.readOnly;
+            var vDisabled = obj.disabled;
+            //处理undefined值情况
+            vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+            vDisabled = (vDisabled == undefined) ? true : vDisabled;
+            //当敲Backspace键时，事件源类型为密码或单行、多行文本的，
+            //并且readOnly属性为true或disabled属性为true的，则退格键失效
+            var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+            //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效
+            var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+            //判断
+            if (flag2 || flag1) return false;
+        }
+        //禁止后退键 作用于Firefox、Opera
+        document.onkeypress = forbidBackSpace;
+        //禁止后退键  作用于IE、Chrome
+        document.onkeydown = forbidBackSpace;
+
+		//获得iframe的window对象
+		function ExportIframeWin(tid){
+			return $('iframe', $('#body' + tid))[0].contentWindow;
+		}
+
+		//设置短信彩信余额
+		function balance(json){
+			//合计
+			jQuery('#totalBalance').text('余额：￥' + ((json.totalBalance!=null)?json.totalBalance:"0.0"));
+			//彩信
+			jQuery('.page-nav .ul-balance li:first').text('彩信：￥' + ((json.mmsBalance!=null)?json.mmsBalance:"0.0"));
+			//短信
+			jQuery('.page-nav .ul-balance li:last').text('短信：￥' + ((json.smsBalance!=null)?json.smsBalance:"0.0"));
+		}
+
+		function getServicePhoneConfig(){			//得到服务端话机配置
+			var config = {};
+			config["openTalkWin"] = ("$!phone.config.isPopUp"=="1")?true:false;			//是否打开通话窗口
+			config["autoRecord"] = ("$!phone.record.isAutoRecord"=="1")?true:false;		//自动录音
+			config["autoPlay"] = ("$!phone.record.isAutoPlay"=="1")?true:false;			//自动播放提示音
+			config["isMute"] = ("$!phone.answer.isMute"=="1")?true:false;				//是否对方留言静音
+			config["openWord"] = ("$!phone.config.isScreamWord"=="1")?true:false;		//屏幕取词
+			config["answerFileVersion"] = '$!phone.answer.fileMd5';							//答录音的文件版本
+			config["tipFileVersion"] = '$!phone.remind.fileMd5';							//来电提示音的文件版本
+			config["ringFileVersion"] = '$!phone.ring.fileMd5';								//来电铃声的文件版本
+			config["answerConfigId"] = '$!phone.answer.answerConfigId';						//答录音配置
+			config["remindConfigId"] = '$!phone.remind.recordRemindId';						//来电提示音配置
+			config["ringConfigId"] = '$!phone.ring.ringSettingId';							//来电铃声配置
+			config["flashBreakTime"] = '$!phone.config.flashBreakTime';						//闪断时间
+			config["outDelay"] = '$!phone.config.outDelay';									//
+			config["outsideCallCode"] = '$!phone.config.outsideCallCode';					//
+			config["ringCount"] = '$!phone.answer.ringCount';								//答录振铃次数
+			config["serverAddress"] = '$!phone.clusters.address';							//服务端地址
+			config["serverPort"] = '$!phone.clusters.port';									//服务端端口
+			config["transport"] = '$!phone.transport.port';									//传输端口
+			if(urlStr){
+				config["usrRef"]=urlStr;
+			}else{
+				config["usrRef"]="";
+			}
+			return config;
+		}
+
+		function phoneLoginAgain()			//托盘启动,重新登入
+		{
+			var config = getServicePhoneConfig();
+			if(sp.test())setPhoneInfo(config);
+		}
+
+		function kickAccount(){				//对没装托盘的帐号踢人
+			var account = readCookie("account");
+            var oldAccount=$("#loginAccount").val();
+			if(account){
+				if(account!=oldAccount){
+					outting = true;
+					jQuery.ajax({
+						type: 'POST',
+						data:{
+	                    userId:$("#userId").val()
+	                    },
+						url: 'closeLogOut.html?oldAccount'+account,
+						success: function(data, textStatus){
+							#if($account!="admin")
+							if(sp.test())sp.logout(account);
+							#end
+							window.location.href = 'showLogin.html?exitflag=yes';
+						}
+					});
+				}
+			}
+		}
+
+		function readCookie(name)
+		{
+		  var cookieValue = "";
+		  var search = name + "=";
+		  if(document.cookie.length > 0)
+		  {
+		      offset = document.cookie.indexOf(search);
+		      if(offset != -1)
+		      {
+		          offset += search.length;
+		          end = document.cookie.indexOf(";",offset);
+		          if(end == -1) end = document.cookie.length;
+		          cookieValue = unescape(document.cookie.substring(offset,end));
+		      }
+		  }
+		  return cookieValue;
+		}
+
+		function setup()			//软件安装
+		{
+			if(!sp.test())
+			{
+				fn.install();
+			}
+		}
+		
+		//录音播放(无备注)
+		function showAudioNoRemarkDiv(fileId){
+			jQuery.post("../data/transcoding.html?random="+Math.random(), {"fileId":fileId}, function(voidName){
+				voidName = voidName.substring(voidName.lastIndexOf("/")+1,voidName.length);
+				videoPlayer1 = jwplayer("span_Video1").setup({
+                	controls:true,
+                	controlbar: 'bottom',
+                	autostart:true,
+                	flashplayer:"../js/player/player.swf",
+                	file:"../Records/"+voidName,
+                	height:24,
+                	width:388
+                });
+    			$('#shadeLayer').show();
+    			$('#popAudioNoRemarkDiv').show();
+			});
+		}
+		
+		//无备注录音关闭
+		function closeAudioNoRemarkDiv(){
+			$('#popAudioNoRemarkDiv').hide();
+			$('#shadeLayer').hide();
+			videoPlayer1.stop();
+		}
+
+		//录音播放(有备注)
+		function showPopAudioDiv(customerName,audioDateName,fileId,id,fid,fromType){
+			$('#dataAudioRemark').val("");
+			jQuery.post("../data/transcoding.html?random="+Math.random(), {"fileId":fileId}, function(voidName){
+				voidName = voidName.substring(voidName.lastIndexOf("/")+1,voidName.length);
+				videoPlayer = jwplayer("span_Video").setup({
+                	controls:true,
+                	controlbar: 'bottom',
+                	autostart:true,
+                	flashplayer:"../js/player/player.swf",
+                	file:"../Records/"+voidName,
+                	height:24,
+                	width:388
+                });
+				jQuery.post("../data/queryDataRemark.html", {"id":id,"type":"1"}, function(obj){
+        			$('#dataAudioRemark').val(obj);
+        			$('#oldRemark').val(obj);
+    			});
+    			$('#audioCustomerName').text(customerName);
+    			$('#audioDataName').text(audioDateName);
+    			$('#audioNameTitle').attr('title',customerName + audioDateName);
+    			$('#dataFid').val(fid);
+    			$('#audioId').val(id);
+    			$('#shadeLayer').show();
+    			$('#popAudioDiv').show();
+    			$('#fromType').val(fromType);
+			});
+		}
+
+		//录音备注保存
+		function saveAudioRemark(){
+			jQuery.post("../data/saveAudioRemark.html", {"id":$('#audioId').val(),"remark":$('#dataAudioRemark').val()}, function(){
+				$('#popAudioDiv').hide();
+    			$('#shadeLayer').hide();
+				videoPlayer.stop();
+    			var win = window.top.ExportIframeWin($('#dataFid').val());
+				if($('#fromType').val() == "loan"){
+					win.changeAudioRemark($('#audioId').val(),$('#dataAudioRemark').val());
+				}else if($('#fromType').val() == "data"){
+					win.refresh();
+				}
+			});
+		}
+
+		//录音关闭并备注保存
+		function closeAudioDiv(){
+			if($('#oldRemark').val() == $('#dataAudioRemark').val()){
+				$('#popAudioDiv').hide();
+    			$('#shadeLayer').hide();
+    			videoPlayer.stop();
+			}else{
+				if(confirm("放弃修改？")){
+					$('#dataAudioRemark').val('');
+					$('#popAudioDiv').hide();
+        			$('#shadeLayer').hide();
+        			videoPlayer.stop();
+				}
+			}
+			
+		}
+
+		//视频显示
+		function showPopVideoDiv(customerName,videoDataName,result,id,fid,fromType){
+			$('#dataVideoRemark').val("");
+			jQuery.post("../data/queryDataRemark.html", {"id":id,"type":"3"}, function(obj){
+    			$('#dataVideoRemark').val(obj);
+    			$('#oldRemark').val(obj);
+			});
+			$('#shadeLayer').show();
+			$('#popVideoDiv').show();
+			$('#customerName').text(customerName);
+			$('#videoDataName').text(videoDataName);
+			$('#videoNameTitle').attr('title',customerName + videoDataName );
+			$('#dataFid').val(fid);
+			$('#videoId').val(id);
+			$('#fromType').val(fromType);
+			thePlayer = jwplayer('container').setup({
+                flashplayer: '../js/player/player.swf',
+                file: '../Records/'+result,
+                width: 640,
+                height: 480,
+                dock: false,
+				autostart:true
+            });
+		}
+
+		//视频备注保存
+		function saveVideoRemark(){
+			jQuery.post("../data/saveVideoRemark.html", {"id":$('#videoId').val(),"remark":$('#dataVideoRemark').val()}, function(){
+				$('#popVideoDiv').hide();
+    			$('#shadeLayer').hide();
+				thePlayer.stop();//停止播放
+    			var win = window.top.ExportIframeWin($('#dataFid').val());
+				if($('#fromType').val() == "loan"){
+					win.changeVideoRemark($('#videoId').val(),$('#dataVideoRemark').val());
+				}else if($('#fromType').val() == "data"){
+					win.refresh();
+				}
+			});
+		}
+
+		//关闭视频层
+		function closeVideoDiv(){
+			if($('#oldRemark').val() == $('#dataVideoRemark').val()){
+				$('#popVideoDiv').hide();
+    			$('#shadeLayer').hide();
+    			thePlayer.stop();//停止播放
+			}else{
+				if(confirm("放弃修改？")){
+					$('#popVideoDiv').hide();
+        			$('#shadeLayer').hide();
+        			thePlayer.stop();//停止播放
+				}
+			}
+		}
+		
+		
+    </script>
+</head>
+
+<body>
+	<div class="skin">
+    	<div class="skin-header"></div>
+        <div class="skin-nav"></div>
+        <div class="skin-side"></div>
+        <div class="skin-main"></div>
+    </div>
+    <div class="page">
+    	<div class="page-header">
+        	<div class="logo"><label style="font-family: 微软雅黑"><strong>移动微贷营销管理</strong>&nbsp;v2.0.0</label></div>
+        	<!--
+        	<a href="${ctx}/help/help.chm" class="help">帮助</a> -->
+        	<label class="main-complayInfo" title="杭州百航信息技术有限公司">中山农商银行</label>
+        </div>
+    	<div class="page-nav">
+			<ul class="page-nav-inner">
+            	<li class="item">
+                	<span class="bold name"><label id="un">$!userName</label></span>
+                </li>
+            	<li class="item line">
+                	<span class="blue agency"><label>$!deptName</label></span>
+                </li>
+            	<li class="item line">
+                	<span id="role" class="hand role"><label>#if($!roleNames)$!roleNames.get(0)#end</label>#if($!roleNames.size()>1)<i class="ddl">&nbsp;</i>#end</span>
+                </li>
+				#if($!hasIcon == 1)
+				<li class="item line">
+                	<span id="state" class="hand green state"><label>在线</label></span>
+                </li>
+				#end
+            	<li class="item line">
+                	<span id="logout" class="hand blue logout"><label>退出</label></span>
+                </li>
+                <li class="separator">
+                	&nbsp;
+                </li>
+				#if($!flag.equals("yes"))
+            	<li class="item">
+                	<span class="hand unread calls" id="callRemind" title="未接来电" onclick="toNotPhone()"><label>($!callRemind)</label></span>
+                </li>
+            	<li class="item">
+                	<span class="hand unread message" id="messageRemind" title="未读留言" onclick="toNotComments()"><label>($!messageRemind)</label></span>
+                </li>
+                <!--
+            	<li class="item">
+                	<span class="hand unread sms" id="smsReceive" title="未读短信" onclick="toSmsNoRead()"><label>($!smsReadRemind)</label></span>
+                </li>
+                -->
+                #end
+                <li class="separator">
+                	&nbsp;
+                </li>
+				#if($!flag.equals("yes"))
+				#end
+                    
+				#if($urlPermitUtil.hasPermission('dialPhone'))
+    				#if($account!="admin")
+                	<li class="item nop fr">
+                    	<span id="tools" class="hand blue tools" title="工具"><i class="gear">&nbsp;</i><i class="ddl">&nbsp;</i></span>
+                    </li>
+                    #end
+    			#end
+    			
+    			<li class="item" style="float:right;">
+                   <span id="flash" title="Flash插件">
+                   <a href='../flash/install_flash_player_ax.exe' target='_self' style='cursor: pointer; color: #0c0cf6; text-decoration: underline;'>Flash插件</a>
+                   </span>
+                </li>
+            </ul>
+
+			<!--role-->
+            <ul class="ul-role">
+				#foreach($item in $!roleNames)
+					#if($velocityCount>1)
+						<li><label>$!item</label></li>
+					#end
+				#end
+            </ul>
+            <!--state-->
+            <ul class="ul-state">
+            	<li class="online" rel='online'><i>&nbsp;</i><label title="在线">在线</label></li>
+                <li class="leave" rel='leave'><i>&nbsp;</i><label title="离开">离开</label></li>
+            </ul>
+            <!--balance
+            <ul class="ul-balance">
+				#if($!flag.equals("yes"))
+            	<li><label>彩信：￥$typeUtil.changeType($!mmsBalance)</label></li>
+                <li><label>短信：￥$typeUtil.changeType($!smsBalance)</label></li>
+				#end
+            </ul>
+            -->
+            <!--tools-->
+            <ul class="ul-tools">
+                <li class="c" rel="call"><i>&nbsp;</i><label title="打开通话窗口">打开通话窗口</label></li>
+                <li class="w" rel="words"><i>&nbsp;</i><label title="打开屏幕取词">打开屏幕取词</label></li>
+            </ul>
+        </div>
+        <div class="page-side">
+			<div class="extend"><!--<i>icon</i>--></div>
+        	<!--modify by wuxj 20130131-->
+        	<div id="swP" style="position: absolute; top: 0px; right:-11px;  width: 10px; height: 100%; background-color:#fff;"></div>
+			<!--modify by wuxj 20130131-->
+        	<div id="switch" class="switch">&nbsp;</div>
+			#if($urlPermitUtil.hasPermission('dialPhone'))
+                #if($!hasIcon == 1)
+    			<div id="dial" class="dial">
+                    <input type="text" id="telNum" class="text middle" focusFlag="false" />
+                    <input type="button" id="call" class="button bg1 ml middle" title="拨号" />
+                    <input type="button" id="hup" class="button bg2 ml middle" title="挂断" />
+                </div>
+				#end
+			#end
+            <div class="menu-header">
+                <label ></font>应用菜单</label>
+                <i>icon</i>
+            </div>
+            <dl id="menu" class="menu">
+
+            </dl>
+        </div>
+        <div class="page-main">
+        	<div class="x-panel">
+                <div class="x-panel-head">
+                    <div id="tabs-items-zone" class="x-panel-inner">
+                        <ul id="head" class="x-panel-inner-ul">
+
+                        </ul>
+                    </div>
+                    <div class="x-panel-bar">
+                        <div id="bar-left" class="x-panel-action x-panel-scroller-left"></div>
+                        <div id="bar-right" class="x-panel-action x-panel-scroller-right"></div>
+                        <div id="bar-fav" class="x-panel-action x-panel-action-fav"></div>
+                        <div id="bar-close" class="x-panel-action x-panel-action-close"></div>
+                    </div>
+                    <ul id="fav" class="x-panel-fav">
+
+                    </ul>
+                </div>
+                <div id="body" class="x-panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- 视频播放器 -->
+	<div id="shadeLayer" class="div-shade-layer"></div>
+    <div id="popVideoDiv" class="tapeVideo-mydiv video-mydiv">
+        <p class="tapeVideo-ttl-width">
+	        <span id="videoNameTitle" class="videoNameTitle">
+		        <label id="customerName" style="margin-right:10px;"></label>
+		        <label id="videoDataName"></label>
+	        </span>
+	        <a href="#2" onClick="closeVideoDiv();return false;" class="tapeVideoClose">close</a></p>
+        <div id="container"></div>
+        <table style="width:100%;">
+        	<tbody>
+        		<tr>
+        			<td style="width:40px;text-align:right;">备注:</td>
+        			<td style="width:600px;">
+        				<div class="ui-div-textarea" style="height:50px;">
+        					<textarea class="textarea" id="dataVideoRemark" onKeyUp="javascript:var val = this.value;if(val.length>250){this.value=val.substring(0,250)}" style="height:50px;"></textarea>
+        				</div>
+        			</td>
+        		</tr>
+        	</tbody>
+        </table>
+        <hr />
+		<div style="text-align:center; padding-bottom:5px;">
+			<span class="ui-span-btn ui-span-btn-save"  onclick="saveVideoRemark();" style="margin-right:10px;">
+				<label>保存</label>
+			</span>
+			<span onclick="closeVideoDiv();" class="ui-span-btn ui-span-btn-cancel">
+				<label>取消</label>
+			</span>
+		</div>
+    </div>
+	<!-- 有备注录音播放器 -->
+	<div id="popAudioDiv" class="tapeVideo-mydiv tape-mydiv">
+		<p class="tapeVideo-ttl-width">
+			<span id="audioNameTitle" class="tapeNameTitle">
+				<label id="audioCustomerName" style="margin-right:10px;"></label>
+				<label id="audioDataName"></label>
+			</span>
+			<a href="#2" onClick="closeAudioDiv();return false;" class="tapeVideoClose">close</a>
+		</p>
+		<div style="text-align: center;padding:5px;">
+			<label id="span_Video"></label>
+			<table class="viewtbl tt" style="width:100%; margin-top:5px;">
+				<tbody>
+					<tr>
+						<td class="field" width="60"><label>备注：</label></td>
+						<td>
+							<div class="ui-div-textarea" style="height:50px;">
+								<textarea class="textarea" style="height:50px;" id="dataAudioRemark" onKeyUp="javascript:var val = this.value;if(val.length>250){this.value=val.substring(0,250)}"></textarea>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<hr />
+			<div class="center" style="margin-bottom:5px;">
+				 <span class="ui-span-btn ui-span-btn-save" onclick="saveAudioRemark();" style="margin-right:10px;">
+                     <label>保存</label>
+                 </span>
+                 <span class="ui-span-btn ui-span-btn-cancel" onclick="closeAudioDiv();">
+                     <label>取消</label>
+                 </span>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 无备注录音播放器 -->
+	<div id="popAudioNoRemarkDiv" class="tapeVideo-mydiv tape-mydiv">
+		<p class="tapeVideo-ttl-width">
+	        <span class="tapeNameTitle"></span>
+			<a href="#2" onClick="closeAudioNoRemarkDiv();return false;" class="tapeVideoClose">close</a>
+		</p>
+		<div style="text-align:center;padding:5px;">
+			<label id="span_Video1"></label>
+			<hr />
+			<div class="center" style="margin-bottom:5px;">
+                 <span class="ui-span-btn ui-span-btn-cancel" onclick="closeAudioNoRemarkDiv();">
+                     <label>关闭</label>
+                 </span>
+			</div>
+		</div>
+	</div>
+	<input type="hidden" id="fromType"/>
+    <input type="hidden" id="audioId"/>
+	<input type="hidden" id="videoId"/>
+	<input type="hidden" id="oldRemark"/>
+	<input type="hidden" id="dataFid"/>
+    <input type="hidden" id="isPopUp" value="$!phoneConfig.isPopUp" />
+    <input type="hidden" name="loginAccount" id="loginAccount" value="$!account" />
+    <input type="hidden" name="userId" id="userId" value="$!userId"/>
+    <input type="hidden" id="pid" value="" />
+</body>
+</html>

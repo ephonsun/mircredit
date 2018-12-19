@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="pdtNotice" extends="default"
+		namespace="/pdtNotice">
+
+		<!-- 产品通知列表页面 -->
+		<!-- 展示通知列表页面 -->
+		<action name="showPdtNoticeList" class="pdtNoticeAction" method="queryPdtNoticeList">
+			<result name="success">/velocity/microProduct/showPdtNoticeList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 查询通知列表页面 -->
+		<action name="queryPdtNoticeList" class="pdtNoticeAction" method="queryPdtNoticeList">
+			<result name="success">/velocity/microProduct/pdtNoticeList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 下载通知页面 -->
+		<action name="downloadPdtNoticeAttachment" class="pdtNoticeAction" method="downloadPdtNoticeAttachment">
+		</action>
+		
+		<!-- 修改通知页面已读未读 -->
+		<action name="editPdtNoticeRead" class="pdtNoticeAction" method="editPdtNoticeRead">
+		</action>
+	</package>
+
+</struts>

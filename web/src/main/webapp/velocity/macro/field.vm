@@ -1,0 +1,208 @@
+#macro(tabOption $fields $entity $flag)				##flag 0新增编辑 1查询 2查看
+	#if($fields.size()>0)
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+		<tbody>
+	#end
+	    	#set($count = 0)
+	    	#set($index = 0)
+	    	#set($next = 0)
+	    	#set($col = 0)
+	    	#foreach($field in $fields)
+	    		#set($colSpan = $field.getColSpan($flag))
+	    		#set($next = $colSpan + $count%4)
+	    		#if($colSpan>1)
+	    			#set($col = $colSpan+1)
+	    		#else
+	    			#set($col = $colSpan)
+	    		#end
+	    		#if($count % 4 == 0)
+	    			<tr>
+	    		#elseif($next > 4)
+	    			#set($count = $count+1)
+	    			<td colSpan="2"></td>
+	    			</tr><tr>
+	    		#end
+	        	<td width="10%" class="field" style="white-space:normal;" >$!field.templateFieldName：</td>
+	        	#if($colSpan>1)
+	        		#set($tdWidth = "auto")
+	        	#else
+	        		#set($tdWidth = "15%")
+	        	#end
+	        	<td colSpan="$col" width="$tdWidth" class="wrap" >
+	        		#if($flag<2)
+	                	#ctrl($field,$entity,$flag)
+	                #else
+	                	#detail($field,$entity,$flag)
+	                #end
+	            </td>
+	        	#set($count = $count+$colSpan)
+	        	#set($index = $index+1)
+	        	#if($index == $fields.size())
+	        		#if($count % 4 != 0)
+	        			#set($lackColSpan=4-$count % 4)
+	        			<td colSpan="$!lackColSpan" >&nbsp;</td>
+	        			</tr>
+	        		#else
+	        			</tr>
+	        		#end
+	        	#end
+	        #end
+	#if($fields.size()>0)
+	    </tbody>
+	</table>
+	#end
+#end
+
+#macro(ctrl,$field,$entity,$flag)
+	#set($val=$refUtil.getPropertyStringValue($entity,$field.fieldName))
+	#if ($field.templateFieldType == 'Text')
+		#textbox($field,$val)
+	#elseif ($field.templateFieldType == 'Date')
+		#if($flag>0)
+			#datespan($field,$entity)
+		#else
+			#datebox($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'Number')
+		#if($flag>0)
+			#numspan($field,$entity)
+		#else
+			#numbox($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'TextArea')
+		#if($flag>0)
+			#textbox($field,$val)
+		#else
+			#textarea($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'Select')
+		#if($flag>0)
+			#mutlcombobox($field,$val)
+		#else
+			#combobox($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'MultipleSelect')
+		#mutlcombobox($field,$val)
+	#elseif ($field.templateFieldType == 'YesNo')
+		#checkbox($field,$val)
+	#end
+#end
+
+#macro(detail,$field,$entity,$flag)
+	#set($val=$refUtil.getPropertyStringValue($entity,$field.fieldName))
+	#if ($field.templateFieldType == 'YesNo')
+		#set($valName="")
+		#if($val.length()>0)
+			#set($valName="是")
+		#else
+			#set($valName="否")
+		#end
+		#label($field,$valName)
+	#else
+		#label($field,$val)
+	#end
+#end
+
+#macro(label,$field,$val)
+<label id="$!field.fieldName" name="exField.$!field.fieldName">$val</label><label>$!field.measurement</label>
+#end
+
+#macro(textbox,$field,$val)
+<div class="dtxt1">
+    <input type="text" name="exField.$!field.fieldName" id="$!field.fieldName" class="dtxt1-txt" value="$val" maxLength="20" />
+</div>
+#end
+
+#macro(datebox,$field,$val)
+<div class="dtxt2">
+	<input type="text" name="exField.$!field.fieldName" id="$!field.fieldName" readonly="true" value="$val" maxLength="10" class="validate[custom[date]] dtxt2-txt" dateFlag="true" />
+    <i class="dtxt2-date">&nbsp;</i>
+</div>
+#end
+
+#macro(datespan,$field,$entity)
+<table class="celltbl">
+	<tr>
+		<td width="120">
+			<div class="dtxt2">
+            	<input type="text" name="exField.$!field.fieldName" id="$!field.fieldName" readonly="true" value="$!refUtil.getPropertyStringValue($entity,$field.fieldName)" maxLength="10" class="validate[custom[date]] dtxt2-txt" dateFlag="true" />
+                <i class="dtxt2-date">&nbsp;</i>
+            </div>
+		</td>
+		<td width="20"><label>-</label></td>
+		<td width="120">
+			<div class="dtxt2">
+            	<input type="text" name="exField.$!field.fieldNameEnd" id="$!field.fieldNameEnd" readonly="true" value="$!refUtil.getPropertyStringValue($entity,$field.fieldNameEnd)" maxLength="10" class="validate[custom[date]] dtxt2-txt" dateFlag="true" />
+                <i class="dtxt2-date">&nbsp;</i>
+            </div>
+		</td>
+	</tr>
+</table>
+#end
+
+#macro(checkbox,$field,$val)
+#if($val.length()>0)
+	#set($checkedStr = "CHECKED")
+#else
+	#set($checkedStr = "")
+#end
+<input type="checkbox" $checkedStr name="exField.$!field.fieldName" value="yes" id="$!field.fieldName" class="chk" />
+#end
+
+#macro(numbox,$field,$val)
+<input type="text" name="exField.$!field.fieldName" maxLength="19" value="$val" id="$!field.fieldName" floatFlag="true" class="txt" style="width: 100px;" />
+$!field.measurement
+#end
+
+#macro(numspan,$field,$entity)
+<table class="celltbl">
+	<tr>
+		<td width="120">
+			<div class="dtxt1">
+				<input type="text" name="exField.$!field.fieldName" id="$!field.fieldName" class="dtxt1-txt" style="top:0; left:0;" value="$!refUtil.getPropertyStringValue($entity,$field.fieldName)" maxLength="19" floatFlag="true" />
+            </div>
+		</td>
+		<td width="20"><label>-</label></td>
+		<td width="120">
+			<div class="dtxt1">
+				<input type="text" name="exField.$!field.fieldNameEnd" id="$!field.fieldNameEnd" class="dtxt1-txt" style="top:0; left:0;" value="$!refUtil.getPropertyStringValue($entity,$field.fieldNameEnd)" maxLength="19" floatFlag="true" />
+            </div>
+		</td>
+		<td><label style="padding-left:5px;">$!field.measurement</label></td>
+	</tr>
+</table>
+#end
+
+#macro(textarea,$field,$val)
+<div class="dtxtarea1">
+	<textarea name="exField.$!field.fieldName" id="$!field.fieldName" class="txtarea" maxLength="400">$val</textarea>
+</div>
+#end
+
+#macro(combobox,$field,$val)
+<select name="exField.$!field.fieldName" id="$!field.fieldName">
+    <option value=""></option>
+    #foreach($code in $field.codes)
+    	#if($code.fieldCodeDataValue==$val)
+    		<option value="$code.fieldCodeDataKey" selected="selected">$code.fieldCodeDataValue</option>
+    	#else
+    		<option value="$code.fieldCodeDataKey">$code.fieldCodeDataValue</option>
+    	#end
+    #end
+</select>
+#end
+
+#macro(mutlcombobox,$field,$val)
+#set($codes = "")
+#foreach($code in $field.codes)
+	#if($codes == "")
+		#set($codes = $code.fieldCodeDataKey)
+	#else
+		#set($codes = $codes+","+$code.fieldCodeDataKey)
+	#end
+#end
+<div class="dtxt2" comboFlag="true" codes="$codes">
+	<input type="text" name="exField.$!field.fieldName" value="$val" readOnly="true" id="$!field.fieldName" class="dtxt2-txt" data-prompt-position="centerRight" />
+    <span class="dtxt2-ddl">ddl</span>
+</div>
+#end

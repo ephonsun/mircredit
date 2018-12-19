@@ -1,0 +1,111 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看拜访记录</title>
+
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	jQuery(document).ready(function(){
+		//initTask();
+    	});
+    	
+		 function initTask(){
+			jQuery.post('../visitRecord/initNextContextTask.html?random='+Math.random(),{
+				'customer.customerId':$!visitRecordInfo.customerId,
+				'task.isDel':0
+			},function(result){
+				if(result!=undefined&&result!=""){
+    				var res=result.split(",");
+    				$('#taskId').val(res[0]);
+    				$('#excDate').text(res[1]);
+    				if(res[2]==0){
+    					$('#finish').text("[未完成]");
+    				}else{
+    					$('#finish').text("[已完成]");
+    				}
+    				if(res[3]==1){
+						$("#nextContactId").attr("checked",true);
+    					$("#spa").show();
+    				}
+    			}else{
+    				$("#spa").hide();
+    			}
+			});
+		}
+		
+		function toUpdate(recordId){
+			var options = {id: "record_writeConnect"+recordId, pid: GetId(), title: "编辑拜访记录", url: "../record/queryRecordConnect.html?type=$!type&calltype=visit&recordId="+recordId+"&random="+Math.random(), lock: false};
+    		tab.add(options);
+	    }
+	</script>
+</head>
+<body>
+	<div style="text-align: right;">
+		#if($urlPermitUtil.hasPermission('recordWriteConnect'))
+			<a href="#2" onclick="toUpdate($!visitRecordInfo.recordInfoId)">编辑</a>
+		#end
+    </div>
+	
+	<input type="hidden" name="visitRecord.recordInfoId" value="$!visitRecordInfo.recordInfoId"></input>
+	
+	<table style="margin-top: 10px;" class="viewtbl" cellpadding="2" cellspacing="2">
+    	<tbody>
+        	<tr>
+            	<td width="66" height="30" align="right">
+            		客户姓名：
+            	</td>
+				<td>
+					<label>$!visitRecordInfo.customerName</label>
+				</td>
+            </tr>
+			<tr>
+            	<td width="66" height="30" align="right">
+            		拜访时间：
+            	</td>
+				<td>
+					<label>$date.format("yyyy-MM-dd HH:mm:ss",$!visitRecordInfo.startDate)</label>
+				</td>
+            </tr>
+			<tr>
+            	<td width="66" height="30" align="right">
+            		沟通进度：
+            	</td>
+				<td>
+					<label>$!visitRecordInfo.commProgressName</label>
+                </td>
+            </tr>
+			<tr>
+            	<td width="66" height="30" align="right">
+            		拜访备注：
+            	</td>
+				<td>
+					<label>$!visitRecordInfo.remark</label>
+                </td>
+            </tr>
+            <tr>
+            	<td width="66" height="30" align="right" nowrap="nowrap"></td>
+            	<td>
+                    <span id="spa" style="display:none;">
+						与<span class="blue">$!customerName</span>客户拜访确认下次联系 <span class="blue" id="finish"></span> <span id="excDate"></span>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+            	<td colspan="2" align="center">
+                	<input type="button" value="关 闭" class="btn6 btn6bg3" onclick="tab.close(GetId(),false);"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+

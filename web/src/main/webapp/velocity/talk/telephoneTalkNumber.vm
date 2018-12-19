@@ -1,0 +1,66 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>选择号码</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <style type="text/css">
+		div.prompt { margin-bottom: 15px; line-height: 24px; font-size: 14px; }
+    	div.item { margin: 5px 0px; }
+		ul li { margin: 5px 0px; }
+    </style>
+    
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript">
+    
+	    jQuery(document).ready(function(){
+			$("#custName").text(window.dialogArguments.custName);
+		});
+		
+    	function change()
+    	{
+    		var type = $("input[type$='radio']:checked").val();
+    		window.returnValue=type;
+			window.close();
+    	}
+    	
+    </script>
+</head>
+
+<body>
+	<div class="prompt">
+    	“<label id="custName"></label>”客户无此联系号码，是否替换现有号码并关联通话记录？
+    </div>
+    <ul>
+    	#if($isMobile>0)
+	    	<li>
+	        	<input type="radio" class="rdo" checked value=1 name="phoneNum" />
+	        	<label>手机一: </label><label id="phone1">$!crmCustomer.mobilePhone1</label>
+	        </li>
+	    	<li>
+	        	<input type="radio" class="rdo" value=2 name="phoneNum" />
+	        	<label>手机二: </label><label id="phone2">$!crmCustomer.mobilePhone2</label>
+	        </li>
+	    #else
+	    	<li>
+	        	<input type="radio" class="rdo" checked value=3 name="phoneNum" />
+	        	<label>固话: </label><label id="tel">$!crmCustomer.phone</label>
+	        </li>
+	    	<li>
+	        	<input type="radio" class="rdo" value=4 name="phoneNum" />
+	        	<label>传真: </label><label id="fax">$!crmCustomer.fax</label>
+	        </li>
+	    #end
+    </ul>
+    <hr />
+    <div class="halign">
+    	<input type="button" onclick="javascript:change()" class="btn6 btn6bg1" value="替换" />
+    	<input type="button" onclick="window.close()" class="btn6 btn6bg3" value="取消" />
+    </div>
+</body>
+</html>

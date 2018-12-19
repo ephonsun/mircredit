@@ -1,0 +1,138 @@
+<script type="text/javascript">
+$(function(){
+	  $('.dateonlypicker').datetimeReset({
+         showTimepicker: false
+      });
+      //收起和展开
+      $('.padInfo-tuck .tuckAndspread').click(function(){
+          if($(this).hasClass('tuckup')){
+             $(this).addClass('spread');
+             $(this).removeClass('tuckup');
+             $(this).parent().prev('.moreInfo').show();
+             $(this).prev('a').html('收起');
+          }else{
+            $(this).addClass('tuckup');
+            $(this).removeClass('spread');
+            $(this).parent().prev('.moreInfo').hide();
+            $(this).prev('a').html('更多');
+          }
+      });
+      $('.padInfo-tuck a').click(function(){
+        $(this).next('.tuckAndspread').trigger('click');
+      });
+      //收起和展开
+});
+</script>
+<table class="htmltbl">
+    <tbody>
+        <tr>
+            <td class="field" width="8%">
+                <label>日期:</label>
+            </td>
+            <td>
+                <table class="celltbl">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="ui-div-text" style="width: 150px;">
+                                    <input type="text" class="text dateonlypicker" id="startDate" value="$!startDate"/>
+                                    <i class="date"></i>
+                                </div>
+                            </td>
+                            <td width="20"><label style="width: 20px;">-</label></td>
+                            <td>
+                                <div class="ui-div-text" style="width: 150px;">
+                                    <input type="text" class="text dateonlypicker" id="endDate" value="$!endDate"/>
+                                    <i class="date"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+    <input type="button" class="ui-input-btn" value="清空" onclick="clearLog();"/>
+    <input type="button" class="ui-input-btn" value="搜索" onclick="searchLog();"/>
+</div>
+
+<div class="action-bar">
+    <span class="ui-span-btn fr" onclick="refreshLog();">
+        <label>刷新</label>
+    </span>
+</div>
+<table class="datatbl">
+    <thead>
+        <tr>
+            <th width="15%">日期</th>
+            <th class="mwh">操作用户</th>
+            <th class="mwh">类型</th>
+            <th class="mwh">日期</th>
+            <th width="15%">当日上传总量</th>
+            <th width="15%">当日下载总量</th>
+        </tr>
+    </thead>
+    <tbody>
+    	#foreach($pad in $!padBean)
+    	#set($padDate="$!date.format('yyyy-MM-dd',$!pad.loginDate)")
+    	#set($m=0)
+        <tr>
+            <td>$!date.format('yyyy-MM-dd',$!pad.loginDate)</td>
+            <td colspan="3" class="td-mycell">
+                <table class="mycelltbl" cellpadding="0" cellspacing="0">
+                	#foreach($log in $!logBean)
+	                	#set($loginDate="$!date.format('yyyy-MM-dd',$!log.loginDate)")
+	                	#set($result=$!dateString.DateComparison("$padDate","$loginDate"))
+	                	#if($result==0)
+	                	#set($m=$m + 1)
+	                	#if($m<=3)
+		                    <tr>
+		                        <td><label  class="mw">$!log.userName</label></td>
+		                        <td><label  class="mw">
+		                        	#if($!log.logType==1)
+		                        		登录
+		                        	#else
+		                        		登出
+		                        	#end
+		                        </label></td>
+		                        <td><label  class="mw">$!date.format('yyyy-MM-dd HH:mm:ss',$!log.loginDate)</label></td>
+		                    </tr>
+		                #end
+	                    #end
+                    #end
+                </table>
+                #set($m=0)
+                <table class="mycelltbl moreInfo" cellpadding="0" cellspacing="0">
+                    #foreach($log in $!logBean)
+	                	#set($loginDate="$!date.format('yyyy-MM-dd',$!log.loginDate)")
+	                	#set($result=$!dateString.DateComparison("$padDate","$loginDate"))
+	                	#if($result==0)
+	                	#set($m=$m + 1)
+	                	#if($m>3)
+		                    <tr>
+		                        <td><label  class="mw">$!log.userName</label></td>
+		                        <td><label  class="mw">
+		                        	#if($!log.logType==1)
+		                        		登录
+		                        	#else
+		                        		登出
+		                        	#end
+		                        </label></td>
+		                        <td><label  class="mw">$!date.format('yyyy-MM-dd HH:mm:ss',$!log.loginDate)</label></td>
+		                    </tr>
+		                #end
+	                    #end
+                    #end
+                </table>
+                #if($m>3)
+                <p class="padInfo-tuck"><a>更多</a><span class="tuckAndspread tuckup"></span></p>
+                #end
+            </td>
+            <td>$!dateString.PadFormetFileSize("$!pad.countUpload")</td>
+            <td>$!dateString.PadFormetFileSize("$!pad.countDownLoad")</td>
+        </tr>
+        #end
+    </tbody>
+</table>

@@ -1,0 +1,201 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>产品销售明细统计</title>
+    
+	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<style type="text/css">
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+	</style>
+	<style type="text/css" media="print"> 
+        .Noprint{ display:none; }
+        .PageNext{ page-break-after:always; }
+		.NOPRINT { font-size:9pt; font-family:'宋体'; }
+        .tdp { border-bottom:1px solid #000; border-left:1px solid #000; border-right:1px solid #fff; border-top:1px solid #fff; } 
+        .tabp { border-width:2px 2px 1px 1px; border-style: solid; border-color: #000 #000 #000 #000; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="../../js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="../../js/report/install_lodop64.exe"></embed>
+	</object> 
+    <script type="text/javascript">
+	var oldJson;
+	$(document).ready(function(){
+		$('#form1').validator();
+		$("#query").click(function(){
+    		queryReport();
+    	});
+    	$("#export").click(function(){
+    		exportReport();
+    	});
+    	$("#print").click(function(){
+    		openPrintPage();
+    	});
+		
+		$('#schtxt').dfilter({
+		url: '../report/initFindProductByNo.html',
+    		data: params,
+    		thead: [
+    			{ text : '产品编号', field : 'productCode', width : 80, align : 'center' },
+    			{ text : '产品名称', field : 'productName', width : 150, align : 'center' }
+    		],
+    		click: click
+		});
+	});
+		
+	function params(){
+		return 'productName=' + $('#productName').val();
+	}
+
+	
+	function click(node){
+		$('#productName').val(node['productName']);
+		$('#productCode').val(node['productCode']);
+	}
+	
+	//查询报表
+    function queryReport()
+    {
+		var bool = jQuery.validator({ form: 'form1', extend: false});
+    	if(!bool){
+    		return;
+    	}
+		$('#pCode').val($('#productCode').val());
+		$('#pName').val($('#productName').val());
+    	jQuery.post("showBuyProductReport.html?random="+Math.random()*1000000,{"productCode": $('#productCode').val(), "productName":  $('#productName').val()},
+    		function(html){
+    			refreshReport(html);
+    	});
+    }
+	
+	function refreshReport(html)
+    {
+    	var elem = $(html);
+    	var grid = $("#reportBody");
+    	grid[0].innerHTML="";
+    	grid.append(elem);
+    }
+	
+	function exportReport(html)
+    {
+		var bool = jQuery.validator({ form: 'form1', extend: false});
+    	if(!bool){
+    		return;
+    	}
+		location.href="exportProductReport.html?random="+Math.random()*1000000+"&pCode="+encodeURI(encodeURI($('#productCode').val()))+"&pName="+encodeURI(encodeURI($('#productName').val()));
+    }
+	
+	function CheckIsInstall() {	
+    	var bool = true;
+    	try{
+    	     var LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+    		if ((LODOP==null)||(typeof(LODOP.VERSION)=="undefined")||(typeof(LODOP.VERSION)=="unknown")) 
+    			bool = false;
+    	 }catch(err){
+    		bool = false;
+    	 }
+    	 return bool;
+    }
+
+	
+	function openPrintPage()
+    {
+		var bool = jQuery.validator({ form: 'form1', extend: false});
+    	if(!bool){
+    		return;
+    	}
+    	if(CheckIsInstall()){
+			prn1_preview();
+    	}else{
+    		//动态生成一个div 下载框
+        	if (navigator.userAgent.indexOf('Win64')>=0){
+        		path = '${ctx}/js/report/install_lodop64.exe';
+        	}else{
+        		path = '${ctx}/js/report/install_lodop32.exe';
+        	}
+    		loadPrintActiveX();
+    	}
+    }
+	
+     //打印预览支持控件路径
+    var path = '';
+    
+    function loadPrintActiveX(){
+    	var installHTML = '<div class=\'ui-model-install\'>'
+    				+ '<h4 style=\'\'>请安装安全报表打印控件，已保证打印预览正常使用！</h4>'
+    				+ '<p style=\'\'><label>控件安装完成后，请重启浏览器！</label></p>'
+    				+ '<div style=\'\'><a href=\'' + path + '\' target=\'_self\'>立即下载</a></div>'
+    				+ '</div>';
+    	art.dialog({
+    		id: 'loadPrintActiveX',
+    		title: '安全报表打印控件下载',
+    		content: installHTML
+    	});
+    }
+    
+    function prn1_preview() {	
+    	CreateOneFormPage();	
+    	LODOP.PREVIEW();	
+    };
+    	
+    function CreateOneFormPage(){
+    	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+    	var strStyleCSS="#parse('/velocity/taglibs.vm')"
+    		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/base.css' />"
+    		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/common.css' />";
+    	var strFormHtml=strStyleCSS+"<body>"+document.getElementById("reportBody").innerHTML+"</body>";
+    		
+    	LODOP.PRINT_INIT("");
+    	LODOP.SET_PRINT_PAGESIZE(2,0,0,"A4");
+    	LODOP.ADD_PRINT_HTM(20,0,"100%","100%",strFormHtml);
+    };
+
+    </script>
+</head>
+ 
+<body>
+	<form id="form1" method="post">
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">产品编号：</label>
+                <div class="dtxt1 fl" style="width: 150px;">
+                    <input type="text" class="dtxt1-txt" id="productCode"/>
+					<input type="hidden" id="pCode"/>
+					<input type="hidden" id="pName"/>
+                </div>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field"><label class="red">*</label>产品名称：</label>
+                <div class="dtxt1 fl" style="width: 150px;" id="schtxt">
+                    <input type="text" class="dtxt1-txt" id="productName" rule="\S" tips="“产品名称”必须填写"/>
+                </div>
+            </div>
+        </div>
+        <div class="sz">
+            <input type="button" id="query" class="btn1" value="搜 索" />
+			#if($urlPermitUtil.hasPermission('exportAddCustomerReport'))
+				<input type="button" id="export" class="btn1" value="导 出" />
+			#end
+			#if($urlPermitUtil.hasPermission('getAddCustomerReportPrint'))
+				<input type="button" id="print" class="btn1" value="打 印" />
+			#end
+        </div>
+    </form>
+    
+    <div class="recenter" id="reportBody">
+    </div>
+</body>
+</html>
+

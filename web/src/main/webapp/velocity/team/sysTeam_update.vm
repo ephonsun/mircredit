@@ -1,0 +1,157 @@
+﻿﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>新建团队</title>
+    #styleLink("base")
+    <style type="text/css">
+        .htmltbl {
+            font-size: 12px;
+        }
+    </style>
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+</head>
+<script type="text/javascript">
+	//删除
+		function delById(userId,teamId,teamName){
+		if(confirm("您确定要删除吗？")){
+				jQuery.post('validateDelTeamUser.html',
+							{'sysTeamUser.userId':userId,'sysTeamUser.teamId':teamId,'sysTeam.teamName':teamName},
+							function(data){
+            					if(data.length>0){
+									banger.page.showMessageBox(data);
+            						return ;
+            					}
+            				tab.close(GetId(),true);	
+    						//tab.add({id: "systeam_update"+teamId, pid: GetId(), title: "编辑团队-"+teamName, url: "../team/updateSysTeam.html?flag=1&sysTeam.teamId="+teamId+"&sysTeamUser.teamName="+teamName+"&random="+Math.random(), lock: false});
+            				});
+			}
+		}
+		
+		
+		
+		//打开页卡
+		function addTab(flag,roleId,roleName){
+		
+			tab.close(GetId(),false);
+			tab.add({id: "systeam_insert"+roleId, pid: GetId(), title: "成员库", url: "../team/showDeptList.html?userIds="+$("#userIds").val()+"&sysTeamUser.teamUserId="+$("#teamUserId").val(), lock: false});
+		}
+    var setting = {
+        check: {
+            enable: true,
+            chkStyle: "checkbox",
+            chkboxType: { "Y": "ps", "N": "ps" }
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        view: {
+            showIcon: false
+        }
+    };
+
+	function checkUnique(obj) {
+        if (obj.value == "") obj.tips = obj.tipworn;
+    }
+
+    //添加角色
+    function addRole(flag) {
+       var teamName = $("#teamName").val();
+		var userIds2 = $("#userIds").val();
+        if (teamName=="") {
+			alert("团队名不能为空");
+            return false;
+        }
+        var team_name = "";
+        jQuery.ajax({
+            type: 'post',
+            url: 'validateTeam.html',
+            data: {'sysTeam.teamName': $('#teamName').val().replace(/(^\s*)|(\s*$)/g,""),'sysTeam.teamId':$('#teamId').val()},
+            cache: false,
+            async: false,
+            success: function (data) {
+                var json = jQuery.parseJSON(data);
+                if (json['team_name']) team_name = json['team_name'];
+                if (team_name != "") {
+                    $('#d1').addClass('v-fails');
+                    $('#teamName').attr('tips', team_name);
+                } else {
+                    $('#d1').removeClass('v-fails');
+                }
+				jQuery.post('saveSysTeamUser.html',
+						{'userIds':$("#userIds").val(),'teamName':teamName,'sysTeam.teamId':$("#teamId").val()},
+						function(data){
+            				if(data.length>0){
+								banger.page.showMessageBox(data);
+            					return;
+            				}
+            			tab.close(GetId(),true);	
+            	});
+            }
+        });
+    }
+
+ 
+    
+</script>
+<body>
+<form id="roleForm" name="roleForm" action="updateSysTeam.html" method="post">
+    <input type="hidden" name="saveFlag" id="saveFlag"/>
+    <input type="hidden" id="funcIds" name="funcIds"/>
+    <input type="hidden" id="menuIds" name="menuIds"/>
+    <input type="hidden" id="dataIds" name="dataIds"/>
+	<input type="hidden" value="$!userIds" id="userIds" name="userIds">
+	<input type="hidden" value="$!sysTeam.teamId" id="teamId" name="sysTeam.teamId">
+	<input type="hidden" value="$!sysTeamUser.teamUserId" id="teamUserId" name="sysTeamUser.teamUserId">
+    <table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td width="80" class="field">
+                <span class="red">*</span>
+                <label>团队名称：</label>
+            </td>
+            <td>
+                <div id="d1" class="dtxt1" style="width: 120px;">
+                    <input type="text" class="dtxt1-txt" id="teamName" name="sysTeam.teamName" value="$!sysTeam.teamName" maxLength="20" rule="\S"
+                           onkeyup="checkUnique(this)" tips="“团队名称”必须填写" tipworn='“团队名称”必须填写'/>
+				</div>
+				 <input type="button" value="添加团队成员" onclick="addTab('save','1','2')" class="btn5"/>
+                <input type="text" style="display:none">
+				
+            </td>  
+			<td>
+			
+            </td>
+        </tr>
+        <tr>
+            <td width="80" class="field">
+                <label>成员列表：</label>
+            </td>
+            <td>
+				 <div id="deptGrid">
+        			#parse("/velocity/team/deptTeamUserList.vm")
+                  </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<div style="margin-top: 20px; text-align: center;">
+    <input type="button" value="保 存" onclick="addRole('update')" class="btn5 btn5bg1"/>
+    <input type="button" value="取 消" onclick="tab.close(GetId(),false);" class="btn5 btn5bg3"/>
+</div>
+</body>
+</html>

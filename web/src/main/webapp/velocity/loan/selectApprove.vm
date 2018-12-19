@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>选择审批人</title>
+
+        <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+        <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+
+        <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+        <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+        <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+        <script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+        <script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+        <script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+        <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+
+        <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+        <script type="text/javascript">
+            window.returnValue="";
+            var returnval="";
+
+            function checkSpr(uid){
+                returnval=uid.id;
+                var trs=uid.parentElement.childNodes;
+                for(x in trs){
+                    if(trs[x].nodeName!="TR")
+                        continue;
+                    trs[x].style.backgroundColor="";
+                }
+                uid.style.backgroundColor="#FAFAD2";
+            }
+            function ok(){
+                if(returnval==""||returnval.length<=0){
+                    alert("请选择审批人！");
+                }
+                window.returnValue=returnval;
+                window.close();
+            }
+        </script>
+    </head>
+    <body>
+        <table>
+            <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <div style="width: 388px;">
+                            <div>
+                                <table>
+                                    <tr>
+                                        <th width="180"><label>姓名</label></th>
+                                        <th width="180"><label>用户名</label></th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <hr />
+                            <div id="tablelist">
+                                <table>
+                                    <tbody>
+                                        #foreach($spUser in $spUserList)
+                                        <tr id="$spUser.userId" onclick="checkSpr(this)">
+                                            <td width="180" align="center" height="20" ><label>$spUser.userName</label></td>
+                                            <td width="180" align="center" height="20"><label>$spUser.account</label></td>
+                                        </tr>
+                                        #end
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
+        <div align="center">
+            <input type="button"  value="确定" style="background-color:lightblue;width: 60px;height:30px" onclick="ok()"/>
+            <input type="button"  value="取消"  style="width: 60px;height: 30px" onclick="javascript:window.close()"/>
+        </div>
+    </body>
+</html>

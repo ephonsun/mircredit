@@ -1,0 +1,183 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加损益</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style tyle="text/css">
+		html, body{ overflow:hidden !important; }
+	</style>
+    #scriptLink("core")
+    #scriptLink("page")
+	
+	
+   
+  
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+ 	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+
+   <script type="text/javascript">
+     jQuery(document).ready(function () {
+	 	maxTextArea("textarea[maxlength]");
+		fixedCost()
+		  jQuery('#asset').validator();
+			jQuery("#btnOk").click(function () {
+              
+                var bool = jQuery.validator({form:'asset',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+				
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",
+					 async: false,
+                    url: "${ctx}/loan/insertXfDetail.html",
+                    data: $("#asset").serialize(),
+                    success: function (data) {
+						var json = eval( "(" + data + ")" );
+						if(json.success){
+							window.close();
+						 window.returnValue="success";
+						}else{
+						
+							alert("添加败");
+						}
+                    }
+                });
+            });
+
+        });
+			  //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+		
+		function fixedCost(obj){
+			
+			//当项目为固定成本时，项目细分也是下拉框
+			if($("#itemId").val()=="174"){
+				xfItemName("")
+				$("#itemDetailName").blur();
+				$("#itemDetailName").hide()
+			    $("#itemDetailId").show()
+				$("#itemDetailId").attr("disabled",null);
+				
+				
+			}else{
+			
+				$("#itemDetailName").show()
+			    $("#itemDetailId").hide()
+				$("#itemDetailId").attr("disabled","disabled");
+				//$("#itemDetailName").attr("rule","\S");
+			}
+		
+		}
+		
+		//项细分赋name值
+		         
+		function xfItemName(){
+			//alert("fdfd")
+			var name=$("#itemDetailId option:selected").text()
+			//alert(name)
+			$("#itemDetailName").val(name)
+				
+		}
+     </script>	 
+    
+</head>
+
+<body style="height:520px;">
+  <form id="asset" method="post">
+  	 <input type="hidden" value="$!loanProfitandlossId" id="loanProfitandlossId" name="lnLoanProfitandlossXfDetail.loanProfitandlossId">
+	 <input type="hidden" value="$!asset.profitandlossJyDetailId" id="profitandlossJyDetailId" name="lnLoanProfitandlossXfDetail.profitandlossJyDetailId">
+      <table class="htmltbl" style="table-layout:auto;width:100%">
+          <tbody>
+             <tr>
+                  <td class="field" width="8%">
+                      <label>项目：</label>
+                  </td>
+                  <td >
+				  <div class="ui-div-text">
+                      <select style="width:100%" id="itemId"  class="text" name="lnLoanProfitandlossXfDetail.itemId" onchange="fixedCost(this)">
+                    
+                    	#foreach($dic in $!dictionary)
+                    	
+                    		#if($!dic.loanInfoDictionaryId==$!asset.itemId)
+                    		<option value="$!dic.loanInfoDictionaryId" selected>$!dic.dictionaryValue</option>
+                    		#else
+								<option value="$!dic.loanInfoDictionaryId" >$!dic.dictionaryValue</option>
+                    		#end
+                    	#end
+                      </select>
+					  </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>                  
+                      <label>项目细分：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text">
+                          <input type="text"  id="itemDetailName" rule="\S" maxlength="20" tips='"项目细分"为必填项'  name="lnLoanProfitandlossXfDetail.itemDetailName" value="$!asset.itemDetailName" class="text" />
+						
+						<select style="width:100%;display: none;" class="text" disabled="disabled" id="itemDetailId" name="lnLoanProfitandlossXfDetail.itemDetailId"  onchange="xfItemName()">
+                    
+                    	#foreach($dic in $!dictionaryItem)
+                    	
+                    		#if($!dic.loanInfoDictionaryId==$!asset.itemDetailId)
+                    		<option value="$!dic.loanInfoDictionaryId" selected>$!dic.dictionaryValue</option>
+                    		#else
+								<option value="$!dic.loanInfoDictionaryId" >$!dic.dictionaryValue</option>
+                    		#end
+                    	#end
+                      </select>
+					 </div>
+					  
+                  </td>              
+              </tr>
+              <tr>
+                  <td class="field" width="8%" >
+                      <label>上年度：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text"  name="lnLoanProfitandlossXfDetail.priorYear" maxlength="15" value="$!asset.priorYear"   rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"/>
+                      </div>
+                  </td>              
+              </tr>
+               <tr>
+                  <td class="field" width="8%" >
+                      <label>本年度：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text" maxlength="15"  name="lnLoanProfitandlossXfDetail.currentYear" value="$!asset.currentYear"  rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"/>
+                      </div>
+                  </td>              
+              </tr
+			  <tr>
+                  <td class="field" width="8%" valign="top">
+                      <label>备注：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-textarea" style="height: 100px;">
+                          <textarea class="textarea" name="lnLoanProfitandlossXfDetail.note"    style="height: 100px; _height:100px;"  maxlength="150">$!asset.note</textarea>
+                      </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table> 
+    </form> 
+   <hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="loanTypeSub" extends="default" namespace="/typeSub">
+
+		<!-- 所有贷款类型子类型 -->
+		<action name="typeSubList" class="typeSubAction" method="typeSubList">
+			<result name="success">/velocity/loan/loanSubTypes.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 单个删除贷款类型子类型（伪删除） -->
+		<action name="delLoanTypeSub" class="typeSubAction" method="delLoanTypeSub">
+			<result name="success" type="redirectAction">../typeSub/typeSubList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到更新贷款类型子类型 -->
+		<action name="toUpdatePage" class="typeSubAction" method="toUpdatePage">
+			<result name="success">/velocity/loan/updateLoanSubType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 新建贷款类型子类型 -->
+		<action name="insLoanTypeSub" class="typeSubAction" method="insLoanTypeSub">
+		   <result name="success">/velocity/loan/loanSubTypesTable.vm</result>
+		</action>
+
+		<!--更新贷款类型子类型 -->
+		<action name="updLoanTypeSub" class="typeSubAction" method="updLoanTypeSub">
+		</action>
+
+		<!--移动 -->
+		<action name="upOrDown" class="typeSubAction" method="upOrDown">
+            <result name="success">/velocity/loan/loanSubTypesTable.vm</result>
+		</action>
+
+		<!-- 验证撤销类型是否已存在 -->
+		<action name="exsLoanTypeSub" class="typeSubAction" method="exsLoanTypeSub">
+		</action>
+        
+       <!-- 通过贷款类型查看贷款子类型 -->
+		<action name="typeSelSubList" class="typeSubAction" method="typeSelSubList">
+			<result name="success">/velocity/loan/loanSubTypesTable.vm</result>
+		</action>
+
+		<!-- 通过贷款类型选择贷款子类型 -->
+		<action name="typeSelSubSelect" class="typeSubAction" method="typeSelSubSelect">
+			<result name="success">/velocity/loan/loanSubTypesSelect.vm</result>
+		</action>
+	</package>
+
+
+</struts>

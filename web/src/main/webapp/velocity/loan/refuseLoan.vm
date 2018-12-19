@@ -1,0 +1,123 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>$!title</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+	      body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script >
+		$(function(){
+		
+			
+			$("input[name='refuseReasonSubTypeId']").change(function(){
+				var targetValue = $(this).attr("target-value");
+				if(targetValue == "其他原因"){
+					$("#refuseContentDiv").show();
+				}else{
+					$("#refuseContentDiv").hide();
+				}
+			});
+		
+		
+			$("#submit").click(function(){
+				var refuseReasonSubTypeId = $("input[name='refuseReasonSubTypeId']:checked").val();
+				var targetValue = $("input[name='refuseReasonSubTypeId']:checked").attr("target-value");
+				var refuseContent = $("#refuseContent").val();
+				if(targetValue == "其他原因"){
+					if(refuseContent == ""){
+						alert("请输入拒绝其他原因！");
+						return;
+					}
+				}
+				
+				var loanId = $("#loanId").val();
+				var refuseReasonTypeId = $("#refuseReasonTypeId").val();
+				var postJson = {};
+				postJson['refuseReasonSubTypeId'] = refuseReasonSubTypeId;
+				postJson['refuseContent'] = refuseContent;
+				postJson['loanId'] = loanId;
+				postJson['refuseReasonTypeId'] = refuseReasonTypeId;
+				postJson['refuseNote'] = targetValue;
+				var urlStr = "../loan/submitRefuseLoan.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+						if(data == "success"){
+                            window.returnValue="success";
+                            window.close();
+						}else{
+							alert(data);
+						}
+                    }
+                });
+				
+				
+				
+			});
+			
+		
+		});
+    </script>
+</head>
+<body>
+    <input type="hidden" id="loanId" value="$!loanId"/>
+	<input type="hidden" id="refuseReasonTypeId" value="$!refuseReasonTypeId"/>
+    <p class="bold loan-ttlbg">$!title</p>
+    <div class="loan-add-box">
+      <table class="viewtbl" style="table-layout: auto;" id="coLoanPerson">
+          <tbody>
+			#foreach($!refuseId in $!refuseReasonSubTypeId.get("$!code"))
+              <tr>
+                  <td class="field" width="8%">
+                     <input type="radio" name="refuseReasonSubTypeId" value="$!refuseId.dictionaryKey" target-value="$!refuseId.dictionaryValue"/>
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text">
+                          $!refuseId.dictionaryValue
+                      </div>
+                  </td>
+              </tr>
+			#end
+			<tr id="refuseContentDiv" style=" display:none">
+                  <td class="field" width="8%">
+					其他原因内容：
+                  </td>
+                  <td colspan="7">
+                      <div class="ui-div-text">
+                          <input type="text" id="refuseContent"  name="refuseContent" style="width:100%"/>
+                      </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+      </div>
+      <hr />
+      <div class="center">
+          <input type="button" id="submit" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+      </div>
+</body>
+</html>

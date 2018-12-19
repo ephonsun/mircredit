@@ -1,0 +1,368 @@
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+	<display-name>banger.mobile</display-name>
+	<distributable />
+	<!-- Define the default CSS Theme -->
+	<context-param>
+		<param-name>csstheme</param-name>
+		<param-value>simplicity</param-value>
+	</context-param>
+	<!-- Define the basename for a resource bundle for I18N -->
+	<context-param>
+		<param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
+		<param-value>ApplicationResources</param-value>
+	</context-param>
+
+	<!--
+		Fallback locale if no bundles found for browser's preferred locale
+	-->
+	<!--
+		Force a single locale using param-name
+		'javax.servlet.jsp.jstl.fmt.locale'
+	-->
+	<context-param>
+		<param-name>javax.servlet.jsp.jstl.fmt.fallbackLocale</param-name>
+		<param-value>en</param-value>
+	</context-param>
+	<!-- Context Configuration locations for Spring XML files -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			classpath:/applicationContext-resources.xml
+            classpath:/applicationContext-dao.xml            
+            classpath*:/applicationContext-service.xml
+            classpath*:/applicationContext.xml
+            /WEB-INF/applicationContext*.xml
+            /WEB-INF/xfire-servlet.xml
+		</param-value>
+	</context-param>
+
+    <!--
+	<filter>
+		<filter-name>prfileFilter</filter-name>
+		<filter-class>com.banger.mobile.webapp.profile.PerformanceMonitorFilter</filter-class>
+		<init-param>
+            <param-name>threshold</param-name>
+            <param-value>100</param-value>
+        </init-param>
+	</filter>
+	<filter>
+		<filter-name>cacheFilter</filter-name>
+		<filter-class>com.opensymphony.oscache.web.filter.CacheFilter</filter-class>
+	</filter>
+	<filter>
+		<filter-name>clickstreamFilter</filter-name>
+		<filter-class>com.opensymphony.clickstream.ClickstreamFilter</filter-class>
+	</filter>
+	-->
+
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>exportFilter</filter-name>
+		<filter-class>org.displaytag.filter.ResponseOverrideFilter</filter-class>
+	</filter>
+	<filter>
+		<filter-name>gzipFilter</filter-name>
+		<filter-class>net.sf.ehcache.constructs.web.filter.GzipFilter</filter-class>
+	</filter>
+
+	<filter>
+		<filter-name>rewriteFilter</filter-name>
+		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+		<init-param>
+			<param-name>logLevel</param-name>
+			<param-value>log4j</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>staticFilter</filter-name>
+		<filter-class>com.banger.mobile.webapp.filter.StaticFilter</filter-class>
+		<init-param>
+			<param-name>includes</param-name>
+			<param-value>/scripts/dojo/*,/eWebEditor/*,/static/*,/test.html,/fileUpload,/showImage,/showImageThumbnail,/js/*,/imageUpload,/imageManager</param-value>
+		</init-param>
+	</filter>
+	<filter>
+		<filter-name>struts-cleanup</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ActionContextCleanUp</filter-class>
+	</filter>
+	
+	<filter>
+		<filter-name>struts</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.FilterDispatcher</filter-class>
+	</filter>
+	<!--  
+	<filter>
+		<filter-name>checkSqlFilter</filter-name>
+		<filter-class>com.banger.mobile.webapp.filter.ChecksqlFilter</filter-class>
+	</filter>
+	 -->
+
+    <!--
+    <filter-mapping>
+        <filter-name>prfileFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+     -->
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!--
+    <filter-mapping>
+        <filter-name>clickstreamFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    -->
+
+    <!--
+    <filter-mapping>
+        <filter-name>checkSqlFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+	<!--
+	<filter-mapping>
+		<filter-name>timerFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	-->
+	<!-- GZipFilter has issues with XFire's service-listing servlet. -->
+	<!-- http://issues.appfuse.org/browse/APF-863 -->
+	<!-- <filter-mapping>
+		<filter-name>gzipFilter</filter-name>
+		<url-pattern>*.css</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>gzipFilter</filter-name>
+		<url-pattern>*.js</url-pattern>
+	</filter-mapping> -->
+	<filter-mapping>
+		<filter-name>exportFilter</filter-name>
+		<url-pattern>*.html</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>rewriteFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>struts-cleanup</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+
+    <!--
+	<filter-mapping>
+		<filter-name>sitemesh</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+	</filter-mapping>
+	-->
+	<filter-mapping>
+		<filter-name>staticFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>struts</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+
+    <!--
+	<listener>
+		<listener-class>com.opensymphony.clickstream.ClickstreamListener</listener-class>
+	</listener>
+	-->
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>
+			org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>
+			org.springframework.web.context.request.RequestContextListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>net.sf.navigator.menu.MenuContextListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>com.banger.mobile.webapp.listener.UserOnlineListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>com.banger.mobile.webapp.listener.QuartzTaskListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>com.banger.mobile.webapp.listener.WebServerRunDayListener</listener-class>
+	</listener>
+	
+	<!-- TCP SOCKET FILE SERVER -->
+	<listener>
+		<listener-class>com.banger.mobile.transport.ServerFileReceiverListener</listener-class>
+	</listener>
+
+    <servlet>
+        <servlet-name>service</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>service</servlet-name>
+        <url-pattern>/service/*</url-pattern>
+    </servlet-mapping>
+
+	<!-- UEditor file upload -->
+	<servlet>
+		<servlet-name>UeditorServlet</servlet-name>
+		<servlet-class>com.banger.mobile.facade.impl.ueditor.ImageUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UeditorServlet</servlet-name>
+		<url-pattern>/imageUpload</url-pattern>
+	</servlet-mapping>
+	
+	<!-- UEditor file manager -->
+	<servlet>
+		<servlet-name>ImageManagerServlet</servlet-name>
+		<servlet-class>com.banger.mobile.facade.impl.ueditor.ImageManagerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ImageManagerServlet</servlet-name>
+		<url-pattern>/imageManager</url-pattern>
+	</servlet-mapping>
+	
+	<!-- http file upload -->
+	<servlet>
+		<servlet-name>HttpFileUploadServer</servlet-name>
+		<servlet-class>com.banger.mobile.transport.http.HttpFileUploadServer</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>HttpFileUploadServer</servlet-name>
+		<url-pattern>/fileUpload</url-pattern>
+	</servlet-mapping>
+	
+	<!-- http file upload -->
+	<servlet>
+		<servlet-name>ShowImageServlet</servlet-name>
+		<servlet-class>com.banger.mobile.transport.http.ShowImageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ShowImageServlet</servlet-name>
+		<url-pattern>/showImage</url-pattern>
+	</servlet-mapping>
+    
+    <!-- 图片缩略图 -->
+    <servlet>
+        <servlet-name>ShowImageThumbnailServlet</servlet-name>
+        <servlet-class>com.banger.mobile.transport.http.ShowImageThumbnailServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ShowImageThumbnailServlet</servlet-name>
+        <url-pattern>/showImageThumbnail</url-pattern>
+    </servlet-mapping>
+	
+	<!-- get user phone config -->
+	<servlet>
+		<servlet-name>GetUserPhoneConfigFile</servlet-name>
+		<servlet-class>com.banger.mobile.transport.http.GetUserPhoneConfigFileServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GetUserPhoneConfigFile</servlet-name>
+		<url-pattern>/getConfig</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>dwr-invoker</servlet-name>
+		<servlet-class>org.directwebremoting.servlet.DwrServlet</servlet-class>
+		<init-param>
+			<param-name>debug</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</servlet>
+	
+	<servlet>
+       <servlet-name>Action</servlet-name>
+       <servlet-class>banger.web.HttpHandler</servlet-class>
+   	</servlet>
+   	<servlet-mapping>
+       <servlet-name>Action</servlet-name>
+       <url-pattern>*.h</url-pattern>
+   	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>dwr-invoker</servlet-name>
+		<url-pattern>/dwr/*</url-pattern>
+	</servlet-mapping>
+	 
+	<servlet>
+		<servlet-name>xfire</servlet-name>
+		<servlet-class>org.codehaus.xfire.spring.XFireSpringServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>xfire</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+
+	<session-config>
+		<session-timeout>360</session-timeout>
+	</session-config>
+ 
+ 
+	<welcome-file-list>
+		<welcome-file>/index.vm</welcome-file>
+	</welcome-file-list>
+
+  
+	<error-page>
+		<error-code>500</error-code>
+		<location>/velocity/login/error.vm</location>
+	</error-page>
+		<error-page>
+		<error-code>404</error-code>
+		<location>/velocity/login/404.vm</location>
+	</error-page>
+  	<error-page>
+		<error-code>403</error-code>
+		<location>/velocity/login/error.vm</location>
+	</error-page>
+	
+	<resource-ref>
+		<description>DB2Connection Pool</description>
+		<res-ref-name>jdbc/micro</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+    </resource-ref>
+
+</web-app>

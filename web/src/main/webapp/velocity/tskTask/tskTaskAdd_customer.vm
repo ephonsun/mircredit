@@ -1,0 +1,369 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建联系任务</title>
+	
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	div.ztree-box { height: 300px; border: 1px solid #ccc; padding: 2px; overflow: auto; }
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+    </style>    
+</head>
+
+<body>
+	 <div id="etabs" class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li #if($!roleType!=0) style="display: none;" #end><label>选择执行者</label></li>
+		        	<li><label>联系客户列表</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+            </div>
+            <div class="etabs-body-child">
+            </div>
+            <div class="etabs-body-child">
+            	<div class="search-bar mt">
+                    <span class="fl bold">
+						已添加客户数(<label class="green">$!customerCount</label>)
+						#if($!roleType==0)，其中未分配(<label class="red">$!unAssingedCount</label>)#end
+                    </span>
+                </div>
+                
+            	<div #if($!roleType==0) class="ui-panel-box2" #else style="padding-left: 0;" #end>
+					#if($!roleType==0)
+                    <div class="l">
+                        <h4>
+                            <label>执行者</label>
+                            <div>
+                                <span class="editor-edi" onclick="toUpdateExecuteePage($!contactId)">&nbsp;</span>
+                            </div>
+                        </h4>
+                        <div class="l-inner">
+                            <ul id="deptTreebox" class="ztree"></ul>
+                        </div>
+                    </div>
+					#end
+                    <div class="r" #if($!roleType!=0) style="margin-left: 0; position:relative;" #end>
+                    	<div class="action-bar">
+                            <span class="ui-span-btn fl" onclick="toInitCustomer($!contactId)">
+                                <label>添加客户</label>
+                            </span>
+                            <span class="ui-span-btn fl ml" onclick="importCustomer($!contactId)">
+                                <label>导入客户</label>
+                            </span>
+							#if($!roleType==0)
+                            <span class="ui-span-btn fl ml" onclick="updateExcUser()">
+                                <label>修改执行者</label>
+                            </span>
+							#end
+                            <span class="ui-span-btn fl ml"onclick="delCus()">
+                                <label>移除客户</label>
+                            </span>
+                        </div>
+						<table id="cusTab" class="datatbl">
+							#parse("/velocity/tskTask/tskTaskAdd_customerTab.vm")
+						</table>
+                    </div>
+                </div>
+				
+                <hr />
+                
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="hasUnAssingedCustomer();"  value="保存" />
+					<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="deleteTaskAndClose($!contactId);" value="取消" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript">
+	function cfirm(){
+		var title;
+		if($!roleType!=0){
+			title='新建日程';
+		}else{
+			title='新建联系任务';
+		}
+		if(confirm('放弃'+title+'并关闭选项卡？')){
+    		deleteTask($!contactId);
+    		return true;
+		}
+	}
+	
+	var setting = {
+		callback:{
+			onClick:treeCustomerList
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			fontCss: getFont,
+			showIcon: true
+		}
+		
+	};
+	function getFont(treeId, node) {
+		return node.font ? node.font : {};
+	}
+	var taskId=$!contactId;
+	//var taskDeptId=$!tskTask.executeDeptId;
+	function treeCustomerList(event, treeId, treeNode){
+		jQuery.post("/tskContact/getContactCustomerList.html?random="+Math.random(),{
+			'contactId':taskId,
+			'treeId':treeNode.id,
+			'treeType':treeNode.type,
+			'actionType':'add'
+		},function(html){			
+			refreshGrid('cusTab',html)
+		});
+	}
+	//编辑执行者
+	function toUpdateExecuteePage(taskId){
+		var url="/tskContact/toUpdateTaskExecuter.html?tskContact.contactId="+taskId+"&random="+Math.random();
+    	var result=window.showModalDialog(url, {window: window}, 'dialogWidth=680px;dialogHeight=480px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result){
+    		jQuery.post('/tskContact/updateTaskExecuter.html',{
+    			'tskContact.contactId':taskId,
+    			'excUserIds': result			
+    		},function(data){
+    			var url = window.url(window.location.href, "random", Math.random());
+        		window.location.href = url;
+        		return true;
+    		});
+		}
+	}	
+	//移除联系客户
+	function delCus(){
+		var mm=document.getElementsByName("customerId");
+		var checkFlag=false;
+		var chestr="";
+		var count = 0;
+		for(var i=0;i<mm.length;i++){
+			if(mm[i].checked==true){
+				checkFlag=true;
+				chestr+=mm[i].value+",";
+				count++;
+			}
+		}
+		if(checkFlag==false){
+			banger.page.showMessageBox("请您选择要移除的联系客户！");
+			return;
+		}else{
+			if(confirm('是否移除选中的'+count+'条记录?')){
+        		jQuery.post('/tskContact/deleteTskTargte.html',{
+        			'customerIds':chestr.substring(0,chestr.length-1)
+        		},function(data){
+        			var url = window.url(window.location.href, "random", Math.random());
+        			window.location.href = url;
+        			return true;
+        		});
+			}
+		}
+	 }
+	
+	jQuery(function(){
+		$('#etabs').etabs({
+			index: 2,
+			beforeOnclick: function(){ return false; }
+		});
+		
+		$('#cusTab').table();
+		
+		if($!roleType==0){
+        	jQuery.post('/tskContact/showDeptExcUserList.html?random='+Math.random(),{
+    			'tskContact.contactId':taskId,
+				'type':"add"
+        	},function(data){
+        		data = jQuery.parseJSON(data);
+        		jQuery.fn.zTree.init($("#deptTreebox"),setting,data);
+    		});
+		}
+	});
+	
+	//刷新
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html).table();
+	}
+	
+	//分页跳转
+	function gotoPage(page)
+	{
+		goto(page,"/tskContact/getContactCustomerList.html?random="+Math.random(),{
+			"contactId":taskId,
+			"actionType":"add",
+			"treeId":$("#treeId").val(),
+			"treeType":$("#treeType").val(),
+			"page.currentPage":page
+		},function(html){refreshGrid('cusTab',html);});
+	}
+
+	//查看客户
+	function customerDetail(customerId){
+		jQuery.ajax({
+			  type: 'POST',
+			  url: "/customer/isDeleteCus.html?random="+Math.random(),
+			  data: {"cusId":customerId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+						banger.page.showMessageBox("'客户'+obj[0].customerName+'被删除，无法查看具体资料！'");
+			  		}else{
+						var options = {id: "task_Customer_detail_add" + customerId, pid: GetId(), title: "客户详情", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId, lock: false};
+						tab.add(options);
+					}
+			  	}
+		});	
+	}
+	
+	//加载修改执行者列表
+	function updateExcUser(){
+		var mm=document.getElementsByName("customerId");
+		var checkFlag=false;
+		var chestr="";
+		for(var i=0;i<mm.length;i++){
+			if(mm[i].checked==true){
+				checkFlag=true;
+				chestr+=mm[i].value+",";
+			}
+		}
+		if(checkFlag==false){
+			banger.page.showMessageBox("请您选择要修改的联系客户！");
+			return;
+		}else{
+    		var url="initUpdateExcUserList.html?tskContact.contactId="+taskId+"&actionType=add&random="+Math.random();
+    		var result=banger.page.openDialog(url,"修改执行者",680,480);
+			//window.showModalDialog(url, '修改执行者', 'dialogWidth=680px;dialogHeight=480px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+    		if(result){
+    			jQuery.post('/tskContact/updateExecuteUser.html',{
+    				'customerIds':chestr.substring(0,chestr.length-1),
+    				'executeId':result
+    			},function(data){
+    				var url = window.url(window.location.href, "random", Math.random());
+        			window.location.href = url;
+        			return true;
+    			});
+    		}
+		}
+	 }
+	 
+	//刷新客户列表
+	function toRefresh(){
+		var url = window.url(window.location.href, "random", Math.random());
+		window.location.href = url;
+	}
+	 
+	 //添加客户
+	 function toInitCustomer(taskId){
+		var url="/customer/customerSelect.html?batchType=task&targetId="+taskId+"&random="+Math.random();
+		var result=banger.page.openDialog(url,"请选择您要添加的客户",960,640);
+		//window.showModalDialog(url, '请选择您要添加的客户', 'dialogWidth=960px;dialogHeight=640px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result!=undefined){
+			if(result=='success') {
+				var url = window.url(window.location.href, "random", Math.random());
+    			window.location.href = url;
+    			return true;
+			}else{
+    			jQuery.post('/tskContact/addTskContactTarget.html',{
+    				'contactId':taskId,
+    				'customerIds':result
+    			},function(data){
+    				var url = window.url(window.location.href, "random", Math.random());
+        			window.location.href = url;
+        			return true;
+    			});
+			}
+		}
+	 }
+	 
+	 //检查有没有未分配至客户经理的联系客户
+	 function hasUnAssingedCustomer(){
+	 	if($!customerCount==0){
+			banger.page.showMessageBox("联系客户不能为空，请添加联系客户！");
+			return;
+		}
+	 	if($!roleType==0){
+         	if($!unAssingedCount != 0){
+				banger.page.showMessageBox("$!unAssingedCount位客户未被分配至客户经理，请分配完全后再保存!");
+        	}else{
+        		toConfirmTaskList();	
+        	}	
+		}else{
+			confirmAddTask($!contactId);
+		}		
+	 }
+	 
+	function toConfirmTaskList(){
+	 	var url ="/tskContact/toConfirmTaskList.html?tskContact.contactId="+$!contactId+"&random="+Math.random();
+		var res = window.showModalDialog(url, {window: window}, 'dialogWidth=468px;dialogHeight=400px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+	 	if(res == "true"){
+			confirmAddTask($!contactId);
+		}
+	}
+	
+	function confirmAddTask(taskId){
+		jQuery.post('/tskContact/confirmAddTask.html',{
+    			'tskContact.contactId':taskId
+    		},function(data){
+				location.href = '/tskContact/postSuccess.html';			
+		});
+	}
+	 
+	function deleteTask(taskId){
+    	jQuery.post('delTaskComplete.html',{
+    			'tskContact.contactId':taskId
+    		},function(data){
+		});
+	}
+	 
+	function deleteTaskAndClose(taskId){
+		if (cfirm()){
+			closeTab();
+		}
+	}
+	 
+	 function closeTab(){
+	 	tab.close(GetId(), true);
+	 }
+	 
+	 function toRelatedTaskPage(customerId,exeId){
+		var title="关联任务";
+    	var url="/tskContact/initRelatedTaskPage.html";
+    	url=url+"?tskCusId="+ customerId +"&exeUserId="+exeId+"&detail=y"+"&random="+Math.random();
+    	var options = {id: "relatedTask"+customerId, pid: GetId(), title: title, url: url, lock: false};
+    	tab.add(options);
+	}
+	
+	//导入客户
+	function importCustomer(taskId){
+		var urlStr="/tskImport/selectImportPath.html?taskId="+taskId+"&random="+Math.random()*10000;
+		tab.add({id: "tsk_imprt_all", pid: GetId(), title: "导入客户", url:urlStr, lock: false, confirm: true,refresh:false});
+	}
+</script>
+</html>

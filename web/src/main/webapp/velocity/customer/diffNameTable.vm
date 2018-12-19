@@ -1,0 +1,89 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+        	#if($urlPermitUtil.hasPermission('getMergeCustomer'))
+            <th width="30">
+                <input type="checkbox" nm="chkall" name="cusCheckAll" id="cusCheckAll"/>
+            </th>
+            #end
+			#if($!diffType == "phone" || $!diffType == "idcard")
+            <th >
+                <label title="客户类型">客户姓名</label>
+            </th>
+			#end
+			<th width="50">
+                <label title="性别">性别</label>
+            </th>
+			<th >
+                <label title="称谓">称谓</label>
+            </th>
+			#if($!diffType == "name" || $!diffType == "phone" || $!diffType == "namephone" || $!diffType == "namecompany")
+			<th >
+                <label title="身份证">身份证</label>
+            </th>
+			#end
+			#if($!diffType == "name" || $!diffType == "phone" || $!diffType == "idcard" || $!diffType == "namephone")
+            <th >
+                <label title="单位">单位</label>
+            </th>
+			#end
+            <th >
+                <label title="归属机构">归属机构</label>
+            </th>
+            <th>
+                <label title="归属人员">归属人员</label>
+            </th>
+            #if($urlPermitUtil.hasPermission('browseCustomer'))
+            <th >
+                <label title="操作">操作</label>
+            </th>
+            #end
+        </tr>
+    </thead>
+    <tbody id="tbodyCusList">
+        #foreach($customerTemp in $!mayDiffCustomerList)
+            <tr id="$!customerTemp.customerId">
+            	#if($urlPermitUtil.hasPermission('getMergeCustomer'))
+                <td>
+                    <input type="checkbox" nm="chkone" name="cusCheck" id="cusCheck" value="$!customerTemp.customerId"/>
+                </td>
+                #end
+				#if($!diffType == "phone" || $!diffType == "idcard")
+				<td>
+					<label title="$!customerTemp.customerName">$!customerTemp.customerName</label>
+                </td>	
+				#end
+                <td>
+					<label title="$!customerTemp.sex">$!customerTemp.sex</label>
+                </td>
+				<td>
+                    <label title="$!customerTemp.customerTitle">$!customerTemp.customerTitle</label>
+                </td>
+				#if($!diffType == "name" || $!diffType == "phone" || $!diffType == "namephone" || $!diffType == "namecompany")
+				<td>
+                    <label title="$!customerTemp.idCard">$!customerTemp.idCard</label>
+                </td>
+				#end
+				#if($!diffType == "name" || $!diffType == "phone" || $!diffType == "idcard" || $!diffType == "namephone")
+				<td>
+                    <label title="$!customerTemp.company">$!customerTemp.company</label>
+                </td>
+				#end
+                <td>
+                    <label title="$!customerTemp.deptName">$!customerTemp.deptName</label>
+                </td>
+                <td>
+                    <label title="$!customerTemp.userName">$!customerTemp.userName</label>
+                </td>
+                #if($urlPermitUtil.hasPermission('browseCustomer'))
+                <td>
+                    #if($urlPermitUtil.hasPermission('editCustomer'))
+						<a class="ui-link-btn" href="#2" onclick="newTab('browse', '$!customerTemp.customerId')">查看</a>
+					#end
+                </td>
+                #end
+            </tr>
+        #end
+    </tbody>
+</table>
+

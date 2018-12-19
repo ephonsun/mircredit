@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="loanCancelReason" extends="default" namespace="/loan">
+		
+		<!-- 所有取消贷款原因字段 -->
+		<action name="cancelReasonList" class="editCanReaFieldAction"
+			method="cancelReasonList">
+			<result name="success">/velocity/loan/cancelReasonList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 单个删除撤销原因（伪删除） -->
+		<action name="deleteCancelReason" class="editCanReaFieldAction"
+			method="deleteCancelReason">
+			<result name="success" type="redirectAction">cancelReasonList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到更新撤销原因界面 -->
+		<action name="toUpdatePage" class="editCanReaFieldAction"
+			method="toUpdatePage">
+			<result name="success">/velocity/loan/updateCancelReason.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 新建撤销原因 -->
+		<action name="insertCancelReason" class="editCanReaFieldAction"
+			method="insertCancelReason">
+			<result name="success" type="redirectAction">cancelReasonList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!--更新撤销原因 -->
+		<action name="updateCancelReason" class="editCanReaFieldAction"
+			method="updateCancelReason">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!--移动 -->
+		<action name="upOrDown" class="editCanReaFieldAction" method="upOrDown">
+		
+		</action>
+		
+		<!-- 验证撤销类型是否已存在 -->
+		<action name="exsitsCancelReason" class="editCanReaFieldAction" method="exsitsCancelReason">
+		</action>
+	</package>
+
+
+</struts>

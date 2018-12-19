@@ -1,0 +1,34 @@
+<input id="total" type="hidden" name="total" value="$!count" />
+<table class="datatbl">
+	<tbody>
+		#foreach($!content in $!knowContentPage.items)
+			<tr>
+				<td style="white-space:normal !important;">
+					<div class="ui-fe-list">
+						<dl style="border:0; margin:0;">
+					        <dt>
+					            <a href="javascript:void(0);" onclick="contentDetail($!content.knowledgebaseContentId);">$!content.knowledgebaseTitle</a>
+					            <label>#if($!content.createDate != '')$date.format("yyyy-MM-dd hh:mm:ss",$!content.createDate)#end</label>
+					        </dt>
+					        <dd class="overview" style="text-align:left;">
+					            <label>$!content.knowledgebaseNote</label>
+					        </dd>
+					        <dd class="action" style="text-align:left;">
+					            <label onclick="editContent($!content.knowledgebaseContentId);">编辑收藏信息</label>
+					            <label onclick="delContent($!content.knowledgebaseContentId,'$!content.knowledgebaseTitle',$!content.articleId);">删除收藏信息</label>
+					            <label onclick="content($!content.articleId);">查看内容</label>
+					        </dd>
+					    </dl>
+					</div>
+				</td>
+			</tr>
+		#end
+	</tbody>
+	<tfoot>
+		<tr>
+			<td>
+				<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>

@@ -1,0 +1,45 @@
+<table class="datatbl">
+        <thead>
+            <tr>
+				 <th width="20"><input type="checkbox" rel="all" id="checkAll" onclick="checkAll(this)"/></th>
+                <th><label title="标题">标题</label></th>
+                <th><label title="分类">分类</label></th>
+				<th><label title="创建时间">创建时间</label></th>
+                <th><label title="发布时间">发布时间</label></th>
+				<th><label title="状态">状态</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+        <tbody >
+       #foreach($!feArticle in $!feArticleList.items)
+            <tr >
+				<td>
+				<input type="hidden" value="$!feArticle.articleId">
+				<input type="checkbox" rel="row" name="checkboxList"/></td>
+                <td><label #if($!feArticle.isPublish==0) class="red" #end title="">$!feArticle.articleTitle</label></td>
+                <td><label #if($!feArticle.isPublish==0) class="red" #end title="">$!feArticle.columnName</label></td>
+                <td><label #if($!feArticle.isPublish==0) class="red" #end title="">$date.format("yyyy-MM-dd",$!feArticle.createDate)</label></td>
+				<td><label #if($!feArticle.isPublish==0) class="red" #end title="">#if($!feArticle.publishDate != '')$date.format("yyyy-MM-dd HH:mm:ss",$!feArticle.publishDate)  #end</label></td>
+				<td><label #if($!feArticle.isPublish==0) class="red" #end title="">
+				#if($!feArticle.isPublish==0)
+						未发布
+				#else
+						已发布
+				#end
+				
+				</label></td>
+                <td>
+                    <span class="link" onclick="updateArticle($!feArticle.articleId)">编辑</span>
+                    <span class="link" onclick="deleteFeArticle($!feArticle.articleId,this)">删除</span>
+                </td>
+            </tr>
+        #end
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7">
+                    <div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

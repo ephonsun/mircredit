@@ -1,0 +1,264 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看客户</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+    	.easy-tabs ul.easy-tabs-header li.easy-tabs-selected { border-bottom: 1px solid #f3f7fb; background-color: #f3f7fb; font-weight: bold; }
+		/* 头像 Begin */
+    	.avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 96px; height: 96px; margin-bottom: 5px; overflow: hidden; }
+		.avatar img { width: 100%; height: 100%; border: 0; }
+		/* 头像 End */
+		
+		div.tabs-header{ height:auto !important;}
+    	div.tabs-items-zone{ white-space:normal;}
+    	ul.tabs-items{ }
+    	ul.tabs-items li{}
+    	ul.tabs-items li label{ width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+        /* 滚动按钮小图标  */
+        .x-panel-bar{ position: absolute; top: 0px; right: 0px; }
+        .x-panel-bar .x-panel-action { float: left; cursor: pointer; width: 20px; height: 20px; margin: 3px; text-indent: -1000px; overflow: hidden; }
+        .x-panel-bar div.x-panel-scroller-left { background: url(../images/index/left.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/left.png"); }
+        .x-panel-bar div.x-panel-scroller-right { background: url(../images/index/right.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/right.png"); }
+    </style>
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+    <script type="text/javascript">
+        function scroll(){
+            if(jQuery.browser.msie && jQuery.browser.version<7.0 && $('html')[0].scrollHeight>$('html').height()){
+                $('html').css('overflow-y','scroll');
+            }
+        }
+
+        var autoLogin = "$!autoLogin";
+
+    	jQuery(function(){
+            /* 内容部分左右按钮滚动js调用  */
+            $('#tabs-items').itemScroll({
+                'oLeft':$('#leftBtn'),
+                'oRight':$('#rightBtn')
+            });
+            $('#tabs').tabs({
+                onClick: scroll
+            });
+
+			if(tab){
+				tab.title(tab.self,'客户详情-'+'$!jsUtil.escapeJs($crmCustomer.customerName)');
+			}
+			initDate('birthday');
+			initDate('datepicker');
+			initControlState();		//初始化默认号码状态
+			initDropDownList();		//初始化下拉多选项
+			initHeadShow();
+			//任务信息
+			$('#taskMsg').load("${ctx}/tskMicroTaskTarget/taskCustomerCard.html?customerId=$!crmCustomer.customerId",{});
+			//联系记录延时加载，未了防止ie6卡住
+			setTimeout(function(){postRecordMsg();},1000);
+			//亲友信息
+			$('#relativesInfo').load("${ctx}/customerRelatives/relativesInfo.html?"+autoLogin+"customerId=$!crmCustomer.customerId&actionType=$!actionType&needLine=$!needLine",{});
+			//理财产品
+			//$('#productMsg').load("${ctx}/pdtProduct/getCustomerBuyProduct.html?"+autoLogin+"customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+            //日程安排
+			$('#taskSchedule').load("${ctx}/tskSchedule/getScheduleListCard.html?"+autoLogin+"customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+            //贷款信息
+            $('#loanInfo').load("${ctx}/loan/getAllLoanByCusId.html?"+autoLogin+"customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+            //资料信息
+            $('#dataMsg').load("${ctx}/data/showDataByCusId.html?"+autoLogin+"customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+            //客户意向延时加载，未了防止ie6卡主
+            var timeHandler = setTimeout(function(){postCustomerPdtProduct();},3000);
+
+			onBirthdayExit();
+		});
+
+        function postCustomerPdtProduct() {
+            //客户意向
+            $('#customerPdtProduct').load("${ctx}/tskSchedule/getCustomerPdtProduct.html?"+autoLogin+"tskSchedule.customerId=$!crmCustomer.customerId&needLine=$!needLine",{});
+        }
+        function postRecordMsg(){
+        	$('#recordMsg').load("${ctx}/record/queryAllByCustomerId.html?"+autoLogin+"customerId=$!crmCustomer.customerId&actionType=$!actionType",{});
+        }
+
+		function initHeadShow(){
+			if('$!crmCustomer.headshow'){
+				var html = "<img src='${ctx}/showImage?fullPath=$!crmCustomer.headshow'/>";
+				jQuery('.avatar').html(html);
+			}else{
+				var path;
+				switch('$!crmCustomer.sex'){
+					case "":
+						path = "${ctx}/images/headImage/a.bmp";
+						break;
+					case "男":
+						path = "${ctx}/images/headImage/b.bmp";
+						break;
+					case "女":
+						path = "${ctx}/images/headImage/c.bmp";
+						break;
+				} 
+				var html = "<img src='"+path+"'/>";
+				jQuery('.avatar').html(html);
+			}
+		}
+		//初始化下拉多选项
+		function initDropDownList(){
+			$("input[dateFlag$='true']").each(function(i){
+				initDate(this.id);
+			});
+			$("div[comboFlag$='true']").each(function(i){
+	 			var codes = $(this).attr("codes");
+	 			var list = codes.split(",");
+	   			jQuery(this).combobox({"allcheck":true,"clear":true,"rev":true,"array":list});
+	 		});
+		}
+		//初始化默认号码状态
+		function initControlState()
+		{
+			$("#rdo1").attr("disabled",true);
+			$("#rdo2").attr("disabled",true);
+			$("#rdo3").attr("disabled",true);
+			$("#rdo4").attr("disabled",true);
+			$("#phoneExt").attr("disabled",true);
+			$("#faxExt").attr("disabled",true);
+			
+			if($!crmCustomer.defaultPhoneType==1){
+				$("#rdo1").attr("checked",true);
+			}
+			else if($!crmCustomer.defaultPhoneType==2){
+				$("#rdo2").attr("checked",true);
+			}
+			else if($!crmCustomer.defaultPhoneType==3){
+				$("#rdo3").attr("checked",true);
+			}
+			else if($!crmCustomer.defaultPhoneType==4){
+				$("#rdo4").attr("checked",true);
+			}
+		}
+		function closeForm(){
+			tab.close(GetId(), false);
+		}
+		
+		//根据生日生成年龄		
+		function onBirthdayExit(){
+			if($("#birthday").val()){
+				var year = $("#birthday").text().substring(0,4);
+				var dd = new Date();
+				$("#age").text(dd.getFullYear()-year);
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<form id="addCustomer" class="formular" method="post">
+		<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	    		#if($hasPerssion==0 && !$isShareCus)
+				<tr>
+		            <td width="120" align="right" nowrap="nowrap" class="bold"><span class="red">无此客户权限</span></td>
+	            	<td></td>
+	            </tr>	
+	            #end
+				#if($crmCustomer.isNoGood==1)
+	        	<tr>
+		            <td width="120" align="right" nowrap="nowrap" class="bold"><span class="red">不良客户</span></td>
+	            	<td></td>
+	            </tr>	
+	            #end
+	        	<tr>
+	                <td width="10%" align="right" nowrap="nowrap" class="bold">客户归属：</td>
+	                <td>
+	                    <label title="$!crmCustomer.deptName">$!crmCustomer.deptName</label>
+	                    #if($crmCustomer.userName && $!crmCustomer.userName != "")
+	                    <label title="$!crmCustomer.userName">（$!crmCustomer.userName）</label>
+	                    #end
+	                </td>
+	            </tr>
+	    	</tbody>
+	    </table>
+	    <div id="tabs" class="tabs" style="margin-top: 10px;">
+	        <div class="tabs-header">
+	            <div id="tabs-items-zone" class="tabs-items-zone" style="height:26px; margin-right:140px;">
+	                <ul id="tabs-items" class="tabs-items">
+	                    <li init="false"><label title="基本信息">基本信息</label></li>
+	                    #if($hasPerssion==1 || $isShareCus)
+			                <li init="false"><label title="联系记录">联系记录</label></li>
+			                <li init="false"><label title="任务安排">任务安排</label></li>
+			                <li init="false"><label title="亲友信息">亲友信息</label></li>
+                            <li init="false"><label title="日程安排">日程安排</label></li>
+                            <li init="false"><label title="贷款信息">贷款信息</label></li>
+                            <li init="false"><label title="客户意向">客户意向</label></li>
+							<li init="false"><label title="资料信息">资料信息</label></li>
+							<!--
+		                    #foreach($template in $temp.getAllCrmTemplate())
+				        		#if($template.isBasic == 0)
+				        			#if($!subString.existChar("$crmCustomer.templateIds","$template.templateId"))
+				        				<li init="false"><label title="$template.templateName">$template.templateName</label></li>
+				        			#else
+				        				<li class="hide"><label title="$template.templateName">$template.templateName</label></li>
+				        			#end
+				        		#end
+				        	#end
+							-->
+			        	#end
+	                </ul>
+	            </div>
+                <!--// .tabs-items-zone-->
+                <div class="x-panel-bar">
+                    <div class="x-panel-action x-panel-scroller-left" id="leftBtn"></div>
+                    <div class="x-panel-action x-panel-scroller-right" id="rightBtn"></div>
+                </div>
+                <!--// .x-panel-bar-->
+	        </div>
+	        <div id="tabs-pages" class="tabs-pages" style="padding: 0;">
+	        	<div class="tabs-page">
+	            #parse("/velocity/customer/browseBaseInfo.vm")
+	            #if($hasPerssion==1 || $isShareCus)
+		            #foreach($template in $temp.getTemplates())
+						#if($template.isBasic > 0)
+							<!--#tabOption($template.fields,$exField,2)-->
+							</div>
+		            		<div class="tabs-page" id="recordMsg"></div>
+		            		<div class="tabs-page" id="taskMsg"></div>
+		            		<div class="tabs-page" id="relativesInfo"></div>
+		            		<div class="tabs-page" id="taskSchedule"></div>
+		            		<div class="tabs-page" id="loanInfo"></div>
+		            		<div class="tabs-page" id="customerPdtProduct"></div>
+							<div class="tabs-page" id="dataMsg"></div>
+						#else
+							<div class="tabs-page" >
+								<!--#tabOption($template.fields,$exField,2)-->
+							</div>
+						#end
+					#end
+				#end
+	        </div>
+	    </div>
+	    
+	    <hr />
+	    #if(!$isBrowseLayer)
+	    <div class="halign">
+	        <input type="button" class="btn6 btn6bg3" onclick="closeForm();" value="关闭" />
+	    </div>
+	    #end
+    </form>
+</body>
+</html>

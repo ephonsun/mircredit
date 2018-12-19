@@ -1,0 +1,50 @@
+ <div class="search-bar">
+                <span class="fl bold">
+                    <label id="templateNameLabel" >所有版块</label>(<label class="green" id="queryCount">$!page.totalRowsAmount</label>)
+                </span>
+                <input type="button" class="ui-input-btn" value="清空" onclick="resetValue()"/>
+                <input type="button" class="ui-input-btn" value="搜索" onclick="search()"/>
+            </div>
+            
+            <div class="action-bar">
+				 <span class="ui-span-btn fl" onclick="addNewTemplate()">
+					<label>新建</label>
+				</span>
+                <span class="ui-span-btn fr" onclick="refreshForm()">
+                    <label>刷新</label>
+                </span>
+            </div>
+<table class="datatbl">
+				<thead>
+					<tr>
+						<th><label title="版块名称">版块名称</label></th>
+						<th><label title="描述">描述</label></th>
+						<th><label title="操作">操作</label></th>
+					</tr>
+				</thead>
+				<tbody>
+					 #foreach($!commTemplate in $!commTemplatePage.items)
+					<tr>
+						<td><label title="">$!commTemplate.templateName</label></td>
+						<td><label title="">$!commTemplate.templateDescription</label></td>
+						<td>
+							#if($!commTemplate.templateState == 1) #set($state=0)#set($stateStr="启用")  #else #set($state=1) #set($stateStr="停用")  #end 
+							 <a class="ui-link-btn" href="javascript:void(0);" onclick="updateCommProgressState('$!commTemplate.templateId',$state)">
+								 $stateStr</a>
+							 <a class="ui-link-btn" href="javascript:void(0);" onclick="updateTemplate('$!commTemplate.templateId')">编辑</a>
+	                        <a class="ui-link-btn" href="javascript:void(0);" onclick="deleteTemplate('$!commTemplate.templateId',this)">删除</a>
+	                        <a class="ui-link-btn up" href="javascript:void(0);" onclick="moveTemplate('$!commTemplate.templateId','up')">上移</a>
+	                        <a class="ui-link-btn down" href="javascript:void(0);" onclick="moveTemplate('$!commTemplate.templateId','down')">下移</a>
+							
+						</td>
+					</tr>
+					#end
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="3">
+							  <div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+						</td>
+					</tr>
+				</tfoot>
+			</table>

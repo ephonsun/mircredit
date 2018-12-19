@@ -1,0 +1,335 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>通话基础配置</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <style type="text/css">
+	h4 { border-bottom: 1px solid #ccc; line-height: 30px; font-size: 12px; }
+	table { margin: 10px 0px; }
+	
+	.gray_self { color:#999999; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.phone.js"></script>
+ 	<script type="text/javascript">
+    	$(function(){
+			if('$!phoneConfig.outDelay') $('#outDelay').val('$!phoneConfig.outDelay');
+			if('$!phoneConfig.flashBreakTime') $('#flashBreakTime').val('$!phoneConfig.flashBreakTime');
+		
+			//渲染控件
+    		jQuery("select").each(function(){
+    			$(this).select();
+    		});
+    		
+    		if($("#isIpCall").val()==1){//长途使用ip拨号
+				$("#isIpCallCheckbox").attr("checked", true);
+			}
+			else{
+				$("#isIpCallCheckbox").attr("checked", false);
+			}
+			
+    		if($("#isIpCallCheckbox").attr("checked")){
+				$("#isIpCallText").removeAttr("readOnly").css("color", "#000");
+			}
+			else{
+				$("#isIpCallText").attr("readOnly", true).css("color", "#666");
+			}
+			
+			//长途是否使用ip拨号
+			$("#isIpCallCheckbox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isIpCallText").attr("readOnly", false).css("color", "#000").focus();
+					$("#isIpCall").val(1);
+				}
+				else{
+					$("#isIpCallText").attr("readOnly", true).css("color", "#666");;
+					$("#isIpCall").val(0);
+					$("#isIpCallText").val("");
+				}
+			});
+			
+			
+			
+			if($("#isShowLastWindow").val()==1){//自动弹出通话窗口
+				$("#isShowLastWindowCheckbox").attr("checked", true);
+			}
+			else{
+				$("#isShowLastWindowCheckbox").attr("checked", false);
+			}
+			
+			//是否自动弹出通话窗口
+			$("#isShowLastWindowCheckbox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isShowLastWindow").val(1);
+				}
+				else{
+					$("#isShowLastWindow").val(0);
+				}
+			});
+			
+			
+    	    numInput("#cityCode");
+    	    telInput("#outsideCode");
+    	    numInput("#extCode");
+    	    numInput("#isIpCallText");
+    	    telInput("#outNumber");
+			
+			
+			if($("#isPopUp").val()==1){//自动弹出通话窗口
+				$("#isPopUpCheckbox").attr("checked", true);
+			}
+			else{
+				$("#isPopUpCheckbox").attr("checked", false);
+			}
+			
+			//是否自动弹出通话窗口
+			$("#isPopUpCheckbox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isPopUp").val(1);
+				}
+				else{
+					$("#isPopUp").val(0);
+				}
+			});
+			
+			//
+			$("input[type=radio][name=radio][value=" + $("#rdo-over").val() + "]").attr("checked",true);
+			$("input[type=radio][name=radio]").click(function(){
+				$("#rdo-over").val($(this).val());
+			});
+			
+			jQuery("#phoneConfig").validator();
+		})
+		function submitPhoneConfig(){
+		
+		    var flag = jQuery.validator({ form: 'phoneConfig'});
+		    if(!flag)return;
+		    
+			setPhoneParams();
+	    	var f=$("#phoneConfig");
+	    	f.action="updatePhoneConfig.html";
+			f.submit();
+			banger.page.showMessageBox({"type":"success","content":"保存成功"});
+		}
+		
+		//ip前缀校验
+		function checkIpNumber(obj){
+			if($("#isIpCallCheckbox").attr("checked")){
+				if($("#isIpCallText").val()=="") {
+					$(obj).attr('tips', '“IP前缀”必须填写！'); 
+					return false;
+				}else return true;
+			}else return true;
+		}
+		
+		function areaCodeValid(src){
+			var tx = $(src).val().replace(/(^\s*)|(\s*$)/g,"");
+			if(tx==""){
+				$(src).attr("tips",'“本地区号”必须填写！');
+				return false;
+			}else{
+				if(tx.length<3 || tx.substr(0,1)!='0' || tx.substr(0,2)=='00'){
+					$(src).attr("tips",'“本地区号”格式不正确！');
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		function setPhoneParams()		//设置话机参数
+		{
+
+			var phone = window.parent.sp.getCurrent();
+			if(phone)
+			{
+				var flashBreakTime = $("#flashBreakTime").val();
+				if(flashBreakTime!=null)phone.setRKeyDefTimes(flashBreakTime);			//闪断时间
+				var outDelay = $("#outDelay").val();
+				if(outDelay!=null)phone.setOutDelayedTime(outDelay);
+				var outsideCallCode = $("#outsideCallCode").val();
+				if(outsideCallCode!=null)phone.setOutlineNumber(outsideCallCode);
+			}
+			
+			var autoOpen = $("#isPopUpCheckbox").attr("checked");
+			if(window.parent.setConfigParams)
+			{
+				if(autoOpen)window.parent.setConfigParams("talkForm","autoOpen",true);
+				else window.parent.setConfigParams("talkForm","autoOpen",false);
+			}
+		}
+		function test(){
+			jQuery.post('updateIsScreamWord.html',
+    					{
+    					 'phoneConfig.isScreamWord':0
+    					},
+    		function(data){
+    		});
+		}
+	</script>
+</head>
+
+<body>
+	<form id="phoneConfig"  name="phoneConfig" action="updatePhoneConfig.html" method="post">
+		<h4>普通配置</h4>
+	    <table class="viewtbl">
+	    	<tbody>
+	        	<tr>
+	            	<td width="100" class="field">
+	                	<label class="red">*</label><label>本地区号：</label>
+	                </td>
+	                <td width="150">
+	                    <div class="dtxt2" style="width:150px;">
+	                        <input type="text" id="cityCode" class="dtxt2-txt" name="phoneConfig.cityCode" value="$!phoneConfig.cityCode" fun="areaCodeValid" maxLength="4" />
+	                    </div>
+	                </td>
+	                <td><label class="gray_self">本地固定电话的区号，如：0571</label></td>
+	            </tr>
+	        	<tr>
+	            	<td width="100" class="field">
+	                	<label>外线加拨号：</label>
+	                </td>
+	                <td width="150">
+	                    <div class="dtxt2" style="width:150px;">
+	                	    <input type="text" id="outsideCode" class="dtxt2-txt" id="outsideCallCode" name="phoneConfig.outsideCallCode" maxLength="5" value="$!phoneConfig.outsideCallCode" />
+	                	</div>
+	                </td>
+	                <td><label class="gray_self">本机拨打公司外线时加拨的号码，如：9</label></td>
+	            </tr>
+	        	<tr>
+	            	<td width="100" class="field">
+	                	<label>内线分机号位数：</label>
+	                </td>
+	                <td width="150">
+	                    <div class="dtxt2" style="width:150px;">
+	                	    <input type="text" id="extCode" class="dtxt2-txt" name="phoneConfig.insiseExtLength" value="$!phoneConfig.insiseExtLength" maxLength="1" />
+	                	</div>
+	                </td>
+	                <td><label class="gray_self">拨打公司内部分机时号码的长度，如分机为8421，则号码长度为4</label></td>
+	            </tr>
+	        </tbody>
+	    </table>
+	    
+	    <h4>高级配置</h4>
+	    <table class="viewtbl">
+	    	<tbody>
+	        	<tr>
+	            	<td width="100" class="field">
+	                	<label>长途使用IP拨号：</label>
+	                </td>
+	                 <td width="250" colSpan=2 >
+	                	<input type="checkbox" id="isIpCallCheckbox" class="chk fl" style="margin:3px 0px 0px 0px;" />
+	                	<input type="hidden" id="isIpCall" name="phoneConfig.isIpCall" value="$!phoneConfig.isIpCall"/>
+						<label class="fl" style="margin-left: 10px;">IP前缀号码：</label>
+					 	<div class="dtxt2 fl" style="width:150px;">
+							<input type="text" class="dtxt2-txt" name="phoneConfig.ipNumber" value="$!phoneConfig.ipNumber" id="isIpCallText" maxLength="10" fun="checkIpNumber" tips=""/>
+						</div>
+					</td>
+					<td>
+					</td>
+	            </tr>
+	        	<tr>
+	            	<td width="100" class="field">
+	                	<label>出局延时：</label>
+	                </td>
+	                 <td width="150">
+	                	<select style="width: 150px;" id="outDelay" name="phoneConfig.outDelay">
+	                    	<option value="1.0">1秒</option>
+	                    	<option value="1.5">1.5秒</option>
+	                    	<option value="2.0">2秒</option>
+	                    	<option value="2.5">2.5秒</option>
+	                    	<option value="3.0">3秒</option>
+	                    	<option value="3.5">3.5秒</option>
+	                    </select>
+	                </td>
+	            	<td width="100" class="field">
+	                	<label>闪断时间：</label>
+	                </td>
+	                <td>
+	                	<select style="width: 150px;" id="flashBreakTime" name="phoneConfig.flashBreakTime">
+	                    	<option value="90">90毫秒</option>
+	                    	<option value="95">95毫秒</option>
+	                    	<option value="100">100毫秒</option>
+	                    	<option value="120">120毫秒</option>
+	                    	<option value="180">180毫秒</option>
+	                    	<option value="300">300毫秒</option>
+	                    	<option value="600">600毫秒</option>
+	                    	<option value="1000">1000毫秒</option>
+	                    </select>
+	                </td>
+	            </tr>
+	        	<tr>
+	            	<td width="100" class="field">
+	                	<label>来电出局号：</label>
+	                </td>
+	                <td colspan="3">
+	                	<div class="dtxt2 fl" style="width:150px;">
+	                		<input type="text" id="outNumber" style="width:150px;"  class="dtxt2-txt" name="phoneConfig.outNumber" maxLength="5" value="$!phoneConfig.outNumber" />
+						</div>
+	                	<label class="gray_self fl" style="Margin-Left:10px;">设置来电显示前多余出局号，如0057188886666前的0</label>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="100" class="field"></td>
+	                <td colspan="3">
+	                	<input type="checkbox" id="isShowLastWindowCheckbox" class="chk" />
+	                	<input type="hidden" id="isShowLastWindow" name="phoneConfig.isShowLastWindow" value="$!phoneConfig.isShowLastWindow"/>
+	                    <label for="isShowLastWindowCheckbox">通话开始时，自动弹出上次联系窗口</label>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="100" class="field"></td>
+	                <td colspan="3">
+	                	<input type="checkbox" id="isPopUpCheckbox" class="chk" />
+	                	<input type="hidden" id="isPopUp" name="phoneConfig.isPopUp" value="$!phoneConfig.isPopUp"/>
+	                	<input type="hidden" id="rdo-over" name="phoneConfig.callOverPopUp" value="$!phoneConfig.callOverPopUp"/>
+	                    <label for="isPopUpCheckbox">通话开始时，自动弹出通话窗口</label>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="100" class="field"></td>
+	                <td colspan="3">
+	                    <label>打开通话窗口的情况下，通话结束时：</label>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="100" class="field"></td>
+	                <td colspan="3">
+	                	<input type="radio" name="radio" id="rdo1" class="rdo" value="1" />
+	                    <label for="rdo1">总是询问通话结束时的操作方式</label>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="100" class="field"></td>
+	                <td colspan="3">
+	                	<input type="radio" name="radio" id="rdo2" class="rdo" value="2" />
+	                    <label for="rdo2">继续当前客户操作，不关闭当前客户窗口</label>
+	                </td>
+	            </tr>
+	            <tr>
+	                <td width="100" class="field"></td>
+	                <td colspan="3">
+	                	<input type="radio" name="radio" id="rdo3" class="rdo" value="3" />
+	                    <label for="rdo3">关闭当前客户窗口</label>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+	    
+	    <hr />
+	    
+	    <div class="halign">
+	    	<input type="button" class="btn6 btn6bg1" onclick="submitPhoneConfig()" value="保存" />
+	    	<input type="hidden" id="isScreamWord" name="phoneConfig.isScreamWord" value="$!phoneConfig.isScreamWord"/>
+	    </div>
+    </form>
+</body>
+</html>

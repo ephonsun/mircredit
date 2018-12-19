@@ -1,0 +1,100 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>新建产品类型模板</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+</head>
+<body>
+	<form id="templateForm" name="templateForm" action="savePdtTemplate.html" method="post">
+		<input type="hidden" name="saveFlag" id="saveFlag"/>
+        <table class="htmltbl">
+            <tbody>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>产品类型：</label>
+                    </td>
+                    <td width="40%">
+                       <div id="d1" class="ui-div-text" style="width:150px;">
+                        	<input type="text" class="text" id="templateName" name="template.templateName"  maxLength="10" rule="\S" onkeyup="checkUnique(this)" tips="“产品类型”必须填写" tipworn='“产品类型”必须填写'/>
+                        </div>
+                    </td>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>最低日均销售比:</label>
+                    </td>
+                    <td width="150px">
+                       <div class="ui-div-text" style="width:150px;">
+                        	<input type="text" class="text" id="templateRate" name="template.templateRate" rule="\S" maxLength="6" onkeyup="if(this.value==this.value2)return;if(this.value.search(/^\d{0,3}(?:\.\d{0,2})?$/)==-1)this.value=(this.value2)?this.value2:'';else this.value2=this.value;" tips="“最低日均销售比”必须填写" />
+                        </div>
+                    </td>
+					<td>
+						<label>%</label>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+    <hr />
+    <div class="center">
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="addTemp('save');" value="保存" />
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-continue" onclick="addTemp();" value="保存并新建" />
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="tab.close(GetId(),false);" value="取消" />
+    </div>
+</body>
+#scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		$('select').select(); 
+		escapeInput("#templateName");
+		jQuery("#templateForm").validator();
+		tab.refresh(GetPid());
+	});
+	
+	//保存
+	function addTemp(flag){
+		var bool = jQuery.validator({ form: 'templateForm', extend: false});
+		if(!bool){
+			return false;
+		}
+		 var temp_name="";
+		 jQuery.ajax({
+		 		type:'post',
+				url:'validateTemplate.html',
+    			data:{'template.templateName':$('#templateName').val().replace(/(^\s*)|(\s*$)/g,""),
+					  'template.templateRate':$('#templateRate').val().replace(/(^\s*)|(\s*$)/g,"") 
+					 },
+				cache: false,
+				async: false,
+				success:function(data){
+        			var json=jQuery.parseJSON(data);
+					if(json['temp_name']) temp_name=json['temp_name'];
+					if(temp_name!= ""){
+						$('#d1').addClass('v-fails');
+  						$('#templateName').attr('tips', temp_name); 
+        			}else{
+						$('#d1').removeClass('v-fails');
+					}
+					if(temp_name==""){
+            			$('#saveFlag').val(flag);
+            			document.templateForm.submit();
+					}
+				}
+    		});
+	}
+	
+	function checkUnique(obj){
+		if(obj.value == "") obj.tips = obj.tipworn;
+	}	
+	
+</script>
+</html>

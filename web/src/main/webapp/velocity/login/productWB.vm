@@ -1,0 +1,54 @@
+<script type="text/javascript">
+	jQuery(function(){
+		jQuery('#productCount').text('(' + $!count + ')');
+	});
+	//跳转到未处理客户列表
+	function toIsDeal(id){
+		var options = {id: 'product_isDealCustomer', pid: GetId(), title: '未处理客户', url: '../product/isDealCustomer.html?productId='+id+'&dealType=0&isSal=1&random='+Math.random(), lock: false};
+		tab.add(options);
+	}
+	
+	//查看更多7天内到期的产品
+	function showALL(){
+		var options = {id: 'product_expire', pid: GetId(), title: '产品到期提醒', url: '../product/queryWeekProduct.html?dealType=0&random='+Math.random(), lock: false};
+		tab.add(options);
+	}
+	
+	//进入产品详情
+	function openProduct(id){
+		var options = {id: 'productWB_queryProductById'+id, pid: GetId(), title: '查看产品详情', url: '../product/queryProductById.html?productId='+id+'&random='+Math.random(), lock: false};
+		tab.add(options);
+	}
+</script>
+
+<table class="ui-desk-reminders">
+	<thead>
+    	<tr>
+        	<th class="left"><label>产品名称</label></th>
+        	<th><label>到期日期</label></th>
+        	<th><label>剩余到期天数</label></th>
+        	<th><label>销售客户数</label></th>
+        	<th><label>未处理客户</label></th>
+        	<th width="80"><label>操作</label></th>
+        </tr>
+    </thead>
+	<tbody>
+		#foreach($product in $!productList.items)
+			#if($velocityCount<11)
+            	<tr>
+                	<td class="left"><a href="#2" onclick="openProduct('$!product.productId');">$!product.productName</a></td>
+                	<td><label>#if($!product.expireDate)$date.format("yyyy-MM-dd",$!product.expireDate)#end</label></td>
+                	<td><label>$!product.expireDays</label> 天</td>
+                	<td><label>$!product.buyCustomerCount</label> 人</td>
+                    <td><label class="red">$!product.isDealCount</label> 人</td>
+                	<td><label class="ui-link-btn" onclick="toIsDeal('$!product.productId');">提醒客户</label></td>
+                </tr>
+			#end
+		#end
+    </tbody>
+</table>
+#if($!count>10)
+<div class="ui-desk-reminders-more">
+	<label class="ui-link-btn" onclick="showALL();">查看更多</label>
+</div>
+#end

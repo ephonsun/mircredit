@@ -1,0 +1,51 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="20"><input type="checkbox" nm="chkall" /></th>
+				<th><label title="客户编号">客户编号</label></th>
+            	<th width="240"><label title="客户姓名(电话)">客户姓名(电话)</label></th>
+            	<th><label title="规划名称">规划名称</label></th>
+            	<th><label title="规划日期">规划日期</label></th>
+            	<th><label title="创建者">创建者</label></th>
+            	<th width="80"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+    	<tbody>
+    		#foreach($plnFastPlanInfo in $!plnFastPlanInfoList.items)
+        	<tr>
+            	<td><input type="checkbox" nm="chkone" value="$!plnFastPlanInfo.fastPlanId"/></td>
+				<td><label title="$!report.customerNo">$!plnFastPlanInfo.customerNo</label></td>
+            	<td>
+					<div class="datacus" style="height:24px">
+                        <span class="slink" onclick="showCustomer('$!plnFastPlanInfo.customerId','$!plnFastPlanInfo.customerName');" title="$!plnFastPlanInfo.customerName（$!plnFastPlanInfo.phone）">$!plnFastPlanInfo.customerName（$!plnFastPlanInfo.phone）</span>
+                        <div class="icon">
+                        	<i class="i phone" onclick="dial('$!plnFastPlanInfo.phone','$!report.customerId')" title="拨号">phone</i>
+                            <i class="i dsc" onclick="tape('$!plnFastPlanInfo.customerId')" title="座谈" >dsc</i>
+                            #if($urlPermitUtil.hasPermission('toAddSms'))
+                            	<i class="i sms" onclick="sendMms('$!plnFastPlanInfo.phone','$!plnFastPlanInfo.customerId')" title="短信">sms</i>
+                            #end
+    		                #if($urlPermitUtil.hasPermission('toAddMms'))
+                            	<i class="i mms" onclick="sendMms('$!plnFastPlanInfo.phone','$!plnFastPlanInfo.customerId')" title="彩信">mms</i>
+                            #end
+                        </div>
+					</div>
+                </td>
+            	<td><label title="$!plnFastPlanInfo.planName">$!plnFastPlanInfo.planName</label></td>
+            	<td><label title="$date.format("yyyy-MM-dd",$!plnFastPlanInfo.planDate)">$date.format("yyyy-MM-dd",$!plnFastPlanInfo.planDate)</label></td>
+            	<td><label title="$!plnFastPlanInfo.userName">$!plnFastPlanInfo.userName</label></td>
+            	<td>
+            		#if($urlPermitUtil.hasPermission('goToUpdatePage'))
+                	<a class="slink" href="javascript:void(0);" onclick="editPlan($!plnFastPlanInfo.fastPlanId,'$!plnFastPlanInfo.planName')">编辑</a>
+                	#end
+                </td>
+            </tr>
+            #end
+        </tbody>
+        <tfoot align="right">
+        	<tr>
+            	<td colspan="7">
+                	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

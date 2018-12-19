@@ -1,0 +1,148 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>团队管理</title>
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+
+	
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<script>
+		var oldPostJson={};
+		$(function(){
+			getQueryJson();
+		});
+
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"getSysTeamPage.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			var elem=$(html);
+			var gridDiv = $("#"+gridId);
+			gridDiv[0].innerHTML="";
+			gridDiv.append(elem);
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+            $("table.datatbl").table();
+		}
+		
+		//搜索
+		function searchType(){
+			var postJson=getQueryJson();
+			oldPostJson = postJson;
+			jQuery.post("getSysTeamPage.html?random="+Math.random()*1000000,postJson,
+    					function(html){
+						 refreshGrid('grid',html);
+    					});
+		}
+		function getQueryJson(){
+        	var postJson = {};
+    		postJson['sysTeam.teamName']=jQuery.trim($('#teamName').val());
+			postJson['sysTeam.userName']=jQuery.trim($('#userName').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+		
+		//清空
+		function qingkong(){
+			$('#teamName').val("");
+			$('#userName').val("");
+		}
+		//删除
+		function delById(teamId,teamName){
+		
+			if(confirm("您确定要删除团队“"+teamName+"”吗？")){
+				jQuery.post('validateDel.html',
+							{'sysTeam.teamId':teamId},
+							function(data){
+            					if(data.length>0){
+									banger.page.showMessageBox(data);
+            						return ;
+            					}
+            					searchType();
+            				});
+			}
+		
+		}
+		//刷新
+		function refreshForm(){
+			goto(null,"getSysTeamPage.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//打开页卡
+		function addTab(flag,roleId,roleName){
+			if(flag=='insert'){
+				tab.add({id: "systeam_insert"+roleId, pid: GetId(), title: "新建团队", url: "../team/saveSysTeam.html", lock: false});
+			}
+			if(flag=='update'){
+				tab.add({id: "systeam_update"+roleId, pid: GetId(), title: "编辑团队-"+roleName, url: "../team/updateSysTeam.html?flag=1&sysTeam.teamId="+roleId+"&sysTeamUser.teamName="+roleName+"&userIds="+1+"&random="+Math.random(), lock: false});
+			}
+			
+		}
+		
+    </script>
+</head>
+
+<body>
+	<form name="roleForm"  id ="roleForm" action=""  method="post">
+		<table class="htmltbl" cellpadding="0" cellspacing="0" width="50%">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" class="field">
+	            		<label>团队名称：</label>
+	            	</td>
+	            	<td>
+	            		<div class="dtxt1" style="width: 200px;">
+	            			<input type="text" id="teamName" name="sysTeam.roleName" class="dtxt1-txt" maxLength="20" />
+	            		</div>
+	                </td>
+	            	<td width="70" class="field">
+	            		<label>用户名：</label>
+	            	</td>
+	            	<td>
+	            		<div class="dtxt1" style="width: 200px;">
+	            			<input type="text" id="userName" name="sysTeam.userName" class="dtxt1-txt" maxLength="20" />
+	            		</div>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+    </form>
+	    <div class="sz">
+	    	##<span class="fl bold">所有角色 (<label id="queryCount" class="dgreen">#set($size=$!page.totalRowsAmount - 2)$size</label>)</span>
+	        <input type="button" value="清空" onclick="qingkong()" class="btn1" />
+	        <input type="button" value="搜索" onclick="searchType()" class="btn1" />
+	    </div>
+	    
+	    <div class="actrow">
+			#if($!adminOrDeptAdimn == 1)
+	    	<span onclick="addTab('insert')" class="btn2 fl">
+	            <label class="btn2-txt">新建</label>
+	        </span>
+			#end
+	    	<span onclick="refreshForm()" class="btn2 fr">
+	            <label class="btn2-txt">刷新</label>
+	        </span>
+	    </div>
+		<div id="grid">
+		   #parse("/velocity/team/sysTeam_listTable.vm")
+		</div>
+</body>
+</html>

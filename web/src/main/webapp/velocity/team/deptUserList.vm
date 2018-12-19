@@ -1,0 +1,43 @@
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+	<input id="cuserIds" type="hidden" name="cuserIds" value="$!userIds"/>
+	<input id="teamUserId" type="hidden" name="teamUserId" value="$!sysTeamUser.teamUserId"/>
+	<input id="teamName" type="hidden" name="teamName" value="$!sysTeam.teamName"/>
+    <thead>
+        <tr>
+			<th width="30"><input type="checkbox" nm="chkall" class="chk" name="userIdsss" onclick="selectAll(this)"/></th>
+            <th>姓名</th>
+            <th>角色</th>
+            <th>归属机构</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($deptUser in $!deptUserList.items)
+           
+			<tr 
+				 #foreach($tdUserId in $!usedUserIdList)
+						#if($!deptUser.userId.equals($tdUserId)) style="display: none" #end
+					#end
+					#foreach($tuser in $!checkdeptUserList)
+					#if($!deptUser.userId.equals($tuser.userId)) style="display: none" #end 
+					#end
+				>
+				<td><input type="checkbox" 
+					#foreach($tuser2 in $!checkUserList)
+					#if($!deptUser.userId.equals($tuser2))  checked="checked" #end 
+					#end
+					nm="chkone" class="chk"  name="userIds" value="$!deptUser.userId"/></td>
+                <td><label title="$!deptUser.userName" name="userName">$!deptUser.userName</label></td>
+                <td><label title="$!deptUser.roleNames">$!deptUser.roleNames</label></td>
+                <td><label title="$!deptUser.deptName">$!deptUser.deptName</label></td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="4">
+				<div class="floatR">#parse("/velocity/deptPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<input id="totalAmount" type="hidden" name="totalAmount" value="$!totalAmount"/>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="commTheme" extends="default" namespace="/commTheme">
+		<!-- 初始化交流区数据 -->
+		<action name="initThemePage" class="commThemeAction" method="initThemePage">
+			<result name="success">/velocity/financeCommu/financeIndex.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 发表主题 -->
+		<action name="insertTheme" class="commThemeAction" method="insertTheme">
+			<result name="addTheme">/velocity/financeCommu/addPostTopic.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 主题查询 -->
+		<action name="getCommThemeListPage" class="commThemeAction"
+			method="getCommThemeListPage">
+			<result name="success">/velocity/financeCommu/themeListCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 查看帖子内容 -->
+		<action name="themeDetail" class="commThemeAction" method="themeDetail">
+			<result name="success">/velocity/financeCommu/themeDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 查看投票帖子内容 -->
+		<action name="themeOptionDetail" class="commThemeAction"
+			method="themeOptionDetail">
+			<result name="success">/velocity/financeCommu/themeDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 修改查看数+1 -->
+		<action name="updateReadCount" class="commThemeAction" method="updateReadCount"></action>
+		<!-- 验证是否收藏/投票 -->
+		<action name="isUserRelation" class="commThemeAction" method="isUserRelation"></action>
+		<!-- 收藏/投票 -->
+		<action name="insertUserRelation" class="commThemeAction"
+			method="insertUserRelation"></action>
+
+		<!-- 发表投票 -->
+		<action name="insertOption" class="commThemeAction" method="insertOption">
+			<result name="addThemeOption">/velocity/financeCommu/addPostOption.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 帖子置顶 -->
+		<action name="themeTop" class="commThemeAction" method="themeTop"></action>
+		<!-- 编辑主题 -->
+		<action name="updateCommTheme" class="commThemeAction" method="updateCommTheme">
+			<result name="toUpTheme">/velocity/financeCommu/themeUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除主题/投票 -->
+		<action name="deleteCommTheme" class="commThemeAction" method="deleteCommTheme"></action>
+		<!-- 新建回复 -->
+		<action name="saveThemeReply" class="commThemeAction" method="saveThemeReply"></action>
+		<!-- 删除回复 -->
+		<action name="deleteThemeReply" class="commThemeAction" method="deleteThemeReply"></action>
+
+		<!-- 修改回复 -->
+		<action name="updateThemeReply" class="commThemeAction" method="updateThemeReply">
+			<result name="toReplyUpdate">/velocity/financeCommu/themeReplyUpdate.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 管理面板、个人主题、个人帖子、个人收藏 -->
+		<action name="getThemePanelPage" class="commThemeAction"
+			method="getThemePanelPage">
+			<result name="success">/velocity/financeCommu/themePanel.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑主题 -->
+		<action name="updateCommOption" class="commThemeAction" method="updateCommOption">
+			<result name="updateCommOption">/velocity/financeCommu/updatePostOption.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 投票 -->
+		<action name="voteCommTheme" class="commThemeAction" method="voteCommTheme"></action>
+		<!-- 已投票用户 -->
+		<action name="showVoteUserPage" class="commThemeAction" method="showVoteUserPage">
+			<result name="success">/velocity/financeCommu/themeOptionUser.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除收藏-->
+		<action name="deleteCollect" class="commThemeAction" method="deleteCollect"></action>
+		<!-- 帖子是否删除-->
+		<action name="isCommThemeDel" class="commThemeAction" method="isCommThemeDel"></action>
+
+	</package>
+</struts>

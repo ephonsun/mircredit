@@ -1,0 +1,86 @@
+<thead>
+<tr>
+    <th width="20"><input type="checkbox" rel="all" nm="chkall" name="loanCheckAll" id="loanCheckAll" /></th>
+    <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+    <th><label title="身份证">身份证</label></th>
+    <!--
+    <th><label title="客户类型">客户类型</label></th>
+    -->
+    <th><label title="申请金额(元)">申请金额(元)</label></th>
+    <th><label title="提交人员">提交人员</label></th>
+    <th><label title="提交时间">提交时间</label></th>
+    <th><label title="贷款类型">贷款类型</label></th>
+    <th width="120"><label title="操作">操作</label></th>
+</tr>
+</thead>
+<tbody>
+#foreach($data in $!dataList)
+    <tr #if($data.isWillPast && $data.isWillPast == 1) class="orange" #end>
+        <td><input type="checkbox" rel="row" nm="chkone" name="loanCheck" id="loanCheck" value="$data.loanId@$data.crmCustomer.customerId"/></td>
+        <td>
+            <div class="customer-infor">
+                #if($!data.crmCustomer.defaultPhoneType=='1')
+                    <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone1)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone1)）</span>
+                #elseif($!data.crmCustomer.defaultPhoneType=='2')
+                    <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone2)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone2)）</span>
+                #elseif($!data.crmCustomer.defaultPhoneType=='3')
+                    <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.phone)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.phone)）</span>
+                #elseif($!data.crmCustomer.defaultPhoneType=='4')
+                    <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.fax)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.fax)）</span>
+                #end
+                <div class="other">
+                    <label class="item cusTitle" title="$!data.crmCustomer.customerTitle">
+                        $!data.crmCustomer.customerTitle
+                    </label>
+                    <label class="item">
+                        $!data.crmCustomer.sex
+                    </label>
+                    <label class="item">
+                        #if($data.crmCustomer.age)
+                        		$!data.crmCustomer.age岁
+                        	#end
+                    </label>
+                    #if($data.crmCustomer.isNoGood && $!data.crmCustomer.isNoGood==1)
+                        <label class="item red">
+                            （不良客户）
+                        </label>
+                    #end
+                </div>
+            </div>
+        </td>
+        <td><label title="$vmHelper.getHideIdCard($!data.crmCustomer.idCard)">$vmHelper.getHideIdCard($!data.crmCustomer.idCard)</label></td>
+        <!--
+        <td><label title="$!data.crmCustomer.customerTypeName">$!data.crmCustomer.customerTypeName</label></td>
+        -->
+        <td><label title="$vmHelper.getUnityDecimalMoney($!data.appMoney)">$vmHelper.getUnityDecimalMoney($!data.appMoney)</label></td>
+        <td><label title="$!data.applyUserName">$!data.applyUserName</label></td>
+        <td><label title="$!date.format('yyyy-MM-dd HH:mm',$!data.applyDate)">$!date.format('yyyy-MM-dd HH:mm',$!data.applySubmitDate)</label></td>
+        <td><label title="$!data.lnLoanTypeBean.loanTypeName">$!data.lnLoanTypeBean.loanTypeName</label></td>
+        <td>
+        	##if($urlPermitUtil.hasPermission('lnAssignLoanEdit'))
+            <span class="link" onclick="queryLoanStatusById($!data.loanId,$!data.crmCustomer.customerId,'edit',$!data.loanStatusId)">编辑</span>
+            ##end
+            <span class="link" onclick="locateLoan($!data.loanId,$!data.crmCustomer.customerId)">定位</span>
+            <!--
+            ##if($urlPermitUtil.hasPermission('lnLocateCustomer'))
+                ##if($data.hasPermission && $!data.hasPermission == 1)
+                    <span class="link" onclick="locateLoan($!data.loanId,$!data.crmCustomer.customerId)">定位</span>
+               ##else
+                    <span disabled="true" style="cursor: default;">定位</span>
+                ##end
+            ##end
+            -->
+            ##if($urlPermitUtil.hasPermission('lnAssignLoanReject'))
+            ##<span class="link" onclick="queryLoanStatusById($!data.loanId,null,'refuse',$!data.loanStatusId)">拒绝</span>
+            ##end
+        </td>
+    </tr>
+#end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="8">
+            #parse("/velocity/ajaxPage.vm")
+        </td>
+    </tr>
+</tfoot>

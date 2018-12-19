@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="plnReport" extends="default" namespace="/plnReport" >
+	
+		<!--  理财规划报告列表页面 -->
+		<action name="getAllReportPage" class="plnReportAction" method="getAllReportPage">
+			<result name="success">/velocity/plnReport/plnReportList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="getAllReportPageForQuery" class="plnReportAction" method="getAllReportPageForQuery">
+			<result name="success">/velocity/plnReport/plnReportListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  删除报告 -->
+		<action name="deleteReport" class="plnReportAction" method="deleteReport">
+			<result name="success" type="redirectAction">getAllReportPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加报告 -->
+		<action name="addPlnReport" class="plnReportAction" method="addPlnReport">
+		</action>
+		
+	  	<action name="getReportById" class="plnReportAction" method="downloadPDFFile">
+		</action>
+		<!-- 验证生成报告现在有生成次数 -->
+	  	<action name="validateReportCount" class="plnReportAction" method="validateReportCount">
+	  		<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--根据客户id查看客户是否删除  -->
+		<action name="getReportCustomerIsDel" class="plnReportAction" method="getReportCustomerIsDel">
+	  		<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="exportPDF" class="pdfExportAction" method="pd4mlPDF">
+		</action>
+	</package>
+
+</struts>

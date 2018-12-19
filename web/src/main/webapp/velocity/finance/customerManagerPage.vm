@@ -1,0 +1,120 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>重要财经-客户经理</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <style type="text/css">
+		div.search-bar { margin-top:0; }
+	</style>
+	#scriptLink("core")
+	#scriptLink("page")
+  	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+		$(function(){
+			$('#count a').click(function(){
+				$('#count a').removeAttr('class');
+				$(this).addClass('active');
+				search($(this).attr('searchType'));
+				return false;
+			});
+		});
+		
+		var oldPostJson={};
+		//分页跳转
+		function gotoPage(page)
+		{
+			var oldPostJson=getQueryJson();
+			goto(page,"/finance/showFinanceMainPageBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+	  //刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+			
+		}
+		//刷新
+		function refreshForm(){
+			var oldPostJson=getQueryJson();
+			goto(null,"/finance/showFinanceMainPageBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//清空搜索条件
+		function resetValue(){
+	    	$(':text').val('');
+	    	$('.htmltbl :checkbox').attr('checked',false);
+	    	$("select").each(function(){
+    		this.selectedIndex = 0;
+    		$(this).select();
+    	}); 
+	    }
+	    //搜索
+	    function search(type){
+        	var postJson=getQueryJson();
+    		postJson['seachType'] = type;
+    		oldPostJson = postJson;
+        	jQuery.post('/finance/showFinanceMainPageBySearch.html?random='+Math.random()*1000000,postJson,function(html){
+        					 refreshGrid('grid',html);
+        	});
+			
+	    }
+	    
+	    //表单数据
+	    function getQueryJson(){
+        	var postJson = {};
+    		postJson['columnId'] = $('#columnId').val();
+			postJson['seachType'] = $('.ui-news-count a.active').attr("searchType");
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+		
+		function openNewAtricle(articleId,title){
+			var url="/finance/readFeArticle.html";
+			url=url+"?articleId="+articleId;
+			var title=title;
+			var id="FeArticle_readFeArticle"+articleId;
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false,confirm: false});
+		
+		}
+    </script>
+</head>
+
+<body>
+	<div class="search-bar">
+        <span class="fl bold">
+            今日总共(<label class="green" >$!countMap.get("todayCount")</label>)条
+        </span>
+    </div>
+    
+    <div id="count" class="ui-news-count">
+				<a href="javascript:void(0);" class="active" searchType="unread">未读<label>$!countMap.get("unReadedCount")</label>条</a>
+				(<a href="javascript:void(0);" hideFocus="true" searchType="mustReadInUnRead">包含必读<label>$!countMap.get("mustReadInUnReadCount")</label>条</a>)
+			</span>
+			<span>
+				<a href="javascript:void(0);" hideFocus="true" searchType="readed">已读<label>$!countMap.get("readedCount")</label>条</a>
+				(<a href="javascript:void(0);" hideFocus="true" searchType="mustReadInRead">包含必读<label>$!countMap.get("mustReadInReadCount")</label>条</a>)
+			</span>
+			<span>
+				<a href="javascript:void(0);" hideFocus="true" searchType="hasAttachment">有附件<label>$!countMap.get("attachmentCount")</label>条</a>
+			</span>
+	</div>
+    <input type="hidden" value="$!columnId" id="columnId">
+	<div id="grid">
+    	 #parse("/velocity/finance/customerManagerPageDiv.vm")
+    </div>
+</body>
+</html>

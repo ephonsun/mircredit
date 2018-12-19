@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="crmCounterUser" extends="default" namespace="/crmCounterUser" >
+		<!-- 第一次加载 -->
+		<action name="showCrmCounterUserPage" class="crmCounterUserAction" method="showCrmCounterUserPage">
+			<result name="success">/velocity/crmCounterUser/crmCounterUser.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 树点击事件 -->
+		<action name="getUserPageList" class="crmCounterUserAction" method="getUserPageList">
+			<result name="success">/velocity/crmCounterUser/crmCounterUserList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		
+		<action name="getDeptUser" class="crmCounterUserAction" method="getDeptUser">
+			<result name="success">/velocity/crmCounterUser/crmCounterUserList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<!-- 加载添加页面 -->
+		<action name="toAddSysUserPage" class="crmCounterUserAction" method="toAddSysUserPage">
+			<result name="success">/velocity/crmCounterUser/insertUser.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	  	<!-- 验证 -->
+	  	<action name="validateCrmCounterUser" class="crmCounterUserAction" method="validateCrmCounterUser"></action>
+	  	<!-- 添加 -->
+	  	<action name="insertCrmCounterUser" class="crmCounterUserAction" method="insertCrmCounterUser"></action>
+	  	<!-- 删除 -->
+	  	<action name="deleteCrmCounterUser" class="crmCounterUserAction" method="deleteCrmCounterUser"></action>
+	  	<!-- 修改 -->
+	  	<action name="deleteCrmCounterUser" class="crmCounterUserAction" method="deleteCrmCounterUser"></action>
+	  	<!-- 加载修改页面 -->
+		<action name="showUpdatePage" class="crmCounterUserAction" method="showUpdatePage">
+			<result name="success">/velocity/crmCounterUser/UpdatePage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	  	<action name="updateCrmCuser" class="crmCounterUserAction" method="updateCrmCuser">
+	  		<result name="success">/velocity/crmCounterUser/crmCounterUserList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	</package>
+
+</struts>

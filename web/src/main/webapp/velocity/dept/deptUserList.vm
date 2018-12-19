@@ -1,0 +1,44 @@
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+			<th width="30"><input type="checkbox" nm="chkall" class="chk" name="userIdsss" onclick="selectAll(this)"/></th>
+            <th>用户名</th>
+            <th>姓名</th>
+            <th>角色</th>
+            <th>归属机构</th>
+            <th>状态</th>
+            <th width="180">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($deptUser in $!deptUserList.items)
+            <tr>
+				<td><input type="checkbox" #if($!deptUser.userId.equals(1)) disabled="true" #end nm="chkone" class="chk" name="userIds" value="$!deptUser.userId"/></td>
+                <td><label title="$!deptUser.account" name="account">$!deptUser.account</label></td>
+                <td><label title="$!deptUser.userName" name="userName">$!deptUser.userName</label></td>
+                <td><label title="$!deptUser.roleNames">$!deptUser.roleNames</label></td>
+                <td><label title="$!deptUser.deptName">$!deptUser.deptName</label></td>
+                <td><label>$!deptUser.state</label></td>
+                <td>
+                    <a class="slink" href="javascript:void(0);" onclick="detail($!deptUser.userId,this)">查看</a>
+					<a class="slink" href="javascript:void(0);" #if($!deptUser.account.equals($!isDeptAdmin))  style="cursor: default; text-decoration: none;" disabled="true" #else onclick="update($!deptUser.userId,this)" #end >编辑</a>
+                    <a class="slink" href="javascript:void(0);" #if($!deptUser.account.equals($!isDeptAdmin))  style="cursor: default; text-decoration: none;" disabled="true" #else onclick="delSysUserById($!deptUser.userId,this)" #end>删除</a>
+                    <a class="slink" href="javascript:void(0);" #if($!deptUser.userId.equals($!isDeptAdmin)) disabled="true" #else onclick="resetPassWord($!deptUser.userId,this)" #end>重置密码</a>
+					#if($!deptUser.feiState.equals("停用"))
+						<a class="slink" href="javascript:void(0);" #if($!deptUser.account.equals($!isDeptAdmin))  style="cursor: default; text-decoration: none;" disabled="true" #else onclick="actived($!deptUser.userId,0,this)"  #end>停用</a>
+						#else
+						<a class="slink" href="javascript:void(0);" #if($!deptUser.account.equals($!isDeptAdmin)) style="cursor: default; text-decoration: none;" disabled="true" #else onclick="actived($!deptUser.userId,1,this)" #end>启用</a>
+					#end
+                </td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="7">
+				<div class="floatR">#parse("/velocity/deptPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<input id="totalAmount" type="hidden" name="totalAmount" value="$!totalAmount"/>

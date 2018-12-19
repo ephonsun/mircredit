@@ -1,0 +1,123 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>营销任务添加执行者</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    #styleLink("base")
+    <style type="text/css">
+    	.Agency-left { position: absolute; left: 10px; width: 200px; }
+		.Agency-left h4 { height: 30px; border: 1px solid #ccc; padding: 0px 5px; line-height: 30px; font-size: 12px; font-family: Microsoft Yahei; }
+		.Agency-left h4 label { float: left;}
+		.Agency-left h4 p { float: right; }
+		.Agency-left h4 p a { float: left; width: 20px; overflow: hidden; text-indent: -1000px; }
+		.Agency-left h4 p a.edi-add { background: url(../../images/template/edi-add.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-up { background: url(../../images/template/edi-up.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-down { background: url(../../images/template/edi-down.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-del { background: url(../../images/template/edi-del.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-edi { background: url(../../images/template/edi-edi.gif) no-repeat center center transparent; }
+		.Agency-left .Agency-tree {width:99%; display: block; height: 430px; border: 1px solid #ccc; margin-top: 2px; overflow: auto; }
+		.Agency-right { margin-left: 210px; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	
+    <script type="text/javascript">
+		var setting = {
+			callback:{
+				onClick:treeOnclick
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				showIcon: showIconForTree
+			}
+			
+		};
+ 		//点击节点查询本部门用户
+ 		function treeOnclick(event, treeId, treeNode) {
+    		jQuery.ajax({
+			    type:"post", //请求方式
+			    url:"getDeptUserListPage.html", //发送请求地址
+			    data:{ //发送给数据库的数据
+			  		deptId:treeNode.id,
+					flagInt:1
+			    },
+			    //请求成功后的回调函数
+			    success:function(html){
+			    	var elem=$(html);
+					var gridDiv = $("#deptGrid");
+					gridDiv[0].innerHTML="";
+					gridDiv.append(elem);
+			    }
+			});
+		};
+
+ 		//json树数据
+		var zNodes = $!deptJson; 
+		//不显示节点图标
+		function showIconForTree(treeId, treeNode) {
+			return !treeNode;
+		};
+		
+		//默认选择第一个节点
+		function initNodeSelect(){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    		var nodes = treeObj.getNodes();
+    		if (nodes.length>0) {
+    			treeObj.selectNode(nodes[0]);
+				$("#deptId").val(nodes[0].id);
+    		}
+		}
+		
+ 		//机构树加载
+		$(document).ready(function(){
+			jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+			initNodeSelect();
+			$(".dataTable").table();
+		});
+		
+		//刷新
+		function refreshGrid(gridId,html)
+		{
+			var elem = $(html);
+			var grid = $("#"+gridId);
+			grid[0].innerHTML="";
+			grid.append(elem);
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			var deptId=$("#deptId").val();
+			goto(page,"getDeptUserListPage.html?random="+Math.random(),{
+				"deptId":deptId,
+				"page.currentPage":page
+			},function(html){refreshGrid('deptGrid',html);});
+		}
+	</script>
+</head>
+ 
+<body>
+	<div class="Agency-left">
+        <div class="Agency-tree">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+    </div>
+    <div class="Agency-right">
+	   <div id="deptGrid">
+       #parse("/velocity/tskTask/tskExcUserList.vm")
+       </div>
+    </div>
+</body>
+</html>
+

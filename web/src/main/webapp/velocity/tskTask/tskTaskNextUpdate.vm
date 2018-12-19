@@ -1,0 +1,194 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑日程</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+    </style>
+</head>
+ 
+<body>
+	<form name="nextTask"  id ="nextTask" action=""  method="post" >
+        <div class="etabs">
+            <div id="etabs-body" class="etabs-body">
+            	<div class="etabs-body-child">
+                	<table class="htmltbl" style="table-layout: auto;">
+                        <tbody>
+    						<tr>
+                                <td class="field" width="80">
+                                    <label>客户：</label>
+                                </td>
+                                <td colspan="3">
+                                   <label class="fl">$!customer.customerName</label>
+                			       <div class="icon">
+                                    	#if($!customer.defaultPhoneType=='1')
+                                        	<i class="i phone" onclick="dial('$!customer.mobilePhone1','$!customer.customerId')" title="拨号">phone</i>	
+                                        #elseif($!customer.defaultPhoneType=='2')
+                                        	<i class="i phone" onclick="dial('$!customer.mobilePhone2','$!customer.customerId')" title="拨号">phone</i>
+                                        	
+                                        #elseif($!customer.defaultPhoneType=='3')
+                                        	<i class="i phone" onclick="dial('$!customer.phone','$!customer.customerId')" title="拨号">phone</i>
+                                        	
+                                        #elseif($!customer.defaultPhoneType=='4')
+                                        	<i class="i phone" onclick="dial('$!customer.fax','$!customer.customerId')" title="拨号">phone</i>
+                                        #end
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>任务标题：</label>
+                                </td>
+                                <td colspan="3">
+                                    <div class="ui-div-text" style="width:375px; overflow:hidden;">
+                                        <input type="text" class="text" id="taskTitle" name="tskTask.contactTitle" value="$!tskTask.contactTitle" rule="\S" tips='“任务标题”必须填写' maxlength="100"/>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>开始日期：</label>
+                                </td>
+                                <td  width="130">
+                                    <div class="ui-div-text" style="width: 120px;">
+                                        <input type="text" class="text datepicker" disabled="true" name="tskTask.startDate" value="$!date.format("yyyy-MM-dd",$!tskTask.startDate)" id="datepicker1" rule="\S" tips='“开始日期”必须填写'/>
+                                    </div>
+                                </td>
+    							 <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>结束日期：</label>
+                                </td>
+                                <td>
+                                    <div class="ui-div-text" style="width: 120px;">
+                                        <input type="text" class="text datepicker" readonly="true" fun="dateFunction" name="tskTask.endDate" value="$!date.format("yyyy-MM-dd",$!tskTask.endDate)" id="datepicker2"  rule="\S" tips='“结束日期”必须填写'/>
+                                        <i class="date"></i>
+                                    </div>
+									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+									<input id="beforeEndDate" type="hidden" value="$!date.format("yyyy-MM-dd",$!tskTask.endDate)">
+                                </td>
+                            </tr>
+    						<tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>联系目的：</label>
+                                </td>
+                                <td colspan="3">
+                                    <select style="width: 120px;" id="contactPurpose" name="tskTask.contactPurpose" value="$!tskTask.contactPurpose" rule="\S" tips='“联系目的”必须填写'>
+                                    	<option></option>
+    									#foreach($!purpose in $!taskPurposeList)
+    										<option value="$!purpose.taskPurposeId">$!purpose.taskPurposeName</option>
+    									#end
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                    <label>任务概述：</label>
+                                </td>
+                                <td colspan="3">
+                                    <div class="ui-div-textarea" style="height: 100px;width:375px;">
+                                        <textarea class="textarea" style="height:100px;width:375px;" id="remark" name="tskTask.remark" >$!tskTask.remark</textarea>
+                                    </div>
+                                </td>
+                            </tr>
+							<tr>
+                                <td class="field" width="80">
+                                    <label>是否紧急：</label>
+                                </td>
+                                <td colspan="3">
+                                	<input type="checkbox" class="checkbox" id="isEmergency" #if($!tskTask.isEmergency==1) checked="true" #end/>
+                                    <label for="isEmergency">紧急任务</label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+        
+                    <hr />
+                    
+                    <div class="center">
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="addSubmit()" value="确定" />
+                        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancel();" value="取消" />
+                    </div>
+                </div>
+    		</div>
+    	</div>
+		 <input type="hidden" name="tskTask.contactId" value="$!tskTask.contactId"/>
+	</form>
+</body>
+    
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator.dateCheck-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript">
+	var json={};
+	$(function(){
+		$('div.etabs').etabs({
+			'head': 'etabs-items',
+			'body': 'etabs-body',
+			'bar': 'etabs-bar'
+		});
+		if('$!tskTask.contactPurpose'){
+			$('#contactPurpose').val('$!tskTask.contactPurpose');
+		}
+		$('select').select();
+		maxInput('#remark',200);
+		$('#nextTask').validator();
+		
+	});
+		
+	function addSubmit(){
+		var bool = jQuery.validator({ form: 'nextTask'});
+		if(!bool){
+			return false;
+		}
+		var postJson = getPostJson();
+		if($('#isEmergency').attr('checked')){
+			postJson['tskTask.isEmergency']=1;
+		}else{
+			postJson['tskTask.isEmergency']=0;
+		}
+		jQuery.post("/tskContact/saveTaskNext.html",postJson,
+			function(text){
+        		window.returnValue=1;
+        		window.close();
+			});
+	}
+	function cancel(){
+    	window.close();
+	}
+	
+	function dateFunction(obj){				
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		var endDate=$("#datepicker2").val();
+		var beEndDate=$("#beforeEndDate").val();
+		if(endDate.length>0){
+			if(endDate<systemDate){
+				$(obj).attr('tips', '未完成的任务，执行结束日期不能小于今天'); return false;
+			}else if(startDate>endDate){
+				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+			}else if(endDate<beEndDate){
+				$(obj).attr('tips', '结束日期不能小于之前的日期：'+beEndDate); return false;
+			}else return true;
+		}else return true;
+	}
+	function dial(number,cusId){
+		window.parent.dialogArguments.dial(number,cusId);
+	}
+</script>
+
+</html>
+

@@ -1,0 +1,73 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>我的客户</title>
+    #styleLink("base")
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script>
+    
+    	function dial(number,cusId)			//拨号
+		{
+			if(window.parent.postDial)
+			{
+				window.parent.postDial(number,cusId);
+			}
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			var params = getUrlParams();
+			var json={}
+			json["detail.deptId"]=params["detail.deptId"];
+			json["detail.userId"]=params["detail.userId"];
+			json["detail.dateBegin"]=params["detail.dateBegin"];
+			json["detail.dateEnd"]=params["detail.dateEnd"];
+			var url = "showAddCustomerReportDetailGrid.html?random="+Math.random()*1000000;
+			goto(page,url,json,function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			var elem = $(html);
+			var grid = $("#"+gridId);
+			grid[0].innerHTML="";
+			grid.append(elem);
+		}
+		//查看客户
+		function browseCustomer(cusId){
+	    	jQuery.ajax({
+				  type: 'POST',
+				  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+				  data: {"cusId":cusId},
+				  success:function(data){
+				  		var obj = jQuery.parseJSON(data);
+				  		if(obj[0].isDel=='1'){
+				  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+				  		}else{
+				  			var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "../customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+							tab.add(options);
+				  		}
+				  	}
+				});	
+	    }
+    </script>
+</head>
+
+<body>
+<form id="form1" method="post">
+    
+	<div class="sz" style="margin-top: 0;">
+        <label class="fl bold">$!detail.title 新增客户统计—"$!detail.name" 明细，共$!page.totalRowsAmount条记录</label>
+	</div>
+	<div id="grid" >
+		#parse("/velocity/report/detailCustomerGrid.vm")
+    </div>
+</form>
+</body>
+</html>

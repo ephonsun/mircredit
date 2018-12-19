@@ -1,0 +1,168 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>业务类型</title>
+    #styleLink("base")
+	#scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    #scriptLink("page")	
+    <script type="text/javascript">
+		//设置第一行 上移 按钮禁用；最后一行 下移 按钮禁用
+		function setstate(){
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+		}	
+	
+		jQuery(function(){
+			jQuery("#recTypeForm").validator();
+			setstate();
+		});
+		
+		function add(){
+			var bool = jQuery.validator({ form: 'recTypeForm', extend: false});
+			if(bool){
+				var postJson = {};
+        		postJson['recbizType.bizTypeName']=$('#bizTypeName').val();
+        		jQuery.ajax({
+        			type: 'POST',
+        			url:'valationType.html',
+        			data:postJson,
+        			cache: false, 
+        			async: false,
+        			success:function(data){
+        				if(data!=""){
+            				$("#bizTypeName").attr('tips', data); 
+            				$('#recDiv').addClass('v-fails');
+            				bool=false;
+            			}else{
+            				$('#recDiv').removeClass('v-fails');
+            				bool=true;
+            			}
+        			}
+        		});
+			if(bool)document.recTypeForm.submit();
+			}
+		}
+		
+		function actived(typeCode,state){
+			var str="启用";
+			if(state==0){
+				str="停用";
+			}
+			if(confirm("您确定要"+str+"该选择项吗？")){
+				location.href="checkActived.html?recbizType.bizTypeId="+typeCode+"&recbizType.isActived="+state;
+			}
+		}
+		function delTypeById(typeCode,obj){
+			if(confirm('您确定要删除选项“'+obj.parentNode.parentNode.childNodes[0].innerText+'”吗？')){
+				jQuery.post('isByTypeUse.html',{'recbizType.bizTypeId':typeCode},function(data){
+					if(data>0){
+						banger.page.showMessageBox("选择项已被使用，无法删除！");
+					}else{
+						location.href="delRecbizTypeById.html?recbizType.bizTypeId="+typeCode;
+					}
+				});
+			}
+		}
+		
+		function update(code){
+			var url="toUpdatePage.html?recbizType.bizTypeId="+code+"&random="+Math.random()*10000;
+			var result=window.showModalDialog(url, { window: window }, 'dialogWidth=550px;dialogHeight=220px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+			if(result==1){
+				suiji();
+			}
+		}
+		
+		function suiji(){
+			document.location.href = "showRecbizTypePage.html?random=" + Math.random();
+		}
+		
+		function upOrdown(code,flag){
+			jQuery.post('upOrDown.html',{
+				'recbizType.bizTypeId':code,
+				'moveFlag':flag
+			},function(data){
+				if(data!='True'){
+					return ;
+				}
+				suiji();
+			});
+		}
+		
+		function valBizType(){
+			var value=$("#bizTypeName").val();
+			if(value.replace(/\ /g,"")==""){
+				$("#bizTypeName").attr('tips', '“业务类型”必须填写');
+				return false;
+			}
+			return true;
+		}
+	</script>
+</head>
+
+<body>
+	<table class="viewtbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="70" class="field"><label>名称：</label></td>
+            	<td><label>业务类型</label></td>
+            	<td width="70" class="field"><label>字段类型：</label></td>
+            	<td><label>系统级</label></td>
+            	<td width="70" class="field"><label>数据类型：</label></td>
+            	<td><label>单选下拉框</label></td>
+            </tr>
+        </tbody>
+    </table>
+    <div style="margin: 10px 0px;"><label>选项列表</label></div>
+	<div style="border: 1px solid #ccc; padding: 10px;">
+		<form name="recTypeForm"  id ="recTypeForm" action="addRecbizType.html"  method="post">
+    		<div class="sz" style="text-align: left;">
+	        	<label class="fl red">*</label>
+            	<label class="fl">新选项：</label>
+				<div class="dtxt2 fl" id="recDiv" style="width: 150px; margin-right: 5px;">
+					<input type="text" fun="valBizType" name="recbizType.bizTypeName" id="bizTypeName" class="dtxt2-txt" maxlength="20" rule="\S" tips="“业务类型”必须填写" focusFlag="false"/>
+                </div>
+                <input type="text" style="display:none">
+                <input type="button" value="添 加" class="btn1 fl" onclick="add()"/>
+            </div>
+		</form>
+		<table class="listtbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>选项名称</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            	#foreach($rec in $!recbiztypeList)
+                <tr>
+                    <td><label>$!rec.bizTypeName</label></td>
+                    <td width="150">
+						<a class="slink" href="#" onclick="update('$!rec.bizTypeId')">编辑</a>
+						<a class="slink" href="#" onclick="delTypeById('$!rec.bizTypeId',this)">删除</a>
+                    	<a href="#" class="slink up" onclick="upOrdown('$!rec.bizTypeId','up')">上移</a>
+    					<a href="#" class="slink down" onclick="upOrdown('$!rec.bizTypeId','down')">下移</a>
+    					#if($!rec.isActived.equals(1))
+    						<a class="slink" href="#" onclick="actived('$!rec.bizTypeId',0)">停用</a>
+    						#else
+    							<a class="slink" href="#" onclick="actived('$!rec.bizTypeId',1)">启用</a>
+    					#end
+                    	
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+	<div class="halign" style="margin-top: 20px;">
+       <input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+    </div>
+</body>
+</html>

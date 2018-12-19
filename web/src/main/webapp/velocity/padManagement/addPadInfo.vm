@@ -1,0 +1,263 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>添加PAD信息</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    #scriptLink("page")
+    <script type="text/javascript">
+		$(function(){
+			$('select').select();
+			//加载验证控件
+			$("#padFrom").validator();
+			
+			$('#userList').atree({
+				setting: {
+					view: {
+						showIcon: true,
+						dblClickExpand: false
+					},
+					data: {
+						simpleData: {
+							enable: true
+						}
+					},
+					callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: null,
+						onCheck: onCheck
+					}
+				},
+				url: function(){return "../padManagement/getPadDeptUserTree.html?flag=add&random="+Math.random()*1000000;},
+				beforeClick: beforeClickUser,
+				okHandler: onClickUser
+			});
+		});
+		//初始化pad品牌型号
+		function initPadBrand(val){
+			if(val){
+				buildBandModel(val);
+			}else{
+				var cSel=$("#bmodel");
+				cSel.empty();
+				var op=$("<OPTION></option>");
+				cSel.append(op);
+				cSel.select();
+			}
+		}
+		
+		function buildBandModel(val){
+			jQuery.ajax({
+                type: "post",
+                url: "getPadModelJson.html",
+                data: {"padModel.padTypeId": val,isActived:1},
+                success: function(json){
+                    var ds=jQuery.parseJSON(json);
+					var cSel=$("#bmodel");
+					var cityVal = cSel.attr("bmodel");
+					cSel.empty();
+					var op=$("<OPTION></option>");
+					cSel.append(op);
+					for(var i=0;i<ds.length;i++)
+					{
+						var d=ds[i];
+						var selStr = (d["code"]==cityVal)?"selected":"";
+						var op=$("<OPTION VALUE='"+d["code"]+"' "+selStr+" >"+d["name"]+"</option>");
+						cSel.append(op);
+					}
+					cSel.select();
+                }
+            });
+		}
+		
+		function addPadInfo(flag){
+			var bool = jQuery.validator({ form: 'padFrom'});
+			if(!bool){
+				return false;
+			}
+			var useStatus=$("#useStatus").val();
+			if(useStatus==1){
+				var userId=$("#userIds").val();
+				if(userId.length==0){
+					banger.page.showMessageBox("Pad已启用,请选择pad的使用人员!");
+					return false;
+				}
+			}
+			
+			var code=jQuery.trim($("#padCode").val());
+			var num=jQuery.trim($("#serialNumber").val());
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "addPadInfo.html",
+		    	data: {'padInfo.padCode': code,
+		    		   'padInfo.serialNumber': num,
+				       'padInfo.brandTypeId': $("#brand").val(),					       
+				       'padInfo.brandSubTypeId': $("#bmodel").val(),
+				       'padInfo.useStatus': useStatus,
+				       'padInfo.userId': $("#userIds").val(),
+				       'flag': flag
+		    	},
+		    	success: function(data){
+		    		if(data=="codeExists"){
+		    			banger.page.showMessageBox("编号为"+code+"的pad已存在,请重新填写!");
+		    		}else if(data=="numExists"){
+		    			banger.page.showMessageBox("序列号为"+num+"的pad已存在,请重新填写!");
+		    		}else if(data=="save"){
+		 	  			tab.close(GetId(), true);
+		 	  		}else if(data=="toAdd"){
+		 	  			document.location.href="../padManagement/addPadInfo.html?random="+Math.random();
+		 	  		}else{
+		 	  			banger.page.showMessageBox("保存信息失败!");
+		 	  		}
+		    	}
+			});
+		}
+		
+		
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#userIds').val(nodes[0].id);
+			$('#userNames').val(nodes[0].name);
+		}
+		//树 下属的
+		function onCheck(e, treeId, treeNode){
+			var zTree = jQuery.fn.zTree.getZTreeObj(treeId), p = treeNode.getParentNode();
+			if(p != null){
+				var child = p.children, n = 0;
+				for(var i=0; i<child.length; i++){
+					if(child[i].checked){
+						n++;
+					}
+				}
+				if(n == child.length){
+					zTree.checkNode(p, true, null, null);
+				}
+				else{
+					zTree.checkNode(p, false, null, null);
+				}
+			}
+		}
+		
+		function ChangeStatus(s){
+			if(s==2){
+				$("#userNames").val("");
+				$("#userIds").val("");
+			}
+		}
+    </script>
+</head>
+
+<body>
+    <p class="pad-title-name">
+        <label>填写pad信息</label>
+    </p>
+   <form id="padFrom" name="padFrom">
+	<table class="htmltbl">
+        <tbody>
+            <tr>
+                <td class="field" width="80">
+                	<label class="red">*</label>
+                    <label>编号：</label>
+                </td>
+                <td colspan="3">
+                    <div class="ui-div-text" style="width:492px; overflow:hidden;">
+                        <input type="text" class="text" id="padCode" rule="\S" tips='"编号"必须填写' maxlength="20"/>
+                    </div>
+                </td>
+                <td colspan="4"></td>
+            </tr>
+            <tr>
+                <td class="field" width="80">
+                    <label class="red">*</label>
+                    <label>序列号：</label>
+                </td>
+                <td colspan="3">
+                    <div class="ui-div-text" style="width:492px; overflow:hidden;">
+                        <input type="text" class="text" id="serialNumber" rule="\S" tips='"序列号"必须填写' maxlength="20"/>
+                    </div>
+                </td>
+                <td colspan="4"></td>
+            </tr>
+            <tr>
+                <td class="field" width="80">
+                    <label>品牌：</label>
+                </td>
+                <td width="200">
+                    <select id="brand" onchange="initPadBrand(this.value)" style="width: 190px;">
+                        <option value=""></option>
+                        #foreach($brand in $!brandList)
+                        	<option value="$brand.brandTypeId">$brand.brandTypeName</option>
+                        #end
+                    </select>
+                </td>
+                <td class="field" width="80">
+                    <label>型号：</label>
+                </td>
+                <td width="200">
+                    <select id="bmodel" bmodel="" style="width: 190px;">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td colspan="4"></td>
+            </tr>
+            <tr>
+				 <td class="field" width="80">
+						<label>状态：</label>
+				</td>
+				<td colspan="3">
+                    <select id="useStatus" style="width:492px; overflow:hidden;" onchange="ChangeStatus(this.value)">
+                        <option value="1">启用</option>
+                        <option value="2">禁用</option>
+                    </select>
+                </td>
+                <td colspan="4"></td>
+			</tr>
+			<tr>
+                <td class="field" width="80">
+                    <label>使用人员：</label>
+                </td>
+                <td colspan="3">
+                    <div id="userList" class="ui-div-text" style="width:492px; overflow:hidden;">
+	                    <input type="text" id="userNames" class="text" readonly="readonly" />
+	                    <input id="userIds" type="hidden" />
+	                    <i class="ddl">ddl</i>
+	                </div>
+                </td>
+                <td colspan="4"></td>
+            </tr>
+        </tbody>
+    </table>
+    <hr />
+
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" onclick="addPadInfo('save');"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-continue" value="保存并新建" onclick="addPadInfo('toAdd');"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+     </form>   
+</body>
+</html>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="recordExport" extends="default" namespace="/recordExport" >
+		<global-results>
+			<result name="error">/velocity/error.vm</result>
+		</global-results>
+		<!-- 导出客户第一步 -->
+		<action name="showRecordExport" class="recordExportAction" method="showRecordExport">
+			<result name="success">/velocity/record/recordExport.vm</result>
+		</action>
+		<!-- 导出验证 -->
+		<action name="exportRecordVerify" class="recordExportAction" method="exportRecordVerify">
+		</action>
+		<!-- 执行导出 -->
+		<action name="exportRecordExute" class="recordExportAction" method="exportRecordExute">
+		</action>
+		<!-- 导出进度条 -->
+		<action name="exportRecordBar" class="recordExportAction" method="exportRecordBar">
+			<param name="filter">none</param>
+		</action>
+		<!-- 导出终止 -->
+		<action name="exportRecordStop" class="recordExportAction" method="exportRecordStop">
+		</action>
+	</package>
+</struts>

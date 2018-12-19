@@ -1,0 +1,144 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑知识分类</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.ddmenuSelect-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+
+    <!--保存校验  Zhangfp-->
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+
+    <script type="text/javascript">
+        function saveResult(msg){
+            if(msg == 'SUCCESS'){
+                window.returnValue = 1;
+                window.close();
+            }else{
+                banger.page.showMessageBox(msg);
+            }
+        }
+        jQuery(function(){
+            jQuery('#editPdtLibrary').validator();
+
+            maxTextArea("textarea[maxlength]");
+
+            jQuery('#class').ddMenuSelect({
+                id: 'ztree',
+                url: 'loadPdtLibraryTreeJson.html',
+                onClick: function(e, treeId, treeNode){
+                    jQuery('#class input[type=\'text\']').val(treeNode.name);
+                    jQuery("#txtSNodeId").val(treeNode.id);
+                    jQuery("#txtSNodeName").val(treeNode.name);
+                }
+            });
+
+            jQuery("#btnSave").click(function(){
+                var bool = jQuery.validator({form:'editPdtLibrary'});
+                if(!bool){
+                    return false;
+                }
+                var libraryId = jQuery("#txtSNodeId").val();
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",
+                    url: "savePdtLibrary.html",
+                    data: {'pdtLibrary.libraryId': jQuery("#txtLibraryId").val(),
+                        'pdtLibrary.parentId': libraryId,
+                        'pdtLibrary.isLeaf': 0,
+                        'pdtLibrary.libNo': jQuery("#lblLibNo").text(),
+                        'pdtLibrary.libTitle': jQuery.trim(jQuery("#txtLibTitle").val()),
+                        'pdtLibrary.remark': jQuery.trim(jQuery("#txtRemark").val())
+                    },
+                    success: function(data){
+                        saveResult(data);
+                    }
+                });
+            });
+        });
+        
+        function titleFunction(obj){
+        	var title=jQuery.trim(jQuery("#txtLibTitle").val());
+        	if(title.length>0){
+        		title=title.toUpperCase();
+				if(title=="NULL"){
+					$(obj).attr('tips', '无效的分类名称'); return false;
+				}else{
+					$('#titleLib').removeClass('v-fails');return true;
+				} 
+			}else {$(obj).attr('tips', '"分类名称"必须填写'); return false;}
+        }
+    </script>
+
+</head>
+
+<body>
+	  <input type="hidden" id="txtLibraryId" value="$!pdtLibrary.libraryId"/>
+	  <input type="hidden" id="txtSNodeId" value="$!pPdtLibrary.libraryId"/>
+	  <input type="hidden" id="txtSNodeName" value="$!pPdtLibrary.libTitle"/>
+      <table class="htmltbl" style="table-layout: auto;" id="editPdtLibrary">
+          <tbody>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>分类编号：</label>
+                  </td>
+                  <td width="92%">
+                   	<label id="lblLibNo">$!pdtLibrary.libNo</label>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>分类名称：</label>
+                  </td>
+                  <td width="92%">
+                  	  <div class="ui-div-text" id="titleLib">
+                          <input type="text" fun="titleFunction" class="text" id="txtLibTitle" value="$!pdtLibrary.libTitle" maxlength="20" tips='"分类名称"必须填写'/>
+                      </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>上级分类：</label>
+                  </td>
+                  <td width="92%">
+                	<div id="class" class="ui-div-text">
+                		<input type="text" class="text" value="$!pPdtLibrary.libTitle"/>
+                		<i class="ddl">&nbsp;</i>
+                	</div>
+                  </td>
+              <tr>
+                  <td class="field" width="8%">
+                      <label>分类说明：</label>
+                  </td>
+                  <td colspan="3">
+                      <div class="ui-div-textarea" style="height: 100px;">
+                          <textarea class="textarea" id="txtRemark" maxlength="500">$!pdtLibrary.remark</textarea>
+                      </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+  
+    
+    <hr />
+    
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" id="btnSave"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close();"/>
+    </div>
+</body>
+</html>

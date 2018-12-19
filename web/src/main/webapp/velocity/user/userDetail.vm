@@ -1,0 +1,147 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>用户详情</title>
+	<base target="_self" />
+    #styleLink("base")
+    <style type="text/css">
+		.left { text-align: left !important; }
+		.pr { padding-right: 5px !important; }
+		.separator { background-color: white !important; padding: 0 !important; border: 0 !important; }
+		.separator h4 { border-bottom: 1px solid #ccc; margin-bottom: 10px; padding-bottom: 8px; }
+		.separator h4.mt { margin-top: 10px; }
+		dl dd { text-indent: 24px; }
+    </style>
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			
+		});
+    </script>
+</head>
+
+<body>
+	<input type="hidden" name="roleNames" id="roleNames" value="$!roleNames">
+    <table class="viewtbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+            <tr>
+            	<td colspan="4" class="separator">
+                	<h4>人员信息</h4>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field">
+                    <label>姓名：</label>
+                </td>
+            	<td width="43%">
+                	<label>$!sysUser.userName</label>
+                </td>
+            	<td width="7%" class="field">
+                    <label>人员编号：</label>
+                </td>
+            	<td width="43%">
+                	<label>$!sysUser.userCode</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field">
+                    <label>归属机构：</label>
+                </td>
+            	<td width="43%">
+                	<label>$!deptParentName</label>
+                </td>
+            	<td width="7%" class="field">
+                    <label>内部分机：</label>
+                </td>
+            	<td width="43%">
+                	<label>$!sysUser.phoneExt</label>
+                </td>
+            </tr>
+            
+        	<tr>
+            	<td width="7%" class="field" valign="top">
+                    <label>角色：</label>
+                </td>
+                <td colspan="3">
+                    #foreach($item in $!sysRolelist)
+                        ## #if($!item.roleTypeId.equals(2))
+                            <dl>
+                                <dt>$!item.roleName <dt>
+                            </dl>
+                        ## #end
+                    #end
+                </td>
+            </tr>
+            <tr>
+            	<td width="7%" class="field">
+                    <label>是否请假：</label>
+                </td>
+            	<td width="43%">
+				#if($!sysUser.leaveTag==1)
+                	<label>是</label>
+				#else	
+				   <label>否</label>
+				#end 
+                </td>
+            	<td width="7%" class="field">
+                    <label>审批金额上限：</label>
+                </td>
+            	<td width="43%">
+				#if($!sysUser.approvalValue)
+                	<label>$!sysUser.approvalValue</label>
+				#else 
+				<label>0.0000</label>				 
+				#end	
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field" valign="top">
+                    <label>人员备注：</label>
+                </td>
+            	<td colspan="3">
+                	<label>$!sysUser.remark</label>
+                </td>
+            </tr>           
+            
+            <tr>
+            	<td colspan="4" class="separator">
+                	<h4 class="mt">用户信息</h4>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field">
+                    <label>用户名：</label>
+                </td>
+            	<td colspan="3">
+                	<label>$!sysUser.account</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field">
+                    <label>状态：</label>
+                </td>
+            	<td width="43%">
+                	<label>#if($!sysUser.isActived.equals(1)) 启用 #else 停用 #end</label>
+                </td>
+            	<td width="7%" class="field">
+                    <label>上次登录时间：</label>
+                </td>
+            	<td width="43%">
+                	<label>$!date.format("yyyy-MM-dd HH:mm:ss",$!sysUser.lastLoginDate)</label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg3" value="关闭"  onclick="javascript:tab.close(GetId(),false);"/>
+    </div>
+</body>
+</html>

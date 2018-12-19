@@ -1,0 +1,95 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>关联营销任务</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};	//上一个搜索条件
+    	
+    	/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			goto(
+				page,
+				"/tskMarketingPlan/queryRelaReportMarketing.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".green").text(total);
+			}else {
+				jQuery(".green").text("0");
+			}
+		}
+		
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var postJson={
+				'executeUserId': $('#executeUserId').val(),
+				'productTarget': $('#productTarget').val(),
+			  	'startDate':  $('#startDate').val(),
+			  	'endDate':  $('#endDate').val()
+				};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+		$(function(){
+			$('table.datatbl').table();
+			
+			initQueryJson();
+			
+			jQuery('#tblList').table();
+		});
+		
+		function viewTskMarketing(marketingId,marketingTitle,mrole){
+			var urls="/tskMarketing/toViewTskMarketingPage.html?tskMarketing.marketingId="+marketingId+"&random="+Math.random()*10000;
+				var options = {id: "tsk_view_"+marketingId, pid: GetId(), title: "查看营销任务-"+marketingTitle, url: urls, lock: false};
+				tab.add(options);
+		}
+	 </script>
+</head>
+
+<body>
+    <div class="search-bar">
+        <span class="fl bold">
+            关联营销任务(<label class="green">$!count</label>)
+        </span>
+    </div>
+   
+    <table class="datatbl" id="tblList">
+		#parse("/velocity/marketTask/reportMarketingListTable.vm")
+    </table>
+    
+    <input type="hidden" id="executeUserId" value="$!executeUserId"/>
+    <input type="hidden" id="productTarget" value="$!productTarget"/>
+    <input type="hidden" id="startDate" value="$!startDate"/>
+    <input type="hidden" id="endDate" value="$!endDate"/>
+</body>
+</html>

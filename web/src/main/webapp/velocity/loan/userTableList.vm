@@ -1,0 +1,20 @@
+<table>
+    <tbody>
+
+        #if(!$userList)
+        <tr id="$user.UserId" onclick="userClick($user.UserId,'$!jsUtil.escapeJs($user.userName)')">
+            <td width="180"><label> 用户不存在 </label></td>
+            <td width="180"><label>$!user.Account</label></td>
+        </tr>
+        #else
+            #foreach($user in $userList)
+            <tr id="$user.UserId" onclick="userClick($user.UserId,'$!jsUtil.escapeJs($user.userName)')">
+                <td width="180"><label>#if($!user.UserName)  $!user.UserName #else 用户不存在  #end</label></td>
+                <td width="180"><label>$!user.Account</label></td>
+            </tr>
+            #end
+
+        #end
+    </tbody>
+
+</table>

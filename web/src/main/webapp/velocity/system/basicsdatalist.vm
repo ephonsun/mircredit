@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>基础数据</title>
+    <link type="text/css" rel="stylesheet" href="../../css/base.css" />
+    <link type="text/css" rel="stylesheet" href="../../css/common.css" />
+	<script type="text/javascript" src="../../js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="../../js/plugins/jquery.plugins.js"></script>
+</head>
+<script>
+function forbidBackSpace(e) {
+    var ev = e || window.event; //获取event对象    
+    var obj = ev.target || ev.srcElement; //获取事件源    
+    var t = obj.type || obj.getAttribute('type'); //获取事件源类型    
+    //获取作为判断条件的事件类型    
+    var vReadOnly = obj.readOnly;
+    var vDisabled = obj.disabled;
+    //处理undefined值情况    
+    vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+    vDisabled = (vDisabled == undefined) ? true : vDisabled;
+    //当敲Backspace键时，事件源类型为密码或单行、多行文本的，    
+    //并且readOnly属性为true或disabled属性为true的，则退格键失效    
+    var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+    //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效    
+    var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+    //判断    
+    if (flag2 || flag1) return false;
+}
+//禁止后退键 作用于Firefox、Opera   
+document.onkeypress = forbidBackSpace;
+//禁止后退键  作用于IE、Chrome   
+document.onkeydown = forbidBackSpace;
+
+		$(document).ready(function(){
+			$('#deptGrid table').table();
+		});	
+
+</script>
+<body>
+    <div class="bold" style="margin-bottom: 10px; font-size: 12px;">
+    	基础数据(<span class="dgreen">8</span>)
+    </div>
+	<div id="deptGrid">
+    <table class="listtbl" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="60">序号</th>
+            	<th>名称</th>
+            	<th width="150">数据类型</th>
+            	<th width="100">操作</th>
+            </tr>
+        </thead>
+    	<tbody>
+        	<tr>
+            	<td width="60">1</td>
+            	<td>客户类型</td>
+            	<td width="150">单选下拉框</td>
+            	<td width="100">
+                	<a class="slink" href="../../system/showCrmCustomerTypeList.html">编辑</a>
+                </td>
+            </tr>
+            <tr>
+            	<td width="60">2</td>
+            	<td>所处行业</td>
+            	<td width="150">单选下拉框</td>
+            	<td width="100">
+                	<a class="slink" href="../../system/showCrmCustomerIndustryList.html">编辑</a>
+                </td>
+            </tr>
+            <tr>
+            	<td width="60">3</td>
+            	<td>沟通进度</td>
+            	<td width="150">单选下拉框</td>
+            	<td width="100">
+                	<a class="slink" href="../../system/showCommProList.html">编辑</a>
+                </td>
+            </tr>
+
+			<tr>
+            	<td width="60">4</td>
+            	<td>业务类型</td>
+            	<td width="150">单选下拉框</td>
+            	<td width="100">
+                	<a class="slink" href="../../recbiztype/showRecbizTypePage.html">编辑</a>
+                </td>
+            </tr>
+
+			<!--
+            <tr>
+                <td width="60">5</td>
+                <td>贷款类型</td>
+                <td width="150">单选下拉框</td>
+                <td width="100">
+                    <a class="slink" href="../../loan/toEditLoanType.html">编辑</a>
+                </td>
+            </tr>
+            -->
+            <tr>
+                <td width="60">5</td>
+                <td>贷款子类型</td>
+                <td width="150">单选下拉框</td>
+                <td width="100">
+                    <a class="slink" href="../../typeSub/typeSubList.html">编辑</a>
+                </td>
+            </tr>
+            <tr>
+                <td width="60">6</td>
+                <td>拒绝原因</td>
+                <td width="150">单选下拉框</td>
+                <td width="100">
+                    <a class="slink" href="../../loan/cancelReasonList.html">编辑</a>
+                </td>
+            </tr>
+            <!--
+            <tr>
+                <td width="60">7</td>
+                <td>PAD品牌</td>
+                <td width="150">单选下拉框</td>
+                <td width="100">
+                    <a class="slink" href="../../padManagement/padTypeList.html">编辑</a>
+                </td>
+            </tr>
+            <tr>
+                <td width="60">8</td>
+                <td>PAD型号</td>
+                <td width="150">单选下拉框</td>
+                <td width="100">
+                    <a class="slink" href="../../padManagement/padModelList.html">编辑</a>
+                </td>
+            </tr>
+            -->
+        </tbody>
+    </table>
+    </div>
+</body>
+</html>

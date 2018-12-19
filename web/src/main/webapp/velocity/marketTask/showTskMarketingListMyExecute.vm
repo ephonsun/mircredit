@@ -1,0 +1,348 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>我执行的营销任务</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator.dateSearchCheck-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};	//上一个搜索条件
+    	
+    	/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			goto(
+				page,
+				"/tskMarketing/queryTskMarketingListMyExecute.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".green").text(total);
+			}else {
+				jQuery(".green").text("0");
+			}
+		}
+		
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var postJson={
+				'tskMarketingBean.gradeId': -1,
+				'tskMarketingBean.assignUserId': -1,
+			  	'completion': 'execing',
+			  	'complete': ''
+				};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+		$(function(){
+			jQuery("#tskForm").validator();
+			$('select').select();
+			$('table.datatbl').table();
+			$('#compl').hide();
+			$('#execuCompl').change(function(){
+				var v=$(this).val();
+				switch(v){
+					case 'unStart':
+					$('#compl').hide();
+					break;
+					case 'execing':
+					$('#compl').show();
+					break;
+					case 'end':
+					$('#compl').show();
+					break;
+					case 'suspend':
+					$('#compl').hide();
+					break;
+					default :
+					$('#compl').hide();
+					break;
+				};
+				$('#comp').attr("checked",false);
+			});
+			
+			$('#execuCompl').change();
+			jQuery("#btnClear").click(function(){
+				jQuery("input[name='conds']").each(function(){
+					jQuery(this).val("");
+				});
+				$('#selTskGrade')[0].selectedIndex = 0;
+				$('#selTskGrade').select();
+				
+				$('#execuCompl')[0].selectedIndex = 1;
+				$('#execuCompl').select();
+				
+				$('#selAssign')[0].selectedIndex = 0;
+				$('#selAssign').select();
+				
+				$('#comp').attr("checked",false);
+				$('#compl').show();
+			});
+			
+			jQuery("#btnSearch").click(function(){
+				var bool = jQuery.validator({ form: 'tskForm'});
+				if(bool){
+    				var marketingTitle = jQuery.trim(jQuery("#txtMarketingTitle").val());
+    				var productTarget = jQuery.trim(jQuery("#txtProductTarget").val());
+    				var createStartDate = jQuery.trim(jQuery("#txtCreateStartDate").val());
+    				var createEndDate = jQuery.trim(jQuery("#txtCreateEndDate").val());
+    				var selTskGrade = jQuery("#selTskGrade").val();
+    				var selAssign = jQuery("#selAssign").val();
+    				var execuCompl = jQuery("#execuCompl").val();
+    				var complete = "";
+    				if($('#comp').attr("checked")){
+    					complete = true;
+    				}
+    				var postJson={'tskMarketingBean.marketingTitle': marketingTitle,
+    							  'tskMarketingBean.productTarget': productTarget,
+    							  'createStartDate': createStartDate,
+    						  	  'createEndDate': createEndDate,
+    						  	  'tskMarketingBean.gradeId': selTskGrade,
+    						  	  'tskMarketingBean.assignUserId': selAssign,
+    						  	  'completion': execuCompl,
+    						  	  'complete': complete
+    				};
+    				oldPostJson = postJson;  //记录OldPostJson
+    				jQuery.ajax({
+    			    	type: "post",
+    			    	url: "queryTskMarketingListMyExecute.html",
+    			    	data: postJson,
+    			    	success: function(data){
+    			 	  		queryResult(data);
+    			    	}
+    				});
+				}
+			});
+			
+			jQuery("#btnAdd").click(function(){
+				var urls="/tskMarketingPlan/planDetailList.html?&random="+Math.random()*10000;
+				var options = {id: "162", pid: GetId(), title: "当天执行的营销计划", url: urls, lock: false,confirm: true};
+				tab.add(options);
+			});
+			
+			jQuery("#btnRefresh").click(function(){
+				goto(null,"/tskMarketing/queryTskMarketingListMyExecute.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html);});
+			});
+			
+			initQueryJson();
+			
+			jQuery('#tblList').table();
+		});
+		//jQuery("#btnRefresh").trigger("click");//执行刷新操作
+		
+		//刷新tab
+		function refreshTab(gridId,html){
+			$('#' + gridId).html(html).table();
+			setstate();
+		}
+		
+		function editTskMarketing(marketingId,marketingTitle,mrole){
+			var urls="/tskMarketing/toEditTskMarketingByAssignPage.html?tskMarketing.marketingId="+marketingId+"&random="+Math.random()*10000;
+				var options = {id: "tsk_edit_"+marketingId, pid: GetId(), title: "编辑营销任务-"+marketingTitle, url: urls, lock: false,confirm: true};
+				tab.add(options);
+		}
+		
+		function editTskMarketingByExecutive(marketingId,marketingTitle,mrole){
+			var urls="/tskMarketing/toEditTskMarketingByExecutivePage.html?tskMarketing.marketingId="+marketingId+"&random="+Math.random()*10000;
+				var options = {id: "tsk_edit_"+marketingId, pid: GetId(), title: "编辑营销任务-"+marketingTitle, url: urls, lock: false,confirm: true};
+				tab.add(options);
+		}
+		
+		function viewTskMarketing(marketingId,marketingTitle,mrole){
+			var urls="/tskMarketing/toViewTskMarketingPage.html?tskMarketing.marketingId="+marketingId+"&random="+Math.random()*10000;
+				var options = {id: "tsk_view_"+marketingId, pid: GetId(), title: "查看营销任务-"+marketingTitle, url: urls, lock: false};
+				tab.add(options);
+		}
+		
+		//删除
+		function delTskMarketing(marketingId){
+			jQuery.post(
+				'delTskMarketing.html',
+				{'tskMarketing.marketingId':marketingId},
+				function(data){
+					if(data==1){
+						jQuery("#btnRefresh").trigger("click");//执行刷新操作
+					}
+				}
+			);
+		}
+		
+		//中止or重启
+		function stopOrReStart(marketingId,isSuspend){
+			jQuery.post(
+				'stopOrReStart.html',
+				{'tskMarketing.marketingId':marketingId,
+				  'tskMarketing.isSuspend':isSuspend
+				},
+				function(data){
+					if(data==1){
+						jQuery("#btnRefresh").trigger("click");//执行刷新操作
+					}
+				}
+			);
+		}
+		function searchStartDateFun(obj){
+    		var startDate=$("#txtCreateStartDate").val();
+    		var endDate=$("#txtCreateEndDate").val();
+    		if(endDate.length>0&&startDate.length>0){
+    			if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+    				$('#endDiv').removeClass('v-fails');
+    				return true;
+    			}
+    		}else return true;
+    	}
+    	function searchEndDateFun(obj){
+    		var startDate=$("#txtCreateStartDate").val();
+    		var endDate=$("#txtCreateEndDate").val();
+    		if(endDate.length>0&&startDate.length>0){
+    			if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+    			}else{
+    				$('#startDiv').removeClass('v-fails');
+    				return true;
+    			}
+    		}else return true;
+    	}
+	 </script>
+</head>
+
+<body>
+	<form id="tskForm" name="tskForm">
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>任务标题：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" name='conds' id="txtMarketingTitle"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>任务等级：</label>
+                </td>
+                <td width="17%">
+                	<select id="selTskGrade">
+                    	<option value="-1"></option>
+                    	#foreach($tskGrade in $!tskGradeList)
+                    		<option value="$!tskGrade.marketingGradeId">$!tskGrade.marketingGradeName</option>
+                    	#end
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>执行日期：</label>
+                </td>
+                <td colspan="3">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text" id="startDiv">
+				                		<input type="text" fun="searchStartDateFun" readonly="readonly" class="text datepicker" name='conds' id="txtCreateStartDate" tips=""/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text" id="endDiv">
+				                		<input type="text" fun="searchEndDateFun" readonly="readonly" class="text datepicker" name='conds' id="txtCreateEndDate" tips=""/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            </tr>
+			<tr>
+            	<td class="field" width="8%">
+                	<label>产品指标：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" name='conds' id="txtProductTarget"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>分配者：</label>
+                </td>
+                <td width="17%">
+                	<select id="selAssign">
+                    	<option value="-1"></option>
+                    	<option value="0">我的</option>
+                    </select>
+                </td>
+				<td class="field" width="8%">
+                	<label>完成情况：</label>
+                </td>
+                <td width="17%">
+                	<select id="execuCompl">
+                    	<option value="unStart">未开始</option>
+                    	<option value="execing" selected>执行中</option>
+                    	<option value="end">已结束</option>
+						<option value="suspend">已中止</option>
+                    </select>
+                </td>
+                <td>
+					<div id="compl" style="display:none;">
+						<input type="checkbox" class="checkbox" id="comp"  />
+						<label for="comp">完成</label>
+					</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+    <div class="search-bar">
+        <span class="fl bold">
+            我执行的营销任务(<label class="green">$!count</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空" id="btnClear"/>
+        <input type="button" class="ui-input-btn" value="搜索" id="btnSearch"/>
+    </div>
+    
+	<div class="action-bar">
+        <span class="ui-span-btn fl" id="btnAdd">
+        	<label>制定产品计划</label>
+        </span>
+        <span class="ui-span-btn fr" id="btnRefresh">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <table class="datatbl" id="tblList">
+		#parse("/velocity/marketTask/tskMarketingListMyExecute.vm")
+    </table>
+</body>
+</html>

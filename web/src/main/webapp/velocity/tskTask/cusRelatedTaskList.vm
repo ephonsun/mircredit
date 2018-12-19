@@ -1,0 +1,63 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>关联任务</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	div.mt { margin-top: 0 !important; }
+    </style>
+</head>
+<input type="hidden" value="$!tskCusId" name="tskCusId" id="tskCusId"/>
+<input type="hidden" value="$!exeUserId" name="exeUserId" id="exeUserId"/>
+<input type="hidden" value="$!isDetail" name="isDetail" id="isDetail"/>
+<body>
+    <div class="search-bar mt">
+        <span class="fl bold">
+            与"$!customerName"关联的联系任务(<label class="green">$!count</label>)
+        </span>
+    </div>
+    
+    <table class="datatbl" id="taskTab">
+       #parse("/velocity/tskTask/relatedTaskListTab.vm")
+    </table>
+</body>    
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#taskTab').table();			
+	});
+	//分页跳转
+   	function gotoPage(page)
+	{
+		var tskCusId=$("#tskCusId").val();
+		var exeUserId=$('#exeUserId').val();
+		var isDetail=$('#isDetail').val();
+		goto(page,"/tskContact/initRelatedTaskList.html?tskCusId="+ tskCusId+"&exeUserId="+exeUserId+"&detail="+isDetail+"&random="+Math.random(),{
+			"page.currentPage":page
+		},function(html){
+			refreshGrid('taskTab',html);
+			}
+		);
+	}
+	//刷新
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html).table();
+	}
+	//查看任务
+	function detailTsk(taskId){
+		var title="查看联系任务";
+		var id="TaskContactDetailPage";
+		var url="/tskContact/toTskContactDetail.html?tskContact.contactId="+taskId+"&actionType=detail&random="+Math.random()*1000;
+		var options = {id: id+ taskId, pid: GetId(), title: title, url: url, lock: false};
+		tab.add(options);
+	}
+</script>
+</html>

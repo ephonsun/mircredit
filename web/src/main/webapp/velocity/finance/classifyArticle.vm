@@ -1,0 +1,57 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>目标分类</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	div.executor { border: 1px solid #ccc; width: 280px; height: 220px; margin: 0 auto; padding: 5px; overflow: auto;  font-size:12px; }
+		div.executor .selectlist{ margin:20px; line-height:30px; width:auto; }
+    </style>
+    
+    #scriptLink("core")
+    <script type="text/javascript">
+		var fn = {};
+		fn.sure = function(){
+			window.returnValue = $('input[name=radio]:checked').attr('columnId');
+			window.close();
+		};
+		fn.cancel = function(){
+			window.close();
+		};
+		
+    	$(function(){
+			$('#ok').click(function(){
+				fn.sure()
+			});
+			
+			$('#cancel').click(function(){
+				fn.cancel();
+			});
+		});
+    </script>
+</head>
+
+<body>
+	<div class="executor">
+		<div class="selectlist">
+		#foreach($!feColumn in $!articleColumnList)
+			<input type="radio" name="radio" class="radio" id="majorfiance" columnId="$!feColumn.columnId" #if($velocityCount==1)checked #end/>
+			<label for="majorfiance">$!feColumn.columnName</label>
+			<br />
+		#end
+		</div>
+		
+    </div>
+    
+    <hr />
+    
+    <div class="center">
+    	<input type="button" id="ok" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" />
+        <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" />
+    </div>
+</body>
+</html>

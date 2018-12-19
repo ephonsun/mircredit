@@ -1,0 +1,377 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看征信</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+        .m1{ margin-left:15px;}
+        .m2{ margin-top:-1px }
+        .w1 { width:100px; }
+        table.datatbl{ margin-bottom:20px;}
+
+
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        jQuery(function () {
+            maxTextArea("textarea[maxlength]");
+        });
+
+
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            var requestId =$('#requestId').val();
+            var configObj = {
+                'action': '../loan/autoUpAttachment.html?requestId='+requestId,
+                'queueId':'fileQueue',
+                'requestId':requestId,
+                'auto':true
+            }
+            setFileUpByParams(configObj);//渲染附件上传功能
+        });
+
+        function delAtte(fileId,formName,rquestId,index){
+            var requestId =$("#requestId").val();
+            if(confirm("您确定要删除附件"+formName+"吗?")){
+                jQuery.ajax({
+                    type: "post",
+                    url: "../loan/delFormAttach.html?RandNum="+requestId,
+                    data: {'fileId': fileId,'requestId':requestId
+                    },
+                    success: function(data){
+                        delResult(data,fileId,index);
+                    }
+                });
+            }
+        }
+        function delResult(msg,fileId,index){
+
+            if(msg == 'success'){
+                jQuery("#attr_"+index).remove();
+
+            }
+            else{
+                banger.page.showMessageBox(msg);
+            }
+
+        }
+
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+
+    </script>
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            jQuery("#remark").validator();
+        });
+
+        function addCrLendRemark(requestId){
+
+            var bool = jQuery.validator({ form: 'remark'});
+            var lendRemark= $('#lendRemark').val();
+
+            if(bool){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/addCrLendRemark.html?RandNum='+Math.random()+"&requestId="+$!requestId,
+                    data:{
+                        'lendRemark' : lendRemark
+                    },
+                    success:function(html){
+                        window.location.reload();
+                    }
+                });
+            }else{
+                return false;
+            }
+        }
+        function addTjLendRemark(requestId){
+            var bool = jQuery.validator({ form: 'remark'});
+            var lendRemark= $('#lendRemark').val();
+
+            if(bool){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/addTjLendRemark.html?RandNum='+Math.random()+"&requestId="+$!requestId,
+                    data:{
+                        'lendRemark' : lendRemark
+                    },
+                    success:function(data){
+
+                        crResult(data);
+                    }
+                });
+            }else{
+                return false;
+            }
+        }
+        function crResult(msg){
+            if(msg == 'success'){
+                window.location.reload();
+            }
+            else{
+                banger.page.showMessageBox('没有上传附件');
+            }
+        }
+        function addBhLendRemark(requestId){
+            var bool = jQuery.validator({ form: 'remark'});
+            var lendRemark= $('#lendRemark').val();
+            if(bool){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/addBhLendRemark.html?RandNum='+Math.random()+"&requestId="+$!requestId,
+                    data:{
+                        'lendRemark' : lendRemark
+                    },
+                    success:function(data){
+                        crResult(data);
+                    }
+                });
+            }else{
+                return false;
+            }
+        }
+        var jsonf = {
+            display: function(b, obj){
+                var bool = obj.is(':hidden');
+                if(bool){
+                    obj.css('display', 'block'); b.text('摘要');
+                }
+                else{
+                    obj.css('display', 'none'); b.text('详细');
+                }
+            },
+            save: function(){
+                //code here...
+            },
+            cancel: function(){
+                if(window.dialogArguments){
+                    window.close();
+                }
+                else{
+                    tab.close(GetId(), false);
+                }
+            }
+        };
+
+        function showPhoto1(requestId) {
+            /*  window.top.aui.builder({
+                  url: '../loan/vZhengXinShow.html?requestId='+ $!requestId+"&zp="+1
+            });
+*/
+            var url="../loan/vZhengXinShow.html?requestId="+ $!requestId+"&zp="+1;
+            var name ="photo";
+            var width=950;
+            var height=550;
+            var top=(window.screen.height-30-height)/2;
+            var left=(window.screen.width-30-width)/2;
+            window.open(url,name,'height='+height+',innerHeight='+height+',width='+width+',innerWidth='+width+',top='+top+',left='+left+',toolbar=no,menubar=no,scrollbars=anto,resizable=no,location=no,status=no');
+        }
+
+        function showPhoto2(requestId) {
+            /*  window.top.aui.builder({
+                  url: '../loan/vZhengXinShow.html?requestId='+ $!requestId+"&zp="+2
+            });*/
+
+            var url="../loan/vZhengXinShow.html?requestId="+ $!requestId+"&zp="+2;
+            var name ="photo";
+            var width=950;
+            var height=550;
+            var top=(window.screen.height-30-height)/2;
+            var left=(window.screen.width-30-width)/2;
+            window.open(url,name,'height='+height+',innerHeight='+height+',width='+width+',innerWidth='+width+',top='+top+',left='+left+',toolbar=no,menubar=no,scrollbars=anto,resizable=no,location=no,status=no');
+
+
+        }
+        function showPhoto3(requestId) {
+            /*  window.top.aui.builder({
+                  url: '../loan/vZhengXinShow.html?requestId='+ $!requestId+"&zp="+3
+            });*/
+
+            var url="../loan/vZhengXinShow.html?requestId="+ $!requestId+"&zp="+3;
+            var name ="photo";
+            var width=950;
+            var height=550;
+            var top=(window.screen.height-30-height)/2;
+            var left=(window.screen.width-30-width)/2;
+            window.open(url,name,'height='+height+',innerHeight='+height+',width='+width+',innerWidth='+width+',top='+top+',left='+left+',toolbar=no,menubar=no,scrollbars=anto,resizable=no,location=no,status=no');
+
+        }
+    </script>
+</head>
+<body >
+
+<input type="hidden" id="requestId" value='$!data.requestId'>
+    #foreach($!formAttachment in $!formAttachmentList)
+    <input type="hidden" id="velocityCount" value='$velocityCount'>
+    #end
+<div class="loan-bg">
+    <p class="bold loan-lheight">基本信息</p>
+    <table class="htmltbl_1" >
+        <tbody>
+        <tr>
+            <td class="field" width="8%">
+                <label>客户姓名：</label>
+            </td>
+            <td width="17%">
+                <label>$!data.customerName</label>
+            </td>
+            <td class="field" width="8%">
+                <label>证件号码：</label>
+            </td>
+            <td width="20%">
+                <label >$!data.idCard</label>
+            </td>
+            <td class="field" width="8%">
+                <label>提交时间：</label>
+            </td>
+            <td width="17%">
+                <label >$!date.format('yyyy-MM-dd HH:mm',$!data.requestDate)</label>
+            </td>
+            <td class="field" width="8%">
+                <label>提交人：</label>
+            </td>
+            <td width="14%">
+                <label >$!data.requestName</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="8%">
+                <label>状&nbsp;&nbsp;态：</label>
+            </td>
+            <td width="10%">
+                <label >$!data.requestStatusValue</label>
+            </td>
+            #if($!data.requestStatusValue!="请求中")
+                <td class="field" width="8%">
+                    <label>处理人：</label>
+                </td>
+                <td width="10%">
+                    <label >$!data.conductorName</label>
+                </td>
+            #end
+        <tr>
+            <td class="field" width="8%">
+                <label>申请资料：</label>
+            </td>
+            <td width="17%">
+                <label><a class="slink" href="#2" onclick="showPhoto1($!requestId);" value='authFileId'>身份证正面</a></label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="8%">
+                <label></label>
+            </td>
+            <td width="17%">
+                <label><a class="slink" href="#2" onclick="showPhoto2($!requestId);" value='authFileId'>身份证背面</a></label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="8%">
+                <label></label>
+            </td>
+            <td width="17%">
+                <label><a class="slink" href="#2" onclick="showPhoto3($!requestId)" value='authFileId'>授权书</a></label>
+            </td>
+        </tbody>
+    </table>
+
+    <p class="bold loan-lheight">调查结果（征信及身份联网核查）</p>
+    <!--添加附件部分-->
+    <div class="loan-bg" style ="background:#FF9;">
+        <p class="loan-exam-attachment">
+            #if($!data.requestStatusValue=="请求中")
+                <input type="file" name="fileInput" id="fileInput"/>
+            #end
+
+        <div id="attachmentList" class="datatbl" style="text-align:left;padding-left:10px;">
+            #parse("/velocity/loan/attachList.vm")
+        </div>
+
+        <div id="fileQueue"></div>
+        </p>
+    </div>
+</div>
+
+<input type="hidden" id="isConfirm" value="$!isConfirm"/>
+
+<div class="loan-bg">
+
+    <p class="bold loan-lheight">调查备注</p>
+    <table class="htmltbl_1" style="table-layout: auto;">
+        <tbody>
+        <tr>
+            <td width="0.5%"></td>
+            <td align=" " width="99%">
+                #if($!data.requestStatusValue!="请求中")
+                    <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;" id="remark"  >
+
+                        <textarea id="lendRemark" runat="server" disabled='disabled' class="textarea" style="height: 100px; _height:100px;"  maxlength="300">$!data.Remark</textarea>
+                    </div>
+                #else
+                    <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;" id="remark">
+                        <textarea id="lendRemark" runat="server" class="textarea" style="height: 100px; _height:100px;" rule="\S" tips="请填写备注信息" maxlength="300">$!data.Remark</textarea>
+                    </div>
+                #end
+            </td>
+            <td width="0.5%"></td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+    #if($!data.requestStatusValue!="请求中")
+    <div class="bold ">
+        <div class="center">
+            <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="jsonf.cancel();" />
+        </div>
+    </div>
+    #else
+    <input type="button" class="ui-span-btn button-table" onclick="addCrLendRemark($!requestId)" value="保存" />
+    <input type="button" class="ui-span-btn button-table" onclick="addTjLendRemark($!requestId)" value="提交" />
+   <span style="margin-right:10px;float:right">
+   <input type="button" class="ui-span-btn button-table"  onclick="addBhLendRemark($!requestId)" value="驳回" />
+   </span>
+
+    #end
+</body>
+</html>

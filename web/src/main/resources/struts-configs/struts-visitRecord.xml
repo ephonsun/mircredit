@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="visitRecord" extends="default" namespace="/visitRecord" >
+	
+		 <!--  新增拜访记录页面 -->
+		<action name="showAddVisitRecordPage" class="visitRecordAction" method="showAddVisitRecordPage">
+			<result name="success">/velocity/visitRecord/newVisitRecord.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 <!--  修改拜访记录页面 -->
+		<action name="showUpdateVisitRecordPage" class="visitRecordAction" method="showUpdateVisitRecordPage">
+			<result name="success">../velocity/visitRecord/editVisitRecord.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 <!--  下次联系页面 -->
+		<action name="showNextTaskPage" class="visitRecordAction" method="showNextTaskPage">
+			<result name="success">/velocity/visitRecord/nextTask.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  新增拜访记录 -->
+		<action name="addVisitRecord" class="visitRecordAction" method="addVisitRecord">
+			<result name="addAndAdd" type="redirect">showAddVisitRecordPage.html?customer.customerId=${visitRecord.customerId}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  更新拜访记录 -->
+		<action name="updateVisitRecord" class="visitRecordAction" method="updateVisitRecord">
+			<result name="success" type="redirect">/record/showRecordInfoListPage.html?type=${type}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="addNextContextTask" class="visitRecordAction" method="addNextContextTask">
+		</action>
+		
+		<action name="nextTaskUp" class="visitRecordAction" method="nextTaskUp">
+			<result name="success">/velocity/visitRecord/nextTaskUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="updateNextContextTask" class="visitRecordAction" method="updateNextContextTask">
+		</action>
+		
+		<action name="initNextContextTask" class="visitRecordAction" method="initNextContextTask">
+		</action>
+	</package>
+
+</struts>

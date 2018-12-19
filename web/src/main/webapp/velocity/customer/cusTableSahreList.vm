@@ -1,0 +1,60 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+                    <th><label title="客户类型">客户类型</label></th>
+                    <th><label title="单位">单位</label></th>
+                    <th><label title="归属机构">归属机构</label></th>
+                    <th><label title="归属人员">归属人员</label></th>
+                    <th width="60"><label title="操作">操作</label></th>
+                </tr>
+            </thead>
+            <tbody>
+            	#foreach($cus in $cusList)  
+                <tr cusid="$!cus.customerId">
+                    <td>
+	                    <div class="datacus">
+		            		#if($!cus.defaultPhoneType=='1')
+		                    	<span class="slink" onclick="browseCustomer($!cus.customerId)" title="$!cus.customerName（$!cus.mobilePhone1）">$!cus.customerName（$!cus.mobilePhone1）</span>
+		                    #elseif($!cus.defaultPhoneType=='2')
+		                    	<span class="slink" onclick="browseCustomer($!cus.customerId)" title="$!cus.customerName（$!cus.mobilePhone2）">$!cus.customerName（$!cus.mobilePhone2）</span>
+		                    #elseif($!cus.defaultPhoneType=='3')
+		                    	<span class="slink" onclick="browseCustomer($!cus.customerId)" title="$!cus.customerName（$!cus.phone）">$!cus.customerName（$!cus.phone）</span>
+		                    #elseif($!cus.defaultPhoneType=='4')
+		                    	<span class="slink" onclick="browseCustomer($!cus.customerId)" title="$!cus.customerName（$!cus.fax）">$!cus.customerName（$!cus.fax）</span>
+		                    #end
+	                    <div class="other">
+	                    	<label class="item cusTitle" title="$!cus.customerTitle">
+	                        	$!cus.customerTitle
+	                        </label>
+	                        <label class="item">
+	                        	$!cus.sex
+	                        </label>
+	                        <label class="item">
+	                        	#if($!cus.age)
+	                        		$!cus.age岁
+	                        	#end
+	                        </label>
+	                    </div>
+	                </div>
+                    </td>
+                    <td><label title="">$!cus.customerTypeName</label></td>
+                    <td><label title="$!cus.company">$!cus.company</label></td>
+                    <td><label title="$!cus.deptName">$!cus.deptName</label></td>
+                    <td><label title="$!cus.userName">$!cus.userName</label></td>
+                    <td>
+                		<span class="slink" onclick="delCustomer('$cus.customerId')">移除</span>
+            		</td>
+                </tr>
+                #end
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6">
+                        <div class="fr">
+                           
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>

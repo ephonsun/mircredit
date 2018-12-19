@@ -1,0 +1,114 @@
+ <script>
+ 	$(".datatbl").table();
+ 		var setting = {
+			callback:{
+				onClick:treeCustomerList
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				fontCss: getFont,
+				showIcon: true
+			}
+			
+		};
+		function getFont(treeId, node) {
+			return node.font ? node.font : {};
+		}
+		var taskId=$!tskTask.taskId;
+		var taskDeptId=$!tskTask.executeDeptId;
+		function treeCustomerList(event, treeId, treeNode){
+			$('#customerTabList').html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待…</div></div>');
+			jQuery.post('loadTskDetailCustomerList.html',{
+				'tskTask.taskId':taskId,
+				'treeType':treeNode.type,
+				'treeId':treeNode.id
+			},function(html){
+				var elem=$(html);
+				var gridDiv = $("#customerTabList");
+				gridDiv[0].innerHTML="";
+				gridDiv.append(elem);
+			});
+		}
+		//加载机构用户树
+		jQuery.post('/tskTask/showDeptExcUserList.html?&random='+Math.random(),{
+				'tskTask.taskId':taskId,
+				'tskTask.executeDeptId':taskDeptId,
+				'tskTask.taskType':1
+		},function(data){
+				data = jQuery.parseJSON(data);
+				jQuery.fn.zTree.init($("#deptTreebox"),setting,data);
+		});
+		//刷新
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			var taskId=$("#tskTaskId").val();
+			goto(page,"/tskTask/loadTskDetailCustomerList.html?random="+Math.random(),{
+				"tskTask.taskId":taskId,
+				"treeId":$("#treeId").val(),
+				"treeType":$("#treeType").val(),
+				"page.currentPage":page
+			},function(html){refreshGrid('customerTabList',html);});
+		}
+		
+		//查看客户
+		function customerDetail(customerId){
+			jQuery.ajax({
+				  type: 'POST',
+				  url: "/customer/isDeleteCus.html?random="+Math.random()*1000,
+				  data: {"cusId":customerId},
+				  success:function(data){
+				  		var obj = jQuery.parseJSON(data);
+				  		if(obj[0].isDel=='1'){
+				  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+				  		}else{
+							var options = {id: "task_Customer_detail_detail"+customerId, pid: GetId(), title: "客户详情", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId, lock: false};
+							tab.add(options);
+						}
+				  	}
+			});	
+		}
+	</script>
+			<!--Begin-->
+            	<div class="sz" style="margin-top: 0;">
+                    <label class="fl bold">
+							分配的客户数(<span class="dgreen">$!page.totalRowsAmount</span>)
+                    </label>
+                </div>
+                <div class="tm-cuslist">
+					#if($!roleType==0)
+                	<div class="left">
+                    	<h4 style="text-align: left;">
+                            <label>
+									任务监控情况
+                            </label>
+                        </h4>
+                        <div class="treebox">
+                            <ul id="deptTreebox" class="ztree"></ul>
+                        </div>
+                    </div>
+					#end
+                    <div class="right" #if($!roleType!=0) style="margin-left: 0;" #end id="customerTabList">
+                        #parse("/velocity/tskTask/taskDetailCustomerTab.vm")
+                    </div>
+                </div>
+                <!--End-->
+				<div>
+                	 <table class="ediTable" width="100%" border="0" cellpadding="2" cellspacing="2">
+                			<tbody>
+        						<tr>
+                                    <td align="center" colspan="2">
+                                        <input type="button" value="关 闭" onclick="javascript:tab.close(GetId(), false);" class="btn1" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                     </table>
+                </div>

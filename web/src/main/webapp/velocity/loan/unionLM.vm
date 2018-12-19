@@ -1,0 +1,136 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑贷后监控</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+		  body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+    <script type="text/javascript">
+	
+	$(function(){
+		$("input:checkbox").click(function(){
+        	var fileId="";
+        	$("input:checkbox:checked").each(function(){
+        		fileId = fileId+","+this.value;
+        	});
+			
+		});
+	//确定
+            $('.ui-footer-btn1-save').click(function(){
+                var postJson = {};
+				postJson['loanLmId']=$("#loanLmId").val();
+               
+               	var fileId="";
+        		$("input:checkbox:checked").each(function(){
+        			fileId = fileId+","+this.value;
+        		});
+				postJson['fildIds']=fileId.substring(1);
+				postJson['flag']="flag";
+                var urlStr = "../loan/unionLM.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+						if(data == "success"){
+                            window.returnValue="success";
+                            window.close();
+						}else{
+							alert(data);
+						}
+                    }
+                });
+            });
+	});
+		
+
+       
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            var txtIDCard = $('#txtLoanIdId').val();
+            if (txtIDCard.length > 0 && txtIDCard.indexOf("*") < 0) {
+                bool = IdentityCodeValid(txtIDCard);
+            }
+
+            return bool;
+        }
+            jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+        
+
+        function paramsName(){
+            return 'customerName=' + jQuery('#txtCustomerName').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function paramsNum(){
+            return 'cphNumber=' + jQuery('#txtCphNumber').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function paramsAddr(){
+            return 'idCard=' + jQuery('#txtIDCard').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+      
+    </script>
+</head>
+<body>
+    <input type="hidden" id="fileId" value=""/>
+	<input type="hidden" id="loanLmId" value="$!loanLmId"/>
+	
+    <p class="bold loan-ttlbg">贷后附件</p>
+    <div class="loan-add-box">
+      <table class="datatbl"  cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+			<th><label title="名称">选择</label></th>
+			<th><label title="名称">名称</label></th>
+			<th><label title="提交时间)">提交时间</label></th>
+			<th><label title="提交人员">提交人员</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #if($fileList)
+                #foreach($file in $fileList)
+                <tr>
+					<td ><input  type="checkbox" value="$!file.fileId"/>
+                    </td>
+					<td><label title="">$!file.uploadFileName</label></td>
+                    <td><label title="">$!date.format('yyyy-MM-dd',$!file.uploadDate)</label></td>
+					<td><label title="">$!file.userName</label></td>
+                </tr>
+                #end
+            #end
+        </tbody>
+    </table>
+      </div>
+      <hr />
+      <div class="center">
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+      </div>
+</body>
+</html>

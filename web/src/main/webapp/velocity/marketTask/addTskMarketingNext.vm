@@ -1,0 +1,390 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建营销任务</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css"/>
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+		.tabletree{ border-bottom:1px solid #ccc !important ;}
+		.tabletree tr td{ padding:0 !important;}
+	</style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+  	<script type="text/javascript" src="${ctx}/js/controls/jquery.tabletree-v1.0.js"></script>
+ 
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript">
+		/**
+		 * 关闭页卡确认框
+		 */
+		function cfirm(){
+			if(confirm("放弃新建营销任务并关闭页卡吗?")){
+				jQuery.post('delTskMarketing.html?random'+ Math.random(),{'tskMarketing.marketingId':$("#txtMarketingId").val()},function(){});
+				return true;
+			}else return false;
+		}
+		
+		var trObjJson = {}; //保存上一个TrS对象
+    	$(function(){
+			$('div.etabs').etabs({
+				'index': 1,
+				'head': 'etabs-items',
+				'body': 'etabs-body',
+				'bar': 'etabs-bar',
+				'beforeOnclick':function(){return false;}
+			});
+			$('select').select();
+			$('table.datatbl').table();
+			$('table.tabletree').tabletree();
+			
+			var setting = {
+				check: {
+					enable: true,
+					chkStyle: "checkbox",
+					chkboxType: { "Y": "p", "N": "s" }
+				},
+				data: {
+					simpleData: {
+						enable: true,
+						idKey: "id",
+						pIdKey: "pId",
+						rootPId: null
+					}
+				},
+				view: {
+					showIcon: true
+				},
+				callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: beforeonclickVal,
+						onCheck: onclickVal
+				}
+			}
+			
+			//加载机构用户树
+			jQuery.post('/tskMarketing/showAllExecuterList.html?&random='+Math.random(),{
+			},function(data){
+				data = jQuery.parseJSON(data);
+				jQuery.fn.zTree.init($("#treeDemo"),setting,data);
+			});
+			
+			function Asure(treeId,treeNode){
+				var m=null;
+				if(treeNode.isParent){
+					var allnodes=getChildNodes(treeId,treeNode).split(',');
+					for(var j=0;j<allnodes.length;j++){
+						if($('table.tabletree tbody').html()){
+							m=$('table.tabletree tbody').find('tr[id='+ allnodes[j] +']').find('td').eq(1).text();
+						}
+						if(m===null){
+							return false;
+						}else if(m!=0){
+							return true;
+						}
+					}
+				}else{
+					if($('table.tabletree tbody').html()){
+						m=$('table.tabletree tbody').find('tr[id='+ treeNode.id +']').find('td').eq(1).text();
+					}
+				}
+				if(m===null){
+					return false;
+				}else if(m==0){
+					return false;
+				}else{
+					return true;
+				}
+				return false;
+			}
+			function getChildNodes(treeId,treeNode) {
+					var zTree = jQuery.fn.zTree.getZTreeObj(treeId);
+					var childNodes = zTree.transformToArray(treeNode); 
+					var nodes = new Array();
+					 for(i = 0; i < childNodes.length; i++) {
+						nodes[i] = childNodes[i].id;
+					 } 
+					return nodes.join(","); 
+			}
+			function beforeonclickVal(treeId, treeNode){
+				if(treeNode.checked && Asure(treeId,treeNode)){
+					if(confirm('是否移除选中的执行对象“'+treeNode["name"]+'”')){
+						if(treeNode.getParentNode()==null){
+							$('#lblTaskTarget').text(0);
+							return true;
+						}
+						return true;		
+					}else{
+						return false;
+					}
+				}else{
+					return true;
+				}
+			}
+			function onclickVal(event, treeId, treeNode){
+				var zTree = jQuery.fn.zTree.getZTreeObj(treeId);
+				if(zTree != null){
+					var nodes = zTree.getCheckedNodes(true), l = nodes.length, trnode=[];
+					for(var i=0; i<l; i++){
+						if(nodes[i].pId == null){
+							nodes[i].pId = 0;
+						}
+						trnode[i]=nodes[i].id+','+nodes[i].pId+','+nodes[i].name+','+nodes[i].type;
+					}
+					var temp = "[";
+					$('table.tabletree tbody').find("tr").each(function(){
+						temp += "{\"id\":\""+$(this).attr('id')+"\",\"m\":\""+$(this).children("td").eq(1).html()+"\",\"d\":\""+$(this).children("td").eq(2).find("label").text()+"\"},";
+					});
+					if(temp != "["){
+						temp = temp.substring(0,(temp.length-1));
+						temp +="]";
+						trObjJson = jQuery.parseJSON(temp); 	
+					}
+					$('table.tabletree tbody').html(' ');
+					var tl=trnode.length;
+					for(var j=0; j<=tl-1;j++){
+						$('table.tabletree tbody').append('<tr id="'+ trnode[j].split(',')[0]
+									+'" pid="'+ trnode[j].split(',')[1] +'" type="'+ trnode[j].split(',')[3] +'">'
+									+'<td style="text-align:left;"><label title="' + trnode[j].split(',')[2] + '">'+trnode[j].split(',')[2]+'</label></td>'
+									+'<td class="inpt">'
+									+'<label>0.00</label>'
+									+'</td>'
+									+'<td><label>0.00</label><input type=\'hidden\' value=\'0.00\'></td>'
+								+'</tr>');
+						if(treeNode.checked){
+							$('tr[id='+ treeNode.id +']').css({
+								'background':'#E3EAF4'
+							});
+						}else{
+							if(treeNode.getPreNode()===null || !treeNode.getPreNode().checked){
+								$('tr[id='+ treeNode.getParentNode().id +']').css({
+									'background':'#E3EAF4'
+								});
+							}else{
+								if(treeNode.getPreNode()!==null){
+									$('tr[id='+ treeNode.getPreNode().id +']').css({
+										'background':'#E3EAF4'
+									});
+								}
+							}
+						}
+						$('tr[id='+ treeNode.pId +']').css({
+								'color':'#00F'
+						});
+					}
+					//对上次保存的tr赋值
+					for (var index = 0, len = trObjJson.length; index < len; index++) {
+						var id = trObjJson[index].id; 
+						var m = trObjJson[index].m; 
+						var d = trObjJson[index].d; 
+						$('table.tabletree tbody').find("tr[id="+id+"]").children("td").eq(1).html(m);
+						$('table.tabletree tbody').find("tr[id="+id+"]").children("td").eq(2).find("label").text(d);
+					}					
+					
+					$('table.tabletree').tabletree();
+					
+					var taskTarget = 0;
+	    			//计算任务总目标
+	    			if($('table.tabletree tbody').find("tr").length>0){
+						taskTarget=$('table.tabletree tbody').find("tr:first").children("td").eq(1).find("label").text();
+					}
+					$('#lblTaskTarget').text(taskTarget);
+					
+					$('.inpt').click(function(){
+						var lbl = $('label', this),v = lbl.text(), tr = $(this).parent();
+						var id=tr.attr('id');
+						var pid=tr.attr('pid');
+						$('tr').css({
+								'background':'#fff',
+								'color':''
+						});
+						$('tr[id='+id +']').css({
+								'background':'#E3EAF4'
+						});
+						$('tr[id='+pid +']').css({
+								'color':'#00F'
+						});
+						lbl.replaceWith('<div class="ui-div-text" style="border:0 !important;">'
+													+'<input type="text" id="tMoney" class="text" value=\'' + v + '\'>'
+												+'</div>');
+						floatInput('input[id=\'tMoney\']',12,4);
+						$('input', this).focus(function(){
+							$(this).css({
+							'background':'#FFE8D9'
+							});
+							$('tr[id='+pid +']').css({
+								'color':'#00F'
+							});
+							this.select();
+						}).blur(function(){
+							if($(this).val().length<=0){
+							 	$(this).val(0);
+							}
+							$('div.ui-div-text').replaceWith('<label>' + $(this).val() + '</label>');
+							update(tr,$(this).val());
+							countChaE();
+						}).focus();
+					});
+					countChaE();
+				}
+			}
+	
+			/**
+			 * 保存方法
+			 */
+			$('#btnSave').click(function(){
+				var target=$("#lblTaskTarget").text();
+    			if(target==0){
+    				banger.page.showMessageBox("任务目标不能为零,请分配任务目标！");
+    				return false;
+    			}
+			
+				var assignTargetJson = "[";
+				$('table.tabletree tbody').find("tr").each(function(){
+					assignTargetJson += "{\"id\":\""+$(this).attr('id')+"\",\"un\":\""+$(this).children("td").eq(2).find("input[type='hidden']").val()+"\",\"pid\":\""+$(this).attr('pid')+"\",\"m\":\""+$(this).children("td").eq(1).find("label").text()+"\",\"t\":\""+$(this).attr('type')+"\"},";
+				});
+				if(assignTargetJson != "["){
+					assignTargetJson = assignTargetJson.substring(0,(assignTargetJson.length-1));
+					assignTargetJson +="]";
+				}else{
+					assignTargetJson = "";
+				}	
+				//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+				jQuery.ajax({
+		    	type: "post",
+		    	url: "svaeTskMarketingExecute.html",
+		    	data: {'tskMarketing.marketingId': $('#txtMarketingId').val(),
+		    		   'assignTargetJson': assignTargetJson
+		    	},
+		    	success: function(data){
+		 	  		saveResult(data);
+				}
+				});
+					
+			});
+		});
+		
+		function saveResult(msg){
+			if(msg == 'SUCCESS'){
+				tab.close(GetId(), true);
+			}else{
+				banger.page.showMessageBox(msg);
+				//alert(msg);
+			}
+		}
+		
+		/*新建时计算未分配*/
+		function countChaE(){
+			$('table.tabletree tbody tr').each(function(){
+				var tr=$(this);
+				var assnum=0;
+				var asscha=0;
+				tr.nextAll().each(function(){
+					if($(this).attr('pid')==tr.attr('id')){
+						assnum+=$(this).find('td').eq(1).text()-0;
+					}
+				});
+				asscha=tr.find('td').eq(1).text()-assnum;
+				if(tr.attr('type')=="u" || tr.attr('type')=='U'){
+					tr.find('td').eq(2).find('input[type="hidden"]').val('-');
+				}else{
+					tr.find('td').eq(2).find('input[type="hidden"]').val(asscha);
+				}
+			});
+		}
+		
+		function update(tr,v){
+			if(v==''){
+				v=0;
+				//$(this).children("td").eq(1).find("label").text(v);
+			}
+			var dAverage = (parseFloat(v)/parseFloat($('#txtDays').val())).toFixed(2);
+			tr.children("td").eq(2).find("label").text(dAverage);
+			var taskTarget = 0;
+			//计算任务总目标
+			if($('table.tabletree tbody').find("tr").length>0){
+				taskTarget=$('table.tabletree tbody').find("tr:first").children("td").eq(1).find("label").text();
+			}
+			$('#lblTaskTarget').text(taskTarget);
+		}
+		
+		function quxiao(){
+			if(confirm("放弃新建营销任务并关闭页卡吗?")){
+				jQuery.post('delTskMarketing.html?random'+ Math.random(),{'tskMarketing.marketingId':$("#txtMarketingId").val()},function(){});
+				tab.close(GetId(), false);
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<input type="hidden" id="txtMarketingId" value="$!tskMarketing.marketingId"/>
+	<input type="hidden" id="txtDays" value="$!days"/>
+    <div class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li><label>营销目标分配</label></li>
+		        </ul>
+    		</div>
+    		<!--<div class="etabs-head-bar">
+    			<ul id="etabs-bar">
+		        	<li class="l">l</li>
+		        	<li class="r">r</li>
+		        </ul>
+    		</div>-->
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+            </div>
+            <div class="etabs-body-child">
+				<div class="ui-panel-box2">
+					<div class="l">
+						<h4>
+							<label>选择执行对象</label>
+						</h4>
+						<div class="l-inner">
+							<ul class="ztree" id="treeDemo"></ul>
+						</div>
+					</div>
+					<div class="r">
+						<div class="contact-amount">
+									<label>任务目标：</label>
+									<label class="green" id="lblTaskTarget">0</label>
+									<label>万元</label>
+						</div>
+						<table class="datatbl tabletree" id="tblAssign">
+							<thead>
+								<tr>
+									<th><label title="执行对象">执行对象</label></th>
+									<th><label title="营销目标(万元)">营销目标(万元)</label></th>
+									<th><label title="日均剩余营销量(万元)">日均剩余营销量(万元)</label></th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<hr />
+				<div class="center">
+					<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" id="btnSave"/>
+					<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="quxiao()"/>
+				</div>
+            </div>
+        </div>
+	</div>
+</body>
+</html>

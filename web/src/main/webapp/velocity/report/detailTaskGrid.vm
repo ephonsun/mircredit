@@ -1,0 +1,76 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>任务完成情况统计报表明细</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	div.mt { margin-top: 0 !important; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript">
+		//查看任务
+    	function detailTsk(contactId){
+			var title="查看联系任务";
+			var id="TaskContactDetailPage";
+			var url="/tskContact/toTskContactDetail.html?tskContact.contactId="+contactId+"&actionType=detail&random="+Math.random()*1000;
+			var options = {id: id+ contactId, pid: GetId(), title: title, url: url, lock: false};
+			tab.add(options);
+    	}
+    </script>
+</head>
+
+<body>
+    <div class="search-bar mt">
+        <span class="fl bold">
+		$!userNameDetail#if($!toPageFlag)关联任务数#else 任务明细-任务总量 #end(<label class="green">$!page.totalRowsAmount</label>)
+        </span>
+    </div>
+    
+    <table class="datatbl">
+        <thead>
+            <tr>
+                <th><label title="任务标题">任务标题</label></th>
+                <th><label title="联系目的">联系目的</label></th>
+                <th><label title="开始日期">开始日期</label></th>
+                <th><label title="结束日期">结束日期</label></th>
+                <th><label title="完成情况">完成情况</label></th>
+                <th><label title="分配者">分配者</label></th>
+            </tr>
+        </thead>
+        <tbody>
+			#foreach($relatedTaskBean in $!relatedTaskPage.items)
+            <tr>
+                <td>
+                	<label onclick="detailTsk($!relatedTaskBean.contactId);" class="ui-link-btn"  title="$!relatedTaskBean.contactTitle">$!relatedTaskBean.contactTitle</label>
+				</td>
+                <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$!relatedTaskBean.contactPurposeName">$!relatedTaskBean.contactPurposeName</label></td>
+                <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$date.format("yyyy-MM-dd",$!relatedTaskBean.startDate)">#if($!relatedTaskBean.startDate)$date.format("yyyy-MM-dd",$!relatedTaskBean.startDate)#end</label></td>
+				<td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$date.format("yyyy-MM-dd",$!relatedTaskBean.endDate)">#if($!relatedTaskBean.endDate)$date.format("yyyy-MM-dd",$!relatedTaskBean.endDate)#end</label></td> 	
+                <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$!relatedTaskBean.hasFinishedTask/$!relatedTaskBean.totalTask">$!relatedTaskBean.finishRate%</label></td>
+                <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$!relatedTaskBean.assignUserName">$!relatedTaskBean.assignUserName</label></td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6">
+                <div class="floatR">
+					<input type="hidden" value="$!userId" name="userId" />
+					<input type="hidden" value="$!startDate" name="startDate" />
+					<input type="hidden" value="$!endDate" name="endDate" />
+					<input type="hidden" value="$!purpostId" name="purpostId" />
+					<input type="hidden" value="$!detailFlag" name="detailFlag" />
+                	#parse("/velocity/page.vm")
+				</div>
+            </td>
+          </tr>
+		</tfoot>
+    </table>
+</body>
+</html>
+

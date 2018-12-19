@@ -1,0 +1,138 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>业务模板</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script language="javascript">
+		function moveData(vid,vmoveType){
+	    	jQuery.ajax({
+			    type:"post", //请求方式
+			    url:"movePdtCrmTemplat.html", //发送请求地址
+			    data:{ //发送给数据库的数据
+			    id:vid,
+			    moveType:vmoveType
+			    },//请求成功后的回调函数有两个参数
+			    //请求成功后的回调函数有两个参数
+			    success:function(data,textStatus){
+			 	  moveResult(data);
+			 	  
+			    }
+			});
+		}
+		//请求后的回调函数
+		function moveResult(msg)
+		{ 
+			if(msg!="SUCCESS"){
+				return;
+			}else{ 
+				//document.location.href="showPdtCrmTemplatListPage.html?random="+Math.random()*100000;
+				document.location.replace("showPdtCrmTemplatListPage.html?random="+Math.random()*100000);
+			}
+			
+		}
+		
+		function add(){
+				var urls="/pdtTemplate/jumpPdtCrmTemplat.html?random="+Math.random()*10000;
+				var options = {id: "pdtTemplate_add", pid: GetId(), title: "新增产品自定义模板", url: urls, lock: false};
+				tab.add(options);
+			}
+		
+	    function delData(id,name){
+			if(confirm("您确定要删除产品自定义模板“"+name+"”吗?")){
+		    	jQuery.ajax({
+				    type:"post", //请求方式
+				    url:"delPdtCrmTemplat.html?tempid="+id, //发送请求地址
+				    data:{ //发送给数据库的数据
+				    'tempid':id
+				    },//请求成功后的回调函数有两个参数
+				    //请求成功后的回调函数有两个参数
+				    success:function(data,textStatus){
+				 	  delResult(data);
+				    }
+					});
+			}else{
+				return;
+			}
+		}
+		function delResult(msg){
+			if(msg!="SUCCESS"){
+				banger.page.showMessageBox(msg);
+				return;
+			}else{ 
+				//document.location.href="showCrmTemplatListPage.html?random="+Math.random()*100000;
+				document.location.replace("showPdtCrmTemplatListPage.html?random="+Math.random()*100000);
+			}
+		}
+		
+		function editTemp(templateId){
+			var urls="/pdtTemplate/crmPdtTemplatDetail.html?tempid="+templateId;
+			var options = {id: "pdtTemplate_update", pid: GetId(), title: "编辑产品自定义模板", url: urls, lock: false};
+			tab.add(options);
+		}
+		
+		function toTemplateField(templateId){
+			var urls="/pdtTemplateField/showPdtTemplateFieldList.html?templateId="+templateId;
+			var options = {id: "pdtTemplateField_list" + templateId, pid: GetId(), title: "模板字段", url: urls, lock: false};
+			tab.add(options);
+		}
+	</script>
+</head>
+
+<body>
+	<form name="showCrmTemplateList"  id = "showCrmTemplateList" action="showPdtCrmTemplatListPage.html"  method="post">
+		<input type="hidden" value="2" name="template.templateTypeId" id="templateTypeId">
+		
+	 	<div class="sz">
+	    	<span class="fl bold">所有产品自定义模板<label class="dgreen">（$!count个）</label></span>
+	    </div>
+	 	<div class="actrow">
+	    	<span onclick="add()" class="btn2 fl">
+	            <label class="btn2-txt">新建</label>
+	        </span>
+	    </div>
+	    <table class="datatbl" cellpadding="0" cellspacing="0" >
+	    	<thead>
+	        	<tr>
+	            	<th width="60"><label>序号</label></th>
+	            	<th width="180"><label>模板名称</label></th>
+	            	<th><label>描述</label></th>
+	            	<th width="180"><label>操作</label></th>
+	            </tr>
+	        </thead>
+	    	<tbody>
+	        	#foreach($crmTemplate in $!crmTemplatList.items)
+				<tr>
+					<td width="60"><label>$velocityCount</label></td>
+					<td width="180"><label>$!crmTemplate.templateName</label></td>
+					<td><label>$!crmTemplate.remark</label></td>
+					<td width="180">
+						<a href="#" onclick="editTemp($!crmTemplate.templateId)">编辑</a>
+						<a href="javascript:void(0);" onclick="delData('$!crmTemplate.templateId','$!crmTemplate.templateName')">删除</a>
+						<a href="javascript:void(0);" onclick="moveData('$!crmTemplate.templateId','Up')">上移</a>
+						<a href="javascript:void(0);" onclick="moveData('$!crmTemplate.templateId','Down')">下移</a>
+						<a href="#" onclick="toTemplateField($!crmTemplate.templateId)">模板字段</a>
+					</td>
+				</tr>
+	            #end
+	        </tbody>
+	 	<tfoot>
+        	<tr>
+            	<td colspan="4">
+                	<div class="fr">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+	</form>
+</table>
+</body>
+</html>

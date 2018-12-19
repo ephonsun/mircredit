@@ -1,0 +1,204 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>贷款统计表</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0>
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop64.exe"></embed>
+	</object> 
+
+<style media=print> 
+.Noprint{display:none;} 
+.PageNext{page-break-after: always;} 
+</style> 
+
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000; 
+    border-style: solid; 
+    border-top-width: 2px; 
+    border-right-width: 2px; 
+    border-bottom-width: 1px; 
+    border-left-width: 1px; 
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+select{
+	width:200px;
+	height:200px;
+
+}
+.btn-bar p{
+	margin-top:6px;
+}
+.btn-bar p .btn{
+	width:40px;
+	height:30px;
+	cursor:pointer;
+	font-family:simsun;
+	font-size:14px;
+}
+</style> 
+<script>
+
+$(function(){	
+	//移到右边
+	$('#add').click(function(){
+		//先判断是否有选中
+		if(!$("#select1 option").is(":selected")){			
+			alert("请选择需要移动的选项")
+		}
+		//获取选中的选项，删除并追加给对方
+		else{
+			$('#select1 option:selected').appendTo('#select2');
+		}	
+	});
+	
+	//移到左边
+	$('#remove').click(function(){
+		//先判断是否有选中
+		if(!$("#select2 option").is(":selected")){			
+			alert("请选择需要移动的选项")
+		}
+		else{
+			$('#select2 option:selected').appendTo('#select1');
+		}
+	});
+	
+	//全部移到右边
+	$('#add_all').click(function(){
+		//获取全部的选项,删除并追加给对方
+		$('#select1 option').appendTo('#select2');
+	});
+	
+	//全部移到左边
+	$('#remove_all').click(function(){
+		$('#select2 option').appendTo('#select1');
+	});
+	
+	
+});
+
+//选择团队
+function queryTeam(){
+	var type=$("#type").val()
+	var queryTeam="queryTeam";
+	if(type=="3"){
+		queryTeam="queryUserId"
+		var selectText=$("#select2 option").map(function(){return $(this).val()}).get().join(",");
+		
+		window.dialogArguments.document.getElementById(queryTeam).innerHTML=selectText
+	}else{
+		var selectText=$("#select2 option").map(function(){return $(this).text()}).get().join(",");
+	    window.dialogArguments.document.getElementById(queryTeam).innerHTML=selectText
+	}
+	
+	window.close();
+}
+</script>
+</head>
+<body>
+	<input type="hidden" id="type" value="$!type" /> 
+		
+			<table align=center>
+				#if("$!type" == "1")
+				<tr>
+					<td><label class="condi-i-field">未选择团队：</label></td> 
+					<td></td> 
+					<td><label class="condi-i-field">已经选择团队：</label></td> 
+				</tr>
+				<tr>
+					<td>
+						
+						<select multiple="multiple" id="select1">
+							 #foreach($team in $!sysTeamList)
+                          		<option value="$!team.teamId" >$!team.teamName</option>
+                    		#end
+						</select>
+					</td>
+					#end
+				
+				#if("$!type" == "2")
+				<tr>
+					<td><label class="condi-i-field">未选择机构：</label></td> 
+					<td></td> 
+					<td><label class="condi-i-field">已经选择机构：</label></td> 
+				</tr>
+				<tr>
+					<td>
+						
+						<select multiple="multiple" id="select1">
+							 #foreach($dept in $!sysDeptList)
+                          		<option value="$!dept.deptId" >$!dept.deptName</option>
+                    		#end
+						</select>
+					</td>
+					#end
+					#if("$!type" == "3")
+				<tr>
+					<td><label class="condi-i-field">未选择客户经理：</label></td> 
+					<td></td> 
+					<td><label class="condi-i-field">已经选择客户经理：</label></td> 
+				</tr>
+				<tr>
+					<td>
+						
+						<select multiple="multiple" id="select1">
+							 #foreach($user in $!sysUserList)
+                          		<option value="$!user.account" >$!user.userName</option>
+                    		#end
+						</select>
+					</td>
+					#end
+					<td>
+						<div class="btn-bar">
+							<p><span id="add"><input type="button" class="btn" value=">" title="移动选择项到右侧"/></span></p>
+							<p><span id="add_all"><input type="button" class="btn" value=">>" title="全部移到右侧"/></span></p>
+							<p><span id="remove"><input type="button" class="btn" value="<" title="移动选择项到左侧"/></span></p>
+							<p><span id="remove_all"><input type="button" class="btn" value="<<" title="全部移到左侧"/></span></p>
+						</div>
+					</td>
+					<td  align=right>
+						<select multiple="multiple" id="select2"></select>
+					</td>
+				</tr>
+				<tr>
+					<td colspan=3 align="center"> 
+						<div class="sz">
+							<input id="query" type="button" class="btn1" onclick="queryTeam()" value="确 定" />
+						</div>
+					</td>
+				</tr>
+				
+			</table>
+		 
+</body>

@@ -1,0 +1,122 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+            <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+            <th><label title="客户类型">客户类型</label></th>
+            <th><label title="单位">单位</label></th>
+            <th><label title="归属机构">归属机构</label></th>
+            <th><label title="归属人员">归属人员</label></th>
+            <th><label title="操作">操作</label></th>
+        </tr>
+    </thead>
+    <tbody>
+    	#foreach($customer in $!customerList.items)
+        <tr id="$!customer.customerId">
+        	<td>
+            	<div class="datacus">
+            		#if($!customer.defaultPhoneType=='1')
+                    	<a class="ui-link-btn" href="javascript:void(0);" onclick="browseCustomer('$!customer.customerId')" title="$!customer.customerName（$!customer.mobilePhone1）">$!customer.customerName（$!customer.mobilePhone1）</a>
+                    #elseif($!customer.defaultPhoneType=='2')
+                    	<a class="ui-link-btn" href="javascript:void(0);" onclick="browseCustomer('$!customer.customerId')" title="$!customer.customerName（$!customer.mobilePhone2）">$!customer.customerName（$!customer.mobilePhone2）</a>
+                    #elseif($!customer.defaultPhoneType=='3')
+                    	<a class="ui-link-btn" href="javascript:void(0);" onclick="browseCustomer('$!customer.customerId')" title="$!customer.customerName（$!customer.phone）">$!customer.customerName（$!customer.phone）</a>
+                    #elseif($!customer.defaultPhoneType=='4')
+                    	<a class="ui-link-btn" href="javascript:void(0);" onclick="browseCustomer('$!customer.customerId')" title="$!customer.customerName（$!customer.fax）">$!customer.customerName（$!customer.fax）</a>
+                    #end
+                    <div class="icon">
+                    	#if($!customer.defaultPhoneType=='1')
+                        	<i class="i phone" onclick="dial('$!customer.mobilePhone1','$!customer.customerId')" title="拨号">phone</i>
+                        	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+                        	#if($urlPermitUtil.hasPermission('toAddSms'))
+                        	<i class="i sms" onclick="sendSms('$!customer.mobilePhone1','$!customer.customerId')" title="短信">sms</i>
+                        	#end
+		                	#if($urlPermitUtil.hasPermission('toAddMms'))
+                        	<i class="i mms" onclick="sendMms('$!customer.mobilePhone1','$!customer.customerId')" title="彩信">mms</i>
+                        	#end
+                        #elseif($!customer.defaultPhoneType=='2')
+                        	<i class="i phone" onclick="dial('$!customer.mobilePhone2','$!customer.customerId')" title="拨号">phone</i>
+                        	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+                        	#if($urlPermitUtil.hasPermission('toAddSms'))
+                        	<i class="i sms" onclick="sendSms('$!customer.mobilePhone2','$!customer.customerId')" title="短信">sms</i>
+                        	#end
+		                	#if($urlPermitUtil.hasPermission('toAddMms'))
+                        	<i class="i mms" onclick="sendMms('$!customer.mobilePhone2','$!customer.customerId')" title="彩信">mms</i>
+                        	#end
+                        #elseif($!customer.defaultPhoneType=='3')
+                        	<i class="i phone" onclick="dial('$!customer.phone','$!customer.customerId')" title="拨号">phone</i>
+                        	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+                        	#if($!customer.mobilePhone1 != '')
+                        		#if($urlPermitUtil.hasPermission('toAddSms'))
+                        		<i class="i sms" onclick="sendSms('$!customer.mobilePhone1','$!customer.customerId')" title="短信">sms</i>	
+                        		#end
+		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                        		<i class="i mms" onclick="sendMms('$!customer.mobilePhone1','$!customer.customerId')" title="彩信">mms</i>
+                        		#end
+                        	#elseif($!customer.mobilePhone2 != '')
+                        		#if($urlPermitUtil.hasPermission('toAddSms'))
+                        		<i class="i sms" onclick="sendSms('$!customer.mobilePhone2','$!customer.customerId')" title="短信">sms</i>
+                        		#end
+		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                        		<i class="i mms" onclick="sendMms('$!customer.mobilePhone2','$!customer.customerId')" title="彩信">mms</i>
+                        		#end
+                        	#end
+                        #elseif($!customer.defaultPhoneType=='4')
+                        	<i class="i phone" onclick="dial('$!customer.fax','$!customer.customerId')" title="拨号">phone</i>
+                        	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+                        	#if($!customer.mobilePhone1 != '')
+                        		#if($urlPermitUtil.hasPermission('toAddSms'))
+                        		<i class="i sms" onclick="sendSms('$!customer.mobilePhone1','$!customer.customerId')" title="短信">sms</i>	
+                        		#end
+		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                        		<i class="i mms" onclick="sendMms('$!customer.mobilePhone1','$!customer.customerId')" title="彩信">mms</i>
+                        		#end
+                        	#elseif($!customer.mobilePhone2 != '')
+                        		#if($urlPermitUtil.hasPermission('toAddSms'))
+                        		<i class="i sms" onclick="sendSms('$!customer.mobilePhone2','$!customer.customerId')" title="短信">sms</i>
+                        		#end
+		                		#if($urlPermitUtil.hasPermission('toAddMms'))
+                        		<i class="i mms" onclick="sendMms('$!customer.mobilePhone2','$!customer.customerId')" title="彩信">mms</i>
+                        		#end
+                        	#end
+                        #end
+                    </div>
+                    <div class="other">
+                    	<label class="item cusTitle" title="$!customer.customerTitle">
+                        	$!customer.customerTitle
+                        </label>
+                        <label class="item">
+                        	$!customer.sex
+                        </label>
+                        <label class="item">
+                        	#if($!customer.age)
+                        		$!customer.age岁
+                        	#end
+                        </label>
+                        <label class="item red">
+                        	（共享客户）
+                        </label>
+                    </div>
+                </div>
+            </td>
+            <td><label title="$!customer.customerTypeName">$!customer.customerTypeName</label></td>
+            <td><label title="$!customer.company">$!customer.company</label></td>
+            <td><label title="$!customer.deptName">$!customer.deptName</label></td>
+            <td><label title="$!customer.userName">$!customer.userName</label></td>
+            <td>
+                #if($urlPermitUtil.hasPermission('editCustomer'))
+                <span class="slink" onclick="editCus('$!customer.customerId')">编辑</span>
+                #end
+            </td>
+        </tr>
+        #end
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="6">
+                <div class="fr">
+                	#parse("/velocity/ajaxPage.vm")
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

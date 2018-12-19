@@ -1,0 +1,50 @@
+
+<h3 class="recenter-ttl" style="text-align: center;">
+	#if($!startDate!=""&&$!endDate!="")
+		$!startDate至$!endDate
+	#elseif($!startDate!=""&&$!endDate=="")
+		$!startDate之后
+	#elseif($!startDate==""&&$!endDate!="")
+		截止至$!endDate
+	#end
+	营销完成情况统计表
+</h3>
+<table class="recenter-tbl">
+    <thead>
+        <tr>
+    		<th><label title="执行者">执行对象</label></th>
+    		<th><label title="任务总量">任务总量</label></th>
+    		<th><label title="未分配占比">未分配占比</label></th>
+    		<th><label title="未完成">未完成</label></th>
+			<th><label title="未完成占比">未完成占比</label></th>
+			<th><label title="已完成">已完成</label></th>
+			<th><label title="已完成占比">已完成占比</label></th>
+    	</tr>
+    </thead>
+    <tbody>
+		#foreach($task in $!taskReportList)
+		<tr>
+			<td><label title="$!task.excuteName">$!task.excuteName</label></td>
+			<td>
+				<label title="$!task.taskCount">
+					#if($!task.taskCount!=0)
+					<a class="slink" href="#2" title="$!task.taskCount" onclick="detail('$!task.excuteId','$!searchType')">$!task.taskCount</a>
+    				#else
+    					$!task.taskCount
+    				#end
+				</label>
+			</td>
+			<td><label title="$!task.unAssignRate%">#if($!task.unAssignRate == '0.0') － #else $!task.unAssignRate% #end</label></td>
+			<td><label title="$!task.unFinish">$!task.unFinish</label></td>
+			<td><label title="$!task.unFinishRate">#if($!task.unFinishRate == '0.0') － #else $!task.unFinishRate% #end</label></td>
+			<td><label title="$!task.finish">$!task.finish</label></td>
+			<td><label title="$!task.finishRate">#if($!task.finishRate == '0.0') － #else $!task.finishRate% #end</label></td>
+		</tr>
+		#end
+    </tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+    制表人：$!userName
+    &nbsp; &nbsp; 
+    制表时间：$!reportTime
+</p>

@@ -1,0 +1,44 @@
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+    <tr>
+        <th colspan="3"><span style="font-size: 16px;color: #0000ff"><b>此机构节点(包含下属机构)下所有团队日志统计</b></span></th>
+        <th>填写 <span style="color: red">$!alrCount</span>/<span style="color: #0000ff">$!count</span>人</th>
+        <th><span class="slink" onclick="newTab('allDeptId', $!deptId)">查看</span> <span class="slink" onclick="daochu('allDeptId', $!deptId)" >导出</span></th>
+    </tr>
+    <tr>
+        <th colspan="3"><span style="font-size: 16px;color: #0000ff"><b>本机构节点(不包含下属机构)的所有团队日志统计</b></span></th>
+        <th>填写 <span style="color: red">$!alrDCount</span>/<span style="color: #0000ff">$!dcount</span>人</th>
+        <th><span class="slink" onclick="newTab('deptId', $!deptId)">查看</span> <span class="slink" onclick="daochu('deptId', $!deptId)">导出</span></th>
+    </tr>
+        <tr>
+            <th>用户名</th>
+            <th>姓名</th>
+			<th>角色</th>
+			<th>今日是否填写</th>
+            <th width="120">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($deptUser in $!deptUserList.items)
+            <tr>
+                <td><label>$!deptUser.account</label></td>
+                <td ><label>$!deptUser.userName</label></td>
+                <td ><label title="$!deptUser.roleNames">$!deptUser.roleNames</label></td>
+                <td><label>#if ($!deptUser.isOK==0) <span style="color: red">未填写</span> #else <span style="color: #0000ff">已填写</span> #end</label></td>
+				<td><span class="slink" onclick="newTab('userId', $!deptUser.userId)">查看</span>
+                #if ($!deptUser.isOK!=0)
+                    <span class="slink" onclick="daochu('userId', $!deptUser.userId)" >导出</span>
+                #end
+                </td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="5">
+				<div class="floatR">#parse("/velocity/deptPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<input id="totalAmount" type="hidden" name="totalAmount" value="$!totalAmount"/>

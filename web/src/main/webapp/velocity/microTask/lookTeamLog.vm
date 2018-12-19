@@ -1,0 +1,382 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>查看团队日志</title>
+
+    <style type="text/css">
+        .v-fails {
+            border: 1px solid red;
+            background-color: #fff7f7;
+        }
+
+        .v-fails input {
+            color: red;
+        }
+
+        .v-tips {
+            position: absolute;
+            border: 1px solid #a6c9e2;
+            background-color: white;
+            padding: 4px 7px;
+            line-height: 20px;
+        }
+
+        .v-tips img {
+            position: absolute;
+            top: -10px;
+            border: 0;
+        }
+
+        div.tabs-header {
+            height: auto !important;
+        }
+
+        div.tabs-items-zone {
+            white-space: normal;
+        }
+    </style>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css"/>
+
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    #scriptLink("page")
+
+</head>
+
+<body>
+    <div id="tabs-pages" class="tabs-pages">
+        <div class="tabs-page">
+        <span style="color: #0000ff;font-size: 20px"><b>$!deptOrUserName 团队日志</b></span>
+        <br/>
+        <br/>
+        <br/>
+        <table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结电话营销(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjdhyx" value="$!sumTeamLog.zrzjdhyx" id="zrzjdhyx" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划电话营销(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.jrjhdhyx" value="$!sumTeamLog.jrjhdhyx" id="jrjhdhyx" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结实地营销(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjsdyx" value="$!sumTeamLog.zrzjsdyx" id="zrzjsdyx" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划实地营销(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.jrjhsdyx" value="$!sumTeamLog.jrjhsdyx" id="jrjhsdyx" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结接待咨询(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjjdzx" value="$!sumTeamLog.zrzjjdzx" id="zrzjjdzx" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划接待咨询(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.jrjhjdzc" value="$!sumTeamLog.jrjhjdzc" id="jrjhjdzc" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结接待申请(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjjdsq" value="$!sumTeamLog.zrzjjdsq" id="zrzjjdsq" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划接待申请(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"   class="dtxt1-txt"  name="sumTeamLog.jrjhjdsq" value="$!sumTeamLog.jrjhjdsq" id="jrjhjdsq" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结调查笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjdcbs" value="$!sumTeamLog.zrzjdcbs" id="zrzjdcbs" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划调查笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  name="sumTeamLog.jrjhdcbs" value="$!sumTeamLog.jrjhdcbs" id="jrjhdcbs" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结放贷笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"   class="dtxt1-txt"  name="sumTeamLog.zrzjfdbs" value="$!sumTeamLog.zrzjfdbs" id="zrzjfdbs" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划放贷笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.jrjhfdbs" value="$!sumTeamLog.jrjhfdbs" id="jrjhfdbs" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结贷后笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjdhbs" value="$!sumTeamLog.zrzjdhbs" id="zrzjdhbs" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划贷后笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"   class="dtxt1-txt"  name="sumTeamLog.jrjhdhbs" value="$!sumTeamLog.jrjhdhbs" id="jrjhdhbs" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>昨日总结上会笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.zrzjshbs" value="$!sumTeamLog.zrzjshbs" id="zrzjshbs" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>今日计划上会笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.jrjhshbs" value="$!sumTeamLog.jrjhshbs" id="jrjhshbs" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>本月累计通过笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"   class="dtxt1-txt"  name="sumTeamLog.byljtgbs" value="$!sumTeamLog.byljtgbs" id="byljtgbs" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>本月净增户数任务指标(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"   class="dtxt1-txt"  name="sumTeamLog.byjzhsrwzb" value="$!sumTeamLog.byjzhsrwzb" id="byjzhsrwzb" maxlength="5"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>本月净增余额任务指标(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"   class="dtxt1-txt"  name="sumTeamLog.byjzyerwzb" value="$!sumTeamLog.byjzyerwzb" id="byjzyerwzb" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>本月通过未发放金额(保留2位小数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.bytgwffje" value="$!sumTeamLog.bytgwffje" id="bytgwffje" maxlength="15"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>预计至月底放款金额(保留2位小数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  name="sumTeamLog.yjydfkje" value="$!sumTeamLog.yjydfkje" id="yjydfkje" maxlength="15"/>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>预计至月底净增金额(保留2位小数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.yjydjzje" value="$!sumTeamLog.yjydjzje" id="yjydjzje" maxlength="15"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>待处理笔数(整数)：</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt"  name="sumTeamLog.dclbs" value="$!sumTeamLog.dclbs" id="dclbs" maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+            </td>
+            <td width="18%">
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月新增笔数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.byxzbs"  maxlength="5"/>
+            </td>
+            <td width="7%" class="field">
+                <label>本月转贷笔数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.byzdbs" maxlength="5" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月叠加笔数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.bydjbs"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+                <label>本月到期笔数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.bydqbs" maxlength="5" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月提前结清笔数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.bytqjqbs"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+                <label>本月提前结清金额（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.bytqjqje" maxlength="15" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月放款笔数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.byfkbs"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+                <label>本月放款加权利率%（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.byfkjqll" maxlength="15" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月有余额户数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.byyyehs"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+                <label>上月有余额户数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.syyyehs" maxlength="5" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月净增户数（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.byjzhs"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+                <label>本月放款金额（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.byfkje" maxlength="5" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月贷款余额（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.bydkye"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+                <label>上月贷款余额（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px"  class="dtxt1-txt" value="$!sumTeamLog.sydkye" maxlength="5" />
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>本月净增余额（系统生成）</label>
+            </td>
+            <td width="18%">
+                <input type="text" readonly style="border: 0px" class="dtxt1-txt"  value="$!sumTeamLog.byjzye"  maxlength="5" />
+            </td>
+            <td width="7%" class="field">
+            </td>
+            <td width="18%">
+            </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+    </div>
+    <hr style="margin: 20px 0px;"/>
+
+    <p class="halign">
+        <input type="button" value="关 闭" class="btn6 btn6bg3"
+               onclick="javascript:tab.close(GetId(), false);"/>
+    </p>
+</body>
+</html>

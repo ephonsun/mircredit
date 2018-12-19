@@ -1,0 +1,196 @@
+ <script>
+ 		//加载联系客户列表脚本
+		$(".datatbl").table();
+		//移除联系客户
+		$('.datatbl tbody tr').each(function(){
+			$('a.del', this).click(function(){
+    			jQuery.post('removeTaskCustomer.html',{'target.taskTargetId': parseInt(this.rel)},function(data){
+    				toRefreshPhoneTask();
+    			});
+				return false;
+			});
+		});	
+
+		//查看客户
+		function customerDetail(customerId){
+			jQuery.ajax({
+				  type: 'POST',
+				  url: "/customer/isDeleteCus.html?random="+Math.random()*1000,
+				  data: {"cusId":customerId},
+				  success:function(data){
+				  		var obj = jQuery.parseJSON(data);
+				  		if(obj[0].isDel=='1'){
+				  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+				  		}else{
+							var options = {id: "task_Customer_detail_update"+customerId, pid: GetId(), title: "客户详情", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId, lock: false};
+							tab.add(options);
+						}
+				  	}
+			});	
+		}
+		//添加客户
+		function toInitCustomer(taskId){
+			var url="/customer/customerSelect.html?random="+Math.random();
+			var result=banger.page.openDialog(url,null,960,620);
+			if(result!=undefined){
+				var taskId=$("#tskTaskId").val();
+				$('#phoneTaskCard').html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待…</div></div>');
+				jQuery.post('savePhoneTaskCustomer.html',{
+					'taskId':taskId,
+					'customerIds':result
+				},function(data){toRefreshPhoneTask()});
+			}
+		 }
+		 
+		 //改变沟通进度
+		 function changeCommPross(targetId,commPid){
+			jQuery.post('changeCommProgress.html',{
+				'target.taskTargetId':targetId,
+				'target.commProgressId':commPid
+			},function(){});
+		 }
+</script>
+
+<div>
+    <table id="cusTab" class="datatbl" cellpadding="0" cellspacing="0">
+        <thead>
+            <tr>
+                <th width="29%">客户（电话）</th>
+                <th width="15%">单位</th>
+                <th width="10%">归属机构</th>
+                <th width="10%">归属人员</th>
+                <th width="11%">沟通进度</th>
+				#if(!$!marketType.equals("3"))
+                <th width="10%">操作</th>
+				#end
+            </tr>
+        </thead>
+        <tbody>
+            #foreach($customer in $!tskTargetCusPage.items)
+                <tr>
+                    <td>
+                    	<div class="datacus">
+                    		#if($!customer.defaultPhoneType=='1')
+                            	<a href="#2" class="nm" onclick="customerDetail('$!customer.customerId')"><label title="$!customer.customerName（$!customer.mobilePhone1）">$!customer.customerName（$!customer.mobilePhone1）</label></a>
+                            #elseif($!customer.defaultPhoneType=='2')
+                            	<a href="#2" class="nm" onclick="customerDetail('$!customer.customerId')"><label title="$!customer.customerName（$!customer.mobilePhone2）">$!customer.customerName（$!customer.mobilePhone2）</label></a>
+                            #elseif($!customer.defaultPhoneType=='3')
+                            	<a href="#2" class="nm" onclick="customerDetail('$!customer.customerId')"><label title="$!customer.customerName（$!customer.phone）">$!customer.customerName（$!customer.phone）</label></a>
+                            #elseif($!customer.defaultPhoneType=='4')
+                            	<a href="#2" class="nm" onclick="customerDetail('$!customer.customerId')"><label title="$!customer.customerName（$!customer.fax）">$!customer.customerName（$!customer.fax）</label></a>
+                            #end
+                            <div class="icon">
+                            	#if($!customer.defaultPhoneType=='1')
+                                	<i class="i phone" onclick="dial('$!customer.mobilePhone1','$!customer.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+									#if($urlPermitUtil.hasPermission('toAddSms'))
+    								<i class="i sms" onclick="sendSms('$!customer.mobilePhone1','$!customer.customerId')" title="短信">sms</i>
+    								#end
+    								#if($urlPermitUtil.hasPermission('toAddMms'))
+    								<i class="i mms" onclick="sendMms('$!customer.mobilePhone1','$!customer.customerId')" title="彩信">mms</i>
+    								#end
+    							#elseif($!customer.defaultPhoneType=='2')
+                                	<i class="i phone" onclick="dial('$!customer.mobilePhone2','$!customer.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+									#if($urlPermitUtil.hasPermission('toAddSms'))
+                            		<i class="i sms" onclick="sendSms('$!customer.mobilePhone2','$!customer.customerId')" title="短信">sms</i>
+    								#end
+    								#if($urlPermitUtil.hasPermission('toAddMms'))
+    								<i class="i mms" onclick="sendMms('$!customer.mobilePhone2','$!customer.customerId')" title="彩信">mms</i>
+    								#end
+                                #elseif($!customer.defaultPhoneType=='3')
+                                	<i class="i phone" onclick="dial('$!customer.phone','$!customer.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+									#if($!customer.mobilePhone1 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+        								<i class="i sms" onclick="sendSms('$!customer.mobilePhone1','$!customer.customerId')" title="短信">sms</i>
+        								#end
+        								#if($urlPermitUtil.hasPermission('toAddMms'))
+        								<i class="i mms" onclick="sendMms('$!customer.mobilePhone1','$!customer.customerId')" title="彩信">mms</i>
+        								#end
+                                	#elseif($!customer.mobilePhone2 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!customer.mobilePhone2','$!customer.customerId')" title="短信">sms</i>
+        								#end
+        								#if($urlPermitUtil.hasPermission('toAddMms'))
+        								<i class="i mms" onclick="sendMms('$!customer.mobilePhone2','$!customer.customerId')" title="彩信">mms</i>
+        								#end
+                                	#end
+                                #elseif($!customer.defaultPhoneType=='4')
+                                	<i class="i phone" onclick="dial('$!customer.fax','$!customer.customerId')" title="拨号">phone</i>
+                                	<i class="i dsc" onclick="tape('$!customer.customerId')" title="座谈" >dsc</i>
+									#if($!customer.mobilePhone1 != '')
+    									#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!customer.mobilePhone1','$!customer.customerId')" title="短信">sms</i>
+        								#end
+        								#if($urlPermitUtil.hasPermission('toAddMms'))
+        								<i class="i mms" onclick="sendMms('$!customer.mobilePhone1','$!customer.customerId')" title="彩信">mms</i>
+        								#end
+                                	#elseif($!customer.mobilePhone2 != '')
+                                		#if($urlPermitUtil.hasPermission('toAddSms'))
+                                		<i class="i sms" onclick="sendSms('$!customer.mobilePhone2','$!customer.customerId')" title="短信">sms</i>
+        								#end
+        								#if($urlPermitUtil.hasPermission('toAddMms'))
+        								<i class="i mms" onclick="sendMms('$!customer.mobilePhone2','$!customer.customerId')" title="彩信">mms</i>
+        								#end
+                                	#end
+                                #end
+                            </div>
+                            <div class="other">
+                            	<label class="item">
+                                	$!customer.customerTitle
+                                </label>
+                                <label class="item">
+                                	$!customer.sex
+                                </label>
+                                <label class="item">
+                                	#if($!customer.age)
+                                		$!customer.age岁
+                                	#end
+                                </label>
+                                #if($!customer.isShare==1)
+                                <label class="item red">
+                                	（共享客户）
+                                </label>
+                                #end
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <label title="$!customer.company">$!customer.company</label>
+                    </td>
+                    <td>
+                        <label title="$!customer.deptName">$!customer.deptName</label>
+                    </td>
+                    <td>
+                        <label title="$!customer.userName">$!customer.userName</label>
+                    </td>
+                    <td>
+						<select id="commPid" #if(!$!marketType.equals("3")) onchange="changeCommPross($!customer.taskTargetId,this.value)" #end>
+							<option value=""></option>
+                        #foreach($progress in $!commProgressList)
+							   <option value="$!progress.commProgressId" #if($!progress.commProgressId==$!customer.commProgressId) selected=true #end>$!progress.commProgressName</option>
+						#end
+						</select>
+                    </td>
+					#if(!$!marketType.equals("3"))
+                    <td>
+                        <a href="javascript:void(0);" class="del" rel='$!customer.taskTargetId'>移除</a>
+                    </td>
+					#end
+                </tr>
+            #end
+        </tbody>
+        <tfoot>
+            <tr>
+                <td #if(!$!marketType.equals("3")) colspan="6" #else colspan="5" #end>
+                    <div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<hr />
+<div class="halign">
+	<input type="button" class="btn6 btn6bg3" value="关闭" #if(!$!marketType.equals("3")) onclick="javascript:tab.close(GetId(), true);" #else onclick="javascript:tab.close(GetId(), false);" #end/>
+</div>

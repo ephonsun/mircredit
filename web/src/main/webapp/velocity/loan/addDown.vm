@@ -1,0 +1,209 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+		 <title>添加上下游</title>
+		 <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+
+
+
+
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+		  body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/micro/askLoan.js"></script>
+
+	<script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	#if($!isAdd)
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	#end
+	
+	<script type="text/javascript">
+   /*jQuery(function () {
+         maxTextArea("textarea[maxlength]");
+        });
+	$(function(){
+			#if($!isAdd)
+				initDate('monDate', { minDate: new Date()});
+                initDate('datepicker');
+            #end
+
+        $("select").each(function () {
+            $(this).select({scroll: 10});
+        });
+
+
+        $(".ui-footer-btn1-cancel").click(function(){
+            window.close();
+        });
+	//确定
+            $('.ui-footer-btn1-save').click(function(){
+
+                var businessCustomer =$("#businessCustomer").val();
+                if (businessCustomer.replace(/(^\s*)|(\s*$)/g, "") == ""){
+                    alert("请输入供应商！");
+                    return false;
+                }
+                var businessRate =$("#businessRate").val();
+                if (businessRate.replace(/(^\s*)|(\s*$)/g, "") == ""){
+                    alert("请输入占比！");
+                    return false;
+                }
+                var businessYear =$("#businessYear").val();
+                if (businessYear.replace(/(^\s*)|(\s*$)/g, "") == ""){
+                    alert("请输入合作年限！");
+                    return false;
+                }
+                var businessRemark =$("#businessRemark").val();
+                if (businessRemark.replace(/(^\s*)|(\s*$)/g, "") == ""){
+                    alert("请输入备注！");
+                    return false;
+                }
+
+
+                var postJson = {};
+                postJson['loanId']=$("#loanId").val();
+                postJson['businessCustomer']=$("#businessCustomer").val();
+                postJson['businessRate']=$("#businessRate").val();
+                postJson['businessYear'] = $("#businessYear").val();
+                postJson['businessRemark'] = $("#businessRemark").val();
+                postJson['reachesType'] =0;
+
+                var urlStr = "../loan/insertInBusinessReaches.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+
+                        if(data == "success"){
+
+                            alert("保存成功");
+
+                            window.returnValue="success";
+                            window.close();
+                        }else{
+                            //alert(data);
+                        }
+                    }
+                });
+            });
+	});*/
+
+   $(function(){
+       jQuery('#guLoanPerson').validator();
+       //确定
+       jQuery('.ui-footer-btn1-save').click(function(){
+           var bool = jQuery.validator({form:'guLoanPerson',extend:true,extendhandler:extendvalidator});
+           if(!bool){
+               return false;
+           }
+
+           var data = $("#myForm").serialize();
+           var url = $("#myForm").attr("action") + "?random="+Math.random()*1000;
+           jQuery.ajax({
+               type: 'POST',
+               url: url,
+               data: data,
+               success:function(data){
+                   window.returnValue="success";
+                   window.close();
+               }
+           });
+
+       });
+
+       jQuery('.ui-footer-btn1-cancel').click(function(){
+           window.close();
+       });
+   });
+    </script>
+</head>
+<body>
+<form id="myForm" action="${ctx}/loan/insertInBusinessReaches.html">
+    <input type="hidden" name="loanId" id="loanId" value="$!loanId"/>
+    <input type="hidden" name="reachesType" id="reachesType" value="0"/>
+    <p class="bold loan-ttlbg">添加下游</p>
+
+    <div class="loan-add-box">
+        <table class="celltbl" style="table-layout: auto;" id="guLoanPerson">
+            <tbody>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>客户：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="businessCustomer">
+                        <input type="text" class="text" id="businessCustomer"  name="businessCustomer" maxlength="20" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>占比：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="businessRate">
+                        <input type="text" class="text" id="businessRate" name="businessRate" maxlength="20" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>合作年限：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="businessYear">
+                        <input type="text" class="text" id="businessYear"  name="businessYear" maxlength="20" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width=9.5% style="text-align: right">
+                    <label>备注：</label>
+                </td>
+                <td width="200" colspan="7">
+                    <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+                        <textarea maxlength="300" class="textarea" id="businessRemark" name="businessRemark" style="height: 100px; _height:100px;">$!lnLoanBalance.businessRemark</textarea>
+                    </div>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+    </div>
+
+</form>
+</body>
+</html>

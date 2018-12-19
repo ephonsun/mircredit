@@ -1,0 +1,111 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户资料同步</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <style type="text/css">
+    	.limit {  }
+		.limit .maxval { margin-top: 20px; padding-left: 12px; }
+		.limit .btnzone { margin-top: 20px; text-align: center; }
+    </style>
+    <script type="text/javascript">
+		$(function(){
+			jQuery('select').select();
+			if($("#isActived").val()==1){//启用客户资料同步
+				$("#isActivedBox").attr("checked", true);
+			}
+			else{
+				$("#isActivedBox").attr("checked", false);
+			}
+			$("#isActivedBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isActived").val(1);
+				}
+				else{
+					$("#isActived").val(0);
+				}
+			});
+		})
+		function sub(){
+    		var f=$("#syncSettingForm");
+    		f.action="updateSyncSetting.html";
+    		f.submit();
+    		banger.page.showMessageBox({"type":"success","content":"保存成功"});
+		}
+	</script>
+</head>
+
+<body>
+	<form id="syncSettingForm" name="syncSettingForm" action="updateSyncSetting.html" method="post">
+	<ul class="limit">
+    	<li>
+    		<input type="hidden" id="isActived" name="sync.isActived" value="$!sync.isActived" />
+        	<input type="checkbox" id="isActivedBox" class="chk" />
+            <label>启用客户资料同步</label>
+        </li>
+        <li class="maxval">
+        	<table width="100%" border="0" cellpadding="2" cellspacing="2">
+            	<tbody>
+                	<tr>
+                        <td width="80" height="30" align="right">导入时间：</td>
+                        <td colspan="3">
+                            系统将在每天
+                            <input type="text" class="txt" style="width: 60px; text-align: right;" name="sync.syncTime" id="syncTime" value="$!sync.syncTime" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')"/>
+                            对数据进行同步
+                        </td>
+                    </tr>
+                    <tr>
+                    	<th align="left" colspan="4">FTP设置<hr /></th>
+                    </tr>
+                    <tr>
+                        <td width="90" height="30" align="right">远程IP地址：</td>
+                        <td><input type="text" class="txt" name="sync.ftpHost" id="ftpHost" value="$!sync.ftpHost"/></td>
+                        <td width="90" align="right">端口号：</td>
+                        <td><input type="text" class="txt" name="sync.ftpPort" id="ftpPort" value="$!sync.ftpPort" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')"/></td>
+                    </tr>
+                    <tr>
+                        <td width="90" height="30" align="right">账号：</td>
+                        <td><input type="text" class="txt" name="sync.ftpAccount" id="ftpAccount" value="$!sync.ftpAccount"/></td>
+                        <td width="90" align="right">密码：</td>
+                        <td><input type="password" class="txt" style="width: 149px;" name="sync.ftpPassword" id="ftpPassword" value="$!sync.ftpPassword"/></td>
+                    </tr>
+                    <tr>
+                    	<td width="90" height="30" align="right">FTP目录：</td>
+                        <td colspan="3">
+                            <select style="width: 450px;" name="sync.ftpSyncDir" value="$!sync.ftpSyncDir">
+                                <option></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                    	<td width="90" height="30" align="right">客户数据文件：</td>
+                        <td colspan="3">
+                            <input type="file" class="txt" style="width: 523px; background-color: #fff;" name="sync.ftpSyncFile" name="sync.ftpSyncFile" value="$!sync.ftpSyncFile""/>
+                        </td>
+                    </tr>
+                   
+                   
+                </tbody>
+            </table>
+            
+            
+        </li>
+        <li class="btnzone">
+            <input type="button" value="应 用" class="btn1" onclick="sub()"/>
+            <input type="button" value="取 消" class="btn1" onclick="javascript:tab.close(GetId(), false);"/>
+        </li>
+    </ul>
+    </form>
+</body>
+</html>

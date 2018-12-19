@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="taskAssignImport" extends="default"
+		namespace="/taskAssignImport">
+		<!-- 跳转到导入页面 -->
+		<action name="transTskImportPage" class="taskAssignImportAction"
+			method="transTskImportPage">
+			<result name="success">/velocity/microTask/importTskAssignPath.vm
+			</result>
+		</action>
+
+		<!-- 下载模板 -->
+		<action name="provExcelSample" class="taskAssignImportAction"
+			method="provExcelSample">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 数据对比 -->
+		<action name="importExcelContrast" class="taskAssignImportAction"
+			method="importExcelContrast">
+			<result name="success">/velocity/microTask/importTskAssignColumns.vm
+			</result>
+			<result name="error">/velocity/microTask/importTskAssignPath.vm
+			</result>
+		</action>
+
+		<!-- 导入验证 -->
+		<action name="logicVerify" class="taskAssignImportAction"
+			method="logicVerify">
+		</action>
+
+		<!-- 导入数据库 -->
+		<action name="excelToDataBase" class="taskAssignImportAction"
+			method="excelToDataBase">
+		</action>
+
+		<!-- 进度条 -->
+		<action name="tskAssignBar" class="taskAssignImportAction"
+			method="tskAssignBar">
+		</action>
+
+		<!-- 终止导入 -->
+		<action name="interruptTskAssign" class="taskAssignImportAction"
+			method="interruptTskAssign">
+		</action>
+
+		<!-- 导出失败 -->
+		<action name="exportFileData" class="taskAssignImportAction" method="exportFileData">
+		</action>
+	</package>
+</struts>

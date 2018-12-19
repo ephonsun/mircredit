@@ -1,0 +1,94 @@
+﻿<script type="text/javascript">
+	var dateStr = 'UnContactMonth';
+	var isFirst = 'true';
+	jQuery(function(){
+		jQuery('#cusCount').text('(' + $!recordCount + ')');
+		
+		serachType('UnContactMonth');
+		
+		jQuery('span.uncontact').click(function(){
+			jQuery(this).addClass('bold');
+			jQuery(this).siblings('span.uncontact').removeClass('bold');
+		});
+	});
+	
+	function serachType(type){
+		var now = new Date();
+		switch(type){
+			case 'UnContactMonth':
+				now.addMonths(-1);
+				break;
+			case 'UnContactTwoWeek':
+				now.addWeeks(-2);
+				break;
+			case 'UnContactAWeek':
+				now.addWeeks(-1);
+				break;
+			default: break;
+		}
+		
+		$('#ayear').text(now.Format('yyyy'));
+		$('#amouth').text(now.Format('MM'));
+		$('#adate').text(now.Format('dd'));
+		
+		dateStr = type;
+		
+		if(isFirst=='true'){
+			isFirst = 'false';
+		}else{
+			Query();
+		}
+	}
+	function Query(){
+		var postJson = {};
+		postJson['crmCustomer.lastContactDateStr']=jQuery.trim(dateStr);
+		postJson['unAllocation'] = 'true';
+		var urlStr = '../customer/unAllocationRemind.html?RandNum='+ Math.random();
+		jQuery.ajax({
+		  type: 'POST',
+		  url: urlStr,
+		  data: postJson,
+		  success:function(html){
+		  	queryBack(html, 'cusList');
+		  }
+		});	
+    }
+    function queryBack(html, id){
+		jQuery('#' + id).html(html);
+		
+		jQuery('#cusCount').text('(' + $('#recordCount').val() + ')');
+	}
+    function browseCustomer(cusId){
+    	jQuery.ajax({
+			  type: 'POST',
+			  url: '../customer/isDeleteCus.html?random='+Math.random(),
+			  data: {'cusId': cusId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+			  		}else{
+			  			var options = {id: 'cusBrowse'+cusId, pid: GetId(), title: '查看客户', url: '../customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId='+cusId, lock: false};
+						tab.add(options);
+			  		}
+			  	}
+			});	
+    }
+    function browseMore(){
+    	var options = {id: 'unAllocationRemind', pid: GetId(), title: '未联系客户提醒', url: '../customer/unAllocationRemindMoreFirst.html?unAllocation=true&&crmCustomer.lastContactDateStr='+dateStr+'&&random='+Math.random(), lock: false};
+		tab.add(options);
+    }
+</script>
+
+<div class="desk-date right">
+    <span class="fl">
+    	<label id="ayear">XX</label> 年 <label id="amouth">XX</label> 月 <label id="adate">XX</label> 日之后未联系的客户
+    </span>
+    
+    <span class="ui-link-btn ml bold uncontact" onclick="serachType('UnContactMonth')">一月未联系</span>
+    <span class="ui-link-btn ml uncontact" onclick="serachType('UnContactTwoWeek')">两周未联系</span>
+    <span class="ui-link-btn ml uncontact" onclick="serachType('UnContactAWeek')">一周未联系</span>
+</div>
+<div id="cusList">
+	#parse("/velocity/customer/benchUnAllocationTableList.vm")
+</div>

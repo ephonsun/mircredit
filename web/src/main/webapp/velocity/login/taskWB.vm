@@ -1,0 +1,66 @@
+<style type="text/css">
+	.right { text-align: right; }
+	.ml { margin-right: 30px; display:inline;width:50px;height:10px;}
+	.bb { border-color: #e6e6e6 !important; }
+	.desk-date { height: 24px; border-bottom: 1px solid #ccc; margin-bottom: 10px; line-height: 24px; }
+	.desk-date a { text-decoration:none; }		
+</style>   
+
+<script type="text/javascript">
+	jQuery(function(){
+		jQuery('#taskCount').text('('+$!sumCount+')');
+	});
+	
+	function changeDate(type){
+		if(type==0){
+			if($('#title').text() == '今天') return;
+			$('#title').text("今天");
+			$('#expire').removeClass("bold");
+			$('#today').addClass("bold");
+			jQuery.post("../tskMicroTask/queryTodayOrOutDateTask.html?type="+type+"&random="+Math.random()*1000000,
+        		function(html){
+					$('#grids').html(html);
+					$('#sumCount').text($('#newCount').val());
+        		});
+		}else{
+			if($('#title').text() == '过期') return;
+			$('#title').text("过期");
+			$('#today').removeClass("bold");
+			$('#expire').addClass("bold");
+			jQuery.post("../tskMicroTask/queryTodayOrOutDateTask.html?type="+type+"&random="+Math.random()*1000000,
+        		function(html){
+					$('#grids').html(html);
+					$('#sumCount').text($('#newCount').val());
+        		});
+		}
+	}
+	
+	function viewTask(taskId,taskTitle,taskType){
+        var url="";
+        var title="查看营销任务";
+        if(taskType==1){
+            title="查看贷款任务";
+            url="../tskMicroTask/toViewTskMicroTaskPage.html?tskMicroTask.taskId="+taskId;
+        }else if(taskType==2){
+            url="../tskMicroTask/toViewPhoneTskMicroTaskMarketingPage.html?tskMicroTask.taskId="+taskId;
+        }else{
+            url="../tskMicroTask/toViewTskMicroTaskMarketingPage.html?tskMicroTask.taskId="+taskId;
+        }
+
+		var options = {id: "viewTask-"+taskId, pid: GetId(), title: title+"-"+taskTitle, url: url+"&random="+Math.random(), lock: false};
+		tab.add(options);
+	}
+	
+	function showMoveTask(){
+		var options = {id: "231", pid: "", title: "所有任务", url: "../tskMicroTask/allTaskList.html?random="+Math.random(), lock: false};
+		tab.add(options);	
+	}
+</script>
+<div class="right bb">
+    <span class="fl"><label id="title">今天</label>的任务(<label id="sumCount">$!count</label>个)</span>
+    <a href="javascript:void(0);" onclick="changeDate(1);" id="expire" class="slink ml">过期</a>
+    <a href="javascript:void(0);" onclick="changeDate(0);" id="today" class="slink bold ml">今天</a>
+</div>
+<div id="grids">
+	 #parse("/velocity/login/taskWBList.vm")
+</div>

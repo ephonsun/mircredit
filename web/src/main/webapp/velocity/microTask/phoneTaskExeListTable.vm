@@ -1,0 +1,115 @@
+<thead>
+	<tr>
+		<th width="240"><label title="客户（电话）">客户（电话）</label>
+		</th>
+		<th><label title="联系状态">联系状态</label>
+		</th>
+		<th><label title="通话时间">通话时间</label>
+		</th>
+		<th><label title="通话时长">通话时长</label>
+		</th>
+		<th><label title="执行者">执行者</label>
+		</th>
+		<th><label title="备注">备注</label>
+		</th>
+		 <th width="80"><label title="操作">操作</label></th>
+	</tr>
+</thead>
+<tbody>
+	#foreach($data in $dataList) 
+	<tr>
+		<td>
+			#if (!$!data.customerId || $!data.customerId<=0)
+			<div class="datacus">
+					#if($!data.customerName && $!data.customerName!='')
+						<span title="$!data.customerName（$!data.phoneNumberHide）">
+						$!data.customerName #if($!data.phoneNumberHide&&$!data.phoneNumberHide!='')（$!data.phoneNumberHide）#end
+						</span>
+					#else
+						<span title="未知客户#if($!data.phoneNumberHide&&$!data.phoneNumberHide!='')（$!data.phoneNumberHide）#end ">
+						 未知客户 #if($!data.phoneNumberHide&&$!data.phoneNumberHide!='')（$!data.phoneNumberHide）#end
+						</span>
+					#end
+				<div class="icon">
+                    #if($urlPermitUtil.hasPermission('tskExeMarketingDialTask'))
+                        <i class="i phone" onclick="dial('$!data.phoneNumber','','$!data.taskTargetId')" title="拨号">phone</i>
+                    #end
+				</div>
+                <div class="other">
+                </div>
+			</div>
+			#else
+			<div class="datacus">
+				<span #if($!data.customerId!='' && $urlPermitUtil.hasPermission('browseCustomer'))  class="link"  onclick="browseCustomer('$!data.customerId')" #end
+					title="$!data.customerName（$!data.phoneNumberHide）">
+					$!data.customerName #if($!data.phoneNumberHide&&$!data.phoneNumberHide!='')（$!data.phoneNumberHide）#end</span>
+				<div class="icon">
+                    #if($urlPermitUtil.hasPermission('tskExeMarketingDialTask'))
+                        <i class="i phone" onclick="dial('$!data.phoneNumber','$!data.customerId','$!data.taskTargetId')" title="拨号">phone</i>
+                    #end
+				</div>
+				<div class="other">
+					<label class="item cusTitle" title="$!data.customerTitle">
+                        $!data.customerTitle
+                    </label>
+                    <label class="item">$!data.sex</label>
+                    <label class="item">
+						#if($!data.age)
+                        	$!data.age岁
+                        #end
+						</label>
+						#if($!data.isNoGood==1)
+                        <label class="item red">
+                        	（不良客户）
+                        </label>
+                        #end
+				</div>
+			</div>
+			#end
+		</td>
+		<td>
+			#if ($!data.isFinish && $!data.isFinish>0)
+			  #if($!data.recordInfoId && $!data.recordInfoId>0)
+			    <label title="已联系">已联系</label>
+			  #else
+			    <label title="未联系">未联系</label>
+			  #end
+			#else
+			    <label title="未联系">未联系</label>
+			#end
+		</td>
+		   #if($!data.isFinish && $data.isFinish>0)
+		<td><label title="#if($!data.callDate)$!date.format('yyyy-MM-dd hh:mm:ss', $!data.callDate)#end">#if($!data.callDate)$!date.format('yyyy-MM-dd HH:mm:ss', $!data.callDate)#end</label>
+		</td>
+		<td><label title="#if($!data.callTime) $dateString.formatCallTime($!data.callTime) #end">#if($!data.callTime)$dateString.formatCallTime($!data.callTime)#end</label>
+		</td>
+		   #else
+		    <td><label title="">&nbsp;</label>
+		    </td>
+		    <td><label title="">&nbsp;</label>
+		    </td>
+		  #end
+		<td><label title="$!data.callUserName">$!data.callUserName</label>
+		</td>
+		<td>
+		    <label title="$!subString.replaceRemark($!data.remark)">$!data.remark</label>
+		</td>
+		<td>
+		  #if($!data.isFinish && $!data.isFinish>0)
+        	#if($!data.fileId && $!data.fileId>0)
+        	 <span class="link" onclick='play(this,"$!data.fileId")'>播放</span>
+            #else
+             <span disabled="true" style="cursor: default;">播放</span>
+            #end
+          #else
+             <span disabled="true" style="cursor: default;">播放</span>
+          #end
+        </td>
+	</tr>
+	#end
+</tbody>
+<tfoot>
+	<tr>
+		<td colspan="7">#parse("/velocity/ajaxPage.vm")</td>
+	</tr>
+</tfoot>

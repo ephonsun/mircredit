@@ -1,0 +1,72 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>身份验证</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+	      body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script>
+		$(function(){
+			jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+		});
+    </script>
+</head>
+<body>
+    <p class="bold loan-ttlbg">身份验证</p>
+      <table class="datatbl" cellpadding="0" cellspacing="0">
+		   <thead>
+				<tr>
+                    <th><label title="姓名">姓名</label></th>
+                    <th><label title="证件号码">证件号码</label></th>
+                    <th><label title="日期">拒绝日期</label></th>
+                    <th><label title="申请支行">申请支行</label></th>
+            		<th><label title="负责人">负责人</label></th>
+					<th><label title="身份">身份</label></th>
+            		<th><label title="贷款状态">贷款状态</label></th>
+					<th><label title="拒绝原因">拒绝原因</label></th>
+				</tr>
+            </thead>
+          <tbody>
+               #foreach($!cusCheck in $!cusCheckList)
+                    <tr>
+                        <td><label title="$!cusCheck.userName">$!cusCheck.userName</label></td>
+            			<td><label title="$!cusCheck.idCard">$!cusCheck.idCard</label></td>
+            			<td><label title="$!date.format('yyyy-MM-dd HH:mm',$!cusCheck.applyDate)">$!date.format('yyyy-MM-dd HH:mm',$!cusCheck.applyDate)</label></td>
+            			<td><label title="$!cusCheck.applyBank">$!cusCheck.applyBank</label></td>
+						<td><label title="$!cusCheck.director">$!cusCheck.director</label></td>
+            			<td><label title="$!cusCheck.identity">$!cusCheck.identity</label></td>
+            			<td><label title="$!cusCheck.loanStatus">$!cusCheck.loanStatus</label></td>
+            			<td><label title="$!cusCheck.rejectContent">$!cusCheck.rejectContent</label></td>
+                    </tr>
+                #end
+          </tbody>
+      </table>
+      <hr />
+      <div class="center">
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="返回" />
+      </div>
+</body>
+</html>

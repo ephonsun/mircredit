@@ -1,0 +1,1158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+    <package name="loan" extends="default" namespace="/loan">
+        <!--征信调查 -->
+
+        <action name="zhengXinLoanList" class="crRequestAction" method="zhengXinLoanList">
+            <result name="success">/velocity/loan/zhengXinLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="zhengXinLoanListQuery" class="crRequestAction" method="zhengXinLoanListQuery">
+            <result name="success">/velocity/loan/zhengXinLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 查看信息-->
+        <action name="zhengXinShow" class="crRequestAction" method="zhengXinShow">
+            <result name="success">/velocity/loan/zhengXinShow.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 图片查看 -->
+        <action name="vZhengXinShow" class="crRequestAction" method="vZhengXinShow">
+            <result name="success">/velocity/loan/vZhengXinShow.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="getAttachList" class="crRequestAction" method="zhengXinShow">
+            <result name="success">/velocity/loan/attachList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 保存 -->
+        <action name="addCrLendRemark" class="crRequestAction" method="addCrLendRemark">
+        </action>
+        <!-- 提交 -->
+        <action name="addTjLendRemark" class="crRequestAction" method="addTjLendRemark">
+        </action>
+        <!--驳回 -->
+        <action name="addBhLendRemark" class="crRequestAction" method="addBhLendRemark">
+        </action>
+        <action name="autoUpAttachment" class="crRequestAction" method="autoUpAttachment">
+            <result name="success">/velocity/loan/zhengXinShow.vm</result>
+        </action>
+        <!--删除附件-->
+        <action name="delFormAttach" class="crRequestAction" method="delFormAttach">
+            <result name="success">/velocity/loan/zhengXinShow.vm</result>
+        </action>
+        <!-- 初始化首页(所有贷款) -->
+        <action name="allLoanList" class="allLoanAction" method="allLoanList">
+            <result name="success">/velocity/loan/allLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="allLoanListQuery" class="allLoanAction" method="allLoanListQuery">
+            <result name="success">/velocity/loan/allLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="lnLoanShow" class="allLoanAction" method="lnLoanShow">
+            <result name="success">/velocity/loan/lnLoanShow.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 初始化首页(显示待提交贷款) -->
+        <action name="needSubmitLoanList" class="needSubmitLoanAction" method="needSubmitLoanList">
+            <result name="success">/velocity/loan/needSubmitLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="needSubmitLoanListQuery" class="needSubmitLoanAction" method="needSubmitLoanListQuery">
+            <result name="success">/velocity/loan/needSubmitLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- author : zhangfp-->
+
+        <!-- 初始化首页(显示未分配贷款) -->
+        <action name="allotingLoanList" class="allotingLoanAction" method="allotingLoanList">
+            <result name="success">/velocity/loan/allotingLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--查询(显示未分配贷款)-->
+        <action name="allotingLoanListQuery" class="allotingLoanAction" method="allotingLoanListQuery">
+            <result name="success">/velocity/loan/allotingLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--显示选择撤销原因页面-->
+        <action name="cancelLoanPage" class="allotingLoanAction" method="cancelLoanPage">
+            <result name="success">/velocity/loan/selectCancelReason.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--撤销贷款-->
+        <action name="cancelLoan" class="allotingLoanAction" method="cancelLoan">
+        </action>
+
+        <!--显示分配贷款页面-->
+        <action name="allotLoanPage" class="allotingLoanAction" method="allotLoanPage">
+            <result name="success">/velocity/loan/allotLoanPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--显示移交贷款页面-->
+        <action name="moveLoanPage" class="allLoanAction" method="moveLoan">
+            <result name="success">/velocity/loan/moveLoanPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--移交贷款查询用户-->
+        <action name="moveSearchUser" class="allLoanAction" method="moveSearchUser">
+            <result name="success">/velocity/loan/userTableList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--调整贷款查询用户-->
+        <action name="backMan" class="allLoanAction" method="backMan">
+            <result name="success">/velocity/loan/userTableList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--移交贷款查询用户by account-->
+        <action name="searchUserByAccount" class="allLoanAction" method="searchUserByAccount">
+            <result name="success">/velocity/loan/userTableList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--退回审批-->
+        <action name="rollBackApprove" class="allotingLoanAction" method="rollBackApprove"></action>
+        <!-- 保存分配备注 -->
+        <action name="saveAllotLoanNote" class="allotingLoanAction" method="saveAllotLoanNote"></action>
+        <!--分配贷款-->
+        <action name="allotLoan" class="allotingLoanAction" method="allotLoan">
+        </action>
+
+        <!--移交贷款-->
+        <action name="moveLoanDetil" class="allLoanAction" method="moveLoanDetil">
+        </action>
+
+        <!--查询用户-->
+        <action name="searchUser" class="allotingLoanAction" method="searchUser">
+            <result name="success">/velocity/loan/userTableList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--编辑未分配贷款-->
+        <action name="editUnAllotLoan" class="allotingLoanAction" method="editUnAllotLoan">
+            <result name="success">/velocity/loan/editUnAllotLoan.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--判断贷款当前的状态-->
+        <action name="queryLoanStatusById" class="allotingLoanAction" method="queryLoanStatusById">
+        </action>
+
+        <!--查询被临时改变的贷款状态数-->
+        <action name="queryChangedLoanStatusCount" class="allotingLoanAction" method="queryChangedLoanStatusCount">
+        </action>
+
+        <!--待调查贷款首页列表-->
+        <action name="unExamLoanList" class="unExamLoanAction" method="unExamLoanList">
+            <result name="success">/velocity/loan/unExamLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--拒绝客户首页列表-->
+        <action name="rejectCustomerList" class="rejectCustomerAction" method="rejectCustomerList">
+            <result name="success">/velocity/loan/lnRejectCustomerList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--导出拒绝客户 -->
+        <action name="exportLnRejcetCustomerList" class="rejectCustomerAction" method="exportLnRejcetCustomerList">
+        </action>
+        <!--查询拒绝客户-->
+        <action name="queryRejectCustomerList" class="rejectCustomerAction" method="queryRejectCustomerList">
+            <result name="success">/velocity/loan/lnRejectCustomerListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--删除拒绝客户 -->
+        <action name="deleteRejectCustomer" class="rejectCustomerAction" method="deleteRejectCustomer">
+        </action>
+
+        <!--查询待调查贷款-->
+        <action name="unExamLoanListQuery" class="unExamLoanAction" method="unExamLoanListQuery">
+            <result name="success">/velocity/loan/unExamLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--验证待调查贷款状态是否被临时改变-->
+        <action name="unExamLoanStatusChanged" class="unExamLoanAction" method="unExamLoanStatusChanged">
+        </action>
+
+        <!--获取审批人-->
+        <action name="getApprovers" class="unExamLoanAction" method="getApprovers">
+            <result name="success">/velocity/loan/selectApprove.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--待调查贷款编辑页面(普通调查)-->
+        <action name="commExamPage" class="unExamLoanAction" method="commExamPage">
+            <result name="success">/velocity/loan/commExamPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--待调查贷款编辑页面(驳回调查)-->
+        <action name="rejectExamPage" class="unExamLoanAction" method="rejectExamPage">
+            <result name="success">/velocity/loan/rejectExamPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 贷款陪调 -->
+        <action name="togetherSurvey" class="unExamLoanAction" method="togetherSurvey">
+            <result name="success">/velocity/loan/togetherSurvey.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+
+        <!--还款方式-->
+        <action name="toHkfs" class="unExamLoanAction" method="toHkfs">
+            <result name="success">/velocity/loan/toHkfs.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+
+
+        <action name="addRepaymentPlan" class="unExamLoanAction" method="addRepaymentPlan"></action>
+        <action name="jyToHkfs" class="unExamLoanAction" method="jyToHkfs"></action>
+
+
+
+        <action name="togetherSurveySubmit" class="unExamLoanAction" method="togetherSurveySubmit"></action>
+
+        <!--添加偏差分析-->
+        <action name="insertLnDeviationAnalsysis" class="lnDeviationAnalsysisAction" method="insertLnDeviationAnalsysis"></action>
+        <action name="queryOneLnDeviationAnalsysis" class="lnDeviationAnalsysisAction" method="queryOneLnDeviationAnalsysis"></action>
+
+
+
+
+        <!--待调查贷款提交审批-->
+        <action name="submitApproval" class="unExamLoanAction" method="submitApproval"></action>
+
+        <!-- 贷款多人审批-->
+        <action name="centerUserTogetherApprove" class="unExamLoanAction" method="centerUserTogetherApprove">
+            <result name="success">/velocity/loan/centerUserTogetherApprove.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="centerUserTogetherApproveSubmit" class="unExamLoanAction" method="centerUserTogetherApproveSubmit"></action>
+
+        <!-- 审批驳回 -->
+        <action name="approveReject" class="unExamLoanAction" method="approveReject">
+            <result name="success">/velocity/loan/approveReject.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="backReject" class="unExamLoanAction" method="backReject">
+            <result name="success">/velocity/loan/backReject.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="approveRejectSubmit" class="unExamLoanAction" method="approveRejectSubmit"></action>
+        <action name="backRejectSubmit" class="unExamLoanAction" method="backRejectSubmit"></action>
+
+        <!-- 添加抵质押物 -->
+        <action name="toAddPledge" class="unExamLoanAction" method="toAddPledge">
+            <result name="success">/velocity/loan/addPledge.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addPledge" class="unExamLoanAction" method="addPledge"></action>
+        <action name="removePledge" class="unExamLoanAction" method="removePledge"></action>
+        <action name="queryCustomerLoanPledge" class="unExamLoanAction" method="queryCustomerLoanPledge">
+            <result name="success">/velocity/loan/pledgeListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="queryLoanPledge" class="unExamLoanAction" method="queryLoanPledge">
+            <result name="success">/velocity/loan/addPledgeTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="queryHavingPledge" class="unExamLoanAction" method="queryHavingPledge"></action>
+        <!--上传附件-->
+
+        <action name="uploadAttachment" class="unExamLoanAction" method="uploadAttachment">
+        </action>
+
+
+        <action name="autoUploadAttachment" class="unExamLoanAction" method="autoUploadAttachment">
+        </action>
+
+        <!--上传附件并关联贷款-->
+        <action name="getAttachmentList" class="unExamLoanAction" method="getAttachmentList">
+            <result name="success">/velocity/loan/attachmentList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--删除附件-->
+        <action name="delFormAttachment" class="unExamLoanAction" method="delFormAttachment">
+        </action>
+
+        <!--下载附件-->
+        <action name="downloadFormAttachment" class="unExamLoanAction" method="downloadFormAttachment">
+        </action>
+
+        <!--打开更换贷款人页面-->
+        <action name="changeLoanPersonPage" class="unExamLoanAction" method="changeLoanPersonPage">
+            <result name="success">/velocity/loan/changeLoanPersonPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--验证是否更换为共同借贷人或担保人-->
+        <action name="isCoBorrowerOrGuarantor" class="unExamLoanAction" method="isCoBorrowerOrGuarantor">
+        </action>
+
+        <!--更换贷款人-->
+        <action name="changeLoanPerson" class="unExamLoanAction" method="changeLoanPerson">
+        </action>
+
+        <!--待审批贷款首页列表-->
+        <action name="unAssessLoanList" class="unAssessLoanAction" method="unAssessLoanList">
+            <result name="success">/velocity/loan/unAssessLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--搜索待审批贷款-->
+        <action name="unAssessLoanListQuery" class="unAssessLoanAction" method="unAssessLoanListQuery">
+            <result name="success">/velocity/loan/unAssessLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--审批贷款详情页面-->
+        <action name="unAssessLoanEdit" class="unAssessLoanAction" method="unAssessLoanEdit">
+            <result name="success">/velocity/loan/unAssessLoanEdit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 主管审批通过 -->
+        <action name="managerAssessLoan" class="unAssessLoanAction" method="managerAssessLoan"></action>
+        <!-- 审批中心通过 -->
+        <action name="centerAssessLoan" class="unAssessLoanAction" method="centerAssessLoan"></action>
+        <!-- 审批中心通过 -->
+        <action name="backerAssessLoan" class="unAssessLoanAction" method="backerAssessLoan"></action>
+
+        <!--审批贷款详情页面 备注-->
+        <action name="addUnAssessRemark" class="unAssessLoanAction" method="addUnAssessRemark"></action>
+
+        <!--分配异常贷款催收页面-->
+        <action name="allotExceptionLoanPage" class="exceptionDunLoanAction" method="allotExceptionLoanPage">
+            <result name="success">/velocity/loan/allotExceptionLoanPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--分配异常催收贷款-->
+        <action name="allotExceptionLoan" class="exceptionDunLoanAction" method="allotExceptionLoan"></action>
+
+
+
+        <!--验证贷款是否已被分配-->
+        <action name="checkExceptionDunLoan" class="exceptionDunLoanAction" method="checkExceptionDunLoan"></action>
+
+        <!--分配未审计页面-->
+        <action name="allotVerifyLoanPage" class="notVerifyLoanAction" method="allotVerifyLoanPage">
+            <result name="success">/velocity/loan/allotVerifyLoanPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--分配未审计-->
+        <action name="allotVerifyLoan" class="notVerifyLoanAction" method="allotVerifyLoan"></action>
+
+        <!--验证未审计贷款是否已被分配-->
+        <action name="checkVerifyLoan" class="notVerifyLoanAction" method="checkVerifyLoan"></action>
+
+        <action name="needAssignLoan" class="notVerifyLoanAction" method="needAssignLoan"></action>
+
+        <!--貸款信息小页卡-->
+        <action name="getAllLoanByCusId" class="allLoanAction" method="getAllLoanByCusId">
+            <result name="success">/velocity/loan/loanInfoCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--贷款信息查询小页卡-->
+        <action name="queryAllLoanByCusId" class="allLoanAction" method="queryAllLoanByCusId">
+            <result name="success">/velocity/loan/loanInfoTableCard.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- author : zhangfp-->
+        <action name="toAskLoanpage" class="askLoanAction" method="toAskLoanpage">
+            <result name="success">/velocity/loan/askLoan.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="toEditLoanPage" class="askLoanAction" method="toEditLoanPage">
+            <result name="success">/velocity/loan/askLoan.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="vLoanData" class="askLoanAction" method="vLoanData"></action>
+        <action name="addLoan" class="askLoanAction" method="addLoan"></action>
+        <action name="editLoan" class="askLoanAction" method="editLoan"></action>
+        <action name="addCustomer" class="askLoanAction" method="addCustomer"></action>
+        <action name="updateCustomer" class="askLoanAction" method="updateCustomer"></action>
+        <action name="toChooseAddUpdate" class="askLoanAction" method="toChooseAddUpdate">
+            <result name="success">/velocity/loan/chooseAddUpdate.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="submitLoan" class="askLoanAction" method="submitLoan"></action>
+        <action name="jytj" class="askLoanAction" method="jytj"></action>
+        <action name="submitLoanEdit" class="askLoanAction" method="submitLoanEdit"></action>
+        <action name="deleteLoan" class="askLoanAction" method="deleteLoan"></action>
+        <action name="delPhotoById" class="askLoanAction" method="delPhotoById"></action>
+
+
+        <!-- 贷款拒绝 -->
+        <action name="refuseLoan" class="askLoanAction" method="refuseLoan">
+            <result name="success">/velocity/loan/refuseLoan.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="submitRefuseLoan" class="askLoanAction" method="submitRefuseLoan"></action>
+        <!-- 贷款状态同步 -->
+        <action name="syncLoanStatus" class="loanSyncAction" method="syncLoanStatus"></action>
+        <!-- 贷款催收信息同步 -->
+        <action name="syncLoanDunInfo" class="loanSyncAction" method="syncLoanDunInfo"></action>
+
+        <!-- 维护贷款类型 -->
+        <action name="toEditLoanType" class="loanTypeAction" method="toEditLoanType">
+            <result name="success">/velocity/loan/loanType.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 检测是否有贷款类型数据 -->
+        <action name="selLoanType" class="loanTypeAction" method="selLoanType"></action>
+
+        <action name="toUpdateLoanTypePage" class="loanTypeAction" method="toUpdateLoanTypePage">
+            <result name="success">/velocity/loan/updateLoanType.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- （上移和下移） -->
+        <action name="moveTypeItems" class="loanTypeAction" method="moveTypeItems">
+            <result name="success" type="redirectAction">toEditLoanType.html</result>
+        </action>
+
+        <action name="addLoanType" class="loanTypeAction" method="addLoanType"></action>
+
+        <action name="updateLoanType" class="loanTypeAction" method="updateLoanType"></action>
+
+        <action name="deleteLoanType" class="loanTypeAction" method="deleteLoanType"></action>
+
+        <!-- 添加贷款客户（根据条件搜索客户信息） -->
+        <action name="initFindCustomerByConds" class="askLoanAction" method="initFindCustomerByConds"></action>
+
+        <!-- 上传贷款需要图片 -->
+        <action name="upLoadLoanPhotoFile" class="askLoanAction" method="upLoadLoanPhotoFile"></action>
+
+        <action name="getLoanSubTypeJson" class="askLoanAction" method="getLoanSubTypeJson"></action>
+
+
+
+        <!-- 添加共同借贷人 -->
+        <action name="toAddCo" class="askLoanAction" method="toAddCo">
+            <result name="success">/velocity/loan/addCo.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addCo" class="askLoanAction" method="addCo"></action>
+        <action name="editCo" class="askLoanAction" method="editCo"></action>
+        <action name="removeCo" class="askLoanAction" method="removeCo"></action>
+        <action name="queryLoanCo" class="askLoanAction" method="queryLoanCo">
+            <result name="success">/velocity/loan/addCoTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 损益  加权毛利率 -->
+       <action name="removePro" class="askLoanAction" method="removePro"></action>
+        <action name="toAddPro" class="askLoanAction" method="toAddPro">
+            <result name="success">/velocity/loan/addPro.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addPro" class="askLoanAction" method="addPro"></action>
+        <action name="editPro" class="askLoanAction" method="editPro"></action>
+        <action name="queryPro" class="askLoanAction" method="queryPro">
+            <result name="success">/velocity/loan/addProTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 损益 基本信息 -->
+        <action name="addProLossBase" class="askLoanAction" method="addProLossBase"></action>
+
+        <action name="saveProLossBase" class="askLoanAction" method="saveProLossBase"></action>
+
+
+        <action name="toEditPro" class="askLoanAction" method="toEditPro">
+            <result name="success">/velocity/loan/editPro.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--添加上下游-->
+        <action name="addUp" class="inBusinessReachesAction" method="addUp">
+            <result name="success">/velocity/loan/addUp.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addDown" class="inBusinessReachesAction" method="addDown">
+            <result name="success">/velocity/loan/addDown.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertInBusinessReaches" class="inBusinessReachesAction" method="insertInBusinessReaches"></action>
+        <!-- 查询上下游 -->
+        <action name="queryInBusinessReachesUp" class="inBusinessReachesAction" method="queryInBusinessReachesUp">
+            <result name="success">/velocity/loan/addUpDown.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="queryInBusinessReachesDown" class="inBusinessReachesAction" method="queryInBusinessReachesDown">
+            <result name="success">/velocity/loan/addDownn.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="dropInBusinessReaches" class="inBusinessReachesAction" method="dropInBusinessReaches"></action>
+
+
+
+        <!-- 添加贷后监控 -->
+        <action name="toAddLM" class="dunLoanAction" method="toAddLM">
+            <result name="success">/velocity/loan/addLM.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 关联贷后附件 -->
+        <action name="toUnionLM" class="dunLoanAction" method="toUnionLM">
+            <result name="success">/velocity/loan/unionLM.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addLM" class="dunLoanAction" method="addLM"></action>
+        <action name="unionLM" class="dunLoanAction" method="unionLM"></action>
+        <action name="updateReadTag" class="dunLoanAction" method="updateReadTag"></action>
+
+
+
+
+
+        <!-- 添加担保人 -->
+        <action name="toAddGu" class="askLoanAction" method="toAddGu">
+            <result name="success">/velocity/loan/addGu.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addGu" class="askLoanAction" method="addGu"></action>
+        <action name="editGu" class="askLoanAction" method="editGu"></action>
+        <action name="removeGu" class="askLoanAction" method="removeGu"></action>
+        <action name="queryLoanGu" class="askLoanAction" method="queryLoanGu">
+            <result name="success">/velocity/loan/addGuTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 添加信贷历史 -->
+        <action name="toAddCh" class="askLoanAction" method="toAddCh">
+            <result name="success">/velocity/loan/addCH.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addCh" class="askLoanAction" method="addCh"></action>
+        <action name="editCh" class="askLoanAction" method="editCh"></action>
+        <action name="removeCh" class="askLoanAction" method="removeCh"></action>
+        <action name="queryLoanCh" class="askLoanAction" method="queryLoanCh">
+            <result name="success">/velocity/loan/addChTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 身份验证 -->
+        <action name="cusCheck" class="askLoanAction" method="cusCheck">
+            <result name="success">/velocity/loan/cusCheck.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 初始化首页(显示未放贷 贷款) -->
+        <action name="notMakeLoanList" class="notMakeLoanAction" method="notMakeLoanList">
+            <result name="success">/velocity/loan/notMakeLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="notMakeLoanListQuery" class="notMakeLoanAction" method="notMakeLoanListQuery">
+            <result name="success">/velocity/loan/notMakeLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="notMakeLoanEdit" class="notMakeLoanAction" method="notMakeLoanEdit">
+            <result name="success">/velocity/loan/notMakeLoanEdit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="downResultExcel" class="notMakeLoanAction" method="downResultExcel"></action>
+        <action name="submitLend" class="notMakeLoanAction" method="submitLend"></action>
+
+
+        <action name="downLoanExcel" class="notMakeLoanAction" method="downLoanExcel"></action>
+        <action name="downTemplateExcel" class="notMakeLoanAction" method="downTemplateExcel"></action>
+        <action name="addLendRemark" class="notMakeLoanAction" method="addLendRemark"></action>
+
+        <!-- 选择导出合同类型 页面 -->
+        <action name="contractTypePage" class="notMakeLoanAction" method="contractTypePage">
+            <result name="success">/velocity/loan/contractTypePage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 填写导出合同信息 页面 -->
+        <action name="downContractPage" class="notMakeLoanAction" method="downContractPage">
+            <result name="success">/velocity/loan/downContractPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 导出合同 -->
+        <action name="downContract" class="notMakeLoanAction" method="downContract"></action>
+        <!-- 保存合同内容 -->
+        <action name="saveContract" class="notMakeLoanAction" method="saveContract"></action>
+
+
+        <!-- 初始化首页(显示贷款落实) -->
+        <action name="confirmLoanList" class="confirmLoanAction" method="confirmLoanList">
+            <result name="success">/velocity/loan/confirmLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="confirmLoanListQuery" class="confirmLoanAction" method="confirmLoanListQuery">
+            <result name="success">/velocity/loan/confirmLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="confirmLoanEdit" class="confirmLoanAction" method="confirmLoanEdit">
+            <result name="success">/velocity/loan/confirmLoanEdit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="confirmLoan" class="confirmLoanAction" method="confirmLoan">
+        </action>
+        <action name="edit" class="confirmLoanAction" method="edit">
+            <result name="success">/velocity/loan/customerLoanInfo.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--查看是否有落实资料-->
+        <action name="hasLoanData" class="confirmLoanAction" method="hasLoanData">
+        </action>
+
+        <!-- 初始化首页(显示贷款撤销) -->
+        <action name="cancelLoanList" class="cancelLoanAction" method="cancelLoanList">
+            <result name="success">/velocity/loan/cancelLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="cancelLoanListQuery" class="cancelLoanAction" method="cancelLoanListQuery">
+            <result name="success">/velocity/loan/cancelLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="cancelLoanEdit" class="cancelLoanAction" method="cancelLoanEdit">
+            <result name="success">/velocity/loan/cancelLoanEdit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="cancelSubmit" class="cancelLoanAction" method="cancelSubmit">
+        </action>
+        <action name="cancelLoanView" class="cancelLoanAction" method="cancelLoanView">
+            <result name="success">/velocity/loan/cancelLoanView.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 初始化首页(显示贷款催收) -->
+        <action name="dunLoanList" class="dunLoanAction" method="dunLoanList">
+            <result name="success">/velocity/loan/dunLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="dunLoanListQuery" class="dunLoanAction" method="dunLoanListQuery">
+            <result name="success">/velocity/loan/dunLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="dunLoanEdit" class="dunLoanAction" method="dunLoanEdit">
+            <result name="success">/velocity/loan/dunLoanEdit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="loanMonitorList" class="dunLoanAction" method="loanMonitorList">
+            <result name="success">/velocity/loan/loanMonitoringTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="noGoodCustomer" class="dunLoanAction" method="noGoodCustomer">
+        </action>
+        <action name="remainFull" class="dunLoanAction" method="remainFull">
+        </action>
+        <!-- 催收设置  -->
+        <action name="showLnDunSetingPage" class="lnDunSetingAction" method="showLnDunSetingPage">
+            <result name="success">/velocity/loan/lnDunSeting.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 保存催收设置 -->
+        <action name="saveLnDunSeting" class="lnDunSetingAction" method="saveLnDunSeting">
+        </action>
+        <!-- 催讨语音上传 -->
+        <action name="upLoadLnRecord" class="lnDunSetingAction" method="upLoadLnRecord">
+        </action>
+        <!-- 验证增值业务账号 -->
+        <action name="checkAccount" class="lnDunSetingAction" method="checkAccount">
+        </action>
+        <!-- 异常催收 -->
+        <action name="exceptionDunLoanList" class="exceptionDunLoanAction" method="exceptionDunLoanList">
+            <result name="success">/velocity/loan/exceptionDunLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="exceptionDunLoanListQuery" class="exceptionDunLoanAction" method="exceptionDunLoanListQuery">
+            <result name="success">/velocity/loan/exceptionDunLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="exceptionDunLoanEdit" class="exceptionDunLoanAction" method="exceptionDunLoanEdit">
+            <result name="success">/velocity/loan/exceptionDunLoanEdit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertExceptionRepaymentPlan" class="exceptionDunLoanAction"
+                method="insertExceptionRepaymentPlan">
+            <result name="success">/velocity/loan/exceptionDunLoanEditTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+
+
+
+
+
+        <action name="updateExceptionRepaymentStatus" class="exceptionDunLoanAction"
+                method="updateExceptionRepaymentStatus">
+            <result name="success">/velocity/loan/exceptionDunLoanEditTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="alreadyRepayCheck" class="exceptionDunLoanAction" method="alreadyRepayCheck"></action>
+        <action name="deleteExceptionRepaymentPlan" class="exceptionDunLoanAction"
+                method="deleteExceptionRepaymentPlan">
+            <result name="success">/velocity/loan/exceptionDunLoanEditTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="editExceptionPlanPage" class="exceptionDunLoanAction" method="editExceptionPlanPage">
+            <result name="success">/velocity/loan/editExceptionPlanPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="editExceptionSort" class="exceptionDunLoanAction" method="editExceptionSort">
+        </action>
+        <action name="paidPrincipalChange" class="exceptionDunLoanAction" method="paidPrincipalChange">
+        </action>
+        <action name="checkPlanDate" class="exceptionDunLoanAction" method="checkPlanDate">
+        </action>
+
+        <!-- 我的异常催收 -->
+        <action name="myExceptionDunLoanList" class="myExceptionDunLoanAction" method="myExceptionDunLoanList">
+            <result name="success">/velocity/loan/myExceptionDunLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="myExceptionDunLoanListQuery" class="myExceptionDunLoanAction"
+                method="myExceptionDunLoanListQuery">
+            <result name="success">/velocity/loan/myExceptionDunLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="myExceptionDunLoanView" class="myExceptionDunLoanAction"
+                method="myExceptionDunLoanView">
+            <result name="success">/velocity/loan/myExceptionDunLoanView.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 系统配置 审批额度配置 -->
+        <action name="showLnApproveLimit" class="lnApproveLimitAction" method="showLnApproveLimit">
+            <result name="success">/velocity/loan/lnApproveLimitSet.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 查询角色的审核额度 -->
+        <action name="queryRoleSet" class="lnApproveLimitAction" method="queryRoleSet">
+            <result name="success">/velocity/loan/lnApproveLimitRoleSet.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--用户审核额度 主体页面（部门）-->
+        <action name="getLimitUsers" class="lnApproveLimitAction" method="getLimitUsers">
+            <result name="success">/velocity/loan/lnApproveLimitUserSet.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--用户审核额度 用户列表 -->
+        <action name="getUserPageList" class="lnApproveLimitAction" method="getLimitUserPageList">
+            <result name="success">/velocity/loan/lnApproveLimitUserListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--用户审核额度 修改金额 -->
+        <action name="updateLimitUserById" class="lnApproveLimitAction" method="updateLimitUserById"></action>
+
+        <!--角色审核额度列表 -->
+        <action name="getLimitRoles" class="lnApproveLimitAction" method="getLimitRoles">
+            <result name="success">/velocity/loan/lnApproveLimitRoleSet.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--用户审核额度 修改金额 -->
+        <action name="updateLimitRoleById" class="lnApproveLimitAction" method="updateLimitRoleById"></action>
+
+        <!--审计模块下所有贷款 -->
+        <action name="verifyAllLoanList" class="lnVerifyAllLoanAction" method="verifyAllLoanList">
+            <result name="success">/velocity/loan/verifyAllLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="verifyAllLoanListQuery" class="lnVerifyAllLoanAction" method="verifyAllLoanListQuery">
+            <result name="success">/velocity/loan/verifyAllLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="verifyAllLoanView" class="lnVerifyAllLoanAction" method="verifyAllLoanView">
+            <result name="success">/velocity/loan/verifyAllLoanView.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="addVerifyRemark" class="lnVerifyAllLoanAction" method="addVerifyRemark">
+        </action>
+
+        <!--未审计贷款 -->
+        <action name="notVerifyLoanList" class="notVerifyLoanAction" method="notVerifyLoanList">
+            <result name="success">/velocity/loan/notVerifyLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="notVerifyLoanListQuery" class="notVerifyLoanAction" method="notVerifyLoanListQuery">
+            <result name="success">/velocity/loan/notVerifyLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="LoanVerifyPass" class="notVerifyLoanAction" method="LoanVerifyPass">
+        </action>
+        <action name="LoanVerifyNotPass" class="notVerifyLoanAction" method="LoanVerifyNotPass">
+        </action>
+        <action name="loanVerify" class="notVerifyLoanAction" method="loanVerify">
+            <result name="success">/velocity/loan/loanVerify.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--审计不合格贷款 -->
+        <action name="verifyNotPassLoanList" class="verifyNotPassAction" method="verifyNotPassLoanList">
+            <result name="success">/velocity/loan/verifyNotPassLoanList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="verifyNotPassLoanListQuery" class="verifyNotPassAction" method="verifyNotPassLoanListQuery">
+            <result name="success">/velocity/loan/verifyNotPassLoanListTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 工作台贷款提醒 -->
+        <action name="getLoanToWorkPlace" class="allLoanAction" method="getLoanToWorkPlace">
+            <result name="success">/velocity/login/loanWB.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 工作台 根据类型查询贷款详情 -->
+        <action name="getLoanToWPbyType" class="allLoanAction" method="getLoanToWPbyType">
+            <result name="success">/velocity/login/loanWBList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 查看贷款详情 查看图片 -->
+        <action name="queryPhotoDetail" class="allLoanAction" method="queryPhotoDetail">
+            <result name="success">/velocity/loan/vLoanPhotoDiv.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="queryPhotoAll" class="allLoanAction" method="queryPhotoAll">
+            <result name="success">/velocity/loan/vLoanPhotoDiv.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 贷后管理 查看图片 -->
+        <action name="queryAfterImageDetail" class="allLoanAction" method="queryAfterImageDetail">
+            <result name="success">/velocity/loan/vAfterLoanPhotoDiv.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 查看贷款详情 切换查看图片 -->
+        <action name="changeLoanPhoto" class="allLoanAction" method="changeLoanPhoto"></action>
+
+        <!--申请贷款  验证客户在三个月内是否有审批失败的贷款记录-->
+        <action name="isLoanFail" class="askLoanAction" method="isLoanFail"></action>
+        <!--申请贷款  验证客户是否为不良客户-->
+        <action name="isNogood" class="askLoanAction" method="isNogood"></action>
+
+        <!--同步贷款状态 -->
+        <action name="synchronousLoanStatus" class="loanSyncAction" method="synchronousLoanStatus"></action>
+
+        <!--已结清 -->
+        <action name="overRepayCheck" class="exceptionDunLoanAction" method="overRepayCheck"></action>
+        <action name="overRepay" class="exceptionDunLoanAction" method="overRepay"></action>
+
+        <!--查看本期还款计划 -->
+        <action name="loanRepaymentPlan" class="dunLoanAction" method="loanRepaymentPlan">
+            <result name="success">/velocity/loan/loanRepaymentPlan.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--贷款回退-->
+        <action name="backLoan" class="allLoanAction" method="backLoan"></action>
+		 <!--申请下载-->
+        <action name="downRapplyExcel" class="allLoanAction" method="downRapplyExcel"></action>
+        <!--导出贷款资料-->
+        <action name="exportLoanData" class="allLoanAction" method="exportLoanData"></action>
+        <!--导出贷款资料（照片、视频、附件、录音、视频）-->
+        <action name="downLoanData" class="allLoanAction" method="downLoanData"></action>
+
+        <!--导出贷款列表-->
+        <action name="exportLoanList" class="allLoanAction" method="exportLoanList"></action>
+        <!--检查是否有贷款资料需要导出-->
+        <action name="hasLoanDatas" class="allLoanAction" method="hasLoanDatas"></action>
+        <!--跑批程序执行页面-->
+        <action name="getExecAllTimeTaskPage" class="allLoanAction" method="getExecAllTimeTaskPage">
+            <result name="success">/velocity/loan/execTimeTaskPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--执行跑批程序-->
+        <action name="execAllTimeTask" class="allLoanAction" method="execAllTimeTask"></action>
+        <!-- 经营贷经营模式 -->
+        <action name="insertLnBusinessModel" class="lnBusinessModeAction" method="insertLnBusinessModel"></action>
+        <action name="sorftInfoAjax" class="lnBusinessModeAction" method="sorftInfoAjax"></action>
+        <action name="selectLnBusinessModel" class="lnBusinessModeAction" method="selectLnBusinessModel"></action>
+        <!-- 消费贷访谈记录 -->
+        <action name="selectLnRecordInterview" class="lnRecordInterviewAction" method="selectLnRecordInterview"></action>
+        <action name="insertLnRecordInterview" class="lnRecordInterviewAction" method="insertLnRecordInterview"></action>
+
+        <!-- 消费贷发展历史 -->
+        <action name="insertLnLoanHistory" class="lnLoanHistoryAction" method="insertLnLoanHistory"></action>
+        <action name="selectLnLoanHistoryModel" class="lnLoanHistoryAction" method="selectLnLoanHistoryModel"></action>
+        <!-- 资产负债表 -->
+        <action name="selectBalance" class="lnLoanBalanceAction" method="selectBalance"></action>
+        <action name="insertBalance" class="lnLoanBalanceAction" method="insertBalance"></action>
+
+        <!-- 资产负债表 资产 -->
+
+        <action name="assetList" class="lnLoanBalanceAssetAction" method="assetList">
+            <result name="success">/velocity/loan/balance/vLoanListAsset.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteAsset" class="lnLoanBalanceAssetAction" method="deleteAsset">
+        </action>
+        <action name="selectAsset" class="lnLoanBalanceAssetAction" method="selectAsset">
+            <result name="success">/velocity/loan/balance/vLoanInsertAsset.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectAssetUI" class="lnLoanBalanceAssetAction" method="selectAssetUI">
+            <result name="success">/velocity/loan/balance/vLoanInsertAsset.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertAsset" class="lnLoanBalanceAssetAction" method="insertAsset">
+        </action>
+        <!-- 资产负债表 负债 -->
+        <action name="debtList" class="lnLoanBalanceDebtAction" method="debtList">
+            <result name="success">/velocity/loan/balance/vLoanListDebt.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteDebt" class="lnLoanBalanceDebtAction" method="deleteDebt">
+        </action>
+        <action name="selectDebt" class="lnLoanBalanceDebtAction" method="selectDebt">
+            <result name="success">/velocity/loan/balance/vLoanInsertDebt.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectDebtUI" class="lnLoanBalanceDebtAction" method="selectDebtUI">
+            <result name="success">/velocity/loan/balance/vLoanInsertDebt.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertDebt" class="lnLoanBalanceDebtAction" method="insertDebt">
+        </action>
+        <!-- 资产负债表 其它交叉检验-->
+        <action name="otherList" class="lnLoanBalanceOtherAction" method="otherList">
+            <result name="success">/velocity/loan/balance/vLoanListOther.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteOther" class="lnLoanBalanceOtherAction" method="deleteOther">
+        </action>
+        <action name="selectOther" class="lnLoanBalanceOtherAction" method="selectOther">
+            <result name="success">/velocity/loan/balance/vLoanInsertOther.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectOtherUI" class="lnLoanBalanceOtherAction" method="selectOtherUI">
+            <result name="success">/velocity/loan/balance/vLoanInsertOther.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertOther" class="lnLoanBalanceOtherAction" method="insertOther">
+        </action>
+
+        <!-- 资产负债表 房产-->
+        <action name="housingtList" class="lnLoanBalanceHousingAction" method="housingtList">
+            <result name="success">/velocity/loan/balance/vLoanListHousing.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteHousing" class="lnLoanBalanceHousingAction" method="deleteHousing">
+        </action>
+        <action name="selectHousing" class="lnLoanBalanceHousingAction" method="selectHousing">
+            <result name="success">/velocity/loan/balance/vLoanInsertHousing.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectHousingUI" class="lnLoanBalanceHousingAction" method="selectHousingUI">
+            <result name="success">/velocity/loan/balance/vLoanInsertHousing.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertHousing" class="lnLoanBalanceHousingAction" method="insertHousing">
+        </action>
+
+        <!-- 资产负债表 机动车-->
+        <action name="selectVehicleUI" class="lnLoanBalanceVehicleAction" method="selectVehicleUI">
+            <result name="success">/velocity/loan/balance/vLoanInsertVehicle.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteVehicleing" class="lnLoanBalanceVehicleAction" method="deleteVehicleing">
+        </action>
+        <action name="selectVehicle" class="lnLoanBalanceVehicleAction" method="selectVehicle">
+            <result name="success">/velocity/loan/balance/vLoanInsertVehicle.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="vehicleList" class="lnLoanBalanceVehicleAction" method="vehicleList">
+            <result name="success">/velocity/loan/balance/vLoanListVehicle.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertVehicle" class="lnLoanBalanceVehicleAction" method="insertVehicle">
+        </action>
+
+        <!-- 资产负债表 应收账-->
+        <action name="receivableList" class="lnLoanBalanceReceivableaAction" method="receivableList">
+            <result name="success">/velocity/loan/balance/vLoanListReceivable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteReceivable" class="lnLoanBalanceReceivableaAction" method="deleteReceivable">
+        </action>
+        <action name="selectReceivable" class="lnLoanBalanceReceivableaAction" method="selectReceivable">
+            <result name="success">/velocity/loan/balance/vLoanInsertReceivable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectReceivableUI" class="lnLoanBalanceReceivableaAction" method="selectReceivableUI">
+            <result name="success">/velocity/loan/balance/vLoanInsertReceivable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertReceivable" class="lnLoanBalanceReceivableaAction" method="insertReceivable">
+        </action>
+
+        <!-- 消费贷损益表详情 -->
+        <action name="XfDetailList" class="lnLoanProfitandlossXfDetailAction" method="XfDetailList">
+            <result name="success">/velocity/loan/profitandloss/vLoanListXfDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteXfDetail" class="lnLoanProfitandlossXfDetailAction" method="deleteXfDetail">
+        </action>
+        <action name="selectXfDetail" class="lnLoanProfitandlossXfDetailAction" method="selectXfDetail">
+            <result name="success">/velocity/loan/profitandloss/vLoanInsertXfDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectXfDetailUI" class="lnLoanProfitandlossXfDetailAction" method="selectXfDetailUI">
+            <result name="success">/velocity/loan/profitandloss/vLoanInsertXfDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertXfDetail" class="lnLoanProfitandlossXfDetailAction" method="insertXfDetail">
+        </action>
+
+        <!-- 经营贷损益表详情 -->
+        <action name="jyDetaiList" class="lnLoanProfitandlossJyDetailAction" method="jyDetaiList">
+            <result name="success">/velocity/loan/profitandloss/vLoanListJyDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="deleteJyDetail" class="lnLoanProfitandlossJyDetailAction" method="deleteJyDetail">
+        </action>
+        <action name="selectJyDetai" class="lnLoanProfitandlossJyDetailAction" method="selectJyDetai">
+            <result name="success">/velocity/loan/profitandloss/vLoanInsertJyDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="selectJyDetailUI" class="lnLoanProfitandlossJyDetailAction" method="selectJyDetailUI">
+            <result name="success">/velocity/loan/profitandloss/vLoanInsertJyDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="insertJyDetail" class="lnLoanProfitandlossJyDetailAction" method="insertJyDetail">
+        </action>
+
+        <!-- 损益表主表 -->
+        <action name="selecProfitandloss" class="lnLoanProfitandlossAction" method="selecProfitandloss"></action>
+        <!-- 损益表修改 -->
+        <action name="updateProfitandloss" class="lnLoanProfitandlossAction" method="updateProfitandloss"></action>
+        <!-- 损益表基础信息修改 -->
+        <action name="updateProfitandlossBaseInfo" class="lnLoanProfitandlossAction" method="updateProfitandlossBaseInfo"></action>
+        <action name="selectProfitandlossUI" class="lnLoanProfitandlossAction" method="selectProfitandlossUI">
+            <result name="success">/velocity/loan/profitandloss/vLoanInsertProfitandloss.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+        
+        <!-- 新损益表主表 -->
+        <action name="getLnProfitLossProdTab" class="askLoanAction" method="getLnProfitLossProdTab">
+            <result name="success">/velocity/loan/lnProfitLossProdTab.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="getProfitTable" class="askLoanAction" method="getProfitTable">
+            <result name="success">/velocity/loan/lnProfitLossProdTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="getSaveProfitPage" class="askLoanAction" method="getSaveProfitPage">
+            <result name="success">/velocity/loan/saveProfit.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="saveProfit" class="askLoanAction" method="saveProfit">
+        </action>
+        <action name="removeProfit" class="askLoanAction" method="removeProfit">
+        </action>
+        <action name="queryProLossBaseInfo" class="askLoanAction" method="queryProLossBaseInfo">
+        </action>
+        <action name="showIetmIfo" class="askLoanAction" method="showIetmIfo">
+            <result name="success">/velocity/loan/itemDetail.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <action name="updatDetails" class="askLoanAction" method="updatDetails">
+        </action>
+        <action name="getJydBaseInfo" class="askLoanAction" method="getJydBaseInfo">
+            <result name="success">/velocity/loan/addProTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+
+
+
+
+
+
+
+
+
+        <!-- 贷后监控文件列表 -->
+        <action name="loanMoniorUploadList" class="confirmLoanAction" method="loanMoniorUploadList">
+            <result name="success">/velocity/loan/loanMonitoringFiles.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 贷款分配回退 -->
+        <action name="assignTheallback" class="askLoanAction" method="assignTheallback">
+
+        </action>
+        <!-- 贷款调查回退 -->
+        <action name="goBackLoanSurvey" class="unExamLoanAction" method="goBackLoanSurvey">
+        </action>
+
+
+        <action name="getLnBalanceTab" class="lnBalanceAction" method="getLnBalanceTab">
+            <result name="success">/velocity/loan/lnBalanceTab.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+
+
+
+
+        <action name="getLnValidationTab" class="lnBalanceAction" method="getLnValidationTab">
+            <result name="success">/velocity/loan/lnValidationTab.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="getLnFinancialTab" class="lnBalanceAction" method="getLnFinancialTab">
+            <result name="success">/velocity/loan/lnFinancialTab.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="getBalanceTable" class="lnBalanceAction" method="getBalanceTable">
+            <result name="success">/velocity/loan/lnBalanceTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="getSaveBalancePage" class="lnBalanceAction" method="getSaveBalancePage">
+            <result name="success">/velocity/loan/saveBalance.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="saveBalance" class="lnBalanceAction" method="saveBalance"></action>
+        <action name="removeBalance" class="lnBalanceAction" method="removeBalance"></action>
+        <action name="saveLnBalanceOff" class="lnBalanceAction" method="saveLnBalanceOff"></action>
+        <action name="getLnBalanceOff" class="lnBalanceAction" method="getLnBalanceOff"></action>
+
+        <action name="saveLnValidationRights" class="lnBalanceAction" method="saveLnValidationRights"></action>
+        <action name="getLnValidationRights" class="lnBalanceAction" method="getLnValidationRights"></action>
+
+        <action name="hkjhDataAjust" class="lnBalanceAction" method="hkjhDataAjust">
+            <result name="success">/velocity/loan/hkjhDataAjust.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+
+    </package>
+
+</struts>

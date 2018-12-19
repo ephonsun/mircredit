@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+
+
+
+
+
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+}
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+.STYLE1 {color: #FF0000}
+-->
+</style></head>
+
+<body onload="getLabelStr();">
+<form id="form1" name="form1" method="post" action="">
+<table width="470" border="0" align="center" cellpadding="1" cellspacing="0">
+  <tr>
+    <td height="20" colspan="2" align="center" valign="middle"><span class="STYLE1">注：如果您不了解标签数字的含意，请不要随意修改。<br />
+      如要修改，请不要增加或减少下划线(_)的个数。</span></td>
+    </tr>
+  <tr>
+    <td align="center" valign="middle">标签字符串值：</td>
+    <td align="center" valign="middle"><textarea name="label" cols="50" rows="4" id="label"></textarea></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center" valign="middle"><input type="button" name="Submit" value="确定修改" onclick="InsertLabel();" />&nbsp;
+      <input type="button" name="Submit2" value="关闭" onclick="window.close();" />
+      &nbsp;</td>
+  </tr>
+</table>
+</form>
+</body>
+</html>
+<script language="javascript">
+   function  splitURLParamVal()
+   {
+       var name,value,i;
+       var str=location.href;
+	  
+       var num=str.indexOf("?");
+       str=str.substr(num+1);
+	    
+       var arrtmp=str.split("&");
+	   
+	   if(arrtmp.length>0){		   
+           for(i=0;i < arrtmp.length ;i++){
+                num=arrtmp[i].indexOf("=");
+                if(num>0){
+                    name=arrtmp[i].substring(0,num);
+                    value=arrtmp[i].substr(num+1);
+                    this[name]=value;					
+                 }
+           }
+		
+		}else{
+		        num=str.indexOf("=");				
+                if(num>0){
+                    name=str.substring(0,num);
+                    value=str.substr(num+1);
+                    this[name]=value;
+                 }
+		     
+		}
+		
+    }
+	 
+   function getLabelStr(){
+       var Request=new splitURLParamVal();
+       var label=Request["labelStr"];	   	
+	   document.form1.label.value = label;
+
+   }
+   function InsertLabel(){
+        var labelvalue = document.form1.label.value;
+		
+		dialogArguments.insertHTML(labelvalue);
+		window.returnValue = labelvalue;
+		window.close();
+ 	 
+   }
+
+
+
+</script>

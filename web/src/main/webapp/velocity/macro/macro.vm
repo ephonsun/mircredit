@@ -1,0 +1,30 @@
+#macro(json)
+<script>
+#foreach($js in $output.getJsons())
+$js;
+
+#end
+</script>
+#end
+
+#macro(styleLink)
+#foreach($gs in $output.getStyles())
+	<link href="/$gs" rel="stylesheet" type="text/css" id="css"  ></link>
+#end
+#end
+
+#macro(scriptLink)
+#foreach($sl in $output.getScripts())
+	<script src="/$sl" type="text/javascript" ></script>
+#end
+#end
+
+#macro(uc $id $vm)
+<span id="$id" style="display:none;" >
+#parse($vm)
+</span>
+#end
+
+#macro(foot)
+<script>InitPC05();InitHC05();</script>
+#end

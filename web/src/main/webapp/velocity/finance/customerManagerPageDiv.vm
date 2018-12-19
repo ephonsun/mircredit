@@ -1,0 +1,25 @@
+ <div class="ui-news-list">
+ #foreach($!feArticle in $!feArticleList.items)
+<dl>
+        	<dt>
+            	<a href="javascript:openNewAtricle('$!feArticle.articleId','$!feArticle.articleTitle');">$!feArticle.articleTitle</a>
+                <label>#if($!feArticle.publishDate != "")$date.format("yyyy-MM-dd HH:mm:ss",$!feArticle.publishDate) #end</label>
+            </dt>
+            <dd class="overview">
+            	<label>$!feArticle.articleContent</label>
+                <a href="javascript:openNewAtricle('$!feArticle.articleId','$!feArticle.articleTitle');">[全文]</a>
+            </dd>
+            <dd class="reminder">
+            	<label>安排阅读时间：$date.format("yyyy-MM-dd",$!feArticle.articleReadtimeBegin)~$date.format("yyyy-MM-dd",$!feArticle.articleReadtimeEnd)</label>
+                #if($!feArticle.isMastread == 0)
+					<i class="ui-news-mark optional">【选读】</i>
+				#else
+					<i class="ui-news-mark required">【必读】</i>
+				#end
+				
+            </dd>
+</dl>
+ #end
+ </div>
+ <hr />
+ <div class="ui-news-footer">#parse("/velocity/ajaxPage.vm")</div>

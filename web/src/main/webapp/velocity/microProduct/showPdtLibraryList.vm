@@ -1,0 +1,478 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>知识库</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+</head>
+
+<body>
+	<input type="hidden" id="txtSNodeId" value="1" />
+	<input type="hidden" id="txtSNodeName" value="所有分类" />
+	<input type="hidden" id="txtPSNodeId" value="1" />
+    <div class="ui-panel-box2">
+        <div class="l">
+            <h4>
+                <label>知识分类树</label>
+                <div> 
+                	<!--#if($urlPermitUtil.hasPermission('libTypeAdd'))-->
+                    <span id="tree-add" class="editor-add" style="margin-left:-5px;">&nbsp;</span>
+                    <!--#end-->
+                    <span id="tree-up" class="editor-up">&nbsp;</span>
+                    <span id="tree-down" class="editor-down">&nbsp;</span>
+                    <span id="tree-del" class="editor-del">&nbsp;</span>
+                    <span id="tree-edit" class="editor-edi">&nbsp;</span>
+                </div>
+            </h4>
+            <div class="l-inner" style="width:174px; overflow:auto;">
+               <ul id="treeItem" class="ztree"></ul>
+            </div>
+        </div>
+        <div class="r">
+            <table class="htmltbl">
+                <tbody>
+                    <tr>
+                        <td width="8%" class="field">
+                            <label>知识标题：</label>
+                        </td>
+                        <td width="17%">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" name="conds" id="txtLibTitle" />
+                            </div>
+                        </td>
+                        <td width="8%" class="field">
+                            <label>知识编号：</label>
+                        </td>
+                        <td width="17%">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" name="conds" id="txtLibNo" />
+                            </div>
+                        </td>
+                        <td class="field" width="8%">
+                            <label>创建时间：</label>
+                        </td>
+                        <td colspan="2"> 
+                            <table class="celltbl">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="ui-div-text" style="width:120px;">
+						                    	<input type="text" class="text datepicker" name="conds" id="txtCreateStartDate" render="date" readonly="true"/>
+												<i class="date"></i>
+						                    </div>
+                                        </td>
+                                        <td width="20"><label>-</label></td>
+                                        <td>
+                                            <div class="ui-div-text" style="width:120px;">
+						                    	<input type="text" class="text datepicker" name="conds" id="txtCreateEndDate" render="date" readonly="true"/>
+												<i class="date"></i>
+						                    </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+						<td widtd="17%"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="search-bar">
+                <span class="fl bold">
+                    知识列表(<label class="green">$!count</label>)
+                </span>
+                <input type="button" id="btnClear" class="ui-input-btn" value="清空" />
+                <input type="button" id="btnSearch" class="ui-input-btn" value="搜索" />
+            </div>
+            
+            <div class="action-bar">
+            	<span class="ui-span-btn fl" id="btnAdd">
+                    <label>新建知识</label>
+                </span>
+                <span class="ui-span-btn fr" id="btnRefresh">
+                    <label>刷新</label>
+                </span>
+            </div>
+            
+            <table id="tblList" class="datatbl">
+                #parse("/velocity/microProduct/pdtLibraryList.vm")
+            </table>
+        </div>
+    </div>
+</body>
+    #scriptLink("core")
+    #scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.exedit-3.2.js"></script>
+<script type="text/javascript">
+	var setting = {
+		callback: {
+			onClick: onTreeClick
+		},
+		view: {
+			showIcon: false
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		}
+	};
+	
+	var oldPostJson={};	//上一个搜索条件
+
+	var zNodes = $!pdtLibraryTreeJson; //绑定产品知识库Json数据
+
+	function showIconForTree(treeId, treeNode) {
+		return !treeNode.isParent;
+	};
+	
+	/**
+	 * 默认选择第一个分类节点
+	 */
+	function initNodeSelect(){
+   		var treeObj = jQuery.fn.zTree.getZTreeObj("treeItem");
+   		var nodes = treeObj.getNodes();
+   		if (nodes.length > 0) {
+   			treeObj.selectNode(nodes[0]);
+			onTreeClick(0,nodes[0].id,nodes[0]);
+   		}
+	}
+	
+	/**
+	 * 知识库分类树点击事件
+	 */
+	function onTreeClick(event, treeId, treeNode){
+		jQuery("#txtSNodeId").val(treeNode.id);
+		jQuery("#txtSNodeName").val(treeNode.name);
+		var pSNode = treeNode.getParentNode();
+		if(pSNode == null){
+			jQuery("#txtPSNodeId").val("1");
+		}else{
+			jQuery("#txtPSNodeId").val(pSNode.id);
+		}
+		refreshIconStatus(treeNode);	//刷新节点操作图标
+		
+		//查询当前节点下数据
+		var parentId = jQuery("#txtSNodeId").val();
+		var postJson={'pdtLibrary.parentId': parentId};
+		oldPostJson = postJson;  //记录OldPostJson
+		jQuery.ajax({
+	    	type: "post",
+	    	url: "queryPdtLibraryList.html",
+	    	data: postJson,
+	    	success: function(data){
+	 	  		queryResult(data);
+	    	}
+		});
+	}
+	
+		/**
+		 * 刷新产品知识库分类操作图标状态
+		 */
+	function refreshIconStatus(treeNode){
+		modfiyStyle("#tree-add",false,"editor-add-disabled");
+		if(treeNode.id == 1){
+			modfiyStyle("#tree-up",true,"editor-up-disabled");
+			modfiyStyle("#tree-down",true,"editor-down-disabled");
+			modfiyStyle("#tree-del",true,"editor-del-disabled"); 
+			modfiyStyle("#tree-edit",true,"editor-edi-disabled");  
+		}else{
+			modfiyStyle("#tree-del",false,"editor-del-disabled"); 
+			modfiyStyle("#tree-edit",false,"editor-edi-disabled");
+
+			var treeObj = jQuery.fn.zTree.getZTreeObj("treeItem");
+			var sNodes = treeObj.getSelectedNodes();
+			if (sNodes.length > 0) {
+                var level = sNodes[0].level;  //最多只能有三层子目录
+                if(level == 3){
+                    //最后一层，不能再添加了
+                    modfiyStyle("#tree-add",true,"editor-add-disabled");
+                }
+                var node = sNodes[0].getParentNode();
+
+                var preNode = sNodes[0].getPreNode();
+				var nextNode = sNodes[0].getNextNode();
+				if(preNode == null){	//如果上一个节点是第一个节点
+					modfiyStyle("#tree-up",true,"editor-up-disabled");
+					
+				}else{
+					modfiyStyle("#tree-up",false,"editor-up-disabled");
+				}
+				
+				if(nextNode == null){	//如果下一个节点是最后一个节点
+						modfiyStyle("#tree-down",true,"editor-down-disabled");
+				}else{
+						modfiyStyle("#tree-down",false,"editor-down-disabled");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 修改icon图标样式和是否可点击
+	 */
+	function modfiyStyle(objId,isDisabled,styleName){
+		jQuery(objId).attr("disabled",isDisabled);
+		if(isDisabled){
+			jQuery(objId).addClass(styleName);
+		}else{
+			jQuery(objId).removeClass(styleName);
+		}
+	}
+	
+	/**
+	 * 操作数据库交互执行界面数据交换位置结果
+	 */
+	function moveNodeResult(msg,textStatus){
+		if(msg == 'SUCCESS'){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("treeItem");
+			var sNodes = treeObj.getSelectedNodes();
+			var mNode;
+			if(textStatus == 'prev'){
+				mNode = sNodes[0].getPreNode();
+				treeObj.moveNode(mNode, sNodes[0], "prev");
+			}else{
+				mNode = sNodes[0].getNextNode();
+				treeObj.moveNode(mNode, sNodes[0], "next");
+			}
+			refreshIconStatus(mNode); //刷新节点图标
+		}else{
+			banger.page.showMessageBox(msg);
+		}
+	}
+	
+	/**
+	 * 操作数据库交互执行删除界面数据结果
+	 */
+	function delResult(msg){
+		if(msg == 'SUCCESS'){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("treeItem");
+			var nodes = treeObj.getSelectedNodes();
+			treeObj.removeNode(nodes[0]);
+			
+			initNodeSelect();
+		}else{
+			banger.page.showMessageBox(msg);
+		}
+	}
+	
+	/**
+	 * 分页跳转
+	 */
+	function gotoPage(page){
+		goto(
+			page,
+			"../pdtLibrary/queryPdtLibraryList.html?RandNum="+ Math.random(),
+			oldPostJson,
+			function(html){
+				queryResult(html);
+			});
+	}
+	
+	/**
+	 * 分页跳转或者查询结果
+	 */
+	function queryResult(html){
+		jQuery("#tblList").html(html).table();
+		//更新记录数
+		var total = jQuery('#total').val();
+		if(total!=undefined){
+			jQuery(".green").text(total);
+		}else {
+			jQuery(".green").text("0");
+		}
+	}
+	
+	/*
+	 * 初始化oldPostJson查询数据
+	 */
+	function initQueryJson(){
+		var postJson={'pdtLibrary.parentId': 1};
+   		oldPostJson = postJson;
+   		return postJson;
+   	}
+   	
+   	/**
+   	 * 删除叶子数据
+   	 */
+	function delLeafPdtLibrary(libraryId,libraryName){
+		if(confirm("您确认要删除知识\""+libraryName+"\"吗？")){
+			//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "delLeafPdtLibrary.html",
+		    	data: {'libraryId': libraryId
+		    	},
+		    	success: function(data){
+		 	  		delLeafResult(data);
+		    	}
+			});
+		}
+	}
+	
+	/**
+	 * 删除知识叶子数据结果
+	 */
+	function delLeafResult(msg){
+		if(msg == 'SUCCESS'){
+			jQuery("#btnRefresh").trigger("click");//执行刷新操作
+		}else{
+			banger.page.showMessageBox(msg);
+		}
+	}
+	
+	/**
+	 * 编辑知识叶子数据
+	 */
+	function editLeafPdtLibrary(libraryId,libraryName){
+		var urls="${ctx}/pdtLibrary/toEditLeafPdtLibraryPage.html?libraryId="+ libraryId +"&random="+Math.random()*10000;
+		var options = {id: "lib_edit" + libraryId, pid: GetId(), title: "编辑知识-" + libraryName, url: urls, lock: false,confirm: true};
+		tab.add(options);
+	}
+	
+	//查看叶子数据
+	function viewLeafPdtLibrary(libraryId,libraryName){
+		var urls="${ctx}/pdtLibrary/toViewLeafPdtLibraryPage.html?libraryId="+ libraryId +"&random="+Math.random()*10000;
+		var options = {id: "lib_view" + libraryId, pid: GetId(), title: "查看知识-" + libraryName, url: urls, lock: false};
+		tab.add(options);
+	}
+
+	jQuery(document).ready(function(){
+		jQuery.fn.zTree.init(jQuery("#treeItem"), setting, zNodes);
+		
+		initNodeSelect();
+		
+		initQueryJson();
+		
+		jQuery("#tree-add").click(function(){
+
+			var libraryId = jQuery("#txtSNodeId").val();
+			var libraryName = jQuery("#txtSNodeName").val();
+			var url="toAddPdtLibraryPage.html?libraryId="+libraryId+"&libraryName="+libraryName+"&random="+Math.random()*10000;
+			//var result=window.showModalDialog(url, '新建知识分类', 'dialogWidth=600px;dialogHeight=350px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            var result=banger.page.openDialog(url,"新建知识分类",600,350);
+            if(result != undefined){
+				location.reload();
+			}
+		});
+		
+		jQuery("#tree-del").click(function(){
+			var libraryName = jQuery("#txtSNodeName").val();
+			if(confirm("您确定要删除知识分类\""+libraryName+"\"吗？")){
+				var libraryId = jQuery("#txtSNodeId").val();
+				//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "delPdtLibrary.html",
+			    	data: {'libraryId': libraryId
+			    	},
+			    	success: function(data){
+			 	  		delResult(data);
+			    	}
+				});
+			}
+		});
+		
+		jQuery("#tree-edit").click(function(){
+			var libraryId = jQuery("#txtSNodeId").val();
+			var libraryName = jQuery("#txtSNodeName").val();
+			var pLibraryId = jQuery("#txtPSNodeId").val();
+			var url="toEditPdtLibraryPage.html?libraryId="+libraryId+"&pLibraryId="+pLibraryId+"&libraryName="+libraryName+"&random="+Math.random()*10000;
+			//var result=window.showModalDialog(url, '编辑知识分类', 'dialogWidth=600px;dialogHeight=380px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            var result=banger.page.openDialog(url,"编辑知识分类",600,380);
+            if(result != undefined){
+				location.reload();
+			}
+		});
+		
+		jQuery("#tree-up").click(function(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("treeItem");
+			var sNodes = treeObj.getSelectedNodes();
+			var preNode = sNodes[0].getPreNode();
+			if(preNode != null){
+				var moveNodeIds = sNodes[0].id + "-" + preNode.id;
+				//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "movePdtLibraryNode.html",
+			    	data: {'moveNodeIds': moveNodeIds
+			    	},
+			    	success: function(data){
+			 	  		moveNodeResult(data,"prev");
+			    	}
+				});
+			}
+		});
+		
+		jQuery("#tree-down").click(function(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("treeItem");
+			var sNodes = treeObj.getSelectedNodes();
+			var nextNode = sNodes[0].getNextNode();
+			if(nextNode != null){
+				var moveNodeIds = sNodes[0].id + "-" + nextNode.id;
+				//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "movePdtLibraryNode.html",
+			    	data: {'moveNodeIds': moveNodeIds
+			    	},
+			    	success: function(data){
+			 	  		moveNodeResult(data,"next");
+			    	}
+				});
+			}	
+		});
+		
+		jQuery("#btnClear").click(function(){
+			jQuery("input[name='conds']").each(function(){
+				jQuery(this).val("");
+			});
+		});
+		
+		jQuery("#btnSearch").click(function(){
+			var parentId = jQuery("#txtSNodeId").val();
+			var libTitle = jQuery.trim(jQuery("#txtLibTitle").val());
+			var libNo = jQuery.trim(jQuery("#txtLibNo").val());
+			var createStartDate = jQuery.trim(jQuery("#txtCreateStartDate").val());
+			var createEndDate = jQuery.trim(jQuery("#txtCreateEndDate").val());
+			var postJson={'pdtLibrary.parentId': parentId,
+						  'pdtLibrary.libTitle': libTitle,
+						  'pdtLibrary.libNo': libNo,
+						  'createStartDate': createStartDate,
+						  'createEndDate': createEndDate
+			};
+			oldPostJson = postJson;  //记录OldPostJson
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "queryPdtLibraryList.html",
+		    	data: postJson,
+		    	success: function(data){
+		 	  		queryResult(data);
+		    	}
+			});
+		});
+		
+		jQuery("#btnAdd").click(function(){
+			var libraryId = jQuery("#txtSNodeId").val();
+			var urls="${ctx}/pdtLibrary/toAddLeafPdtLibraryPage.html?libraryId="+ libraryId +"&random="+Math.random()*10000;
+			var options = {id: "lib_add", pid: GetId(), title: "新建知识", url: urls, lock: false,confirm: true};
+			tab.add(options);
+		});
+		
+		jQuery("#btnRefresh").click(function(){
+			goto(null,"../pdtLibrary/queryPdtLibraryList.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html);});
+		});
+		
+		jQuery('#tblList').table();
+	});	
+</script>
+</html>

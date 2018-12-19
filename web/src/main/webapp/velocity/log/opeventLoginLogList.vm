@@ -1,0 +1,128 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>系统日志</title>
+    
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+		function Query(){
+	    	var f=$("#opeventLoginLogForm");
+	    	f.action="listAllSysLog.html";
+			f.submit();
+	    }
+	    function resetValue(){
+	    	$(':text').val('');
+	    }
+	    function deleteAll(){
+	    	if(confirm('是否清空所有系统日志?')){
+	    		location.href="deleteAllSysLog.html";
+	    	}else{
+	    		return false;
+	    	}
+	    }
+	</script>
+</head>
+
+<body>
+	<form id="opeventLoginLogForm" name="opeventLoginLogForm" action="" method="post">
+		<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="7%" class="field">操作时间：</td>
+	            	<td width="33%">
+	            		<div class="dtxt2 fl" style="width: 40%;">
+                            <input type="text"name="startTime" value="$!startLogDate" id="datepicker1" class="dtxt2-txt" readonly="true"/>
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                        <label class="dash">—</label>
+						<div class="dtxt2 fl" style="width: 40%;">
+                            <input type="text" name="endTime" value="$!endLogDate" id="datepicker2" class="dtxt2-txt" readonly="true"/>
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                        
+	                </td>
+	                
+	                <td width="7%" class="field">
+                        <label>操作对象：</label>
+                    </td>
+                    <td width="15%">
+                        <div class="dtxt2">
+                            <input type="text" class="dtxt2-txt" name="opeventObj" value="$!opeventObj" maxLength="20"/>
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>操作者：</label>
+                    </td>
+                    <td width="15%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" name="userName" value="$!userName" maxLength="20"/>
+                        </div>
+                    </td>
+                    
+	            </tr>
+	        </tbody>
+	    </table>
+	</form>
+    <div class="sz">
+          <label class="fl bold">所有日志(<span class="dgreen">$!count</span>)</label>
+          <input type="button" id="reset" value="清 空" class="btn1" onclick="resetValue()" />
+          <input type="button" value="搜 索" class="btn1" onclick="Query()"/>
+    </div>
+        
+    <div class="actrow" style="margin-top: 10px;">
+    	
+        <a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="deleteAll()">
+        	<label class="btn2-txt">清空日志</label>
+        </a>
+        #if($!count!=0)
+    		<a href="javascript:void(0);" class="btn2 fr" onclick="filterPageForm_submit()">
+    	#else
+    		<a href="javascript:void(0);" class="btn2 fr" onclick="Query()">
+    	#end
+            <label class="btn2-txt">刷新</label>
+        </a>
+    </div>
+    <table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="25%"><label title="操作时间">操作时间</label></th>
+            	<th width="17%"><label title="操作对象">操作对象</label></th>
+            	<th width="22%"><label title="操作信息">操作信息</label></th>
+            	<th width="12%"><label title="操作者">操作者</label></th>
+            	<th width="7%"><label title="终端">终端</label></th>
+            	<th width="17%"><label title="操作IP">操作IP</label></th>
+            </tr>
+        </thead>
+    	<tbody>
+			#foreach($log in $!logList.items)
+        	<tr>
+            	<td><label title="$date.format("yyyy-MM-dd HH:mm:ss",$!log.opeventDate)">$date.format("yyyy-MM-dd HH:mm:ss",$!log.opeventDate)</label></td>
+            	<td><label title="$!log.opeventObj">$!log.opeventObj</label></td>
+            	<td><label title="$!log.opeventAction">$!log.opeventAction</label></td>
+            	<td><label title="$!log.userName">$!log.userName</label></td>
+            	<td><label title="$!log.clientTypeName">$!log.clientTypeName</label></td>
+            	<td><label title="$!log.opeventIp">$!log.opeventIp</label></td>
+            </tr>
+			#end
+        </tbody>
+		<tfoot>
+        	<tr>
+            	<td colspan="6">
+                	<div class="floatR">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>
+

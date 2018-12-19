@@ -1,0 +1,39 @@
+ <table class="datatbl">
+    <thead>
+        <tr>
+            <th width="200"><label title="视频名称">视频名称</label></th>
+			<th><label title="时长">时长</label></th>
+            <th width="140"><label title="创建时间">创建时间</label></th>
+            <th width="140"><label title="提交时间">提交时间</label></th>
+            <th><label title="备注">备注</label></th>
+            <th><label title="提交人员">提交人员</label></th>
+			<th><label title="事件">事件</label></th>
+            <th width="100"><label title="操作">操作</label></th>
+        </tr>
+    </thead>
+    <tbody>
+         #foreach($video in $!videoDataList.items)
+        	<tr>
+            	<td><label title="$!video.videoName">$!video.videoName</label></td>
+				<td><label title="#if($!video.recordLength)$dateString.formatCallTime($!video.recordLength)#end">#if($!video.recordLength)$dateString.formatCallTime($!video.recordLength)#end</label></td>
+				<td><label title="#if($!video.recordDate)$date.format("yyyy-MM-dd HH:mm:ss",$!video.recordDate)#end">#if($!video.recordDate)$date.format("yyyy-MM-dd HH:mm:ss",$!video.recordDate)#end</label></td>
+				<td><label title="#if($!video.uploadDate)$date.format("yyyy-MM-dd HH:mm:ss",$!video.uploadDate)#end">#if($!video.uploadDate)$date.format("yyyy-MM-dd HH:mm:ss",$!video.uploadDate)#end</label></td>
+				<td><label title="$!subString.replaceRemark($!video.remark)">$!video.remark</label></td>
+				<td><label title="$!video.uploadUser">$!video.uploadUser</label></td>
+				<td><label title="$!video.eventName">$!video.eventName</label></td>
+				<td>
+					#if($urlPermitUtil.hasPermission('showVideoDiv'))
+						<label><a class="slink" href="#2" onclick="javascript:showVideoDiv(this,$!video.videoId,'$!video.videoName','$!video.fileId','$!video.recordLength','$!customerName');">播放</a></label>
+					#end
+				</td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+         <tr>
+        	<td colspan="8">
+            	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

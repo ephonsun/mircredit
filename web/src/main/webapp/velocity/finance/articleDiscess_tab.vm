@@ -1,0 +1,59 @@
+<ul class="ui-fe-reviews">
+	#foreach($!discess in $!discessReplyPage.items)
+    	<li class="item">
+    		<div class="summary">
+    			<img src="../../images/public/exchange area/touxiang.png" alt="暂无头像" class="avatar" />
+    			<label class="name">$!discess.discess.userName</label>
+    			<label class="level">业绩排名:#if($!discess.discess.salesRank)$!discess.discess.salesRank#else无#end</label>
+    			<p class="pfrom">来自：$!discess.discess.deptName</p>
+    		</div>
+    		<div class="words">
+    			<label>$!discess.discess.discessContent</label>
+    		</div>
+    		<div class="footer">
+    			<label class="time">$!discess.discess.publishTime</label>
+				#if($!discess.discess.isSupport==0)
+					<a  class="link" href="javascript:void(0);" onclick="push($!discess.discess.discessId);return false;">支持[<label>$!discess.discess.discessSupportCount</label>]</a>
+    			#else	
+					<label>支持[<label>$!discess.discess.discessSupportCount</label>]</label>
+				#end
+				<a class="link ml reply" href="javascript:void(0);">回复[<label>$!discess.replyList.size()</label>]</a>
+    		</div>
+    		<div class="ui-fe-forum" style="display:none;">
+    			<div class="bar">
+    				<i class="close">&nbsp;</i>
+    			</div>
+    			<div class="ui-div-textarea" style="height:50px;">
+    				<textarea class="textarea" id="reply_$!discess.discess.discessId" maxlength="500" style="height:50px;"></textarea>
+    			</div>
+    			<div class="footer">
+    				<a href="javascript:void(0);" class="button" onclick="reply($!discess.discess.discessId);return false;">回复</a>
+    			</div>
+    		</div>
+			<ul class="ui-fe-reviews">
+            	#foreach($!reply in $!discess.replyList)
+                	<li class="item">
+                		<div class="summary">
+                			<img src="../../images/public/exchange area/touxiang.png" alt="暂无头像" class="avatar" />
+                			<label class="name">$!reply.userName</label>
+                			<label class="level">业绩排名:#if($!reply.salesRank)$!reply.salesRank#else无#end</label>
+                			<p class="pfrom">来自：$!reply.deptName</p>
+                		</div>
+                		<div class="words">
+                			<label>$!reply.replyContent</label>
+                		</div>
+						<div class="footer">
+							<label class="time">$!reply.publishTime</label>
+                        </div>
+                	</li>
+            	#end
+            </ul>
+    	</li>
+	#end
+</ul>
+<div style="clear:both;"></div>
+<hr />
+<div>
+    <div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+</div>
+<input type="hidden" id="count" name="count" value="$!count">

@@ -1,0 +1,422 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>重要财经-业务主管</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css">
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <style type="text/css">
+		div.search-bar { margin-top:0; }
+		#customerSearch td{cursor:pointer;}
+	</style>
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+	
+    <script type="text/javascript">
+		$(function(){
+			$('select').select();
+			initBelongTo();
+			$("#htmltbl").validator();
+			numInput("#unReadCount");
+			numInput("#commentCount");
+			numInput("#collectCount");
+		});
+		
+		var oldPostJson={};
+		//分页跳转
+		function gotoPage(page)
+		{
+			var oldPostJson=getQueryJson();
+			goto(page,"/finance/showFinanceMainPageBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+	  //刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+			
+		}
+		//刷新
+		function refreshForm(){
+			var oldPostJson=getQueryJson();
+			goto(null,"/finance/showFinanceMainPageBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//清空搜索条件
+		function resetValue(){
+	    	$(':text').val('');
+	    	$('.htmltbl :checkbox').attr('checked',false);
+			var isCommon  = '$!isCommon';
+	    	$("select").each(function(){
+				if(isCommon){
+					this.selectedIndex = 1;
+        			$(this).select();
+					changeBelongTo('brMine');
+				}else{
+					this.selectedIndex = 0;
+        			$(this).select();
+					changeBelongTo();
+				}
+        		
+    		}); 
+			$('#articleReadtimeBegin').val($('#currentDate').val());
+			$('#articleReadtimeEnd').val($('#currentDate').val());
+			$('#unread').attr('checked',true);
+	    }
+	    //搜索
+	    function search(){
+			var bool = jQuery.validator({ form: 'htmltbl'});
+			if(bool){
+    			var postJson=getQueryJson();
+        		oldPostJson = postJson;
+            	jQuery.post('/finance/showFinanceMainPageBySearch.html?random='+Math.random()*1000000,postJson,function(html){
+            					 refreshGrid('grid',html);
+            	});
+			}
+	    }
+	    
+	    //表单数据
+	    function getQueryJson(){
+        	var postJson = {};
+    		postJson['columnId'] = $('#columnId').val();
+			postJson['feArticle.articleReadtimeBegin']=jQuery.trim($('#articleReadtimeBegin').val());
+    		postJson['feArticle.articleReadtimeEnd']=jQuery.trim($('#articleReadtimeEnd').val());
+			switch($('#BelongToType').val()){
+				case "brUser":
+					postJson['userId']=jQuery.trim($('#userId').val());
+					postJson['readType']=$("input[name='read']:checked").val();
+					
+					break;
+				case "brMine":
+					postJson['userId']=jQuery.trim($('#myUserId').val()); 
+					postJson['readType']=$("input[name='read']:checked").val();
+					break;
+				default: 
+				postJson['feArticle.unReadCount']=jQuery.trim($('#unReadCount').val());
+				postJson['feArticle.articleDiscessCount']=jQuery.trim($('#commentCount').val());
+				postJson['feArticle.articleCollectCount']=jQuery.trim($('#collectCount').val());
+				break;
+			}
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+		
+		function openNewAtricle(articleId,title){
+			var url="/finance/readFeArticle.html";
+			url=url+"?articleId="+articleId;
+			var title=title;
+			var id="FeArticle_readFeArticle"+articleId;
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false,confirm: false});
+		
+		}
+		
+		function searchStartDateFun(obj){
+		
+			var mytable = $(obj).closest("table .celltbl");
+			var startDate=mytable.find("input").eq(0).val();
+			var endDate=mytable.find("input").eq(1).val();
+			if(endDate.length>0&&startDate.length>0){
+				if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+					$('#endDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		function searchEndDateFun(obj){
+			var mytable = $(obj).closest("table .celltbl");
+			var startDate=mytable.find("input").eq(0).val();
+			var endDate=mytable.find("input").eq(1).val();
+			if(endDate.length>0&&startDate.length>0){
+				if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		
+		//改变归属
+		function changeBelongTo(val){
+			$('#userIds').val("");
+			$("#my").hide();
+			$("#userList").hide();
+			$("#defaultSearch").hide();
+			$("#customerSearch").hide();
+			//$('#userText').removeAttr("rule");
+			switch(val){
+				case "brUser":
+					$("#userList").show();
+					$("#customerSearch").show();
+					//$('#userText').attr("rule","\S");
+					break;
+				case "brMine":
+					$("#customerSearch").show();
+					$("#my").show();
+					break;
+				default: 
+					$("#defaultSearch").show();
+				break;
+			}
+		}
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+			
+		function initBelongTo(){
+		var isCommon  = '$!isCommon';
+		if(isCommon){
+				changeBelongTo('brMine');
+			}else{
+				changeBelongTo();
+		}
+			
+			var urlUser = "";
+			urlUser = function(){return "/customer/getCusBelongToJson.html?BelongToType=brUser&random="+Math.random()*1000000;};	
+			//加载下属树
+			$('#userList').atree({
+					setting: {
+						check: {
+							enable: false,
+							chkboxType: { "Y": "s", "N": "s" }
+						},
+						view: {
+							showIcon: true,
+							dblClickExpand: false
+						},
+						data: {
+							simpleData: {
+								enable: true
+							}
+						},
+						callback: {
+							beforeClick: null,
+							onClick: null,
+							beforeCheck: null,
+							onCheck: null
+						}
+					},
+					url: urlUser,
+					beforeClick: beforeClickUser,
+					okHandler: onClickUser
+				});
+			$("#BelongToType").change(function(){
+				changeBelongTo($(this).val());
+			});
+			
+		}
+		
+		function judgeUserText(obj){
+			if($("#BelongToType").val() == 'brUser'){
+				if($(obj).val() == ''){
+					$(obj).attr('tips','客户经理必须填写！');
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#userId').val(nodes[0].id);
+			$('#userText').val(nodes[0].name);
+		}
+		//查看已收藏，未阅读，已阅读
+		function showUsers(id,type){
+			var title;
+			if(type==='read'){
+				title='已阅读-客户经理';
+			}else if(type==='unread'){
+				title='未阅读-客户经理';
+			}else if(type==='collect'){
+				title="已收藏";
+			}
+			var url='/finance/showFinanceUsersPage.html?feArticle.articleId='+id+'&actionType='+type+'&random='+Math.random()*1000000;
+			window.showModalDialog(url, {window: window,"title":title}, 'dialogWidth=880px;dialogHeight=540px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		}
+		
+		//评论
+		function toDiscess(id){
+			var url = '/finance/showArticleDiscessPage.html?feArticle.articleId='+id+'&random='+Math.random();
+        	var options = {id: "articleDiscess"+id, pid: GetId(), title:'', url: url, lock: false};
+			tab.add(options);
+		}
+		
+		function keyDown(obj){
+		
+        	var e = window.event;
+    		var key = e.keyCode || e.which;
+			
+    		var flag = (e.shiftKey && jQuery.keyboard.insert==key) || (e.ctrlKey && key==86) || (e.ctrlKey && key==67);
+    		if(key==229)
+    		{
+    			jQuery.input.fn.imeKeyDown(obj,checkNumber);
+    			return true;
+    		}
+    		else
+    		{
+    			if(!flag)
+    			{
+    				return jQuery.input.fn.textKeyDown(e,obj,checkNumber);
+    			}
+    			else
+    			{
+    				return true;
+    			}
+    		}
+		}
+
+	function textPaste(obj){
+		var e = window.event;
+		return jQuery.input.fn.textPasteNew(e,obj,checkNumber);
+	}
+    
+	function checkNumber(text){
+		if(text=="")return false;
+		if(!inChars(text,"0123456789"))return false;
+		//if(text.substr(0,1)=='0')return false;
+		return true;
+	}
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl" id="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>安排阅读时间：</label>
+                </td>
+                <td width="34%">
+					#set($currentDate=$date.get('yyyy-MM-dd'))
+					<input type="hidden" value="$currentDate" id="currentDate">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="130">
+                					<div class="ui-div-text" style="width:120px;">
+				                		<input type="text" fun="searchStartDateFun" readonly="readonly" class="text datepicker" value="$currentDate" id="articleReadtimeBegin"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="130">
+                					<div class="ui-div-text"  style="width:120px;">
+				                		<input type="text" fun="searchEndDateFun" readonly="readonly" class="text datepicker" value="$currentDate" id="articleReadtimeEnd"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+             	<td class="field" width="8%">
+                	<label>客户经理：</label>
+                </td>
+                <td width="120">
+					<select style="width:120px;" id="BelongToType">
+                    	<option value="brAll" ></option>
+                    	<option value="brMine" #if($!isCommon == '1') selected="selected" #end>我的</option>
+                    	<option value="brUser">下属的</option>
+                    </select>	
+                </td>
+                <td colspan="2">
+                	<div>
+    					<span class="btn2 fl" id="my" style="display: none;" id="my">
+                    		<input id="myUserId" type="hidden" value="$!myUserId"/>
+                            <label class="btn2-txt" id="showText">$!myUserName</label>
+                        </span>
+                        <div id="userList" class="dtxt2 fl" style="width: 150px;display:none">
+                            <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"  fun="judgeUserText" />
+                            <input id="userId" type="hidden" />
+							<span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+    		<tr>
+                <td colspan="7">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr id="defaultSearch">
+                				<td width="80"><label>未阅读数>=</label></td>
+                				<td width="60">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text" id="unReadCount" />
+				                	</div>
+                				</td>
+                				<td width="80"><label>已评论数>=</label></td>
+                				<td width="60">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text" id="commentCount" />
+				                	</div>
+                				</td>
+                				<td width="80"><label>已收藏数>=</label></td>
+                				<td width="60">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text" id="collectCount" />
+				                	</div>
+                				</td>
+                			</tr>
+							<tr id="customerSearch" style="display:none">
+    							<td >
+                                	<input type="radio" name="read" class="radio" id="unread" value="unread" checked/>
+                                	<label for="unread">未读</label>
+                                	<input type="radio" name="read" class="radio" id="mustRead" value="mustRead" />
+                                	<label for="mustRead">必读，并且未读</label>
+                                	<input type="radio" name="read" class="radio" id="readed" value="readed"/>
+                                	<label for="readed">已读</label>
+    							</td>
+							</tr>
+                		</tbody>
+                	</table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar" style="margin-top:10px;">
+        <span class="fl bold">
+            满足条件的记录数(<label class="green" id="queryCount">$!page.totalRowsAmount</label>)个
+        </span>
+		<input type="button" class="ui-input-btn" value="清空"  onclick="resetValue()"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="search()"/>
+    </div>
+    
+    <hr />
+	<input type="hidden" value="$!columnId" id="columnId">
+    <div id="grid">
+    	 #parse("/velocity/finance/executivePageDiv.vm")
+    </div>
+
+</body>
+</html>

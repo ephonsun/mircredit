@@ -1,0 +1,301 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>未处理客户</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+		.b-bomb-box1 { z-index: 1000; }
+		.b-bomb-box1 .l { width: 150px;  overflow: auto;}
+	</style>
+	#scriptLink("core")
+	#scriptLink("page")
+	
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	
+    <script type="text/javascript">
+		var oldPostJson={};
+    	$(function(){
+			$('select').select();
+			$('#customer').tips({ msg: "姓名、编号等" });
+			getQueryJson();
+			initBelongToTree();		//下属机构树
+			changeBelongTo($('#BelongToType').val());		//初始化加载
+		});
+	
+		function deal(pcId){
+			location.href("dealCustomer.html?productId="+$('#productId').val()+"&dealType="+$('#dealType').val()+"&pcId="+pcId+"&isSal="+$!isSal);
+		}
+		
+		//刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			var elem=$(html);
+			var gridDiv = $("#"+gridId);
+			gridDiv[0].innerHTML="";
+			gridDiv.append(elem);
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+			if($('#dealType').val()==9){
+				$('#queryContent').text("所有");
+			}else if($('#dealType').val()==0){
+				$('#queryContent').text("未处理");
+			}else if($('#dealType').val()==1){
+				$('#queryContent').text("已处理");
+			}
+		}
+		
+		//分页跳转
+		function gotoPage(page){
+			if(!oldPostJson['productId']){
+    			oldPostJson['productId'] = $('#productId').val();
+				oldPostJson['dealType'] = 0;
+				oldPostJson['isSal']=$!isSal;
+    		}
+			goto(page,"isDealCustomer.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新
+		function refresh(){
+    		if(!oldPostJson['productId']){
+    			oldPostJson['productId'] = $('#productId').val();
+				oldPostJson['dealType'] = 0;
+				oldPostJson['isSal']=$!isSal;
+    		}
+    		goto(null,"isDealCustomer.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		function getQueryJson(){
+        	var postJson = {};
+			if($('#customer').val()=="姓名、编号等"){
+				postJson['customer']="";
+    		}else{
+				postJson['customer']=jQuery.trim($('#customer').val());
+			}
+    		postJson['productId']=jQuery.trim($('#productId').val());
+			postJson['dealType']=jQuery.trim($('#dealType').val());
+			postJson['userIds']=jQuery.trim($('#userIds').val());
+			postJson['BelongToType']=jQuery.trim($('#BelongToType').val());
+			postJson['showName']=jQuery.trim($('#showName').val());
+			postJson['isSal']=jQuery.trim($('#isSal').val());
+    		return postJson;
+    	}
+		
+		function sub(){
+			var postJson=getQueryJson();
+			oldPostJson = postJson;
+			jQuery.post("isDealCustomer.html?fenye=1&isSal="+$('#isSal').val()+"&random="+Math.random()*1000000,postJson,
+				function(html){
+					refreshGrid('grid',html);
+				});
+		}
+		
+		function clean(){
+			$('#form1 :text').val('');
+			$("#customer").tips({ msg: "姓名、编号等" });
+			
+			$('select').each(function(){
+				if(this.id=="dealType")
+					this.selectedIndex = 1;
+				else{
+					this.selectedIndex = 0;
+				}
+				$(this).change().select();
+			});
+			$('#userIds').val("");
+		}
+		
+    	//进入客户详情
+    	function openCustomer(id){
+			jQuery.post("../record/getCustomerIsDel.html", {"customerId": id}, function(result){
+    			if(result=="0"){
+    				banger.page.showMessageBox("该客户已删除,无法查看客户！");
+    				return;
+    			}else{
+            		var options = {id: "NotDealCustomer_queryCustomerById"+id, pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+id+"&random="+Math.random(), lock: false};
+            		tab.add(options);
+    			}
+			});
+    	}
+		
+		
+		
+		
+		//机构树
+		function initBelongToTree(){
+			var type = "$parameterMap.get('BelongTo')";
+			var urlUser = "";
+			var urlDept = "";
+			urlUser = function(){return "getCusBelongToJson.html?BelongToType=brUser&random="+Math.random()*1000000;};
+			switch(type){
+				case "brUser":
+					urlUser = function(){return "getCusBelongToJson.html?BelongToType=brUser&belongDeptId="+$crmCustomer.belongDeptId +
+						"&belongUserId="+ $crmCustomer.belongUserId +"&random="+Math.random()*1000000;};	
+					$('#userTree').val("$!crmCustomer.userName");
+					break;
+				default: break;
+			}
+			$('#userList').atree({
+				setting: {
+					check: {
+						enable: true,
+						chkboxType: { "Y": "s", "N": "s" }
+					},
+					view: {
+						showIcon: true,
+						dblClickExpand: false
+					},
+					data: {
+						simpleData: {
+							enable: true
+						}
+					},
+					callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: null,
+						onCheck: null
+					}
+				},
+				url: urlUser,
+				beforeClick: beforeClickUser,
+				okHandler: onClickUser
+			});
+			
+			$("#BelongToType").change(function(){
+				changeBelongTo($(this).val());
+			});
+		}
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(nodes!=''){
+    			$('#userTree').val(nodes[0].name);
+    			$('#userIds').val(nodes[0].id);
+				$('#userName').text("("+nodes[0].name+")");
+			}
+		}
+		//改变归属
+		function changeBelongTo(val){
+			switch(val){
+				case "brAll":
+					$("#my,#userList").hide();
+					$('#belongUserId').val("0");
+					break;
+				case "brMine":
+					$("#my").show();
+					$('#showText').text(window.top.getUn());
+					$("#userList").hide();
+					$('#userName').text("("+"$!parameterMap.get('currentUserName')"+")");
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#my").hide();
+					$('#belongUserId').val("0");
+					break;
+				default: break;
+			}
+		}
+    </script>
+</head>
+ 
+<body>
+	<form id="form1" method="post">
+    	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td width="7%" class="field">
+                        <label>客户：</label>
+						<input type="hidden"  id="productId" value="$!productId"/>
+						<input type="hidden" id="isSal" value="$!isSal"/>
+                    </td>
+                    <td width="18%">
+						<div class="dtxt1">
+                            <input type="text"  id="customer" name="customer" class="dtxt1-txt" value="$!customer"/>
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>处理状态：</label>
+                    </td>
+                    <td width="18%">
+                        <select id="dealType" name="dealType">
+                        	<option value="9" ></option>
+							<option value="0" #if($!dealType==0)selected=true #end>未处理</option>
+							<option value="1" #if($!dealType==1)selected=true #end>已处理</option>
+                        </select>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>营销人员：</label>
+                    </td>
+					<td width="120">
+                        <select id="BelongToType" name="BelongToType">
+							#if($!isSal==1)
+								<option value="brMine" >我的</option>
+								<option value="brUser" >下属的</option>
+							#else
+    							#if($!isManager==1)
+    							<option value="brAll"></option>
+    							<option value="brMine" #if($!select==1) selected=true #end>我的</option>
+    							<option value="brUser" #if($!select==2) selected=true #end>下属的</option>
+    							#else
+    							<option value="brMine" >我的</option>
+								#end
+							#end
+                        </select>
+                    </td>
+                    <td>
+                    	<span id="my" class="btn2" #if($!isManager==1)#if($!isSal!="1")#end#end>
+							<label id="showText" name="uname" class="btn2-txt">$!uname</label>
+							<input type="hidden" name="uid" value="$!uid" id="myUserId"/>
+						</span>
+                        <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                            <input type="text" class="dtxt2-txt" readonly="readonly" id="userTree"/>
+	                        <input id="userIds" name="userIds" type="hidden" />
+                            <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</form>
+    
+    <div class="sz">
+        <span class="fl bold">
+           <label id="queryContent">未处理</label>客户数(<label id="queryCount" class="dgreen">$!count</label>)
+        </span>
+		<input type="button" class="btn1" value="清 空" onclick="clean();"/>
+        <input type="button" class="btn1" value="搜 索" onclick="sub();"/>
+    </div>
+    <div class="actrow">
+		<span class="btn2 fr" onclick="refresh();">
+            <label>刷新</label>
+        </span>
+    </div>
+	
+    <div id="grid">
+		 #parse("/velocity/product/NotDealCustomerTable.vm")
+	</div>
+</body>
+</html>
+

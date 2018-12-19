@@ -1,0 +1,670 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>组织机构</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+   <style type="text/css">
+    	.Agency-left { float: left; width: 220px; }
+		.Agency-left h4 { height: 30px; border: 1px solid #ccc; padding: 0px 5px; line-height: 30px; font-size: 12px; font-family: Microsoft Yahei; }
+		.Agency-left h4 label { float: left;}
+		.Agency-left h4 p { float: right; }
+		.Agency-left h4 p a { float: left; width: 20px; overflow: hidden; text-indent: -1000px; }
+		.Agency-left h4 p a.edi-add { background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-up { background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-down { background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-del { background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-edi { background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent; }
+		.Agency-left .Agency-tree {width:99%; display: block; height: 500px; border: 1px solid #ccc; margin-top: 2px; overflow: auto; }
+		
+		.Agency-right { min-height: 534px; height: auto !important; height: 534px; margin-left: 230px; }
+    </style>
+
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+		var oldPostJson={};
+		var postJson={};
+		var setting = {
+			callback:{
+				onClick:treeOnclick
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				showIcon: false
+			}
+			
+		};
+		//json树数据
+		var zNodes = $!deptJson; 
+		
+		//默认选择第一个节点
+		function initNodeSelect(){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    		var nodes = treeObj.getNodes();
+    		if (nodes.length>0) {
+    			treeObj.selectNode(nodes[0]);
+				$("#deptId").val(nodes[0].id);
+				$("#dName").text(nodes[0].name);
+				if(nodes[0].id == 2) {
+					$("#detailData").text("下所有人员");
+					$("#deptCheckbox").attr("checked",true);
+					$("#deptCheckbox").attr("disabled",true);
+				}
+				treeOnclick(event, nodes[0].id, nodes[0]);
+    		}
+			
+		}
+		
+		//延迟器
+		var timer = null;
+		
+ 		//机构树加载
+		$(document).ready(function(){
+			jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+			$('#deptGrid table').table();
+			timer = setTimeout(delay, 100);
+		});
+		
+		function delay(){
+			initNodeSelect();
+			changeActive(1);
+			getQueryJson();
+			
+			clearTimeout(timer);
+		}
+		
+		//清空
+		function qingkong(){
+			var length = document.forms[0].length
+			for(i=0;i<length;i++)
+			{
+				 var type = document.forms[0].elements[i].type;
+				 if(type!="button"){
+					 document.forms[0].elements[i].value = "";
+				 }
+			}
+			 if(document.getElementById("deptCheckbox").checked && document.getElementById("deptCheckbox").disabled==false){ 
+			   document.getElementById("deptCheckbox").checked = false;
+			 }
+		}
+		
+ 		//点击节点查询本部门用户
+ 		function treeOnclick(event, treeId, treeNode) {
+			$("#deptId").val(treeNode.id);
+     		$("#dName").text(treeNode.name);
+			
+			if(treeNode.name == "您管理的机构") {//虚拟节点 
+				$('#userAdd').hide();//隐藏新增人员按钮
+				addNoStyle();
+				delNoStyle();
+				ediNoStyle();
+				upNoStyle();
+				downNoStyle();
+			}else{
+				$('#userAdd').show();
+				addStyle();
+				var parentNode = treeNode.getParentNode();
+    			if(parentNode){//非根节点
+					delStyle();
+					if(parentNode.name=="您管理的机构"){
+						upNoStyle();
+						downNoStyle();
+						delNoStyle();
+					}else{
+					
+    					var pnodes = parentNode.children;
+    					if(treeNode.id == pnodes[0].id){//第一个节点
+    						upNoStyle();
+    					}else{
+    						upStyle();
+    					}
+    					if(treeNode.id == pnodes[pnodes.length-1].id){//最后一个节点
+    						downNoStyle();
+    					}else{
+    						downStyle();
+    					}
+					}
+					
+    			}else{ //根节点
+    				delNoStyle();
+					upNoStyle();
+					downNoStyle();
+				}
+				ediStyle();
+				
+			}
+			$("#account").val("");
+ 			$("#userName").val("");
+			$("#isActived").val("");
+			$("#isActived").select();
+			
+			//如果点击虚拟根节点
+			if(treeNode.id == 2){
+				$("#detailData").text("下所有人员");
+				$("#deptCheckbox").attr("checked",true);
+				$("#deptCheckbox").attr("disabled",true);
+				
+				postJson={};
+				postJson['flagInt']=3;
+				oldPostJson = postJson;
+				jQuery.post('getUserPageList.html',
+        					postJson,
+        					function(html){
+    							$("#deptGrid").html(html).find('table').table();
+    			    			$("#total").text($("#totalAmount").val());
+        				});
+			}else{
+    			$("#deptCheckbox").attr("disabled",false);
+     			document.getElementById("deptCheckbox").checked = false;
+     			$("#detailData").text("下直属人员");
+				
+				postJson={};
+				postJson['deptId']=treeNode.id;
+				postJson['flagInt']=1;
+				oldPostJson = postJson;
+        		jQuery.ajax({
+    			    type:"post",
+    			    url:"getUserPageList.html", 
+    			    data:postJson,
+    			    success:function(html){
+    			    	$("#deptGrid").html(html).find('table').table();
+    			    	$("#total").text($("#totalAmount").val());
+    			    }
+    			});
+    		}
+		}
+		//组装数据
+		function getQueryJson(){
+    		postJson['deptUserBean.account']=jQuery.trim($('#account').val());
+			postJson['deptUserBean.userName']=jQuery.trim($('#userName').val());
+			postJson['deptUserBean.isActived']=jQuery.trim($('#isActived').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+		
+		//刷新
+		function refreshForm(){
+			filterPageForm_submit();
+		}
+		//模糊查询搜索用户
+		function postUserQuery(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+			var node = treeObj.getSelectedNodes()[0];
+			var name=node.name;
+			var deptId=node.id;
+			$("#deptId").val(deptId);
+    		$("#dName").text(name);
+			if(deptId == 2){//虚拟根节点
+			
+				$("#detailData").text("下所有人员");
+				$("#deptCheckbox").attr("checked",true);
+				$("#deptCheckbox").attr("disabled",true);
+				
+				postJson={};
+				postJson=getQueryJson();
+				postJson['flagInt']=4;
+				oldPostJson = postJson;
+				
+				jQuery.post('getUserPageList.html',
+        						postJson,
+        				function(html){
+							$("#deptGrid").html(html).find('table').table();
+			    			$("#total").text($("#totalAmount").val());
+        				});
+			}else{
+				
+    			var check = document.getElementById("deptCheckbox").checked;
+    			var flag;
+    			if(check){//包含下属
+    				$("#detailData").text("下所有人员");
+    				flag = 1;
+    			}else{//不包含下属
+    				$("#detailData").text("下直属人员");
+    				flag = 0;
+    			}
+				postJson={};
+				postJson=getQueryJson();
+				postJson['flagInt']=2;
+				postJson['deptId']=deptId;
+				postJson['flag']=flag;
+				oldPostJson = postJson;
+    			jQuery.ajax({
+    			    type:"post", 
+    			    url:"getUserPageList.html", 
+    			    data:postJson,
+    			    success:function(html){
+    			    	$("#deptGrid").html(html).find('table').table();
+    			    	$("#total").text($("#totalAmount").val());
+    			    }
+    			});
+			}
+		}
+		//新增取消
+		function addNoStyle(){
+			$("#add").attr("disabled",true);
+			$("#add").css({filter:"gray"});
+			$("#add").css({cursor:"default"});
+		}
+		//新增样式
+		function addStyle(){
+			$("#add").attr("disabled",false);
+			$("#add").css({filter:""});
+			$("#add").css({cursor:"hand"});
+		}
+		//删除取消
+		function delNoStyle(){
+			$("#del").attr("disabled",true);
+			$("#del").css({filter:"gray"});
+			$("#del").css({cursor:"default"});
+		}
+		//删除样式
+		function delStyle(){
+			$("#del").attr("disabled",false);
+    		$("#del").css({filter:""});
+    		$("#del").css({cursor:"hand"});
+		}
+		
+		//编辑取消
+		function ediNoStyle(){
+			$("#edi").attr("disabled",true);
+			$("#edi").css({filter:"gray"});
+			$("#edi").css({cursor:"default"});
+		}
+		//编辑样式
+		function ediStyle(){
+			$("#edi").attr("disabled",false);
+			$("#edi").css({filter:""});
+			$("#edi").css({cursor:"hand"});
+		}
+		//上移取消
+		function upNoStyle(){
+			$("#up").attr("disabled",true);
+			$("#up").css({filter:"gray"});
+			$("#up").css({cursor:"default"});
+		}
+		//上移样式
+		function upStyle(){
+			$("#up").attr("disabled",false);
+			$("#up").css({filter:""});
+			$("#up").css({cursor:"hand"});
+		}
+		//下移取消
+		function downNoStyle(){
+			$("#down").attr("disabled",true);
+			$("#down").css({filter:"gray"});
+			$("#down").css({cursor:"default"});
+		}
+		//下移样式
+		function downStyle(){
+			$("#down").attr("disabled",false);
+			$("#down").css({filter:""});
+			$("#down").css({cursor:"hand"});
+		}
+		//树加载完成后初始化按钮图标样式
+		function changeActive(flag){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+        	var nodes = treeObj.getSelectedNodes();
+			var allNodes = treeObj.getNodes();
+			var rootId = allNodes[0].id;
+        	var n=nodes[0];
+        	var deptName = "";
+        	var deptId="";
+        	if(n){
+        		deptName=n.name;
+        		deptId=n.id;
+        	}
+			
+        	if(deptName == "您管理的机构") {//虚拟节点
+				$('#userAdd').hide();
+				delNoStyle();
+				ediNoStyle();
+				upNoStyle();
+				downNoStyle();
+			}else{
+				addStyle();
+				if(deptId == rootId){//根节点
+    				delNoStyle();
+					upNoStyle();
+					downNoStyle();
+    			}else{
+					delStyle();
+					var parentNode = n.getParentNode();
+					if(parentNode.name=="您管理的机构"){
+						upNoStyle();
+						downNoStyle();
+						delNoStyle();
+					}else{
+    					var pnodes = parentNode.children;
+    					if(deptId == pnodes[0].id){//第一个节点
+    						upNoStyle();
+    					}else{
+    						upStyle();
+    					}
+    					if(deptId == pnodes[pnodes.length-1].id){//最后一个节点
+    						downNoStyle();
+    					}else{
+    						downStyle();
+    					}
+					}
+				}
+				ediStyle();
+				
+				if(flag==2)  insertDept(deptId,deptName);
+				if(flag==3)  upMovingDept(nodes,treeObj);
+				if(flag==4)  downMovingDept(nodes,treeObj);
+				if(flag==5)  deleteDept(deptId,nodes);
+				if(flag==6)  updateDept(deptId,rootId);
+			}
+		
+		}
+		
+	//新增机构
+	function insertDept(deptId,deptName){
+		var url="deptInsertForm.html?deptParentName="+encodeURI(encodeURI(deptName))+"&deptId="+deptId+"&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,"新增机构",600,400);
+		if(result==1){
+			window.location.reload();
+		}
+	}
+	
+	 //编辑机构
+	 function updateDept(deptId,rootId){ 
+	 	var url="deptUpdateForm.html?deptId="+deptId+"&rootId="+rootId+"&random="+Math.random()*10000;
+	 	var result=banger.page.openDialog(url,"编辑机构",600,400);
+	 	if(result==1){
+			window.location.reload();
+		}
+	 }
+	
+	 //删除机构
+	 function deleteDept(deptId,nodes){
+	 	var n=nodes[0];
+		var str = "您确定要删除“"+n.name+"(包含下属机构)”吗?";
+	 	var result = confirm(str);
+		if(result){
+			jQuery.post('deleteDept.html',
+					{'deptId':deptId},
+			function(data){
+				if(data!=""){
+					banger.page.showMessageBox(data);
+				}else{
+					document.location.href="showDeptList.html?random="+Math.random()*100000;
+				}
+			});
+		}
+	 }
+	 //上移部门
+	 function upMovingDept(nodes,treeObj){
+	 	var node = nodes[0];
+		if(node.pId){
+			var parentNode = node.getParentNode();
+    		var nodes = parentNode.children;
+    		if(node.id != nodes[0].id){
+    			var prevNode = node.getPreNode();
+    			treeObj.moveNode(prevNode, node, "prev");
+        		var deptId = node.id;
+        		jQuery.post('upMovingDept.html',
+        						{'deptId':deptId},
+        				function(data){
+							changeActive(0);
+        				});
+    		}
+		}
+	 }
+	 //下移部门
+	 function downMovingDept(nodes,treeObj){
+		var node = nodes[0];
+		if(node.pId){
+    		var parentNode = node.getParentNode();
+    		var nodes = parentNode.children;
+    		if(node.id != nodes[nodes.length-1].id){
+    			var nextNode = node.getNextNode();
+    			treeObj.moveNode(nextNode, node, "next");
+        		var deptId = node.id;
+        		jQuery.post('downMovingDept.html',
+        						{'deptId':deptId},
+        				function(data){
+							changeActive(0);
+        				});
+    		}
+		}
+	 }
+	 
+	 function getDeptInfo(){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+		var nodes = treeObj.getSelectedNodes();
+		var n=nodes[0];
+		var deptName = "";
+		var deptId="";
+		if(n){
+			deptName=n.name;
+			deptId=n.id;
+		}
+		return deptName+","+deptId;
+	 }
+	 
+	 //新增用户
+	 function addSysUser(){
+    	 	var str=getDeptInfo();
+	 		window.top.tempDeptName = str;
+	 
+			var url="../user/toAddSysUserPage.html?random="+Math.random()*10000;
+		
+			tab.add({id: "user_add", pid: GetId(), title: "新建用户", url: url, lock: false});
+	}
+	
+	//启用，禁用用户
+	function actived(userId,state,obj){
+		var account=$(obj).parent().parent().find("label[name='account']").text();
+			if(state==0){
+				if(confirm("您确定要停用“"+account+"”吗？停用后，用户将不能登录系统")){
+						jQuery.ajax({
+            			    type:"post", 
+            			    url:"../user/checkUserActived.html",
+            			    data:{ 
+            			  		userId:userId
+            			    },
+            			    success:function(data,textStatus){
+								refreshForm();
+            			    }
+            			});
+				}
+			}else{
+				if(confirm("您确定要启用“"+account+"”吗？启用后，用户可正常登录系统")){
+						jQuery.post('../user/checkUserActived.html',{
+                			'userId':userId
+                		},function(data){
+                			refreshForm();
+                		});	
+				}
+			}
+		}
+		//根据ID删除用户
+		function delSysUserById(userId,obj){
+			var account=$(obj).parent().parent().find("label[name='account']").text();
+    		if(confirm("您确定要彻底删除用户“"+account+"”吗？")){
+				jQuery.ajax({
+    			    type:"post", 
+    			    url:"../user/delSysUserById.html",
+    			    data:{ 
+    			  		userId:userId
+    			    },
+    			    success:function(data,textStatus){
+						refreshForm();
+    			    }
+    			});
+    		}
+    	}
+		//复选框选中和取消
+		function selectAll(obj){   
+          var mm=document.getElementsByName("userIds");
+		  	for(var i=0;i<mm.length;i++){
+    			if(obj.checked==true){
+					mm[i].checked=true;
+    			}else{
+					mm[i].checked=false;
+				}
+				if(mm[i].disabled==true){
+					mm[i].checked=false;
+				}
+    		}
+        }   
+
+		//删除全部
+		function deleteAll(){
+			var mm=document.getElementsByName("userIds");
+    		var checkFlag=false;
+			var chestr="";
+    		for(var i=0;i<mm.length;i++){
+    			if(mm[i].checked==true){
+    				checkFlag=true;
+					chestr+=mm[i].value+",";
+    			}
+    		}
+			if(checkFlag==false){
+				banger.page.showMessageBox("请选择你要删除的用户!");
+				return ;
+			}
+			if(confirm("您确定要删除所选定的用户吗？")){
+    			jQuery.post('../user/delSysUserList.html',{
+    				'userIds':chestr
+    			},function(data){
+    				refreshForm();
+    			});
+			}
+		}
+		
+		//重置用户密码
+		function resetPassWord(userId,obj){
+			var account=$(obj).parent().parent().find("label[name='account']").text();
+    		if(confirm("您确认要重置 “"+account+"”的密码吗？")){
+				jQuery.ajax({
+    			    type:"post", 
+    			    url:"../user/userPwdConfirm.html",
+    			    data:{ 
+    			  		userId:userId
+    			    },
+    			    success:function(data,textStatus){
+						banger.page.showMessageBox({"type":"success","content":"密码重置成功"});
+    			    }
+    			});
+    		}
+    	}
+		
+		
+		//编辑用户
+		function update(userId,obj){
+			var userName=$(obj).parent().parent().find("label[name='userName']").text();
+			var url="../user/toUpdateSysUserPage.html?userId="+userId+"&random="+Math.random()*10000;
+			tab.add({id: "user_update"+userId, pid: GetId(), title: "编辑用户-"+userName, url: url, lock: false});
+		}
+		
+		function tabAdd(){
+        	tab.add({id: "user_pass", pid: GetId(), title: "修改密码", url: "../user/userPwdUpdatePage.html?random="+Math.random(), lock: false});
+        }
+		//查看用户
+		function detail(userId,obj){
+			var userName=$(obj).parent().parent().find("label[name='userName']").text();
+			var url="../user/toDetailSysUserPage.html?userId="+userId+"&random="+Math.random()*10000;
+			tab.add({id: "user_detail"+userId, pid: GetId(), title: "用户详情-"+userName, url: url, lock: false});
+		}
+
+	</script>
+</head>
+ 
+<body>
+	<div class="Agency-left">
+    	<h4>
+        	<label>组织机构</label>
+            <p>
+				<input id="deptId" type="hidden" name="deptId" />
+                <a href="javascript:void(0);" class="edi-add" id="add" onclick="changeActive(2)">add</a>
+                <a href="javascript:void(0);" class="edi-up" id="up" onclick="changeActive(3)">up</a>
+                <a href="javascript:void(0);" class="edi-down" id="down" onclick="changeActive(4)">down</a>
+                <a href="javascript:void(0);" class="edi-del" id="del" onclick="changeActive(5)">del</a>
+                <a href="javascript:void(0);" class="edi-edi" id="edi" onclick="changeActive(6)">edi</a>
+            </p>
+        </h4>
+        <div class="Agency-tree">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+    </div>
+    <div class="Agency-right">
+		<form name="deptList" id="deptList" style="width: 100%;">
+			<table class="htmltbl" cellpadding="0" cellspacing="0" width="100%">
+            	<tbody>
+                	<tr>
+                        <td width="6%" class="field" style="text-align: left;">
+                        	<label>用户名:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt1">
+								<input type="text" id="account" name="deptUserBean.account" class="dtxt1-txt" maxLength="20" />
+							</div>
+                        </td>
+                        <td width="6%" class="field" style="text-align: left;">
+                        	<label>姓名:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt1">
+								<input type="text" id="userName" name="deptUserBean.userName" class="dtxt1-txt" maxLength="20" />
+							</div>
+                        </td>
+						 <td width="6%" class="field" style="text-align: left;">
+                        	<label>状态:</label>
+                        </td>
+                        <td width="20%">
+                        	<select id="isActived" name="deptUserBean.isActived" render="select">
+                              <option value=""></option>
+            				  <option value="1">启用</option>
+        					  <option value="0">停用</option>
+							</select>
+                        </td>
+                        <td class="field" style="text-align: left;">
+                        	<input type="checkbox" id="deptCheckbox" class="chk" />
+                            <label for="chk-include">包含下属机构</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+	     </form>
+    		 <p  class="sz" style="clear: none;">
+            	<span class="fl bold">
+					<label>[<span id="dName">$!deptName</span>]</label>
+                    <span id="detailData">下直属人员</span>
+                    <span>(<label id="total" class="dgreen">$!totalAmount</label>)</span>
+				</span>
+                <input type="button" value="清 空" onclick="qingkong()" class="btn1" />
+                <input type="button" value="搜 索" onclick="postUserQuery()" class="btn1" />
+    		</p>
+		
+            <div class="actrow" style="margin-top: 20px;" >
+    	    	<a href="javascript:void(0);" class="btn2 fl add"  id="userAdd" onclick="addSysUser();">
+    	            <label class="btn2-txt">新 建</label>
+    	        </a>
+    	    	<a href="javascript:void(0);" class="btn2 fl" style="margin-left: -1px;"  onclick="deleteAll();">
+    	            <label class="btn2-txt">删 除</label>
+    	        </a>
+    	    	<a href="javascript:void(0);" class="btn2 fr" onclick="refreshForm()">
+    	            <label class="btn2-txt">刷 新</label>
+    	        </a>
+    	    </div>
+    	   <div id="deptGrid">
+			#parse("/velocity/dept/deptUserList.vm")
+           </div>
+    </div>
+</body>
+</html>

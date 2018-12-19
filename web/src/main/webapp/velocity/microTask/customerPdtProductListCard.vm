@@ -1,0 +1,96 @@
+<script type="text/javascript" src="../js/system/b.base.js"></script>
+<script type="text/javascript" src="../js/controls/jquery.select-v1.0.js"></script>
+#scriptLink("page")
+
+<script type="text/javascript">
+    $(function(){
+        $('table.datatbl').table();
+        getQueryJson();
+    });
+
+    var oldPostJson = {};
+
+    function getQueryJson(){
+        var customerId = $!customerId;
+        var postJson = {};
+        postJson['customerId']=customerId;
+        oldPostJson = postJson;
+        return postJson;
+    }
+
+    function addPdtProductCustomer(){
+        var customerId = $!customerId;
+        var url = "../pdtProductCustomer/addPdtProductCusCardPage.html?customerId="+customerId+"&random="+Math.random()*10000;
+        //var result=window.showModalDialog(url, '添加意向', 'dialogWidth=600px;dialogHeight=400px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+        var result=banger.page.openDialog(url,"添加意向",600,400);
+        if(result){
+            jQuery.ajax({
+                type:'POST',
+                url:"../tskSchedule/queryCustomerPdtProduct.html?RandNum="+Math.random(),
+                data:getQueryJson(),
+                success:function(html){
+                    queryBackPdt(html, 'pdtDataList');
+                }
+            });
+        }
+    }
+
+    //分页跳转
+    function gotoPageCustomerPdt(page){
+        if(getQueryJson()){
+            gotoCustomerPdt(
+                    page,
+                    "../tskSchedule/queryCustomerPdtProduct.html?RandNum="+ Math.random()*10000,
+                    getQueryJson(),
+                    function(html){
+                        queryBackPdt(html, 'pdtDataList');
+                    });
+        }
+    }
+
+    function queryBackPdt(html, gridId){
+        $("#"+gridId).html(html);
+        $('table.datatbl').table();
+        var total = $('#pdtRecordCount').val();
+        if(total!=null){
+            $("#cusPdtRecordCount").text(total);
+        }else {
+            $("#cusPdtRecordCount").text(0);
+        }
+    }
+
+    function refreshPdt(){
+        var customerId = $!customerId;
+        if(getQueryJson()){
+            gotoCustomerPdt(
+                    null,
+                    "../tskSchedule/queryCustomerPdtProduct.html?RandNum="+Math.random(),
+                    getQueryJson(),
+                    function(html){
+                        queryBackPdt(html, 'pdtDataList');
+                    });
+        }
+    }
+
+</script>
+<input type="hidden" id="customerId" value="$!customerId"/>
+<div class="sz">
+        <span class="bold fl">
+            客户意向(<label class="green" id="cusPdtRecordCount">$!recordCount</label>)
+        </span>
+</div>
+<div class="actrow" style="clear:both;">
+	#if($urlPermitUtil.hasPermission('pdtAddCustomer'))
+    #if($!hasPermission)
+        <span class="ui-span-btn fl" id="btnAddPdtProductCustomer" onclick="addPdtProductCustomer();">
+            <label>添加意向</label>
+        </span>
+    #end
+    #end
+    <span class="ui-span-btn fr">
+        <label onclick="refreshPdt();" id="btnRefresh">刷新</label>
+    </span>
+</div>
+<table class="datatbl" id="pdtDataList">
+    #parse("/velocity/microTask/customerPdtProductListTableCard.vm")
+</table>

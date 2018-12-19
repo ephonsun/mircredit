@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="sysparam" extends="default" namespace="/param" >
+	
+		 <!--  流量控制查看 -->
+		<action name="showFlowControlPage" class="sysParamAction" method="showFlowControlPage">
+			<result name="success">/velocity/flow/flow.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		 <!--  流量控制设置 -->
+		<action name="updateFlowParam" class="sysParamAction" method="updateFlowParam">
+			<result name="success" type="redirect-action">showFlowControlPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	   
+	  	<!-- 查询录音设置信息 -->
+	  	<action name="queryRecordSysParam" class="sysParamAction" method="queryRecordSysParam">
+	  		<result name="success" >/velocity/record/recordSet.vm</result>
+			<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	  	<!-- 修改录音设置信息 -->
+	  	<action name="updateRecordSet" class="sysParamAction" method="updateRecordSysParam">
+	  		<result name="success" type="redirect-action">queryRecordSysParam</result>
+	  		<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	  	<!-- 验证路径 -->
+	  	<action name="isValidPath" class="sysParamAction" method="isValidPath"></action>
+	  	
+        <!-- 上传录音提示音 -->
+        <action name="uploadPromptTone" class="uploadFileAction">
+        	<result name="success" type="redirect-action">queryRecordSysParam</result>
+        	<result name="error">/velocity/error.vm</result>
+        </action>
+	</package>
+
+</struts>

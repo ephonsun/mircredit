@@ -1,0 +1,74 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>关联客户</title>
+	<base target="_self" />
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+	 function sub(){
+		jQuery.post("relationPhone.html", {"recordId":$('#recordId').val(), "customerId": $('#customerId').val(),"newPhone":$('#newPhone').val(),"phoneNum":$('input:[name=\'phoneNum\']:checked').val(),"customerName":$('#customerName').val()}, function(){
+			window.close(); 
+    	});
+	 }
+    </script>
+</head>
+ 
+<body style="padding-bottom: 0;">
+	<form>
+    	<table class="viewtbl" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td>“$!baseCrmCustomer.customerName”客户无此联系号码，是否替换现有号码并关联通话记录？</td>
+                </tr>
+				<tr>
+                    <td>
+						<input type="hidden" id="newPhone" value="$!phone"/>
+						<input type="hidden" id="customerId" value="$!baseCrmCustomer.customerId"/>
+						<input type="hidden" id="recordId" value="$!recordId"/>
+						<input type="hidden" id="customerName" value="$!baseCrmCustomer.customerName"/>
+						#if($!phoneType==1)
+    						<input type="radio" class="rdo" id="mobilePhone1" name="phoneNum" value="1" checked="checked" />
+    						<label>手机1：$!baseCrmCustomer.mobilePhone1 </label>
+						#elseif($!phoneType==2)
+							<input type="radio" class="rdo" id="phone" name="phoneNum" value="3" checked="checked"/>
+    						<label>固话：$!baseCrmCustomer.phone </label>
+						#end
+					</td>
+                </tr>
+				<tr>
+					<td>
+						#if($!phoneType==1)
+    						<input type="radio" class="rdo" id="mobilePhone2" name="phoneNum" value="2" />
+    						<label>手机2：$!baseCrmCustomer.mobilePhone2 </label>
+						#elseif($!phoneType==2)
+							<input type="radio" class="rdo" id="fax" name="phoneNum" value="4"/>
+    						<label>传真：$!baseCrmCustomer.fax </label>
+						#end
+					</td>
+                </tr>
+            </tbody>
+        </table>
+		
+        <hr />
+		
+        <div class="halign">
+            <input type="button" class="btn6 btn6bg1" value="替换" onclick="sub();"/>
+            <input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close();"/>
+        </div>
+    </form>
+</body>
+</html>
+

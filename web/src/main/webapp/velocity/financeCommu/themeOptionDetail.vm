@@ -1,0 +1,82 @@
+<div class="pc">
+    <table cellpadding="0" cellspacing="0">
+    <tbody>
+    <tr>
+    	<td class="pp">
+    		<div class="postMessage">
+    			<div class="threadtitle">
+    				<p class="threadcontent">$!theme.themeContent</p>
+    			</div>
+    			<div class="pollChart" style="margin-bottom:15px; width:100%;">
+    				<table class="votoOption" cellpadding="0" cellspacing="0">
+    					<thead>
+    						<tr>
+    							<th class="pollinfo">
+    								<strong>投票:</strong>
+    								<span>$!theme.themeTitle</span>
+    							</th>
+    							<th class="pollTimer">
+									#if($!expriteDate != "")
+        								<label>截止时间:</label>
+        								<label>$!expriteDate </label>
+									#end
+    							</th>
+    						</tr>
+    					</thead>
+    					<tbody>
+    						#if($!theme.selectOptionCount > 1) 
+    							#set($optionInput="checkbox") 
+    						#else
+    							#set($optionInput="radio") 
+    						#end
+    						#foreach($option in $!optionList)
+    						<tr>
+    							<td class="pollOption">
+    								<input type="$optionInput" value="$!option.optionId" class="radio" name="optionInput" id="$!option.optionId" />
+    								<label for="$!option.optionId">$velocityCount.&nbsp;&nbsp;&nbsp;&nbsp;$!option.optionContent</label>
+    							</td>
+    							<td class="optionvotes"></td>
+    						</tr>
+    						<tr>
+    							#if($!isUserVote > 0 && $!theme.showOptionResult ==1)
+    							<td class="optionvessel">
+    								<div class="optionbg">
+    									<div class="polloptionbar" style="width:$!option.percent%;"></div>
+    								</div>
+    							</td>
+    							<td class="optionvotes">
+    								<em class="pollvote">
+    									<label>$!option.selectOptionCount</label>
+    									<label>票/</label>
+    									<label>$!option.percent%</label>
+    								</em>
+    							</td>
+    							#end
+    						</tr>
+    						#end														
+    					</tbody>
+    				</table>
+    				<div class="specialmsg">
+						#if($!countDays > 0 && $!isUserVote == 0)
+    					<span class="ui-footer-btn2 ui-footer-btn2-continue"  onclick="vote('$!theme.selectOptionCount')">
+    						<label >马上投票</label>
+    					</span>
+						 #else
+							<span class="ui-footer-btn2 ui-footer-btn2-continue">
+    						<label>提示:您已经投过票或者投票已经过期</label> 
+    					</span>
+						#end	
+    					#if($!theme.showOptionUser ==1)
+    					<p style="margin-top:5px;">
+    						<label class="ui-link-btn" title="" onclick="showVoteUserPage($!theme.themeId)">查看投票用户名单>></label>
+    					</p>
+    					#end
+    				</div>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+    </table>
+</div>
+

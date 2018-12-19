@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="product" extends="default" namespace="/product" >
+	 <!--  所有产品列表页面 -->
+	<action name="getProductListPage" class="productAction" method="getProductListPage">
+		<result name="success">/velocity/product/productList.vm</result>
+		<result name="toPage">/velocity/product/productListTabel.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 新建理财产品 -->
+	<action name="openSaveProduct" class="productAction" method="openSaveProduct">
+		<result name="success">/velocity/product/productAdd.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 新建产品验证产品编号和名称唯一 -->
+	<action name="isExistProduct" class="productAction" method="isExistProduct"></action>
+	
+	<!-- 保存理财产品 -->
+	<action name="saveProduct" class="productAction" method="saveProduct">
+		<result name="toadd" type="redirect">/product/openSaveProduct.html</result>
+		<result name="success">/velocity/tskTask/succ.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 删除产品 -->
+	<action name="deleteProduct" class="productAction" method="deleteProduct">
+		<result name="success" type="redirect">/product/getProductListPage.html?expireType=${expireType}</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 根据id查看产品详情 -->
+	<action name="queryProductById" class="productAction" method="queryProductById">
+		<result name="success">/velocity/product/productDetail.vm</result>
+		<result name="toPage">/velocity/product/productDetailTable.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 跳转编辑页面 -->
+	<action name="openUpdateProduct" class="productAction" method="openUpdateProduct">
+		<result name="success">/velocity/product/productUpdate.vm</result>
+		<result name="toPage">/velocity/product/productUpdateTable.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 修改理财产品 -->
+	<action name="updateProduct" class="productAction" method="updateProduct">
+		<result name="success" type="redirect">/product/getProductListPage.html</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 删除客户购买产品记录 -->
+	<action name="deleteBuyCustomer" class="productAction" method="deleteBuyCustomer">
+		<result name="success" type="redirect">/product/openUpdateProduct.html?productId=${productId}</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 查询是否有购买记录或营销任务 -->
+	<action name="queryProductRelated" class="productAction" method="queryProductRelated"></action>
+	
+	<!-- 添加产品购买记录 -->
+	<action name="toAdd" class="productAction" method="toAdd">
+		<result name="success">/velocity/product/BuyProductAdd.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 搜索客户信息 -->
+	<action name="initFindCustomerByNo" class="productAction" method="initFindCustomerByNo"></action>
+	
+	<!-- 搜索所有营销人员 -->
+	<action name="findUserByAccount" class="productAction" method="findUserByAccount"></action>
+	
+	<!-- 判断购买日期是否大于当前日期 -->
+	<action name="isDateMoreNow" class="productAction" method="isDateMoreNow"></action>
+	
+	<!-- 添加购买产品的客户 -->
+	<action name="addBuyProduct" class="productAction" method="addBuyProduct">
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 根据产品购买信息查找是否存在(包含删除)  -->
+	<action name="queryBuyCustomerByAll" class="productAction" method="queryBuyCustomerByAll"></action>
+	
+	<!-- 跳转未处理客户页面 -->
+	<action name="isDealCustomer" class="productAction" method="isDealCustomer">
+		<result name="success">/velocity/product/NotDealCustomer.vm</result>
+		<result name="toPage">/velocity/product/NotDealCustomerTable.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 处理客户 -->
+	<action name="dealCustomer" class="productAction" method="dealCustomer">
+		<result name="success" type="redirect">/product/isDealCustomer.html?productId=${productId}&amp;dealType=${dealType}&amp;isSal=${isSal}</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 获取树形机构json -->
+	<action name="showDeptNameList" class="productAction" method="showDeptNameList"></action>
+	
+	<!-- 根据树节点查询user -->
+	<action name="getDeptUserListPage" class="productAction" method="showUserByDept"></action>
+	
+	<!-- 查询一周内到期的理财产品 -->
+	<action name="getWorkBenchProduct" class="productAction" method="getWorkBenchProduct">
+		<result name="success">/velocity/login/productWB.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	<!-- 查询一周内所有的到期的理财产品 -->
+	<action name="queryWeekProduct" class="productAction" method="queryWeekProduct">
+		<result name="success">/velocity/login/productMore.vm</result>
+		<result name="error">/velocity/error.vm</result>
+	</action>
+	
+	<!-- 返回客户对应的购买产品信息 -->
+    <action name="getCustomerBuyProduct" class="productAction" method="getCustomerBuyProduct">
+     	<result name="success">/velocity/customer/cusProductCard.vm</result>
+	<result name="error">/velocity/error.vm</result>
+    </action>
+    
+    <!-- 柜台人员机构树 -->
+    <action name="getCusBelongToJson" class="productAction" method="getCusBelongToJson"></action>
+	</package>
+</struts>

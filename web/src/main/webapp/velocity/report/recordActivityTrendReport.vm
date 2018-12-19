@@ -1,0 +1,752 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>活动量趋势统计报表</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop64.exe"></embed>
+	</object> 
+
+<style media=print> 
+.Noprint{display:none;} 
+.PageNext{page-break-after: always;} 
+</style> 
+
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000; 
+    border-style: solid; 
+    border-top-width: 2px; 
+    border-right-width: 2px; 
+    border-bottom-width: 1px; 
+    border-left-width: 1px; 
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+
+</style> 
+<script>
+var oldJson;
+jQuery(document).ready(function(){
+	$("#query").click(function(){
+		queryReport();
+	});
+	$("#export").click(function(){
+		exportReport();
+	});
+	$("#print").click(function(){
+		openPrintPage();
+	});
+	
+	$("#yearBegin").val('$!condition.yearBegin');
+	$("#yearEnd").val('$!condition.yearEnd');
+	$("#monthBegin").val('$!condition.monthBegin');
+	$("#monthEnd").val('$!condition.monthEnd');
+	$("#quarterBegin").val('$!condition.quarterBegin');
+	$("#quarterEnd").val('$!condition.quarterEnd');
+	
+	$(":radio").click(function(){
+		switch(jQuery(this).attr("id")){
+			case "rdoMonth":
+				jQuery("div[rel='month']").show().next().hide();
+				break;
+			case "rdoQuarter":
+				jQuery("div[rel='quarter']").show().prev().hide();
+				break;
+			case "rdoYear":
+				jQuery("div[rel='month'], div[rel='quarter']").hide()
+				break;
+			case "rdo1":
+			case "rdo2":
+			case "rdo3":
+				changeReportType(jQuery('#'+jQuery(this).attr('id')).val());
+				break;
+		}
+	});
+	
+	$("#belongTo").change(function(){
+		changeBelongTo($(this).val());
+	});
+			
+	//表
+	$('#userList').atree({
+		setting: {
+			view: {
+				showIcon: true,
+				dblClickExpand: false
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			callback: {
+				beforeClick: null,
+				onClick: null,
+				beforeCheck: null,
+				onCheck: onCheck
+			}
+		},
+		url: function(){return "../customer/getCusBelongToJson.html?BelongToType=brUser&random="+Math.random()*1000000;},
+		beforeClick: beforeClickUser,
+		okHandler: onClickUser
+	});
+  	$("#deptList").atree({
+		url: function(){return "../customer/getCusBelongToJson.html?BelongToType=brDept&random="+Math.random()*1000000;},
+		okHandler: onClickDept
+	});
+	
+	changeBelongTo('my');
+	changeReportType('rtGrid');
+	
+	$("select[render='sel']").each(function(){
+		$(this).select();
+	});
+	jQuery('#form1').validator();
+});
+//树 下属的
+function onCheck(e, treeId, treeNode){
+	var zTree = jQuery.fn.zTree.getZTreeObj(treeId), p = treeNode.getParentNode();
+	
+	if(p != null){
+		var child = p.children, n = 0;
+		for(var i=0; i<child.length; i++){
+			if(child[i].checked){
+				n++;
+			}
+		}
+		if(n == child.length){
+			zTree.checkNode(p, true, null, null);
+		}
+		else{
+			zTree.checkNode(p, false, null, null);
+		}
+	}
+}
+	
+//点击之前User
+function beforeClickUser(treeId, treeNode){
+	if(treeNode.flag == 'D') return false;
+}
+//点击User
+function onClickUser(treeId){
+	var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+	var nodes = treeObj.getSelectedNodes();
+	if(!nodes[0]){
+		return;
+	}
+	$('#userIds').val(nodes[0].id);
+	$('#userNames').val(nodes[0].name);
+}
+//点击Dept
+function onClickDept(treeId){
+	var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+	var nodes = treeObj.getSelectedNodes();
+	if(!nodes[0]){
+		return;
+	}
+	$('#deptIds').val(nodes[0].id);
+	$('#deptNames').val(nodes[0].name);
+}
+
+function changeReportType(type){
+	$('#reportType').val(type);
+	if(oldJson){
+		queryReport();
+	}
+}
+
+//查询报表
+function queryReport()
+{
+	var bool = jQuery.validator({ form: 'form1', extend: false});
+	if(!bool){
+		return;
+	}
+	$("#reportBody").html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待...</div></div>');
+	var json = getConditionJson();
+	jQuery.post("showRecordActivityTrendReport.html?random="+Math.random()*1000000,json,
+		function(html){
+		 refreshReport(html);
+	});
+}
+
+function refreshReport(html)
+{
+	var elem = $(html);
+	var grid = $("#reportBody");
+	grid[0].innerHTML="";
+	grid.append(elem);
+}
+
+function showDetail(id,dateBegin,dateEnd,name,title,type)
+{
+	var idType = $("#idType").val();
+	var userId="";
+	var deptId="";
+	if(idType=="dept")deptId=id;
+	else userId=id;
+	var url = "showRecordActivityReportDetail.html?detail.userId="+userId+"&detail.deptId="+deptId+"&detail.dateBegin="+dateBegin+"&detail.dateEnd="+dateEnd+"&detail.dateType=ym&detail.callType="+type+"&detail.name="+encodeURI(encodeURI(name))+"&detail.title="+encodeURI(encodeURI(title));
+	var key = id+dateBegin+dateEnd;
+	tab.add({"id":"showRecordDetail"+key,"pid":GetId(),"title":"活动量趋势统计明细","url":url,"lock":false});
+}
+
+function getConditionJson()
+{
+	var json = getPostJson();
+	var belongTo = $("#belongTo").val();
+	switch(belongTo)
+	{
+		case "my":
+			json["condition.userIds"]=$("#myUserId").val();
+			json["condition.text"]='$!userName';
+			break;
+		case "sub":
+			json["condition.userIds"]=$("#userIds").val();
+			json["condition.text"]=$("#userNames").val();
+			break;
+		case "dept":
+			json["condition.deptIds"]=$("#deptIds").val();
+			json["condition.text"]=$("#deptNames").val();
+			json["condition.containSub"]='0';
+			break;
+	}
+	json["reportType"] = $('#reportType').val();
+	oldJson = json;
+	return json;
+}
+
+function exportReport(html)
+{
+	var type = $('#reportType').val();
+	switch(type){
+		case "rtGrid":
+			var json = oldJson;
+			if(!json){
+				banger.page.showMessageBox("没有可导出的数据！");
+				return;
+			}
+			var params = "";
+			var value = "";
+			for(var nm in json)
+			{
+				if(nm=='condition.text'){
+					value = encodeURI(encodeURI(json[nm]));
+				}else{
+					value = json[nm];
+				}
+				params +="&"+nm+"="+value;
+			}
+			location.href="exportRecordActivityTrendReport.html?random="+Math.random()*1000000+params;
+			break;
+		case "rtLine":
+			var json = oldJson;
+			if(!json){
+				banger.page.showMessageBox("没有可导出的数据！");
+				return;
+			}
+			var value = "";
+			for(var nm in json)
+			{
+				if(nm=='condition.text'){
+					value = json[nm];
+				}
+			}
+			chart.exportChart({filename:"活动量趋势曲线图("+value+")",type:"image/jpeg"});
+			break;
+		case "rtColumn": 
+			var json = oldJson;
+			if(!json){
+				banger.page.showMessageBox("没有可导出的数据！");
+				return;
+			}
+			var value = "";
+			for(var nm in json)
+			{
+				if(nm=='condition.text'){
+					value = json[nm];
+				}
+			}
+			chart.exportChart({filename:"活动量趋势柱状图("+value+")",type:"image/jpeg"});
+			break;
+	}
+}
+
+function changeBelongTo(val){
+	switch(val){
+		case "my":
+			$("#my").show();
+			$("#userList, #deptList").hide();
+			break;
+		case "sub":
+			$("#userList").show();
+			$("#my, #deptList").hide();
+			break;
+		case "dept":
+			$("#deptList").show();
+			$("#my, #userList").hide();
+			break;
+		default: break;
+	}
+}
+
+function CheckIsInstall() {	
+	var bool = true;
+	try{
+	     var LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+		if ((LODOP==null)||(typeof(LODOP.VERSION)=="undefined")||(typeof(LODOP.VERSION)=="unknown")) 
+			bool = false;
+	 }catch(err){
+		bool = false;
+	 }
+	 return bool;
+}
+
+function openPrintPage()
+{
+	var json = oldJson;
+	if(!json){
+		banger.page.showMessageBox("没有可打印的数据！");
+		return;
+	}
+	if(CheckIsInstall()){
+		prn1_preview();
+	}else{
+		//动态生成一个div 下载框
+		if (navigator.userAgent.indexOf('Win64')>=0){
+			path = '${ctx}/js/report/install_lodop64.exe';
+		}else{
+			path = '${ctx}/js/report/install_lodop32.exe';
+		}
+		loadPrintActiveX();
+	}
+}
+
+//打印预览支持控件路径
+var path = '';
+
+function loadPrintActiveX(){
+	var installHTML = '<div class=\'ui-model-install\'>'
+				+ '<h4 style=\'\'>请安装安全报表打印控件，已保证打印预览正常使用！</h4>'
+				+ '<p style=\'\'><label>控件安装完成后，请重启浏览器！</label></p>'
+				+ '<div style=\'\'><a href=\'' + path + '\' target=\'_self\'>立即下载</a></div>'
+				+ '</div>';
+	art.dialog({
+		id: 'loadPrintActiveX',
+		title: '安全报表打印控件下载',
+		content: installHTML
+	});
+}
+
+function prn1_preview() {	
+	CreateOneFormPage();	
+	LODOP.PREVIEW();	
+};
+	
+function CreateOneFormPage(){
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	var strStyleCSS="#parse('/velocity/taglibs.vm')"
+		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/base.css' />"
+		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/common.css' />";
+	var strFormHtml=strStyleCSS+"<body>"+document.getElementById("reportBody").innerHTML+"</body>";
+		
+	LODOP.PRINT_INIT("");
+	LODOP.SET_PRINT_PAGESIZE(2,0,0,"A4");
+	
+	var type = $('#reportType').val();
+	switch(type){
+		case "rtGrid":
+			LODOP.ADD_PRINT_HTM(20,0,"100%","100%",strFormHtml);
+			break;
+		case "rtLine":
+		case "rtColumn":
+			LODOP.ADD_PRINT_HTML(20,0,"100%","100%",strFormHtml);
+			break;
+	}
+};	
+
+function printReport()
+{
+	window.document.body.ExecWB(7,1)
+}
+
+/*验证下属和机构是否为空*/
+        	function executeUserFunction(obj){
+				var belongTo=$("#belongTo").val();
+				if(belongTo=="sub"){
+					var text=$("#userNames").val();
+					if(text.length==0){
+						$(obj).attr('tips', '“统计对象下属”必须填写'); return false;
+					}
+				}else if(belongTo=="dept"){
+					var text=$("#deptNames").val();
+					if(text.length==0){
+						$(obj).attr('tips', '“统计对象机构”必须填写'); return false;
+					}
+				}
+				return true;
+			}
+			
+		  /*验证开始年份*/	
+	        function searchStartYearFun(obj){
+	        	$('#ui-select-yearEnd,#ui-select-monthEnd,#ui-select-quarterEnd').removeClass('v-fails');
+				var yb = $("#yearBegin").val();
+	        	var ye = $("#yearEnd").val();
+				var mb = $("#monthBegin").val();
+		        var me = $("#monthEnd").val();
+		        var qb = $("#quarterBegin").val();
+		        var qe = $("#quarterEnd").val();
+				if(ye.length>0&&yb.length>0){
+					if(parseInt(ye)>parseInt(yb)){
+						$('#ui-select-monthBegin').removeClass('v-fails');
+						$('#ui-select-monthEnd').removeClass('v-fails');
+						
+						$('#ui-select-quarterBegin').removeClass('v-fails');
+						$('#ui-select-quarterEnd').removeClass('v-fails');
+					}else if(parseInt(ye)==parseInt(yb)){
+						if(me.length>0&&mb.length>0){
+							if(parseInt(me)<parseInt(mb)){
+								$('#ui-select-monthBegin').removeClass('v-fails');
+								$('#ui-select-monthEnd').addClass('v-fails');
+								$('#ui-select-monthEnd input').attr('tips', '结束月份不能小于开始月份');
+							}else{
+								$('#ui-select-monthBegin').removeClass('v-fails');
+								$('#ui-select-monthEnd').removeClass('v-fails');
+							}
+						}
+						if(qe.length>0&&qb.length>0){
+							if(parseInt(qe)<parseInt(qb)){
+								$('#ui-select-quarterBegin').removeClass('v-fails');
+								$('#ui-select-quarterEnd').addClass('v-fails');
+								$('#ui-select-quarterEnd input').attr('tips', '结束季度不能小于开始季度');
+							}else{
+								$('#ui-select-quarterBegin').removeClass('v-fails');
+								$('#ui-select-quarterEnd').removeClass('v-fails');
+							}
+						}
+					}
+					if(parseInt(ye)<parseInt(yb)){
+						$(obj).attr('tips', '开始年份必须小于结束年份'); return false;
+					}else{
+						$('#yearEnd').removeClass('v-fails');
+						return true;
+					}
+			}else return true;
+		}
+		 /*验证结束年份*/	
+		function searchEndYearFun(obj){
+			$('#ui-select-yearBegin').removeClass('v-fails');
+			var yb = $("#yearBegin").val();
+	        var ye = $("#yearEnd").val();
+	        var mb = $("#monthBegin").val();
+	        var me = $("#monthEnd").val();
+	        var qb = $("#quarterBegin").val();
+	        var qe = $("#quarterEnd").val();
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)>parseInt(yb)){
+					$('#ui-select-monthBegin').removeClass('v-fails');
+					$('#ui-select-monthEnd').removeClass('v-fails');
+					
+					$('#ui-select-quarterBegin').removeClass('v-fails');
+					$('#ui-select-quarterEnd').removeClass('v-fails');
+				}else if(parseInt(ye)==parseInt(yb)){
+					if(me.length>0&&mb.length>0){
+						if(parseInt(me)<parseInt(mb)){
+							$('#ui-select-monthBegin').removeClass('v-fails');
+							$('#ui-select-monthEnd').addClass('v-fails');
+							$('#ui-select-monthEnd input').attr('tips', '结束月份不能小于开始月份');
+						}else{
+							$('#ui-select-monthBegin').removeClass('v-fails');
+							$('#ui-select-monthEnd').removeClass('v-fails');
+						}
+					}
+					if(qe.length>0&&qb.length>0){
+						if(parseInt(qe)<parseInt(qb)){
+							$('#ui-select-quarterBegin').removeClass('v-fails');
+							$('#ui-select-quarterEnd').addClass('v-fails');
+							$('#ui-select-quarterEnd input').attr('tips', '结束季度不能小于开始季度');
+						}else{
+							$('#ui-select-quarterBegin').removeClass('v-fails');
+							$('#ui-select-quarterEnd').removeClass('v-fails');
+						}
+					}
+				}
+				if(parseInt(ye)<parseInt(yb)){
+					$(obj).attr('tips', '结束年份不能小于开始年份'); return false;
+				}else{
+					$('#yearEnd').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+			 /*验证开始月份*/	
+	        function searchStartMonthFun(obj){
+	        	$('#ui-select-monthEnd').removeClass('v-fails');
+	        	var yb = $("#yearBegin").val();
+	      		var ye = $("#yearEnd").val();
+	      		
+				var mb = $("#monthBegin").val();
+	        	var me = $("#monthEnd").val();
+				
+				if(ye.length>0&&yb.length>0){
+					if(parseInt(ye)==parseInt(yb)){
+						if(me.length>0&&mb.length>0){
+							if(parseInt(me)<parseInt(mb)){
+								$(obj).attr('tips', '开始月份必须小于结束月份'); return false;
+							}else{
+								$('#monthBegin,#monthEnd').removeClass('v-fails');
+								return true;
+							}
+						}else return true;
+					}else return true;
+				}else return true;
+			}
+			
+			  /*验证结束月份*/	
+		function searchEndMonthFun(obj){
+			$('#ui-select-monthBegin').removeClass('v-fails');
+			
+			var yb = $("#yearBegin").val();
+	      	var ye = $("#yearEnd").val();
+	      	
+			var mb = $("#monthBegin").val();
+	        var me = $("#monthEnd").val();
+			
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)==parseInt(yb)){
+					if(me.length>0&&mb.length>0){
+						if(parseInt(me)<parseInt(mb)){
+							$(obj).attr('tips', '结束月份不能小于开始月份'); return false;
+						}else{
+							$('#monthBegin,#monthEnd').removeClass('v-fails');
+							return true;
+						}
+					}else return true;
+				}else return true;
+			}else return true;
+		}
+		 
+		  /*验证结束季度*/	
+		function searchBeginQuarterFun(obj){
+			$('#ui-select-quarterEnd').removeClass('v-fails');
+			
+			var yb = $("#yearBegin").val();
+	      	var ye = $("#yearEnd").val();
+	      	
+			var qb = $("#quarterBegin").val();
+	        var qe = $("#quarterEnd").val();
+			
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)==parseInt(yb)){
+					if(qe.length>0&&qb.length>0){
+						if(parseInt(qe)<parseInt(qb)){
+							$(obj).attr('tips', '开始季度必须小于结束季度'); return false;
+						}else{
+							$('#quarterBegin,#quarterEnd').removeClass('v-fails');
+							return true;
+						}
+					}else return true;
+				}else return true;
+			}else return true;
+		} 
+		  /*验证结束季度*/	
+		function searchEndQuarterFun(obj){
+			$('#ui-select-quarterBegin').removeClass('v-fails');
+			
+			var yb = $("#yearBegin").val();
+	      	var ye = $("#yearEnd").val();
+	      	
+			var qb = $("#quarterBegin").val();
+	        var qe = $("#quarterEnd").val();
+			
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)==parseInt(yb)){
+					if(qe.length>0&&qb.length>0){
+						if(parseInt(qe)<parseInt(qb)){
+							$(obj).attr('tips', '结束季度不能小于开始季度'); return false;
+						}else{
+							$('#quarterBegin,#quarterEnd').removeClass('v-fails');
+							return true;
+						}
+					}else return true;
+				}else return true;
+			}else return true;
+		}
+		
+function getDateType()
+{
+	if($("#rdoYear")[0].checked)return "year";
+	else if($("#rdoMonth")[0].checked)return "month";
+	else if($("#rdoQuarter")[0].checked)return "quarter";
+}
+</script>
+</head>
+<body>
+	<form id="form1" method="post">
+		<center class="Noprint" >
+	    <div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">统计对象：</label>
+                <select id="belongTo" name="condition.belongTo" render="sel" style="width: 120px;">
+                    <option value="my">我的</option>
+                    #if($hasBelongTo)
+                    	<option value="sub">下属的</option>
+                    	<option value="dept">机构的</option>
+                    #end
+                </select>
+                <span id="my" class="btn2 fl" style="display: none; margin-left: 5px;">
+                	<input id="myUserId" type="hidden" value="$!userId" />
+                    <label class="btn2-txt">$!userName</label>
+                </span>
+                <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                    <input type="text" id="userNames" fun="executeUserFunction" class="dtxt2-txt" readonly="readonly" />
+                    <input id="userIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+                <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+                    <input type="text" id="deptNames" fun="executeUserFunction" class="dtxt2-txt" readonly="readonly" />
+                    <input id="deptIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">时间类型：</label>
+                <div class="fl" style="padding: 4px 0px;">
+                	<input type="radio" name="condition.dateType" value="month" id="rdoMonth" class="rdo" checked="checked" />
+                    <label for="rdoMonth">按月汇总</label>&nbsp; &nbsp; 
+                    <input type="radio" name="condition.dateType" value="quarter" id="rdoQuarter" class="rdo" />
+                    <label for="rdoQuarter">按季度汇总</label>&nbsp; &nbsp; 
+                    <input type="radio" name="condition.dateType" value="year" id="rdoYear" class="rdo" />
+                    <label for="rdoYear">按年汇总</label>
+                </div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">开始年份：</label>
+                <select id="yearBegin" fun="searchStartYearFun" name="condition.yearBegin" render="sel" style="width: 120px;">
+                    #foreach($y in $years)
+                		#set($ys=$y+"年")
+                    	<option value="$y">$ys</option>
+                    #end
+                </select>
+            </div>
+            <div class="condi-i" rel="month">
+            	<label class="condi-i-field">月份：</label>
+                <select id="monthBegin" fun="searchStartMonthFun" name="condition.monthBegin" render="sel" style="width: 120px;">
+                    <option value="1">1月</option>
+                    <option value="2">2月</option>
+                    <option value="3">3月</option>
+                    <option value="4">4月</option>
+                    <option value="5">5月</option>
+                    <option value="6">6月</option>
+                    <option value="7">7月</option>
+                    <option value="8">8月</option>
+                    <option value="9">9月</option>
+                    <option value="10">10月</option>
+                    <option value="11">11月</option>
+                    <option value="12">12月</option>
+                </select>
+            </div>
+            <div class="condi-i hide" rel="quarter">
+            	<label class="condi-i-field">季度：</label>
+                <select id="quarterBegin" fun="searchBeginQuarterFun" name="condition.quarterBegin" render="sel" style="width: 120px;">
+                    <option value="1">第1季度</option>
+                    <option value="2">第2季度</option>
+                    <option value="3">第3季度</option>
+                    <option value="4">第4季度</option>
+                </select>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">结束年份：</label>
+                <select id="yearEnd" fun="searchEndYearFun" name="condition.yearEnd" render="sel" style="width: 120px;">
+                	#foreach($y in $years)
+                		#set($ys=$y+"年")
+                    	<option value="$y">$ys</option>
+                    #end
+                </select>
+            </div>
+            <div class="condi-i" rel="month">
+            	<label class="condi-i-field">月份：</label>
+                <select id="monthEnd" fun="searchEndMonthFun" name="condition.monthEnd" render="sel" style="width: 120px;">
+                    <option value="1">1月</option>
+                    <option value="2">2月</option>
+                    <option value="3">3月</option>
+                    <option value="4">4月</option>
+                    <option value="5">5月</option>
+                    <option value="6">6月</option>
+                    <option value="7">7月</option>
+                    <option value="8">8月</option>
+                    <option value="9">9月</option>
+                    <option value="10">10月</option>
+                    <option value="11">11月</option>
+                    <option value="12">12月</option>
+                </select>
+            </div>
+            <div class="condi-i hide" rel="quarter">
+            	<label class="condi-i-field">季度：</label>
+                <select id="quarterEnd" fun="searchEndQuarterFun" name="condition.quarterEnd" render="sel" style="width: 120px;">
+                    <option value="1">第1季度</option>
+                    <option value="2">第2季度</option>
+                    <option value="3">第3季度</option>
+                    <option value="4">第4季度</option>
+                </select>
+            </div>
+        </div>
+	        <div class="condi-row">
+		        <div class="condi-i">
+	            	<label class="condi-i-field">图表类型：</label>
+			        <div class="fl" style="padding: 4px 0px;">
+				        <input type="hidden" value="" id="reportType"/>
+				        <input type="radio" name="reportType" class="rdo" id="rdo1" value="rtLine"/>
+				        <label for="rdo1">曲线图</label>&nbsp; &nbsp; 
+				        <input type="radio" name="reportType" class="rdo" id="rdo2" value="rtColumn"/>
+				        <label for="rdo2">柱状图</label>&nbsp; &nbsp; 
+				        <input type="radio" name="reportType" class="rdo" id="rdo3" value="rtGrid" checked="checked"/>
+				        <label for="rdo3">统计表</label>&nbsp; &nbsp; 
+			        </div>
+		        </div>
+	        </div>
+	        <div class="sz">
+	            <input id="query" type="button" class="btn1" value="搜 索" />
+	            #if($urlPermitUtil.hasPermission('exportAddCustomerReport'))
+	            <input id="export" type="button" class="btn1" value="导 出" />
+	            #end
+            	#if($urlPermitUtil.hasPermission('getAddCustomerReportPrint'))
+	            <input id="print" type="button" class="btn1" value="打 印" />
+	            #end
+	        </div>
+        </center>
+        <div id="reportBody" class="recenter">
+	    	
+    	</div>
+    </form>
+</body>
+</head>

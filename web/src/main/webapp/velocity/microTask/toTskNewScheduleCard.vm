@@ -1,0 +1,151 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加日程</title>
+	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+
+
+    <script type="text/javascript">
+		$(function(){
+			$('select').select();
+            jQuery("#addScheduleTable").validator();
+			maxTextArea("textarea[maxlength]");
+		});
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            //联系时间
+            var contactDate = jQuery.trim($('#contactDate').val());
+            if(contactDate == ""){
+                return false;
+            }
+            //联系方式
+            var contactType = jQuery.trim($('#contactType').val());
+            if(contactType == ""){
+                return false;
+            }
+            return true;
+        }
+
+		//确定
+		function sureAdd(){
+            var bool = jQuery.validator({form:'addScheduleTable',extend:true,extendhandler:extendvalidator});
+            if(!bool){
+                jQuery('#sure').attr("disabled",false);
+                return false;
+            }
+            jQuery('#sure').attr("disabled",true);
+            jQuery.ajax({
+                type:'POST',
+                url:"../tskSchedule/addScheduleByCusIdCard.html?RandNum="+Math.random(),
+                data:{
+                    'tskSchedule.contactType':jQuery.trim($('#contactType').val()),
+                    'tskSchedule.contactDate':jQuery.trim($('#contactDate').val()),
+                    'tskSchedule.remark':jQuery.trim($('#remark').val()),
+                    'tskSchedule.customerId':jQuery.trim($('#customerId').val())
+                },
+                success:function(retVal){
+                    if(retVal == "1"){
+                        window.returnValue="1";
+                        window.close();
+                    }
+                }
+            });
+		}
+		
+		//取消
+		function cancelAdd(){
+			window.close();
+		}
+
+        //验证联系时间的输入情况
+        function checkDate(obj){
+            var date= new Date();
+            var nowDate = date.Format("yyyy-MM-dd hh:mm");
+            var inputDate=obj.value;
+            if(nowDate>inputDate){
+                $("#contactDate").parent().addClass('v-fails');
+                $(obj).attr('tips', '联系时间必须大于当前时间，请重新填写！');
+                return false;
+            }else{
+                $("#contactDate").parent().removeClass('v-fails');
+                return true;
+            }
+        }
+    </script>
+</head>
+
+<body>
+<!--
+<form id="newSchedule" class="formular" method="post">
+-->
+	<input type="hidden" id="customerId" value="$!customerId"/>
+      <table class="htmltbl" style="table-layout: auto;" id="addScheduleTable">
+          <tbody>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>联系时间：</label>                  
+                  </td>
+                  <td>
+                      #set($currDate=$date.get('yyyy-MM-dd HH:mm'))
+                      <div class="ui-div-text">
+                          <input onchange="checkDate(this);" type="text" name="conds" id="contactDate" class="text datepicker" fun="checkDate" value="$currDate" rule="\S" tips='"联系时间"必须填写' readonly="readonly"/>
+                          <i class="date"></i>
+                      </div>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>联系方式：</label>
+                  </td>
+                  <td>
+                      <select id="contactType" tips="'联系方式'必须填写">
+                          <option value="1">&nbsp;电话联系</option>
+                          <option value="2">&nbsp;上门拜访</option>
+                      </select>                     
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%" valign="top">
+                      <label>日程备注：</label>
+                  </td>
+                  <td>
+                      <div class="dtxtarea1" >
+                          <textarea id="remark" maxlength="200" style="_height:100px; *height:100px; _width:100%"></textarea>
+                      </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table>    
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" id="sure" onclick="sureAdd()" value="确 定" />
+    <!--
+    <input type="button" value="确 定" id="saveAndClose" class="btn6 btn6bg2" onclick="sureAdd();"/>
+    -->
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancelAdd()" value="取 消" />
+    </div>
+<!--
+</form>
+-->
+</body>
+</html>

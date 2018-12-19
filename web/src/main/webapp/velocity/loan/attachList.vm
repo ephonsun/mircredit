@@ -1,0 +1,15 @@
+#foreach($!formAttachment in $!formAttachmentList)
+<div id="attr_$velocityCount" class="uploadifyQueueItem" style ="background:#FF9;">
+    #if($!data.requestStatusValue=="请求中")
+        <div class="cancel">
+            <a href="#" onclick="delAtte($!formAttachment.fileId,'$!formAttachment.uploadFileName',$!requestId,$velocityCount)"><img src="../uploadify/cancel.png" border="0"></a>
+        </div>
+    #end
+    <span class="fileName">
+            <a href="#" class="attrFile" onclick="downFileAttr($!formAttachment.fileId)" >$!formAttachment.uploadFileName</a>&nbsp;&nbsp;
+            <label class="gray">($!dateString.FormetFileSize("$formAttachment.fileSize"))</label>
+        </span>
+    <span class="percentage"></span>
+</div>
+#end
+

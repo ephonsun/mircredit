@@ -1,0 +1,89 @@
+    <!--startprint1-->
+    <table class="datatbl"  cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th><label title="还款日期">日期</label></th>
+            <th><label title="监控类型">监控类型</label></th>
+            <th><label title="回访类型">回访类型</label></th>
+			<th><label title="结果">其他</label></th>
+			##<th><label title="材料">材料</label></th>
+			<th><label title="客户经理">客户经理</label></th>
+			<th><label title="是否检查"> 是否检查</label></th>
+            <th><label title="备注">备注</label>
+			<th><label title="操作">操作</label></th>
+        </tr>
+        </thead>
+        <tbody>
+            #if($lnLoanMonitorList)
+                #foreach($lnLoanMonitor in $lnLoanMonitorList)
+                <tr>
+                    <td><label title="">$!date.format('yyyy-MM-dd HH:mm:ss',$!lnLoanMonitor.monDate)</label></td>
+                    <td><label title="">
+							#foreach($!jklx in $!checkBoxMessage.get("JKLX"))
+								#if($!lnLoanMonitor.monType == $!jklx.dictionaryKey) $!jklx.dictionaryValue #end
+							#end
+					</label></td>
+                    <td><label title="">
+							#foreach($!hflx in $!checkBoxMessage.get("HFLX"))
+								#if($!lnLoanMonitor.revisitType == $!hflx.dictionaryKey) $!hflx.dictionaryValue #end
+							#end
+					</label></td>
+					<td><label title="$!lnLoanMonitor.userResult">$!lnLoanMonitor.userResult</label></td>
+					##<td><label title="">
+							###if($lnLoanMonitor.fileIdList)
+    							###foreach($file in $lnLoanMonitor.fileIdList)
+                                ##<a href="" onclick="downFileAttr('$file.fileId')">$file.uploadFileName</a>&nbsp;
+    							###end
+							###end
+					##</label></td>
+					<td><label title="">$!lnLoanMonitor.userName</label></td>
+					<td><label title="">#if($!lnLoanMonitor.readTag == 1) 是  #else 否   #end </label></td>
+                    #if($!isCustomerManage == true)
+                        <td><textarea maxlength="500" cols="8"  readonly="readonly" class="textarea" id="remak_$!lnLoanMonitor.loanMonId"  style="background-color: #f1f1f1">$!lnLoanMonitor.remak</textarea></td>
+                    #else
+                        <td><textarea maxlength="500"  cols="8"  class="textarea" id="remak_$!lnLoanMonitor.loanMonId" style="background-color: #f1f1f1">$!lnLoanMonitor.remak</textarea></td>
+                    #end
+
+					<td><label title="">
+							<span onclick='showDataList2($!lnLoanMonitor.loanMonId)' class="link">查看资料</span>
+							#if($!isCustomerManage == true)
+								<span onclick="updateLm($!lnLoanMonitor.loanMonId)" class="link">编辑</span>
+								<span onclick="unionLm($!lnLoanMonitor.loanId,$!lnLoanMonitor.loanMonId)" class="link">关联附件</span>
+							#else
+								<span onclick="readLm($!lnLoanMonitor.loanMonId)" class="link">检查</span>
+							#end
+
+                </tr>
+                #end
+            #end
+        </tbody>
+    </table>
+
+    <!--endprint1-->
+	<!--查看资料 -->
+	<div id="ziliao123" style="display: none;">
+
+
+	</div>
+    <script type="text/javascript">
+        //贷款资料开始
+        //显示录音、视频、表单列表
+
+        function showDataList2(loanMonId) {
+
+           var url = "../loan/loanMoniorUploadList.html?loanMonId="+loanMonId+"&random=" + Math.random() * 1000;
+            var result = banger.page.openDialog(url, "查看资料", 600, 440);
+            if (result != undefined) {
+                if (null != document.getElementById("player")) {
+                    document.getElementById("player").Stop();
+                }
+            }
+        }
+
+        function closeDiv() {
+            $('#ziliao123').hide();
+            if (null != document.getElementById("player")) {
+                document.getElementById("player").Stop();
+            }
+        }
+    </script>

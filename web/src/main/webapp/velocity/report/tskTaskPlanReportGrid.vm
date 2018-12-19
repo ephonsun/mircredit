@@ -1,0 +1,60 @@
+<h3 class="recenter-ttl" style="text-align: center;">
+	#if($!startDate!=""&&$!endDate!="")
+		$!startDate至$!endDate
+	#elseif($!startDate!=""&&$!endDate=="")
+		$!startDate之后
+	#elseif($!startDate==""&&$!endDate!="")
+		截止至$!endDate
+	#end
+	计划执行情况统计表
+</h3>
+<table class="recenter-tbl">
+    <thead>
+		<tr>
+			<th rowspan="2"><label title="执行者">执行者</label></th>
+			<th rowspan="2"><label title="计划联系量">计划联系量</label></th>
+			<th colspan="2"><label title="有效联系量">有效联系量</label></th>
+			<th rowspan="2"><label title="有效占计划比">有效占计划比</label></th>
+			<th rowspan="2"><label title="综合业绩排名">综合业绩排名</label></th>
+		</tr>
+		 <tr>
+			<th width="90"><label>总量</label></th>
+			<th width="90"><label>难以联系</label></th>
+		</tr>
+	</thead>
+	<tbody>
+		#foreach($plan in $!taskPlanReportList)
+		<tr #if($!plan.isEmergency==1)class="red"#end >
+			<td><label title="$!plan.executeUserName">$!plan.executeUserName</label></td>
+			<td><label title="$!plan.planCount">
+					#if($!plan.planCount!=0)
+						<a class="slink" href="#2" title="$!plan.planCount" onclick="detail($!plan.executeUserId,'all')">$!plan.planCount</a>
+					#else
+						$!plan.planCount
+					#end
+			</label></td>
+			<td><label title="$!plan.planFinishCount">
+					#if($!plan.planFinishCount!=0)
+						<a class="slink" href="#2" title="$!plan.planFinishCount" onclick="detail($!plan.executeUserId,'planFinishCount')">$!plan.planFinishCount</a>
+					#else
+						$!plan.planFinishCount
+					#end
+			</label></td>
+			<td><label title="$!plan.planLevelCount">
+					#if($!plan.planLevelCount!=0)
+						<a class="slink" href="#2" title="$!plan.planLevelCount" onclick="detail($!plan.executeUserId,'planLevelCount')">$!plan.planLevelCount</a>
+					#else
+						$!plan.planLevelCount
+					#end
+			</label></td>
+			<td><label title="$!plan.planRate%">$!plan.planRate%</label></td>
+			<td><label title="$velocityCount">$velocityCount</label></td>
+		</tr>
+		#end
+	</tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+    制表人：$!userName
+    &nbsp; &nbsp; 
+    制表时间：$!reportTime
+</p>

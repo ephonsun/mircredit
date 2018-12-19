@@ -1,0 +1,309 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css">
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    #scriptLink("page")
+    
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator.dateSearchCheck-v1.0.js"></script>
+	
+	
+    <script type="text/javascript">
+    	var oldPostJson={};
+		$(function(){
+			$('select').select();
+			initBelongTo();
+			$('#datepicker1,#datepicker2').blur(function(){
+	    		dateSearchCheck('#datepicker1','#datepicker2');
+	    	});
+			$('table.datatbl').table();
+		});
+		//清空搜索条件
+		function resetValue(){
+	    	//$(':text').val('');
+			$('#userText').val('');
+	    	$("#userIds").val('');
+	    	$("select").each(function(){
+    		this.selectedIndex = 0;
+    		$(this).select();
+			$("#datepicker1").val($("#sDate").val());
+			$("#datepicker2").val($("#eDate").val());
+    	}); 
+	    }
+	     //搜索
+	    function search(){
+			if(dateSearchCheck('#datepicker1','#datepicker2')){
+    	    	var postJson=getQueryJson();
+    			oldPostJson = postJson;
+    	    	jQuery.post('/tskConnectPlan/showAllTaskPlanBySearch.html?random='+Math.random()*1000000,postJson,function(html){
+    	    					 refreshGrid('grid',html);
+    	    				});
+			}
+	    }
+	     //刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+			var total = $('#total').val();
+			var startDate=$('#hiddenStartDate').val();
+			var endDate=$('#hiddenEndDate').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text(0);
+			}
+			if(startDate!=null){
+				$('#datepicker1').val(startDate);
+			}
+			if(endDate!=null){
+				$('#datepicker2').val(endDate);
+			}
+			$('table.datatbl').table();
+			
+		}
+		//刷新
+		function refreshForm(){
+			if(!oldPostJson['startDate']){
+				oldPostJson['startDate'] = $('#sDate').val();
+			}
+			if(!oldPostJson['endDate']){
+				oldPostJson['endDate'] = $('#eDate').val();
+			}
+			goto(null,"/tskConnectPlan/showAllTaskPlanBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			if(!oldPostJson['startDate']){
+				oldPostJson['startDate'] = $('#sDate').val();
+			}
+			if(!oldPostJson['endDate']){
+				oldPostJson['endDate'] = $('#eDate').val();
+			}
+			goto(page,"/tskConnectPlan/showAllTaskPlanBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//表单数据
+	    function getQueryJson(){
+        	var postJson = {};
+    		postJson['execUser']=jQuery.trim($('#userIds').val());
+    		postJson['startDate']=jQuery.trim($('#datepicker1').val());
+    		postJson['endDate']=jQuery.trim($('#datepicker2').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+    	
+		function initBelongTo(){
+			changeBelongTo("brMine");
+			//加载下属树
+			$('#userList').subtree({
+				tid: 'subtree',
+				showIcon: true,
+				url: function(){ return '/report/initDeptUserTree.html?random=' + Math.random(); },
+				buttons: [
+					{ text: '确定', callback: onCheckUser },
+					{ text: '取消' }
+				]
+			});
+			//加载机构树
+			$('#deptList').agetree({
+				tid: 'agetree',
+				url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+				buttons: [
+					{ text: '确定', callback: onCheckDept },
+					{ text: '取消' }
+				]
+			});
+			
+			$("#BelongToType").change(function(){
+				changeBelongTo($(this).val());
+			});
+			//changeBelongTo('brAll');
+		}
+		
+		//点击User
+		function onCheckUser(treeId){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'U');
+			$('#userIds').val(postJson.ids);
+			$('#userText').val(postJson.names);
+		}
+		//点击Dept
+		function onCheckDept(treeId, checkbox){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'D');
+			$('#deptIds').val(postJson.ids);
+			$('#deptText').val(postJson.names);
+			if(checkbox.checked){
+				containSub = '1';
+			}else{
+				containSub = '0';
+			}
+		}
+		function getCheckJson(treeId, flag){
+			var postJson = {};
+    		var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			if(treeObj==null) return postJson;
+    		var nodes = treeObj.getCheckedNodes(true);
+			if(nodes==null) return postJson;
+    		var len=nodes.length;
+    		var uIds = "";
+    		var uName = "";
+    		for(var i=0; i<len; i++){
+    			if(flag=='U'){
+    				if(nodes[i].type==flag){
+    					if(uIds==""){
+    						uIds = nodes[i].id;
+    						uName = nodes[i].name;
+    					}else{
+    						uIds = uIds + "," + nodes[i].id;
+    						uName = uName+ "," +nodes[i].name;
+    					}
+    				}
+    			}else{
+    				if(uIds==""){
+    					uIds = nodes[i].id;
+    					uName = nodes[i].name;
+    				}else{
+    					uIds = uIds + "," + nodes[i].id;
+    					uName = uName+ "," +nodes[i].name;
+    				}	
+    			}
+    		}
+    		
+    		postJson['ids'] = uIds;
+    		postJson['names'] = uName;
+    		return postJson;
+    	}
+		//改变归属
+		function changeBelongTo(val){
+			$('#userIds').val("");
+			switch(val){
+				case "brUser":
+					$("#userList").show();
+					break;
+				default: break;
+			}
+		}
+		//制定计划
+		function makeTskPlan(){
+			var url = '/tskConnectPlan/makeConPlanPage.html?random='+Math.random()*1000;
+			tab.add({id: "makeTskPlan", pid: GetId(), title: "制定联系计划", url: url, lock: false});
+		}
+		//编辑计划
+		function updateTaskPlan(tableName){
+			var name=tableName;
+			if(name.indexOf(".")!=-1){
+				name=name.replace(/\./g,"");
+			}
+			if(name.indexOf("!")!=-1){
+				name=name.replace(/\!/g,"");
+			}
+			var url = '/tskConnectPlan/loadMakePlanList.html?tableName='+encodeURI(encodeURI(tableName))+'&random='+Math.random()*1000;
+			tab.add({id: "updateTskPlan"+name, pid: GetId(), title: "编辑联系计划-"+tableName, url: url, lock: false});
+		}
+		//查看计划
+		function detailTaskPlan(tableName){
+			var name=tableName;
+			if(name.indexOf(".")!=-1){
+				name=name.replace(/\./g,"");
+			}
+			if(name.indexOf("!")!=-1){
+				name=name.replace(/\!/g,"");
+			}
+			var url = '/tskConnectPlan/detailTaskPlan.html?tableName='+encodeURI(encodeURI(tableName))+'&random='+Math.random()*1000;
+			tab.add({id: "detailTskPlan"+name, pid: GetId(), title: "联系计划详情-"+tableName, url: url, lock: false});
+		}
+    </script>
+</head>
+
+<body  style="padding-bottom: 0;">
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+    			#if($!isCharge==1)
+    			<td class="field" width="8%">
+                	<label>执行者：</label>
+                </td>
+                
+                <td width="17%" style="width: 200px;">
+                    <div id="userList" class="ui-div-text" style="width: 200px;">
+                        <input type="text" class="text" readonly="readonly" id="userText"/>
+                        <input id="userIds" name="userIds" type="hidden" />
+                        <i class="ddl" id="ddlchange"></i>
+                    </div>
+                </td>
+                #end
+            	<td class="field" width="8%">
+                	<label>执行日期：</label>
+					<input type="hidden" id="sDate" value="$!startDate"/>
+					<input type="hidden" id="eDate" value="$!endDate"/>
+                </td>
+                <td colspan="5">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" readonly="readonly"  class="text datepicker" id="datepicker1" value="$!startDate" tips=""/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" readonly="readonly"  class="text datepicker" id="datepicker2" value="$!endDate" tips=""/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl bold">
+            所有的联系计划(<label class="green" id="queryCount">$!count</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空" onclick="resetValue()"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="search()"/>
+    </div>
+    
+	<div class="action-bar">
+		#if($!isManager==1)
+        <span class="ui-span-btn fl" onclick="makeTskPlan()">
+        	<label>制定联系计划</label>
+        </span>
+        #end
+        <span class="ui-span-btn fr" onclick="refreshForm()">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <div id="grid">
+		   #parse("/velocity/tskConnectPlan/showAllTaskPlanDiv.vm")
+	</div>
+</body>
+</html>

@@ -1,0 +1,1094 @@
+<script type="text/javascript" src="${ctx}/js/micro/askLoan.js"></script>
+
+<!--贷款状态为"消费"的贷款基本信息-->
+<p class="bold loan-exam-titlebar">
+    <label>登记信息</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-tuckup"></label>
+</p>
+<div class="loan-exam-info-div">
+    <table class="htmltbl_1" >
+        <tbody>
+       
+        <tr>
+            <td class="field" width="10%">
+                <label>微贷事业中心:</label>
+            </td>
+            <td width="23%">
+				<label>
+					
+					#foreach($!sysTeam in $!sysTeamList)
+						#if($!lnLoanInfo.registerMicroBizCenter == $!sysTeam.teamId) $!sysTeam.teamName #end 
+					#end
+				</label>				
+            </td>
+            <td class="field" width="10%">
+                <label>推荐支行:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.registerRecommendBank</label>
+            </td>
+            
+        </tr>
+        <tr>
+			<td class="field" width="10%">
+                <label>申请日期:</label>
+            </td>
+            <td width="23%">
+                <label>#if($lnLoanInfo.registerApplyDate)$date.format("yyyy-MM-dd",$lnLoanInfo.registerApplyDate)#end</label>
+            </td>
+            <td class="field" width="10%">
+                <label>需要贷款日期:</label>
+            </td>
+            <td colspan="7">
+                <label>#if($!lnLoanInfo.registerLoanDate)$date.format("yyyy-MM-dd",$lnLoanInfo.registerLoanDate)#end</label>
+            </td>
+        </tr>
+		<!--
+		  <tr>
+			<td class="field" width="10%" >
+                    <label>信息来源：</label>
+           </td>
+		   <td  width="60%">
+             <input type="checkbox" class="checkbox" name="registerInfoSourceId" id="registerInfoSourceId" #if($!soucesIdMap.get("1") == 1) checked #end value="1" maxlength="20"/>直接营销&nbsp;
+             <label width="30" />$!lnLoanInfo.registerDirectMarket &nbsp;
+             <input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("4") == 1) checked #end value="4" maxlength="20"/>现有客户介绍 &nbsp;
+			 <label width="30"/>$!lnLoanInfo.registerExistCusIntroduct &nbsp;
+			 <input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("2") == 1) checked #end value="2" maxlength="20"/>报纸 &nbsp;
+			 <input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("3") == 1) checked #end value="3" maxlength="20"/>电视&nbsp;
+			 <input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("5") == 1) checked #end value="5" maxlength="20"/>第三方推荐&nbsp;
+         </td>
+        </tr>
+		<tr >
+				<td lass="field" width="10%" > </td>
+                <td width="50%">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("6") == 1) checked #end value="6" maxlength="20"/>网站&nbsp;&nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("7") == 1) checked #end value="7" maxlength="20"/>广播 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("8") == 1) checked #end value="8" maxlength="20"/>广告牌&nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("9") == 1) checked #end value="9" maxlength="20"/>网店宣传 &nbsp;&nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("10") == 1) checked #end value="10" maxlength="20"/>内行员工推荐 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("11") == 1) checked #end value="11" maxlength="20"/>微信微博 &nbsp;&nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("12") == 1) checked #end value="12" maxlength="20"/>其他 &nbsp;
+					<label width="30"/>$!lnLoanInfo.registerInfoSourceOther &nbsp;
+				</td>
+			</tr>
+			-->
+        </tbody>
+    </table>
+</div>
+
+<p class="bold loan-exam-titlebar">
+    <label>信息来源</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-tuckup"></label>
+</p>
+
+<div class="loan-exam-info-div">
+    <table class="htmltbl_1" >
+			<tr>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("7") == 1) checked #end id="" value="7" />广播
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("2") == 1) checked #end id="" value="2" />报纸
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("3") == 1) checked #end id="" value="3" />电视
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("8") == 1) checked #end id="" value="8" />广告牌
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("13") == 1) checked #end id="" value="13" />公交车
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("14") == 1) checked #end id="" value="14" />影院
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("15") == 1) checked #end id="" value="15" />高铁站
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("16") == 1) checked #end id="" value="16" />续贷
+				    </div>
+				</td>
+			</tr>
+			
+			<tr>				
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("9") == 1) checked #end id="" value="9" />网点宣传
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("5") == 1) checked #end id="" value="5" />第三方推荐
+				    </div>
+				</td>
+				
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerExistCusIntroduct',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("4") == 1) checked #end id="" value="4" />放款客户介绍
+				    </div>
+				</td>
+				<td colspan="1" width="12.5%">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerExistCusIntroduct" name="lnLoanInfo.registerExistCusIntroduct"  value="$!lnLoanInfo.registerExistCusIntroduct" #if($!soucesIdMap.get("4") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("6") == 1) checked #end id="" value="6" />网站
+				    </div>
+				</td>
+				
+				<td style="text-align:left" colspan="2">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceFFKKHJS',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("17") == 1) checked #end id="" value="17" />非放款客户/朋友/同学介绍
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceFFKKHJS" name="lnLoanInfo.registerSourceFFKKHJS" value="$!lnLoanInfo.registerSourceFFKKHJS"  #if($!soucesIdMap.get("17") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+		
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceWX',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("11") == 1) checked #end id="" value="11" />微信
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceWX" name="lnLoanInfo.registerSourceWX" value="$!lnLoanInfo.registerSourceWX"  #if($!soucesIdMap.get("11") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceMM',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("18") == 1) checked #end id="" value="18" />陌陌
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceMM" name="lnLoanInfo.registerSourceMM" value="$!lnLoanInfo.registerSourceMM" #if($!soucesIdMap.get("18") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceCCK',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("19") == 1) checked #end id="" value="19" />插车卡
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceCCK" name="lnLoanInfo.registerSourceCCK" value="$!lnLoanInfo.registerSourceCCK"  #if($!soucesIdMap.get("19") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceHNYGJS',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("10") == 1) checked #end id="" value="10" />行内员工介绍
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceHNYGJS" name="lnLoanInfo.registerSourceHNYGJS" value="$!lnLoanInfo.registerSourceHNYGJS"  #if($!soucesIdMap.get("10") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerDirectMarket',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("1") == 1) checked #end id="" value="1" />客户经理营销
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerDirectMarket" name="lnLoanInfo.registerDirectMarket" value="$!lnLoanInfo.registerDirectMarket"  #if($!soucesIdMap.get("1") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceDHYX',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("20") == 1) checked #end id="" value="20" />电话营销
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceDHYX" name="lnLoanInfo.registerSourceDHYX" value="$!lnLoanInfo.registerSourceDHYX"  #if($!soucesIdMap.get("20") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceHZSHTJ',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("21") == 1) checked #end id="" value="21" />合作商户推荐
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceHZSHTJ" name="lnLoanInfo.registerSourceHZSHTJ" value="$!lnLoanInfo.registerSourceHZSHTJ"  #if($!soucesIdMap.get("21") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceZXSQ',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("22") == 1) checked #end id="" value="22" />在线申请
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceZXSQ" name="lnLoanInfo.registerSourceZXSQ" value="$!lnLoanInfo.registerSourceZXSQ"  #if($!soucesIdMap.get("22") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerInfoSourceOther',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("12") == 1) checked #end id="" value="12" />其他
+				    </div>
+				</td>
+				<td  colspan="3">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerInfoSourceOther" name="lnLoanInfo.registerInfoSourceOther" value="$!lnLoanInfo.registerInfoSourceOther"  #if($!soucesIdMap.get("12") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+<p class="bold loan-exam-titlebar">
+    <label>申请信息</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread"></label>
+</p>
+<div class="loan-exam-info-div">
+    <table class="htmltbl_1" >
+        <tbody>
+        <tr>
+            <td class="field" width="10%">
+                <label>贷款类型:</label>
+            </td>
+            <td width="23%">
+                <label>
+					#foreach($!dklx in $!checkBoxMessage.get("DKLX"))
+						 #if($!lnLoanInfo.appLoanTypeId == $!dklx.dictionaryKey) $!dklx.dictionaryValue #end 
+					#end
+				</label>
+            </td>
+            <td class="field" width="10%">
+                <label>申请金额:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.appMoney</label>
+            </td>
+            <td class="field" width="10%">
+                <label>申请期限:</label>
+            </td>
+            <td colspan="3">
+                <label>$!lnLoanInfo.appLimitYear</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="10%">
+                <label>月可支配收入(元)</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.appRepaymentMonth</label>
+            </td>
+            <td class="field" width="10%">
+                <label>贷款用途:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.appRepaymentMonth</label>
+            </td>
+            <td class="field" width="10%">
+                <label>还款日:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.resultRepayDate</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="10%">
+                <label>担保方式:</label>
+            </td>
+            <td width="23%">
+                <label>
+				#foreach($!dbfs in $!checkBoxMessage.get("DBFS"))
+					#if($!lnLoanInfo.appGuarantorWayId == $!dbfs.dictionaryKey) $!dbfs.dictionaryValue #end 
+				#end
+				</label>
+            </td>
+            
+        </tr>
+        <tr>
+            <td class="field" width="10%">
+                <label>最大分期还款额:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.appMaxInstallmentMoney</label>
+            </td>
+            <td class="field" width="10%">
+                <label>总项目成本:</label>
+            </td>
+            <td colspan="5">
+                <label>$!lnLoanInfo.appTotalProjectCost</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="10%">
+                <label>使用明细:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.appUserDetail</label>
+            </td>
+           
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--贷款信息部分-->
+<p class="bold loan-exam-titlebar">
+    <label>个人信息</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread "></label>
+</p>
+<div class="loan-exam-info-div">
+<table class="htmltbl_1">
+    <tbody>
+    <tr>
+        <td class="field" width="10%">
+            <label>申请人姓名:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusName</label>
+        </td>
+        <td class="field" width="10%">
+            <label>出生日期:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusBirthday </label>
+        </td>
+        <td class="field" width="10%">
+            <label>性别:</label>
+        </td>
+        <td colspan="3">
+            <label>$!lnLoanInfo.cusSex</label>
+        </td>
+    </tr>
+    <tr>
+       <td class="field" width="10%">
+            <label>证件类型:</label>
+        </td>
+        <td width="23%">
+            <label>
+				#foreach($!zjlx in $!checkBoxMessage.get("ZJLX"))
+					 #if($!lnLoanInfo.cusIdtypeId == $!zjlx.dictionaryKey) $!zjlx.dictionaryValue #end 
+				#end
+			</label>
+        </td>
+        <td class="field" width="10%">
+            <label>证件号码:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusIdcard</label>
+        </td>
+        <td class="field" width="10%">
+            <label>户口:</label>
+        </td>
+        <td colspan="3">
+            <label></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="field" width="10%">
+            <label>手机:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMobilePhone</label>
+        </td>
+        <td class="field" width="10%">
+            <label>固定电话:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusPhone</label>
+        </td>
+        <td class="field" width="10%">
+            <label>教育程度:</label>
+        </td>
+        <td colspan="3">
+            <label>
+				#foreach($!jycd in $!checkBoxMessage.get("JYCD"))
+					#if($!lnLoanInfo.cusEducationId == $!jycd.dictionaryKey) $!jycd.dictionaryValue #end
+				#end
+			</label>
+        </td>
+    </tr>
+    <tr>
+        <td class="field" width="10%">
+            <label>居住状况: </label>
+        </td>
+        <td width="23%">
+            <label>
+				#foreach($!jzzk in $!checkBoxMessage.get("JZZK"))
+					#if($!lnLoanInfo.cusLivingStatusId == $!jzzk.dictionaryKey)$!jzzk.dictionaryValue #end
+				#end
+			</label>
+        </td>
+        <td class="field" width="10%">
+            <label>家庭住址:</label>
+        </td>
+        <td colspan="3">
+            <label>$!lnLoanInfo.cusAddress</label>
+        </td>
+		
+    </tr>
+    <tr>
+        <td class="field" width="10%">
+            <label>居住场所类型: </label>
+        </td>
+        <td width="23%">
+            <label>
+				#foreach($!jzcslx in $!checkBoxMessage.get("JZCSLX"))
+					#if($!lnLoanInfo.cusLivingTypeId == $!jzcslx.dictionaryKey)$!jzcslx.dictionaryValue #end 
+				#end
+			</label>
+        </td>
+        <td class="field" width="10%">
+            <label>现居地址:</label>
+        </td>
+        <td colspan="5">
+            <label>$!lnLoanInfo.cusLivingAddress</label>
+        </td>
+    </tr>
+    <tr>
+       <td class="field" width="10%">
+            <label>居住起始年月:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusLivingStartDate</label>
+        </td>
+        <td class="field" width="10%">
+            <label>格局:</label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusHousePattern</label>
+        </td>
+        <td class="field" width="10%">
+            <label>面积:</label>
+        </td>
+        <td colspan="3">
+            <label>$!lnLoanInfo.cusHouseArea</label>
+        </td>
+    </tr>
+    <tr>
+        <td class="field" width="10%">
+            <label>装修情况:</label>
+        </td>
+        <td width="23%">
+            <label>
+				#foreach($!zxqk in $!checkBoxMessage.get("ZXQK"))
+					#if($!lnLoanInfo.cusHouseDecorateId == $!zxqk.dictionaryKey) $!zxqk.dictionaryValue #end 
+				#end
+			</label>
+        </td>
+        <td class="field" width="10%">
+            <label>经济网状态:</label>
+        </td>
+        <td colspan="5">
+            <label>$!lnLoanInfo.cusEconomicState</label>
+        </td>
+    </tr>
+    <tr>
+        <td class="field" width="10%">
+            <label>备注: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusNote</label>
+        </td>
+        <td class="field" width="10%">
+            <label>网龄:</label>
+        </td>
+        <td colspan="5">
+            <label>$!lnLoanInfo.cusNetAge</label>
+        </td>
+    </tr>
+    <tr>
+        <td class="field" width="10%">
+            <label>婚姻状态: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMarriage</label>
+        </td>
+       
+    </tr>
+	 <tr>
+        <td class="field" width="10%">
+            <label>配偶姓名: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateName</label>
+        </td>
+        <td class="field" width="10%">
+            <label>身份证号: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateIdcard</label>
+        </td>
+		<td class="field" width="10%">
+            <label>单位名称: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusCompanyName</label>
+        </td>
+    </tr>
+	<tr>
+        <td class="field" width="10%">
+            <label>手机: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateMobilePhone</label>
+        </td>
+        <td class="field" width="10%">
+            <label>固定电话: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMatePhone</label>
+        </td>
+		<td class="field" width="10%">
+            <label>单位电话: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateCompanyPhone</label>
+        </td>
+    </tr>
+	<tr>
+        <td class="field" width="10%">
+            <label>单位性质: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusCompanyNature</label>
+        </td>
+        <td class="field" width="10%">
+            <label>工作岗位: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateJob</label>
+        </td>
+		<td class="field" width="10%">
+            <label>工作年限: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateWorkYear</label>
+        </td>
+    </tr>
+	<tr>
+        <td class="field" width="10%">
+            <label>单位地址: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusMateAddress</label>
+        </td>
+        <td class="field" width="10%">
+            <label>月收入水平: </label>
+        </td>
+        <td width="23%">
+            <label>
+				#foreach($!ysrcp in $!checkBoxMessage.get("YSRSP"))
+					#if($!lnLoanInfo.cusMateMonthlyIncomingId == $!ysrcp.dictionaryKey)$!ysrcp.dictionaryValue #end
+				#end
+			</label>
+        </td>
+		
+    </tr>
+	<tr>
+        <td class="field" width="10%">
+            <label>子女情况: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusChdInfo</label>
+        </td>
+        <td class="field" width="10%">
+            <label>家庭人数: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusFamilyNum</label>
+        </td>
+		
+    </tr>
+	<tr>
+        <td class="field" width="10%">
+            <label>父母情况: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusParentInfo</label>
+        </td>
+        <td class="field" width="10%">
+            <label>本地居住年限: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusLocalYear</label>
+        </td>
+		
+    </tr>
+	<tr>
+        <td class="field" width="10%">
+            <label>第一印象: </label>
+        </td>
+        <td width="23%">
+            <label>$!lnLoanInfo.cusFirstImpress</label>
+        </td>
+        
+		
+    </tr>
+    </tbody>
+</table>
+
+
+</div>
+<p class="bold loan-exam-titlebar">
+    <label>工作信息</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread"></label>
+</p>
+<div class="loan-exam-info-div">
+    <table class="htmltbl_1" >
+        <tbody>
+       
+        <tr>
+            <td class="field" width="10%">
+                <label>工作单位:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.companyName</label>
+            </td>
+            <td class="field" width="10%">
+                <label>单位性质:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.companyNature</label>
+            </td>
+            <td class="field" width="10%">
+                <label>工作岗位:</label>
+            </td>
+            <td colspan="3">
+                <label>$!lnLoanInfo.companyJob</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="field" width="10%">
+                <label>工作年限:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.companyWorkYear</label>
+            </td>
+            <td class="field" width="10%">
+                <label>月收入水平:</label>
+            </td>
+            <td width="23%">
+                <label>
+					#foreach($!ysrcp in $!checkBoxMessage.get("YSRSP"))
+    					#if("$!lnLoanInfo.companyMonthlyIncoming" == $!ysrcp.dictionaryKey) $!ysrcp.dictionaryValue #end 
+					#end
+				</label>
+            </td>
+           
+        </tr>
+		<tr>
+            <td class="field" width="10%">
+                <label>单位地址:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.companyAddress</label>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<p class="bold loan-exam-titlebar">
+    <label>共同借款人</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread"></label>
+</p>
+<div class="loan-exam-info-div">
+<div class="loan-bg">
+    <div id="coList">
+         #parse("/velocity/loan/addCoTable.vm")
+	</div>
+</div>
+</div>
+<p class="bold loan-exam-titlebar">
+    <label>保证人</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread"></label>
+</p>
+<div class="loan-exam-info-div">
+  <div class="loan-bg">
+    <div id="guList">
+        #parse("/velocity/loan/addGuTable.vm")
+	</div>
+</div>
+</div>
+<p class="bold loan-exam-titlebar">
+    <label>信贷历史</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread"></label>
+</p>
+<div class="loan-exam-info-div">
+	  <div class="loan-bg">
+  <div id="lnCreditHistoryList">
+	<div id="chList">
+         #parse("/velocity/loan/addChTable.vm")
+    </div>
+	</div>
+		 <table class="htmltbl_1" >
+        <tbody>
+		<tr>
+             <td class="field" width="10%">
+                <label>信用卡总数:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.cafTotalCreditCard</label>
+            </td>
+            <td class="field" width="10%">
+                <label>授信总金额:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.cafTotalCreditMoney</label>
+            </td>
+            <td class="field" width="10%">
+                <label>透支总金额:</label>
+            </td>
+            <td colspan="3">
+                <label>$!lnLoanInfo.cafTotalOverdraftMoney</label>
+            </td>
+        </tr>
+        </tbody>
+         </table>
+	#* 	 	<div class="loan-bg-one">
+		<p class="bold loan-lheight">申请资料</p>
+    <p class="loan-exam-attachment">
+        #if($urlPermitUtil.hasPermission('lnResearchUpload'))
+            <input type="file" name="fileInput2" id="fileInput2"/>
+        #end
+    <div id="attachmentList2" class="datatbl" style="text-align:left;padding-left:10px;">
+        #parse("/velocity/loan/attachmentList.vm")
+    </div>
+    <div id="fileQueue"></div>
+    </p>
+    </div>
+	
+    
+</div>*#
+
+<p class="bold loan-exam-titlebar">
+    <label>抵质押物</label>
+    <label title="展开(收起)" class="loan-exam-tuckAndspread loan-exam-spread"></label>
+</p>
+
+<div class="loan-exam-info-div">
+
+   <div class="loan-bg" id="pledgeList">
+        #parse("/velocity/loan/pledgeListTable.vm")
+   </div>
+</div>
+<div class="loan-exam-info-div" style="display: block;">
+	<table class="htmltbl_1" >
+        <tbody>
+	<p class="bold loan-exam-title-lheight">调查资料</p>
+		<tr>
+             <td class="field" width="10%">
+                <label>建议金额(元):</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.adviceMoney</label>
+            </td>
+            <td class="field" width="10%">
+                <label>建议期限(月):</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.adviceLimitYear</label>
+            </td>
+            <td class="field" width="10%">
+                <label>建议利率(%):</label>
+            </td>
+            <td colspan="3">
+                <label>$!lnLoanInfo.adviceRate</label>
+            </td>
+        </tr>
+		<tr>
+              <td class="field" width="10%">
+                <label>建议还款日:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.adviceRepayDate</label>
+            </td>
+            <td class="field" width="10%">
+                <label>放款方式:</label>
+            </td>
+            <td width="23%">
+                <label>
+					#foreach($!fkfs in $!checkBoxMessage.get("FKFS"))
+						#if("$!lnLoanInfo.adviceLendWayId" == $!fkfs.dictionaryKey) $!fkfs.dictionaryValue #end 
+					#end
+				</label>
+            </td>
+            <td class="field" width="10%">
+                <label>还款方式:</label>
+            </td>
+            <td colspan="3">
+                <label>
+					#foreach($!hkfs in $!checkBoxMessage.get("HKFS"))
+    					#if("$!lnLoanInfo.adviceRepayWayId" == $!hkfs.dictionaryKey) $!hkfs.dictionaryValue #end 
+					#end
+				</label>
+            </td>
+        </tr>
+		<tr>
+            <td class="field" width="10%">
+                <label>其他:</label>
+            </td>
+			<td width="23%">
+                <label>$!lnLoanInfo.adviceOther</label>
+            </td>
+            <td class="field" width="10%">
+                <label>陪调人:</label>
+            </td>
+            <td width="23%">
+                <label>$!togetherSurveyUsername</label>
+            </td>
+        </tr>
+		<tr>
+            <td class="field" width="10%">
+                <label>调查备注:</label>
+            </td>
+			<td width="23%">
+                <label>$!lnLoanInfo.adviceNote</label>
+            </td>
+            </td>
+        </tr>
+			
+        </tbody>
+         </table>
+</div>
+<div class="loan-exam-info-div" style="display: block;">
+	<table class="htmltbl_1" >
+        <tbody>
+		<p class="bold loan-exam-title-lheight">审批资料</p>
+		<tr>
+             <td class="field" width="10%">
+                <label>决议金额(元):</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.resultMoney</label>
+            </td>
+            <td class="field" width="10%">
+                <label>决议期限(月):</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.resultLimitYear</label>
+            </td>
+            <td class="field" width="10%">
+                <label>决议利率(%):</label>
+            </td>
+            <td colspan="3">
+                <label>$!lnLoanInfo.resultRate</label>
+            </td>
+        </tr>
+		<tr>
+              <td class="field" width="10%">
+                <label>决议还款日:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.resultRepayDate</label>
+            </td>
+            <td class="field" width="10%">
+                <label>分期还款额:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.resultInstalRepayMoney</label>
+            </td>
+            
+        </tr>
+		<tr>
+             <td class="field" width="10%">
+                <label>风险提示:</label>
+            </td>
+			<td width="23%">
+                <label>$!lnLoanInfo.resultRiskWarm</label>
+            </td>
+        </tr>
+		<tr>
+             <td class="field" width="10%">
+                <label>调查资料:</label>
+            </td>
+			<td width="23%">
+                <label>$!lnLoanInfo.appRepaymentMonth</label>
+            </td>
+        </tr>
+		<tr>
+             <td class="field" width="10%">
+                <label>存在问题:</label>
+            </td>
+			<td width="23%">
+                <label>$!lnLoanInfo.resultSurveyExisProblems</label>
+            </td>
+        </tr>
+		<tr>
+             <td class="field" width="10%">
+                <label>审批备注:</label>
+            </td>
+			<td width="23%">
+                <label>$!lnLoanInfo.resultNote</label>
+            </td>
+        </tr>
+		<tr>
+			<td class="field" width="10%">
+           ## <a>审批资料</a>
+            </td>
+			
+        </tr>
+		
+			
+        </tbody>
+         </table>
+</div>
+<div class="loan-exam-info-div" style="display: block;">
+	<table class="htmltbl_1" >
+        <tbody>
+		<p class="bold loan-exam-title-lheight">审批资料</p>
+		<tr>
+             <td class="field" width="10%">
+                <label>合同号:</label>
+            </td>
+            <td width="23%">
+               ## <label>$!lnLoanInfo.lendConfrimContractNum</label>
+                <input type="text" value="$!lnLoanInfo.lendConfrimContractNum" id="lendConfrimContractNum">
+            </td>
+            <td class="field" width="10%">
+                <label>放贷备注:</label>
+            </td>
+            <td width="23%">
+                <label>$!lnLoanInfo.lendNote</label>
+            </td>
+            <td class="field" width="10%">
+                <label>贷款状态:</label>
+            </td>
+            <td width="23%">
+                <div class="ui-div-text">
+                    <select id="select_id" name="select_id" maxlength="20" >
+                        <option ></option>
+                        <option #if("$!loan.loanStatusId" != "")selected #end value="5">放贷</option>
+                        <option #if("$!loan.loanStatusId" != "")selected #end value="6">催收</option>
+                    </select>
+                </div>
+            </td>
+            
+        </tr>
+		
+			
+        </tbody>
+         </table>
+</div>
+
+</div>
+##移除抵押物
+<input type="hidden" id="removePledgeUrl" value="${ctx}/loan/removePledge.html" />
+<input type="hidden" id="queryLoanPledgeUrl" value="${ctx}/loan/queryCustomerLoanPledge.html" />
+<!--共同借款人增加url -->
+<input type="hidden" id="toAddCoUrl" value="${ctx}/loan/toAddCo.html" />
+<!--共同借款人查询url-->
+<input type="hidden" id="queryLoanCoUrl" value="${ctx}/loan/queryLoanCo.html" />
+<!--移除共同借贷人查询url-->
+<input type="hidden" id="removeCoUrl" value="${ctx}/loan/removeCo.html" />
+<!--担保人增加url -->
+<input type="hidden" id="toAddGuUrl" value="${ctx}/loan/toAddGu.html" />
+<!--担保人查询url-->
+<input type="hidden" id="queryLoanGuUrl" value="${ctx}/loan/queryLoanGu.html" />
+<!--移除担保人url-->
+<input type="hidden" id="removeGuUrl" value="${ctx}/loan/removeGu.html" />
+<!--信贷历史增加url -->
+<input type="hidden" id="addChUrl" value="${ctx}/loan/toAddCh.html" />
+<!--信贷历史增加url -->
+<input type="hidden" id="queryLoanChUrl" value="${ctx}/loan/queryLoanCh.html" />
+<!--移除信贷历史url -->
+<input type="hidden" id="removeChUrl" value="${ctx}/loan/removeCh.html" />
+<input type="hidden" id="txtLoanIdId" value="${loanId}" />
+
+<script>
+//移除抵质押物
+function removePledge(pledgeId) {
+	var postJson = {};
+	postJson['pledgeId'] = pledgeId;
+	var urlStr = $("#removePledgeUrl").val() + "?random=" + Math.random() * 1000;
+	jQuery.ajax({
+		type : 'POST',
+		url : urlStr,
+		data : postJson,
+		success : function(data) {
+			banger.page.showMessageBox({
+				"type" : "success",
+				"content" : "移除抵质押物成功！"
+			});
+			urlStr = $("#queryLoanPledgeUrl").val() + "?loanId=" + $("#loanId").val();
+					+ "&random=" + Math.random() * 1000;
+			jQuery.ajax({
+				type : 'POST',
+				url : urlStr,
+				data : {},
+				success : function(data) {
+					$("#pledgeList").html(data);
+				}
+			});
+		}
+	});
+}
+function textOclick(id,obj){
+	var flage=$(obj).attr("checked");
+	  if(flage){
+		$("#"+id).show()
+	  }else{
+		$("#"+id).hide()
+	    $("#"+id).val("")
+	  }
+	}
+
+function edit(){
+    var postJson = {};
+    var loanStatusId=$("#select_id").val();
+    postJson["loanStatusId"] = loanStatusId;
+    postJson['lendConfrimContractNum'] = document.getElementById("lendConfrimContractNum").value;
+    postJson["loanId"] = "$!loan.loanId";
+    var urlStr = "../loan/edit.html?random=" + Math.random() * 1000;
+    jQuery.ajax({
+        type : 'POST',
+        url : urlStr,
+        data : postJson,
+        success : function(data) {
+            banger.page.showMessageBox({
+                "type" : "success",
+                "content" : "修改合同号或贷款状态成功！"
+            });
+        }
+    });
+}
+
+</script>
+
+<hr style="clear:both;"/>
+    <div class="center">
+        #if($isEdit && $loan.loanStatusId == 1)
+            <input type="button" id="print1" class="ui-footer-btn1 ui-footer-btn1-save" value="打印"/>
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+        #else
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+        #end
+        #if($!roles==1)
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="保存" onclick="edit()">
+        #end
+    </div>

@@ -1,0 +1,128 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>任务全景展示</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style type="text/css">
+		body { margin: 0; padding: 0; }
+		div.box { font-size: 0; margin:10px; }
+		div.box div.inner { float: left; width: 50%; border: 0; }
+		div.box div.alltask { }
+		div.box div.owntask { }
+		div.box div.dayplan { }
+		div.box div.inner div.tabdata { height: 220px; border: 10px solid #fff; font-size: 12px; }
+		div.box div.inner div.tabdata label{}
+		div.box div.inner div.tabdata label.tabtitle{ float:left; margin-left:10px; margin-bottom:5px; padding: 0; font-size:14px; font-weight:600; }
+		div.box div.inner div.tabdata label.f{ float:right; margin-right:10px; padding:0; font-size:12px;}
+		
+		table.datatbl tbody tr td { height: 28px !important;}
+	</style>
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript">
+		$(function(){
+			$('#allTask').table();
+			$('#myTask').table();
+			$('#dayPlan').table();
+		});
+		
+		function toTaskPage(execType){
+			var title;
+			var id;
+			if(execType == 0){
+				title="所有的联系任务";
+				id = 61;
+			}else{
+				title="我制定的联系任务";
+				id = 62;
+			}
+        	var url= "/tskContact/tskTaskUnFinishPage.html?excType="+ execType +"&isTaskFinished=3&random="+Math.random()*1000;
+        	var options = {id: id, pid: GetId(), title: title, url: url, lock: false};
+        	tab.add(options);
+	    }
+		
+		function toTaskPlanPage(){
+			var title;			
+			var url="/tskConnectPlan/showAllTaskPlan.html?random="+Math.random();
+			title="所有的联系计划";
+        	var options = {id: 63, pid: GetId(), title: title, url: url, lock: false};
+        	tab.add(options);
+		}
+    </script>	
+</head>
+
+<body>
+	<div class="box">
+		<div class="inner alltask">
+			<div class="tabdata">
+					<label class="tabtitle">所有任务完成情况</label>
+					<label class="ui-link-btn f" title="更多" onclick="toTaskPage(0);" >更多</label>
+				<table class="datatbl" id="allTask">
+					<thead>
+						<th><label title="任务标题">任务标题</th>
+						<th><label title="完成情况">完成情况</th>
+						<th><label title="分配者">分配者</th>
+					</thead>
+					<tbody>
+						#foreach($!task in $!allTaskViewList)											
+						<tr>
+							<td><label #if($!task.isEmergency==1) class="red" #end title="$!task.contactTitle">$!task.contactTitle</td>
+							<td><label #if($!task.isEmergency==1) class="red" #end title="$!task.hasfinishedTask/$!task.totalTask">$moneyUtil.decimePercent($!task.percent)%</td>
+							<td><label #if($!task.isEmergency==1) class="red" #end title="$!task.assignName">$!task.assignName</td>
+						</tr>
+						#end
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="inner owntask">
+			<div class="tabdata">
+				<label class="tabtitle">我制定的任务完成情况</label>
+				<label class="ui-link-btn f" title="更多" onclick="toTaskPage(1);" >更多</label>
+				<table class="datatbl" id="myTask">
+					<thead>
+						<th><label title="任务标题">任务标题</th>
+						<th><label title="完成情况">完成情况</th>
+					</thead>
+					<tbody>
+						#foreach($!task in $!myTaskViewList)											
+						<tr>
+							<td><label #if($!task.isEmergency==1) class="red" #end title="$!task.contactTitle">$!task.contactTitle</td>
+							<td><label #if($!task.isEmergency==1) class="red" #end title="$!task.hasfinishedTask/$!task.totalTask">$moneyUtil.decimePercent($!task.percent)%</td>
+						</tr>
+						#end
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="inner dayplan">
+			<div class="tabdata">
+				<label class="tabtitle">当天联系计划情况</label>
+				<label class="ui-link-btn f" title="更多" onclick="toTaskPlanPage();">更多</label>
+				<table class="datatbl" id="dayPlan">
+					<thead>
+						<th><label title="客户经理">客户经理</th>
+						<th><label title="计划联系量">计划联系量</th>
+						<th><label title="有效联系量">有效联系量</th>
+					</thead>
+					<tbody>
+						#foreach($!tskPlan in $!allPlanViewList)
+						<tr>
+							<td><label title="$!tskPlan.executeUser">$!tskPlan.executeUser</td>
+							<td><label title="$!tskPlan.totalConnect">$!tskPlan.totalConnect</td>
+							<td><label title="$!tskPlan.finishConnect">$!tskPlan.finishConnect</td>
+						</tr>
+						#end
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,596 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+    
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+	<style type="text/css">
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.box-content { z-index: 1111; }
+	</style>
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+	var oldPostJson={};
+	var containSub = '1';
+	var postJson = {};
+	$(function(){
+		$('select').select();
+		$('#recForm').validator();
+		initBelongTo();
+		getQueryJson();
+		init();//初始化客户分类和操作者默认项
+	});
+
+	//初始化客户和操作者默认选项
+	function init(){
+		if($!dataCode=="1"){
+			$('#customerTypeId').change(function(){
+				switch($(this).val()){
+					case '0':
+						$('#BelongToType').html('<option id=\'brMine\' value=\'brMine\'>我的</option><option value=\'brUser\'>下属的</option><option value=\'brDept\'>机构的</option>').select();
+						$("#userList, #deptList").hide();
+						changeBelongTo("brMine");
+						break;
+					case '1':
+						$('#BelongToType').html('<option value=\'brAll\'></option><option value=\'brMine\'>我的</option>').select();
+						$("#my,#userList, #deptList").hide();
+						break;
+					case '2':
+						$('#BelongToType').html('<option value=\'brAll\'></option><option value=\'brMine\'>我的</option>').select();
+						$("#my,#userList, #deptList").hide();
+						break;
+					case '3':
+						$('#BelongToType').html('<option value=\'brAll\'></option><option value=\'brMine\'>我的</option><option value=\'brUser\'>下属的</option><option value=\'brDept\'>机构的</option>').select();
+						$("#my,#userList, #deptList").hide();
+						break;
+				}
+			});
+		}else{
+			$('#customerTypeId').change(function(){
+				switch($(this).val()){
+					case '0':
+						$('#BelongToType').html('<option id=\'brMine\' value=\'brMine\'>我的</option>').select();
+						changeBelongTo("brMine");
+						$("#userList, #deptList").hide();
+						break;
+					case '1':
+						$('#BelongToType').html('<option value=\'brAll\'></option><option value=\'brMine\'>我的</option>').select();
+						$("#my,#userList, #deptList").hide();
+						break;
+					case '2':
+						$('#BelongToType').html('<option value=\'brAll\'></option><option value=\'brMine\'>我的</option>').select();
+						$("#my,#userList, #deptList").hide();
+						break;
+					case '3':
+						$('#BelongToType').html('<option value=\'brMine\'>我的</option>').select();
+						$("#my").show();
+						$("#userList, #deptList").hide();
+						break;
+				}
+			});
+		}
+	}
+	
+	$(document).ready(function()
+    {
+		$("#customer").tips({ msg: "姓名、电话" });
+		var href=location.href;
+		if(href.indexOf("?",0)!=-1){
+    		$('#type').val(href.split("?")[1].split("&")[0].split("=")[1]);
+		}
+    })
+	
+	function deleteRecordInfoById(recordId,recordNo){
+		if(confirm("您确认要删除"+recordNo+"吗？")){
+    		jQuery.post("deleteRecordInfoById.html", {"type": $!type, "recordId": recordId}, function(){
+				sub();
+        	});
+		}
+	}
+	
+	//日期验证
+	function checkDate(obj){
+		var bool=true;
+		var date1=$("#datepicker1").val();
+    	var date2=obj.value;
+		if(date2!=''){
+    		if(date1!=''&&date1>date2){
+    			$("#datepicker2").parent().addClass('v-fails');
+    			$(obj).attr('tips', '日期必须晚于'+date1); 
+    			bool = false;
+    		}else{
+    			$("#datepicker2").parent().removeClass('v-fails');
+    		}
+		}
+		return bool;
+	}
+	
+	function sub(){
+		var bool = jQuery.validator({ form: 'recForm', extend: false});
+		if(!bool){
+			return false;
+		}
+		var postJson=getQueryJson();
+		oldPostJson = postJson;
+		jQuery.post("showSMSList.html?fenye=1&&random="+Math.random()*1000000,postJson,
+			function(html){
+				refreshGrid('grid',html);
+			});
+	}
+	
+	function queryRecord(recordId){
+		var v;
+		if($!type == 4){
+			v = '短信记录';
+		}else if($!type == 5){
+			v = '彩信记录';
+		}
+		var options = {id: "record_queryDetail"+recordId, pid: GetId(), title: "查看"+v, url: "/record/queryRecordById.html?type=$!type&recordId="+recordId+"&random="+Math.random(), lock: false};
+		tab.add(options);
+	} 
+	
+	function initBelongTo(){
+		changeBelongTo("brMine");
+		//加载下属树
+		$('#userList').subtree({
+			tid: 'subtree',
+			showIcon: true,
+			url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckUser },
+				{ text: '取消' }
+			]
+		});
+		//加载机构树
+		$('#deptList').agetree({
+			tid: 'agetree',
+			url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckDept },
+				{ text: '取消' }
+			]
+		});
+		
+		$("#BelongToType").change(function(){
+			changeBelongTo($(this).val());
+		});
+		//changeBelongTo('brAll');
+	}
+	//点击User
+	function onCheckUser(treeId){
+		var postJson = {};
+		postJson = getCheckJson(treeId, 'U');
+		$('#userIds').val(postJson.ids);
+		$('#userText').val(postJson.names);
+	}
+	//点击Dept
+	function onCheckDept(treeId, checkbox){
+		var postJson = {};
+		postJson = getCheckJson(treeId, 'D');
+		$('#deptIds').val(postJson.ids);
+		$('#deptText').val(postJson.names);
+		if(checkbox.checked){
+			containSub = '1';
+		}else{
+			containSub = '0';
+		}
+	}
+	function getCheckJson(treeId, flag){
+		var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+		var nodes = treeObj.getCheckedNodes(true);
+		var len = nodes.length;
+		var uIds = "";
+		var uName = "";
+		for(var i=0; i<len; i++){
+			if(flag=='U'){
+				if(nodes[i].flag==flag){
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}
+				}
+			}else{
+				if(uIds==""){
+					uIds = nodes[i].id;
+					uName = nodes[i].name;
+				}else{
+					uIds = uIds + "," + nodes[i].id;
+					uName = uName+ "," +nodes[i].name;
+				}	
+			}
+		}
+		var postJson = {};
+		postJson['ids'] = uIds;
+		postJson['names'] = uName;
+		return postJson;
+	}	
+	//改变归属
+	function changeBelongTo(val){
+		$('#userIds').val("");
+		$('#deptIds').val("");
+		switch(val){
+			case "brAll":
+				$("#my, #userList, #deptList").hide();	
+				break;
+			case "brMine":
+				$("#my").show();
+				$('#showText').text(window.top.getUn());
+				$("#userList, #deptList").hide();
+				break;
+			case "brUser":
+				$("#userList").show();
+				$("#my, #deptList").hide();
+				break;
+			case "brDept":
+				$("#deptList").show();
+				$("#my, #userList").hide();
+				break;
+			default: break;
+		}
+	}
+		
+	function deleteAll(){
+		var obj = jQuery(".datatbl").find("input[type=checkbox][name=chkone]:checked");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("请选择您要删除的记录！");
+			return false;
+		}
+		var str = "";
+		obj.each(function(){
+			if(jQuery(this).attr("checked")){
+				str += jQuery(this).val() + ",";
+			}
+		});
+		var v;
+		if($('#type').val()=='4'){
+			v="短信";
+		}else{
+			v="彩信";
+		}
+	 	//获取customerId集合
+		var cusIds="";
+		obj.each(function(){
+			cusIds += jQuery(this).attr("cusId")+",";
+		});
+		
+	 	if(confirm("您确认要删除选中的"+v+"吗？")){
+			jQuery.post("deleteAll.html", {"type": $!type, "recordIds": str,"cusIds":cusIds}, function(){
+				sub();
+        	});
+		}
+	}
+	
+	function downExcel(){
+		if($('#queryCount').text() == 0){
+			banger.page.showMessageBox("没有可导出的联系记录！");
+			return false;
+		}
+		var type = $('#type').val();
+		var option;
+		if(type == 4){
+			option= {id: "exportRecMSS", pid: GetId(), title: "导出短信记录", url: "${ctx}/recordExport/showRecordExport.html?random="+Math.random()*1000, lock: false, confirm: true,refresh:false};
+			tab.add(option);
+		}else if(type == 5){
+			option= {id: "exportRecSMS", pid: GetId(), title: "导出彩信记录", url: "${ctx}/recordExport/showRecordExport.html?random="+Math.random()*1000, lock: false, confirm: true,refresh:false};
+			tab.add(option);
+		}else return;
+	}
+	
+	//导出记录数据组装
+	function getCustPostJson(){
+		postJson = oldPostJson;
+		if(!postJson['type']){
+			postJson['type'] = $('#type').val();
+		}
+		postJson['url'] = "../record/queryRecordInfosByMap.html?random="+Math.random()*1000;
+		postJson['url2'] = "../record/exportFile.html?random="+Math.random()*1000;
+		postJson['recordCount'] = $('#queryCount').text();
+		postJson['BelongToType'] = $('#BelongToType').val();
+		return postJson;
+	}
+	
+    function clean(){
+    	$('#recForm :text').val('');
+		$('#customer').tips({ msg: "姓名、电话" });
+        $('select').each(function(){
+            this.selectedIndex = 0;
+            $(this).change().select();
+        });
+		$('#type').val($!type);
+    }
+	
+	//搜索条件封装
+	function getQueryJson(){
+		postJson['type'] = $('#type').val();
+		postJson['queryBean.customerTypeId'] = $('#customerTypeId').val();
+		if($('#customer').val()=="姓名、电话"){
+			postJson['queryBean.customer']="";
+		}else{
+			postJson['queryBean.customer'] = $('#customer').val();
+		}
+		postJson['queryBean.startDate'] = $('#datepicker1').val();
+		postJson['queryBean.endDate'] = $('#datepicker2').val();
+		postJson['queryBean.callTypeId'] = $('#callTypeId').val();
+		postJson['queryBean.content'] = $('#content').val();
+		postJson['queryBean.status'] = $('#status').val();
+		postJson['queryBean.mmsTitle'] = $('#mmsTitle').val();
+		postJson['BelongToType'] = $('#BelongToType').val();
+		postJson['userIds'] = $('#userIds').val();
+		postJson['deptIds'] = $('#deptIds').val();
+		postJson['containSub'] = containSub;
+		return postJson;
+	}
+	
+	//分页跳转
+	function gotoPage(page){
+		if(!oldPostJson['type']){
+			oldPostJson['type'] = $('#type').val();
+		}
+		goto(page,"showSMSList.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	
+	//刷新Grid
+	function refreshGrid(gridId,html)
+	{
+		$("#" + gridId).html(html);
+		$('table.datatbl').table();
+		var total = $('#total').val();
+		if(total!=null){
+			$('#queryCount').text(total);
+		}
+		else {
+			$('#queryCount').text("0");
+		}
+	}
+		
+	//刷新
+	function refresh(){
+		if(!oldPostJson['type']){
+			oldPostJson['type'] = $('#type').val();
+		}
+		goto(null,"showSMSList.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	
+	function showCustomer(customerId,customerName){
+		jQuery.post("getCustomerIsDel.html", {"customerId": customerId}, function(result){
+			if(result=="0"){
+				banger.page.showMessageBox("客户“"+customerName+"”被删除，无法查看具体资料！");
+				return;
+			}else{
+        		var options = {id: "record_showCustomer", pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+        		tab.add(options);
+			}
+		});
+	}
+	
+	//关联客户
+	function relation(obj,id,phone,calltype){
+		$(obj).parents('tr').dblclick();
+		var url="${ctx}/customer/customerSelect.html?selType=single&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,{"msg":"选择客户！"},1000,700);
+		var r;
+		if(result!=undefined){
+    		jQuery.ajax({//查询待关联的客户数据栏位是否已满
+    			type: 'POST',
+    			url: "../record/relationQuery.html",
+				data:{customerId:result,phone:phone,recordId:id,calltype:calltype},
+    			success:function(data){
+					if(data==1){//后台关联客户后刷新
+						refresh();
+					}else{
+						banger.page.openDialog("toCheckPhone.html?recordId="+id+"&customerId="+data+"&phone="+phone,{"msg":"关联客户"},500,200);
+						refresh();
+					}
+    		  	}
+    		});	
+    	}
+	}
+	
+	//取消关联
+	function cancelRelation(obj,recordId,customerId,customerName,phone,calltype){
+		$(obj).parents('tr').dblclick();
+		if(confirm("您确认要将“"+customerName+"”的通话记录设置成未知客户吗？")){
+			jQuery.post("cancelRelation.html", {"type": $!type, "recordId": recordId,"customerId":customerId,"customerName":customerName,"phone":phone,"calltype":calltype}, function(){
+				refresh();
+        	});
+		}
+	}
+	
+	//查看客户-无客户则新建并关联
+	function createCustomer(obj,recordId,phone,calltype){
+		$(obj).parents('tr').dblclick();
+		var url="${ctx}/customer/addCustomer.html?actionType=insert";
+		if(calltype=="座谈记录"){
+			url+="&typeList=isScene&recId="+recordId+"&phoneNumber="+phone;
+		}else{
+			url+="&typeList=isNotScene&recId="+recordId+"&phoneNumber="+phone;
+		}
+		var options = {id: "cusInsert"+recordId, pid: GetId(), title: "新建客户", url: url, lock: false};
+		tab.add(options);
+	}
+    </script>
+</head>
+ 
+<body>
+	<form id="recForm" method="post">
+        <table class="htmltbl" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td width="7%" class="field">
+                        <label>客户分类：</label>
+						<label id="hid">
+        					<input type="hidden" id="type" name="type" value="$!type"/>
+                            <input type="hidden" id="hcustomerTypeId" value="$!queryBean.customerTypeId"/>
+        					<input type="hidden" id="hcustomer" value="$!queryBean.customer"/>
+        					<input type="hidden" id="hstartDate" value="$!queryBean.startDate"/>
+        					<input type="hidden" id="hendDate" value="$!queryBean.endDate"/>
+        					<input type="hidden" id="hcallType" value="$!queryBean.callType"/>
+        					<input type="hidden" id="hcontent" value="$!queryBean.content"/>
+        					<input type="hidden" id="hstatus" value="$!queryBean.status"/>
+        					<input type="hidden" id="hmmsTitle" value="$!queryBean.mmsTitle"/>
+        					<input type="hidden" id="hqueryuserName" value="$!queryBean.queryuserName"/>
+        					<input type="hidden" id="huserId" value="$!userId"/>
+							<input type="hidden" id="huserName" value="$!userName"/>
+						</label>
+                    </td>
+                    <td width="18%">
+						<select name="queryBean.customerTypeId" id="customerTypeId">
+    						<option value="0"></option>
+    						<option value="1" #if($!queryBean.customerTypeId==1) selected=true #end>归属我的</option>
+    						<option value="3" #if($!queryBean.customerTypeId==3) selected=true #end>未知客户</option> 
+                        </select>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>客户：</label>
+                    </td>
+                    <td width="18%">
+                        <div class="dtxt1">
+                            <input type="text" id="customer" name="queryBean.customer" class="dtxt1-txt" value="$!queryBean.customer"/>
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>#if($!type==4)发送/接收时间:#else 发送时间：#end</label>
+                    </td>
+                    <td colspan="3">
+                        <table class="celltbl">
+    						<tr>
+                            	<td width="110">
+                                	<div class="dtxt2">
+    									<input type="text" class="dtxt2-txt date" id="datepicker1" readonly name="queryBean.startDate" value="#if($!queryBean.startDate)$date.format("yyyy-MM-dd",$!queryBean.startDate)#end"/>
+                                        <span class="dtxt2-date">date</span>
+                                    </div>
+                                </td>
+                            	<td width="20">
+                                	<label>—</label>
+                                </td>
+                            	<td width="110">
+    								<div class="dtxt2">
+                                        <input type="text" class="dtxt2-txt " id="datepicker2" readonly name="queryBean.endDate" fun="checkDate" value="#if($!queryBean.endDate)$date.format("yyyy-MM-dd",$!queryBean.endDate)#end"/>
+                                        <span class="dtxt2-date">date</span>
+    								</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+					#if($!type==4)
+                        <td width="7%" class="field">
+                            <label>短信类型：</label>
+                        </td>
+                        <td width="18%">
+                            <select name="queryBean.callTypeId" id="callTypeId">
+                                <option value="0"></option>
+    							<option value="7" #if($!queryBean.callTypeId==7) selected=true #end>已发</option>
+    							<option value="8" #if($!queryBean.callTypeId==8) selected=true #end>已收</option>
+                            </select>
+                        </td>
+                        <td width="7%" class="field">
+                            <label>短信内容：</label>
+                        </td>
+                        <td width="18%">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" id="content" name="queryBean.content" value="$!queryBean.content"/>
+                            </div>
+                        </td>
+					#elseif($!type==5)
+						 <td width="7%" class="field">
+                            <label>状态：</label>
+                        </td>
+                        <td width="18%">
+                            <select name="queryBean.status" id="status">
+                                <option value="无" ></option>
+    							<option value="成功" #if($!queryBean.status=='成功') selected=true #end>成功</option>
+    							<option value="失败" #if($!queryBean.status=='失败') selected=true #end>失败</option>
+                            </select>
+                        </td>
+                        <td width="7%" class="field">
+                            <label>彩信标题：</label>
+                        </td>
+                        <td width="18%">
+                            <div class="dtxt1" style="position: static;">
+                                <input type="text" id="mmsTitle" class="dtxt1-txt" name="queryBean.mmsTitle" value="$!queryBean.mmsTitle"/>
+                            </div>
+                        </td>
+					#end
+                    <td width="7%" class="field">
+                        <label>操作者：</label>
+                    </td>
+                    <td width="18%">
+                        <select id="BelongToType" name="BelongToType">
+	                    	<option value="brMine">我的</option>
+							#if($!dataCode == "3")
+	                    	<option value="brUser">下属的</option>
+	                    	<option value="brDept">机构的</option>
+							#end
+	                    </select>
+                    </td>
+                    <td>
+	                	<span class="btn2 fl" id="my">
+	                		<input id="myUserId" type="hidden"/>
+	                        <label class="btn2-txt" id="showText"></label>
+	                    </span>
+	                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+	                        <input id="userIds" name="userIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+	                    <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="deptText"/>
+	                        <input id="deptIds" name="deptIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+					</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="sz">
+            <span class="fl bold">
+                所有#if($!type==4)短信记录#elseif($!type==5)彩信记录#end(<label id="queryCount" class="dgreen">$!count</label>)
+            </span>
+        <input type="button" value="清 空" class="btn1" onclick="clean();"/>
+        <input type="button" value="搜 索" class="btn1" onclick="sub();"/>
+        </div>
+    </form>
+    
+    
+    <div class="actrow">
+		#if($urlPermitUtil.hasPermission('recordDeleteRecordInfoById'))
+    		<a href="javascript:void(0);" class="btn2 floatL" onclick="deleteAll()">
+    				<label class="btn2-txt">删 除</label>
+            </a>
+		#end
+		#if($urlPermitUtil.hasPermission('recordShowRecordExport'))
+    		<a href="javascript:void(0);" class="btn2 floatL" style="margin-left: -1px;" onclick="downExcel()">
+    			<label class="btn2-txt">导出记录</label>
+    		</a>
+		#end
+		<a href="javascript:void(0);" class="btn2 fr" onclick="refresh()">
+			<label class="btn2-txt">刷新</label>
+		</a>
+    </div>
+    <div id="grid">
+		 #parse("/velocity/record/MSSandSMSListTable.vm")
+	</div>
+</body>
+</html>
+

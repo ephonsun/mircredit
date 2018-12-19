@@ -1,0 +1,186 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加意向</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <!--
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+        -->
+    <!--保存校验  Zhangfp-->
+    <!--
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+        -->
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <!--保存校验  Zhangfp-->
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+
+    <script type="text/javascript">
+        jQuery(function () {
+            jQuery('select').select();
+
+            jQuery('#f').validator();
+
+            jQuery("#btnOk").click(function () {
+                var bool = jQuery.validator({form:'f',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+
+                var productId = jQuery("#selProduct").val();
+                var productName = jQuery("#selProduct").find("option:selected").text();
+                var customerId = jQuery.trim(jQuery("#txtCustomerId").val());
+                var remark = jQuery.trim(jQuery("#txtRemark").val());
+                var customerName = "$!jsUtil.escapeJs($!crmCustomer.customerName)";
+
+                var postData = {
+                    'pdtProductCustomer.productCustomerId': 0,
+                    'pdtProductCustomer.productId': productId,
+                    'pdtProductCustomer.customerId': customerId,
+                    'pdtProductCustomer.remark': remark,
+                    'customerName': customerName,
+                    'productName': productName
+                };
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    async:false,
+                    type: "post",
+                    url: "../pdtProductCustomer/savePdtProductCustomer.html",
+                    data: postData,
+                    success: function (data) {
+                        saveResult(data);
+                    }
+                });
+            });
+        });
+        //验证搜索条件
+        function checkQueryCondition(){
+            var bool = false;
+            var objs = $('[phoneType=\'group\']');
+            for(i = 0; i < objs.length; i++){
+                if(jQuery.trim($(objs[i]).val())){
+                    bool = true;
+                    break;
+                }
+            }
+            return bool;
+        }
+
+        function extendvalidator(){
+            var bool = true;
+            if(checkQueryCondition()){
+                $('[phoneType=\'group\']').parent().removeClass('v-fails');
+            }else{
+                $('[phoneType=\'group\']').parent().addClass('v-fails');
+                $('[phoneType=\'group\']').attr('tips', '您必须选择一个意向产品或填写意向说明！');
+                bool = false;
+            }
+            return bool;
+        }
+
+        function saveResult(msg) {
+            if (msg == 'SUCCESS') {
+                window.returnValue = msg;
+                window.close();
+            } else {
+                banger.page.showMessageBox(msg);
+            }
+        }
+
+    </script>	  
+    
+</head>
+
+<body>
+<input type="hidden" id="txtCustomerId" value="$!crmCustomer.customerId"/>
+<input type="hidden" id="txtOldCustomerName" value="$!crmCustomer.customerName"/>
+<input type="hidden" id="txtOldAddress" value="$!crmCustomer.address"/>
+  <form id="f" method="post">
+      <table class="htmltbl" style="table-layout: auto;">
+          <tbody>
+              <tr>
+                  <td class="field" width="4%">
+                      <label>客户姓名：</label>
+                  </td>
+                  <td width="18%">
+                      <label>$!crmCustomer.customerName</label>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="4%">
+                      <label>联系电话：</label>
+                  </td>
+                  <td width="18%">
+                      #if($!crmCustomer.defaultPhoneType == '1')
+                          <label>$!crmCustomer.mobilePhone1</label>
+                      #elseif($!crmCustomer.defaultPhoneType == '2')
+                          <label>$!crmCustomer.mobilePhone2</label>
+                      #elseif($!crmCustomer.defaultPhoneType == '3')
+                          <label>$!crmCustomer.phone</label>
+                      #elseif($!crmCustomer.defaultPhoneType == '4')
+                          <label>$!crmCustomer.fax</label>
+                      #end
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="4%" >
+                      <label>联系地址：</label>
+                  </td>
+                  <td width="18%">
+                      #if($!crmCustomer.address)
+                          <label>$!crmCustomer.address</label>
+                      #end
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="4%">
+                      <label>意向产品：</label>
+                  </td>
+                  <td phoneType="divGroup">
+                      <select id="selProduct" #if($!productId) disabled="disabled" #end phoneType="group" tips="您必须选择一个意向产品或填写意向说明！">
+                    	<option value="" ></option>
+                    	#foreach($!pdtProduct in $!pdtProductList)
+                    		#if($!pdtProduct.productId==$!productId)
+                    		<option value="$!pdtProduct.productId" selected>$!pdtProduct.productCode|$!pdtProduct.productName</option>
+                    		#else
+                    		<option value="$!pdtProduct.productId" >$!pdtProduct.productCode|$!pdtProduct.productName</option>
+                    		#end
+                    		
+                    	#end
+                      </select>
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="4%" valign="top">
+                      <label>意向说明：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-textarea" style="height: 100px;" phoneType="divGroup">
+                          <textarea phoneType="group" tips="您必须选择一个意向产品或填写意向说明！" class="textarea" maxlength="300" id="txtRemark" style="height: 100px; _height:100px;"></textarea>
+                      </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table> 
+    </form> 
+     <hr />  
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>
+

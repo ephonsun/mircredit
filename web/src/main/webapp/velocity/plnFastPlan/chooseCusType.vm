@@ -1,0 +1,61 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择客户类别</title>
+    
+    #styleLink("base")
+    
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+			$("input[type=radio][name=radio]").click(function(){
+				$("#hiddenInput").val($(this).val());
+			});
+		});
+		function nextStep(){
+			var type =$("#hiddenInput").val();
+			location.href="/plnFastPlan/nextPage.html?type="+type
+		}
+    </script>
+</head>
+
+<body>
+	<table class="step2" cellpadding="0" cellspacing="0">
+		<input type="hidden" id="hiddenInput" value="1" />
+    	<tbody>
+        	<tr>
+            	<td class="bar" align="center">第一步：选择客户类别</td>
+                <td align="center">第二步：确认目标客户</td>
+                <td align="center">第三步：进行快速规划</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <dl class="cus-class">
+    	<dt class="fl">
+        	<label>客户类别：</label>
+        </dt>
+        <dd class="fl">
+        	<ul>
+                <li>
+                    <input type="radio" name="radio" id="line" class="rdo" value="1" checked/>
+                    <label for="line">在行客户</label>
+                </li>
+                <li>
+                    <input type="radio" name="radio" id="unline" class="rdo" value="2" />
+                    <label for="unline">非在行客户</label>
+                </li>
+            </ul>
+        </dd>
+    </dl>
+    
+    <hr style="margin-top: 50px;" />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg2" value="下 一 步" onclick="nextStep()"/>
+    </div>
+</body>
+</html>

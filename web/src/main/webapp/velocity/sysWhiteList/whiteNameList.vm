@@ -1,0 +1,166 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>白名单</title>
+    
+    #styleLink("base")
+    <style type="text/css">
+    	.ml { margin-left: 5px; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};
+    	function insertList(){
+			var url="showInsertPage.html?random="+Math.random()*1000;
+			var result=banger.page.openDialog(url,"新增通话白名单",600,400);
+			if(result==1){
+				window.location.reload();
+			}
+		}
+		function updateData(id){
+			var url="showUpdPage.html?id="+id+"&random="+Math.random()*1000;
+			var result=banger.page.openDialog(url,"编辑通话白名单",600,400);
+			if(result==1){
+				window.location.reload();
+			}
+		}
+		function deleteData(id,no){
+			if(confirm('您确定要从白名单中删除联系电话“'+no+'”吗？')){
+			jQuery.post('deleteSysWhiteList.html',
+    					{ 'id':id},
+    					function(){
+							refreshForm();
+    					});
+		}
+    		
+		}
+		function resetValue(){
+	    	$(':text').val('');
+	    }
+	    //搜索
+		function search(){
+	 //   	var f=$("#sysWhiteListForm");
+	 //   	f.action="getSysWhiteListPage.html";
+	//		f.submit();
+			
+			
+			var postJson=getQueryJson();
+			oldPostJson = postJson;
+			jQuery.post("getSysWhiteListForPage.html?random="+Math.random()*1000000,postJson,
+    					function(html){
+						 refreshGrid('grid',html);
+    					});
+	    }
+	    function getQueryJson(){
+        	var postJson = {};
+    		postJson['whiteListName']=jQuery.trim($('#whiteListName').val());
+    		postJson['phoneNo']=jQuery.trim($('#phoneNo').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+	    
+	    var flag = 0;
+	    //导入
+	    function showImportPage(){
+			if(flag == 0){
+				tab.add({id: "importWhiteList", pid: GetId(), title: "导入通话白名单", url: "../sysWhiteList/showImPortPage.html", lock: false,confirm: true});
+				flag = 1;
+			}else{
+				banger.page.showMessageBox('您已经有一个导入白名单请求正在处理，不能再次导入！');
+				flag = 0;
+			}
+	    }
+		
+		$(document).ready(function(){
+			$('#grid table').table();
+		});
+	    
+	    //检查长度
+	  	function checkLength(str){
+    		if(str.length>19){
+    		if(event.keyCode!=8)
+    				window.event.returnValue = false;
+    		}
+    	}
+    	//刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#grid").html(html).find('table').table();
+			var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+		}
+		//刷新
+		function refreshForm(){
+			goto(null,"getSysWhiteListForPage.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"getSysWhiteListForPage.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>
+                <td width="7%" class="field">
+                    <label>姓名：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                    	<input type="text" class="dtxt1-txt" name="whiteListName" id="whiteListName" value="$!whiteListName" onkeydown="checkLength(this.value)"/>
+                    </div>
+                </td>
+                <td width="7%" class="field">
+                    <label>联系电话：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                    	<input type="text" class="dtxt1-txt" name="phoneNo" id="phoneNo" value="$!phoneNo" onkeydown="checkLength(this.value)" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')"/>
+                    </div>
+                </td>
+                <td colspan="4"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="sz mt">
+        <span class="fl bold">
+            所有白名单号码(<span id="queryCount" class="dgreen">$!count</span>)
+        </span>
+        <input type="button" class="btn1" value="清空" onclick="resetValue()"/>
+        <input type="button" class="btn1" value="搜索" onclick="search()"/>
+    </div>
+    
+    	<div class="actrow">
+            <span class="btn2 fl" onclick="insertList()">
+                <label class="btn2-txt" >新建</label>
+            </span>
+            <span class="btn2 fl ml" style="margin-left: -1px;" onclick="showImportPage()">
+                <label class="btn2-txt" >导入</label>
+            </span>
+            <span class="btn2 fr mr" onclick="refreshForm()">
+    			<label class="btn2-txt" >刷新</label>
+    		</span>
+            
+        </div>
+        
+        <div id="grid">
+		   #parse("/velocity/sysWhiteList/sysWhiteListTable.vm")
+		</div>
+        
+</body>
+</html>

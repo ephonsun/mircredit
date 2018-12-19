@@ -1,0 +1,47 @@
+<table class="datatbl">
+        <thead>
+            <tr>
+                <th><label title="产品类型">产品类型</label></th>
+                <th><label title="产品编号">产品编号</label></th>
+                <th><label title="产品名称">产品名称</label></th>
+                <th><label title="购买客户数">购买客户数</label></th>
+                <th><label title="已销售额(万元)">已销售额(万元)</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+
+    	<tbody>
+			#foreach($product in $!productList.items)
+        	<tr>
+				<td><label title="$!product.templateName">$!product.templateName</label></td>
+                <td><label title="$!product.productCode">$!product.productCode</label></td>
+                <td><label class="ui-link-btn" title="$!product.productName" onclick="detailProduct($!product.productId);">$!product.productName</label></td>
+                <td><label title="$!product.buyCustomerCount">$!product.buyCustomerCount</label></td>
+                <td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoney))">$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoney))</label></td>
+                <td>
+					<span class="link" #if($!product.isCanUpdate==1)onclick="editProduct($!product.productId)"#else style="color:gray;cursor: default;text-decoration:none;" #end >编辑</span>
+					#if($!type==0)
+						#if($urlPermitUtil.hasPermission('openUpdateProduct'))
+							<span class="link" onclick="stopProduct($!product.productId,'$!jsUtil.escapeJs($product.productName)');">停售</span>
+						#else
+							<span href="#" disabled="true" style="cursor: default;">停售</span>
+						#end
+					#else
+						#if($urlPermitUtil.hasPermission('deleteProduct'))
+							<span class="link" onclick="deleteProduct($!product.productId,'$!jsUtil.escapeJs($product.productName)');">删除</span>
+						#else
+							<span href="#" disabled="true" style="cursor: default;">删除</span>
+						#end
+					#end
+                </td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="6">
+                	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

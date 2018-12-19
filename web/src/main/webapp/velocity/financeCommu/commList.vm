@@ -1,0 +1,166 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有交流区</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	.ui-fe-list { font-family: 'Microsoft Yahei'; }
+    </style>
+    
+</head>
+
+<body style="_height:auto !important;">
+    <div class="ui-panel-box2">
+        <div class="l">
+            <h4>
+                <label>交流区树</label>
+                <div>
+					<input id="typeId" type="hidden" name="typeId" />
+                    <span class="editor-add editor-add-disabled">&nbsp;</span>
+                    <span class="editor-up">&nbsp;</span>
+                    <span class="editor-down">&nbsp;</span>
+                    <span class="editor-del">&nbsp;</span>
+                    <span class="editor-edi">&nbsp;</span>
+                </div>
+            </h4>
+            <div class="l-inner">
+                <ul class="ztree" id="klTree"></ul>
+            </div>
+        </div>
+        <div class="r">
+            <table class="htmltbl">
+                <tbody>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label>版块名称：</label>
+                        </td>
+                        <td>
+                            <div class="ui-div-text" style="width:150px;">
+                                <input type="text" class="text" />
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="search-bar">
+                <span class="fl bold">
+                    <label>[XXX]</label>所有版块(<label class="green">0</label>)
+                </span>
+                <input type="button" class="ui-input-btn" value="清空" />
+                <input type="button" class="ui-input-btn" value="搜索" />
+            </div>
+            
+            <div class="action-bar">
+				 <span class="ui-span-btn fl">
+					<label>新建</label>
+				</span>
+                <span class="ui-span-btn fr">
+                    <label>刷新</label>
+                </span>
+            </div>
+           <table class="datatbl">
+				<thead>
+					<tr>
+						<th><label title="版块名称">版块名称</label></th>
+						<th><label title="描述">描述</label></th>
+						<th><label title="操作">操作</label></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><label title="">财经资讯</label></td>
+						<td><label title=""></label></td>
+						<td>
+							<span class="link">启用</span>
+							<span class="link">编辑</span>
+							<span class="link">删除</span>
+							<span class="link">上移</span>
+							<span class="link">下移</span>
+						</td>
+					</tr>
+					<tr>
+						<td><label title="">股市资讯</label></td>
+						<td><label title=""></label></td>
+						<td>
+							<span class="link">启用</span>
+							<span class="link">编辑</span>
+							<span class="link">删除</span>
+							<span class="link">上移</span>
+							<span class="link">下移</span>
+						</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="3">
+							分页控件
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js "></script>	
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+
+<script type="text/javascript">
+	var oldPostJson={};
+	var setting = {
+		callback:{
+			onClick:treeOnclick
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			showIcon: false
+		}			
+	};
+	//json树数据
+	var zNodes = $!commPartition; 
+	//初始化
+	$(function(){
+		$('table.datatbl').table();
+		//加载验证控件
+		//jQuery("#contentForm").validator();
+		jQuery.fn.zTree.init($("#klTree"), setting, zNodes);			
+		initNodeSelect();
+	});
+	//树点击事件
+	function treeOnclick(event, treeId, treeNode) {
+		$("#typeId").val(treeNode.id);
+		$("#tName").text(subNameStr(treeNode.name));		
+		changeActive(treeNode);	
+		search();
+	}
+	
+	//模拟点击第一个节点
+	function initNodeSelect(){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("klTree");
+		var nodes = treeObj.getNodes();
+		if (nodes.length>0) {
+			treeObj.selectNode(nodes[0]);
+			$("#typeId").val(nodes[0].id);
+			$("#tName").text(subNameStr(nodes[0].name));
+			treeOnclick(event, nodes[0].id, nodes[0]);
+		}
+	}	
+    </script>
+</html>
+

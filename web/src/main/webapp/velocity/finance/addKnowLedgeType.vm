@@ -1,0 +1,162 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>新建分类</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+</head>
+
+<body>
+	<form id="knowledgeForm" name="knowledgeForm">
+        <table class="htmltbl">
+            <tbody>
+                <tr>
+                    <td class="field" width="80">
+						<label class="red">*</label>
+                        <label>名称：</label>
+                    </td>
+                    <td>
+    					<div id="dName" class="ui-div-text">
+                        	<input type="text" id="typeName" name="knowledgeType.knowledgebaseTypeName" class="text" rule="\S" tips='“名称”必须填写' maxlength="30"/>
+                        </div>
+                </td>
+                </tr>
+                <tr>
+                    <td class="field" width="80">
+                    	<label class="red">*</label>
+                        <label>创建到：</label>
+                    </td>
+                    <td>
+                       	<div id="typeList" class="ui-div-text">
+                    		<input id="parCel" name="parName"  type="text" class="text" readonly="readonly" value="$!parentTypeName"/>
+                    		<i class="ddl" onclick="showMenu();"></i>
+                    	</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</form>
+    
+    <hr />
+    
+    <div class="center">
+		<input type="button" id="ok" class="ui-footer-btn1 ui-footer-btn1-save" value="添加" />
+		<input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" />
+    </div>
+	
+	<div id="menuContent" class="menuContent" style="display:none; position: absolute; overflow-x: hidden; border: 1px solid #ccc; background-color: #fff;">
+		<ul id="klTree" class="ztree" style="margin-top:0; width:320px;"></ul>
+	</div>
+	<input id="parentId" name="knowledgeType.parentId" type="hidden" value="$!parentId"/>
+</body>
+#scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript">
+	var setting = {
+		callback:{
+			beforeClick: beforeClick,
+			onClick:treeOnclick
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			dblClickExpand: false,	
+			showIcon: false
+		}			
+	};
+	//json树数据
+	var zNodes = $!typeJson; 
+	
+	$(function(){
+		$('#ok').click(function(){
+			fn.sure()
+		});
+		
+		$('#cancel').click(function(){
+			fn.cancel();
+		});
+		jQuery("#knowledgeForm").validator();
+		initKnowList();			
+	});
+		
+	var fn = {};
+	fn.sure = function(){
+		addsubmit();
+	};
+	fn.cancel = function(){
+		window.returnValue = "";
+		window.close();
+	};
+		
+	function initKnowList(){
+		jQuery.fn.zTree.init($("#klTree"), setting, zNodes);
+	}			
+	function showMenu() {
+		var parObj = $("#parCel");
+		var parOffset = $("#parCel").offset();
+		$("#menuContent").css({left:parOffset.left + "px", top:parOffset.top + parObj.outerHeight() + "px"}).slideDown("fast"); 
+		$("body").bind("mousedown", onBodyDown);
+	}
+	function hideMenu() {
+		$("#menuContent").fadeOut("fast");
+		$("body").unbind("mousedown", onBodyDown);
+	}
+	function onBodyDown(event) {
+		if (!(event.target.id == "menuBtn" || event.target.id == "parCel" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+			hideMenu();
+		}
+	}
+	
+	function beforeClick(treeId, treeNode) {
+		var check = (treeNode);
+		return check;
+	}
+	
+	function treeOnclick(e, treeId, treeNode) {
+		var zTree = jQuery.fn.zTree.getZTreeObj("klTree");
+		var nodes = zTree.getSelectedNodes();
+		var v = "";
+		nodes.sort(function compare(a,b){return a.id-b.id;});
+		for (var i=0, l=nodes.length; i<l; i++) {
+			v += nodes[i].name + ",";
+		}
+		if (v.length > 0 ) v = v.substring(0, v.length-1);
+		var parObj = $("#parCel");
+		parObj.attr("value", v);
+		$("#parentId").attr("value",treeNode.id);
+	}
+	
+	function addsubmit(){
+		var bool = jQuery.validator({ form: 'knowledgeForm', extend: false});
+		if(!bool){
+			return false;
+		}			
+		jQuery.ajax({ 
+			type:'post',
+			url :'saveKnowledgeType.html',
+			data:{'knowledgeType.knowledgebaseTypeName':$('#typeName').val().replace(/(^\s*)|(\s*$)/g,""),
+			 	  'knowledgeType.parentId':$('#parentId').val().replace(/(^\s*)|(\s*$)/g,"")
+			     },
+			success:function(data){
+				if(data){
+					$('#dName').addClass('v-fails');
+	  				$('#typeName').attr('tips', data);
+				}else{
+    				window.returnValue = "1";
+    				window.close();
+				}
+			}
+		});
+	}
+</script>
+</html>

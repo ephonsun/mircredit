@@ -1,0 +1,93 @@
+﻿<html xmlns:Nff>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<title></title>
+#styleLink()
+#scriptLink()
+</head>
+<Script>
+function NodeClick(node)
+{
+    var url="getMenuFunPage.html?Id="+node.Value;
+    PostSave(url);
+}
+
+function AddMenu()
+{
+	var url = "getAddMenuPage.html";
+	var result = OpenDialog(url);
+	if(result=="ok")
+	{
+		UrlHelper.Refresh();
+	}
+}
+
+function EditMenu()
+{
+	var menuId = DS.SYS_MENU[0]["MENU_ID"];
+	if(menuId!=null)
+	{
+		var url = "getEditMenuPage.html?Id="+menuId;
+		var jsonString= OpenDialog(url);
+		if(jsonString!=null && jsonString!="")
+		{
+			var json = Json.CreateObjectByJsonString(jsonString);
+			Source.Update("DS.SYS_MENU",json,0);
+		}
+	}
+	else banger.page.showMessageBox("请先选中菜单项,再点修改");
+}
+
+function AddFunc()
+{
+	var menuId = DS.SYS_MENU[0]["MENU_ID"];
+	if(menuId!=null)
+	{
+		var url = "getAddFuncPage.html?Id="+menuId;
+		var result = OpenDialog(url);
+		if(result=="ok")
+		{
+			UrlHelper.Refresh();
+		}
+	}
+	else banger.page.showMessageBox("请先选中菜单项,再进入添加操作功能!");
+}
+
+function EditFunc(entity)
+{
+	var funcId = entity["FUNC_ID"];
+	var url = "getEditFuncPage.html?Id="+funcId;
+	var result = OpenDialog(url);
+	if(result=="ok")
+	{
+		UrlHelper.Refresh();
+	}
+}
+
+function ShowFunc(entity)
+{
+	var funcId = entity["FUNC_ID"];
+	var url = "getEditFuncPage.html?Id="+funcId;
+	OpenDialog(url);
+}
+</Script>
+<body>
+#json()
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+    <td style="width:220px;vertical-align:top;">
+    <Nff:Control Type="TreeView" CSName="CS.EXTEND.EX_MENU" DSName="DS.SYS_MENU" ></Nff:Control></td>
+    <td style="vertical-align:top">
+    <Nff:HtmlTable CSName="CS.SYS_MENU" DSName="DS.SYS_MENU" ></Nff:HtmlTable>
+    <Nff:BlockSplit/>
+    <Nff:HtmlButton CSName="CS.SYS_MENU.Button" DSName="DS.SYS_MENU" ></Nff:HtmlButton>
+    <Nff:BlockSplit/>
+    <Nff:HtmlList CSName="CS.SYS_FUNC" DSName="DS.SYS_FUNC" ></Nff:HtmlList>
+    <Nff:BlockSplit/>
+    <Nff:HtmlButton CSName="CS.SYS_FUNC.Button" DSName="DS.SYS_FUNC" ></Nff:HtmlButton>
+    </td>
+</tr>
+</table>
+#foot()
+</body>
+</html>

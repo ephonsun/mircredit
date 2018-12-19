@@ -1,0 +1,273 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建产品</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css" />
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+		.gray_self { color:#999999; }
+    </style>
+</head>
+
+<body>
+	<form id="pdtForm" name="pdtForm">
+    	<table class="htmltbl" style="table-layout: auto;">
+    		<tbody>
+        		<tr>
+                	<td class="field" width="10%">
+                    	<label class="red">*</label>
+    					<label>产品类型：</label>
+                    </td>
+                    <td width="15%">
+                    	<select name="pdtProduct.templateId" id="tempId" rule="\S" tips='“产品类型”必须填写！' onchange="onTempChange();">
+							<option value=""></option>
+							#foreach($!temp in $!tempList)
+								<option value="$!temp.templateId">$!temp.templateName</option>
+							#end
+                        </select>
+                    </td>
+    				<td class="field" width="10%">
+                    	<label class="red">*</label>
+    					<label>产品名称：</label>
+                    </td>
+                    <td width="15%">
+    					<div id="nameDiv" class="ui-div-text" style="word-break:break-all;">
+    						<input name="pdtProduct.productName" id="pdtName" type="text" class="text" maxlength="100" rule="\S" tips='“产品名称”必须填写！' focusFlag="false"/>
+    					</div>
+                    </td>
+                	<td class="field" width="10%">
+    					<label class="red">*</label>
+                    	<label>产品编号：</label>
+                    </td>
+                    <td width="15%">
+                    	<div id="codeDiv" class="ui-div-text">
+                    		<input name="pdtProduct.productCode" id="pdtCode" type="text" class="text" maxlength="20" rule="\S" tips='“产品编号”必须填写！' focusFlag="false"/>
+                    	</div>
+                    </td>
+                    <td width="10%"></td>
+                    <td width="15%"></td>
+                </tr>
+			  </tbody>
+    	</table>
+		<div id="tempField">
+        </div>
+		<table class="htmltbl" style="table-layout: auto;">
+    		<tbody>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label class="red">*</label>
+    					<label>上架日期：</label>
+    				</td>
+                    <td colspan="7">
+                        <table id="date-panel" class="celltbl">
+                            <tbody>
+                                <tr>
+                                    <td width="120">
+                                        <div class="ui-div-text">
+                                            <input name="pdtProduct.saleStartDate" id="datepicker1" fun="startDateFun" type="text" readonly="readonly" class="text datepicker" rule="\S" tips='“上架日期的开始日期”必须填写！' focusFlag="false" />
+                                            <i class="date"></i>
+                                        </div>
+                                    </td>
+                                    <td width="20"><label>-</label></td>
+                                    <td width="120">
+                                        <div class="ui-div-text">
+                                            <input name="pdtProduct.saleEndDate" id="datepicker2" fun="endDateFun" type="text" readonly="readonly" class="text datepicker" rule="\S" tips='“上架日期的结束日期”必须填写！' focusFlag="false" />
+                                            <i class="date"></i>
+                                        </div>
+    									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+    			</tr>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label>附件管理：</label>
+    				</td>
+    				<td colspan="7">
+    					<input type="file" name="fileInput" id="fileInput" />
+                        <label class="gray_self" title="添加附件">(*单个文件不能超过100M)</label>
+    					<div id="fileQueue"></div>
+    				</td>
+    			</tr>
+    		</tbody>
+    	</table>
+    </form>
+	
+	<hr />
+	
+	<div class="center">
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="saveProduct();" value="保存" />
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancel();" value="取消" />
+	</div>            
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>	
+<script type="text/javascript">
+	$(function(){
+		//上传附件初始化
+		setUpload();
+		//下拉框加载
+		$('select').select();
+		//加载验证控件
+		jQuery("#pdtForm").validator();			
+	});
+	
+	function cfirm(){
+		if(confirm("放弃新建并关闭选项卡？")){
+			return true;
+		}
+	}
+	//取消
+	function cancel(){
+		if(cfirm()){
+			tab.close(GetId(), false);
+		}
+	}
+	//结束日期校验
+	function endDateFun(obj){
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		var endDate=$("#datepicker2").val();
+		if(endDate.length>0){
+			if(startDate>endDate){
+				$('#datepicker2').attr('tips', '上架日期的结束日期不能小于开始日期！'); return false;
+			}else return true;
+		}else{
+			return true;
+		}
+	}
+	
+	//开始日期校验
+	function startDateFun(obj){
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		if(systemDate.length>0&&startDate<systemDate){
+			$('#datepicker1').attr('tips', '上架日期的开始日期不能小于今天！'); return false;
+		}else return true;
+	}
+	
+	//下拉框值发生变化
+	function onTempChange(){
+		var tempId=$('#tempId').val();
+		if(tempId){
+			jQuery.post('/pdtProduct/onPdtTemplateChange.html',
+			{'tempId':tempId,
+			 'isSearch':'false',
+			 'flag':0
+			 },function(html){
+				refreshField(html);
+				});
+		}else{
+			$('#tempField').html(' ');
+		}
+	}
+	
+	//刷新字段
+	function refreshField(html){
+		$('#tempField').html(html);
+		$('select').select();
+		$("input[dateFlag$='true']").each(function(i){
+   			initDate(this.id);
+ 		});
+		$("div[comboFlag$='true']").each(function(i){
+ 			var codes = $(this).attr("codes");
+ 			var list = codes.split(",");
+   			jQuery(this).combobox({"array":list});
+ 		});
+		dateInput("input[dateFlag$='true']");
+		numInput("input[intFlag$='true']");
+		floatInput("input[floatFlag$='true']");
+		maxTextArea("textarea[maxlength]");
+		$('#tempField table, #tempField table tr td').css({
+			'background':'#DFE0E3 !important'
+		});
+	}
+	
+	//保存产品
+	function saveProduct(){
+		var bool = jQuery.validator({ form: 'pdtForm', extend: false});
+		if(!bool){
+			return false;
+		}
+		jQuery.ajax({ 
+			type:'post',
+			url :'/pdtProduct/checkNameAndCode.html',
+			data:{'pdtProduct.productName':jQuery.trim($('#pdtName').val().replace(/(^\s*)|(\s*$)/g,"")),
+    			  'pdtProduct.productCode':jQuery.trim($('#pdtCode').val().replace(/(^\s*)|(\s*$)/g,""))
+			     },
+			success:function(data){					
+				if(data){
+					var str=data.split(",");
+					if(jQuery.trim(str[0])==='pdtName'){
+						$('#nameDiv').addClass('v-fails');
+						$('#pdtName').attr('tips', str[1]); 
+					}else{
+						$('#codeDiv').addClass('v-fails');
+						$('#pdtCode').attr('tips', str[1]); 
+					}						
+				}else{
+					uploadFile();
+				}
+			}
+		});				
+	}
+	//上传文件
+	function uploadFile(){
+		var isUpload = false;
+		//是否有上传文件
+		var fileUpload = $('input[name=fileInput]');
+		if(fileUpload){
+			$('input[name=fileInput]').each(function(){
+				var fileQueue = $('#fileQueue')[0].innerText;
+				if(fileQueue!=""){
+					$(this).uploadifyUpload();
+					isUpload = true;
+				}
+			});
+		}
+		if(!isUpload){
+			submitMessage();
+		}								
+	}
+	//递交
+	function submitMessage(){
+		var postJson = getPostJson();
+  		var fileNameTask = [];
+		var fileSize =[];
+		var fileNameOld = [];
+		$('input[name=fileNameTask]').each(function(){
+			fileNameTask.push($(this).val());	
+		});
+		$('input[name=fileNameOld]').each(function(){
+			fileNameOld.push($(this).val());	
+		});
+		$('input[name=fileSize]').each(function(){
+			fileSize.push($(this).val());	
+		});
+		postJson["fileNameTask"]= fileNameTask.join(",");
+		postJson["fileNameOld"]= fileNameOld.join(",");
+		postJson["fileSize"]= fileSize.join(",");
+		jQuery.post('/pdtProduct/savePdtProduct.html?random='+Math.random()*1000000,postJson,
+		function(data){
+			tab.close(GetId(), true);
+			});
+	}
+</script>
+</html>

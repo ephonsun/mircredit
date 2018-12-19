@@ -1,0 +1,112 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>更新业务数据</title>
+    
+    #styleLink("base")
+    #scriptLink("core")
+    #scriptLink("page")	
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+		});
+		function check(){ 
+   			if(basicDataForm.file.value == "") {
+        	banger.page.showMessageBox("请选择文件路径");
+        	return false;
+   			}else{
+   			return true;
+    	}
+		}
+		function closeTab(){
+			tab.close(GetId(), true);
+		}
+		function forbidBackSpace(e) {
+            var ev = e || window.event; //获取event对象    
+            var obj = ev.target || ev.srcElement; //获取事件源    
+            var t = obj.type || obj.getAttribute('type'); //获取事件源类型    
+            //获取作为判断条件的事件类型    
+            var vReadOnly = obj.readOnly;
+            var vDisabled = obj.disabled;
+            //处理undefined值情况    
+            vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+            vDisabled = (vDisabled == undefined) ? true : vDisabled;
+            //当敲Backspace键时，事件源类型为密码或单行、多行文本的，    
+            //并且readOnly属性为true或disabled属性为true的，则退格键失效    
+            var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+            //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效    
+            var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+            //判断    
+            if (flag2 || flag1) return false;
+        }
+		//禁止后退键 作用于Firefox、Opera   
+        document.onkeypress = forbidBackSpace;
+        //禁止后退键  作用于IE、Chrome   
+        document.onkeydown = forbidBackSpace;
+    </script>
+</head>
+
+<body>
+	<form name="basicDataForm"  id ="basicDataForm"  enctype="multipart/form-data" action="calculateCount.html" onsubmit="return check();"  method="post" >
+	<table class="bartbl">
+    	<tr>
+        	<td class="over">第 1 步</td>
+        	<td>第 2 步</td>
+        	<td>完 成</td>
+        </tr>
+    </table>
+    <h4 class="steptxt">
+    	第1步：选择升级包
+    </h4>
+    
+    <table width="100%">
+    	<tr>
+        	<td width="60">
+            	<label>文件路径：</label>
+            </td>
+        	<td>
+            	<div class="dfile" id="uploadSpan">
+                     <input type="file" class="file" name="file" style="width: 100%;" onkeydown="return false;" onpaste="return false;" onchange='checkFileType(this.value);' />
+                </div>
+            </td>
+        </tr>
+        <tr>
+        	<td width="60"></td>
+        	<td>
+            	<label class="gray" style="line-height:24px;" id="uploadSpan">
+                	目前支持导入的文件格式：
+                    Zip
+                </label>
+            </td>
+        </tr>
+    </table>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="submit" class="btn6 btn6bg1" value="下一步" />
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="closeTab()"/>
+    </div>
+    </form>
+</body>
+<script>
+	//检查文件类型
+	function checkFileType(str){
+			var pos = str.lastIndexOf(".");
+			var lastname = str.substring(pos,str.length);
+			var resultName=lastname.toLowerCase();
+			if ('.zip'!=resultName.toString()){
+				banger.page.showMessageBox('只能上传zip文件，您上传的文件类型为'+lastname+'，请重新上传');
+				resetFile();
+			}
+		}
+		var html=document.getElementById('uploadSpan').innerHTML; 
+		function resetFile(){ 
+			document.getElementById('uploadSpan').innerHTML=html; 
+		}
+</script>
+</html>

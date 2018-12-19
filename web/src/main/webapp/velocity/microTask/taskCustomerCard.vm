@@ -1,0 +1,50 @@
+<script type="text/javascript">
+	var oldPostJson = {};
+    $(function(){
+        $('table.datatbl').table();
+        getQueryJson();
+    });
+    function getQueryJson(){
+        var postJson = {};
+        postJson['customerId']=$("#customerId").val();
+        oldPostJson = postJson;
+        return postJson;
+    }
+
+    //分页跳转
+    function gotoPageTask(page){
+    	oldPostJson['customerId']=$("#customerId").val();
+        if(oldPostJson){
+            gotoTask(
+                    page,
+                    "../tskMicroTaskTarget/taskCustomerCardQuery.html?RandNum="+ Math.random()*10000,
+                    oldPostJson,
+                    function(html){
+                        queryBack(html, 'dataList');
+                    });
+        }
+    }
+
+    function queryBack(html, gridId){
+        $("#"+gridId).html(html);
+        $('table.datatbl').table();
+
+        var total = $('#tskTotal').val();
+        if(total!=null){
+            $("#recordCount").text(total);
+        }else {
+            $("#recordCount").text(0);
+        }
+    }
+</script>
+
+
+<input type="hidden" id="customerId" value="$!customerId"/>
+<div class="search-bar sz">
+    <span class="bold fl">
+        安排任务(<label id="recordCount" class="green">$!recordCount</label>)
+    </span>
+</div>
+<table id="dataList" class="datatbl">
+    #parse("/velocity/microTask/taskCustomerCardTable.vm")
+</table>

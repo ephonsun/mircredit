@@ -1,0 +1,41 @@
+<thead>
+<tr>
+    <th><label title="创建时间">创建时间</label></th>
+    <th><label title="申请金额（元）">申请金额（元）</label></th>
+    <th><label title="贷款状态">贷款状态</label></th>
+    <th><label title="贷款类型">贷款类型</label></th>
+    <th><label title="申请人员">申请人员</label></th>
+	#if($needLine && $!needLine=='1')
+		<th><label title="操作">操作</label></th>
+	#end
+</tr>
+</thead>
+<tbody>
+    #foreach($loan in $!dataList)
+    <tr>
+        <td><label title="$!date.format('yyyy-MM-dd HH:mm',$!loan.createDate)">$!date.format('yyyy-MM-dd HH:mm',$!loan.createDate)</label></td>
+        <td><label title="$vmHelper.getUnityDecimalMoney($!loan.loanMoney)">$vmHelper.getUnityDecimalMoney($!loan.loanMoney)</label></td>
+        <td><label title="$!loan.lnLoanStatus.loanStatusName">$!loan.lnLoanStatus.loanStatusName</label></td>
+        <td>
+        #if($!loan.lnLoanTypeBean)
+            <label title="$!loan.lnLoanTypeBean.loanTypeName">$!loan.lnLoanTypeBean.loanTypeName</label>
+        #end
+        </td>
+        <td><label title="$!loan.sysUser.applyUserName">$!loan.sysUser.applyUserName</label></td>
+		#if($needLine && $!needLine=='1')
+            <td>
+            	#if($urlPermitUtil.hasPermission('lnViewLoanDetail'))
+					<span class="link" onclick="viewLoan($!loan.loanId);">查看</span>
+				#end
+            </td>
+        #end
+    </tr>
+    #end
+</tbody>
+<tfoot>
+<tr>
+    <td colspan="#if($needLine && $!needLine=='1') 6 #else 5 #end">
+        #pageSize($page,'Loan')
+    </td>
+</tr>
+</tfoot>

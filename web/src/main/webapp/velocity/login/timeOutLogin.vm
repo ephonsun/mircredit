@@ -1,0 +1,113 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>移动贷款平台 v2.0.0 — 登录</title>
+    
+    #styleLink("base")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	#scriptLink("page")
+	<script type="text/javascript">
+		//登陆操作
+		function Login()
+		{	var account = document.getElementById("account").value;
+			var pw = document.getElementById("password").value;
+			var obj = document.getElementById("errorMsg");
+			if(account==""){
+				obj.style.display = "block";
+				return document.getElementById("msgdiv").innerHTML = "帐号不能为空~！";
+			}
+			if(pw==""){
+				obj.style.display = "block";
+				return document.getElementById("msgdiv").innerHTML = "密码不能为空~！";
+			}
+			obj.style.display = "none";
+		   	jQuery.ajax({
+    		    type:"post", //请求方式
+    		    url:"userLogin.html", //发送请求地址
+    		    data:{ 
+    		    	 account:$("#account").val(),
+    		   		 password:$("#password").val()
+    		    },
+		    	success:function(data,textStatus){
+		 	  		 LoginResult(data);
+		    	}
+			});
+		}
+		
+		//登陆后的回调函数
+		function LoginResult(msg)
+		{
+			if(msg=="Pass"){
+				window.close();
+			}else{
+				banger.page.showMessageBox(msg);
+			}
+		}
+		function keydownLogin() 
+		{ 
+			if (event.keyCode==13) //判断输入的是不是回车
+			{ 
+				Login(); 
+			} 
+		}
+		function OnitLoginStatus(){
+		  var pWin=document.parentWindow || document.defaultView;
+		  if(pWin){
+		  	 var frame=pWin.frameElement;
+		  	 if(frame)
+		  	 {
+		  	 	if(frame.parentElement && frame.parentElement.ownerDocument)
+		  	 	{
+		  	 		var doc = frame.parentElement.ownerDocument;
+		  	 		var parent=doc.parentWindow || doc.defaultView;
+		  	 		parent.location.reload();
+		  	 	}
+		  	 }
+		  }
+		}
+	</script>
+</head>
+
+<body>
+	<div class="page">
+        <div class="login">
+            <table cellpadding="0" cellspacing="2">
+                <tbody>
+                    <tr>
+                        <td height="54" colspan="3">
+                            <p class="login-icon">Login</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="60" height="54" align="center">
+                            <label class="login-ttl">账	号</label>
+                        </td>
+                        <td width="220">
+                            <input type="text" id="account" name="account" class="login-txt" />
+                        </td>
+                        <td width="80"></td>
+                    </tr>
+                    <tr>
+                        <td width="60" height="54" align="center">
+                            <label class="login-ttl">密	码</label>
+                        </td>
+                        <td width="220">
+                            <input type="password" id="password" name="password" onkeydown="keydownLogin()"  class="login-txt" />
+                        </td>
+                        <td width="80"></td>
+                    </tr>
+                    <tr>
+                        <td width="60" height="54"></td>
+                        <td width="220"><input type="button" id="loginOp" name="loginOp" class="login-btnlogin" value="登   录"   onclick="Login()" />	<input type="button" value="取 消" onclick="javascript:window.close()"  class="btn5 btn5bg3" /></td>
+                        <td width="80"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

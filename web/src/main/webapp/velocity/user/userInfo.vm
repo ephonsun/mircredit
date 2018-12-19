@@ -1,0 +1,135 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>个人信息</title>
+	#styleLink("base")
+	#scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+</head>
+<style type="text/css">
+	.pwd-strength { width: 160px; border: 1px solid #ccc; }
+</style>
+<script language="javascript" type="text/javascript">
+function checklevel(psw) 
+{
+    color = "#ededed";
+    color_l = "#ff0000";
+    color_m = "#ff9900";
+    color_h = "#33cc00";
+    thelev = psw;
+    if (psw == null || psw == '')
+    {
+        lcor = color;
+        mcor = color;
+        hcor = color;
+    }
+    else 
+    {
+        switch (thelev) 
+        {
+            case '1':
+                lcor = color_l;
+                hcor = mcor = color;
+                break;
+            case '2':
+                mcor = lcor = color_m;
+                hcor = color;
+                break;
+            case '3':
+                hcor = mcor = lcor = color_h;
+                break;
+    		 default:
+                    lcor = mcor = hcor = color;
+        }
+	}
+    document.getElementById("strength_L").style.background = lcor;
+    document.getElementById("strength_M").style.background = mcor;
+    document.getElementById("strength_H").style.background = hcor;
+}
+function tabAdd(){
+	tab.add({id: "101", pid: GetId(), title: "修改密码", url: "../user/userPwdUpdatePage.html?random="+Math.random(), lock: false});
+}
+function changecolor()
+{
+	checklevel("$!PASSWORDSTR");
+}
+function forbidBackSpace(e) {
+        var ev = e || window.event; //获取event对象    
+        var obj = ev.target || ev.srcElement; //获取事件源    
+        var t = obj.type || obj.getAttribute('type'); //获取事件源类型    
+        //获取作为判断条件的事件类型    
+        var vReadOnly = obj.readOnly;
+        var vDisabled = obj.disabled;
+        //处理undefined值情况    
+        vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+        vDisabled = (vDisabled == undefined) ? true : vDisabled;
+        //当敲Backspace键时，事件源类型为密码或单行、多行文本的，    
+        //并且readOnly属性为true或disabled属性为true的，则退格键失效    
+        var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+        //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效    
+        var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+        //判断    
+        if (flag2 || flag1) return false;
+    }
+    //禁止后退键 作用于Firefox、Opera   
+    document.onkeypress = forbidBackSpace;
+    //禁止后退键  作用于IE、Chrome   
+    document.onkeydown = forbidBackSpace;
+</script>
+<body>
+	<dl>
+    	<dt class="bold"><label>您的基础信息</label></dt>
+        <dd>
+        	<table width="100%" border="0">
+            	<tbody>
+                	<tr>
+                    	<td width="10%" height="30" align="right">姓名：</td>
+                    	<td width="20%" ><label>$USER_NAME</label></td>
+                    	<td width="10%"  align="right">人员编号：</td>
+                    	<td width="20%" ><label>$USER_CODE</label></td>
+                    	<td width="10%"  align="right">用户名：</td>
+                    	<td><label>$ACCOUNT</label></td>
+                    </tr>
+                	<tr>
+                    	<td  height="30" align="right">归属机构：</td>
+                    	<td><label>$DEPT_NAME</label></td>
+                    	<td align="right">机构编号：</td>
+                    	<td><label>$DEPT_ID</label></td>
+                    	<td align="right">所在团队：</td>
+                    	<td>$TEAM_NAME</td>
+                    </tr>
+                	<tr>
+                    	<td  height="30" align="right">角色：</td>
+                    	<td colspan="5"><label>$ROLE_NAME</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </dd>
+		<dt class="bold" style="margin-top: 40px;">帐号安全信息</dt>
+        <dd>
+           <table width="100%" border="0">
+			<tbody>
+    			<tr>
+    				<td width="70" height="30" align="right">强度：</td>
+    				<td width="180" width="130">
+    					<table class="pwd-strength" cellspacing="1" cellpadding="0">
+    	        			<tr align="center">
+    	            			<td height="12" id="strength_L">弱</td>
+    				            <td id="strength_M">中</td>
+    				            <td id="strength_H">强</td>
+    	        			</tr>
+    	    			</table>
+        			</td>
+    				<td width="70">登录密码</td>
+    				<td>安全性高的密码可以使帐号更安全。建议您定期更换密码，且设置一个包含数字和字母，并长度超过6位以上的密码。<a class="slink" href="javascript:void(0);" onclick="tabAdd()">修改</a></td>
+    			</tr>
+            </tbody>	
+    		</table>
+        </dd>
+    </dl>
+	<script type="text/javascript">changecolor()</script>
+</body>
+</html>

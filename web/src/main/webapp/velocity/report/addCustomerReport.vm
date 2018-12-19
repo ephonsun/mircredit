@@ -1,0 +1,872 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新增客户统计报表</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css" media="print"> 
+        .Noprint{ display:none; }
+        .PageNext{ page-break-after:always; }
+		.NOPRINT { font-size:9pt; font-family:'宋体'; }
+        .tdp { border-bottom:1px solid #000; border-left:1px solid #000; border-right:1px solid #fff; border-top:1px solid #fff; } 
+        .tabp { border-width:2px 2px 1px 1px; border-style: solid; border-color: #000 #000 #000 #000; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop64.exe"></embed>
+	</object>
+    <script type="text/javascript">
+		var oldJson, containSub = '1';
+        jQuery(document).ready(function(){
+        	jQuery('#query').click(function(){
+        		queryReport();
+        	});
+        	jQuery('#export').click(function(){
+        		exportReport();
+        	});
+        	jQuery('#print').click(function(){
+        		openPrintPage();
+        	});
+        	jQuery('#yearBegin').val('$!condition.yearBegin');
+        	jQuery('#yearEnd').val('$!condition.yearEnd');
+        	jQuery('#monthBegin').val('$!condition.monthBegin');
+        	jQuery('#monthEnd').val('$!condition.monthEnd');
+        	jQuery('#quarterBegin').val('$!condition.quarterBegin');
+        	jQuery('#quarterEnd').val('$!condition.quarterEnd');
+        	
+        	jQuery(':radio').click(function(){
+        		switch(jQuery(this).attr('id')){
+        			case 'rdoMonth':
+        				jQuery('div[rel=\'month\']').show().next().hide();
+        				bindMonthEvent();
+        				changeMonthEvent(jQuery('#yearBegin').val(),jQuery('#monthBegin').val());
+        				initDefaultValue();
+        				break;
+        			case 'rdoQuarter':
+        				jQuery('div[rel=\'quarter\']').show().prev().hide();
+        				bindQuarterEvent();
+        				changeQuarterEvent(jQuery('#yearBegin').val(),jQuery('#quarterBegin').val());
+        				initDefaultValue();
+        				break;
+        			case 'rdoYear':
+        				jQuery('div[rel=\'month\'], div[rel=\'quarter\']').hide();
+        				bindYearEvent();
+        				changeYearEvent(jQuery('#yearBegin').val());
+        				initDefaultValue();
+        				break;
+        			case 'rdo1':
+        			case 'rdo2':
+        			case 'rdo3':
+        			case 'rdo4':
+        				changeReportType(jQuery('#'+jQuery(this).attr('id')).val());
+        				break;
+        		}
+        	});
+        	
+        	jQuery('#belongTo').change(function(){
+        		changeBelongTo(jQuery(this).val());
+        	});
+        	
+        	bindMonthEvent();
+        	changeMonthEvent('$!condition.yearBegin','$!condition.monthBegin');
+        	initDefaultValue();
+        			
+        	//加载下属树
+        	jQuery('#userList').subtree({
+        		tid: 'subtree',
+        		showIcon: true,
+        		url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+        		buttons: [
+        			{ text: '确定', callback: onCheckUser },
+        			{ text: '取消' }
+        		]
+        	});
+        	//加载机构树
+        	jQuery('#deptList').agetree({
+        		tid: 'agetree',
+        		url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+        		buttons: [
+        			{ text: '确定', callback: onCheckDept },
+        			{ text: '取消' }
+        		]
+        	});
+        	
+        	changeBelongTo('my');
+        	changeReportType('rtGrid');
+        	
+        	jQuery('select').select();
+        	jQuery('#form1').validator();
+        });
+        
+        var years = [];
+        #foreach($y in $years)
+            years.push($y);
+        #end
+        
+        function unbindEvent(){
+        	$("#yearBegin").unbind("change");
+        	$("#monthBegin").unbind("change");
+        	$("#quarterBegin").unbind("change");
+        	$("#yearEnd").unbind("change");
+        	//还原下拉初始值
+        	setYearOption(years);
+        	var months = [1,2,3,4,5,6,7,8,9,10,11,12];
+        	setMonthOption(months);
+        	var quarters = [1,2,3,4];
+        	setQuarterOption(quarters);
+        	initDefaultValue();
+        }
+        
+        function initDefaultValue(){
+        	$("#yearBegin").find("option[value='$!condition.yearBegin']").attr('selected','selected').end().select();
+        	$("#yearEnd").find("option[value='$!condition.yearEnd']").attr('selected','selected').end().select();
+        	$("#monthBegin").find("option[value='$!condition.monthBegin']").attr('selected','selected').end().select();
+        	$("#monthEnd").find("option[value='$!condition.monthEnd']").attr('selected','selected').end().select();
+        	$("#quarterBegin").find("option[value='$!condition.quarterBegin']").attr('selected','selected').end().select();
+        	$("#quarterEnd").find("option[value='$!condition.quarterEnd']").attr('selected','selected').end().select();
+        }
+        
+        function bindYearEvent(){
+        	unbindEvent();
+			$('#yearBegin').change(function(){
+				changeYearEvent($(this).val());
+			});
+        }
+        function bindMonthEvent(){
+        	unbindEvent();
+			$('#yearBegin').change(function(){
+        		changeMonthEvent($(this).val(), $('#monthBegin').val());
+        	});
+			$('#monthBegin').change(function(){
+        		changeMonthEvent($('#yearBegin').val(), $(this).val());
+        	});
+        }
+        function bindQuarterEvent(){
+        	unbindEvent();
+        	$('#yearBegin').change(function(){
+        		changeQuarterEvent($(this).val(), $('#quarterBegin').val());
+        	});
+        	$('#quarterBegin').change(function(){
+        		changeQuarterEvent($('#yearBegin').val(), $(this).val());
+        	});
+        }
+        
+        
+        function bindYearEventByMonth(y,m){
+        	$("#yearEnd").bind("change",function(){
+        		changeYearEventByMonth(y,m);
+        	});	
+        }
+        
+        function bindYearEventByQuarter(y,q){
+        	$("#yearEnd").bind("change",function(){
+        		changeYearEventByQuarter(y,q);
+        	});	
+        }
+        
+        function changeMonthEvent(y,m){
+        	//根据开始年月，设置结束年月范围
+        	var y_arr = [];
+        	y_arr[0] = y;
+        	if(m>1){
+        		y_arr[1] = parseInt(y)+1;	
+        	}
+        	setYearOption(y_arr);
+        	bindYearEventByMonth(y,m);
+        	changeYearEventByMonth(y,m);
+        }
+        
+        function changeQuarterEvent(y,q){
+        	//根据开始年季度，设置结束年季度范围
+        	var y_arr = [];
+        	y_arr[0] = y;
+        	y_arr[1] = parseInt(y)+1;
+        	if(q>1){
+        		y_arr[2] = parseInt(y)+2;	
+        	}
+        	setYearOption(y_arr);
+        	bindYearEventByQuarter(y,q);
+        	changeYearEventByQuarter(y,q);
+        }
+        
+        function changeYearEvent(y){
+        	//根据开始年，设置结束年范围
+        	
+        }
+        
+        function changeYearEventByMonth(y,m){
+        	//根据开始年月和结束年，设置结束月年范围
+        	var yearEnd = $("#yearEnd").val();
+        	var m_arr = [];
+        	if(y==yearEnd){
+        		m_arr = [1,2,3,4,5,6,7,8,9,10,11,12];
+        	}else{
+        		for(var i=0;i<m-1;i++){
+        			m_arr[i] = i+1;
+        		}
+        	}
+        	setMonthOption(m_arr);
+        }
+        
+        function changeYearEventByQuarter(y,q){
+        	//根据开始年季度和结束年，设置结束季度范围
+        	var yearEnd = $("#yearEnd").val();
+        	var q_arr = [];
+        	if((parseInt(y)==parseInt(yearEnd))||(parseInt(y)==parseInt(yearEnd)-1)){
+        		q_arr = [1,2,3,4];
+        	}else{
+        		for(var i=0;i<q-1;i++){
+        			q_arr[i] = i+1;
+        		}
+        	}
+        	setQuarterOption(q_arr);
+        }
+        
+        function checkInArray(val, arr){
+        	for(var i=0, l = arr.length; i<l; i++){
+        		if(arr[i]==val){
+        			return true;
+        		}
+        	}
+        	return false;
+        }
+        
+        //设置下拉框可选年份
+        function setYearOption(arr){
+        	var a = [];
+        	for(var i=0, l = years.length; i<l; i++){
+        		var y = years[i];
+        		if(checkInArray(y, arr)){
+        			a.push('<option value=\'' + y + '\'>' + y + '年</option>');
+        		}else{
+        			//a.push('<option value=\'' + y + '\' disabled=\'disabled\'>' + y + '年</option>');
+        		}
+        	}
+        	$('#yearEnd').html(a.join('')).select();
+        }
+        //设置下拉框可选月份
+        function setMonthOption(arr){
+        	var months = [1,2,3,4,5,6,7,8,9,10,11,12], a = [];
+        	for(var i=0, l = months.length; i<l; i++){
+        		var m = months[i];
+        		if(checkInArray(m, arr)){
+        			a.push('<option value=\'' + m + '\'>' + m + '月</option>');
+        		}else{
+        			//a.push('<option value=\'' + m + '\' disabled=\'disabled\'>' + m + '月</option>');
+        		}
+        	}
+        	$('#monthEnd').html(a.join('')).select();
+        }
+        //设置下拉框可选季度
+        function setQuarterOption(arr){
+        	var quarters = [1,2,3,4], a = [];
+        	for(var i=0, l = quarters.length; i<l; i++){
+        		var q = quarters[i];
+        		if(checkInArray(q, arr)){
+        			a.push('<option value=\'' + q + '\'>第' + q + '季度</option>');
+        		}else{
+        			//a.push('<option value=\'' + q + '\' disabled=\'disabled\'>第' + q + '季度</option>');
+        		}
+        	}
+        	$('#quarterEnd').html(a.join('')).select();
+        }
+        
+        function changeReportType(type){
+        	$('#reportType').val(type);
+        	if(oldJson){
+        		queryReport();
+        	}
+        }
+        //点击User
+        function onCheckUser(treeId){
+        	var postJson = {};
+        	postJson = getCheckJson(treeId, 'U');
+        	$('#userIds').val(postJson.ids);
+        	$('#userNames').val(postJson.names);
+        	$("#userNames").focus().blur();
+        }
+        //点击Dept
+        function onCheckDept(treeId, checkbox){
+        	var postJson = {};
+        	postJson = getCheckJson(treeId, 'D');
+        	$('#deptIds').val(postJson.ids);
+        	$('#deptNames').val(postJson.names);
+        	if(checkbox.checked){
+        		containSub = '1';
+        	}else{
+        		containSub = '0';
+        	}
+        	$("#deptNames").focus().blur();
+        }
+        function getCheckJson(treeId, flag){
+        	var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+        	var nodes = treeObj.getCheckedNodes(true);
+        	var len = nodes.length;
+        	var uIds = "";
+        	var uName = "";
+        	for(var i=0; i<len; i++){
+        		if(flag=='U'){
+        			if(nodes[i].flag==flag){
+        				if(uIds==""){
+        					uIds = nodes[i].id;
+        					uName = nodes[i].name;
+        				}else{
+        					uIds = uIds + "," + nodes[i].id;
+        					uName = uName+ "," +nodes[i].name;
+        				}
+        			}
+        		}else{
+        			if(uIds==""){
+        				uIds = nodes[i].id;
+        				uName = nodes[i].name;
+        			}else{
+        				uIds = uIds + "," + nodes[i].id;
+        				uName = uName+ "," +nodes[i].name;
+        			}	
+        		}
+        	}
+        	var postJson = {};
+        	postJson['ids'] = uIds;
+        	postJson['names'] = uName;
+        	return postJson;
+        }	
+        
+         //查询报表
+        function queryReport()
+        {	var bool = jQuery.validator({ form: 'form1', extend: false});
+			if(!bool){
+				return;
+			}
+        	
+        	$("#reportBody").html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待...</div></div>');
+        	var json = getConditionJson();
+        	jQuery.post("showAddCustomerReport.html?random="+Math.random()*1000000,json,
+        		function(html){
+        		 refreshReport(html);
+        	});
+        }
+        
+        function changeBelongTo(val){
+        	switch(val){
+        		case "my":
+        			$("#my").show();
+        			$("#userList, #deptList").hide();
+        			break;
+        		case "sub":
+        			$("#userList").show();
+        			$("#my, #deptList").hide();
+        			break;
+        		case "dept":
+        			$("#deptList").show();
+        			$("#my, #userList").hide();
+        			break;
+        		default: break;
+        	}
+        }
+        
+        function showDetail(id,dateBegin,dateEnd,name,title)
+        {
+        	var idType = $("#idType").val();
+        	var userId="";
+        	var deptId="";
+        	var sub="";
+        	if(idType=="dept"){
+        		deptId=id;
+        		for(var nm in oldJson)
+				{
+					if(nm=='condition.containSub'){
+						sub = oldJson[nm];
+						break;
+					}
+				}
+        	}else{
+        		userId=id;
+        	} 
+        	var url = "../report/showAddCustomerReportDetail.html?containSub="+sub+"&detail.userId="+userId+"&detail.deptId="+deptId+"&detail.dateBegin="+dateBegin+"&detail.dateEnd="+dateEnd+"&detail.name="+encodeURI(encodeURI(name))+"&detail.title="+encodeURI(encodeURI(title));
+        	var key = id+dateBegin+dateEnd;
+        	tab.add({"id":"showAddCustDetail"+key,"pid":GetId(),"title":"新增客户统计明细","url":url,"lock":false});
+        }
+        
+        function refreshReport(html)
+        {
+        	var elem = $(html);
+        	var grid = $("#reportBody");
+        	grid[0].innerHTML="";
+        	grid.append(elem);
+        }
+        
+        function exportReport()
+        {
+        	var type = $('#reportType').val();
+        	switch(type){
+        		case "rtGrid":
+        			var json = oldJson;
+        			if(!json){
+        				banger.page.showMessageBox("没有可导出的数据！");
+        				return;
+        			}
+        			var params = "";
+        			for(var nm in json)
+        			{
+        				params +="&"+nm+"="+json[nm];
+        			}
+        			location.href="exportAddCustomerReport.html?random="+Math.random()*1000000+params;
+        			break;
+        		case "rtLine":
+        			var json = oldJson;
+        			if(!json){
+        				banger.page.showMessageBox("没有可导出的数据！");
+        				return;
+        			}
+        			chart.exportChart({filename:"新增客户曲线图",type:"image/jpeg"});
+        			break;
+        		case "rtColumn": 
+        			var json = oldJson;
+        			if(!json){
+        				banger.page.showMessageBox("没有可导出的数据！");
+        				return;
+        			}
+        			chart.exportChart({filename:"新增客户柱状图",type:"image/jpeg"});
+        			break;
+        	}
+        }
+        
+        function getConditionJson()
+        {
+        	var json = getPostJson();
+        	var belongTo = $("#belongTo").val();
+        	switch(belongTo)
+        	{
+        		case "my":
+        			json["condition.userIds"]=$("#myUserId").val();
+        			break;
+        		case "sub":
+        			json["condition.userIds"]=$("#userIds").val();
+        			break;
+        		case "dept":
+        			json["condition.deptIds"]=$("#deptIds").val();
+        			json["condition.containSub"]=containSub;
+        			break;
+        	}
+        	json["reportType"] = $('#reportType').val();
+        	oldJson = json;
+        	return json;
+        }
+        
+        function CheckIsInstall() {	
+        	var bool = true;
+        	try{
+        	     var LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+        		if ((LODOP==null)||(typeof(LODOP.VERSION)=="undefined")||(typeof(LODOP.VERSION)=="unknown")) 
+        			bool = false;
+        	 }catch(err){
+        		bool = false;
+        	 }
+        	 return bool;
+        }
+        	
+        function openPrintPage()
+        {
+        	var json = oldJson;
+        	if(!json){
+        		banger.page.showMessageBox("没有可打印的数据！");
+        		return;
+        	}
+        	
+        	if(CheckIsInstall()){
+        		prn1_preview();
+        	}else{
+        		//动态生成一个div 下载框
+        		if (navigator.userAgent.indexOf('Win64')>=0){
+        			path = '${ctx}/js/report/install_lodop64.exe';
+        		}else{
+        			path = '${ctx}/js/report/install_lodop32.exe';
+        		}
+        		
+        		loadPrintActiveX();
+        	}
+        }
+		
+        //打印预览支持控件路径
+		var path = '';
+		
+        function loadPrintActiveX(){
+        	var installHTML = '<div class=\'ui-model-install\'>'
+						+ '<h4 style=\'\'>请安装安全报表打印控件，已保证打印预览正常使用！</h4>'
+						+ '<p style=\'\'><label>控件安装完成后，请重启浏览器！</label></p>'
+						+ '<div style=\'\'><a href=\'' + path + '\' target=\'_self\'>立即下载</a></div>'
+						+ '</div>';
+			art.dialog({
+				id: 'loadPrintActiveX',
+    			title: '安全报表打印控件下载',
+    			content: installHTML
+    		});
+        }
+        
+        function prn1_preview() {	
+        	CreateOneFormPage();	
+        	LODOP.PREVIEW();	
+        };
+        	
+        function CreateOneFormPage(){
+        	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+        	var strStyleCSS="#parse('/velocity/taglibs.vm')"
+        		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/print.css' />";
+        	var strFormHtml=strStyleCSS+"<body>"+document.getElementById("reportBody").innerHTML+"</body>";
+        		
+        	LODOP.PRINT_INIT("");
+        	LODOP.SET_PRINT_PAGESIZE(2,0,0,"A4");
+        	
+        	var type = $('#reportType').val();
+        	switch(type){
+        		case "rtGrid":
+        			LODOP.ADD_PRINT_HTM(20,0,"100%","100%",strFormHtml);
+        			break;
+        		case "rtLine":
+        		case "rtColumn":
+        			LODOP.ADD_PRINT_HTML(20,0,"100%","100%",strFormHtml);
+        			break;
+        	}
+        };	 
+        	
+        	
+        	/*验证下属和机构是否为空*/
+        	function executeUserFunction(obj){
+				var belongTo=$("#belongTo").val();
+				if(belongTo=="sub"){
+					var text=$("#userNames").val();
+					if(text.length==0){
+						$(obj).attr('tips', '“统计对象下属”必须填写'); return false;
+					}
+				}else if(belongTo=="dept"){
+					var text=$("#deptNames").val();
+					if(text.length==0){
+						$(obj).attr('tips', '“统计对象机构”必须填写'); return false;
+					}
+				}
+				return true;
+			}
+			
+		  /*验证开始年份*/	
+	        function searchStartYearFun(obj){
+	        	$('#ui-select-yearEnd').removeClass('v-fails');
+				var yb = $("#yearBegin").val();
+	        	var ye = $("#yearEnd").val();
+				if(ye.length>0&&yb.length>0){
+					if(parseInt(ye)<parseInt(yb)){
+						$(obj).attr('tips', '开始年份必须小于结束年份'); return false;
+					}else{
+						$('#yearEnd').removeClass('v-fails');
+						return true;
+					}
+				}else return true;
+			}
+		 /*验证结束年份*/	
+		function searchEndYearFun(obj){
+			$('#ui-select-yearBegin').removeClass('v-fails');
+			var yb = $("#yearBegin").val();
+	        var ye = $("#yearEnd").val();
+	        var mb = $("#monthBegin").val();
+	        var me = $("#monthEnd").val();
+	        var qb = $("#quarterBegin").val();
+	        var qe = $("#quarterEnd").val();
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)>parseInt(yb)){
+					$('#ui-select-monthBegin').removeClass('v-fails');
+					$('#ui-select-monthEnd').removeClass('v-fails');
+					
+					$('#ui-select-quarterBegin').removeClass('v-fails');
+					$('#ui-select-quarterEnd').removeClass('v-fails');
+				}else if(parseInt(ye)==parseInt(yb)){
+					if(me.length>0&&mb.length>0){
+						if(parseInt(me)<parseInt(mb)){
+							$('#ui-select-monthBegin').removeClass('v-fails');
+							$('#ui-select-monthEnd').addClass('v-fails');
+							$('#ui-select-monthEnd input').attr('tips', '结束月份不能小于开始月份');
+						}else{
+							$('#ui-select-monthBegin').removeClass('v-fails');
+							$('#ui-select-monthEnd').removeClass('v-fails');
+						}
+					}
+					if(qe.length>0&&qb.length>0){
+						if(parseInt(qe)<parseInt(qb)){
+							$('#ui-select-quarterBegin').removeClass('v-fails');
+							$('#ui-select-quarterEnd').addClass('v-fails');
+							$('#ui-select-quarterEnd input').attr('tips', '结束季度不能小于开始季度');
+						}else{
+							$('#ui-select-quarterBegin').removeClass('v-fails');
+							$('#ui-select-quarterEnd').removeClass('v-fails');
+						}
+					}
+				}
+				if(parseInt(ye)<parseInt(yb)){
+					$(obj).attr('tips', '结束年份不能小于开始年份'); return false;
+				}else{
+					$('#yearEnd').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+			 /*验证开始月份*/	
+	        function searchStartMonthFun(obj){
+	        	$('#ui-select-monthEnd').removeClass('v-fails');
+	        	var yb = $("#yearBegin").val();
+	      		var ye = $("#yearEnd").val();
+	      		
+				var mb = $("#monthBegin").val();
+	        	var me = $("#monthEnd").val();
+				
+				if(ye.length>0&&yb.length>0){
+					if(parseInt(ye)==parseInt(yb)){
+						if(me.length>0&&mb.length>0){
+							if(parseInt(me)<parseInt(mb)){
+								$(obj).attr('tips', '开始月份必须小于结束月份'); return false;
+							}else{
+								$('#monthBegin,#monthEnd').removeClass('v-fails');
+								return true;
+							}
+						}else return true;
+					}else return true;
+				}else return true;
+			}
+			
+			  /*验证结束月份*/	
+		function searchEndMonthFun(obj){
+			$('#ui-select-monthBegin').removeClass('v-fails');
+			
+			var yb = $("#yearBegin").val();
+	      	var ye = $("#yearEnd").val();
+	      	
+			var mb = $("#monthBegin").val();
+	        var me = $("#monthEnd").val();
+			
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)==parseInt(yb)){
+					if(me.length>0&&mb.length>0){
+						if(parseInt(me)<parseInt(mb)){
+							$(obj).attr('tips', '结束月份不能小于开始月份'); return false;
+						}else{
+							$('#monthBegin,#monthEnd').removeClass('v-fails');
+							return true;
+						}
+					}else return true;
+				}else return true;
+			}else return true;
+		}
+		 
+		  /*验证结束季度*/	
+		function searchBeginQuarterFun(obj){
+			$('#ui-select-quarterEnd').removeClass('v-fails');
+			
+			var yb = $("#yearBegin").val();
+	      	var ye = $("#yearEnd").val();
+	      	
+			var qb = $("#quarterBegin").val();
+	        var qe = $("#quarterEnd").val();
+			
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)==parseInt(yb)){
+					if(qe.length>0&&qb.length>0){
+						if(parseInt(qe)<parseInt(qb)){
+							$(obj).attr('tips', '开始季度必须小于结束季度'); return false;
+						}else{
+							$('#quarterBegin,#quarterEnd').removeClass('v-fails');
+							return true;
+						}
+					}else return true;
+				}else return true;
+			}else return true;
+		} 
+		  /*验证结束季度*/	
+		function searchEndQuarterFun(obj){
+			$('#ui-select-quarterBegin').removeClass('v-fails');
+			
+			var yb = $("#yearBegin").val();
+	      	var ye = $("#yearEnd").val();
+	      	
+			var qb = $("#quarterBegin").val();
+	        var qe = $("#quarterEnd").val();
+			
+			if(ye.length>0&&yb.length>0){
+				if(parseInt(ye)==parseInt(yb)){
+					if(qe.length>0&&qb.length>0){
+						if(parseInt(qe)<parseInt(qb)){
+							$(obj).attr('tips', '结束季度不能小于开始季度'); return false;
+						}else{
+							$('#quarterBegin,#quarterEnd').removeClass('v-fails');
+							return true;
+						}
+					}else return true;
+				}else return true;
+			}else return true;
+		}
+		
+		 function getDateType()
+        {
+        	if($("#rdoYear")[0].checked)return "year";
+        	else if($("#rdoMonth")[0].checked)return "month";
+        	else if($("#rdoQuarter")[0].checked)return "quarter";
+        }
+    </script>
+</head>
+
+<body>
+	<form id="form1" method="post">
+		<center class="Noprint" >
+        <div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">统计对象：</label>
+                <select id="belongTo" name="condition.belongTo" render="sel" style="width: 120px;">
+                    <option value="my">我的</option>
+                    #if($hasBelongTo)
+                    	<option value="sub">下属的</option>
+                    	<option value="dept">机构的</option>
+                    #end
+                </select>
+                <span id="my" class="btn2 fl" style="display: none; margin-left: 5px;">
+                	<input id="myUserId" type="hidden" value="$!userId" />
+                    <label class="btn2-txt">$!userName</label>
+                </span>
+                <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                    <input type="text" fun="executeUserFunction" id="userNames" class="dtxt2-txt" readonly="readonly" />
+                    <input id="userIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+                <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+                    <input type="text" fun="executeUserFunction" id="deptNames" class="dtxt2-txt" readonly="readonly" />
+                    <input id="deptIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">时间类型：</label>
+                <div class="fl" style="padding: 4px 0px;">
+                	<input type="radio" name="condition.dateType" value="month" id="rdoMonth" class="rdo" checked="checked" />
+                    <label for="rdoMonth">按月汇总</label>&nbsp; &nbsp; 
+                    <input type="radio" name="condition.dateType" value="quarter" id="rdoQuarter" class="rdo" />
+                    <label for="rdoQuarter">按季度汇总</label>&nbsp; &nbsp; 
+                    <input type="radio" name="condition.dateType" value="year" id="rdoYear" class="rdo" />
+                    <label for="rdoYear">按年汇总</label>
+                </div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">开始年份：</label>
+                <select id="yearBegin" fun="searchStartYearFun" name="condition.yearBegin" style="width: 120px;">
+                    #foreach($y in $years)
+                		#set($ys=$y+"年")
+                    	<option value="$y">$ys</option>
+                    #end
+                </select>
+            </div>
+            <div class="condi-i" rel="month">
+            	<label class="condi-i-field">月份：</label>
+                <select id="monthBegin" fun="searchStartMonthFun" name="condition.monthBegin" style="width: 120px;">
+                    <option value="1">1月</option>
+                    <option value="2">2月</option>
+                    <option value="3">3月</option>
+                    <option value="4">4月</option>
+                    <option value="5">5月</option>
+                    <option value="6">6月</option>
+                    <option value="7">7月</option>
+                    <option value="8">8月</option>
+                    <option value="9">9月</option>
+                    <option value="10">10月</option>
+                    <option value="11">11月</option>
+                    <option value="12">12月</option>
+                </select>
+            </div>
+            <div class="condi-i hide" rel="quarter">
+            	<label class="condi-i-field">季度：</label>
+                <select id="quarterBegin" fun="searchBeginQuarterFun" name="condition.quarterBegin" style="width: 120px;">
+                    <option value="1">第1季度</option>
+                    <option value="2">第2季度</option>
+                    <option value="3">第3季度</option>
+                    <option value="4">第4季度</option>
+                </select>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">结束年份：</label>
+                <select id="yearEnd" fun="searchEndYearFun" name="condition.yearEnd" style="width: 120px;">
+                	#foreach($y in $years)
+                		#set($ys=$y+"年")
+                    	<option value="$y">$ys</option>
+                    #end
+                </select>
+            </div>
+            <div class="condi-i" rel="month">
+            	<label class="condi-i-field">月份：</label>
+                <select id="monthEnd" fun="searchEndMonthFun" name="condition.monthEnd" style="width: 120px;">
+                    <option value="1">1月</option>
+                    <option value="2">2月</option>
+                    <option value="3">3月</option>
+                    <option value="4">4月</option>
+                    <option value="5">5月</option>
+                    <option value="6">6月</option>
+                    <option value="7">7月</option>
+                    <option value="8">8月</option>
+                    <option value="9">9月</option>
+                    <option value="10">10月</option>
+                    <option value="11">11月</option>
+                    <option value="12">12月</option>
+                </select>
+            </div>
+            <div class="condi-i hide" rel="quarter">
+            	<label class="condi-i-field">季度：</label>
+                <select id="quarterEnd" fun="searchEndQuarterFun" name="condition.quarterEnd" style="width: 120px;">
+                    <option value="1">第1季度</option>
+                    <option value="2">第2季度</option>
+                    <option value="3">第3季度</option>
+                    <option value="4">第4季度</option>
+                </select>
+            </div>
+        </div>
+        <div class="condi-row">
+	        <div class="condi-i">
+            	<label class="condi-i-field">图表类型：</label>
+		        <div class="fl" style="padding: 4px 0px;">
+			        <input type="hidden" value="" id="reportType"/>
+			        <input type="radio" name="reportType" class="rdo" id="rdo1" value="rtLine" />
+			        <label for="rdo1">曲线图</label>&nbsp; &nbsp; 
+			        <input type="radio" name="reportType" class="rdo" id="rdo2" value="rtColumn" />
+			        <label for="rdo2">柱状图</label>&nbsp; &nbsp; 
+			        <input type="radio" name="reportType" class="rdo" id="rdo4" value="rtGrid" checked="checked" />
+			        <label for="rdo4">统计表</label>&nbsp; &nbsp; 
+		        </div>
+	        </div>
+        </div>
+        <div class="sz">
+            <input id="query" type="button" class="btn1" value="搜 索" />
+            #if($urlPermitUtil.hasPermission('exportAddCustomerReport'))
+            <input id="export" type="button" class="btn1" value="导 出" />
+            #end
+            #if($urlPermitUtil.hasPermission('getAddCustomerReportPrint'))
+            <input id="print" type="button" class="btn1" value="打 印" />
+            #end
+        </div>
+        </center>
+        <div id="reportBody" class="recenter">
+	    	
+    	</div>
+    </form>
+</body>
+</head>

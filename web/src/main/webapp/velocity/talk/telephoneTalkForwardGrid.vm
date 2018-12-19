@@ -1,0 +1,27 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+	<thead>
+    	<tr>
+        	<th><label title="用户名">用户名</label></th>
+        	<th><label title="人员姓名">人员姓名</label></th>
+        	<th><label title="机构">机构</label></th>
+        	<th><label title="分机号">分机号</label></th>
+        </tr>
+    </thead>
+	<tbody>
+        #foreach($user in $!forwardUsers.items)
+	    	<tr data="$!user.phoneExt" style="hand:pointer;" onclick="javascript:selPhoneExt(this)" >
+	    		<td><label title="$!user.account">$!user.account</label></td>
+        		<td><label title="$!user.userName">$!user.userName</label></td>
+        		<td><label title="$!user.deptName">$!user.deptName</label></td>
+        		<td><label title="$!user.phoneExt">$!user.phoneExt</label></td>
+	        </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="4">
+            	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

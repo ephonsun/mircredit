@@ -1,0 +1,93 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新增客户统计报表</title>
+	#styleLink("base")
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/report/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+   
+    <style media=print> 
+.Noprint{display:none;} 
+.PageNext{page-break-after: always;} 
+</style> 
+
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000; 
+    border-style: solid; 
+    border-top-width: 2px; 
+    border-right-width: 2px; 
+    border-bottom-width: 1px; 
+    border-left-width: 1px; 
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+
+</style> 
+
+    <script>
+
+	jQuery(document).ready(function(){
+		$("#print").click(function(){
+			printReport('$!reportType');
+		});
+		$("#close").click(function(){
+			window.close();
+		});
+	});
+	
+	function printReport(reportType)
+	{
+		switch(reportType){
+			case "rtGrid":
+				if(CheckIsInstall()){
+					window.print();	
+				}
+				break;
+			case "rtLine":
+			case "rtColumn":
+				chart.print();
+				break;
+		}
+	}
+
+	
+  </script>
+</head>
+<body style="padding-bottom: 0;">
+<div class="recenter" style="width: 764px; height: 400px; margin: 0px auto;">
+#if($!reportType=='rtGrid')
+	#parse("/velocity/report/addCustomerReportGrid.vm")
+#elseif($!reportType=='rtLine')
+	#parse("/velocity/report/addCustomerReportLine.vm")
+#elseif($!reportType=='rtColumn')
+	#parse("/velocity/report/addCustomerReportColumn.vm")
+#end
+</div>
+<center class="Noprint" >
+	<OBJECT  id=WebBrowser  classid=CLSID:8856F961-340A-11D0-A96B-00C04FD705A2  height=0  width=0> 
+	</OBJECT>
+	<div class="sz">
+	    <input id="print" type="button" class="btn1" value="开始打印" />
+	    <input id="close" type="button" class="btn1" value="关闭" />
+	</div>
+</center>
+</body>
+</html>

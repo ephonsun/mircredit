@@ -1,0 +1,2019 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>申请贷款</title>
+<link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+<link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+<style type="text/css">
+    table.htmltbl_1 { margin-bottom:15px; }
+    .w1 { width:100px; }
+    .mt { margin-top:-5px; }
+        /* 头像 */
+    .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+    .avatar img { width: 124px; height: 124px; border: 0; }
+    .m2{ width:74px;}
+    #draggable {background-color:#FFF; width:165px; padding:5px 0px 5px 10px; position:absolute; right:12px; top:11px; float:left; z-index:99999; }
+</style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+	
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+<script type="text/javascript" src="${ctx}/js/micro/askLoan.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+
+#if($!isEdit == "yes")
+	<base target="_self"/>
+	 #styleLink("base")
+	
+<link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+
+	<script type="text/javascript">
+   
+
+$(function(){
+		
+            var loanId = '$!loanId';
+            var customerId = '$!lnLoanInfo.customerId';
+            var loanCusId = loanId+","+customerId+","+1;
+            var configObj = {
+                'action': '../loan/autoUploadAttachment.html?loanCusId='+loanCusId,
+                'queueId':'fileQueue',
+                'loanId':loanId,
+                'customerId':customerId,
+                'loanStatusId':1,
+                'auto':true
+            }
+            setFileUploadByParams(configObj);//渲染附件上传功能
+        });
+    </script>
+#end
+<script type="text/javascript">
+ jQuery(function () {
+         maxTextArea("textarea[maxlength]");
+        });
+		$(function () {//页面初始化
+		
+		
+   maxInput('#remark', 200);
+    telInput('#phoneExt');
+    escapeInput('#account'); 
+   // escapeInput('#userName');
+    unsignedIntInput('#buessRank');
+    var str = window.top.tempDeptName;
+    var arr = str.split(",");
+    $("#registerRecommendBank").val(arr[0]);
+    $("#deptId").val(arr[1]);
+    jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+    jQuery.fn.zTree.init($("#dataAuthTree"), settingData, zDataNodes);
+
+    var bussTreeObj = jQuery.fn.zTree.getZTreeObj("dataAuthTree");
+    var bussNodes = bussTreeObj.getNodes();    
+    for (var j = 0; j < bussNodes.length; j++) {
+        if (bussNodes[j].name == arr[0]) {
+            $('#' + bussNodes[j].tId + '_check').click();
+            break;
+        }
+    }
+    tab.refresh(GetPid());
+    $("select").each(function () {
+        $(this).select({scroll: 10});
+    });
+    $('#userForm').validator();
+    $('#bussPlan').hide();
+
+    var str = "$!roleNames", arr = new Array();
+    str.length > 0 ? arr = str.split(",") : arr = [];
+    jQuery("#combox1").combobox({
+        allcheck: true,
+        clear: true,
+        rev: true,
+        array: arr
+    });
+    #if(!$!account.equals("admin"))
+        $("input[name='roleType']:checkbox").each(function () {
+            #foreach($item in $!sysRoleAuthList)
+                var temp = $(this).val();
+                var roleId =$item.roleId;
+                if (temp == roleId)
+                    $(this).attr("disabled", true);
+            #end
+        })
+        $("input[name='roleType']:checkbox").each(function () {
+            if ($(this).attr("disabled")) {
+                $(this).attr("disabled", false);
+            } else {
+                $(this).attr("disabled", true);
+                $(this).next('label').attr("disabled", true);
+            }
+        })
+    #end
+  //机构输入框获取焦点时，显示下拉框 add by wuxj
+    $("#registerRecommendBank, #deptRange").focus(function(){
+        $(this).next('span').click();
+    });
+	$("#registerRecommendBank").val('$!lnLoanInfo.registerRecommendBank');
+});
+var setting = {
+    data: {
+        simpleData: {
+            enable: true
+        }
+    },
+    callback: {
+        onClick: onClick
+    },
+    view: {
+        dblClickExpand: false,
+        showIcon: false
+    }
+
+};
+var zNodes = $!deptJson;
+function onClick(e, treeId, treeNode) {
+    var zTree = jQuery.fn.zTree.getZTreeObj("deptTree"),
+            nodes = zTree.getSelectedNodes(),
+            v = "";
+    nodes.sort(function compare(a, b) {
+        return a.id - b.id;
+    });
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        v += nodes[i].name + ",";
+    }
+    if (v.length > 0) v = v.substring(0, v.length - 1);
+    var obj = $("#registerRecommendBank");
+    obj.attr("value", v);
+    $("#deptId").attr("value", treeNode.id);
+}
+function showMenu() {
+    var cityObj = $("#registerRecommendBank");
+    var cityOffset = $("#registerRecommendBank").offset();
+    $("#menuContent").css({left: cityOffset.left + "px", top: cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+    $("body").bind("mousedown", onBodyDown);
+}
+function hideMenu() {
+    $("#menuContent").fadeOut("fast");
+    $("body").unbind("mousedown", onBodyDown);
+}
+function onBodyDown(event) {
+    if (!(event.target.id == "menuBtn" || event.target.id == "registerRecommendBank" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length > 0)) {
+        hideMenu();
+    }
+}
+var settingData = {
+    check: {
+        enable: true,
+        chkStyle: "checkbox",
+        chkboxType: { "Y": "s", "N": "s" }
+    },
+    data: {
+        simpleData: {
+            enable: true
+        }
+    },
+    callback: {
+        onCheck: onAuthClick,
+        beforeCheck: beforeAuthcheck
+    },
+    view: {
+        showIcon: false
+    }
+};
+var zDataNodes = $!businessJsonArray;
+//业务主管树选中
+function onAuthClick(e, treeId, treenode) {
+    var tree = jQuery.fn.zTree.getZTreeObj("dataAuthTree"),
+            nodes = treenode.children;
+    var bool = treenode.checked;
+    if (bool && typeof(nodes) != 'undefined') {
+        for (var i = 0; i < nodes.length; i++) {
+            tree.setChkDisabled(nodes[i], bool);
+        }
+    }
+    var vid = "";
+    var d = tree.getCheckedNodes(), v = '';
+    jQuery.each(d, function (i) {
+        if (!d[i].chkDisabled) {
+            v += d[i].name + ',';
+            vid += d[i].id + ',';
+        }
+    });
+    if (v.length > 0) v = v.substring(0, v.length - 1);
+    var cityObj = $("#deptRange");
+    cityObj.attr("value", v);
+    $("#bussdept").attr("value", vid);
+}
+function beforeAuthcheck(treeid, treenode) {
+    var tree = jQuery.fn.zTree.getZTreeObj("dataAuthTree"),
+            nodes = treenode.children;
+    var bool = treenode.checked;
+    if (bool && typeof(nodes) != 'undefined') {
+        for (var i = 0; i < nodes.length; i++) {
+            tree.setChkDisabled(nodes[i], !bool);
+        }
+    }
+}
+
+function showDataPlan() {
+    var cityObj = $("#deptRange");
+    var cityOffset = $("#deptRange").offset();
+    $("#menuContent2").css({left: cityOffset.left + "px", top: cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+
+    $("body").bind("mousedown", onBodyDown2);
+}
+function hideDataPlan() {
+    $("#menuContent2").fadeOut("fast");
+    $("body").unbind("mousedown", onBodyDown2);
+}
+function onBodyDown2(event) {
+    if (!(event.target.id == "menuBtn" || event.target.id == "deptRange" || event.target.id == "menuContent2" || $(event.target).parents("#menuContent2").length > 0)) {
+        hideDataPlan();
+    }
+}
+$(function(){
+	$('select').select();
+	#if($!isEdit == "yes")
+		$("#appLoanTypeId").change();
+        $("#cusMarriage").change();
+        $("input[name='registerInfoSourceId']").change();
+        $("#appGuarantorWayId").change();
+        $("#appMortgageId").change();
+        $("#appPledgeId").change();
+        $("#bizLawFormId").change();
+        $("#bizOrgId").change();
+		$("#gtgsh").change();
+        $("#isLocal").change();
+        $("#cusBirthday").change();
+        $("#schtxtidcard").change();
+        $("#cusIdcard").change();
+        $("#isSeason").change();
+		$('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+		
+	#end
+	 jQuery('#schtxtname').dfilter({
+        url: '${ctx}/loan/initFindCustomerByConds.html',
+        data: paramsName,
+        thead: [
+            { text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+            { text : '联系电话', field : 'replaceNumber', width : 150, align : 'center' },
+            { text : '身份证', field : 'replaceIDCard', width : 150, align : 'center' }
+        ],
+        click: clickCus
+    });
+
+    jQuery('#schtxtnum').dfilter({
+        url: '${ctx}/loan/initFindCustomerByConds.html',
+        data: paramsNum,
+        thead: [
+            { text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+            { text : '联系电话', field : 'replaceNumber', width : 150, align : 'center' },
+            { text : '身份证', field : 'replaceIDCard', width : 150, align : 'center' }
+        ],
+        click: clickCus
+    });
+
+    jQuery('#schtxtidcard').dfilter({
+        url: '${ctx}/loan/initFindCustomerByConds.html',
+        data: paramsAddr,
+        thead: [
+            { text : '客户姓名', field : 'customerName', width : 100, align : 'center' },
+            { text : '联系电话', field : 'replaceNumber', width : 150, align : 'center' },
+            { text : '身份证', field : 'replaceIDCard', width : 150, align : 'center' }
+        ],
+        click: clickCus
+    });
+
+});
+function fun1(h, b){
+    return true;
+}
+function fun2(h, b){
+}
+function showDiv(div,eventId){
+    $(".event").hide();
+    $(".line-round-orange.orange.fl").attr("class","line-round-black gray fl");
+    $(div).attr("class","line-round-orange orange fl");
+    $("#"+eventId).show();
+}
+ function paramsName(){
+     return 'customerName=' + jQuery('#cusName').val()+ "&customerIds="+$("#customerId").val()+ "&filter=true";
+
+//     var postJson = {};
+//		postJson['customerName'] = $("#cusName").val();
+//		postJson['customerIds'] = $("#customerId").val();
+//		postJson['filter'] = "true";
+//		return postJson;
+}
+
+ function paramsNum(){
+    return 'cphNumber=' + jQuery('#cusMobilePhone').val()+ "&customerIds="+$("#customerId").val()+ "&filter=true";;
+}
+
+function paramsAddr(){
+    return 'idCard=' + jQuery('#cusIdcard').val()+ "&customerIds="+$("#customerId").val()+ "&filter=true";;
+}
+
+function clickCus(node){
+
+    //验证客户为不良客户
+    var isNogoodCus = isNogood(customerId);
+    if(isNogoodCus){
+        //验证不通过，不可以重新申请贷款
+        var msg = "客户“"+customerName+"”为系统不良客户，不允许申请贷款！";
+        banger.page.showMessageBox(msg);
+        jQuery('#txtCustomerName').val("");
+        jQuery("#txtCphNumber").val("");
+        jQuery("#txtIDCard").val("");
+        return;
+    }
+
+    //取消必填验证
+    var bool = jQuery.validator({form:'baseInfo',extend:true,extendhandler:extendvalidator});
+    if(!bool){
+        return false;
+    }
+	
+	var customerId = node['customerId'];
+	jQuery("#customerId").val(customerId);
+	jQuery("#cusName").val(node['customerName']);
+    jQuery("#cusMobilePhone").val(node['cphNumber']);
+    jQuery("#cusIdcard").val(node['idCard']);
+	
+	$("#cusIdtypeId option[value='"+node['credentialTypeId']+"']").attr("selected", "selected");
+	$("#cusIdtypeId").select();
+	showBirthday(node['idCard']);
+}
+
+//验证申请贷款数据是否有效
+function vLoanData(){
+    var isOk = saveBaseInfo(1);
+    if (!isOk) {
+        return false;
+    }
+
+    var customerId = $("#txtCustomerId").val();
+    var customerName = $("#txtOldCustomerName").val();
+    if(customerId != ""){
+        var postJson = {};
+        postJson['customerId'] = customerId;
+        postJson['customerName'] = customerName;
+        var urlStr = "${ctx}/loan/vLoanData.html?random="+Math.random()*1000;
+        jQuery.ajax({
+            type: 'POST',
+            url: urlStr,
+            data: postJson,
+            success:function(data){
+                if(data != "SUCCESS"){
+                    banger.page.showMessageBox(data);
+                    return false;
+                }else{
+                    //执行保存成功操作
+                    saveLoan();
+                }
+            }
+        });
+    }else{
+        //执行保存成功操作
+        saveLoan();
+    }
+}
+
+/**
+ * 申请拒绝贷款
+ *
+ * @param loanId
+ * @param loanStatusId
+ */
+function applyRefuse(loanId,loanStatusId){
+    isRefuseLoan = true;
+    var ret = applySave();
+    var applyRemark = jQuery.trim($("#applyRemark").val());
+    var radioValue = refuseApplyLoan();
+    if(radioValue){
+        radioValue['remark'] = applyRemark;
+        radioValue['loanId'] = loanId;
+        radioValue['beforeStatusId'] = loanStatusId;
+        radioValue['customerId'] = $("#txtCustomerId").val();
+        jQuery.ajax({
+            type:'POST',
+            url:'../loan/cancelLoan.html?RandNum='+Math.random(),
+            data:radioValue,
+            success:function(){
+                tab.close(GetId(), true);
+            }
+        });
+    }else{
+        isRefuseLoan = false;
+    }
+}
+
+//拒绝贷款
+function refuseApplyLoan(){
+    var url = "../loan/cancelLoanPage.html?RandNum="+Math.random();
+    var result = window.showModalDialog(url,{window: window},'dialogWidth=550px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+    return result;
+}
+
+function textOclick(id,obj){
+	var flage=$(obj).attr("checked");
+	  if(flage){
+		$("#"+id).show()
+	  }else{
+		$("#"+id).hide()
+	    $("#"+id).val("")
+	  }
+	}
+
+
+ function getCusIdcard(){
+     var cusIdcard=  $("#cusIdcard").val();
+     if(cusIdcard=="1") {
+         $("#cusBirthday").val(cusIdcard.substring(6, 10) + "-" + cusIdcard.substring(10, 12) + "-" + cusIdcard.substring(12, 14));
+     }
+
+ }
+
+
+
+
+
+	
+</script>
+</head>
+<body>
+<!--共同借款人增加url -->
+<input type="hidden" id="toAddCoUrl" value="${ctx}/loan/toAddCo.html" />
+<!--共同借款人查询url-->
+<input type="hidden" id="queryLoanCoUrl" value="${ctx}/loan/queryLoanCo.html" />
+<!--移除共同借贷人查询url-->
+<input type="hidden" id="removeCoUrl" value="${ctx}/loan/removeCo.html" />
+<input type="hidden" id="editCoUrl" value="${ctx}/loan/editCo.html" />
+<!--担保人增加url -->
+<input type="hidden" id="toAddGuUrl" value="${ctx}/loan/toAddGu.html" />
+<input type="hidden" id="editGuUrl" value="${ctx}/loan/editGu.html" />
+<!--担保人查询url-->
+<input type="hidden" id="queryLoanGuUrl" value="${ctx}/loan/queryLoanGu.html" />
+<!--移除担保人url-->
+<input type="hidden" id="removeGuUrl" value="${ctx}/loan/removeGu.html" />
+<!--信贷历史增加url -->
+<input type="hidden" id="addChUrl" value="${ctx}/loan/toAddCh.html" />
+<input type="hidden" id="editChUrl" value="${ctx}/loan/editCh.html" />
+<!--信贷历史增加url -->
+<input type="hidden" id="queryLoanChUrl" value="${ctx}/loan/queryLoanCh.html" />
+<!--移除信贷历史url -->
+<input type="hidden" id="removeChUrl" value="${ctx}/loan/removeCh.html" />
+<!--验证是否有失败记录信息 url-->
+<input type="hidden" id="isLoanFailUrl" value="${ctx}/loan/isLoanFail.html" />
+<!--验证是否有失败记录信息 url-->
+<input type="hidden" id="isNogoodUrl" value="${ctx}/loan/isNogood.html" />
+
+<input type="hidden" id="isEdit" value="$!isEdit" />
+<input type="hidden" id="isSave"  />
+#if($!isEdit == "yes")
+<div class="etabs">
+<div class="etabs-head">
+    <div class="etabs-head-items">
+        <ul id="etabs-items">
+            <li><label>贷款信息</label></li>
+            <li><label>贷款资料</label></li>
+            <li><label>贷款历史操作</label></li>
+        </ul>
+    </div>
+</div>
+<div id="etabs-body" class="etabs-body">
+<div class="etabs-body-child">
+#end
+<form id="myForm" #if($!isEdit == "yes") save-url = "${ctx}/loan/editLoan.html" #else save-url="${ctx}/loan/addLoan.html" #end submit-url="${ctx}/loan/submitLoan.html"  method="post">
+
+<p class="bold loan-lheight">贷款状态：贷款申请</p>
+<input type="hidden" id="loanId" name="lnLoanInfo.loanId" value="$!lnLoanInfo.loanId"/>
+<input type="hidden" id="customerId" name="lnLoanInfo.customerId" value="$!lnLoanInfo.customerId" />
+<!--贷款申请 登记信息开始 -->
+<input type="hidden" id="registerInfoSourceIds" name="lnLoanInfo.registerInfoSourceIds" value="$!lnLoanInfo.registerInfoSourceIds" />
+
+
+
+
+<div class="loan-bg">
+    <p class="bold loan-lheight">登记信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="12.5%" style="text-align: right">
+					<label class="red">*</label>
+                    <label>微贷事业中心:</label>
+                </td>
+                <td width="12.5%">
+                    <div class="ui-div-text">
+                        <select id="registerMicroBizCenter" name="lnLoanInfo.registerMicroBizCenter" maxlength="20" >
+                            <option ></option>
+							#foreach($!sysTeam in $!sysTeamList)
+								<option #if("$!lnLoanInfo.registerMicroBizCenter" == "$!sysTeam.teamId")selected #end value="$!sysTeam.teamId">$!sysTeam.teamName</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				<td class="field" width="12.5%" style="text-align: right">
+					<label class="red">*</label>
+                    <label>申请日期:</label>
+                </td>
+                <td width="12.5%">
+                    <div class="ui-div-text" >
+                        <input type="text" class="text datepicker" readonly="readonly" id="registerApplyDate" name="lnLoanInfo.registerApplyDate" value="$!date.format('yyyy-MM-dd',$!lnLoanInfo.registerApplyDate)" onblur="checkDate(this.value)" />
+                        <i class="date"></i>
+                    </div>
+                </td>
+				<td class="field" width="12.5%" style="text-align: right">
+					<label class="red">*</label>
+                    <label>需要贷款日期:</label>
+                </td>
+                <td width="12.5%">
+                    <div class="ui-div-text" >
+                        <input type="text" class="text datepicker" readonly="readonly" id="registerLoanDate" name="lnLoanInfo.registerLoanDate" value="$!date.format('yyyy-MM-dd',$!lnLoanInfo.registerLoanDate)" onblur="checkDate(this.value)" />
+                        <i class="date"></i>
+                    </div>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+			
+			
+			<tr style="height:10px">
+				<td colspan="8"></td>
+			</tr>
+			
+			<!--
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>信息来源:</label>
+                </td>
+					<td style="text-align:right">
+                    <input type="checkbox" class="checkbox" name="registerInfoSourceId" id="registerInfoSourceId" #if($!soucesIdMap.get("1") == 1) checked #end value="1" maxlength="20"/>直接营销
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;
+                </td>
+				<td style="width:400;" colspan="3">
+					<input type="text" class="text" id="registerDirectMarket" name="lnLoanInfo.registerDirectMarket" value="$!lnLoanInfo.registerDirectMarket"  style=" display:none" maxlength="20"/>
+                </td>
+				<td style="text-align:right">
+                    <input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("4") == 1) checked #end value="4" maxlength="20"/>现有客户介绍 &nbsp;
+                </td>
+				<td style="width:400;" colspan="2" >
+					<input type="text" class="text" id="registerExistCusIntroduct" name="lnLoanInfo.registerExistCusIntroduct"  value="$!lnLoanInfo.registerExistCusIntroduct" style=" display:none" maxlength="20"/>
+                </td>
+            </tr>
+			<tr style="height:10px">
+				<td></td>
+                <td class="field" style="text-align:right">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("2") == 1) checked #end value="2" maxlength="20"/>报纸 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("3") == 1) checked #end value="3" maxlength="20"/>电视&nbsp;
+				</td>
+				<td class="field" style="width:94px">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("5") == 1) checked #end value="5" maxlength="20"/>第三方推荐&nbsp;
+				</td>
+				<td class="field"  style="width:94px">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("6") == 1) checked #end value="6" maxlength="20"/>网站&nbsp;&nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("7") == 1) checked #end value="7" maxlength="20"/>广播 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("8") == 1) checked #end value="8" maxlength="20"/>广告牌&nbsp;
+				</td>
+				<td class="field" style="width:94px">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("9") == 1) checked #end value="9" maxlength="20"/>网店宣传 &nbsp;&nbsp;
+				</td>
+				<td class="field" style="width:230px;text-align:center;">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("10") == 1) checked #end value="10" maxlength="20"/>内行员工推荐 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("11") == 1) checked #end value="11" maxlength="20"/>微信微博 &nbsp;&nbsp;
+				</td>
+				<td class="field" style="width:128px;text-align:left;" colspan="2">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("12") == 1) checked #end value="12" maxlength="20"/>其他 &nbsp;
+					<input type="text" class="text" id="registerInfoSourceOther" name="lnLoanInfo.registerInfoSourceOther" value="$!lnLoanInfo.registerInfoSourceOther" style="display:none" maxlength="20"/>
+				</td>
+			</tr>
+			-->
+        </table>
+    </div>
+</div>
+
+
+<div class="loan-bg">
+	<p class="bold loan-lheight">信息来源</p>
+	<div id="" class="applyMessage">
+		<table class="htmltbl">
+			<tr>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("7") == 1) checked #end id="" value="7" />广播
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("2") == 1) checked #end id="" value="2" />报纸
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("3") == 1) checked #end id="" value="3" />电视
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("8") == 1) checked #end id="" value="8" />广告牌
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("13") == 1) checked #end id="" value="13" />公交车
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("14") == 1) checked #end id="" value="14" />影院
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("15") == 1) checked #end id="" value="15" />高铁站
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("16") == 1) checked #end id="" value="16" />续贷
+				    </div>
+				</td>
+			</tr>
+			
+			<tr>				
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("9") == 1) checked #end id="" value="9" />网点宣传
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("5") == 1) checked #end id="" value="5" />第三方推荐
+				    </div>
+				</td>
+				
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerExistCusIntroduct',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("4") == 1) checked #end id="" value="4" />放款客户介绍
+				    </div>
+				</td>
+				<td colspan="1" width="12.5%">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerExistCusIntroduct" name="lnLoanInfo.registerExistCusIntroduct"  value="$!lnLoanInfo.registerExistCusIntroduct" #if($!soucesIdMap.get("4") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceId" #if($!soucesIdMap.get("6") == 1) checked #end id="" value="6" />网站
+				    </div>
+				</td>
+				
+				<td style="text-align:left" colspan="2">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceFFKKHJS',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("17") == 1) checked #end id="" value="17" />非放款客户/朋友/同学介绍
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceFFKKHJS" name="lnLoanInfo.registerSourceFFKKHJS" value="$!lnLoanInfo.registerSourceFFKKHJS"  #if($!soucesIdMap.get("17") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+		
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceWX',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("11") == 1) checked #end id="" value="11" />微信
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceWX" name="lnLoanInfo.registerSourceWX" value="$!lnLoanInfo.registerSourceWX"  #if($!soucesIdMap.get("11") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceMM',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("18") == 1) checked #end id="" value="18" />陌陌
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceMM" name="lnLoanInfo.registerSourceMM" value="$!lnLoanInfo.registerSourceMM" #if($!soucesIdMap.get("18") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceCCK',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("19") == 1) checked #end id="" value="19" />插车卡
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceCCK" name="lnLoanInfo.registerSourceCCK" value="$!lnLoanInfo.registerSourceCCK"  #if($!soucesIdMap.get("19") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceHNYGJS',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("10") == 1) checked #end id="" value="10" />行内员工介绍
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceHNYGJS" name="lnLoanInfo.registerSourceHNYGJS" value="$!lnLoanInfo.registerSourceHNYGJS"  #if($!soucesIdMap.get("10") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerDirectMarket',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("1") == 1) checked #end id="" value="1" />客户经理营销
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerDirectMarket" name="lnLoanInfo.registerDirectMarket" value="$!lnLoanInfo.registerDirectMarket"  #if($!soucesIdMap.get("1") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceDHYX',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("20") == 1) checked #end id="" value="20" />电话营销
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceDHYX" name="lnLoanInfo.registerSourceDHYX" value="$!lnLoanInfo.registerSourceDHYX"  #if($!soucesIdMap.get("20") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceHZSHTJ',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("21") == 1) checked #end id="" value="21" />合作商户推荐
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceHZSHTJ" name="lnLoanInfo.registerSourceHZSHTJ" value="$!lnLoanInfo.registerSourceHZSHTJ"  #if($!soucesIdMap.get("21") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceZXSQ',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("22") == 1) checked #end id="" value="22" />在线申请
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceZXSQ" name="lnLoanInfo.registerSourceZXSQ" value="$!lnLoanInfo.registerSourceZXSQ"  #if($!soucesIdMap.get("22") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerInfoSourceOther',this)" name="registerInfoSourceId" #if($!soucesIdMap.get("12") == 1) checked #end id="" value="12" />其他
+				    </div>
+				</td>
+				<td  colspan="3">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerInfoSourceOther" name="lnLoanInfo.registerInfoSourceOther" value="$!lnLoanInfo.registerInfoSourceOther"  #if($!soucesIdMap.get("12") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<!--贷款申请 登记信息结束 -->
+
+<!--申请信息开始 -->
+<div class="loan-bg">
+    <p class="bold loan-lheight">申请信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>贷款类型:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <select id="appLoanTypeId" name="lnLoanInfo.appLoanTypeId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!dklx in $!checkBoxMessage.get("DKLX"))
+                                <option #if($!lnLoanInfo.appLoanTypeId == $!dklx.dictionaryKey) selected #end value="$!dklx.dictionaryKey">$!dklx.dictionaryValue</option>
+                            #end
+                        </select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>贷款小类:</label>
+                </td>
+                <td width="200">
+                    <input type="hidden" id="appLoanSubTypeIdHid" value="$!lnLoanInfo.appLoanSubTypeId"/>
+                    <div class="ui-div-text" id="appLoanSubTypeIdDiv">
+                        <select id="appLoanSubTypeId" name="lnLoanInfo.appLoanSubTypeId" maxlength="20" >
+                            <option ></option>
+                        </select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>申请金额(元):</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" name="lnLoanInfo.appMoney" value="$!lnLoanInfo.appMoney" id="appMoney" maxlength="18"  />
+                    </div>
+                </td>
+
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>申请期限(月):</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" name="lnLoanInfo.appLimitYear" value="$!lnLoanInfo.appLimitYear" id="appLimitYear"  maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label>月可支配收入(元)</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" name="lnLoanInfo.appRepaymentMonth" value="$!lnLoanInfo.appRepaymentMonth" id="appRepaymentMonth" maxlength="20"/>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>贷款用途:</label>
+                </td>
+                <td width="200" colspan="3" >
+                    <div class="ui-div-text">
+                        <input type="text" class="text" name="lnLoanInfo.appLoanPurpose"  value="$!lnLoanInfo.appLoanPurpose" id="appLoanPurpose"  style="width:300px" maxlength="50" />
+                    </div>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label>担保方式:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <select id="appGuarantorWayId" name="lnLoanInfo.appGuarantorWayId" value="$lnLoanInfo.appGuarantorWayId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!dbfs in $!checkBoxMessage.get("DBFS"))
+                                <option #if($lnLoanInfo.appGuarantorWayId == $!dbfs.dictionaryKey) selected #end value="$!dbfs.dictionaryKey">$!dbfs.dictionaryValue</option>
+                            #end
+                        </select>
+                    </div>
+                </td>
+
+                <td class="field zy" width="100" style="text-align: right;display:none">
+                    <label>质押:</label>
+                </td>
+                <td class="zy" width="200" style="display:none">
+                    <div class="ui-div-text">
+                        <select id="appMortgageId" name="lnLoanInfo.appMortgageId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!zy in $!checkBoxMessage.get("ZY"))
+                                <option #if($!lnLoanInfo.appMortgageId == $!zy.dictionaryKey) selected #end value="$!zy.dictionaryKey">$!zy.dictionaryValue</option>
+                            #end
+                        </select>
+                    </div>
+                </td>
+
+                <td class="field dy" width="100" style="text-align: right;display:none">
+                    <label>抵押:</label>
+                </td>
+                <td class="dy" width="200" style="display:none">
+                    <div class="ui-div-text">
+                        <select id="appPledgeId" name="lnLoanInfo.appPledgeId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!dy in $!checkBoxMessage.get("DY"))
+                                <option #if($!lnLoanInfo.appPledgeId == $!dy.dictionaryKey) selected #end value="$!dy.dictionaryKey">$!dy.dictionaryValue</option>
+                            #end
+                        </select>
+                    </div>
+                </td>
+            ##抵押其他
+                <td class="zyOther" style="display:none">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" name="lnLoanInfo.appPledgeOther" value="$!lnLoanInfo.appPledgeOther" id="appPledgeOther" maxlength="20"/>
+                    </div>
+                </td>
+            ##质押其他
+                <td class="dyOther" style="display:none">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" name="lnLoanInfo.appMortgageOther" value="$!lnLoanInfo.appMortgageOther" id="appMortgageOther" maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+
+
+        #*	 		<tr>
+                        <td class="field" width="100" style="text-align: right">
+                            <label>最大分期还款额:</label>
+                        </td>
+                        <td width="200">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" name="appMaxInstallmentMoney" id="appMaxInstallmentMoney" />
+                            </div>
+                        </td>
+                        <td class="field" width="100" style="text-align: right">
+                            <label>总项目成本:</label>
+                        </td>
+                        <td width="200">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" name="appTotalProjectCost" id="appTotalProjectCost" />
+                            </div>
+                        </td>
+                        <td class="field" width="100" style="text-align: right">
+                            <label>使用明细: </label>
+                        </td>
+                        <td width="200" colspan="3">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" name="appUserDetail" id="appUserDetail"  maxlength="20" style="width:200"/>
+                            </div>
+                        </td>
+                    </tr>*#
+
+        </table>
+    </div>
+</div>
+
+<!--申请信息结束-->
+
+
+<!--个人信息开始 -->
+<div class="loan-bg">
+    <p class="bold loan-lheight">个人信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>申请人姓名:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" id="schtxtname">
+                        <input type="text" class="text" name="lnLoanInfo.cusName" value="$!lnLoanInfo.cusName" id="cusName" maxlength="20" />
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+                    <label>性    别:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                     <select id="cusSex" name="lnLoanInfo.cusSex" maxlength="20" >
+                            <option #if($!lnLoanInfo.cusSex == "男") selected #end value="男">男</option>
+							<option #if($!lnLoanInfo.cusSex == "女") selected #end value="女">女</option>
+                        </select>
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>证件类型:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <select id="cusIdtypeId" name="lnLoanInfo.cusIdtypeId" maxlength="20" >
+                            <option ></option>
+							#foreach($!zjlx in $!checkBoxMessage.get("ZJLX"))
+								<option #if($!lnLoanInfo.cusIdtypeId == $!zjlx.dictionaryKey)selected #end value="$!zjlx.dictionaryKey">$!zjlx.dictionaryValue</option>
+							#end
+                      </select>
+                    </div>
+                </td>
+            </tr>
+
+			<tr style="height:10px">
+				<td colspan="8"></td>
+			</tr>
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>证件号码:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" id="schtxtidcard">
+                        <input type="text" class="text" name="lnLoanInfo.cusIdcard" value="$!lnLoanInfo.cusIdcard" id="cusIdcard" onblur="checkDbrIdCard()"  maxlength="20" onpropertychange="getCusIdcard()" oninput="getCusIdcard()"   />
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>出生日期:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" >
+                        <input type="text" class="text datepicker" readonly="readonly" id="cusBirthday" name="lnLoanInfo.cusBirthday" value="$!lnLoanInfo.cusBirthday" onblur="checkDate(this.value)"  />
+
+                        <i class="date"></i>
+                    </div>
+                </td>
+
+
+
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>手    机:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" id="schtxtnum">
+						<input type="text" class="text" name="lnLoanInfo.cusMobilePhone" value="$!lnLoanInfo.cusMobilePhone" id="cusMobilePhone"  maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>固定电话:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                       <input type="text" class="text" rule="\S" tips='"联系电话"必须填写' name="lnLoanInfo.cusPhone" value="$!lnLoanInfo.cusPhone" id="cusPhone"  maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>教育程度:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <select id="cusEducationId" name="lnLoanInfo.cusEducationId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!jycd in $!checkBoxMessage.get("JYCD"))
+                                <option #if($!lnLoanInfo.cusEducationId == $!jycd.dictionaryKey)selected #end value="$!jycd.dictionaryKey">$!jycd.dictionaryValue</option>
+                            #end
+                        </select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>居住状况:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<select id="cusLivingStatusId" name="lnLoanInfo.cusLivingStatusId" maxlength="20" >
+                            <option ></option>
+							#foreach($!jzzk in $!checkBoxMessage.get("JZZK"))
+								<option #if($!lnLoanInfo.cusLivingStatusId == $!jzzk.dictionaryKey)selected #end value="$!jzzk.dictionaryKey">$!jzzk.dictionaryValue</option>
+							#end
+						</select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>家庭住址:</label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" name="lnLoanInfo.cusAddress" value="$!lnLoanInfo.cusAddress" id="cusAddress"  maxlength="50" style="width:200"/>
+                    </div>
+                </td>
+
+
+		#*	 	<td class="field consumType" width="100" style="text-align: right; display:none" >
+                    <label>居住场所类型:</label>
+                </td>
+                <td width="200" class="consumType"  style="display:none" >
+                    <div class="ui-div-text">
+						<select id="cusLivingTypeId" name="lnLoanInfo.cusLivingTypeId" maxlength="20" >
+                            <option ></option>
+							#foreach($!jzcslx in $!checkBoxMessage.get("JZCSLX"))
+								<option  #if($!lnLoanInfo.cusLivingTypeId == $!jzcslx.dictionaryKey)selected #end  value="$!jzcslx.dictionaryKey">$!jzcslx.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>*#
+            </tr>
+			
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>婚姻状况:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <select id="cusMarriage" name="lnLoanInfo.cusMarriage" maxlength="20" >
+                            <option > </option>
+                            #foreach($!hyzk in $!checkBoxMessage.get("HYZK"))
+                                <option  #if($!lnLoanInfo.cusMarriage == $!hyzk.dictionaryKey) selected #end  value="$!hyzk.dictionaryKey">$!hyzk.dictionaryValue</option>
+                            #end
+                        </select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>是否本地人:</label>
+                </td>
+                <td width="200" >
+                    <div class="ui-div-text">
+                        <select id="isLocal" name="lnLoanInfo.isLocal" maxlength="20" >
+                            <option ></option>
+                            <option #if($!lnLoanInfo.isLocal == "是") selected #end value="是">是</option>
+                            <option #if($!lnLoanInfo.isLocal == "否") selected #end value="否">否</option>
+                        </select>
+                    </div>
+                </td>
+
+                <td class="field cusLocalYear" width="100" style="text-align: right;display:none">
+                    <label>居住年限:</label>
+                </td>
+                <td width="200" style="display:none" class="cusLocalYear">
+                    <div class="ui-div-text">
+                        #*<input type="text" class="text" value="$!lnLoanInfo.cusLocalYear" name="lnLoanInfo.cusLocalYear" id="cusLocalYear" maxlength="20"/>*#
+                        <input type="text" class="text" value="#if($lnLoanInfo.cusLocalYear)$lnLoanInfo.cusLocalYear#end"  name="lnLoanInfo.cusLocalYear" id="cusLocalYear"  maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')"/>
+                    </div>
+                </td>
+			</tr>
+			
+			<tr class="consumType" style="display:none">
+				<td class="field" width="100" style="text-align: right">
+                    <label>现居地址:</label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" name="lnLoanInfo.cusLivingAddress" value="$!lnLoanInfo.cusLivingAddress" id="cusLivingAddress" maxlength="50" style="width:200"/>
+                    </div>
+                </td>
+			</tr>
+
+			<tr class="isMarriage" style="display:none">
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶姓名:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfo.cusMateName" name="lnLoanInfo.cusMateName" id="cusMateName" maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶身份证号:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusMateIdcard" name="lnLoanInfo.cusMateIdcard" id="cusMateIdcard" maxlength="20" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶手机号:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusMateMobilePhone" name="lnLoanInfo.cusMateMobilePhone" id="cusMateMobilePhone" maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶固定号码:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusMatePhone" name="lnLoanInfo.cusMatePhone" id="cusMatePhone" maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr  class="cusMateCompany" style="display:none">
+                <td class="field" width="100" style="text-align: right">
+                    <label>配偶单位名称:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfo.cusCompanyName" name="lnLoanInfo.cusCompanyName" id="cusCompanyName" maxlength="30"/>
+                    </div>
+                </td>
+				 <td class="field" width="100" style="text-align: right">
+                    <label>配偶单位电话:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfo.cusMateCompanyPhone" name="lnLoanInfo.cusMateCompanyPhone" id="cusMateCompanyPhone" maxlength="20" />
+                    </div>
+                </td>
+
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶月收入水平:</label>
+                </td>
+                <td width="200">
+						<select name="lnLoanInfo.cusMateMonthlyIncomingId" id="cusMateMonthlyIncomingId" maxlength="20" >
+                            <option ></option>
+    						#foreach($!ysrcp in $!checkBoxMessage.get("YSRSP"))
+    							<option #if($!lnLoanInfo.cusMateMonthlyIncomingId == $!ysrcp.dictionaryKey)selected #end value="$!ysrcp.dictionaryKey">$!ysrcp.dictionaryValue</option>
+							#end
+						</select>
+                </td>
+            </tr>
+			
+			<tr class="cusMateCompany" style="display:none"> 
+                <td class="field" width="100" style="text-align: right">
+                    <label>配偶工作岗位:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfo.cusMateJob" name="lnLoanInfo.cusMateJob" id="cusMateJob" maxlength="20"/>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>配偶工作年限:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusMateWorkYear" name="lnLoanInfo.cusMateWorkYear" id="cusMateWorkYear" maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶单位地址:</label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusMateAddress" name="lnLoanInfo.cusMateAddress" id="cusMateAddress" maxlength="50" style="width:200"/>
+                    </div>
+                </td>
+				
+            </tr>
+			
+			
+			<tr class="consumType" style="display:none">
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>子女情况:</label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusChdInfo"  name="lnLoanInfo.cusChdInfo" id="cusChdInfo" maxlength="100" style="width:200"/>
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>家庭人数:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusFamilyNum" name="lnLoanInfo.cusFamilyNum" id="cusFamilyNum" maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr class="consumType" style="display:none">
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>父母情况:</label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cusParentInfo" name="lnLoanInfo.cusParentInfo" id="cusParentInfo" maxlength="100" style="width:200"/>
+                    </div>
+                </td>
+				
+              #*  <td class="field" width="100" style="text-align: right">
+                    <label>本地居住年限:  </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+			 		<input type="text" class="text" value="$!lnLoanInfo.cusLocalYear" name="lnLoanInfo.cusLocalYear" id="cusLocalYear" maxlength="20"/>
+                    </div>
+                </td>*#
+            </tr>
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>第一印象:</label>
+                </td>
+                <td width="300" colspan="6">
+                    <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+						<textarea maxlength="500" class="textarea" id="cusFirstImpress" name="lnLoanInfo.cusFirstImpress" style="height: 100px; _height:100px;">$!lnLoanInfo.cusFirstImpress</textarea>
+					</div>
+                </td>
+				
+            </tr>
+			
+        </table>
+    </div>
+</div>
+
+<!--个人信息结束-->
+
+<!-- 工作信息开始 -->
+<div class="loan-bg consumType" style="display:none"> 
+    <p class="bold loan-lheight">工作信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>工作单位:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfo.companyName" name="lnLoanInfo.companyName" id="companyName" maxlength="20"/>
+                    </div>
+                </td>
+
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>工作岗位:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.companyJob" name="lnLoanInfo.companyJob" id="companyJob" maxlength="20" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>工作年限:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfo.companyWorkYear" name="lnLoanInfo.companyWorkYear" id="companyWorkYear" maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>月收入水平:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                       <select id="companyMonthlyIncoming" name="lnLoanInfo.companyMonthlyIncoming" maxlength="20" >
+                            <option ></option>
+							#foreach($!ysrcp in $!checkBoxMessage.get("YSRSP"))
+    							<option #if("$!lnLoanInfo.companyMonthlyIncoming" == $!ysrcp.dictionaryKey) selected #end value="$!ysrcp.dictionaryKey">$!ysrcp.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				
+				
+            </tr>
+			
+			<tr>
+				
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>单位地址:</label>
+                </td>
+                <td width="200" colspan="3" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.companyAddress"  name="lnLoanInfo.companyAddress" id="companyAddress"  style="width:300px" maxlength="50"/>
+                    </div>
+                </td>
+				
+            </tr>
+        </table>
+    </div>
+</div>
+<!-- 工作信息结束-->
+
+
+    <!-- 生意信息开始 -->
+    <div class="loan-bg bizType" style="display:none">
+        <p class="bold loan-lheight">生意信息</p>
+        <div id="dksqb1" class="bizMessage">
+            <table class="htmltbl">
+                <tr>
+                    <td class="field" width="100" style="text-align: right">
+                        <label class="red">*</label>
+                        <label>企业名称:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizCompany" name="lnLoanInfo.bizCompany" id="bizCompany" maxlength="30" />
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>经营范围:</label>
+                    </td>
+                    <td width="500" colspan="3">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizScope" name="lnLoanInfo.bizScope" id="bizScope" maxlength="150"  />
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>营业执照号码:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizLicenseNum" name="lnLoanInfo.bizLicenseNum" id="bizLicenseNum" maxlength="20" />
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>组织形式:</label>
+                    </td>
+                    <td width="200">
+                        <select id="bizOrgId" name="lnLoanInfo.bizOrgId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!zzxs in $!checkBoxMessage.get("ZZXS"))
+                                <option #if($!lnLoanInfo.bizOrgId == $!zzxs.dictionaryKey) selected #end value="$!zzxs.dictionaryKey">$!zzxs.dictionaryValue</option>
+                            #end
+                        </select>
+                    </td>
+                    <td class="field bizOrgCode" width="100" style="text-align: right;display:none">
+                        <label>法律形式:</label>
+                    </td>
+                    <td width="200" class="bizOrgCode" style="display:none">
+                        <select id="bizLawFormId" name="lnLoanInfo.bizLawFormId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!flxs in $!checkBoxMessage.get("FLXS"))
+                                <option #if($!lnLoanInfo.bizLawFormId == $!flxs.dictionaryKey)selected #end value="$!flxs.dictionaryKey">$!flxs.dictionaryValue</option>
+                            #end
+                        </select>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>法人代表:</label>
+                    </td>
+                    <td width="200" >
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizLeagl" name="lnLoanInfo.bizLeagl" id="bizLeagl" maxlength="20" />
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>实际经营者:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizActualOperator" name="lnLoanInfo.bizActualOperator" id="bizActualOperator" maxlength="20" />
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="field togetherBiz" width="100" style="text-align: right;display:none">
+                        <label>共同经营者:</label>
+                    </td>
+                    <td class="togetherBiz" style="display:none" width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" name="lnLoanInfo.cusCommonOperaterName" value="$!lnLoanInfo.cusCommonOperaterName" id="cusCommonOperaterName"  maxlength="20" />
+                        </div>
+                    </td>
+                    <td class="field togetherBiz" width="100" style="text-align: right;display:none">
+                        <label>共同经营者身份证号:</label>
+                    </td>
+                    <td class="togetherBiz" width="200" style=" display:none">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" name="lnLoanInfo.cusCommonOperaterIdcard" value="$!lnLoanInfo.cusCommonOperaterIdcard" id="cusCommonOperaterIdcard" maxlength="60"/>
+                        </div>
+                    </td>
+                    <td class="field togetherBiz" width="100" style="text-align: right;display:none">
+                        <label>共同经营者手机号:</label>
+                    </td>
+                    <td class="togetherBiz" width="200" style=" display:none">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" name="lnLoanInfo.cusCommonOperaterMobilePhone" value="$!lnLoanInfo.cusCommonOperaterMobilePhone" id="cusCommonOperaterMobilePho" maxlength="20" />
+                        </div>
+                    </td>
+                    <td class="field togetherBiz" width="100" style="text-align: right;display:none">
+                        <label>股东占比情况:</label>
+                    </td>
+                    <td width="200" class="togetherBiz" style=" display:none" >
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizShareholderProportion" name="lnLoanInfo.bizShareholderProportion" id="bizShareholderProportion" maxlength="20" />
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>实际经营地址:</label>
+                    </td>
+                    <td width="200" colspan="3">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizAddress" name="lnLoanInfo.bizAddress" id="bizAddress"  maxlength="50" style="width:200"/>
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>经营场所:</label>
+                    </td>
+                    <td width="200" >
+                        <select id="bizPlaceId" name="lnLoanInfo.bizPlaceId" maxlength="20" >
+                            <option ></option>
+                            #foreach($!jysc in $!checkBoxMessage.get("JYCS"))
+                                <option #if($!lnLoanInfo.bizPlaceId == $!jysc.dictionaryKey)selected #end value="$!jysc.dictionaryKey">$!jysc.dictionaryValue</option>
+                            #end
+                        </select>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>经营场所面积:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizArea" name="lnLoanInfo.bizArea" id="bizArea" maxlength="20" />
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>电话号码:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizLeaglMobilePhone" name="lnLoanInfo.bizLeaglMobilePhone" id="bizLeaglMobilePhone" maxlength="20" />
+                        </div>
+                    </td>
+
+                    <td class="field" width="100" style="text-align: right">
+                        <label>雇员人数:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizEmployeeNum" name="lnLoanInfo.bizEmployeeNum" id="bizEmployeeNum" maxlength="20" onkeyup="value=value.replace(/[^\d.]/g,'')"/>
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>经营年限:</label>
+                    </td>
+                    <td width="200">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="#if($!lnLoanInfo.bizOpenDate) $!lnLoanInfo.bizOpenDate #end" name="lnLoanInfo.bizOpenDate" id="bizOpenDate"  maxlength="20" onkeyup="value=value.replace(/[^\d.]/g,'')"/><p></p>
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>是否我行客户:</label>
+                    </td>
+                    <td width="200" >
+                        <select id="bizIsBelongMybank" name="lnLoanInfo.bizIsBelongMybank" maxlength="20" >
+                            <option ></option>
+                            <option #if($!lnLoanInfo.bizIsBelongMybank == "是") selected #end value="是">是</option>
+                            <option #if($!lnLoanInfo.bizIsBelongMybank == "否") selected #end value="否">否</option>
+                        </select>
+                    </td>
+                </tr>
+
+            ##                <tr style="height:10px">
+            ##                    <td colspan="8"></td>
+            ##                </tr>
+                <tr>
+                    <td class="field myBank" width="100" style="text-align: right;display:none">
+                        <label>我行的银行卡号:</label>
+                    </td>
+                    <td width="200" style="display:none" class="myBank">
+                        <div class="ui-div-text">
+                            <input type="text" class="text"  name="lnLoanInfo.bizMybankNo" id="bizMybankNo" value="$!lnLoanInfo.bizMybankNo" maxlength="20" />
+                        </div>
+                    </td>
+                    <td class="field" width="100" style="text-align: right">
+                        <label>备 注:</label>
+                    </td>
+                    <td width="200" colspan="3">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" value="$!lnLoanInfo.bizNote"  name="lnLoanInfo.bizNote" id="bizNote"  maxlength="50" style="width:200"/>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!-- 生意信息结束 -->
+
+<!-- 财务信息开始 -->
+<div class="loan-bg bizType" style="display:none">
+    <p class="bold loan-lheight">财务信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>月销售额(元):</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cafMonthlySales" name="lnLoanInfo.cafMonthlySales" id="cafMonthlySales" maxlength="20" />
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>是否有淡旺季:</label>
+                </td>
+                <td width="100" >
+                    <select id="isSeason" name="lnLoanInfo.isSeason" maxlength="20" >
+                        <option ></option>
+                        <option #if($!lnLoanInfo.isSeason == "是") selected #end value="是">是</option>
+                        <option #if($!lnLoanInfo.isSeason == "否") selected #end value="否">否</option>
+                    </select>
+                </td>
+                <td class="field seasonRemark" width="100" style="text-align: right;display:none">
+                    <label>淡旺季描述:</label>
+                </td>
+                <td width="500" style="display:none" class="seasonRemark" colspan="3">
+                    <div class="ui-div-text">
+                        <input type="text" class="text"  value="$!lnLoanInfo.seasonRemark" maxlength="20" name="lnLoanInfo.seasonRemark" id="seasonRemark" maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+                </td>
+            </tr>
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>毛利率(%):</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cafGrossMargin" name="lnLoanInfo.cafGrossMargin" id="cafGrossMargin" maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label class="red">*</label>
+                    <label>净利率(%):</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cafNetMargin" name="lnLoanInfo.cafNetMargin" id="cafNetMargin" maxlength="20" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>存    货(元):</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cafInventory" name="lnLoanInfo.cafInventory" id="cafInventory" maxlength="20" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>负    债(元):</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfo.cafDebt" name="lnLoanInfo.cafDebt" id="cafDebt" maxlength="20" />
+                    </div>
+                </td>
+				
+            </tr>
+
+			<tr>
+
+                <td class="field" width="100" style="text-align: right">
+                <label class="red">*</label>
+                <label>应收账款(元):</label>
+            </td>
+                <td width="200" >
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfo.cafReceivableMoney" name="lnLoanInfo.cafReceivableMoney" id="cafReceivableMoney" maxlength="20" />
+                    </div>
+                </td>
+
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>总 资 产(元):</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfo.cafTotalMoney" name="lnLoanInfo.cafTotalMoney" id="cafTotalMoney" maxlength="30" />
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>其它收入(元):</label>
+                </td>
+				<td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text"  value="$!lnLoanInfo.cafOther" name="lnLoanInfo.cafOther" id="cafOther" maxlength="50" style="width:200"/>
+                    </div>
+                </td>
+			</tr>
+			
+        </table>
+	</div>
+</div>
+
+<!-- 共同借款人开始 -->
+<div class="loan-bg">
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">共同借款人</span>
+	<span id="addCo" class="ui-span-btn fr" style="margin-top:10px;margin-right:10px">
+        	<label>新增</label>
+    </span>
+    <div id="coList">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td><label title="姓名">姓名</label></td>
+                    <td><label title="身份证">身份证</label></td>
+                    <td><label title="联系电话">联系电话</label></td>
+                    <td><label title="企业/工作单位">企业/工作单位</label></td>
+                    <td><label title="经营/单位地址">经营/单位地址</label></td>
+					<td><label title="与申请人关系">与申请人关系</label></td>
+					<td><label title="操作">操作</label></td>
+                </tr>
+            </thead>
+			<tbody>
+				<tr>
+					 #foreach($loanCoBorrower in $loanCoBorrowerList)
+
+
+                        <tr>
+                            <td><label title="$!loanCoBorrower.customerName">$!loanCoBorrower.customerName</label></td>
+                            <td><label title="$!loanCoBorrower.idCard">$!loanCoBorrower.idCard</label></td>
+							<td><label title="$!loanCoBorrower.cphNumber">$!loanCoBorrower.cphNumber</label></td>
+                            <td><input type="text" id="$!loanCoBorrower.loanCoBorrowerId"  value="$!loanCoBorrower.company"></td>
+                			<td><input type="text" id="cus_$!loanCoBorrower.loanCoBorrowerId" value="$!loanCoBorrower.companyAddress"></td>
+                			<td><input type="text" id="$!loanCoBorrower.customerId" value="$!loanCoBorrower.petitionerRelate"></td>
+                            <td>
+                                <a href="javascript:removeCo($!loanCoBorrower.loanCoBorrowerId,$!loanCoBorrower.loanId,$!loanCoBorrower.customerId)">移除</a>&nbsp;&nbsp;<a href="javascript:editCo($!loanCoBorrower.loanCoBorrowerId,$!loanCoBorrower.loanId,$!loanCoBorrower.customerId)">提交修改</a>
+                            </td>
+                        </tr>
+                       #end
+                </tr>
+            </tbody>
+        </table>
+	</div>
+</div>
+<!-- 共同借款人结束 -->
+<!-- 保证人开始 -->
+<div class="loan-bg">
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">保证人</span>
+	<span id="addGu" class="ui-span-btn fr" style="margin-top:10px;margin-right:10px">
+        	<label>新增</label>
+    </span>
+    <div  id="guList">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td><label title="姓名">姓名</label></td>
+                    <td><label title="身份证">身份证</label></td>
+                    <td><label title="联系电话">联系电话</label></td>
+                    <td><label title="企业/工作单位">企业/工作单位</label></td>
+                    <td><label title="经营/单位地址">经营/单位地址</label></td>
+					<td><label title="与申请人关系">与申请人关系</label></td>
+					<td><label title="操作">操作</label></td>
+                </tr>
+            </thead>
+			<tbody>
+                 #foreach($loanGuarantor in $loanGuarantorList)
+                    <tr>
+                        <td><label title="$!loanGuarantor.customerName">$!loanGuarantor.customerName</label></td>
+                        <td><label title="$!loanGuarantor.idCard">$!loanGuarantor.idCard</label></td>
+                        <td><label title="$!loanGuarantor.cphNumber">$!loanGuarantor.cphNumber</label></td>
+                        <td><input id="$!loanGuarantor.guarantorId" type="text" value="$!loanGuarantor.company"></td>
+                        <td><input id="GU_$!loanGuarantor.guarantorId" type="text" value="$!loanGuarantor.companyAddress"></td>
+                        <td><input id="$!loanGuarantor.customerId" type="text" value="$!loanGuarantor.petitionerRelate"></td>
+                        <td>
+                            <a href="javascript:removeGu($!loanGuarantor.guarantorId,$!loanGuarantor.loanId,$!loanGuarantor.customerId)">移除</a>&nbsp;&nbsp;<a href="javascript:editGu($!loanGuarantor.guarantorId,$!loanGuarantor.loanId,$!loanGuarantor.customerId)">提交修改</a>
+                        </td>
+                    </tr>
+                  #end
+            </tbody>
+        </table>
+	</div>
+    <table class="htmltbl">
+        <tr>
+            <td class="field" width="100" style="text-align: right">
+                <label>收入校验:</label>
+            </td>
+            <td width="200" colspan="6">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+                    <textarea maxlength="300" class="textarea" id="guarantyIncomeCheck" name="lnLoanInfo.guarantyIncomeCheck" style="height: 100px; _height:100px;">$!lnLoanInfo.guarantyIncomeCheck</textarea>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+    <table class="htmltbl">
+        <tr>
+            <td class="field" width="100" style="text-align: right">
+                <label>负债担保说明:</label>
+            </td>
+            <td width="200" colspan="6">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+                    <textarea maxlength="300" class="textarea" id="guarantyDebtRemark" name="lnLoanInfo.guarantyDebtRemark" style="height: 100px; _height:100px;">$!lnLoanInfo.guarantyDebtRemark</textarea>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+    <table class="htmltbl">
+        <tr>
+            <td class="field" width="100" style="text-align: right">
+                <label>其他:</label>
+            </td>
+            <td width="200" colspan="6">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+                    <textarea maxlength="300" class="textarea" id="guarantyOtherRemark" name="lnLoanInfo.guarantyOtherRemark" style="height: 100px; _height:100px;">$!lnLoanInfo.guarantyOtherRemark</textarea>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+<!-- 保证人结束 -->
+<!-- 信贷历史开始 -->
+<div class="loan-bg">
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">信贷历史</span>
+	<span id="addCH" class="ui-span-btn fr" style="margin-top:10px;margin-right:10px">
+        	<label>新增</label>
+    </span>
+    <div id="chList">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td><label title="融资来源">融资来源</label></td>
+                    <td><label title="用途">用途</label></td>
+                    <td><label title="贷款金额">贷款金额</label></td>
+                    <td><label title="放款日期">放款日期</label></td>
+                    <td><label title="期限">期限</label></td>
+					<td><label title="月还款额">月还款额</label></td>
+					<td><label title="逾期信息">逾期信息</label></td>
+					<td><label title="余额">余额</label></td>
+					<td><label title="操作">操作</label></td>
+                </tr>
+            </thead>
+			<tbody>
+				<tr>
+					#foreach($lnCreditHistory in $lnCreditHistoryList)
+                        <tr>
+                            <td><input id="CH1_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.finaceSource"></td>
+                			<td><input id="CH2_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanPurpose"></td>
+                			<td><input id="CH3_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanMoney"></td>
+                			<td><input id="CH4_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanDate"></td>
+                			<td><input id="CH5_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.loanLimitYear"></td>
+                			<td><input id="CH6_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.repayMonth"></td>
+                			<td><input id="CH7_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.overdueInformation"></td>
+                			<td><input id="CH8_$!lnCreditHistory.creditHistoryId" type="text" value="$!lnCreditHistory.balanceMoney"></td>
+                            <td>
+                                <a href="javascript:removeCh($!lnCreditHistory.creditHistoryId,$!lnCreditHistory.loanId)">移除</a>&nbsp;&nbsp;<a href="javascript:editCh($!lnCreditHistory.creditHistoryId,$!lnCreditHistory.loanId)">提交修改</a>
+                            </td>
+                        </tr>
+                    #end
+                </tr>
+            </tbody>
+        </table>
+	</div>
+</div>
+<!-- 信贷历史结束 -->
+	<div id="menuContent" class="menuContent"
+     style="position:absolute; display:none; width:160px; height: 370px; overflow-x:auto; overflow-y:auto; border:1px solid #ccc; background-color:#fff; padding-bottom:20px;">
+    <ul id="deptTree" class="ztree"></ul>
+</div>
+<div id="menuContent2" class="menuContent"
+     style="position:absolute; display:none; width:160px; height: 370px; overflow-x:auto; overflow-y:auto; border:1px solid #ccc; background-color:#fff; padding-bottom:20px;">
+    <ul id="dataAuthTree" class="ztree"></ul>
+</div>
+  <input type="hidden" name="deptId" id="deptId" value="$!deptId">
+	<input type="hidden" name="bussdept" id="bussdept">
+<!--申请资料开始 -->
+#if($!isEdit == "yes")
+	<div class="loan-bg">
+		<p class="bold loan-lheight">申请资料</p>
+    <p class="loan-exam-attachment">
+        ##if($urlPermitUtil.hasPermission('lnResearchUpload'))
+            <input type="file" name="fileInput" id="fileInput"/>
+        ##end
+    <div id="attachmentList" class="datatbl" style="text-align:left;padding-left:10px;">
+        #parse("/velocity/loan/attachmentList.vm")
+    </div>
+    <div id="fileQueue"></div>
+    </p>
+    </div>
+#end
+
+
+#if("$!lnLoanInfo.signInfoPath" != "")
+	<div class="loan-bg">
+		<p class="bold lo	an-lheight">客户签名</p>
+    <p class="loan-exam-attachment">
+		本人向中山农商银行保证提供的所有信息和资料真实、合法、有效，并承诺一旦信息出现变更，将及时通知银行。本人同意中山农商银行向相关有关单位收集并查证信息，并同意该银行在电脑中处理和保存相关信息。本人同时授权中山农商银行获取、使用和保存任何其他相关信息或参考资料，含第三方或第三方企业的资料或参考资料，其中包括向央行征信系统报告相关信用信息。中山农商银行有权决定是否批准贷款，本人同意银行保存本申请表及附带资料文档。
+		</br>
+##		<img src="/micro/showImage?fullPath=$!lnLoanInfo.signInfoPath" style="width:100px;height:100px"/>
+    </p>
+    </div>
+#end
+#* <div class="loan-bg">
+    <p class="bold loan-lheight">照片资料</p>
+    <div class="apply-upload-photo-btn">
+            <span class="ui-div-file1 upload-photo">
+                  <input type="button" class="btn1 hard-wid" value="上传照片" />
+                  <input type="file" id="logoImage" name="logoImage" class="file1" />
+            </span>
+    </div>
+    <div class="apply-upload-photo-div">
+        #if($photoList)
+            #foreach($!photo in $photoList)
+                <div class="apply-upload-photo">
+                    <img src="../showImage?fullPath=$!{photo.filePath}&fileId=$!photo.fileId"/>
+                    <a href="#2" class="del" id="photoId$!photo.photoId" name="$!photo.photoId" onclick="delPhoto($photo.photoId,this);">X</a>
+                    <input type="hidden" value="$!photo.filePath"/>
+                </div>
+            #end
+        #end
+    </div>
+</div>*#
+<!--申请资料结束 -->
+    <div style="padding-bottom:30px;">
+        <table>
+##    	<td><input type="button" id="cusCheck" class="ui-span-btn button-table" value="身份验证" /></td>
+    	<td><input type="button" id="applySave" class="ui-span-btn button-table" value="保存"/></td>
+    	<td><input type="button" id="applySubmit" class="ui-span-btn button-table" value="提交"/></td>
+    	
+    	<td><label>审批主管: </label>	</td>    	
+    	<td id="assignUserSelect" >
+    		<select id="assignUserId" name="assignUserId" maxlength="20" style="width:120px">
+				<option value="0">随机选择</option>
+				#foreach($!ap in $!assignUserList)
+					<option value="$!ap.userId">$!ap.userName</option>
+                #end
+    		</select>
+    	</td>
+		<td><input type="button" id="cancel" class="ui-span-btn button-table" value="取消" />	</td>
+		</table>
+    </div>
+
+</form>
+</div>
+#if($!isEdit == "yes")
+
+<!--贷款资料开始-->
+<div class="etabs-body-child">
+      #parse("/velocity/loan/lnLoanData.vm")
+</div>
+<!--贷款资料结束 -->
+<!--操作历史开始 -->
+<div class="etabs-body-child">
+    #foreach($his in $hisList)
+        <div class="spacing">
+            <p class="fl m3">$!date.format('yyyy-MM-dd HH:mm:ss',$!his.opHistoryDate)<span
+                    class="m1">$!his.userName #if($his.account)（$!his.account） #else 系统#end</span></p>
+
+            <p class=" #if($his.beforeStatusName && $!his.beforeStatusName != '') line-arrow #end green bold fr">$!his.afterStatusName</p>
+            #if($his.beforeStatusName && $!his.beforeStatusName != "")
+                <p class="fr">$!his.beforeStatusName</p>
+            #end
+            <p class="loan-p-three">操作内容:$!his.content</p>
+            <!--
+                <p class="loan-p-three">备注:$!his.remark</p>
+                -->
+            <p class="loan-p-three">备注:
+                #if ($his.remark && $!his.remark != "")
+                    #if($his.preRemark && $!his.preRemark != "")
+                        $!his.preRemark<br/>
+                    #end
+                    $!his.sufRemark
+                #end
+            </p>
+        </div>
+    #end
+    <hr style="clear:both;"/>
+	
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+    </div>
+
+</div>
+<!--操作历史结束 -->
+</div>
+<div id="tapeVideoDiv" style="display: none;">
+    #parse("/velocity/loan/cusDataListTable.vm")
+</div>
+#end
+</body>
+</html>
+	

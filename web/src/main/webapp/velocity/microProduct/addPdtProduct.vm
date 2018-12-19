@@ -1,0 +1,307 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>新建产品</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    div.m1 { margin-top:20px;}
+		div.mt { margin-top: 20px; margin-bottom:20px; }
+		.line { border-bottom:1px solid #b1b1b1; line-height:30px; }
+		.clear {
+            clear: both;
+        }
+        /* 头像 */
+    	.avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; overflow:hidden; margin-bottom: 5px; }
+		.avatar img { width: 100%; height: 100%; border: 0; }
+		.m2{ width:74px;}
+    </style>
+    <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.all.js"></script>
+</head>
+<body>
+	<input type="hidden" id="txtProductCoverImage" value="" />
+	<div class="bold line" style="margin-bottom:10px;">产品基本信息</div>
+	<table class="htmltbl" id="addPdtProduct">
+    	<tbody>
+            <tr>
+                <td width="15%" class="field">
+                    <label class="red">*</label>
+                    <label>产品代码：</label>
+                </td>
+                <td width="35%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="txtProductCode" maxlength="10" rule="\S" tips='"产品代码"必须填写' />
+                	</div>
+                </td>
+                <td width="15%" class="field"></td>
+                <td width="35%" valign="top" rowspan="5" align="center">
+  					<div class="avatar">
+                    	<img src="${ctx}/images/productImage/p_logo.bmp" id="imgPLogo" title="产品logo" alt="产品logo"  />
+	                </div>
+	                <div class="ui-div-file-btn">
+	                     <label>上 传</label>
+	                     <input type="file" name=logoImage id="logoImage" class="file" />
+	                 </div>
+                </td>
+           </tr>
+           <tr>
+              <td width="15%" class="field">
+                  <label>&nbsp;</label>
+              </td>
+              <td width="35%">
+                  <label>&nbsp;</label>
+              </td>
+              <td width="15%" class="field"></td>
+          </tr>
+          <tr>
+              <td width="15%" class="field">
+                  <label class="red">*</label>
+                  <label>产品名称：</label>
+              </td>
+              <td width="35%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="txtProductName" maxlength="50" rule="\S" tips='"产品名称"必须填写'/>
+                	</div>
+              </td>
+              <td width="15%" class="field"></td>
+          </tr>
+          <tr>
+              <td width="15%" class="field">
+                  <label>&nbsp;</label>
+              </td>
+              <td width="35%">
+                  <label>&nbsp;</label>
+              </td>
+              <td width="15%" class="field"></td>
+           </tr>
+          <tr>
+              <td width="15%" class="field">
+                  <label>&nbsp;</label>
+              </td>
+              <td width="35%">
+                  <label>&nbsp;</label>
+              </td>
+              <td width="15%" class="field"></td>
+          </tr>
+        </tbody>
+    </table>
+		<div class="bold m1"
+			style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+			&nbsp;简要说明
+		</div>
+		<div class="ui-div-textarea mt" style="height: 100px;">
+            <textarea class="textarea" style="font-size:16px;font-family:宋体; height:90px; resize:none;  padding:5px 0;" id="txtRemark" maxlength="300" ></textarea>
+		</div>
+		<div class="bold"
+			style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+			产品特点
+		</div>
+		<div class="mt">
+			 <script type="text/plain" id="txtFeature">
+			 </script>
+	    </div>
+	    <div class="clear"></div>
+	    
+		<div class="bold"
+			style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+			适用对象
+		</div>
+		<div class="mt">
+			<script type="text/plain" id="txtSuitableUser">
+			</script>
+	    </div>
+	    <div class="clear"></div>
+	    
+		<div class="bold"
+			style="border-bottom: 1px solid #b1b1b1; line-height: 30px;">
+			申请资料
+		</div>
+		<div class="mt">
+			<script type="text/plain" id="txtApplyNeedData">
+			</script>
+	    </div>
+	    <div class="clear"></div>
+	    
+		<hr />
+		<div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" id="btnSave"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+#scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+
+    <!--保存校验  Zhangfp-->
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+<script type="text/javascript">
+    //获取当前url根节点(micro)
+    var urlRef = (window.location.href).replace('http://', '');
+    var urlStr = urlRef.substring(urlRef.indexOf('/'), urlRef.indexOf('/pdtProduct'));
+    /**
+	 * 加载ue编辑器 产品特点
+	 */
+	var ueFeature=new UE.ui.Editor({
+		minFrameHeight:343,
+    	wordCount:true,
+    	focus:false,
+        maximumWords:500,
+        imageUrl: urlStr+"/imageUpload",
+        imagePath: urlStr+"/showImage?fullPath=",
+        imageManagerUrl: urlStr+"/imageManager",
+        imageManagerPath: urlStr+"/showImage?fullPath=",
+        wordOverFlowMsg:'<span style="color:red;">你输入的字符个数已经超出最大允许值，服务器可能会拒绝保存！</span>'
+    });
+    ueFeature.render('txtFeature');
+	
+	ueFeature.addListener("selectionchange", function () {
+	     var state = ueFeature.queryCommandState( "source" );
+	     var btndiv = document.getElementById( "btns" );
+	     if ( btndiv && state == -1 ) {
+	         disableBtn( "enable" );
+	     }
+    });
+    
+    /**
+	 * 加载ue编辑器 适用对象
+	 */
+    var ueSuitableUser=new UE.ui.Editor({
+		minFrameHeight:343,
+        maximumWords:500,
+    	wordCount:true,
+    	focus:false,
+        imageUrl: urlStr+"/imageUpload",
+        imagePath: urlStr+"/showImage?fullPath=",
+        imageManagerUrl: urlStr+"/imageManager",
+        imageManagerPath: urlStr+"/showImage?fullPath=",
+        wordOverFlowMsg:'<span style="color:red;">你输入的字符个数已经超出最大允许值，服务器可能会拒绝保存！</span>'
+    });
+    ueSuitableUser.render('txtSuitableUser');
+	
+	ueSuitableUser.addListener("selectionchange", function () {
+	     var state = ueSuitableUser.queryCommandState( "source" );
+	     var btndiv = document.getElementById( "btns" );
+	     if ( btndiv && state == -1 ) {
+	         disableBtn( "enable" );
+	     }
+    });
+    
+    /**
+	 * 加载ue编辑器 申请资料
+	 */
+    var ueApplyNeedData=new UE.ui.Editor({
+		minFrameHeight:343,
+        maximumWords:500,
+    	wordCount:true ,
+    	focus:false,
+        imageUrl: urlStr+"/imageUpload",
+        imagePath: urlStr+"/showImage?fullPath=",
+        imageManagerUrl: urlStr+"/imageManager",
+        imageManagerPath: urlStr+"/showImage?fullPath=",
+        wordOverFlowMsg:'<span style="color:red;">你输入的字符个数已经超出最大允许值，服务器可能会拒绝保存！</span>'
+    });
+    ueApplyNeedData.render('txtApplyNeedData');
+	
+	ueApplyNeedData.addListener("selectionchange", function () {
+	     var state = ueApplyNeedData.queryCommandState( "source" );
+	     var btndiv = document.getElementById( "btns" );
+	     if ( btndiv && state == -1 ) {
+	         disableBtn( "enable" );
+	     }
+    });
+
+		function saveResult(msg){
+			if(msg == 'SUCCESS'){
+				tab.close(GetId(), true);
+			}else{
+				banger.page.showMessageBox(msg);
+			}
+		}
+		
+		/**
+		 * 上传产品logo
+		 */
+		function upLoadLogoFile(){
+			ajaxFileUpload({
+				url:"../pdtProduct/upLoadLogoFile.html?random="+Math.random()*10000,
+		        id:'logoImage',
+		        callback:function(){
+		        	var data = this.responseText;  
+		        	var json = jQuery.parseJSON(data);
+		        	if(json.error){
+		        		banger.page.showMessageBox(json.error);
+		        	}else{						
+						jQuery("#txtProductCoverImage").val(json.fullPath);
+						jQuery("#imgPLogo").attr("src","../showImage?fullPath=" + json.fullPath);
+		        	}
+		        }
+		    });  
+			return false;
+		}
+		
+		jQuery(function(){
+			maxInput('#txtRemark',300);
+            codeInput("#txtProductCode");
+            jQuery('#addPdtProduct').validator();
+
+			jQuery("#btnSave").click(function(){
+				if(!ueFeature || !ueSuitableUser || !ueApplyNeedData){
+					return false;
+				}
+                var reg = new RegExp("[\r\t\n]", "g");
+                var featureContentTxt =  ueFeature.getContentTxt().replace(reg,"");
+                var suitableUserContentTxt = ueSuitableUser.getContentTxt().replace(reg,"");
+                var applyNeedDataContentTxt  = ueApplyNeedData.getContentTxt().replace(reg,"");
+                var bool = jQuery.validator({form : 'addPdtProduct'});
+                if(!bool){
+                    return false;
+                }
+                if(featureContentTxt.length >500 || suitableUserContentTxt.length >500 ||
+                        applyNeedDataContentTxt.length >500){
+                    return false;
+                }
+				
+				var productName = jQuery.trim(jQuery("#txtProductName").val()).replace(/\s+/g, "");
+				var productCode = jQuery.trim(jQuery("#txtProductCode").val()).replace(/\s+/g, "");
+				var productCoverImage = jQuery.trim(jQuery("#txtProductCoverImage").val());				
+				var remark = jQuery.trim(jQuery("#txtRemark").val());
+				var feature = ueFeature.getContent();
+				var suitableUser = ueSuitableUser.getContent();
+				var applyNeedData = ueApplyNeedData.getContent();
+				 
+				var postData={'pdtProduct.productId': 0,
+							  'pdtProduct.productName': productName,
+							  'pdtProduct.productCode': productCode,
+							  'pdtProduct.productCoverImage': productCoverImage,
+							  'pdtProduct.remark': remark,
+							  'pdtProduct.feature': feature,
+							  'pdtProduct.suitableUser': suitableUser,
+							  'pdtProduct.applyNeedData': applyNeedData  
+				};
+				//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "savePdtProduct.html",
+			    	data: postData,
+			    	success: function(data){
+			 	  		saveResult(data);
+			    	}
+				});
+			});
+			
+			jQuery('#logoImage').change(function(){
+				//jQuery('#text').val(file.val(this));
+				upLoadLogoFile();
+			});
+		});
+
+	</script>
+</body>
+</html>

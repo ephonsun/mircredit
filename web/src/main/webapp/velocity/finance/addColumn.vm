@@ -1,0 +1,157 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<base target="_self"> 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>新建栏目</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript">
+		//给按钮绑定事件
+		$(function(){
+			$('#sure').click(function(){
+				fn.sure();
+			});
+			
+			$('#cancel').click(function(){
+				fn.cancel();
+			});
+			
+			$('#sureAndNew').click(function(){
+				fn.sureAndNew();
+			});
+			maxTextArea('textarea[maxlength]');
+			//给表单添加验证
+			jQuery("#columnForm").validator();			
+				
+		});
+		//保存按钮
+		function submitColumn(){
+			var bool = jQuery.validator({ form: 'columnForm', extend: false});
+			if(!bool){
+				return false;
+			}
+			jQuery.ajax({
+			  type: 'POST',
+			  url: '/finance/addColumn.html',
+			  data:{'feColumn.columnName':$('#columnName').val().replace(/(^\s*)|(\s*$)/g,""),
+			  	'feColumn.columnDescription':$('#des').val().replace(/(^\s*)|(\s*$)/g,"")
+			  },
+			  success:function(data){
+			  	if(data){
+					$('#d1').addClass('v-fails');
+	  				$('#columnName').attr('tips', "已存在相同的栏目名，请重新输入"); 
+				}else{
+					//这个返回值就是allColumn.vm中的result
+    			 	window.returnValue="1";
+    			  	window.close();
+				}
+			 }
+			});
+		}
+		
+		//保存和新建
+		function submitAndNew(){
+			var bool = jQuery.validator({ form: 'columnForm', extend: false});
+			if(!bool){
+				return false;
+			}
+			
+			jQuery.post(
+				'addColumn.html',
+				{'feColumn.columnName':$('#columnName').val().replace(/(^\s*)|(\s*$)/g,""),
+			  		'feColumn.columnDescription':$('#des').val().replace(/(^\s*)|(\s*$)/g,"")
+			  	},
+				function(data){
+					if(data){
+    					$('#d1').addClass('v-fails');
+    	  				$('#columnName').attr('tips', "已存在相同的栏目名，请重新输入"); 
+    				}else{
+    					refreshColumn();
+    				}
+				}
+			);
+		}
+		
+		function refreshColumn(){
+			this.target='_self';
+			var reload=document.getElementById('reload'); 
+			reload.href = window.location.href + "&random="+Math.random()*100000; 
+			reload.click(); 
+			window.returnValue="1";
+		}
+		
+		var fn={};
+		fn.sure = function(){
+			submitColumn();
+			
+		}
+		fn.cancel = function(){
+			window.close();
+		}
+		fn.sureAndNew = function(){
+			submitAndNew();
+		}
+		
+		//栏目名称失去焦点事件
+		$('#columnName').blur(function(){
+			banger.page.showMessageBox("失去焦点");
+			jQuery.post(
+				'validatorColumnName.html',
+				{'feColumn.columnName':$('#columnName').val().replace(/(^\s*)|(\s*$)/g,"")},
+				function(data){
+					banger.page.showMessageBox(data);
+				}
+			);
+		});
+		
+    </script>
+</head>
+
+<body>
+	<a id="reload" href="addColumn.html?random=+Math.random()*100000" style="display:none"></a>
+    <table class="htmltbl">
+		<form id="columnForm" name="column">
+            <tbody>
+                <tr>
+                    <td class="field" width="100">
+                        <label class="red">*</label>
+                        <label>栏目名称：</label>
+                    </td>
+                    <td>
+                       <div id="d1" class="ui-div-text" style="width:150px;">
+                        	<input type="text" class="text" id="columnName" name="columnName" rule="\S" tips='“栏目名称”必须填写' maxlength="10"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="100">
+                        <label>描述：</label>
+                    </td>
+                    <td>
+                        <div class="ui-div-textarea" style="height: 100px;">
+                            <textarea class="textarea" id ="des" name="columnDescription" maxlength="500"></textarea>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+		</form>
+    </table>
+    
+    <hr />
+    
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" id="sure" value="保存"/>
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-continue" id="sureAndNew" value="保存并新建"/>
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" id="cancel" value="取消" />
+    </div>
+</body>
+</html>

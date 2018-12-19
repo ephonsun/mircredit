@@ -1,0 +1,128 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>非在行客户 </title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    #scriptLink("page")	
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+		$(function(){
+			$('select').select();
+			
+			$('#form1').validator();
+			
+			//备注字数限制
+			maxInput('#remark',200);
+			numInput('#phoneNumber');
+			//mobileInput('#phoneNumber');
+		});
+    </script>
+</head>
+
+<body>
+	  <form id="form1">
+      <table class="htmltbl" style="table-layout: auto;">
+          <tbody>
+              <tr>
+                  <td class="field" width="8%">
+                      <label>客户姓名：</label>                  
+                  </td>
+                  <td>
+                      <div class="ui-div-text">
+                          <input id="customerName" type="text" class="text"  maxlength="20"/>
+                      </div>                 
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>
+                      <label>联系电话：</label>
+                  </td>
+                  <td>
+                  	  <div class="ui-div-text">
+                          <input id="phoneNumber" type="text" class="text" fun="yzPhoneNumber" maxlength="20"/>
+                      </div>                 
+                  </td>
+              </tr>
+              <tr>
+                  <td class="field" width="8%" valign="top">
+                      <label>备注：</label>
+                  </td>
+                  <td>
+                     <div class="ui-div-textarea" style="height: 100px;">
+						<textarea class="textarea" style="_height:100px; *height:100px; _width:100%;" id="remark"></textarea>
+					 </div>
+                  </td>
+              </tr>
+          </tbody>
+      </table>    
+      </form>
+    <div class="center">
+    	<input type="hidden" id="taskId" value="$!taskId" />
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" />
+    </div>
+</body>
+<script type="text/javascript">
+	$(function(){
+		$(".ui-footer-btn1-save").click(function(){
+			var bool = jQuery.validator({ form: 'form1' , extend: false});
+			if(!bool){
+				return false;
+			}
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "addPhoneTaskExe.html",
+		    	data: {'taskId': jQuery.trim(jQuery("#taskId").val()),
+				       'customerName': jQuery.trim(jQuery("#customerName").val()),
+				       'phoneNumber': jQuery.trim(jQuery("#phoneNumber").val()),
+				       'remark': jQuery.trim(jQuery("#remark").val())
+		    	},
+		    	success: function(data){
+		    	 if(data!=''){
+	    	       if(jQuery.trim(data)=="notBelong"){
+                      var dd=jQuery.trim($("#customerName").val());
+		    	      banger.page.showMessageBox("客户不是您的归属客户，不允许添加为任务目标客户！");
+		    	     }
+		    	   if(jQuery.trim(data)=="isExsits"){
+		    	      var dd=jQuery.trim($("#phoneNumber").val());
+		    	      banger.page.showMessageBox("任务目标"+dd+"已存在，不能重复添加！");
+		    	     }
+		    	  }
+		    	  else{
+		    		window.returnValue = 1;
+		 	  		window.close();}
+		    	}
+			});
+		});
+		
+		$(".ui-footer-btn1-cancel").click(function(){
+			window.close();
+		});
+	});
+	
+	function yzPhoneNumber(obj){
+		if($("#phoneNumber").val() == '' ){
+			$("#phoneNumber").parent().removeClass('v-fails');
+			$("#phoneNumber").parent().addClass('v-fails');
+			$(obj).attr('tips','"联系电话"必须填写');
+			return false;
+		}else{
+			$("#phoneNumber").parent().removeClass('v-fails');
+			return true;
+		}
+	}
+</script>
+</html>	

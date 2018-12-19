@@ -1,0 +1,321 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有联系任务</title>
+    #styleLink("base")
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};
+		$(function(){
+			$('select').select();
+			$("#taskForm").validator();
+		});
+		var excType='$!excType';
+		//中止任务
+		function breakOff(contactId){
+		
+		}
+		//编辑任务
+		function updateTask(contactId,isNext){
+			if(isNext==1){
+				    var url="/tskContact/detailNextTask.html?tskTask.contactId="+contactId+"&taskType=4&random="+Math.random();
+        			var result=window.showModalDialog(url, window, 'dialogWidth=530px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+        			if(result==1&&result!=undefined){
+        				var url = window.location.href;
+        				window.location.href =window.url(url, "random", Math.random());
+    					return true;
+        			}
+			}else{				
+        		var id="";
+				var title="编辑联系任务";
+				id="TaskContactPage_update";
+				var url="/tskContact/toTskContactDetail.html";
+				url=url+"?tskContact.contactId="+contactId+"&actionType=edit&random="+Math.random();
+				var options = {id: id+contactId, pid: GetId(), title: title, url: url, lock: false,confirm: true};
+				tab.add(options);
+			}
+		}
+		
+		//删除任务
+		function deleteTask(contactId,obj){
+			if(confirm("确认要删除任务“"+obj.parentNode.parentNode.childNodes[0].innerText+"”吗?")){
+				jQuery.post('delTaskContact.html',{
+    				'tskContact.contactId':contactId
+    			},function(data){
+    					refreshForm();
+    			});
+			}
+		}
+		//中止
+		function stopTask(contactId,isSuspend,obj){
+    		if(confirm('您确认要中止任务"'+obj.parentNode.parentNode.childNodes[0].innerText+'"吗?')){
+    			jQuery.post('stopOrStartTask.html',{
+    				'suspend':1,
+					'id':contactId
+    			},function(data){
+    				refreshForm();
+    			});
+			}
+		}
+		//重启
+		function reStartTask(contactId,obj){
+    		if(confirm('您确认要重启任务"'+obj.parentNode.parentNode.childNodes[0].innerText+'"吗?')){
+    			jQuery.post('stopOrStartTask.html',{
+    				'suspend':0,
+					'id':contactId
+    			},function(data){
+    				refreshForm();
+    			});
+			}
+		}
+		//清空搜索条件
+		function resetValue(){
+	    	$(':text').val('');
+	    	$("select").each(function(){
+        		this.selectedIndex = 0;
+				if(this.id == 'isTaskFinished') this.selectedIndex = 1;
+        		$(this).select();
+        	}); 
+			
+	    }
+	    //搜索
+	    function search(){
+			var bool = jQuery.validator({ form: 'taskForm'});
+			if(bool){
+    	    	var postJson=getQueryJson();
+    			oldPostJson = postJson;
+    	    	jQuery.post('/tskContact/showAllContectTaskBySearch.html?random='+Math.random()*1000000,postJson,function(html){
+    	    					 refreshGrid('grid',html);
+    	    				});
+			}
+	    }
+	     //刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+			$('table.datatbl').table();
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+			
+		}
+		//刷新
+		function refreshForm(){
+    		if(!oldPostJson['excType']){
+    			oldPostJson['excType'] = excType;
+    		}
+			if(!oldPostJson['isTaskFinished']){
+				oldPostJson['isTaskFinished'] = 3;
+			}
+			goto(null,"/tskContact/showAllContectTaskBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			if(!oldPostJson['excType']){
+    			oldPostJson['excType'] = excType;
+    		}
+			if(!oldPostJson['isTaskFinished']){
+				oldPostJson['isTaskFinished'] = 3;
+			}
+			goto(page,"/tskContact/showAllContectTaskBySearch.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//表单数据
+	    function getQueryJson(){
+        	var postJson = {};
+    		postJson['tskTaskListBean.contactTitle']=jQuery.trim($('#taskTitle').val());
+    		postJson['tskTaskListBean.taskPurpose']=jQuery.trim($('#taskPurpose').val());
+    		postJson['startDate']=jQuery.trim($('#datepicker1').val());
+    		postJson['endDate']=jQuery.trim($('#datepicker2').val());
+    		postJson['tskTaskListBean.assignName']=jQuery.trim($('#assignUser').val());
+			postJson['isTaskFinished']=jQuery.trim($('#isTaskFinished').val());
+			postJson['excType']=excType;
+    		return postJson;
+    	}
+    	//新建任务
+		function newPage(tit){
+			var url="/tskContact/saveTskContact.html";
+			var title=tit;
+			var id= "TaskContactPage_add";
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false,confirm: true});
+		}
+		//查看任务
+		function detailTsk(contactId,isNext){
+			if(isNext==1){
+				var url="/tskContact/detailNextTask.html?tskTask.contactId="+contactId+"&taskType=3&random="+Math.random();
+				window.showModalDialog(url, window, 'dialogWidth=530px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no')
+			}else{
+				var title="查看联系任务";
+				var id="TaskContactDetailPage";
+				var url="/tskContact/toTskContactDetail.html?tskContact.contactId="+contactId+"&actionType=detail&random="+Math.random()*1000;
+    			var options = {id: id+ contactId, pid: GetId(), title: title, url: url, lock: false};
+    			tab.add(options);
+			}
+		}
+		
+		function makeTskPlan(){
+			var url = '/tskConnectPlan/makeConPlanPage.html?random='+Math.random()*1000;
+			tab.add({id: "makeTskPlan", pid: GetId(), title: "制定联系计划", url: url, lock: false});
+		}
+		
+		function searchStartDateFun(obj){
+			var startDate=$("#datepicker1").val();
+			var endDate=$("#datepicker2").val();
+			if(endDate.length>0&&startDate.length>0){
+				if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+					$('#endDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		function searchEndDateFun(obj){
+			var startDate=$("#datepicker1").val();
+			var endDate=$("#datepicker2").val();
+			if(endDate.length>0&&startDate.length>0){
+				if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+    </script>
+</head>
+
+<body>
+	<form id="taskForm" name="taskForm" >
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>任务标题：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="taskTitle"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>联系目的：</label>
+                </td>
+                <td width="17%">
+                	<select id="taskPurpose">
+                		<option value=""></option>
+                		#foreach($!purpose in $!taskPurposeList)
+                    	<option value="$!purpose.taskPurposeId">$!purpose.taskPurposeName</option>
+                    	#end
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>执行日期：</label>
+                </td>
+                <td colspan="3">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text" id="startDiv">
+				                		<input type="text" fun="searchStartDateFun" class="text" id="datepicker1" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text" id="endDiv">
+				                		<input type="text" fun="searchEndDateFun" class="text" id="datepicker2" readonly="true" />
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            </tr>
+            <tr>
+            	<td class="field" width="8%">
+                	<label>完成情况：</label>
+                </td>
+                <td width="17%">
+                	<select id="isTaskFinished">
+                    	<option value="0">未开始</option>
+						<option value="3" #if($!isTaskFinished==3) selected="selected" #end>执行中</option>
+                    	<option value="1">已结束</option>
+                    	<option value="2"> 已中止</option>
+                    </select>
+                </td>
+               #if($!excType!=1)
+            	<td class="field" width="8%">
+                	<label>分配者：</label>
+                </td>
+                <td width="17%">
+                	<select id="assignUser">
+                    	<option value="1"></option>
+                    	<option value="2">我的</option>
+                    </select>
+                </td>
+                #end
+                <td colspan="4">
+                		
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+    <div class="search-bar">
+        <span class="fl bold">
+            所有的联系任务(<label id="queryCount" class="green">$!count</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空" onclick="resetValue()" />
+        <input type="button" class="ui-input-btn" value="搜索" onclick="search()"/>
+    </div>
+    
+	<div class="action-bar">
+        #if($!isCharge==1)
+       		<span class="ui-span-btn fl" onclick="newPage('新建联系任务')">
+				<label>新建联系任务</label>
+			</span>
+		#else
+			<span class="ui-span-btn fl" onclick="newPage('新建日程')">
+				<label>新建日程</label>
+			</span>
+		#end
+        #if($!isManager==1)
+        <span class="ui-span-btn fl ml" onclick="makeTskPlan()">
+        	<label>制定联系计划</label>
+        </span>
+        #end
+        <span class="ui-span-btn fr">
+        	<label onclick="refreshForm()">刷新</label>
+        </span>
+    </div>
+   	<div id="grid">
+		   #parse("/velocity/task/taskListDiv.vm")
+	</div>
+</body>
+</html>

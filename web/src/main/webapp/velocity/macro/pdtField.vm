@@ -1,0 +1,196 @@
+#macro(pdtTabOption $fields $entity $flag)				##flag 0新增编辑 1查询 2查看
+	#if($fields.size()>0)
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+		<tbody>
+	#end
+	    	#set($count = 0)
+	    	#set($index = 0)
+	    	#set($next = 0)
+	    	#set($col = 0)
+	    	#foreach($field in $fields)
+	    		#set($colSpan = $field.getColSpan($flag))
+	    		#set($next = $colSpan + $count%4)
+	    		#if($colSpan>1)
+	    			#set($col = $colSpan+1)
+	    		#else
+	    			#set($col = $colSpan)
+	    		#end
+	    		#if($count % 4 == 0)
+	    			<tr>
+	    		#elseif($next > 4)
+	    			#set($count = $count+1)
+	    			<td colSpan="2"></td>
+	    			</tr><tr>
+	    		#end
+	        	<td width="10%" class="field" align="right" style="white-space:normal;" >$!field.templateFieldName：</td>
+	        	#if($colSpan>1)
+	        		#set($tdWidth = "auto")
+	        	#else
+	        		#set($tdWidth = "15%")
+	        	#end
+	        	<td colSpan="$col" width="$tdWidth" >
+					#set($val='')
+					#set($val = $entity.get($field.templateFieldId))
+					#if(!$val)
+						#set($val='')
+					#end
+	        		#if($flag<2)
+	                	#ctrl1($field,$val,$flag)
+	                #else
+	                	#detail1($field,$val,$flag)
+	                #end
+	            </td>
+	        	#set($count = $count+$colSpan)
+	        	#set($index = $index+1)
+	        	#if($index == $fields.size())
+	        		
+	        		#if($count % 4 != 0)
+	        			#set($lackColSpan=4-$count % 4)
+	        			<td colSpan="$!lackColSpan" >&nbsp;</td>
+	        			</tr>
+	        		#else
+	        			</tr>
+	        		#end
+	        	#end
+	        #end
+	#if($fields.size()>0)
+	    </tbody>
+	</table>
+	#end
+#end
+
+#macro(ctrl1,$field,$val,$flag)
+	#if ($field.templateFieldType == 'Text')
+		#textbox1($field,$val)
+	#elseif ($field.templateFieldType == 'Date')
+		#if($flag>0)
+			#datespan1($field,$val)
+		#else
+			#datebox1($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'Number')
+		#if($flag>0)
+			#numspan1($field,$val)
+		#else
+			#numbox1($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'TextArea')
+		#if($flag>0)
+			#textbox1($field,$val)
+		#else
+			#textarea1($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'Select')
+		#if($flag>0)
+			#mutlcombobox1($field,$val)
+		#else
+			#combobox1($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'MultipleSelect')
+		#mutlcombobox1($field,$val)
+	#elseif ($field.templateFieldType == 'YesNo')
+		#checkbox1($field,$val)
+	#end
+#end
+
+#macro(detail1,$field,$val,$flag)
+	#if ($field.templateFieldType == 'YesNo')
+		#set($valName="")
+		#if($val==1)
+			#set($valName="是")
+		#else
+			#set($valName="否")
+		#end
+		#label1($field,$valName)
+	#elseif($field.templateFieldType == 'Date')
+		#set($valName="")
+		#set($valName=$!date.format("yyyy-MM-dd",$val))
+		#label1($field,$valName)
+	#else
+		#label1($field,$val)
+	#end
+#end
+
+#macro(label1,$field,$val)
+<label>$val</label><label>$!field.templateFieldExt</label>
+#end
+
+#macro(textbox1,$field,$val)
+<div class="ui-div-text">
+    <input type="text" name="field.$!field.templateFieldId" value="$val" id="$!field.templateFieldId" class="text" maxLength="20" />
+</div>
+#end
+
+#macro(datebox1,$field,$val)
+<div class="ui-div-text">
+    <input id="$!field.templateFieldId" name="field.$!field.templateFieldId" type="text" readonly="readonly" value="$!date.format("yyyy-MM-dd",$val)" class="text datepicker" dateFlag="true" />
+    <i class="date"></i>
+</div>
+#end
+
+#macro(datespan1,$field,$val)
+<div class="ui-div-text floatL" style="width: 100px;">
+	<input type="text" name="field.start.$!field.templateFieldId" readonly="readonly" value="$!date.format("yyyy-MM-dd",$val)"  id="start_$!field.templateFieldId" class="text datepicker" dateFlag="true" />
+    <i class="date"></i>
+</div>
+<label class="dash">—</label>
+<div class="ui-div-text floatL" style="width: 100px;">
+	<input type="text" name="field.end.$!field.templateFieldId" readonly="readonly" value="$!date.format("yyyy-MM-dd",$val)" id="end_$!field.templateFieldId" class="text datepicker" dateFlag="true" />
+    <i class="date"></i>
+</div>
+#end
+
+#macro(checkbox1,$field,$val)
+#if($val==1)
+	#set($checkedStr = "CHECKED")
+#else
+	#set($checkedStr = "")
+#end
+<input type="checkbox" $checkedStr name="field.$!field.templateFieldId" value="yes" id="$!field.templateFieldId" class="checkbox" />
+#end
+
+#macro(numbox1,$field,$val)
+<input type="text" name="field.$!field.templateFieldId" maxLength="19" value="$val" id="$!field.templateFieldId" floatFlag="true" class="txt" style="width: 100px;" />
+$!field.templateFieldExt
+#end
+
+#macro(numspan1,$field,$val)
+<input type="text" name="field.start.$!field.templateFieldId" maxLength="19" class="txt" floatFlag="true" id="start_$!field.templateFieldId" value="$val" style="width: 100px;" />
+<label>—</label>
+<input type="text" name="field.end.$!field.templateFieldId" maxLength="19" class="txt" floatFlag="true" id="end_$!field.templateFieldId" value="$val" style="width: 100px;" />
+$!field.templateFieldExt
+#end
+
+#macro(textarea1,$field,$val)
+<div class="ui-div-textarea" style="height: 100px;">
+	<textarea class="textarea" style="height:100px;" name="field.$!field.templateFieldId" id="$!field.templateFieldId"  maxLength="200">$val</textarea>
+</div>
+#end
+
+#macro(combobox1,$field,$val)
+<select name="field.$!field.templateFieldId" id="$!field.templateFieldId">
+    <option value=""></option>
+    #foreach($code in $field.codes)
+    	#if($code.fieldCodedataValue==$val)
+    	#	<option value ="$code.fieldCodedataKey" SELECTED >$code.fieldCodedataValue</option>
+    	#else
+    		<option value ="$code.fieldCodedataKey" >$code.fieldCodedataValue</option>
+    	#end
+    #end
+</select>
+#end
+
+#macro(mutlcombobox1,$field,$val)
+#set($codes = "")
+#foreach($code in $field.codes)
+	#if($codes == "")
+		#set($codes = $code.fieldCodedataKey)
+	#else
+		#set($codes = $codes+","+$code.fieldCodedataKey)
+	#end
+#end
+<div class="dtxt2" comboFlag="true" codes="$codes">
+	<input type="text" name="field.$!field.templateFieldId" value="$val" readOnly="true" id="$!field.templateFieldId" class="dtxt2-txt" data-prompt-position="centerRight" />
+    <span class="dtxt2-ddl">ddl</span>
+</div>
+#end

@@ -1,0 +1,400 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>理财规划报告</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};
+		var postJson = {};
+    	jQuery(function(){
+    		$('select').select();
+			initBelongTo();
+			getQueryJson();
+			jQuery("#plnReportForm").validator();	
+			//jQuery("#select").change(function(){
+			//	changeSpan(1);
+			//	initBelongTo();
+			//});
+		});
+		function deleteReport(){
+			var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+			if(obj.size() == 0){
+				banger.page.showMessageBox("请您选择要删除的报告");
+				return false;
+			}
+			var str = "";
+			obj.each(function(){
+				if(jQuery(this).attr("checked")){
+					if(!str){
+						str = jQuery(this).val();
+					}
+					else{
+						str = str +"," +jQuery(this).val();
+					}
+				}
+			});
+			
+			if(confirm("您确定要删除所选的"+obj.size()+"条记录吗？")){
+	//			location.href="/plnReport/deleteReport.html?plnReportId="+str;
+				
+				jQuery.post('deleteReport.html',
+				{'plnReportId': str},
+				function(){
+					refresh();
+				});
+				
+				
+			}
+			
+		}
+		//搜索
+		function search(){
+			var bool = jQuery.validator({ form: 'plnReportForm', extend: false});
+    		if(!bool){
+    			return false;
+    		}
+			var postJson=getQueryJson();
+			oldPostJson = postJson;
+			jQuery.post("getAllReportPageForQuery.html?fenye=1&&random="+Math.random()*1000000,postJson,
+				function(html){
+					refreshGrid('grid',html);
+				});
+	    }
+	    //刷新Grid
+		function refreshGrid(gridId,html){
+			$("#" + gridId).html(html);
+			$('table.datatbl').table();
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+			
+		}
+		//分页跳转
+	function gotoPage(page){
+		if(!oldPostJson['type']){
+			oldPostJson['type'] = $('#type').val();
+		}
+		goto(page,"getAllReportPageForQuery.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+		
+	    //导出
+	    function downloadFile(id){
+	    	location.href="/plnReport/exportPDF.html?plnReportId="+id;
+	    }
+	    
+	  function clean(){
+			var length = document.forms[0].length
+			for(i=0;i<length;i++){
+			  	var type = document.forms[0].elements[i].type;
+			 	if(type!="button"){
+				 	document.forms[0].elements[i].value = "";
+			 	}
+			 
+			}
+			$("select").each(function(){
+    			this.selectedIndex = 0;
+    			$(this).select();
+    		});
+		initBelongTo();
+	 }  
+	function initBelongTo(){
+	
+		changeBelongTo("brMine");
+		//加载下属树
+		$('#userList').subtree({
+			tid: 'subtree',
+			showIcon: true,
+			url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckUser },
+				{ text: '取消' }
+			]
+		});
+		//加载机构树
+		$('#deptList').agetree({
+			tid: 'agetree',
+			url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckDept },
+				{ text: '取消' }
+			]
+		});
+		
+		$("#BelongToType").change(function(){
+			changeBelongTo($(this).val());
+		});
+	}
+	
+	//点击User
+	function onCheckUser(treeId){
+		var postJson = {};
+		postJson = getCheckJson(treeId, 'U');
+		$('#userIds').val(postJson.ids);
+		$('#userText').val(postJson.names);
+	}
+	//点击Dept
+	function onCheckDept(treeId, checkbox){
+		var postJson = {};
+		postJson = getCheckJson(treeId, 'D');
+		$('#deptIds').val(postJson.ids);
+		$('#deptText').val(postJson.names);
+		if(checkbox.checked){
+			containSub = '1';
+		}else{
+			containSub = '0';
+		}
+	}
+		
+		
+	
+	function getCheckJson(treeId, flag){
+		var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+		var nodes = treeObj.getCheckedNodes(true);
+		var len = nodes.length;
+		var uIds = "";
+		var uName = "";
+		for(var i=0; i<len; i++){
+			if(flag=='U'){
+				if(nodes[i].flag==flag){
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}
+				}
+			}else{
+				if(uIds==""){
+					uIds = nodes[i].id;
+					uName = nodes[i].name;
+				}else{
+					uIds = uIds + "," + nodes[i].id;
+					uName = uName+ "," +nodes[i].name;
+				}	
+			}
+		}
+		var postJson = {};
+		postJson['ids'] = uIds;
+		postJson['names'] = uName;
+		return postJson;
+	}	
+	//改变归属
+	function changeBelongTo(val){
+		$('#userIds').val("");
+		$('#deptIds').val("");
+		switch(val){
+			case "brAll":
+				$("#my, #userList, #deptList").hide();	
+				break;
+			case "brMine":
+				$("#my").show();
+				$('#showText').text(window.top.getUn());
+				$("#userList, #deptList").hide();
+				break;
+			case "brUser":
+				$("#userList").show();
+				$("#my, #deptList").hide();
+				break;
+			case "brDept":
+				$("#deptList").show();
+				$("#my, #userList").hide();
+				break;
+			default: break;
+		}
+	}
+	
+	//搜索条件封装
+	function getQueryJson(){
+		postJson['reportInfo.customerNo'] = $('#reprotInfoCustomerNo').val();
+		postJson['reportInfo.customerName'] = $('#reportInfoCustomerName').val();
+		postJson['reportInfo.planName'] = $('#reportInfoPlanName').val();
+		postJson['planType'] = $('#planType').val();
+		postJson['startDate'] = $('#datepicker1').val();
+		postJson['endDate'] = $('#datepicker2').val();
+		postJson['userIds'] = $('#userIds').val();
+		postJson['BelongToType'] = $('#BelongToType').val();
+		return postJson;
+	}
+	//刷新
+	function refresh(){
+		if(!oldPostJson['type']){
+			oldPostJson['type'] = $('#type').val();
+		}
+		goto(null,"getAllReportPageForQuery.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+	}
+	
+	function showCustomer(customerId,customerName){
+		jQuery.post("/plnReport/getCustomerIsDel.html", {"customerId": customerId}, function(result){
+			if(result=="3"){
+				banger.page.showMessageBox("该客户为非在行客户");
+				return;
+			}else if(result=="0"){
+				banger.page.showMessageBox("客户“"+customerName+"”被删除，无法查看具体资料！");
+				return;
+			}else{
+        		var options = {id: "plnReport_showCustomer", pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+        		tab.add(options);
+			}
+		});
+	}
+	//显示客户信息
+	function showCustomer(customerId,customerName){
+		jQuery.post("/plnReport/getReportCustomerIsDel.html", {"customerId": customerId}, function(result){
+			if(result=="3"){
+				banger.page.showMessageBox("该客户为非在行客户");
+				return;
+			}else if(result=="0"){
+				banger.page.showMessageBox("客户“"+customerName+"”被删除，无法查看具体资料！");
+				return;
+			}else{
+        		var options = {id: "plnFastPlan_showCustomer", pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+        		tab.add(options);
+			}
+		});
+	}
+	
+	//结束日期校验
+		function checkDate(obj){
+			var bool = true;
+			var date1=$("#datepicker1").val();
+        	var date2=obj.value;
+			if(date2!=''){
+    			if(date1!=''&&date1>date2){
+        			$("#datepicker2").parent().addClass('v-fails');
+        			$(obj).attr('tips', '结束日期不能早于开始日期'); 
+    				bool = false;
+    			}else{
+        			$("#datepicker2").parent().removeClass('v-fails');
+        		}
+			}
+			return bool;
+		}
+    </script>
+</head>
+
+<body>
+	<form id="plnReportForm" name="plnReportForm" action="getAllReportPage.html" method="post">
+    	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        	<tbody>
+            	<tr>
+					 <td width="7%" class="field">
+                        <label>客户编号：</label>
+                    </td>
+                    <td width="15%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" name="reportInfo.customerNo" id="reprotInfoCustomerNo" value="$!reportInfo.customerNo" maxLength="20" />
+                        </div>
+                    </td>
+                	<td width="7%" class="field">
+                        <label>客户姓名：</label>
+                    </td>
+                    <td width="18%">
+                    	<div class="dtxt1"> 
+                            <input type="text" class="dtxt1-txt" id="reportInfoCustomerName" name="reportInfo.customerName" value="$!reportInfo.customerName" maxLength="20" />
+                        </div>
+                    </td>
+                	<td width="7%" class="field">
+                        <label>规划名称：</label>
+                    </td>
+                    <td width="18%">
+                    	<div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" id="reportInfoPlanName" name="reportInfo.planName" value="$!reportInfo.planName" maxLength="20" />
+                        </div>
+                    </td>
+                	<td width="7%" class="field">
+                        <label>规划类型：</label>
+                    </td>
+                    <td width="18%">
+                        <select name="planType" id="planType" value="$!planType"  render="select">
+                       			<option></option>
+                            	<option value="1" #if($!planType==1) selected="true" #end>快速规划</option>
+                        </select>
+                    </td>
+					<td width="7%" class="field">
+                    </td>
+					<td width="18%"></td>
+                </tr>
+            	<tr>
+                	<td width="7%" class="field">
+                        <label>规划日期：</label>
+                    </td>
+                    <td colspan="3">
+                    	<div class="dtxt2 fl" style="width: 120px;">
+                            <input type="text" class="dtxt2-txt date" name="startDate" value="$!startDate" id="datepicker1" readonly="true"/>
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                        <label class="dash">—</label>
+                        <div class="dtxt2 fl" style="width: 120px;">
+                            <input type="text" class="dtxt2-txt date" name="endDate"  fun="checkDate" value="$!endDate" id="datepicker2" readonly="true"/>
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                    </td>
+                	<td width="7%" class="field">
+                        <label>客户经理：</label>
+                    </td>
+				<td width="18%">
+                        <select id="BelongToType" name="BelongToType">
+	                    	<option value="brMine">我的</option>
+							#if($!role=="1")
+	                    	<option value="brUser">下属的</option>
+							#end
+	                    </select>
+                    </td>
+                    <td colspan="2">
+	                	<span class="btn2 fl" id="my">
+	                		<input id="myUserId" type="hidden"/>
+	                        <label class="btn2-txt" id="showText"></label>
+	                    </span>
+	                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+	                        <input id="userIds" name="userIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="sz">
+            <label class="fl bold">所有理财规划报告(<span id="queryCount" class="dgreen">$!count</span>)</label>
+            <input type="button" class="btn1" value="清 空"  onclick="clean()"/>
+            <input type="button" class="btn1" value="搜 索"  onclick="search()"/>
+        </div>
+    </form>
+    
+    <div class="actrow">
+    	<span class="btn2 fl" onclick="deleteReport()">
+            <label>删除</label>
+        </span>
+    	<span class="btn2 fr" style="margin-left: -1px;" onclick="refresh()">
+            <label>刷新</label>
+        </span>
+    </div>
+    <div id="grid">
+    	 #parse("/velocity/plnReport/plnReportListTable.vm")
+    </div>
+</body>
+</html>

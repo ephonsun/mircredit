@@ -1,0 +1,302 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑联系任务</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+		.gray_self { color:#999999; }
+    </style>    
+</head>
+
+
+<body>
+    <div id="etabs" class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li><label>联系客户列表</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+				<form id="taskForm" name="taskForm" method="post" action="/tskContact/updateTskContact.html">
+                	<table class="htmltbl" style="table-layout: auto;">
+                        <tbody>
+                            <tr>
+                                <td class="field" width="80">								
+                                	<label class="red">*</label>
+                                    <label>任务标题：</label>
+                                </td>
+                                <td colspan="3">
+    								<input type="hidden" name="tskContact.contactId" id="tskTaskId" value="$!tskContact.contactId"/>
+                                    <div class="ui-div-text" style="width:392px; overflow:hidden;">
+                                        <input type="text" class="text" name="tskContact.contactTitle" value="$!tskContact.contactTitle"  rule="\S" tips='“任务标题”必须填写' maxlength="100"/>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>联系目的：</label>
+                                </td>
+                                <td colspan="3">
+                                    <select style="width: 140px;" id="taskPurpose" name="tskContact.contactPurpose"  rule="\S" tips='“联系目的”必须填写'>
+                                    	<option value=""></option>
+    									#foreach($!purpose in $!taskPurposeList)
+    										<option value="$!purpose.taskPurposeId">$!purpose.taskPurposeName</option>
+    									#end
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>开始日期：</label>
+                                </td>
+                                <td width="150">
+                                    <div class="ui-div-text" style="width: 140px;">
+                                        <input type="text" class="text datepicker" readonly="readonly"  name="tskContact.startDate" value="$!date.format("yyyy-MM-dd",$!tskContact.startDate)" id="datepicker1" rule="\S" tips='“开始日期”必须填写'/>
+                                        <i class="date" id="date1"></i>
+                                    </div>
+                                </td>
+                                <td class="field" width="80">
+                                	<label class="red">*</label>
+                                    <label>结束日期：</label>
+                                </td>
+                                <td>
+                                    <div class="ui-div-text" style="width: 140px;">
+                                        <input type="text" class="text datepicker"  fun="dateFunction" readonly="readonly" name="tskContact.endDate" value="$!date.format("yyyy-MM-dd",$!tskContact.endDate)" id="datepicker2" rule="\S" tips='“结束日期”必须填写' />
+                                        <i class="date"></i>
+                                    </div>
+									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+									<input id="beforeEndDate" type="hidden" value="$!date.format("yyyy-MM-dd",$!tskContact.endDate)">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                    <label>任务概述：</label>
+                                </td>
+                                <td colspan="3">
+                                    <div class="ui-div-textarea" style="height: 100px; width:392px;">
+                                        <textarea class="textarea" style="height:100px;" name="tskContact.remark" id="remark" >$!tskContact.remark</textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field" width="80">
+                                    <label>是否紧急：</label>
+                                </td>
+                                <td colspan="3">
+                                	<input type="checkbox" class="checkbox" id="isEmergency" name="tskContact.isEmergency" #if($!tskContact.isEmergency==1) checked value="1" #else value="0" #end/>
+                                    <label for="isEmergency">紧急任务</label>
+                                </td>
+                            </tr>
+                            </tr>
+						
+							<tr>
+								<td class="field" width="80">
+                                    <label>上传附件：</label>
+                                </td>
+    
+							 <td colspan="3">
+									<input type="file" name="fileInput" id="fileInput" />
+                                    <label class="gray_self" title="添加附件">(*单个文件不能超过100M)</label>
+								   #foreach($attr in $!attrList)
+								   <div id="attr_$velocityCount" class="uploadifyQueueItem">
+	            						<div class="cancel">
+	            							<a href="#" onclick="delAttr($!tskContact.contactId,$!attr.attachmentId,$velocityCount)"><img src="${ctx}/uploadify/cancel.png" border="0" /></a>
+	            						</div>
+	                                    <span class="fileName"><a href="#" onclick="downFile($attr.attachmentId)" class="attrFile">$!attr.fileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label></span><span class="percentage"></span>
+	            				   </div>
+								   #end
+								   <div id="fileQueue">
+								   </div>
+							</td>
+                        </tr>
+                        </tbody>
+                    </table> 
+				</form>
+                <hr />                
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick ="upTask();" value="保存" />
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="closeTab();" value="取消" />
+                </div>
+            </div>
+			<!-- 联系客户 -->
+			<div class="etabs-body-child" id="taskCustomerCard">
+				
+			</div>
+        </div>
+    </div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js "></script>
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.editRemark-v1.0.js"></script>
+<script>
+	var systemDate;
+	var startDate;
+	jQuery(function(){
+		//设置标题
+		if($!roleType!=0){
+			tab.title(tab.self,'编辑日程-'+'$!jsUtil.escapeJs($tskContact.contactTitle)');
+		}else{
+			tab.title(tab.self,'编辑联系任务-'+'$!jsUtil.escapeJs($tskContact.contactTitle)');
+		}
+		//上传附件相关
+		setUpload();
+		
+		//备注字数限制
+		maxInput('#remark',200);
+		
+		//加载内部页卡		
+		$('div.etabs').etabs({
+			'head': 'etabs-items',
+			'body': 'etabs-body',
+			'bar': 'etabs-bar',
+			'beforeOnclick': function(){ return true; }
+		});
+		
+		if('$!tskContact.contactPurpose') $('#taskPurpose').val('$!tskContact.contactPurpose');
+		//加载下拉选择框
+		$('select').select();
+		
+		//加载校验控件
+		jQuery("#taskForm").validator();
+		
+		//是否是紧急任务单击
+    	$("#isEmergency").click(function(){
+    		var flag = $(this).attr("checked");
+    		if(flag){
+    			$(this).val(1);
+    		}
+    		else{
+    			$(this).val(0);
+    		}
+    	});
+		
+		//初始化联系客户页面
+		$('#taskCustomerCard').load('/tskContact/initContactCustomerList.html?contactId=$!tskContact.contactId&actionType=edit',{});
+		systemDate=$("#systemTime").val();
+		startDate=$("#datepicker1").val();
+		//处理开始日期，如小于等于今天，则不能编辑
+		if(startDate.length >0 && startDate <= systemDate){			
+			$("#datepicker1").attr('disabled','disabled');
+			$("#date1").attr('disabled','disabled');
+		}
+	});
+	
+	function upTask(){
+		var bool = jQuery.validator({ form: 'taskForm'});
+		if(bool){
+			var isUpload = false;
+			//是否有上传文件
+			var fileUpload = $('input[name=fileInput]');
+			if(fileUpload){
+				$('input[name=fileInput]').each(function(){
+					var fileQueue =$('#fileQueue')[0].innerText;
+					if(fileQueue!=""){
+						$(this).uploadifyUpload();
+						isUpload = true;
+					}
+				});
+			}
+			if(!isUpload){
+				submitMessage();
+			}
+		}
+	}
+	function submitMessage(){
+		$("#datepicker1").removeAttr('disabled');
+		document.taskForm.submit();
+	}
+	
+	function getParentUn(){
+		return window.top.getUn();
+	}
+	
+	//删除附件
+	function delAttr(taskId,attrId,index){
+		if(confirm("确定移除附件吗?")){
+			jQuery.post('/tskContact/removeAttr.html',{'taskAttr.contactId':taskId,'taskAttr.attachmentId':attrId},function(date){
+				if(date>0){
+					$("#attr_"+index).remove();
+				}
+			});
+		}
+	}
+	
+	//修改后跳转
+	function toRefresh(){
+		//var treeId=$("#treeId").val();
+		//var treeType=$("#treeType").val();
+		$('#taskCustomerCard').load('/tskContact/initContactCustomerList.html?contactId=$!tskContact.contactId&actionType=edit',{});
+	}
+	
+	function downFile(attrId){
+		location.href="/tskContact/downTaskFile.html?taskAttr.attachmentId="+attrId;
+		return false;
+	}
+	
+	function cfirm(){
+		var title;
+		if($!roleType!=0){
+			title='编辑日程';
+		}else{
+			title='编辑联系任务';
+		}
+		if(sccCount!=count){
+			if(confirm('正在上传联系任务相关的文件，您确认要关闭'+title+'页卡吗？')) return taskConfirm();
+		}else{
+			return taskConfirm();
+		}
+	}
+	
+	function deleteUnAssignTarget(taskId){
+		jQuery.post('/tskContact/deleteUnAssignTarget.html',{
+			'contactId':taskId
+		},function(data){
+		});		
+	}
+	
+	function dateFunction(obj){				
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		var endDate=$("#datepicker2").val();
+		var beEndDate=$("#beforeEndDate").val();
+		if(endDate.length>0){
+			if(endDate<systemDate){
+				$(obj).attr('tips', '未完成的任务，执行结束日期不能小于今天'); return false;
+			}else if(startDate>endDate){
+				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+			}else if(endDate<beEndDate){
+				$(obj).attr('tips', '结束日期不能小于之前的日期：'+beEndDate); return false;
+			}else return true;
+		}else return true;
+	}
+</script>
+</html>

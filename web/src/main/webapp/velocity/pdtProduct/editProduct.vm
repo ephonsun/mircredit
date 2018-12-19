@@ -1,0 +1,501 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑产品</title>   
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css" />
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+		.gray_self { color:#999999; }
+	</style>
+</head>
+
+<input type="hidden" name="pdtProduct.productId" id="productId" value="$!pdtProduct.productId"/>
+<input type="hidden" name="pdtProduct.productState" id="productState" value="$!pdtProduct.productState"/>
+<input type="hidden" name="pdtProduct.templateId" id="templateId" value="$!pdtProduct.templateId"/>
+<body>
+	<form id="pdtForm" name="pdtForm">
+		#if($!canUpdate==1&&$!saleState!=1)
+		<table class="htmltbl" style="table-layout: auto;">
+    		<tbody>
+        		<tr>					
+                	<td class="field" width="10%">
+    					<label>产品类型：</label>
+                    </td>
+                    <td width="15%">
+                    	<label>$!pdtProduct.templateName</label>
+                    </td>
+    				<td class="field" width="10%">
+						<label class="red">*</label>
+    					<label>产品名称：</label>
+                    </td>
+					 <td width="15%">
+    					<div id="nameDiv" class="ui-div-text" style="word-break:break-all;">
+    						<input name="pdtProduct.productName" value="$!pdtProduct.productName" id="pdtName" type="text" class="text" maxlength="100" rule="\S" tips='“产品名称”必须填写！'/>
+    					</div>
+                    </td>
+                	<td class="field" width="10%">
+    					<label class="red">*</label>
+                    	<label>产品编号：</label>
+                    </td>
+					<td width="15%">
+                    	<div id="codeDiv" class="ui-div-text">
+                    		<input name="pdtProduct.productCode" value="$!pdtProduct.productCode" id="pdtCode" type="text" class="text" maxlength="20" rule="\S" tips='“产品编号”必须填写！'/>
+                    	</div>
+                    </td>
+					<td width="10%">
+                    </td>
+					<td width="15%">
+                    </td>
+                </tr>
+    		</tbody>
+    	</table>
+		<div id="tempField">
+        </div>
+		<table class="htmltbl" style="table-layout: auto;">
+			<tbody>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label>产品状态：</label>
+                    </td>
+                    <td colspan="7">
+                    	<label>$!pdtProduct.pdtStateStr</label>
+                    </td>
+    			</tr>
+    			<tr>
+    				<td class="field" width="10%">
+						<label class="red">*</label>
+    					<label>上架日期：</label>
+    				</td>
+    				<td colspan="7">
+                        <table id="date-panel" class="celltbl">
+                            <tbody>
+                                <tr>
+                                    <td width="120">
+                                        <div class="ui-div-text">
+                                            <input name="pdtProduct.saleStartDate" id="datepicker1" fun="startDateFun" value="$!date.format("yyyy-MM-dd",$!pdtProduct.saleStartDate)" type="text" readonly="readonly" class="text datepicker" rule="\S" tips='“上架日期的开始日期”必须填写！' />
+                                            <i class="date" id="date1"></i>
+                                        </div>
+                                    </td>
+									<td width="20"><label>-</label></td>
+                                    <td width="120">
+                                        <div class="ui-div-text">
+                                            <input name="pdtProduct.saleEndDate" id="datepicker2" fun="endDateFun" value="$!date.format("yyyy-MM-dd",$!pdtProduct.saleEndDate)" type="text" readonly="readonly" class="text datepicker" rule="\S" tips='“上架日期的结束日期”必须填写！'  />
+                                            <i class="date"></i>
+                                        </div>
+    									<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+					 </td>
+    			</tr>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label>附件管理：</label>
+    				</td>					
+					<td colspan="7">
+						<input type="file" name="fileInput" id="fileInput" />
+                        <label class="gray_self" title="添加附件">(*单个文件不能超过100M)</label>
+						#foreach($attr in $!attrList)
+						<div id="attr_$velocityCount" class="uploadifyQueueItem">
+    						<div class="cancel">
+    							<a href="#" onclick="delAttr($!attr.attachmentId,$velocityCount)"><img src="${ctx}/uploadify/cancel.png" border="0" /></a>
+    						</div>
+                            <span class="fileName"><a href="#" onclick="downFile($attr.attachmentId)" class="attrFile">$!attr.fileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label></span><span class="percentage"></span>
+						</div>
+						#end
+						<div id="fileQueue">
+						</div>
+					</td>
+    			</tr>
+			</tbody>
+		</table>
+		#else
+		<table class="htmltbl" style="table-layout: auto;">
+    		<tbody>
+        		<tr>					
+                	<td class="field" width="10%">
+    					<label>产品类型：</label>
+                    </td>
+                    <td width="15%">
+                    	<label>$!pdtProduct.templateName</label>
+                    </td>
+    				<td class="field" width="10%">
+    					<label>产品名称：</label>
+                    </td>
+                    <td width="15%">
+    					<p style="word-break:break-all;">$!pdtProduct.productName</p>
+                    </td>
+                	<td class="field" width="10%">
+                    	<label>产品编号：</label>
+                    </td>
+                    <td width="15%">
+                    	<label>$!pdtProduct.productCode</label>
+                    </td>
+					<td width="10%">
+                    </td>
+					<td width="15%">
+                    </td>
+                </tr>
+    		</tbody>
+    	</table>
+		<div id="tempField">
+        </div>
+		<table class="htmltbl" style="table-layout: auto;">
+			<tbody>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label>产品状态：</label>
+                    </td>
+                     <td colspan="7">
+                    	<label>$!pdtProduct.pdtStateStr</label>
+                    </td>
+    			</tr>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label>上架日期：</label>
+    				</td>
+                    <td colspan="7">
+                       <label>$!date.format("yyyy-MM-dd",$!pdtProduct.saleStartDate)</label> 至 <label>$!date.format("yyyy-MM-dd",$!pdtProduct.saleEndDate)</label>
+                    </td>
+    			</tr>
+    			<tr>
+    				<td class="field" width="10%">
+    					<label>附件管理：</label>
+    				</td>					
+					<td colspan="7">
+						#foreach($attr in $!attrList)
+							<span class="fileName"><a href="#" onclick="downFile($attr.attachmentId)" class="attrFile">$!attr.fileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label></span><span class="percentage"></span>
+						#end
+					</td>
+    			</tr>
+			</tbody>
+		</table>
+		#end
+    </form>
+	
+	#if($!saleState!=0)
+	<div class="etabs" style="margin-top:10px;">
+    	<div class="etabs-head">
+        	<div class="etabs-head-items">
+        		<ul id="etabs-items">
+                	<li><label>购买信息</label></li>
+                </ul>
+        	</div>
+        </div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child" id="pdtCustomer">
+        	</div>
+        </div>
+    </div>
+	#end
+	<hr />
+	
+	<div class="center">
+		#if($!canUpdate==1&&$saleState!=1)
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="saveProduct(false);" value="保存" />
+		#if($saleState==2)
+			<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="saveProduct(true);" value="保存并上架" />
+		#end
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancel();" value="取消" />
+		#else			
+			<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="javascript:tab.close(GetId(),false);"value="关闭" />
+		#end
+	</div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		tab.title(tab.self,'编辑产品-'+'$!jsUtil.escapeJs($pdtProduct.productName)');
+		//上传附件初始化
+		setUpload();			
+		//加载验证控件
+		jQuery("#pdtForm").validator();		
+		//初始化页卡
+		$('div.etabs').etabs({
+			'head': 'etabs-items',
+			'body': 'etabs-body',
+			'bar': 'etabs-bar'
+		});
+		//初始化自定义字段
+		loadField($!pdtProduct.templateId,$!flag);
+		//加载购买客户列表
+		if($!saleState!=0){
+			$('#pdtCustomer').load('/pdtProduct/loadPdtBuyCustomer.html?actionType=edit&random='+Math.random()*10000,{'pdtProduct.productId':$!pdtProduct.productId});
+		}
+		if($!saleState==2){
+			disStartDate();
+		}
+	});
+	
+	function cfirm(){
+		if($canUpdate==1&&$saleState!=1){
+			if(confirm('放弃更新产品信息并关闭选项卡？')){
+				return true;
+			}
+		}else{
+			return true;
+		}
+	}
+	function cancel(){
+		if(cfirm()){
+			tab.close(GetId(),false);
+		}
+	}
+
+	function add(){
+		var pdtId=$('#productId').val();
+		var url="toAdd.html?productId="+pdtId+"&random="+Math.random()*10000;
+		var result=banger.page.openDialog(url,"添加购买记录",650,520);
+		//window.showModalDialog(url,"添加购买记录","dialogWidth=650px;dialogHeight=520px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no");
+		if(result==1){
+			refresh();
+		}
+	}
+	
+	function deleteBuyCustomer(pcId,userId){
+		if(confirm("您确定要移除选择的购买记录吗？")){
+			jQuery.post('/pdtProduct/deleteBuyCustomer.html',{'pcId':pcId,'productId':$('#productId').val(),'bcustomer.userId':userId},function(){
+				refresh();
+			});
+		}
+	}
+	
+	function updateSellUser(pcId){
+		var obj = jQuery(".datatbl").find("input[type=checkbox][name=chkone]:checked");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("请您选择要修改的选项！");
+			return false;
+		}
+		var str = "";
+		obj.each(function(){
+			if(jQuery(this).attr("checked")){
+				str += jQuery(this).val() + ",";
+			}
+		});
+		if(str!="")str = str.substring(0,str.length-1);
+		var url="updateSellUser.html?ids="+str+"&random="+Math.random()*10000;
+		var result=banger.page.openDialog(url,"修改营销人员",400,300);
+		//window.showModalDialog("updateSellUser.html?ids="+str+"&random="+Math.random()*10000,"修改营销人员","dialogWidth=400px;dialogHeight=300px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no");
+		if(result==1){
+			refresh();
+		}
+	}
+	
+	function importBase(){
+		var productId=$('#productId').val();
+		var urlStr="../pdtProductimport/initImportPath.html?productId="+productId+"&random="+Math.random()*10000;
+		tab.add({id: "pro_imprt", pid: GetId(), title: "导入购买记录", url:urlStr, lock: false,confirm: true});
+	}
+	
+	//结束日期校验
+	function endDateFun(obj){
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		var endDate=$("#datepicker2").val();
+		if(endDate.length>0){
+			if(startDate>endDate){
+				$('#datepicker2').attr('tips', '上架日期的结束日期不能够晚于开始日期！'); return false;
+			}else return true;
+		}else{
+			return true;
+		}
+	}
+	
+	//开始日期校验
+	function startDateFun(obj){
+		if($!saleState!=0){
+			return true;
+		}
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#datepicker1").val();
+		if(systemDate.length>0&&startDate<systemDate){
+			$('#datepicker1').attr('tips', '上架日期的开始日期不能够晚于今天！'); return false;
+		}else return true;
+	}
+	
+	//删除附件
+	function delAttr(attrId,index){
+		if(confirm("确定移除附件吗?")){
+			jQuery.post('/pdtProduct/removeAttr.html',{'pdtAttr.attachmentId':attrId},function(date){
+				if(date>0){
+					$("#attr_"+index).remove();
+				}
+			});
+		}
+	}
+	//下载附件
+	function downFile(attrId){
+		location.href="/pdtProduct/downPdtFile.html?pdtAttr.attachmentId="+attrId;
+		return false;
+	}
+	
+	function loadField(tempId, flag){
+		if(tempId){
+			jQuery.post('/pdtProduct/onPdtTemplateChange.html',
+			{'tempId':tempId,
+			 'isSearch':'false',
+			 'flag':flag,
+			 'productId':$('#productId').val()
+			 },function(html){
+				refreshField(html);
+				});
+		}else{
+			$('#tempField').html(' ');
+		}
+	}
+	
+	//刷新字段
+	function refreshField(html){
+		$('#tempField').html(' ');
+		$('#tempField').html(html);
+		$('select').select();
+		$("input[dateFlag$='true']").each(function(i){
+   			initDate(this.id);
+ 		});
+		$("div[comboFlag$='true']").each(function(i){
+ 			var codes = $(this).attr("codes");
+ 			var list = codes.split(",");
+   			jQuery(this).combobox({"array":list});
+ 		});
+		dateInput("input[dateFlag$='true']");
+		numInput("input[intFlag$='true']");
+		floatInput("input[floatFlag$='true']");
+		maxTextArea("textarea[maxlength]");
+		$('#tempField table, #tempField table tr td').css({
+			'background':'#DFE0E3 !important'
+		});
+	}
+	
+	//刷新列表
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html).table();
+	}
+	
+	//分页跳转
+	function gotoPage(page)
+	{
+		var pdtId=$("#productId").val();
+		goto(page,'/pdtProduct/loadPdtBuyCustomer.html?random='+Math.random()*10000,{
+			"pdtProduct.productId":pdtId,
+			"actionType":"edit",
+			"page.currentPage":page
+		},function(html){refreshGrid('pdtCustomer',html);});
+	}
+	
+	//刷新
+	function refresh(){
+		var pdtId=$("#productId").val();
+		goto(null,'/pdtProduct/loadPdtBuyCustomer.html?random='+Math.random()*10000,{
+			"pdtProduct.productId":pdtId,
+			"actionType":"edit"
+		},function(html){
+			refreshGrid('pdtCustomer',html);
+			});
+	}
+	
+	function disStartDate(){    				
+		$("#datepicker1").attr('disabled','disabled');
+		$("#date1").attr('disabled','disabled');
+	}
+	
+	//保存产品
+	function saveProduct(isPublish){
+		if($saleState==2&&!isPublish){
+			if(confirm("您确定要重新发布此产品?")){
+				isPublish=true;
+			}
+		}
+		var bool = jQuery.validator({ form: 'pdtForm', extend: false});
+		if(!bool){
+			return false;
+		}
+		if(isPublish){
+			$('#productState').val(0);
+		}
+		jQuery.ajax({ 
+			type:'post',
+			url :'/pdtProduct/checkNameAndCode.html',
+			data:{'pdtProduct.productId':$('#productId').val(),
+				  'pdtProduct.productName':jQuery.trim($('#pdtName').val().replace(/(^\s*)|(\s*$)/g,"")),
+    			  'pdtProduct.productCode':jQuery.trim($('#pdtCode').val().replace(/(^\s*)|(\s*$)/g,""))
+			     },
+			success:function(data){					
+				if(data){
+					var str=data.split(",");
+					if(jQuery.trim(str[0])==='pdtName'){
+						$('#nameDiv').addClass('v-fails');
+						$('#pdtName').attr('tips', str[1]); 
+					}else{
+						$('#codeDiv').addClass('v-fails');
+						$('#pdtCode').attr('tips', str[1]); 
+					}						
+				}else{
+					uploadFile();
+				}
+			}
+		});				
+	}
+	//上传文件
+	function uploadFile(){
+		var isUpload = false;
+		//是否有上传文件
+		var fileUpload = $('input[name=fileInput]');
+		if(fileUpload){
+			$('input[name=fileInput]').each(function(){
+				var fileQueue =$('#fileQueue')[0].innerText;
+				if(fileQueue!=""){
+					$(this).uploadifyUpload();
+					isUpload = true;
+				}
+			});
+		}
+		if(!isUpload){
+			submitMessage();
+		}								
+	}
+	//递交
+	function submitMessage(){
+		var postJson = getPostJson();
+  		var fileNameTask = [];
+		var fileSize =[];
+		var fileNameOld = [];
+		$('input[name=fileNameTask]').each(function(){
+			fileNameTask.push($(this).val());	
+		});
+		$('input[name=fileNameOld]').each(function(){
+			fileNameOld.push($(this).val());	
+		});
+		$('input[name=fileSize]').each(function(){
+			fileSize.push($(this).val());	
+		});
+		postJson["fileNameTask"]= fileNameTask.join(",");
+		postJson["fileNameOld"]= fileNameOld.join(",");
+		postJson["fileSize"]= fileSize.join(",");
+		jQuery.post('/pdtProduct/savePdtProduct.html?random='+Math.random()*1000000,postJson,
+		function(data){
+			tab.close(GetId(), true);
+			});
+	}
+</script>
+</html>

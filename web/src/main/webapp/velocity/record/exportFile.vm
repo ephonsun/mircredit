@@ -1,0 +1,332 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>联系记录文件导出</title>
+	#styleLink("base")
+    #scriptLink("core")
+	#scriptLink("page")
+	<style>
+		ul.easy-tabs-header{  white-space:nowrap; overflow:hidden;}
+    	ul.easy-tabs-header li{ text-align:center; white-space:nowrap; overflow:hidden;}
+    	ul.easy-tabs-header li label{ width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+            /* 滚动按钮小图标  */
+        .x-panel-bar{ position: absolute; top: 0px; right: 0px; }
+        .x-panel-bar .x-panel-action { float: left; cursor: pointer; width: 20px; height: 20px; margin: 3px; text-indent: -1000px; overflow: hidden; }
+        .x-panel-bar div.x-panel-scroller-left { background: url(../images/index/left.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/left.png"); }
+        .x-panel-bar div.x-panel-scroller-right { background: url(../images/index/right.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/right.png"); }
+
+        .easy-tabs .easy-tabs-scroll{ position:relative; overflow:hidden; height:30px; margin-right:120px;}
+    </style>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+    <script type="text/javascript">
+	var postJson ;
+	var url;
+	var confirmMsg;
+	var totalAmount;
+	var type;
+    	$(function(){
+			$(".chk").click( function() {
+                if ( $(".chk:checked").length > 5 ) {
+                    $(this).attr("checked",false);
+					banger.page.showMessageBox("最多只能选择5个客户字段，请重新操作！");
+                }
+            } );
+		
+			$('.easy-tabs').easytabs();
+			
+			$('.cr-fieldbox').each(function(){
+				var s = this;
+				$('a.all', s).click(function(){
+					$(':checkbox', s).attr('checked', 'checked');
+					return false;
+				});
+				$('a.none', s).click(function(){
+					$(':checkbox', s).removeAttr('checked');
+					return false;
+				});
+			});
+			$("#export").click(function(){
+				exportCustomer();
+			});
+			$("#download").click(function(){
+				download();
+			});
+			var pid = GetPid();
+			var win = window.top.ExportIframeWin(pid);
+			if(win && win.getCustPostJson){
+    			postJson = win.getCustPostJson();
+    			type = postJson["type"];
+    			url = postJson["url2"];
+    			totalAmount = postJson["recordCount"];
+    			$("#totalCount").text(postJson["recordCount"]);
+    			$("#totalCount1").text(postJson["recordCount"]);
+    			$("#totalCount2").text(postJson["recordCount"]);
+			}
+			#foreach($feild in $!feilds)
+				$('#'+'$feild').attr("checked",true);
+			#end
+
+            /* 内容部分左右按钮滚动js调用  */
+            $('#easyScroll').itemScroll({
+                'oLeft':$('#leftBtn'),
+                'oRight':$('#rightBtn')
+            });
+		});
+		
+		var proId;
+		//跳到第二页
+		function exportCustomer(){
+			confirmMsg = 1;
+			var data="";
+    		$("input[type$='checkbox']").each(function(i){
+    			if(this.checked) data += this.value + ":";
+    		});
+			if(data==""){
+				banger.page.showMessageBox("请您选择要导出的字段！");
+			}else{
+    			jQuery.post('../record/exportRecordFileVerify.html?random='+Math.random()*10000,
+    					postJson,
+    					function(json){
+							var ds=jQuery.parseJSON(json);
+							if(ds['error']){
+								banger.page.showMessageBox({"type":"error","content":"系统出错了"});
+							}else{
+								if(ds['isfile']){
+									$('#fileCount').text(ds['isfile']);
+								}else{
+									$('#fileCount').text(0);
+								}
+								if(ds['size']){
+									$('#successCount').text(ds['isfile'])
+								}else{
+									$('#successCount').text(0);
+								}							
+                				$("#d1").css("display","none");
+                				$("#d2").css("display","block");
+                				$("#d3").css("display","none");
+                				writeExcel(data);
+                				proId = setInterval("progressBar()", 1000);
+							}
+					});
+			}
+		
+		}
+		
+		//写入excel
+		function writeExcel(data){
+			postJson["crmPostData"] = data;
+			jQuery.post( url,
+        				postJson,
+        				function(str){
+							
+        				});
+		}
+		//导出进度
+		function progressBar(){
+			jQuery.post('../record/exportRecordFileBar.html?random='+Math.random()*10000,
+						{},
+						function(json){
+							var curr;
+							var p;
+							var per;
+							var ds=jQuery.parseJSON(json);
+							if(ds["curr"]) {
+								curr = ds["curr"];
+							}
+							if(typeof(curr)=='undefined') curr = 0;
+							if(totalAmount==0){
+								per=100;
+								p = "100%";
+							}else{
+   								per=Math.round(parseInt(curr) * 100 /parseInt(totalAmount));
+                				p = (per>100?100:per)+'%';
+							}
+                			$("#percent").text(p);
+                			$("#porgressBar").css("width",p);
+                			if(p == "100%"){
+                				clearInterval(proId);
+                				$("#d1").css("display","none");
+                				$("#d2").css("display","none");
+                				$("#d3").css("display","block");
+								confirmMsg=2;
+                			}
+						
+						}
+			
+			);
+		
+			
+		}
+		//下载
+		function download(){
+			document.location.href="../record/exportFileDown.html?type="+type+"&random="+Math.random()*1000;
+		}
+		
+		function cfirm(){
+			if(confirmMsg == 1 && typeof(proId) != 'undefined'){
+    			if(confirm('正在导出录音文件，您确定要取消导出吗？')) {
+					clearInterval(proId);
+					jQuery.post('../record/exportRecordFileStop.html',
+        				{},
+        				function(json){
+						
+        				});
+					return true;
+				}
+			}else return true;
+		}
+	
+    </script>
+</head>
+ 
+<body>
+	<div id="d1" style="display:block">
+    	<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td>第 2 步</td>
+            	<td>完成</td>
+            </tr>
+        </table>
+        <h4 class="steptxt">
+        	第1步：选择导出字段
+        </h4>
+       <form name="exportForm"  id ="exportForm" action="" method="post" >
+            <div class="cr-fieldbox">
+                <h4>
+                	<label class="fl">基础字段</label>
+                </h4>
+                <div class="cr-field-items">
+    				#foreach($param in ${baseColumn.keySet()})
+                    <div style="width: 160px;">
+                        <input type="checkbox" id="$param" class="chk" name="$param" value="$param"/>
+                        <label title="${baseColumn.get($param)}">${baseColumn.get($param)}</label>
+                    </div> 
+    				#end
+                </div>
+            </div>
+           <div class="easy-tabs" style="margin-top: 20px;">
+               <div style="position:relative;">
+                   <div class="easy-tabs-scroll">
+                       <ul class="easy-tabs-header" id="easyScroll">
+                            #foreach($template in $temp.getTemplates())
+                                <li><label title="$template.templateName">$template.templateName</label></li>
+                            #end
+                        </ul>
+                   </div>
+                   <!--// .easy-tabs-scroll-->
+                   <div class="x-panel-bar">
+                       <div class="x-panel-action x-panel-scroller-left" id="leftBtn"></div>
+                       <div class="x-panel-action x-panel-scroller-right" id="rightBtn"></div>
+                   </div>
+                   <!--// .x-panel-bar-->
+               </div>
+            <div class="easy-tabs-pages">
+    			
+    			#foreach($template in $temp.getTemplates())
+                <div class="easy-tabs-page">
+                    <div class="cr-fieldbox">
+                        <div class="cr-field-items">
+							#foreach($field in $!template.fields)
+    							<div style="width: 160px;">
+    								#if($template.isBasic.equals(1))
+    									<input type="checkbox" class="chk" id="$!field.fieldName" name="$!field.fieldName" value="$template.isBasic,$!field.templateFieldName,$!field.fieldName"/>
+    								#else
+    									<input type="checkbox" class="chk" id="$!field.fieldName" name="$!field.fieldName" value="$template.isBasic,$template.templateName,$!field.templateFieldName,$!field.fieldName"/>
+									#end    
+									<label title="$!field.templateFieldName">
+									   #set($str=$!field.templateFieldName) 
+                                       #if($str.length()>10)
+                                          #set($str=$str.substring(0,10))
+                                       $str ...
+                                       #else
+										  $!field.templateFieldName
+                                       #end 
+									 </label>
+                                </div>
+							#end
+                        </div>
+                    </div>
+                </div>
+               #end		
+            </div>
+        </div>
+    
+    		<hr style="margin-top: 20px;" />
+        
+            <div class="halign">
+            	<input type="button" id="export" class="btn6 btn6bg1" value="导出" />
+            	<input type="button" class="btn6 btn6bg3" onclick="tab.close(GetId(),false);" value="取消" />
+            </div>
+       </form>
+	</div>
+	
+	<div id="d2" style="display:none">
+		<table class="bartbl">
+    	<tr>
+        	<td class="over">第 1 步</td>
+        	<td class="over">第 2 步</td>
+        	<td>完成</td>
+        </tr>
+        </table>
+        <h4 class="steptxt">
+        	第2步：导出录音进度
+        </h4>
+        
+        <div class="pgrbar">
+        	<div class="ppt">
+            	<span class="fl">
+                    正在导出数据，共
+                    <label id="totalCount" class="dgreen bold"></label>
+                    条数据…
+                </span>
+                <span id="percent" class="fr">
+                </span>
+            </div>
+            <div class="bar" >
+                <div id="porgressBar"></div>
+            </div>
+        </div>
+	</div>
+	
+	<div id="d3" style="display:none">
+    	<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">完成</td>
+            </tr>
+        </table>
+        
+        <h4 class="steptxt">
+        	完成文件导出
+        </h4>
+        
+        <dl class="sucppt">
+        	<dt>文件导出已完成！</dt>
+            <dd class="img"></dd>
+            <dd>
+                搜索结果中<span id="stype"></span>共
+                <span id="totalCount1" class="green"></span>
+                条，其中录音
+                <span id="fileCount" class="green"></span>
+                条，成功导出
+				<span id="successCount" class="green"></span>条<input type="hidden" id="type" />
+        	</dd>
+        </dl>
+        
+        <hr />
+        
+        <div class="halign">
+        	<input type="button" id="download" class="btn6 btn6bg1" value="另存导出结果" />
+        	<input type="button" class="btn6 btn6bg3" onclick="tab.close(GetId(),false);" value="关闭" />
+        </div>
+	</div>
+
+</body>
+</html>

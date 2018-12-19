@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="tskTask" extends="default" namespace="/tskTask">
+
+		<!--  今天未完成的任务     -->
+		<action name="showTodayUnfinishedTask" class="tskTaskAction"
+			method="showTodayUnfinishedTask">
+			<result name="success">/velocity/tskTask/tskTaskTodayUnfinished.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  三天内未完成的任务     -->
+		<action name="taskThreeDayUnfinishPage" class="tskTaskAction"
+			method="taskThreeDayUnfinishPage">
+			<result name="success">/velocity/tskTask/tskTaskThreeDayUnfinished.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  一周内未完成的任务     -->
+		<action name="taskOneWeekUnfinishPage" class="tskTaskAction"
+			method="taskOneWeekUnfinishPage">
+			<result name="success">/velocity/tskTask/tskTaskOneWeekUnfinished.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  新建联系任务    -->
+		<action name="saveTskTaskContact" class="tskTaskAction"
+			method="saveTskTaskContact">
+			<result name="toContact">/velocity/tskTask/tskTaskAdd.vm</result>
+			<result name="toTaskTarget" type="redirect">initContactCustomerList.html?tskTask.taskId=${tskTask.taskId}&amp;tskTask.executeDeptId=${tskTask.executeDeptId}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 任务附件上传 -->
+		<action name="uploadFile" class="tskTaskAction"
+			method="uploadFile">
+		</action>
+		<!-- 任务附件下载 -->
+		<action name="downTaskFile" class="tskTaskAction"
+			method="downTaskFile">
+		</action>
+		<!-- 初始化任务联系客户列表 -->
+		<action name="initContactCustomerList" class="tskTaskAction"
+			method="initContactCustomerList">
+			<result name="success">/velocity/tskTask/tskTaskAdd_customer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- jquery查询任务联系客户列表 -->
+		<action name="getContactCustomerList" class="tskTaskAction"
+			method="getContactCustomerList">
+			<result name="success">/velocity/tskTask/tskTaskAdd_customerTab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 添加任务联系客户 -->
+		<action name="saveTargetCustomer" class="tskTaskAction"
+			method="saveTargetCustomer">
+		</action>
+		
+		<!-- 删除目标任务联系客户 -->
+		<action name="delTaskCustomer" class="tskTaskAction" method="delTaskCustomer">
+			<result name="success" type="redirect">getContactCustomerList.html?tskTask.taskId=${tskTask.taskId}</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 跳转编辑任务页面 -->
+		<action name="toTskTaskUpdatePage" class="tskTaskAction" method="toTskTaskUpdatePage">
+			<result name="toTaskContact">/velocity/tskTask/tskTaskUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 加载任务联系客户 -->
+		<action name="loadTaskCustomer" class="tskTaskAction" method="loadTaskCustomer">
+			<result name="success">/velocity/tskTask/customerTabList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 移除附件 -->
+		<action name="removeAttr" class="tskTaskAction" method="removeAttr">
+		</action>
+		
+		<!-- 任务目标联系情况变更 -->
+		<action name="changeTskFinish" class="tskTaskAction"
+			method="changeTskFinish">
+		</action>
+		
+		<!-- 编辑联系客户 -->
+		<action name="updateTaskContact" class="tskTaskAction" method="updateTaskContact">
+			<result name="success" type="redirect">toTskTaskUpdatePage.html?tskTask.taskId=${tskTask.taskId}&amp;tskTask.taskType=${tskTask.taskType}</result>
+<!--			<result name="success">/velocity/tskTask/succ.vm</result>-->
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 任务查看 -->
+		<action name="detailTask" class="tskTaskAction" method="detailTask">
+			<result name="taskContactDetail">/velocity/tskTask/tskTaskDetail.vm</result>
+			<result name="taskNextDetail">/velocity/tskTask/tskTaskNextDetail.vm</result>
+			<result name="toTskNxetUpdate">/velocity/tskTask/tskTaskNextUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 查看和执行任务联系客户列表加载 -->
+		<action name="loadTaskCustomerDetail" class="tskTaskAction" method="loadTaskCustomerDetail">
+			<result name="success">/velocity/tskTask/taskCustomerDetailCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="loadTskDetailCustomerList" class="tskTaskAction" method="loadTskDetailCustomerList">
+			<result name="success">/velocity/tskTask/taskDetailCustomerTab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 删除任务 -->
+		<action name="delTskTask" class="tskTaskAction" method="delTskTask"></action>
+		
+		<!-- 中止任务 -->
+		<action name="taskStop" class="tskTaskAction" method="taskStop">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 重启任务 -->
+		<action name="taskRestart" class="tskTaskAction" method="taskRestart">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 我分配的任务 -->
+		<action name="showMyAssignTaskPage" class="tskTaskAction"
+			method="showMyAssignTaskPage">
+			<result name="success">/velocity/tskTask/tskTaskMyAssignList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 我执行的任务 -->
+		<action name="showMyExecuteTaskPage" class="tskTaskAction"
+			method="showMyExecuteTaskPage">
+			<result name="success">/velocity/tskTask/tskTaskMyExcuteList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 执行任务-->
+		<action name="executeTask" class="tskTaskAction" method="executeTask">
+			<result name="executeTaskContact">/velocity/tskTask/tskTaskExecuteContact.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 修改执行日期 -->
+		<action name="updateExecuteTask" class="tskTaskAction" method="updateExecuteTask">
+			<result name="toUpExcTskPage">/velocity/tskTask/taskExcDateUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 已中止的任务 -->
+		<action name="tskTaskStopPage" class="tskTaskAction" method="tskTaskStopPage">
+			<result name="success">/velocity/tskTask/tskTaskStopList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 未完成的任务 -->
+		<action name="tskTaskUnFinishPage" class="tskTaskAction" method="tskTaskUnFinishPage">
+			<result name="success">/velocity/tskTask/tskTaskUnFinishList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 系统托盘待分配的任务 -->
+		<action name="taskUnallocatedMarket" class="tskTaskAction" method="taskUnallocatedMarket">
+			<result name="success">/velocity/tskTask/tskUnallocatedMatketList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 已完成的任务 -->
+		<action name="tskTaskCompletePage" class="tskTaskAction" method="tskTaskCompletePage">
+			<result name="success">/velocity/tskTask/tskTaskCompleteList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 过期的任务 -->
+		<action name="tskTaskExpiredPage" class="tskTaskAction" method="tskTaskExpiredPage">
+			<result name="success">/velocity/tskTask/tskTaskExpiredList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		<!-- 新建营销任务 -->
+		<action name="saveTskTaskMarket" class="tskTaskAction" method="saveTskTaskMarket">
+			<result name="toTskTaskMarketPage">/velocity/tskTask/taskMarketAdd.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 返回组织机构及用户树 -->
+		<action name="showDeptExcUserList" class="taskExcPluginAction" method="showDeptExcUserList">
+		</action>
+		
+		<!-- 加载修改执行者列表-->
+		<action name="initUpdateExcUserList" class="taskExcPluginAction" method="initUpdateExcUserList">
+			<result name="success">/velocity/tskTask/updateExcUserPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 查询机构下在此任务中的用户 -->
+		<action name="getDeptUserListPage" class="taskExcPluginAction" method="getDeptUserListPage">
+			<result name="success">/velocity/tskTask/tskExcUserList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 批量修改执行者 -->
+		<action name="updateExecuteUser" class="tskTaskAction" method="updateExecuteUser">
+		</action>
+		
+		<!-- 移除联系客户 -->
+		<action name="removeTaskCustomer" class="tskTaskAction" method="removeTaskCustomer">
+		</action>
+		
+		<!-- 查询任务指定的执行者对应的联系客户数 -->
+		<action name="getExcUserCusCount" class="taskExcPluginAction" method="getExcUserCusCount">
+		</action>
+		
+		<!-- 添加联系客户 -->
+		<action name="saveTaskCustomer" class="tskTaskAction" method="saveTaskCustomer">
+		</action>
+		
+		<!-- 中止/重启任务 -->
+		<action name="stopOrStartTask" class="tskTaskAction" method="stopOrStartTask">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 修改子任务任务状态 -->
+		<action name="changeParentTskStatus" class="tskTaskAction" method="changeParentTskStatus">
+		</action>
+		
+		<!-- 更改任务联系客户的联系情况 -->
+		<action name="changeTskCustomerFinish" class="tskTaskAction" method="changeTskCustomerFinish">
+		</action>
+		
+		<action name="loadCustomerListVm" class="tskTaskAction" method="loadCustomerListVm">
+			<result name="success">/velocity/tskTask/taskCustomerCard.vm</result>
+		</action>
+		
+		<!-- 客户管理->客户对应的任务-->
+		<action name="customerTaskCard" class="tskTaskAction" method="customerTaskCard">
+			<result name="success">/velocity/customer/customerTaskCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="initTaskNext" class="tskTaskAction" method="initTaskNext">
+			<result name="toNextTaskAdd">/velocity/tskTask/tskTaskNextAdd.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 新建下次联系任务 -->
+		<action name="saveTaskNext" class="tskTaskAction" method="saveTaskNext">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		
+		<!--                  营销任务部分                                               -->
+		<action name="saveTskTaskMarket" class="taskMarketAction" method="saveTskTaskMarket">
+			<result name="toTaskMarketAdd">/velocity/tskTask/taskMarketAdd.vm</result>
+			<result name="success" type="redirect">/tskTask/getByTaskMarket.html?tskTask.taskId=${tskTask.taskId}&amp;marketType=0</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="getByTaskMarket" class="taskMarketAction" method="getByTaskMarket">
+			<result name="success">/velocity/tskTask/taskMarketSaveToPage.vm</result>
+			<result name="toMarketTskDetail">/velocity/tskTask/taskMarketDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+			<result name="noAssignAuth">/velocity/tskTask/taskMarketUpNoAssaign.vm</result>
+		</action>
+		<!-- 初始化产品信息 -->
+		<action name="initProductJsonMsg" class="taskMarketAction" method="initProductJsonMsg"></action>
+		<!-- 根据产品ID查询产品的营销任务量 -->
+		<action name="getByTaskProduct" class="taskMarketAction" method="getByTaskProduct"></action>
+		<!-- 制定电话任务 -->
+		<action name="phontTasks" class="taskMarketAction" method="phontTasks">
+			<result name="success">/velocity/tskTask/formulatePhoneTask.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 分配营销任务 -->
+		<action name="assignTaskMarket" class="taskMarketAction" method="assignTaskMarket">
+			<result name="success">/velocity/tskTask/assignTaskMarketCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加电话任务联系客户 -->
+		<action name="savePhoneTaskCustomer" class="taskMarketAction" method="savePhoneTaskCustomer">
+		</action>
+		<!-- 修改沟通进度 -->
+		<action name="changeCommProgress" class="taskMarketAction" method="changeCommProgress">
+		</action>
+		
+		<!-- 编辑营销任务 -->
+		<action name="updateTaskMarket" class="taskMarketAction" method="updateTaskMarket">
+			<result name="toAddUpdate" type="redirect">/tskTask/getByTaskMarket.html?tskTask.taskId=${tskTask.taskId}</result>
+<!--			<result name="success" type="redirect">tskTaskUnFinishPage.html</result>-->
+			<result name="success">/velocity/tskTask/succ.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 编辑任务目标额(针对客户经理) -->
+		<action name="updateTargetAccount" class="taskMarketAction" method="updateTargetAccount">
+		</action>
+		<!-- 编辑任务目标额(针机构) -->
+		<action name="updateTargetDept" class="taskMarketAction" method="updateTargetDept">
+		</action>
+		
+		<!-- 工作台任务提醒 -->
+		<action name="initTask" class="workbenchTaskAction" method="initTask">
+			<result name="success">/velocity/tskTask/workTaskMain.vm</result>
+		</action>
+		<action name="initWorkTask" class="workbenchTaskAction" method="initWorkTask">
+			<result name="success">/velocity/login/taskRmiMainCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="getMoreTask" class="workbenchTaskAction" method="getMoreTask">
+			<result name="success">/velocity/login/taskRmiMore.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="updateNextTaskIsDel" class="tskTaskAction" method="updateNextTaskIsDel">
+		</action>
+		
+		<action name="isStopTask" class="taskExcPluginAction" method="isStopTask">
+		</action>
+	</package>
+</struts>

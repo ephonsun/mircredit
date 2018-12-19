@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="talk" extends="default" namespace="/talk">
+
+		<!--  通适窗口  -->
+		<action name="getCallInPage" class="telephoneTalkAction" method="getCallInPage">
+			<result name="success">/velocity/talk/telephoneTalkHeader.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 通适内容 -->
+		<action name="getTelephoneTalkPage" class="telephoneTalkAction" method="getTelephoneTalkPage">
+			<result name="success">/velocity/talk/telephoneTalkBody.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  来电弹窗 -->
+		<action name="getTalkIncomingPopup" class="telephoneTalkAction" method="getTalkIncomingPopup">
+			<result name="success">/velocity/talk/telephoneTalkCallIn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  保存通话信息 -->
+		<action name="saveTelephoneTalk" class="telephoneTalkAction" method="saveTelephoneTalk">
+			<param name="rules" >crmCustomerService.checkCustomerNo(crmCustomer.customerNo,crmCustomer.customerId,loginInfo.userId)</param>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  选择客户，获得Json数据  -->
+		<action name="getCustomerJson" class="telephoneTalkAction" method="getCustomerJson">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  得到处理过的拨号号码  -->
+		<action name="getDialNumber" class="telephoneTalkAction" method="getDialNumber">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  检查通话状态  -->
+		<action name="checkUserLoginStatus" class="telephoneTalkAction" method="checkUserLoginStatus">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  得到来电转接页面  -->
+		<action name="getCallForwardPage" class="telephoneTalkAction" method="getCallForwardPage">
+			<result name="error">/velocity/error.vm</result>
+			<result name="success">/velocity/talk/telephoneTalkForward.vm</result>
+		</action>
+		
+		<!--  来电转接页面分页  -->
+		<action name="getCallForwardGrid" class="telephoneTalkAction" method="getCallForwardGrid">
+			<result name="error">/velocity/error.vm</result>
+			<result name="success">/velocity/talk/telephoneTalkForwardGrid.vm</result>
+		</action>
+		
+		<!-- 复盖已有号码  -->
+		<action name="getTalkNumberChange" class="telephoneTalkAction" method="getTalkNumberChange">
+			<result name="error">/velocity/error.vm</result>
+			<result name="success">/velocity/talk/telephoneTalkNumber.vm</result>
+		</action>
+
+		<!-- 屏幕取词  -->
+		<action name="getWordsPage" class="telephoneTalkAction" method="getWordsPage">
+			<result name="error">/velocity/error.vm</result>
+			<result name="success">/velocity/talk/telephoneTalkWords.vm</result>
+		</action>
+
+		<!-- 屏幕取词  -->
+		<action name="getWordsGrid" class="telephoneTalkAction" method="getWordsGrid">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 退出保存通话记录  -->
+		<action name="closeSaveTelephoneTalk" class="telephoneTalkAction" method="closeSaveTelephoneTalk">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+
+	</package>
+</struts>

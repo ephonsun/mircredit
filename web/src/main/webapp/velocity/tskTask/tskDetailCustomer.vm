@@ -1,0 +1,189 @@
+<div class="search-bar mt">
+    <span class="fl bold">
+        已添加客户数(<label class="green">$!customerCount</label>)
+    </span>
+</div>                
+<div #if($!roleType==0) class="ui-panel-box2" #end>
+	#if($!roleType==0)
+    <div class="l">
+        <h4>
+            <label>执行者</label>
+        </h4>
+        <div class="l-inner">
+            <ul id="deptTreebox" class="ztree"></ul>
+        </div>
+    </div>
+	#end	
+    <div class="r" #if($!roleType!=0) style="margin-left: 0; position:relative;" #end>
+    	<div class="contact-amount">
+			#if($!roleType==0)
+				<label id="userName"></label>
+			#end
+			#if($!isPast==0)
+                <label class="ml" id="dailyTitle"></label>
+                <label class="green" id="leftDaily"></label>
+			#end
+            <label class="ml" id="leftTitle"></label>
+            <label class="green" id="leftTotal"></label>
+            <label class="ml" id="totalTitle"></label>
+            <label class="green" id="totalCount"></label>
+        </div>
+		<table id="cusTab" class="datatbl">
+			#parse("/velocity/tskTask/tskDetailCustomer_Tab.vm")
+		</table>           
+    </div>
+</div>
+ <script type="text/javascript">
+	var setting = {
+		callback:{
+			onClick:treeCustomerList
+		},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		view: {
+			fontCss: getFont,
+			showIcon: true
+		}
+		
+	};
+	function getFont(treeId, node) {
+		return node.font ? node.font : {};
+	}
+	var taskId=$!contactId;
+	function treeCustomerList(event, treeId, treeNode){
+		jQuery.post("/tskContact/getContactCustomerList.html?random="+Math.random(),{
+			'contactId':taskId,
+			'treeId':treeNode.id,
+			'treeType':treeNode.type,
+			'actionType':'detail'
+		},function(html){
+			refreshGrid('cusTab',html);
+			$('#userName').text($('#userName1').val());
+			setExecDetail(true);
+		});
+	}
+	
+	//刷新
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html).table();
+		initEdit();
+	}
+	//分页跳转
+	function gotoPage(page)
+	{
+		var taskId=$("#tskTaskId").val();
+		goto(page,"/tskContact/getContactCustomerList.html?random="+Math.random(),{
+			"contactId":taskId,
+			"actionType":"detail",
+			"treeId":$("#treeId").val(),
+			"treeType":$("#treeType").val(),
+			"page.currentPage":page
+		},function(html){refreshGrid('cusTab',html);});
+	}
+	
+	//查看客户
+	function customerDetail(customerId){
+		jQuery.ajax({
+			  type: 'POST',
+			  url: "/customer/isDeleteCus.html?random="+Math.random()*1000,
+			  data: {"cusId":customerId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+			  		}else{
+						var options = {id: "task_Customer_detail_detail" + customerId , pid: GetId(), title: "客户详情", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+						tab.add(options);
+					}
+			  	}
+		});	
+	}
+	
+	//关联任务
+	function toRelatedTaskPage(customerId,exeId){
+		var title="关联任务";
+    	var url="/tskContact/initRelatedTaskPage.html";
+    	url=url+"?tskCusId="+ customerId +"&exeUserId="+exeId+"&detail=y"+"&random="+Math.random();
+    	var options = {id: "relatedTask"+customerId, pid: GetId(), title: title, url: url, lock: false};
+    	tab.add(options);
+	}
+	
+	//查看客户的联系记录
+	function customerContactRec(customerId,number){
+		var taskId=$("#tskTaskId").val();
+		var url = "/record/showRecordListForTsk.html";
+		var id; 
+		if(customerId == 0){
+			url = url+"?number="+number+"&contactId="+taskId+"&random="+Math.random();
+			id = number;			
+		}else{
+			url = url+"?customerId="+customerId+"&contactId="+taskId+"&random="+Math.random();
+			id = customerId;
+		}	
+		var options = {id: "task_record_detail"+id , pid: GetId(), title: "联系记录", url: url, lock: false};
+		tab.add(options);
+	}
+	
+	$(function(){
+    	//加载机构用户树
+	
+    	jQuery.post('/tskContact/showDeptExcUserList.html?random='+Math.random(),{
+			'tskContact.contactId':taskId,
+			'type':"detail"
+    	},function(data){
+    		data = jQuery.parseJSON(data);
+    		jQuery.fn.zTree.init($("#deptTreebox"),setting,data);
+			initRootExecTask();
+		});
+		setExecDetail(true);
+		$('#cusTab').table();
+		initEdit();
+	});
+	
+	function initRootExecTask(){
+		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTreebox");
+		if(treeObj){
+        	var nodes = treeObj.getNodes();
+        	if (nodes.length>0) {
+    			$('#userName').text(nodes[0].name);
+    	  	}
+			setExecDetail(true);
+		}		
+	}
+	
+	//设置日均剩余联系量等任务统计情况
+	function setExecDetail(isUser){
+		if(isUser){
+			$('#dailyTitle').text("日均剩余联系量：");
+    		$('#leftTitle').text("剩余联系总量：");
+    		$('#totalTitle').text("总联系量："); 	
+			$('#leftDaily').text($('#leftDaily1').val());
+    		$('#leftTotal').text($('#leftTotal1').val());
+    		$('#totalCount').text($('#totalCount1').val());			
+		}else{
+    		$('#dailyTitle').text("");
+    		$('#leftDaily').text("");
+    		$('#leftTitle').text("");
+        	$('#leftTotal').text("");
+    		$('#totalTitle').text("");		
+        	$('#totalCount').text("");			
+		}		
+	}
+	function initEdit(){
+		editRemark('.edit');
+	}
+		
+	function updateRemark(tr, text){
+		var id = $(':hidden',tr).val();
+		jQuery.post('/tskContact/modifyTargetRemark.html',{
+			'tskTarget.contactTargetId':id,
+			'tskTarget.remark':jQuery.trim(text.replace(/(^\s*)|(\s*$)/g,""))   
+		},function(data){
+			
+		});
+	}	
+</script>

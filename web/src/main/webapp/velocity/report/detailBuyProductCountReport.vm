@@ -1,0 +1,594 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>产品销售统计报表</title>
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<style type="text/css" media="print"> 
+        .Noprint{ display:none; }
+        .PageNext{ page-break-after:always; }
+		.NOPRINT { font-size:9pt; font-family:'宋体'; }
+        .tdp { border-bottom:1px solid #000; border-left:1px solid #000; border-right:1px solid #fff; border-top:1px solid #fff; } 
+        .tabp { border-width:2px 2px 1px 1px; border-style: solid; border-color: #000 #000 #000 #000; }
+    </style>
+	#scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	#scriptLink("page")
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="../../js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="../../js/report/install_lodop64.exe"></embed>
+	</object> 
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000; 
+    border-style: solid; 
+    border-top-width: 2px; 
+    border-right-width: 2px; 
+    border-bottom-width: 1px; 
+    border-left-width: 1px; 
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+
+</style> 
+<script>
+var oldJson;
+var containSub = '1';
+$(document).ready(function(){
+	$('select').select();
+	$('.choConcretePro').click(function(e){
+		var box = $('.concretePro');
+		if(!$('.proQuota').is(':hidden')){
+			if(box.is(':hidden')){
+				var obj = $(this);
+				box.css({
+					top: obj.offset().top + obj.outerHeight(true) - 1 + 'px',
+					left: obj.offset().left + 'px'
+				}).show();
+				obj = null;
+			}
+			else{
+				box.hide();
+			}
+			box = null;
+			e.stopPropagation();
+		}
+	});
+	/**
+	 * 窗体大小发生改变时弹框相对位置
+	**/
+	$(window).resize(function(){
+		if(!$('.concretePro').is(':hidden')){
+			var obj = $('.choConcretePro');
+			$('.concretePro').css({
+				left: obj.offset().left + 'px'
+			})
+			obj = null;
+		}
+	});
+	/**
+	 * 点击窗体其他区域隐藏请求者层
+	**/
+	$(document).click(function(){
+		$('.concretePro').hide();
+	});
+	/*鼠标在下拉框之外点击就隐藏下拉框*/
+	$(document).mouseup(function(event){ 
+		if($(event.target).parents(".ui-subtree,.ui-agetree, .combobox-box, .concretePro").length==0){
+			$(".ui-subtree, .ui-agetree, .combobox-box, .concretePro").css('display','none');
+			$('.ui-select').children().find('ul').parent('div').css('display','none');
+		}
+	});
+	/**
+	 * 阻止请求者层中的元素事件冒泡
+	**/
+	$('.concretePro').click(function(e){
+		e.stopPropagation();
+	});	
+
+	$('#form1').validator();
+	$("#query").click(function(){
+		queryReport();
+	});
+	$("#export").click(function(){
+		exportReport();
+	});
+	$("#print").click(function(){
+		openPrintPage();
+	});
+	
+	$("#dateBegin").val('$!condition.dateBegin');
+	$("#dateEnd").val('$!condition.dateEnd');
+	
+	$("#belongTo").change(function(){
+		changeBelongTo($(this).val());
+	});
+			
+	//加载下属树
+	$('#userList').subtree({
+		tid: 'subtree',
+		showIcon: true,
+		url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+		buttons: [
+			{ text: '确定', callback: onCheckUser },
+			{ text: '取消' }
+		]
+	});
+	//加载产品类型
+	$('.concretePro').show();
+	var setting = {
+    	check: {
+    		enable: true,
+    		chkStyle: "checkbox",
+    		chkboxType: { "Y": "ps", "N": "ps" }
+    	},data: {
+    		simpleData: {enable: true}
+    	},view: {showIcon: false}
+	};
+	jQuery.post('/report/initProductTypeTree.html?random='+Math.random(),{
+	},function(data){
+		data = jQuery.parseJSON(data);
+		jQuery.fn.zTree.init($("#treeDivTree"),setting,data);
+	});
+	$('.concretePro').hide();
+	//加载机构树
+	$('#deptList').agetree({
+		tid: 'agetree',
+		url: function(){ return '/customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+		buttons: [
+			{ text: '确定', callback: onCheckDept },
+			{ text: '取消' }
+		]
+	});
+	
+	changeBelongTo($("#belongTo").val());
+	
+	$("input[dateFlag$='true']").each(function(i){
+		initDate(this.id);
+	});
+	$("select[render='sel']").each(function(){
+		$(this).select();
+	})
+	
+	$('.ok').click(function(){
+    	okCheckedVal('treeDivTree');
+    	$('.concretePro').hide();
+    });
+    /**
+     * 请求者层 取消 按钮事件
+    **/
+    $('.close').click(function(){
+    	$('.concretePro').hide();
+    });
+});
+
+//确定按钮事件
+function okCheckedVal(treeId){
+	var zTree = jQuery.fn.zTree.getZTreeObj(treeId);
+	if(zTree != null){
+		var nodes = zTree.getCheckedNodes(true), l = nodes.length, txt = '', val = '';
+		for(var i=0; i<l; i++){
+			if(nodes[i].type != 'D'){
+				txt += nodes[i].name + ',';
+				val += nodes[i].id + ',';
+			}
+		}
+		if(txt.length > 0){
+			txt = txt.substring(0, txt.length-1);
+			val = val.substring(0, val.length-1);
+		}
+		$("#productName").val(txt);
+		$("#proId").val(val);
+	}
+}
+
+function params(){
+	return 'productName=' + $('#productName').val();
+}
+
+
+function click(node){
+	$('#productName').val(node['productName']);
+	$('#proId').val(node['productId']);
+}
+
+//点击User
+function onCheckUser(treeId){
+	var postJson = {};
+	postJson = getCheckJson(treeId, 'U');
+	$('#userIds').val(postJson.ids);
+	$('#userNames').val(postJson.names);
+	$("#userNames").focus().blur();
+}
+//点击Dept
+function onCheckDept(treeId,checkbox){
+	var postJson = {};
+	postJson = getCheckJson(treeId, 'D');
+	$('#deptIds').val(postJson.ids);
+	$('#deptNames').val(postJson.names);
+	if(checkbox.checked){
+		containSub = '1';
+	}else{
+		containSub = '0';
+	}
+	$("#deptNames").focus().blur();
+}
+function getCheckJson(treeId, flag){
+	var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+	var nodes = treeObj.getCheckedNodes(true);
+	var len = nodes.length;
+	var uIds = "";
+	var uName = "";
+	for(var i=0; i<len; i++){
+		if(flag=='U'){
+			if(nodes[i].flag==flag){
+				if(uIds==""){
+					uIds = nodes[i].id;
+					uName = nodes[i].name;
+				}else{
+					uIds = uIds + "," + nodes[i].id;
+					uName = uName+ "," +nodes[i].name;
+				}
+			}
+		}else{
+			if(uIds==""){
+				uIds = nodes[i].id;
+				uName = nodes[i].name;
+			}else{
+				uIds = uIds + "," + nodes[i].id;
+				uName = uName+ "," +nodes[i].name;
+			}	
+		}
+	}
+	var postJson = {};
+	postJson['ids'] = uIds;
+	postJson['names'] = uName;
+	return postJson;
+}
+
+//查询报表
+function queryReport()
+{
+	var bool = jQuery.validator({ form: 'form1', extend: false});
+	if(!bool){
+		return;
+	}
+	var json = getConditionJson();
+	$('#reportBody').html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待…</div></div>');
+	jQuery.post("showBuyProductCount.html?random="+Math.random(),json,
+		function(html){
+		 $("#reportBody").html(html);
+	});
+}
+
+function getConditionJson()
+{
+	var json = getPostJson();
+	var belongTo = $("#belongTo").val();
+	switch(belongTo)
+	{
+		case "my":
+			json["userIds"]=$("#myUserId").val();
+			break;
+		case "sub":
+			json["userIds"]=$("#userIds").val();
+			break;
+		case "dept":
+			json["deptIds"]=$("#deptIds").val();
+			json["condition.containSub"]='1';
+			break;
+	}
+	json["startDate"]=$("#dateBegin").val();
+	json["endDate"]=$("#dateEnd").val();
+	json["proId"]=$('#proId').val();
+	json["belongType"]=belongTo;
+	json["containSub"]=containSub;
+	oldJson = json;
+	return json;
+}
+
+function changeBelongTo(val){
+	switch(val){
+		case "all":
+			$("#userList, #deptList,#my").hide();
+			break;
+		case "my":
+			$("#my").show();
+			$("#userList, #deptList").hide();
+			break;
+		case "sub":
+			$("#userList").show();
+			$("#my, #deptList").hide();
+			break;
+		case "dept":
+			$("#deptList").show();
+			$("#my, #userList").hide();
+			break;
+		default: break;
+	}
+}
+
+function exportReport(html)
+{
+	var json = oldJson;
+	if(!json){
+		banger.page.showMessageBox("没有可导出的数据！");
+		return;
+	}
+	var params = "";
+	for(var nm in json)
+	{
+		params +="&"+nm+"="+json[nm];
+	}
+	location.href="exportProductCountReport.html?productName="+encodeURI(encodeURI($("#productName").val()))+"&random="+Math.random()*1000000+params;
+}
+
+function CheckIsInstall() {	
+	var bool = true;
+	try{
+	     var LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+		if ((LODOP==null)||(typeof(LODOP.VERSION)=="undefined")||(typeof(LODOP.VERSION)=="unknown")) 
+			bool = false;
+	 }catch(err){
+		bool = false;
+	 }
+	 return bool;
+}
+
+function openPrintPage()
+{
+	var json = oldJson;
+	if(!json){
+		banger.page.showMessageBox("没有可打印的数据！");
+		return;
+	}
+	if(CheckIsInstall()){
+		prn1_preview();
+	}else{
+		//动态生成一个div 下载框
+		if (navigator.userAgent.indexOf('Win64')>=0){
+			path = '${ctx}/js/report/install_lodop64.exe';
+		}else{
+			path = '${ctx}/js/report/install_lodop32.exe';
+		}
+		loadPrintActiveX();
+	}
+}
+
+ //打印预览支持控件路径
+var path = '';
+
+function loadPrintActiveX(){
+	var installHTML = '<div class=\'ui-model-install\'>'
+				+ '<h4 style=\'\'>请安装安全报表打印控件，已保证打印预览正常使用！</h4>'
+				+ '<p style=\'\'><label>控件安装完成后，请重启浏览器！</label></p>'
+				+ '<div style=\'\'><a href=\'' + path + '\' target=\'_self\'>立即下载</a></div>'
+				+ '</div>';
+	art.dialog({
+		id: 'loadPrintActiveX',
+		title: '安全报表打印控件下载',
+		content: installHTML
+	});
+}
+
+function prn1_preview() {	
+	CreateOneFormPage();	
+	LODOP.PREVIEW();	
+};
+	
+function CreateOneFormPage(){
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	var strStyleCSS="#parse('/velocity/taglibs.vm')"
+		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/base.css' />"
+		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/common.css' />";
+	var strFormHtml=strStyleCSS+"<body>"+document.getElementById("reportBody").innerHTML+"</body>";
+		
+	LODOP.PRINT_INIT("");
+	LODOP.SET_PRINT_PAGESIZE(2,0,0,"A4");
+	LODOP.ADD_PRINT_HTM(20,0,"100%","100%",strFormHtml);
+};
+
+function searchPro(){
+	jQuery.post('/report/initProductTypeTree.html?random='+Math.random(),{
+		'product.productCode':$("#pNo").val(),
+		'product.productName':$("#pName").val()
+	},function(data){
+		var setting = {
+        	check: {
+        		enable: true,
+        		chkStyle: "checkbox",
+        		chkboxType: { "Y": "ps", "N": "ps" }
+        	},data: {
+        		simpleData: {enable: true}
+        	},view: {showIcon: false}
+    	};
+		data = jQuery.parseJSON(data);
+		jQuery.fn.zTree.init($("#treeDivTree"),setting,data);
+	});
+}
+function searchStartDateFun(obj){
+	var startDate=$("#dateBegin").val();
+	var endDate=$("#dateEnd").val();
+	if(endDate.length>0&&startDate.length>0){
+		if(endDate<startDate){
+			$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+		}else{
+			$('#endDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+function searchEndDateFun(obj){
+	var startDate=$("#dateBegin").val();
+	var endDate=$("#dateEnd").val();
+	if(endDate.length>0&&startDate.length>0){
+		if(startDate>endDate){
+			$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+		}else{
+			$('#startDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+function executeUserFunction(obj){
+	var belongTo=$("#belongTo").val();
+	if(belongTo=="sub"){
+		var text=$("#userNames").val();
+		if(text.length==0){
+			$(obj).attr('tips', '“统计对象下属”必须填写'); return false;
+		}
+	}else if(belongTo=="dept"){
+		var text=$("#deptNames").val();
+		if(text.length==0){
+			$(obj).attr('tips', '“统计对象机构”必须填写'); return false;
+		}
+	}
+	return true;
+}
+//查看产品
+function detailProduct(id){
+	var options = {id: "detail_product"+id, pid: GetId(), title: "查看产品", url: "/pdtProduct/editProduct.html?pdtProduct.productId="+id+"&actionType=detail&random="+Math.random(), lock: false,confirm: false};
+	tab.add(options);
+}
+</script>
+</head>
+<body style="padding-bottom: 500px;">
+	<form id="form1" method="post">
+		<center class="Noprint" >
+	    <div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">统计对象：</label>
+                <select id="belongTo" name="" render="sel" style="width: 120px;">
+					#if($isManage)
+					<option value="all"></option>
+					#end
+                    <option value="my">我的</option>
+                    #if($isManage)
+                    	<option value="sub">下属的</option>
+                    	<option value="dept">机构的</option>
+                    #end
+                </select>
+                <span id="my" class="btn2 fl" style="display: none; margin-left: 5px;">
+                	<input id="myUserId" type="hidden" value="$!userId" />
+                    <label class="btn2-txt">$!userName</label>
+                </span>
+                <div id="userList" class="dtxt2 fl" style="display: none; margin-left: 5px; width: 200px;">
+                    <input type="text" fun="executeUserFunction" id="userNames" class="dtxt2-txt" readonly="readonly" />
+                    <input id="userIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+                <div id="deptList" class="dtxt2 fl" style="display: none; margin-left: 5px; width: 200px;">
+                    <input type="text" fun="executeUserFunction" id="deptNames" class="dtxt2-txt" readonly="readonly" />
+                    <input id="deptIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">产&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;品：</label>
+				<input type="hidden" id="proId" />
+				<div class="ui-div-text dtxt2 fl choConcretePro" style="width: 260px;">
+					<input type="text" class="text" id="productName" readonly="readonly"/>
+					<i class="ddl"></i>
+				</div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">统计时间：</label>
+                <div class="dtxt2 fl" id="startDiv" style="width: 120px;">
+                    <input type="text" fun="searchStartDateFun" id="dateBegin" name="dateBegin" dateFlag="true" readonly  class="dtxt2-txt date" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">-</label>
+                <div class="dtxt2 fl" id="endDiv" style="width: 120px;">
+                    <input type="text" fun="searchEndDateFun"  id="dateEnd" name="dateEnd" dateFlag="true" readonly class="dtxt2-txt" class="dtxt2-txt date" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </div>
+        </div>
+        <div class="sz">
+            <input type="button" class="btn1" id="query" value="搜 索" />
+			#if($urlPermitUtil.hasPermission('exportAddCustomerReport'))
+				<input type="button" class="btn1" id="export" value="导 出" />
+			#end
+			#if($urlPermitUtil.hasPermission('getAddCustomerReportPrint'))
+				<input type="button" class="btn1" id="print" value="打 印" />
+			#end
+        </div>
+    	<div class="recenter" id="reportBody">
+        </div>
+    </form>
+	<div id="downLoad"  style="display:none"><a href="../../js/report/install_lodop32.exe" target="_self">下载</a></div>
+	<div style="z-index:1;" class="concretePro">
+    	<table>
+    		<tbody>
+    			<tr>
+    				<td>产品编号:</td>
+    				<td>
+    					<div class="ui-div-text">
+    						<input type="text" class="text" id="pNo"/>
+    					</div>
+    				</td>
+    				<td>产品名称:</td>
+    				<td>
+    					<div class="ui-div-text">
+    						<input type="text" class="text" id="pName"/>
+    					</div>
+    				</td>
+    				<td>
+    					<button class="ui-input-btn" onclick="searchPro()">搜索</button>
+    				</td>
+    			</tr>
+    			<tr>
+    				<td colspan="5">
+    					<table style="width:100%;">
+    						<tbody>
+    							<tr>
+    								<td>
+    									<div id="treeDiv" class="ztree-box" style="width:100%;height:315px; overflow:auto;border-top:1px solid #ccc; border-bottom:1px solid #ccc;">
+											<ul id="treeDivTree" class="ztree"></ul>
+    									</div>
+    								</td>
+    							</tr>
+    						</tbody>
+    					</table>
+    				</td>
+    			</tr>
+				<tr>
+					<td style="text-align:right;" colspan="5">
+						<button class="ui-input-btn ok">确定</button>
+						<button class="ui-input-btn close" style="margin-left:10px;">取消</button>
+					</td>
+				</tr>
+    		</tbody>
+    	</table>
+    </div>
+</body>
+</head>

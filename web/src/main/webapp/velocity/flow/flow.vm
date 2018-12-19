@@ -1,0 +1,216 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+	
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+ 	<style type="text/css">
+	.webchk { line-height: 24px; margin: 0px 0px 10px 0px; }
+	.web { width: 800px; padding-left: 19px; margin-bottom: 10px; }
+	.padchk { margin: 30px 0px 10px 0px; line-height: 24px; }
+	.pad { padding-left: 19px; }
+	.pad .txt { text-align: right !important; }
+	.webchk .pl, .padchk .pl { padding-left: 19px; }
+	.web, .pad { display: none; }
+	.mt { margin-top: 50px; }
+	.w { width: 100px; }
+	.x-pannel-tabletree { width: auto; }
+	.x-pannel-tabletree tbody tr td { padding: 4px; }
+    </style>
+	<style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+		.gray_self { color:#999999; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.tabletree-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+    		$('#tabs').easytabs();
+			jQuery("#flowForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		//加载树形表格
+    		jQuery("table").tabletree();
+    		
+			if($("#isActive").val()==1){//pad启用
+				$("#chk-limit").attr("checked", true);
+				$(".maxval").show();
+			}
+			else{//禁用
+				$("#chk-limit").attr("checked", false);
+				$(".maxval").hide();
+			}
+			if($("#webIsActive").val()==1){//web启用
+				$("#isWebLimit").attr("checked", true);
+				$(".maxval").show();
+			}
+			else{//禁用
+				$("#isWebLimit").attr("checked", false);
+				$(".maxval").hide();
+			}
+    		
+			$("#chk-limit").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#isActive").val(1);
+					$(".maxval").show();
+				}
+				else{
+					$("#isActive").val(0);
+					$(".maxval").hide();
+				}
+			});
+			$("#isWebLimit").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#webIsActive").val(1);
+					$(".web").show();
+				}
+				else{
+					$("#webIsActive").val(0);
+					$(".web").hide();
+				}
+			});
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		
+		//提交方法
+		function submitflowConfig(){
+			var bool = jQuery.validator({ form: 'flowForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+		    	var f=$("#flowForm");
+		    	f.action="updateFlowParam.html";
+				f.submit();
+				banger.page.showMessageBox({"type":"success","content":"保存成功"});
+		}
+		
+		var fn = {};
+		fn.change = function(chk, obj){
+			if(chk[0].checked)
+				obj.show();
+			else
+				obj.hide();
+		}
+		
+		$(function(){
+			var c1 = $('.webchk :checkbox'), b1 = $('.web'), c2 = $('.padchk :checkbox'), b2 = $('.pad');
+			
+			//预加载“WEB限流”和“PAD限流”显隐
+			fn.change(c1, b1);
+			fn.change(c2, b2);
+			
+			//启用WEB限流 按钮单击事件
+			$('.webchk :checkbox').click(function(){
+				fn.change($(this), b1);
+			});
+			
+			//启用PAD限流 按钮单击事件
+			$('.padchk :checkbox').click(function(){
+				fn.change($(this), b2);
+			});
+		});
+		
+		function changeValue(obj){
+    		if(obj.checked){
+    			$(obj).next().val(1);
+    		}else{
+    			$(obj).next().val(0);
+    		}
+    	}
+    	function check(obj){
+	  		var str,reg;
+	  		str=obj.value;
+	  		reg=/^\d+$/;
+	  		if(str.length==0||str==""){
+	  			$(obj).attr('tips', '必须填写'); return false;
+	  		}else if(!reg.test(str)){
+	  			$(obj).attr('tips', '只能是正整数'); return false;
+	  		}
+	  	}
+	</script>
+</head>
+
+<body>
+	<form id="flowForm"  name="flowForm" action="updateFlowParam.html" method="post">
+		<div class="webchk">
+	    	<input type="checkbox" checked="checked" class="chk" id="isWebLimit" />
+	        <label>启用WEB限流</label>
+	        <br />
+	        <label class="gray_self">开启设置录音文件上传的最大的速度</label>
+	    </div>
+	    <div class="web">
+	    	<table class="x-pannel-tabletree" cellpadding="0" cellspacing="0">
+		    	<thead>
+		        	<tr>
+		            	<th width="250">组织机构</th>
+		            	<th width="100">启用限流</th>
+		            	<th width="150">上传速度（K/S）</th>
+		            </tr>
+		        </thead>
+		    	<tbody>
+		    		#foreach($data in $!webFlowControlList)
+		        	<tr id="$!data.deptId" #if($!data.deptParentId==2) pid="null" #else pid="$!data.deptParentId" #end>
+		            	<td>$!data.deptName</td>
+		            	<td align="center">
+		            		<input type="checkbox" id="checkbox" #if($!data.isActive==1) checked #end onclick="changeValue(this)" />
+		            		<input type="hidden" id=""  value="$!data.isActive" name="isActived" />
+		            	</td>
+		            	<td align="center">
+		            		<div class="dtxt2" style="width: 150px;">
+		            			<input type="text" class="dtxt2-txt" value="$!data.maxBPS" name="maxBPS" rule="^\d+$" tips="“上传速度”的数据类型只能是正整数"/>
+		            		</div>	
+		            	</td>
+		            	
+		            	<input type="hidden" id="" value="$!data.deptId" name="deptId" />
+		            </tr>
+		            #end
+		        </tbody>
+		    </table>
+	    </div>
+		
+		<div class="padchk">
+	    	<input type="checkbox" class="chk" id="chk-limit" />
+	        <label>启用PAD限流</label>
+	        <br />
+	        <label class="gray_self">开启设置录音文件上传的最大的速度</label>
+	    </div>
+	    <div class="pad" style="height: 24px; line-height: 24px;">
+	    	<label class="fl">个人最大限流</label>
+	    	<div class="dtxt2 fl" style="width: 150px; margin: 0px 5px;">
+				<input type="text" id="maxBps" name="maxBps" value="$!maxBps" class="dtxt2-txt" style="width: 145px;" rule="^\d+$" tips="“上传速度”的数据类型只能是正整数"/>
+	        </div>
+	        <label class="fl">kb/s</label>
+	    </div>
+		    
+	   	<hr class="mt" />
+	   	
+	   	<div class="halign">
+	   		<input type="button" class="btn6 btn6bg1" onclick="submitflowConfig()" value="保存" />
+	        <input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+	   	</div>
+	    
+		<input type="hidden" id="isActive" name ="isActive" value="$!isActive" />
+		<input type="hidden" id="webIsActive" name ="webIsActive" value="$!webIsActive" />
+    </form>
+</body>
+</html>
+

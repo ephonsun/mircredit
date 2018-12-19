@@ -1,0 +1,102 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑下次联系任务</title>
+	<base target="_self" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script src="${ctx}/js/plugins/jquery.validationEngine.js" type="text/javascript" charset="utf-8"></script>
+	<script src="${ctx}/js/plugins/jquery.validationEngine-zh_CN.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+</head>
+<script>
+	jQuery(document).ready(function(){
+		jQuery("#taskCusForm").validationEngine();
+	});
+	function addSubmit(){
+		if(jQuery("#taskCusForm").validationEngine('validate')){
+			document.taskCusForm.submit();
+        	window.returnValue=1;    
+        	window.close(); 
+		}
+	}
+</script>
+<body>
+	<form name="taskCusForm"  id ="taskCusForm" action="updateNextTask.html?submitType=1&taskFlag=$!taskFlag"  method="post">
+	<table border="0" width="100%" cellspacing="2" cellpadding="2">
+    	<thead>
+        	<tr>
+            	<th height="20" align="left" colspan="3">编辑下次联系任务<hr /></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="80" height="30" align="right">
+                	客户名称：
+                </td>
+                <td width="200">$!taskCustomer.customerName</td>
+            </tr>
+			<tr>
+                <td width="80" height="30" align="right">
+                	<span class="red">*</span>任务标题：
+                </td>
+                <td width="200">
+					<input type="hidden" name="task.taskId" value="$!taskCustomer.taskId"/>
+					<input type="hidden" name="task.executeUser" value="$!taskCustomer.executeUser"/>
+					<input type="text" style="width: 445px;" name="task.taskTitle" value="$!taskCustomer.taskTitle" class="validate[required,maxSize[50]] txt" data-prompt-position="topLeft"/>
+				</td>
+            </tr>
+			<tr>
+				<td width="80" height="30" align="right">
+                	<span class="red">*</span>执行日期：
+                </td>
+                <td>
+                    <div class="dtxt2" style="width: 120px;">
+						<input type="hidden" value="$date.format("yyyy-MM-dd",$!taskCustomer.executeDate)" id="taskTime"/>
+						<input type="text" name="task.executeDate" value="$date.format("yyyy-MM-dd",$!taskCustomer.executeDate)" class="validate[required,custom[date],future[$!dateString.getSystemTimes()]] dtxt2-txt" data-prompt-position="topLeft" id="datepicker1"/>
+						<span class="dtxt2-date">date</span>
+					</div>
+				</td>
+            </tr>
+			<tr>
+			<td width="80" align="right">
+                	任务备注：
+                </td>
+                <td>
+					<textarea name="task.remark" class="validate[maxSize[200]]" style="width: 445px; height: 80px;">$!taskCustomer.remark</textarea>
+				</td>
+            </tr>
+            <tr>
+                <td width="80" height="30" align="right">
+                	完成情况：
+                </td>
+                <td>
+					<input type="checkbox" name="task.isFinish" #if($!taskCustomer.isFinish==1) checked=true #end value="1" class="chk" />
+                </td>
+            </tr>
+			
+        </tbody>
+        <tbody>
+            <tr>
+                <td colspan="4" align="center">
+                	<input type="button" value="保 存" onclick="addSubmit()" class="btn5 btn5bg1" />
+                	<input type="button" value="取 消" onclick="javascript:window.close();" class="btn5 btn5bg3" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

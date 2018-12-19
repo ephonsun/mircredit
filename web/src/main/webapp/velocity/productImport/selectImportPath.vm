@@ -1,0 +1,140 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>导入产品</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style>
+		#intercustom{ }
+		#outercustom{ margin: 0px 0px 0px 10px;}
+	</style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+	$(function(){
+		$('select').select();
+		$('#templateId').val($('#tempId').val());
+		$('#tempId').change(function(){
+			$('#templateId').val($('#tempId').val());
+			$("#tempName").text($("select[id='tempId'] :selected").text());
+		});
+		$("#tempName").text($("select[id='tempId'] :selected").text());
+	});
+		
+	function cheackPage(){
+		var changObj=document.getElementById("failureMsg");
+		if(changObj.value!=""){
+			banger.page.showMessageBox(changObj.value);
+		}
+	}
+ 	function cfirm(){
+		return true;
+	}
+    </script>
+</head>
+ 
+<body>
+	<form name="importForm"  id ="importForm"  enctype="multipart/form-data" action="tskImportExcel.html" onsubmit="return check();"  method="post" >
+    	<input type="hidden" name="failureMsg" id="failureMsg" value="$!failureMsg">
+		<input type="hidden" name="templateId" id="templateId">
+    	<table class="upload-pointer">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td>第 2 步</td>
+            	<td>第 3 步</td>
+            	<td>完成</td>
+            </tr>
+        </table>
+        <h4 class="upload-level">第1步，请选择导入文件</h4>
+        <table>
+    		<tr>
+            	<td width="80">
+					<label class="red">*</label>
+					<label>产品类型:</label>
+				</td>
+				<td>
+					<select style="width: 150px;" id="tempId">
+						#foreach($template in $!templateList)
+    						<option value="$!template.templateId">$!template.templateName</option>
+    					#end
+					</select>
+				</td>
+            </tr>		
+		</table>
+		<table class="upload-form">
+        	<tr>
+            	<td width="60">
+                	<label>文件路径：</label>
+                </td>
+            	<td width="90%">
+                	<div id="uploadSpan" class="dfile">
+                        <input type="file" id="file" name="file" class="dfile-fl" style="width: 100%;" onkeydown="return false;" onpaste="return false;" onchange='checkFileType(this.value);' />
+                    </div>
+                </td>
+            </tr>
+        </table>
+        
+		 <dl class="upload-tips">
+            <dd><label>为了更好的导入产品，请下载</label><label id="tempName"></label><label>产品的模板</label></dd>
+            <dd class="upload-failed-save"><input type="button" class="ui-input-btn" value="Excel模板下载" onclick="exportModelExcel()"/></dd>
+		 </dl>
+		 
+        <hr />
+        
+        <div class="halign">
+        	<input type="submit" class="btn6 btn6bg1" value="下一步" />
+        	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+        </div>
+	</form>
+</body>
+<script type="text/javascript">
+    function check() 
+    { 
+       if(importForm.file.value == "") {
+			   banger.page.showMessageBox('请选择文件路径');
+               return false;
+       }else{
+	   		if($('#templateId').val()>0){
+       			return true;
+			}else{
+				banger.page.showMessageBox('没有可用的产品类型');
+                return false;
+			}
+       }
+    }
+	
+	//下载产品模板
+	function exportModelExcel(){
+		var templateId = $('#templateId').val();
+		if(templateId>0){
+			document.location.href="exportModelExcel.html?templateId="+templateId+"&random="+Math.random()*100000;
+		}
+	}
+
+	var html=document.getElementById('uploadSpan').innerHTML; 
+
+    function resetFile(){ 
+    	document.getElementById('uploadSpan').innerHTML=html; 
+    }
+	
+    function checkFileType(str){
+    	var pos = str.lastIndexOf(".");
+    	var lastname = str.substring(pos,str.length);
+    	var resultName=lastname.toLowerCase();
+    	if ('.xls'!=resultName.toString()&&'.xlsx'!=resultName.toString()&&'.et'!=resultName.toString()&&'.ett'!=resultName.toString()){
+    		banger.page.showMessageBox('只能上传xls/xlsx,et/ett文件，您上传的文件类型为'+lastname+'，请重新上传');
+    		resetFile();
+    	}
+    }
+    cheackPage();
+	
+</script>
+
+</html>
+

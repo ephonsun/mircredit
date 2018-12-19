@@ -1,0 +1,119 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>查看知识</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+		div.m1 { margin-top:20px;}
+		div.mt { margin-top: 20px; margin-bottom:20px; height:auto; }
+
+            /*设置编辑器边框*/
+        .edui-editor{ border:none !important;}
+    </style>
+
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.all.js"></script>
+    <script type="text/javascript">
+        /**
+         * 下载知识附件
+         */
+        function downFileAttr(libraryAttachmentId){
+            location.href="downloadPdtLibraryAttachment.html?libraryAttachmentId="+libraryAttachmentId;
+            return false;
+        }
+        jQuery(function(){
+            //jQuery("#libContent").html($("#content").val());
+        });
+    </script>
+</head>
+<body>
+	<table class="viewtbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>知识标题：</label>
+                </td>
+                <td width="17%">
+                    <label>$!pdtLibrary.libTitle</label> 
+                </td>
+            	<td class="field" width="8%">
+                	<label>知识编号：</label>
+                </td>
+                <td width="17%">
+                    <label>$!pdtLibrary.libNo</label> 
+                </td>
+            	<td class="field" width="8%">
+                	<label>创建时间：</label>
+                </td>
+                <td  width="17%">
+                    <label>$date.format("yyyy-MM-dd",$!pdtLibrary.createDate)</label>  
+                </td>
+				<td colspan="2"></td>
+    		</tr>
+            <tr>				
+            	<td class="field" width="8%">
+                	<label>更新时间：</label>
+                </td>
+                <td>
+                    <label>$date.format("yyyy-MM-dd",$!pdtLibrary.updateDate)</label> 
+                </td>
+            	<td class="field" width="8%">
+                	<label>所属分类：</label>
+                </td>
+                <td>
+                    <label>$!pPdtLibrary.libTitle</label>
+                </td>
+				<td colspan="4"></td>
+    		</tr>
+        </tbody>
+    </table>
+    <input type="hidden" id="content" value='$!pdtLibrary.libContent'>
+    <div class="bold" style="border-bottom:1px solid #b1b1b1; line-height:30px;">知识内容</div>
+    <div class="mt">
+        <script type="text/plain" id="txtLibContent">
+        </script>
+    </div>
+    <table class="viewtbl">
+    	<tbody>
+          <tr>
+              <td width="80">
+                  <label>上传附件：</label>
+              </td>
+              <td colspan="3">
+                  #foreach($attr in $!attrList)
+					   <div id="attr_$velocityCount" class="uploadifyQueueItem">
+     						<span class="fileName"><a href="#" onclick="downFileAttr($attr.libraryAttachmentId)" class="attrFile">$!attr.sysUploadFile.uploadFileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.sysUploadFile.fileSize"))</label></span><span class="percentage"></span>
+	         		   </div>
+					#end
+              </td>
+          </tr>
+        </tbody>
+    </table>     
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+
+    <script type="text/javascript">
+        //加载ue编辑器 产品特点
+        var libContent=new UE.ui.Editor({
+            toolbars:[],
+            wordCount:false,
+            initialFrameHeight:80,
+            initialContent: jQuery("#content").val(),
+            autoHeightEnabled:true
+        });
+        libContent.render('txtLibContent');
+        libContent.addListener('ready',function(){
+            this.disable('selectall');
+        });
+    </script>
+</body>
+</html>

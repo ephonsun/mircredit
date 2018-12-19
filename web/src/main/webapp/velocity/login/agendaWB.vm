@@ -1,0 +1,156 @@
+#parse("/velocity/taglibs.vm")
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript">
+	$(function(){
+		jQuery('#agendaCount').text('('+$!scheduleCount+')');
+		$('select').select();
+	});
+	
+	function queryMoveAgenda(){
+		var options = {id: "235", pid: "", title: "日程安排", url: "${ctx}/tskSchedule/firstLoadScheduleList.html?workSpace=true&RandNum="+ Math.random(), lock: false};
+		tab.add(options);
+	}
+	
+	function showCustomer(customerId,customerName){
+		jQuery.post("../record/getCustomerIsDel.html", {"customerId": customerId}, function(result){
+			if(result=="0"){
+				banger.page.showMessageBox("客户“"+customerName+"”被删除，无法查看具体资料！");
+				return;
+			}else{
+        		var options = {id: "record_showCustomer", pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+        		tab.add(options);
+			}
+		});
+	}
+	
+	//沟通进度编辑
+    function commProgressEdit(scheduleId,selectDom){
+        jQuery.ajax({
+            type:'POST',
+            url:"../tskSchedule/editSchedule.html?RandNum="+Math.random(),
+            data:{
+                'tskSchedule.commProgressId':jQuery.trim(selectDom.val()),
+                'tskSchedule.scheduleId':jQuery.trim(scheduleId)
+            },
+            success:function(){
+            }
+        });
+    }
+	
+    //完成情况编辑
+    function statusEdit(scheduleId,selectDom){
+        var selectText = jQuery.trim($('#status'+scheduleId).find("option:selected").text());
+		var commProgressText = jQuery.trim($('#commProgress'+scheduleId).find("option:selected").text());
+        if(confirm("您确定将日程状态改为"+selectText+"吗？修改后日程将不能编辑！")){
+            jQuery.ajax({
+                type:'POST',
+                url:'../tskSchedule/editSchedule.html?Random='+Math.random(),
+                data:{
+                    'tskSchedule.status':jQuery.trim(selectDom.val()),
+                    'tskSchedule.scheduleId':jQuery.trim(scheduleId)
+                },
+                success:function(){
+            		$('#dstatus'+scheduleId).hide();
+					$('#dCommProgress'+scheduleId).hide();
+            		$('#textStatus'+scheduleId).text(selectText);
+					$('#textCommProgress'+scheduleId).text(commProgressText);
+					$('#tdSelect'+scheduleId).attr('style',"");
+					$('#textCommProgress'+scheduleId).attr('title',commProgressText);
+                }
+            });
+        }else{
+			$('#status'+scheduleId).val(0);
+			$('#status'+scheduleId).select();
+		}
+    }
+</script>      
+
+<table class="ui-desk-reminders">
+    <thead>
+        <tr>
+            <th width="120"><label>联系时间</label></th>
+            <th width="240"><label>客户（电话）</label></th>
+            <th><label>联系方式</label></th>
+            <th><label>沟通进度</label></th>
+            <th><label>日程备注</label></th>
+            <th><label>完成情况</label></th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($schedule in $!scheduleList)
+        <tr>
+            <td width="120"><label>#if($!schedule.contactDate)#if($!dateString.getSystemTimes().equals($date.format("yyyy-MM-dd",$!schedule.contactDate))) 今天 #else $date.format("yyyy-MM-dd",$!schedule.contactDate)#end#end</label></td>
+            <td width="240">
+				<div class="customer-infor">
+					#if($urlPermitUtil.hasPermission('browseCustomer'))
+                        <span class="slink" onclick="showCustomer('$!schedule.customerId', '$!jsUtil.escapeJs($!schedule.pdtProductCustomerBean.customerName)')" style="width:150px;" title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.cphNumber)">
+                            $!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.cphNumber )
+                        </span>
+					#else
+						<span style="width:150px;" title="$!schedule.pdtProductCustomerBean.customerName ($!schedule.pdtProductCustomerBean.cphNumber)">
+							$!schedule.pdtProductCustomerBean.customerName ( $!schedule.pdtProductCustomerBean.cphNumber )
+						</span>
+					#end
+                    <div class="icon">
+						#if($!schedule.pdtProductCustomerBean.cphNumber!="")
+							#if($urlPermitUtil.hasPermission('dialPhone'))
+								<i class="i phone" onclick="dial('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.customerId')" title="拨号">phone</i>
+							#end
+							#if($!schedule.pdtProductCustomerBean.customerName!="")
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+									<i class="i dsc" onclick="tape('$!schedule.customerId')" title="座谈" >dsc</i>
+								#end
+							#end
+							#if($!schedule.pdtProductCustomerBean.cphNumber.length()==11&&$!schedule.pdtProductCustomerBean.cphNumber.substring(0, 1)=="1")
+                                #if($urlPermitUtil.hasPermission('toAddSms'))
+                                <i class="i sms" onclick="sendSms('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.customerId')" title="短信">sms</i>
+                				#end
+                				#if($urlPermitUtil.hasPermission('toAddMms'))
+                				<i class="i mms" onclick="sendMms('$!schedule.pdtProductCustomerBean.cphNumber','$!schedule.customerId')" title="彩信">mms</i>
+								#end
+							#end
+						#end
+                    </div>
+                    <div class="other">
+                        <label class="item cusTitle" title="$!schedule.pdtProductCustomerBean.customerTitle">$!schedule.pdtProductCustomerBean.customerTitle</label>
+                        <label class="item">$!schedule.pdtProductCustomerBean.sex</label>
+                        <label class="item">$!schedule.pdtProductCustomerBean.age</label>
+                    </div>
+                </div>
+			</td>
+            <td><label title="#if($!schedule.contactType == 1)电话联系#else上门拜访#end">#if($!schedule.contactType == 1)电话联系#else上门拜访#end</label></td>
+            <td style="overflow:visible;" id="tdSelect$!schedule.scheduleId">
+				<div id="dCommProgress$!schedule.scheduleId">
+                    <select id="commProgress$!schedule.scheduleId" name="commProgress" onchange="commProgressEdit($!schedule.scheduleId,$(this));" >
+    				#foreach($commProgress in $commProgressList)
+                        <option value="$commProgress.COMM_PROGRESS_ID" style="color: black;" #if($!schedule.commProgressId == $commProgress.COMM_PROGRESS_ID) selected#end>$!commProgress.COMM_PROGRESS_NAME</option>
+                    #end
+                    </select>   
+                </div>
+				<label id="textCommProgress$!schedule.scheduleId">
+                </label>
+            </td>
+            <td><label title="$!subString.replaceRemark($!schedule.remark)">$!schedule.remark</label></td>
+            <td style="overflow:visible;">
+				<div id="dstatus$!schedule.scheduleId">
+                    <select id="status$!schedule.scheduleId" onchange="statusEdit($!schedule.scheduleId,$(this));" >
+                        <option value="0" #if($!schedule.status == 0) selected #end>未完成</option>
+                        <option value="1" #if($!schedule.status == 1) selected #end>已完成</option>
+                        <option value="2" #if($!schedule.status == 2) selected #end>已作废</option>
+                    </select>
+                </div>
+				<label id="textStatus$!schedule.scheduleId" >
+                </label>
+            </td>                                                
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+        <tr>
+			#if($!scheduleList.size()==10)
+				<td colspan="6"><a href="#2" onclick="queryMoveAgenda();">查看更多</a></td>
+			#end
+        </tr>
+    </tfoot>
+</table>

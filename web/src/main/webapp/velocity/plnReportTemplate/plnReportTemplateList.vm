@@ -1,0 +1,232 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>理财规划模板管理</title>
+    
+    #styleLink("base")
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+		var oldPostJson={};
+    	jQuery(function(){
+			$('#grid table').table();
+			jQuery("#refresh").click(function(){
+				refreshForm();
+			});
+			jQuery("#clean").click(function(){
+				clear();
+			});
+			jQuery("#search").click(function(){
+				search();
+			});
+			getQueryJson();
+		});
+		
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"getPlnReportTemplatePage.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#grid").html(html).find('table').table();
+			var total = $('#total').val();
+			if(total!=null){
+				$('#queryCount').text(total);
+			}
+			else {
+				$('#queryCount').text("0");
+			}
+		}
+		
+		function getQueryJson(){
+        	var postJson = {};
+    		postJson['plnReportTemplate.templateNo']=jQuery.trim($('#templateNo').val());
+			postJson['plnReportTemplate.templateName']=jQuery.trim($('#templateName').val());
+			postJson['plnReportTemplate.intervalTypeId']=jQuery.trim($('#intervalTypeId').val());
+			postJson['plnReportTemplate.isActived']=jQuery.trim($('#isActived').val());
+			postJson['plnReportTemplate.planTypeId']=jQuery.trim($('#planTypeId').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+		//刷新
+		function refreshForm(){
+			goto(null,"getPlnReportTemplatePage.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//查询
+		function search(){
+			var postJson=getQueryJson();
+			oldPostJson = getQueryJson();
+			jQuery.post("getPlnReportTemplatePage.html?random="+Math.random()*1000000,postJson,
+    					function(html){
+						 refreshGrid('grid',html);
+    					});
+		}
+		//清空
+		function clear(){
+			$('#templateNo').val("");
+			$('#templateName').val("");
+			$("select").val("");
+    		jQuery("select").each(function(){
+    			$(this).select();
+    		});
+		}
+		//复选框选中和取消
+		function selectAll(obj){   
+          var mm=document.getElementsByName("templateId");
+		  	for(var i=0;i<mm.length;i++){
+    			if(obj.checked==true){
+					mm[i].checked=true;
+    			}else{
+					mm[i].checked=false;
+				}
+    		}
+        }   
+		//添加页卡
+		function addTab(flag,templateId,templateName){
+			if(flag=='detail'){
+				tab.add({id: "plnPlanReportTemplate_detail"+templateId , pid: GetId(), title: "理财规划模板详情-"+templateName, url: "../plnReportTemplate/getPlanTemplateDetail.html?plnReportTemplate.templateId="+templateId+"&random="+Math.random(), lock: false});
+			}
+			if(flag=='insert'){
+				tab.add({id: "plnPlanReportTemplate_insert"+templateId, pid: GetId(), title: "新建理财规划模板", url: "../plnReportTemplate/savePlanTemplateForm.html", lock: false});
+			}
+			if(flag=='update'){
+				tab.add({id: "plnPlanReportTemplate_update"+templateId, pid: GetId(), title: "编辑理财规划模板-"+templateName, url: "../plnReportTemplate/updatePlanTemplateForm.html?plnReportTemplate.templateId="+templateId+"&random="+Math.random(), lock: false});
+			}
+		}
+		//删除多个模板
+		function delByIds(){
+			var mm=document.getElementsByName("templateId");
+    		var checkFlag=false;
+			var chestr="",count=0;
+    		for(var i=0;i<mm.length;i++){
+    			if(mm[i].checked==true){
+    				checkFlag=true;
+					chestr+=mm[i].value+",";
+					count++;
+    			}
+    		}
+			if(checkFlag==false){
+				banger.page.showMessageBox("请选择您要删除的模板!")
+				return ;
+			}
+			if(confirm("您确认要删除所选的"+count+"条记录吗？")){
+    			jQuery.post('../plnReportTemplate/delPlanTemplates.html',{
+    				'templateIds':chestr
+    			},function(data){
+    				search();
+    			});
+			}
+		}
+		//启用停用模板
+		function active(flag,tempId){
+			var str;
+			if(flag == 0) str="启用";
+			else str="停用";
+			if(confirm("您确定要"+str+"该理财规划模板吗？")){
+    			jQuery.post('../plnReportTemplate/activePlanTemplate.html',
+				            {
+							'activeFlag':flag,
+    						'plnReportTemplate.templateId':tempId
+    						},
+            				function(data){
+								if(data !=""){
+									banger.page.showMessageBox(data);
+								}else{
+                					search();
+								}
+                			});
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<form id="formQuery" method="post">
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="7%" class="field">
+                	<label>模板编号：</label>
+                </td>
+            	<td width="18%">
+                	<div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" maxLength="30" id="templateNo" name="plnReportTemplate.templateNo"/>
+                    </div>
+                </td>
+            	<td width="7%" class="field">
+                	<label>模板名称：</label>
+                </td>
+            	<td width="18%">
+                	<div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" maxLength="90" id="templateName" name="plnReportTemplate.templateName"/>
+                    </div>
+                </td>
+            	<td width="7%" class="field">
+                	<label>适合对象：</label>
+                </td>
+            	<td width="18%">
+                    <select id="intervalTypeId" name="plnReportTemplate.intervalTypeId" render="select">
+                        <option value=""></option>
+						#foreach($rsk in $!rskIntervalTypeList)
+        				<option value="$rsk.typeId">$rsk.typeName</option>
+						#end
+                    </select>
+                </td>
+            	<td width="7%" class="field">
+                	<label>状态：</label>
+                </td>
+            	<td width="18%">
+                     <select id="isActived" name="plnReportTemplate.isActived" render="select">
+                          <option value=""></option>
+        				  <option value="1">启用</option>
+    					  <option value="0">停用</option>
+                     </select>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field">
+                	<label>规划类型：</label>
+                </td>
+            	<td width="18%">
+                    <select id="planTypeId" name="plnReportTemplate.planTypeId" render="select">
+                        <option value=""></option>
+						#foreach($planType in $!planTypeList)
+        				<option value="$!planType.planTypeId">$!planType.planTypeName</option>
+						#end
+                    </select>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+    <div class="sz">
+    	<span class="fl bold">所有理财规划报告模板(<label class="dgreen" id="queryCount">$!totalAmount</label>)</span>
+        <input type="button" value="清 空" id="clean" class="btn1" />
+        <input type="button" value="搜 索" id="search" class="btn1" />
+    </div>
+    
+    <div class="actrow">
+		<a href="javascript:void(0);" onclick="addTab('insert')" class="btn2 fl">
+            <label>新建模板</label>
+        </a>
+		<a href="javascript:void(0);" onclick="delByIds()" class="btn2 fl" style="margin-left: -1px;">
+            <label>删除</label>
+        </a>
+		<a href="javascript:void(0);" id="refresh" class="btn2 fr">
+            <label>刷新</label>
+        </a>
+    </div>
+     <div id="grid">
+       #parse("/velocity/plnReportTemplate/plnReportTemplateTable.vm")
+     </div>
+</body>
+</html>

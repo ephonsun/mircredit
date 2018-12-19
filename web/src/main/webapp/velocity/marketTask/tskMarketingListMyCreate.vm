@@ -1,0 +1,68 @@
+<thead>
+    <tr>
+        <th><label title="任务等级">任务等级</label></th>
+        <th><label title="任务标题">任务标题</label></th>
+        <th><label title="开始日期">开始日期</label></th>
+		<th><label title="结束日期">结束日期</label></th>
+        <th><label title="产品指标">产品指标</label></th>
+        <th><label title="任务目标(万元)">任务目标(万元)</label></th>
+        <th><label title="完成情况">完成情况</label></th>
+        <th><label title="分配者">分配者</label></th>
+        <th width="100"><label title="操作">操作</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($tskMarkting in $!tskMarketingBeanPage.items)
+	#set($execDate=$date.format("yyyy-MM-dd",$!tskMarkting.endDate))
+	#set($result=$!dateString.getSystemDate($execDate))
+	
+	#set($sDate=$date.format("yyyy-MM-dd",$!tskMarkting.startDate))
+	#set($sult=$!dateString.getSystemDate($sDate))
+	<tr>
+		<td><label title="">$!tskMarkting.marketingGradeName</label></td>
+        <td><label class="ui-link-btn" title="$!tskMarkting.marketingTitle" onclick="viewTskMarketing('$!tskMarkting.marketingId','$!tskMarkting.marketingTitle','assign')">$!tskMarkting.marketingTitle</label></td>
+		<td><label title="$date.format("yyyy-MM-dd",$!tskMarkting.startDate)"></label>$date.format("yyyy-MM-dd",$!tskMarkting.startDate)</td>
+        <td><label title="$date.format("yyyy-MM-dd",$!tskMarkting.endDate)"></label>$date.format("yyyy-MM-dd",$!tskMarkting.endDate)</td>
+        <td><label title="$!tskMarkting.productTarget">$!tskMarkting.productTarget</label></td>
+        <td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!tskMarkting.taskTarget))">$moneyUtil.decimeMoney($typeUtil.changeType($!tskMarkting.taskTarget))</label></td>
+        <td><label title="">
+			#if($!tskMarkting.isSuspend==1)已中止#elseif($sult==-1)未开始#else$vmHelper.getPercentDec($!tskMarkting.comPercent)#end
+		</label></td>
+        <td><label title="">$!tskMarkting.assignUserName</label></td>
+        <td>
+			#if($result!=1 && $!tskMarkting.isSuspend==0 && $!tskMarkting.comPercent<1)
+    			#if($!userId == $!tskMarkting.assignUserId && $!tskMarkting.comPercent<1)
+    				<span class="link" onclick="editTskMarketing('$!tskMarkting.marketingId','$!tskMarkting.marketingTitle','assign')">编辑</span>
+    			#else
+    				<span class="link" onclick="editTskMarketingByExecutive('$!tskMarkting.marketingId','$!tskMarkting.marketingTitle','exec')">编辑</span>
+    			#end
+			#else
+				<span href="#" disabled="true" style="cursor: default;">编辑</span>
+			#end
+			#if($!tskMarkting.isSuspend==0)
+				#if($result!=1 && $!tskMarkting.comPercent<1)
+				<span class="link" onclick="stopOrReStart('$!tskMarkting.marketingId','$!tskMarkting.isSuspend','$!tskMarkting.marketingTitle')">中止</span>
+				#else
+					<span href="#" disabled="true" style="cursor: default;">中止</span>
+				#end
+			#elseif($!tskMarkting.isSuspend==1)
+				<span class="link" onclick="stopOrReStart('$!tskMarkting.marketingId','$!tskMarkting.isSuspend','$!tskMarkting.marketingTitle')">重启</span>
+			#end
+			#if($result!=1 && $!tskMarkting.isSuspend==0 && $!tskMarkting.comPercent<1)
+            <span class="link" onclick="delTskMarketing('$!tskMarkting.marketingId','$!tskMarkting.marketingTitle','$!tskMarkting.comPercent')">删除</span>
+			#else
+				<span href="#" disabled="true" style="cursor: default;">删除</span>
+			#end
+		</td>
+    </tr>
+	#end
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="9">
+           <div class="pagination">
+				#parse("/velocity/ajaxPage.vm")
+			</div>
+        </td>
+    </tr>
+</tfoot>

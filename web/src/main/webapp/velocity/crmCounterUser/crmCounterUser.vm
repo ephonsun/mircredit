@@ -1,0 +1,243 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>组织机构</title>
+    
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+   <style type="text/css">
+		.Agency-left { position: absolute; left: 10px; width: 170px; }
+		.Agency-left h4 { height: 30px; border: 1px solid #ccc; padding: 0px 5px; line-height: 30px; font-size: 12px; font-family: Microsoft Yahei; }
+		.Agency-left h4 label { float: left;}
+		.Agency-left h4 p { float: right; }
+		.Agency-left h4 p a { float: left; width: 20px; overflow: hidden; text-indent: -1000px; }
+		.Agency-left h4 p a.edi-add { background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-up { background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-down { background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-del { background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-edi { background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent; }
+		.Agency-left .Agency-tree {width:99%; display: block; height: 500px; border: 1px solid #ccc; margin-top: 2px; overflow: auto; }
+		
+		.Agency-right { min-height: 534px; height: auto !important; height: 534px; margin-left: 180px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	
+    <script type="text/javascript">
+    	var oldPostJson={};
+		var postJson={};
+		var setting = {
+			callback:{
+				onClick:treeOnclick
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				showIcon: false
+			}
+			
+		};
+		//json树数据
+		var zNodes = $!deptJson; 
+		
+		//默认选择第一个节点
+		function initNodeSelect(){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    		var nodes = treeObj.getNodes();
+    		if (nodes.length>0) {
+    			treeObj.selectNode(nodes[0]);
+				$("#deptId").val(nodes[0].id);
+				$("#dName").text(nodes[0].name);
+				if(nodes[0].id == 2) {
+					$("#detailData").text("下所有柜台人员");
+					$('.actrow .add').addClass('hide');
+					$('#addBtn').hide();
+				}
+				$("#searchCode").val("query");
+    		}
+    		treeOnclick(event, nodes[0].id, nodes[0]);
+		}
+		
+ 		//机构树加载
+		$(document).ready(function(){
+			jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+			initNodeSelect();
+			$('#deptGrid table').table();
+		});
+		
+ 		//点击节点查询本部门用户
+ 		function treeOnclick(event, treeId, treeNode) {
+			$("#deptId").val(treeNode.id);
+     		$("#dName").text(treeNode.name);
+			
+			//如果点击虚拟根节点
+			if(treeNode.id == 2){
+				$('.actrow .add').addClass('hide');
+				$('#addBtn').hide();
+				$("#detailData").text("下所有柜台人员");
+				
+				postJson={};
+				postJson['flagInt']=3;
+				oldPostJson = postJson;
+				
+				jQuery.post('getUserPageList.html',
+        					postJson,
+        					function(html){
+								$("#deptGrid").html(html).find('table').table();
+    			    			$("#total").text($("#totalAmount").val());
+        				});
+			}else{
+				$('.actrow .add').removeClass('hide');
+				$('#addBtn').show();
+    			document.getElementById("searchCode").value = "query";//查询本部门
+     			$("#detailData").text("下的柜台人员");
+     			
+     			postJson={};
+				postJson['deptId']=treeNode.id;
+				postJson['flagInt']=1;
+     			oldPostJson = postJson;
+        		jQuery.ajax({
+    			    type:"post", //请求方式
+    			    url:"getUserPageList.html", //发送请求地址
+    			    data:postJson,
+    			    //请求成功后的回调函数
+    			    success:function(html){
+    			   		$("#deptGrid").html(html).find('table').table();
+    			    	$("#total").text($("#totalAmount").val());
+    			    }
+    			});
+    		}
+		}
+
+		
+	 
+	 //新增用户
+	 function addSysUser(){
+    	 	var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    		var nodes = treeObj.getSelectedNodes();
+    		var n=nodes[0];
+    		var deptName = "";
+			var deptId="";
+			if(n){
+				deptName=n.name;
+				deptId=n.id;
+			}
+			var url="../crmCounterUser/toAddSysUserPage.html?deptName="+encodeURI(encodeURI(deptName))+"&deptId="+deptId+"&random="+Math.random()*10000;
+			var result=banger.page.openDialog(url,"新建柜台人员",720,540);
+			if(result==1){
+		//		postUserQuery();
+			queryCrmCounterUser();
+			}
+		//	tab.add({id: "user_add", pid: GetId(), title: "新建用户", url: url, lock: false});
+	}
+	
+		//根据ID删除用户
+		function delSysUserById(id,name){
+    		if(confirm('您确定要删除柜台人员'+name+'吗？')){
+				jQuery.ajax({
+    			    type:"post", //请求方式
+    			    url:"../crmCounterUser/deleteCrmCounterUser.html", //发送请求地址
+    			    data:{ //发送给数据库的数据
+    			  		'crmCounterUser.counterUserId':id
+    			    },
+    			    //请求成功后的回调函数有两个参数
+    			    success:function(data,textStatus){
+						refreshForm();
+    			    }
+    			});
+    		}
+    	}
+
+		//编辑用户
+		function updateCrmCuser(userId){
+			var url="../crmCounterUser/showUpdatePage.html?crmCounterUserId="+userId+"&random="+Math.random()*10000;
+			var result = banger.page.openDialog(url,"编辑用户",780,550);
+			if(result==1){
+				queryCrmCounterUser();
+			}
+			// tab.add({id: "user_update", pid: GetId(), title: "编辑用户", url: url, lock: false});
+		}
+		
+		//刷新
+		function refreshForm(){
+			filterPageForm_submit();
+		}
+		
+		function queryCrmCounterUser(){
+			var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+			var node = treeObj.getSelectedNodes()[0];
+			var name=node.name;
+			var deptId=node.id;
+			var flagInt=1;
+			if(deptId==2){
+				flagInt=3
+			}
+			
+			jQuery.ajax({
+    			    type:"post", //请求方式
+    			    url:"getUserPageList.html", //发送请求地址
+    			    data:{ //发送给数据库的数据
+    			  		deptId:deptId,
+    					flagInt:flagInt
+    			    },
+    			    //请求成功后的回调函数
+    			    success:function(html){
+    			    	$("#deptGrid").html(html).find('table').table();
+    			    	$("#total").text($("#totalAmount").val());
+    			    }
+    			});
+		}
+		
+	</script>
+</head>
+ 
+<body>
+	<div class="Agency-left">
+    	<h4>
+        	<label>组织机构树</label>
+            <p>
+				<input id="searchCode" type="hidden" name="serachCode" />
+				<input id="deptId" type="hidden" name="deptId" />
+				<input id="rootData" type="hidden" name="rootData" value="1" />
+				<input id="selectSearch" type="hidden" name="selectSearch"/>
+            </p>
+        </h4>
+        <div class="Agency-tree">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+    </div>
+    <div class="Agency-right">
+    		<p  class="sz">
+            	<label class="fl bold">
+					<label>[<span id="dName">$!deptName</span>]</label>
+                    <span id="detailData">下的柜台人员</span>
+                    <label>(<span id="total" class="dgreen">$!totalAmount</span>)</label>
+				</label>
+    		</p>
+    		
+            <div class="actrow" style="margin-top: 20px;">
+    	    	<a href="javascript:void(0);" class="btn2 floatL add" id="addBtn" onclick="addSysUser();">
+    	            <label class="btn2-txt">新 建</label>
+    	        </a>
+    	    	<a href="javascript:void(0);" class="btn2 floatR" onclick="refreshForm()" style="margin-left: -1px;">
+    	            <label class="btn2-txt">刷 新</label>
+    	        </a>
+    	    </div>
+    	   <div id="deptGrid">
+    	   	#parse("/velocity/crmCounterUser/crmCounterUserList.vm")
+           </div>
+    </div>
+</body>
+</html>
+

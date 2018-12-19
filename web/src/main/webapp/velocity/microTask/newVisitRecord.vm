@@ -1,0 +1,202 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>新建拜访记录</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+    	jQuery(document).ready(function(){
+			$('#tabs').easytabs();
+			jQuery("#visitRecordForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+			jQuery('select').select();
+		});
+		
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+    
+		function subvist(str){
+			var bool = jQuery.validator({ form: 'visitRecordForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			var cusId=$("#customerId").val();
+			jQuery.post(
+				'addVisitRecord.html',
+				{
+					'type':str,
+					'visitRecord.customerName':$("#customerName").val(),
+					'visitRecord.startDate':$("#datepicker1").val(),
+					'visitRecord.commProgress':$("#commProgress").val(),
+					'visitRecord.remark':$("#remark").val(),
+					'task.taskId':$("#taskId").val(),
+					'visitRecord.customerId':$("#customerId").val(),
+					'tabid':$("#tabid").val(),
+                    'tskSchedule.scheduleId':$("#scheduleId").val()
+				},
+				function(){
+					if(str=="save"){
+						tab.close(GetId(), true);	    	
+					}else{
+						location.reload();
+			//			location.href="../visitRecord/showAddVisitRecordPage.html?customer.customerId=cusId";
+					
+					}
+				});	
+		}
+		function closeTab(){
+			tab.close(GetId(),false);
+		}
+		    	
+	    
+	    function toAdd(customerId){
+			var taskId=$('#taskId').val();
+			if(taskId.length>0){
+				return false;
+			}
+	    	var url="showNextTaskPage.html?crmCustomer.customerId="+customerId+"&random="+Math.random();
+    		var result=banger.page.openDialog(url,"新建下次联系任务",600,360);
+    		returnDate(result);
+	    }
+	    
+	    function returnDate(result){
+	    	if(result!=undefined&&result!=""){
+				var res=result.split(",");
+				$('#taskId').val(res[0]);
+				$('#excDate').text(res[1]);
+				if(res[2]==0){
+					$('#finish').text("[未完成]");
+				}else{
+					$('#finish').text("[已完成]");
+				}
+				$("#nextContactId").attr("checked",true);
+				$("#nextContactId").removeAttr("onclick");
+				$("#spa").show();
+			}
+	    }
+	    
+	    function edit(customerId){
+	    	var url="nextTaskUp.html?customer.customerId="+customerId+"&task.taskId="+$('#taskId').val()+"&task.isDel=0&random="+Math.random();
+    		var result=banger.page.openDialog(url,"编辑下次联系任务",600,380);
+    		returnDate(result);
+	    }
+	    function checkDate(obj){
+	    	var date=$("#systemTime").val();
+        	var inputDate=obj.value;
+    		if(date<inputDate){
+    			$("#datepicker1").parent().addClass('v-fails');
+//    			$(obj).attr('tips', '拜访时间不能晚于今天'); return false;
+    			$(obj).attr('tips', '拜访时间不能晚于今天'); return false;
+    		}else{
+    			$("#datepicker1").parent().removeClass('v-fails');
+    			return true;
+    		}
+	    }	
+	</script>
+</head>
+
+<body>
+	<form id="visitRecordForm" name="visitRecordForm" method="post">
+        <input type="hidden" value="$!scheduleId" id="scheduleId"/>
+		<table class="htmltbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="8%" class="field">
+	            		<label>客户姓名：</label>
+	            	</td>
+	            	<td><label name="visitRecord.customerName">$!customerName</label></td>
+	            	<input type="hidden" value="$!customerName" id="customerName">
+					<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+	            </tr>
+	            <tr>
+	            	<td width="8%" class="field">
+		            	<label class="red">*</label>
+		            	<label>拜访时间：</label>
+	            	</td>
+	            	<td>
+	                	<div class="ui-div-text" style="width: 150px;">
+	                       <input type="text" value="$!date.format('yyyy-MM-dd HH:mm',$!visitRecordInfo.startDate)" name="visitRecord.startDate" id="datepicker1" class="text datepicker" fun="checkDate" rule="\S" tips="“拜访时间”不能为空" readonly="true"/>
+	                       <i class="date"></i>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<td width="8%" class="field">
+	            		<label>沟通进度：</label>
+	            	</td>
+	            	<td>
+						<select id="commProgress" name="visitRecord.commProgress" style="width: 150px;">
+							<option value="0"></option>
+								#foreach($CommProgress in $commProgressList)  
+							<option value ="$CommProgress.COMM_PROGRESS_ID" #if($!CommProgress.COMM_PROGRESS_ID==$!commProgressId) selected=true #end>$CommProgress.COMM_PROGRESS_NAME</option>
+							#end
+						</select>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<td width="8%"  height="30" align="right" class="field">
+	            		<label class="red">*</label>
+		            	<label>拜访备注：</label>
+	            	</td>
+	            	<td>
+						<div class="dtxtarea1" style="width: 400px;" >
+							<textarea id="remark" style="width: 400px; height: 80px;" name="visitRecord.remark" onKeyUp="javascript:var val = this.value;if(val.length>200){this.value=val.substring(0,200)}" rule="\S" tips="“拜访备注”不能为空" style="border: 0;"></textarea>
+						</div>
+	                </td>
+	            </tr>
+	            
+	            <tr>
+	            	<td width="8%" class="field"></td>
+	            	<td>
+                        <!--
+	                	<input type="checkbox" id="nextContactId" class="chk" onclick="toAdd($!customerId)"/>
+	                    <label for="chk-nextContact">下次联系
+	                    <span id="spa" style="display:none;">
+	                      （与<span  class="blue">$!customerName</span>客户拜访确认下次联系 <span class="blue" id="finish"></span> <span id="excDate"></span>）
+	                    <a href="#" onclick="edit($!customerId)" class="blue">编辑</a>
+	                    </span>
+	                    </label>
+                        -->
+						<input type="hidden" id="taskId" name="task.taskId"/>
+	                </td>
+	            </tr>
+	        </tbody>
+	        <input type="hidden" name="visitRecord.customerId" id="customerId" value="$!customerId"/>
+	        <input type="hidden" name="tabid" id="tabid" value="$!tabid"/>
+	    </table>
+	</form>
+	
+	<hr />
+	
+	<div class="halign">
+		<input type="button" id="button" value="保存" class="btn6 btn6bg1" onclick='subvist("save")'/>
+        <!--
+    	<input type="button" value="保存并新建"  class="btn6 btn6bg2" onclick='subvist("saveAndAdd")'/>
+    	-->
+    	<input type="button" value="取消" class="btn6 btn6bg3"onclick="closeTab()" />
+	</div>
+</body>
+</html>
+

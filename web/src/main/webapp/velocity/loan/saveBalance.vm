@@ -1,0 +1,591 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>添加-$!pagename</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .viewtbl{ margin-top:20px; }
+        body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $("select").each(function () {
+                $(this).select({scroll: 10});
+            });
+            jQuery('#coLoanPerson').validator();
+            //确定
+            jQuery('.ui-footer-btn1-save').click(function(){
+                var bool = jQuery.validator({form:'coLoanPerson',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+
+                var data = $("#myForm").serialize();
+
+                var url = '${ctx}/loan/saveBalance.html' + "?loanId=" + $("#loanId").val()
+                        + "&flag="+ $("#flag").val()
+                        + "&type="+ $("#type").val()
+                        + "&oldId="+ $("#id").val()
+                        + "&random=" + Math.random() * 1000;
+
+                jQuery.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: data,
+                    success:function(data){
+                        if(data=="success"){
+                            window.returnValue="success";
+                            window.close();
+                        }
+                    }
+                });
+
+            });
+
+            jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+        });
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+
+
+
+        function setFixedAmount(){
+            if($!type=="1"){
+                var itemNum = $("#balanceFixed_itemNum").val();
+                var originalValue = $("#balanceFixed_originalValue").val();
+                var depreciationValue = $("#balanceFixed_depreciationValue").val();
+
+                if(null==itemNum||""==itemNum||''==itemNum||undefined==itemNum){
+                    itemNum = "0";
+                }
+                if(null==originalValue||""==originalValue||''==originalValue||undefined==originalValue){
+                    originalValue = "0";
+                }
+                if(null==depreciationValue||""==depreciationValue||''==depreciationValue||undefined==depreciationValue){
+                    depreciationValue = "0";
+                }
+
+                var presentValue = parseFloat(originalValue)-parseFloat(depreciationValue);
+                $("#balanceFixed_presentValue").val(presentValue);
+                $("#balanceFixed_presentAmount").val(parseInt(itemNum)*parseFloat(presentValue));
+                if(originalValue!="0"){
+                    $("#balanceFixed_depreciationRate").val(parseFloat(depreciationValue)/parseFloat(originalValue)*100);
+                }else{
+                    $("#balanceFixed_depreciationRate").val(0);
+                }
+            }
+
+            if($!type=="2"){
+                var itemNum = $("#balanceFixed_itemNum").val();
+                var presentValue = $("#balanceFixed_presentValue").val();
+
+                if(null==itemNum||""==itemNum||''==itemNum||undefined==itemNum){
+                    itemNum = "0";
+                }
+                if(null==presentValue||""==presentValue||''==presentValue||undefined==presentValue){
+                    presentValue = "0";
+                }
+                $("#balanceFixed_presentAmount").val(parseInt(itemNum)*parseFloat(presentValue));
+            }
+
+        }
+
+
+        function checkDate(date) {
+            if (date.length <= 0 || date == "") {
+                $(this).removeAttr("style");
+                canSubmit = true;
+                return;
+            }
+            var pattern = /^((19|20)\d{2})\-(((0[1-9])|[1-9]|10|11|12))\-(((1|2)[0-9])|[1-9]|30|31|0[1-9])$/;
+            if (pattern.test(date)) {
+                $(this).removeAttr("style");
+                return true;
+            } else {
+                alert("日期格式错误(格式2014-01-01))");
+                $(this).css({
+                    backgroundColor : "red"
+                });
+                return false;
+            }
+        }
+
+
+    </script>
+</head>
+<body>
+<form id="myForm" action="${ctx}/loan/saveBalance.html">
+    <input type="hidden" id="loanId" value="$!loanId"/>
+    <input type="hidden" id="id" value="$!id"/>
+    <input type="hidden" id="type" value="$!type"/>
+    <input type="hidden" id="flag" value="$!flag"/>
+
+    <p class="bold loan-ttlbg">添加-$!pagename</p>
+
+    #if($!flag=="cash")
+        <div class="loan-add-box" id="coLoanPerson">
+            <table class="viewtbl" style="table-layout: auto;">
+                <tbody>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>项目：</label>
+                    </td>
+                    <td colspan="7">
+                        #if($!type=="1"||$!type=="2"||$!type=="3"||$!type=="6")
+                            <select id="balanceCash_itemName" name="balanceCash.itemName" maxlength="20" rule="\S" tips='"项目"必须填写'>
+                                <option ></option>
+                                #foreach($!item in $!checkBoxMessage.get("$!flag$!type"))
+                                    <option #if($!balanceCash.itemName == $!item.dictionaryKey) selected #end value="$!item.dictionaryKey">$!item.dictionaryValue</option>
+                                #end
+                            </select>
+                        #else
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceCash_itemName" name="balanceCash.itemName" value="$!balanceCash.itemName" maxlength="50" rule="\S" tips='"项目"必须填写'/>
+                            </div>
+                        #end
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>金额（元）：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceCash_amount" name="balanceCash.amount" value="$!balanceCash.amount" maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label>备注：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-textarea" id="balanceCash_remark_div"  style="height: 100px; margin-bottom:15px;">
+                            <textarea maxlength="300" id="balanceCash_remark" name="balanceCash.remark"  class="textarea" style="height: 100px; _height:100px;" >$!balanceCash.remark</textarea>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    #end
+
+    #if($!flag=="account")
+        <div class="loan-add-box" id="coLoanPerson">
+            <table class="viewtbl" style="table-layout: auto;" >
+                <tbody>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>#if($!type=="1"||$!type=="4") 客户名称 #else 供应商 #end：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceAccount_itemName" name="balanceAccount.itemName" value="$!balanceAccount.itemName" maxlength="50" rule="\S" tips='必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>金额（元）：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceAccount_amount" name="balanceAccount.amount" value="$!balanceAccount.amount" maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>结算方式：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <select id="balanceAccount_settlingType" name="balanceAccount.settlingType" maxlength="20" rule="\S" tips='"结算方式"必须填写' >
+                                <option #if($!balanceAccount.settlingType == "1") selected #end value="1">现结</option>
+                                <option #if($!balanceAccount.settlingType == "2") selected #end value="2">月结算</option>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>账龄</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceAccount_accountAge" name="balanceAccount.accountAge" value="$!balanceAccount.accountAge" maxlength="50" rule="\S" tips='"账龄"必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>业务关系存续：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <select id="balanceAccount_bizRenew" name="balanceAccount.bizRenew" maxlength="20" rule="\S" tips='"业务关系存续s"必须填写' >
+                                <option #if($!balanceAccount.bizRenew == "0") selected #end value="0">否</option>
+                                <option #if($!balanceAccount.bizRenew == "1") selected #end value="1">是</option>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>付款方式：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceAccount_payMethod" name="balanceAccount.payMethod" value="$!balanceAccount.payMethod" maxlength="50" rule="\S" tips='"付款方式"必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label>备注：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-textarea" id="balanceAccount_remark_div"  style="height: 100px; margin-bottom:15px;">
+                            <textarea maxlength="300" id="balanceAccount_remark" name="balanceAccount.remark"  class="textarea" style="height: 100px; _height:100px;" >$!balanceAccount.remark</textarea>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    #end
+
+    #if($!flag=="fixed")
+        <div class="loan-add-box" id="coLoanPerson">
+            <table class="viewtbl" style="table-layout: auto;" >
+                <tbody>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>类型：</label>
+                    </td>
+                    <td colspan="7">
+                        #if($!type=="1"||$!type=="2")
+                            <select id="balanceFixed_itemType" name="balanceFixed.itemType" maxlength="20" rule="\S" tips='"类型"必须填写'>
+                                <option ></option>
+                                #foreach($!item in $!checkBoxMessage.get("$!flag$!type$!appLoanTypeId"))
+                                    <option #if($!balanceFixed.itemType == $!item.dictionaryKey) selected #end value="$!item.dictionaryKey">$!item.dictionaryValue</option>
+                                #end
+                            </select>
+                        #else
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_itemType" name="balanceFixed.itemType" value="$!balanceFixed.itemType" maxlength="50" rule="\S" tips='"类型"必须填写'/>
+                            </div>
+                        #end
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>名称：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceFixed_itemName" name="balanceFixed.itemName" value="$!balanceFixed.itemName" maxlength="50" rule="\S" tips='"名称"必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>数量：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceFixed_itemNum" name="balanceFixed.itemNum" value="$!balanceFixed.itemNum" maxlength="9" rule="^[0-9]*[1-9][0-9]*$" tips='"数量"必须为正整数' onpropertychange="setFixedAmount()" oninput="setFixedAmount()"/>
+                        </div>
+                    </td>
+                </tr>
+                #if($!type=="2")
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>价格：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_presentValue" name="balanceFixed.presentValue" value="$!balanceFixed.presentValue"   maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]' onpropertychange="setFixedAmount()" oninput="setFixedAmount()"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>金额（元）：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_presentAmount" name="balanceFixed.presentAmount" value="$!balanceFixed.presentAmount"  readonly="readonly"/>
+                            </div>
+                        </td>
+                    </tr>
+                #else
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>原值：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_originalValue" name="balanceFixed.originalValue" value="$!balanceFixed.originalValue" maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]' onpropertychange="setFixedAmount()" oninput="setFixedAmount()"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>折旧金额：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_depreciationValue" name="balanceFixed.depreciationValue" value="$!balanceFixed.depreciationValue" maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]'  onpropertychange="setFixedAmount()" oninput="setFixedAmount()"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>现值：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_presentValue" name="balanceFixed.presentValue" value="$!balanceFixed.presentValue"  readonly="readonly"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>金额（元）：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_presentAmount" name="balanceFixed.presentAmount" value="$!balanceFixed.presentAmount"  readonly="readonly"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="8%">
+                            <label class="red">*</label>
+                            <label>折旧率(%)：</label>
+                        </td>
+                        <td colspan="7">
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceFixed_depreciationRate" name="balanceFixed.depreciationRate" value="$!balanceFixed.depreciationRate" readonly="readonly"/>
+                            </div>
+                        </td>
+                    </tr>
+                #end
+
+                <tr>
+                    <td class="field" width="8%">
+                        <label>备注：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-textarea" id="balanceFixed_remark_div"  style="height: 100px; margin-bottom:15px;">
+                            <textarea maxlength="300" id="balanceFixed_remark" name="balanceFixed.remark"  class="textarea" style="height: 100px; _height:100px;" >$!balanceFixed.remark</textarea>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    #end
+
+    #if($!flag=="debt")
+        <div class="loan-add-box" id="coLoanPerson">
+            <table class="viewtbl" style="table-layout: auto;" >
+                <tbody>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>来源：</label>
+                    </td>
+                    <td colspan="7">
+                        #if($!type=="5")
+                            <select id="balanceDebt_debtSource" name="balanceDebt.debtSource" maxlength="20" rule="\S" tips='"来源"必须填写'>
+                                <option ></option>
+                                #foreach($!item in $!checkBoxMessage.get("$!flag$!type"))
+                                    <option #if($!balanceDebt.debtSource == $!item.dictionaryKey) selected #end value="$!item.dictionaryKey">$!item.dictionaryValue</option>
+                                #end
+                            </select>
+                        #else
+                            <div class="ui-div-text">
+                                <input type="text" class="text" id="balanceDebt_debtSource" name="balanceDebt.debtSource" value="$!balanceDebt.debtSource" maxlength="50" rule="\S" tips='"来源"必须填写'/>
+                            </div>
+                        #end
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>金额（元）：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceDebt_amount" name="balanceDebt.amount" value="$!balanceDebt.amount" maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>期限：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceDebt_limitYear" name="balanceDebt.limitYear" value="$!balanceDebt.limitYear" maxlength="50" rule="\S" tips='"期限"必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>用途：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceDebt_loanPurpose" name="balanceDebt.loanPurpose" value="$!balanceDebt.loanPurpose" maxlength="50" rule="\S" tips='"用途"必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>发放日期：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text" >
+                            <input type="text" class="text datepicker" readonly="readonly"  name="balanceDebt.beginDate" value="#if($!balanceDebt.beginDate)$date.format("yyyy-MM-dd",$!balanceDebt.beginDate)#end"  id="lnBalanceDebt_beginDate" maxlength="18"  onblur="checkDate(this.value)" rule="\S" tips='"发放日期"必须填写'/>
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>余额（元）：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="balanceDebt_loanBalance" name="balanceDebt.loanBalance" value="$!balanceDebt.loanBalance" maxlength="19" rule="^(([1-9]{1}((\d){0,15}))|([0]{1}))(\.(\d){1,2})?$" tips='金额格式不正确，格式为[16位].[2位]'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>保证方式：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <select id="balanceDebt_guarantyType" name="balanceDebt.guarantyType" maxlength="20" rule="\S" tips='"结算方式"必须填写' >
+                                <option #if($!balanceDebt.guarantyType == "1") selected #end value="1">担保</option>
+                                <option #if($!balanceDebt.guarantyType == "2") selected #end value="2">信用</option>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label>备注：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-textarea" id="balanceDebt_remark_div"  style="height: 100px; margin-bottom:15px;">
+                            <textarea maxlength="300" id="balanceDebt_remark" name="balanceDebt.remark"  class="textarea" style="height: 100px; _height:100px;" >$!balanceDebt.remark</textarea>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    #end
+
+    #if($!flag=="validation")
+        <div class="loan-add-box" id="coLoanPerson">
+            <table class="viewtbl" style="table-layout: auto;">
+                <tbody>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>名称：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="validationItem_itemName" name="validationItem.itemName" value="$!validationItem.itemName" maxlength="50" rule="\S" tips='"名称"必须填写'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label class="red">*</label>
+                        <label>偏差率（%）：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="validationItem_itemRate" name="validationItem.itemRate" value="$!validationItem.itemRate" maxlength="6" rule="^[0-9]+([.][0-9]{1,2}){0,1}$" tips='必须为数字'/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field" width="8%">
+                        <label>描述：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-textarea" id="validationItem_itemRemark_div"  style="height: 100px; margin-bottom:15px;">
+                            <textarea maxlength="300" id="validationItem_itemRemark" name="validationItem.itemRemark"  class="textarea" style="height: 100px; _height:100px;" >$!validationItem.itemRemark</textarea>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    #end
+
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+    </div>
+</form>
+</body>
+</html>

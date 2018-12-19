@@ -1,0 +1,33 @@
+ <table class="datatbl">
+    <thead>
+        <tr>
+            <th width="250"><label title="附件名称">附件名称</label></th>
+            <th><label title="上传时间">上传时间</label></th>
+            <th><label title="上传人员">上传人员</label></th>
+			<th><label title="事件">事件</label></th>
+            <th width="100"><label title="操作">操作</label></th>
+        </tr>
+    </thead>
+    <tbody>
+         #foreach($form in $!formDataList.items)
+        	<tr>
+            	<td><label title="$!form.formName">$!form.formName</label></td>
+				<td><label title="#if($!form.uploadDate)$date.format("yyyy-MM-dd HH:mm:ss",$!form.uploadDate)#end">#if($!form.uploadDate)$date.format("yyyy-MM-dd HH:mm:ss",$!form.uploadDate)#end</label></td>
+				<td><label title="$!form.uploadUser">$!form.uploadUser</label></td>
+				<td><label title="$!form.eventName">$!form.eventName</label></td>
+				<td>
+					#if($urlPermitUtil.hasPermission('uploadForm'))
+						<label><a class="slink" href="#2" onclick="javascript:uploadForm('$!form.FileId','$!form.formName')">下载</a></label>
+					#end
+				</td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+         <tr>
+        	<td colspan="5">
+            	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

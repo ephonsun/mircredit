@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="customer" extends="default" namespace="/customer" >
+		<!-- 所有客户 第一次加载 -->
+		<action name="FirstLoad" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerAllList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 所有客户 查询-->
+		<action name="DoQuery" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableAllList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 我的客户 第一次加载 -->
+		<action name="FirstLoadMyCustomer" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerMyList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 我的客户 查询 -->
+		<action name="DoQueryMyCustomer" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableMyList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 未分配客户 第一次加载 -->
+		<action name="FirstLoadUnAllocate" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerUnAllocationList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 未分配客户 查询 -->
+		<action name="DoQueryUnAllocate" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableAllList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 拜访客户 第一次加载 -->
+		<action name="FirstLoadVisit" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerVisitList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 未拜访客户 查询 -->
+		<action name="DoQueryVisit" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableVisitList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 第一次 共享给别人的 -->
+		<action name="queryShareToOthers" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerShareToOthersList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 共享给别人的 -->
+		<action name="queryShareO" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableShareToOthersList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--第一次 别人共享给我的 -->
+		<action name="queryShareToMe" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerShareToMeList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 别人共享给我的 -->
+		<action name="queryShareM" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableShareToMeList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 未拜访客户 查询 -->
+		<action name="DoQueryVisit" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableVisitList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 垃圾箱客户 第一次加载 -->
+		<action name="FirstLoadDustbin" class="crmCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/customerDustbinList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 垃圾箱客户 查询 -->
+		<action name="DoQueryDustbin" class="crmCustomerAction" method="DoQuery">
+			<result name="success">/velocity/customer/cusTableDustbinList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 设置拜访客户 -->
+		<action name="SetVisitCustomer" class="crmCustomerAction" method="SetVisitCustomer">
+		</action>
+		
+		<!-- 新增客户 -->
+		<action name="addCustomer" class="crmCustomerAction" method="addCustomer">
+			<result name="addCustomer">/velocity/customer/addCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 编辑客户 -->
+		<action name="editCustomer" class="crmCustomerAction" method="editCustomer">
+			<result name="editCustomer">/velocity/customer/addCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 获得客户称谓 -->
+		<action name="getNickName" class="crmCustomerAction" method="getNickName">
+		</action>
+		
+		<!-- 校验客户编号是否唯一 -->
+		<action name="checkCustomerNo" class="crmCustomerAction" method="checkCustomerNo">
+		</action>
+		
+		<!-- 删除客户至垃圾箱 -->
+		<action name="delCustomers" class="crmCustomerAction" method="delCustomers">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 校验删除客户是否有贷款 -->
+		<action name="getDelCusMsg" class="crmCustomerAction" method="getDelCusMsg">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查看客户 -->
+		<action name="browseCustomer" class="crmCustomerAction" method="editCustomer">
+			<result name="editCustomer">/velocity/customer/browseCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 清空垃圾箱 -->
+		<action name="cleanDustnbin" class="crmCustomerAction" method="delCustomersComplete">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 还原垃圾箱 -->
+		<action name="restoreDustnbin" class="crmCustomerAction" method="restoreCustomerByCustomerIds">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 还原客户 -->
+		<action name="restoreCustomers" class="crmCustomerAction" method="restoreCustomers">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 彻底删除客户 -->
+		<action name="delCusComplete" class="crmCustomerAction" method="delCusComplete">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 得到客户归属数据 -->
+		<action name="getCustomerBelongToData" class="belongToAction" method="getBelongToJson">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 选择客户 -->
+		<action name="customerSelect" class="crmCustomerAction" method="customerSelect">
+			<result name="success">/velocity/customer/customerSelect.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 选择条件客户 -->
+		<action name="customerConditionSelect" class="crmCustomerAction" method="customerSelect">
+			<result name="success">/velocity/customer/customerConditionSelect.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 获得选择客户的实体集合 -->
+		<action name="selectCusByIds" class="crmCustomerAction" method="selectCusByIds">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 得到客户归属数据 -->
+		<action name="getCusBelongToJson" class="crmCustomerAction" method="getCusBelongToJson">
+			<!--<result name="error">/velocity/error.vm</result>-->
+		</action>
+		
+		<!-- 分配客户归属 -->
+		<action name="showCusBelongTo" class="crmCustomerAction" method="showCusBelongTo">
+			<result name="success">/velocity/customer/showCusBelongTo.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更改客户归属 -->
+		<action name="modifyCusBelongTo" class="crmCustomerAction" method="modifyCusBelongTo">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更改客户归属 -->
+		<action name="modifyCusBelongToAll" class="crmCustomerAction" method="modifyCusBelongToAll">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更改客户归属 -->
+		<action name="searchUser" class="crmCustomerAction" method="searchUser">
+		    <result name="success">/velocity/customer/userTableList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户是否已删除 -->
+		<action name="isDeleteCus" class="crmCustomerAction" method="isDeleteCus">
+		</action>
+		
+		<!-- 共享客户显示 -->
+		<action name="showShareCustomer" class="crmCustomerAction" method="showShareCustomer">
+			<result name="success">/velocity/customer/customerShare.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 保存客户共享 -->
+		<action name="saveShareCustomer" class="crmCustomerAction" method="saveShareCustomer">
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 取消共享客户 -->
+		<action name="cancelShareCus" class="crmCustomerAction" method="cancelShareCus">
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 取消共享用户 -->
+		<action name="cancelShareUser" class="crmCustomerAction" method="cancelShareUser">
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 取消共享用户 选择人员列表 -->
+		<action name="showCancelShareUsers" class="crmCustomerAction" method="showCancelShareUsers">
+		    <result name="success">/velocity/customer/cancelShareUserList.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 导出客户 -->
+		<action name="showExportCustomer" class="crmCustomerAction" method="showExportCustomer">
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 生日提醒 -->
+		<action name="birthdayRemind" class="crmCustomerAction" method="birthdayRemind">
+		    <result name="success">/velocity/customer/benchBirthdayRemind.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更多生日提醒 -->
+		<action name="birthdayRemindFirstMore" class="crmCustomerAction" method="birthdayRemind">
+		    <result name="success">/velocity/customer/benchBirthdayRemindMore.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更多提醒 -->
+		<action name="birthdayRemindMore" class="crmCustomerAction" method="birthdayRemind">
+		    <result name="success">/velocity/customer/birthdayTableList.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 未联系客户提醒 -->
+		<action name="unAllocationRemindFirst" class="crmCustomerAction" method="unAllocationRemind">
+		    <result name="success">/velocity/customer/benchUnAllocationRemind.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 未联系客户提醒 -->
+		<action name="unAllocationRemind" class="crmCustomerAction" method="unAllocationRemind">
+		    <result name="success">/velocity/customer/benchUnAllocationTableList.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更多未联系提醒 -->
+		<action name="unAllocationRemindMoreFirst" class="crmCustomerAction" method="unAllocationRemind">
+		    <result name="success">/velocity/customer/benchMoreUnAllocationRemind.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更多未联系客户提醒 -->
+		<action name="unAllocationRemindMore" class="crmCustomerAction" method="unAllocationRemind">
+		    <result name="success">/velocity/customer/unAllocationTableList.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 更多未联系客户提醒 -->
+		<action name="upLoadHead" class="crmCustomerAction" method="upLoadHead">
+		</action>
+		
+		<!-- 根据电话号码返回最近的联系客户 -->
+		<action name="getRecentlyCustomer" class="crmCustomerAction" method="getRecentlyCustomer">
+		    <result name="success">/velocity/customer/recentCustomerList.vm</result>
+		    <result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 根据条件选择客户 -->
+		<action name="getCusByCondition" class="crmCustomerAction" method="getCusByCondition">
+		</action>
+		
+		<!-- 判断客户是否有未结算的贷款 -->
+		<action name="isNotEndLoan" class="crmCustomerAction" method="isNotEndLoan">
+		</action>
+	</package>
+</struts>

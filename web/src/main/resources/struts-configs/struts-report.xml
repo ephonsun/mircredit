@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="report" extends="default" namespace="/report">
+
+	    <!-- 报表图片导出 -->
+		<action name="exportImage" class="exportReportAction" method="exportImage">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新增客户统计 显示报表页面 -->
+		<action name="getAddCustomerReport" class="addCustomerReportAction" method="getReportPage">
+			<result name="success">/velocity/report/addCustomerReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新增客户统计 显示报表数据 -->
+		<action name="showAddCustomerReport" class="addCustomerReportAction" method="showReport">
+			<result name="rtGrid">/velocity/report/addCustomerReportGrid.vm</result>
+			<result name="rtLine">/velocity/report/addCustomerReportLine.vm</result>
+			<result name="rtColumn">/velocity/report/addCustomerReportColumn.vm</result>
+			<result name="rtPercent">/velocity/report/addCustomerReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新增客户统计 导出报表数据 -->
+		<action name="exportAddCustomerReport" class="addCustomerReportAction" method="exportReport">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新增客户统计 显示打印预览 -->
+		<action name="getAddCustomerReportPrint" class="addCustomerReportAction" method="showReportPrint">
+			<result name="success">/velocity/report/addCustomerReportPrint.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新增客户统计 显示客户明细预览 -->
+		<action name="showAddCustomerReportDetail" class="addCustomerReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailCustomerList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新增客户统计 显示客户明细预览 -->
+		<action name="showAddCustomerReportDetailGrid" class="addCustomerReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailCustomerGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户联系跟进统计 显示报表页面 -->
+		<action name="getContactCustomerReport" class="contactCustomerReportAction" method="getReportPage">
+			<result name="success">/velocity/report/contactCustomerReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户联系跟进统计 显示报表数据 -->
+		<action name="showContactCustomerReport" class="contactCustomerReportAction" method="showReport">
+			<result name="success">/velocity/report/contactCustomerReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户联系跟进统计 导出报表数据 -->
+		<action name="exportContactCustomerReport" class="contactCustomerReportAction" method="exportReport">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户联系跟进统计 显示打印预览 -->
+		<action name="getContactCustomerReportPrint" class="contactCustomerReportAction" method="showReportPrint">
+			<result name="success">/velocity/report/contactCustomerReportPrint.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户联系跟进统计 显示客户明细 -->
+		<action name="showContactCustomerReportDetail" class="contactCustomerReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailContactCustomerList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 客户联系跟进统计 显示客户明细分页 -->
+		<action name="showContactCustomerReportDetailGrid" class="contactCustomerReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailCustomerGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  活动量统计 显示报表页面 -->
+		<action name="getRecordActivityReport" class="recordActivityReportAction" method="getReportPage">
+			<result name="success">/velocity/report/recordActivityReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量统计 显示报表数据 -->
+		<action name="showRecordActivityReport" class="recordActivityReportAction" method="showReport">
+			<result name="success">/velocity/report/recordActivityReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量统计 导出报表数据 -->
+		<action name="exportRecordActivityReport" class="recordActivityReportAction" method="exportReport">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 活动量统计 显示打印预览 -->
+		<action name="getRecordActivityReportPrint" class="recordActivityReportAction" method="showReportPrint">
+			<result name="success">/velocity/report/recordActivityReportPrint.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量统计表明细 -->
+		<action name="showRecordReportDetail" class="recordActivityReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailRecordList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量统计表明细 -->
+		<action name="showRecordReportDetailGrid" class="recordActivityReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailRecordGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  活动量趋势统计 显示报表页面 -->
+		<action name="getRecordActivityTrendReport" class="recordActivityTrendReportAction" method="getReportPage">
+			<result name="success">/velocity/report/recordActivityTrendReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量趋势统计 显示报表数据 -->
+		<action name="showRecordActivityTrendReport" class="recordActivityTrendReportAction" method="showReport">
+			<result name="rtGrid">/velocity/report/recordActivityTrendReportGrid.vm</result>
+			<result name="rtLine">/velocity/report/recordActivityTrendReportLine.vm</result>
+			<result name="rtColumn">/velocity/report/recordActivityTrendReportColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量趋势统计 导出报表数据 -->
+		<action name="exportRecordActivityTrendReport" class="recordActivityTrendReportAction" method="exportReport">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 活动量趋势统计 显示打印预览 -->
+		<action name="getRecordActivityTrendReportPrint" class="recordActivityTrendReportAction" method="showReportPrint">
+			<result name="success">/velocity/report/recordActivityTrendReportPrint.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 活动量趋势统计表明细 -->
+		<action name="showRecordActivityReportDetail" class="recordActivityTrendReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailRecordList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 活动量趋势统计表明细分页 -->
+		<action name="showRecordActivityReportDetailGrid" class="recordActivityTrendReportAction" method="showReportDetial">
+			<result name="success">/velocity/report/detailRecordGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 财经要点报表统计页面 -->
+		<action name="initFinanceReport" class="financeReportAction" method="initFinanceReport">
+			<result name="success">/velocity/report/financeReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 财经要点报表列表 -->
+		<action name="financeReportPageList" class="financeReportAction" method="financeReportPageList">
+			<result name="success">/velocity/report/financeReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 导出财经报表 -->
+		<action name="exportFinanceReport" class="financeReportAction" method="exportFinanceReport">
+		</action>
+		<!-- 财经要点报表统计明细 -->
+		<action name="financeReportDetail" class="financeReportAction" method="financeReportDetail">
+			<result name="success">/velocity/report/detailFinanceGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+        <!--贷款量统计表-->
+        <action name="getFirstLoanCountReportPage" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="success">/velocity/report/loanCountReport.vm</result>
+            <result name="test">/velocity/report/loanReport.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--贷款量统计表(条件搜索)-->
+        <action name="queryLoanCountListReportPage" class="loanCountReportAction" method="queryLoanCountListReportPage">
+            <result name="success">/velocity/report/loanCountReportTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+          <!--支行存量贷款统计表 按团队-->
+        <action name="branchStockLoanStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/branchStockLoanStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+          <!--支行存量贷款统计表 按机构-->
+        <action name="branchStockLoanStatisticsJiGou" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/branchStockLoanStatisticsJiGou.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <action name="branchStockLoanStatisticsLeiXing" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/branchStockLoanStatisticsLeiXing.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+           <!--客户经理贷款明细统计-->
+        <action name="customerManagerLoansDetailedStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/customerManagerLoansDetailedStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+       
+           <!--支行放款统计表 按团队-->
+        <action name="branchBankLendingStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/branchBankLendingStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+           <!--支行放款统计表 按机构-->
+        <action name="branchBankLendingStatisticsJiGou" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/branchBankLendingStatisticsJiGou.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <action name="branchBankLendingStatisticsLeiXing" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/branchBankLendingStatisticsLeiXing.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+           <!--贷款前后对照统计表-->
+        <action name="beforeAndAfterTheLoanControlTab" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/beforeAndAfterTheLoanControlTab.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+           <!--贷款账号明细统计表-->
+        <action name="loanAccountDetails" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/loanAccountDetails.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--贷款效率统计表  -->
+         <action name="loanEfficiencyStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/loanEfficiencyStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+       
+           <!--审批过程统计表-->
+        <action name="examinationAndApprovalProcessStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/examinationAndApprovalProcessStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+           <!--期间拒绝统计表-->
+        <action name="statisticalTable" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/statisticalTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+           <!--贷款拒绝统计表-->
+        <action name="loanDenialStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/loanDenialStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+           <!--预计还款统计-->
+        <action name="estimatedRepaymentStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/estimatedRepaymentStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+          <!--逾期报表-->
+        <action name="overdueReport" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/overdueReport.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+           <!--逾期信息明细表-->
+        <action name="overdueInformationList" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/overdueInformationList.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        
+           <!--逾期贷款历史明细-->
+        <action name="historyOfOverdueLoans" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/historyOfOverdueLoans.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+          <!--信息来源统计表-->
+        <action name="informationSourceStatistics" class="loanCountReportAction" method="getFirstLoanCountReportPage">
+            <result name="test">/velocity/report/informationSourceStatistics.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+         <!--添加团队-->
+        <action name="getTeam" class="loanCountReportAction" method="getTeam">
+            <result name="success">/velocity/report/loanSelectTeams.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+		<!--经营消费贷统计表-->
+		<action name="getLoanInfoStatisticsTable" class="loanCountReportAction" method="getLoanInfoStatisticsTable">
+			<result name="success">/velocity/report/loanInfoStatisticsTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="downLoanInfoStatisticsTable" class="loanCountReportAction" method="downLoanInfoStatisticsTable">
+		</action>
+
+		<action name="downKDBStatisticsTable" class="loanCountReportAction" method="downKDBStatisticsTable">
+		</action>
+		<!--客户联系资料表 -->
+		<action name="getCustomerContactInfoTable" class="loanCountReportAction" method="getCustomerContactInfoTable">
+			<result name="success">/velocity/report/customerContactInfoTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	</package>
+</struts>

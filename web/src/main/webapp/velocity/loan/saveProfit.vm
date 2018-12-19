@@ -1,0 +1,142 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>添加-$!pagename</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .viewtbl{ margin-top:20px; }
+        body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $("select").each(function () {
+                $(this).select({scroll: 10});
+            });
+            jQuery('#loanProfitLoss').validator();
+            //确定
+            jQuery('.ui-footer-btn1-save').click(function(){
+                var bool = jQuery.validator({form:'loanProfitLoss',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+
+//                var data = $("#myProForm").serialize();
+                var postJson={};
+
+                postJson['itemName']=$('#lnProfitLossItem_itemName').val();
+
+                postJson['remark']=$('#lnProfitLossItem_remark').html();
+
+                var url = '${ctx}/loan/saveProfit.html' + "?loanId=" + $("#loanId").val()
+                        + "&flag="+ $("#flag").val()
+                        + "&type="+ $("#type").val()
+                        + "&oldId="+ $("#id").val()
+                        + "&year=" + $('#year').val()
+                        + "&month=" + $('#month').val()
+                        + "&num=" +$('#num').val()
+                        + "&random=" + Math.random() * 1000;
+//                alert(url);
+                jQuery.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: postJson,
+                    success:function(data){
+                        if(data=="success"){
+                            window.returnValue="success";
+                            window.close();
+                        }
+                    }
+                });
+
+            });
+
+            jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+        });
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+
+    </script>
+</head>
+<body>
+
+    <input type="hidden" id="loanId" value="$!loanId"/>
+    <input type="hidden" id="id" value="$!id"/>
+    <input type="hidden" id="type" value="$!type"/>
+    <input type="hidden" id="flag" value="$!flag"/>
+    <input type="hidden" id="year" value="$!year"/>
+    <input type="hidden" id="month" value="$!month"/>
+    <input type="hidden" id="num" value="$!num"/>
+
+
+    <p class="bold loan-ttlbg">添加-$!pagename</p>
+
+        <div class="loan-add-box" id="loanProfitLoss">
+            <table class="viewtbl" style="table-layout: auto;">
+                <tbody>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>项目：</label>
+                </td>
+                <td colspan="7">
+                    #if("$!flag$!type"=="prod11"||"$!flag$!type"=="prod13"||"$!flag$!type"=="prod14"||"$!flag$!type"=="prod15"
+                    ||"$!flag$!type"=="prod26"||"$!flag$!type"=="prod27"||"$!flag$!type"=="prod28")
+                        <select id="lnProfitLossItem_itemName"  maxlength="20" rule="\S" tips='"项目"必须填写'>
+                            <option ></option>
+                            #foreach($!item in $!checkBoxMessage.get("$!flag$!type"))
+                                <option #if($!lnProfitLossItem.itemName == $!item.dictionaryValue) selected #end value="$!item.dictionaryValue">$!item.dictionaryValue</option>
+                            #end
+                        </select>
+                    #else
+                        <div class="ui-div-text">
+                            <input type="text" class="text" id="lnProfitLossItem_itemName" value="$!lnProfitLossItem.itemName" maxlength="50" rule="\S" tips='"项目"必须填写'/>
+                        </div>
+                    #end
+                </td>
+                <tr>
+                    <td class="field" width="8%">
+                        <label>备注：</label>
+                    </td>
+                    <td colspan="7">
+                        <div class="ui-div-textarea" id="lnProfitLossItem_remark_div"  style="height: 100px; margin-bottom:15px;">
+                            <textarea maxlength="300" id="lnProfitLossItem_remark"  class="textarea" style="height: 100px; _height:100px;" >$!lnProfitLossItem.remark</textarea>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+##<p></p>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+    </div>
+
+</body>
+</html>
+

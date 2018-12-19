@@ -1,0 +1,89 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑业务类型</title>
+	<base target="_self" />
+    #styleLink("base")
+	#scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+</head>
+<script>
+	jQuery(document).ready(function(){
+		jQuery("#recTypeForm").validator();
+	});
+	function upSubmit(){
+		var bool = jQuery.validator({ form: 'recTypeForm', extend: true, extendhandler: extendvalidator});
+		if(bool){
+			document.recTypeForm.submit();
+    		window.returnValue=1;    
+    		window.close();
+		}
+	}
+	
+	function extendvalidator(){
+		var bool = true;
+		var postJson = {};
+		postJson['recbizType.bizTypeName']=$('#bizTypeName').val();
+	 	postJson['OldBizTypeName']=$('#OldBizTypeName').val();
+		jQuery.ajax({
+			type: 'POST',
+			url:'updateValidate.html',
+			data:postJson,
+			cache: false, 
+			async: false,
+			success:function(data){
+				if(data!=""){
+    				$("#bizTypeName").attr('tips', data); 
+    				$('#recDiv').addClass('v-fails');
+    				bool=false;
+    			}else{
+    				$('#recDiv').removeClass('v-fails');
+    				bool=true;
+    			}
+			}
+		});
+		return bool;
+	}
+</script>
+<body>
+	<form name="recTypeForm"  id ="recTypeForm" action="updateRecbizType.html"  method="post" >
+	<table class="htmltbl" cellspacing="2" cellpadding="2">
+    	<thead>
+        	<tr>
+            	<th height="20" align="left" colspan="4">编辑业务类型<hr /></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="80" height="30" align="right">
+                	<span class="red">*</span>业务名称：
+                </td>
+                <td>
+					<input type="hidden" name="recbizType.bizTypeId" value="$!recbizType.bizTypeId"/>
+					<div class="dtxt1" id="recDiv" style="width: 200px;">
+					<input type="text" class="dtxt1-txt" rule="\S" tips='“业务名称”必须填写!' maxlength="20" id="bizTypeName" name="recbizType.bizTypeName" value="$!recbizType.bizTypeName"/>
+					</div>
+                    <input type="text" style="display:none">
+				</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <td colspan="4" align="center">
+                	<input type="button" value="保 存" onclick="upSubmit()" class="btn5 btn5bg1" />
+					<input type="button" value="取消" onclick="javascript:window.close();window.returnValue=0;" class="btn5 btn5bg3"/>
+					<input type="hidden" id="OldBizTypeName" value="$!recbizType.bizTypeName"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

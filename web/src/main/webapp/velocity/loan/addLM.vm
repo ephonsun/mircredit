@@ -1,0 +1,314 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	 #if($!isAdd)
+		 <title>添加贷后监控</title>
+		 <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	#else
+		<title>编辑贷后监控</title>
+	#end
+
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+		  body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/micro/askLoan.js"></script>
+
+	<script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.idcard.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	#if($!isAdd)
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	#end
+	
+	<script type="text/javascript">
+   jQuery(function () {
+         maxTextArea("textarea[maxlength]");
+        });
+	$(function(){
+			#if($!isAdd)
+				initDate('monDate', { minDate: new Date()});
+                initDate('datepicker');
+            #end
+
+        $("select").each(function () {
+            $(this).select({scroll: 10});
+        });
+
+
+        $(".ui-footer-btn1-cancel").click(function(){
+            window.close();
+        });
+	//确定
+            $('.ui-footer-btn1-save').click(function(){
+
+              var monType = $("#monType").val();
+                if (monType == ""){
+                    alert("请输入监控类型！");
+                    return false;
+                }
+                var revisitType =$("#revisitType").val();
+                if (revisitType == ""){
+                    alert("请输入回访类型！");
+                    return false;
+                }
+                var customerStatus =$("#customerStatus").val();
+                if (customerStatus == ""){
+                    alert("请输入客户基本情况！");
+                    return false;
+                }
+                var bizStatus =$("#bizStatus").val();
+                if (bizStatus == ""){
+                    alert("请输入生成经营情况！");
+                    return false;
+                }
+                var financeStatus =$("#financeStatus").val();
+                if (financeStatus == ""){
+                    alert("请输入财务情况！");
+                    return false;
+                }
+                var guarantorStatus =$("#guarantorStatus").val();
+                if (guarantorStatus == ""){
+                    alert("请输入保证担保！");
+                    return false;
+                }
+                var ledgeStatus =$("#ledgeStatus").val();
+                if (ledgeStatus == ""){
+                    alert("请输入抵押担保！");
+                    return false;
+                }
+                var userResult =$("#userResult").val();
+                if (userResult == ""){
+                    alert("请输入其他！");
+                    return false;
+                }
+                var postJson = {};
+                postJson['loanId']=$("#txtLoanIdId").val();
+                postJson['monType']=monType;
+                postJson['monDate']=$("#monDate").val();
+                postJson['revisitType'] = revisitType;
+                postJson['userResult'] = userResult;
+                postJson['loanLmId'] = $("#loanLmId").val();
+                postJson['customerStatus'] = customerStatus;
+                postJson['bizStatus'] = bizStatus;
+                postJson['financeStatus'] = financeStatus;
+                postJson['guarantorStatus'] = guarantorStatus;
+                postJson['ledgeStatus']=ledgeStatus;
+                var urlStr = "../loan/addLM.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+					
+						if(data == "success"){
+
+						 alert("保存成功");
+
+                            window.returnValue="success";
+                            window.close();
+
+						}else{
+							//alert(data);
+						}
+                    }
+                });
+            });
+	});
+    </script>
+</head>
+<body>
+    <input type="hidden" id="txtLoanIdId" value="$!loanId"/>
+	 <input type="hidden" id="loanLmId" value="$!lnLoanMonitor.loanMonId"/>
+	 #if($!isAdd)
+		 <p class="bold loan-ttlbg">添加贷后监控</p>
+	#else
+		<p class="bold loan-ttlbg">编辑贷后监控</p>
+	#end
+    <div class="loan-add-box">
+      <table class="celltbl"  id="guLoanPerson">
+          <tbody>
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>日期：</label>
+                  </td>
+                  <td colspan="2" >
+                      <div class="left"  id="schtxtname">
+                          <input type="text" class="text" readonly="readonly" id="monDate" value="$!date.format('yyyy-MM-dd HH:mm:ss',$!lnLoanMonitor.monDate)" />
+                  </td>
+                  <td width="200"></td>
+              </tr>
+              <tr>
+
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>监控类型：</label>
+                  </td>
+                  <td colspan="2">
+
+						<select id="monType"   class="ui-div-text" style="width:280px"  name="monType">
+                            <option  value=""></option>
+							#foreach($!jklx in $!checkBoxMessage.get("JKLX"))
+								<option #if($!lnLoanMonitor.monType == $!jklx.dictionaryKey) selected #end value="$!jklx.dictionaryKey">$!jklx.dictionaryValue</option>
+							#end
+                        </select>
+
+                  </td>
+                  <td ></td>
+
+              </tr>
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>回访类型：</label>
+                  </td>
+                  <td colspan="2">
+
+						<select id="revisitType" class="ui-div-text" style="width:280px" name="revisitType" >
+                            <option value=""></option>
+							#foreach($!hflx in $!checkBoxMessage.get("HFLX"))
+								<option #if($!lnLoanMonitor.revisitType == $!hflx.dictionaryKey) selected #end value="$!hflx.dictionaryKey">$!hflx.dictionaryValue</option>
+							#end
+                        </select>
+
+                  </td>
+                  <td ></td>
+
+              </tr>
+
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>客户基本情况：</label>
+                  </td>
+                  <td colspan="2">
+                          <select id="customerStatus" class="ui-div-text" style="width:280px" name="customerStatus" >
+                              <option value=""></option>
+                              #foreach($!khjbqk in $!checkBoxMessage.get("KHJBQK"))
+                                  <option #if($!lnLoanMonitor.customerStatus == $!khjbqk.dictionaryKey) selected #end value="$!khjbqk.dictionaryKey">$!khjbqk.dictionaryValue</option>
+                              #end
+                          </select>
+
+                  </td>
+                  <td ></td>
+
+              </tr>
+
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>生成经营情况：</label>
+                  </td>
+                  <td colspan="2">
+
+                          <select id="bizStatus" class="ui-div-text" style="width:280px" name="bizStatus" >
+                              <option value=""></option>
+                              #foreach($!scjyqk in $!checkBoxMessage.get("SCJYQK"))
+                                  <option #if($!lnLoanMonitor.bizStatus == $!scjyqk.dictionaryKey) selected #end value="$!scjyqk.dictionaryKey">$!scjyqk.dictionaryValue</option>
+                              #end
+                          </select>
+
+                  </td>
+                  <td ></td>
+
+              </tr>
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>财务情况：</label>
+                  </td>
+                  <td colspan="2">
+
+                          <select id="financeStatus" class="ui-div-text" style="width:280px" name="financeStatus" >
+                              <option value=""></option>
+                              #foreach($!cwqk in $!checkBoxMessage.get("CWQK"))
+                                  <option #if($!lnLoanMonitor.financeStatus == $!cwqk.dictionaryKey) selected #end value="$!cwqk.dictionaryKey">$!cwqk.dictionaryValue</option>
+                              #end
+                          </select>
+
+                  </td>
+                  <td ></td>
+
+              </tr>
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>保证担保：</label>
+                  </td>
+                  <td colspan="2">
+
+                          <select id="guarantorStatus" class="ui-div-text" style="width:280px" name="guarantorStatus" >
+                              <option value=""></option>
+                              #foreach($!bzdb in $!checkBoxMessage.get("BZDB"))
+                                  <option #if($!lnLoanMonitor.guarantorStatus == $!bzdb.dictionaryKey) selected #end value="$!bzdb.dictionaryKey">$!bzdb.dictionaryValue</option>
+                              #end
+                          </select>
+
+                  </td>
+                  <td ></td>
+
+              </tr>
+
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>抵(质)押担保：</label>
+                  </td>
+                  <td colspan="2">
+
+                          <select id="ledgeStatus" class="ui-div-text" style="width:280px" name="ledgeStatus">
+                              <option value=""></option>
+                              #foreach($!dydb in $!checkBoxMessage.get("DYDB"))
+                                  <option #if($!lnLoanMonitor.ledgeStatus == $!dydb.dictionaryKey) selected #end value="$!dydb.dictionaryKey">$!dydb.dictionaryValue</option>
+                              #end
+                          </select>
+                  </td>
+                  <td ></td>
+              </tr>
+              <tr>
+                  <td class="field" width="120">
+                      <label class="red">*</label>
+                      <label>其他：</label>
+                  </td>
+                 <td width="450" colspan="3" id="schtxtidcard">
+                    <div class="ui-div-textarea" style="height:180px; margin-bottom:15px;">
+						<textarea  class="textarea"  id="userResult" value="$!lnLoanMonitor.userResult" name ="userResult" maxlength="150"  rule="\S" tips='"结果"必须填写' style="height: 100px; _height:100px;">$!lnLoanMonitor.userResult</textarea>
+					</div>
+                </td>
+              </tr>
+          <tr></tr>
+          <tr></tr>
+          <tr></tr>
+          <tr></tr>
+
+          </tbody>
+      </table>
+      </div>
+      <hr />
+      <div class="center">
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+          <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+      </div>
+</body>
+</html>

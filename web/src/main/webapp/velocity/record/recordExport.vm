@@ -1,0 +1,346 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>联系记录导出</title>
+    
+    #styleLink("base")
+    #scriptLink("core")
+	#scriptLink("page")
+	
+	<style>
+		ul.easy-tabs-header{  white-space:nowrap; overflow:hidden;}
+    	ul.easy-tabs-header li{ text-align:center; white-space:nowrap; overflow:hidden;}
+    	ul.easy-tabs-header li label{ width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+        /* 滚动按钮小图标  */
+        .x-panel-bar{ position: absolute; top: 0px; right: 0px; }
+        .x-panel-bar .x-panel-action { float: left; cursor: pointer; width: 20px; height: 20px; margin: 3px; text-indent: -1000px; overflow: hidden; }
+        .x-panel-bar div.x-panel-scroller-left { background: url(../images/index/left.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/left.png"); }
+        .x-panel-bar div.x-panel-scroller-right { background: url(../images/index/right.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/right.png"); }
+
+        .easy-tabs .easy-tabs-scroll{ position:relative; overflow:hidden; height:30px; margin-right:120px;}
+    </style>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+    <script type="text/javascript">
+	var userId = '$!userId';
+	var postJson ;
+	var url;
+	var confirmMsg;
+	var totalAmount;
+	var proId;
+	var type;
+    	$(function(){
+			$('.easy-tabs').easytabs();
+			
+			$('.cr-fieldbox').each(function(){
+				var s = this;
+				$('a.all', s).click(function(){
+					$(':checkbox', s).attr('checked', 'checked');
+					return false;
+				});
+				$('a.none', s).click(function(){
+					$(':checkbox', s).removeAttr('checked');
+					return false;
+				});
+			});
+			$("#export").click(function(){
+				exportCustomer();
+			});
+			$("#download").click(function(){
+				download();
+			});
+			var pid = GetPid();
+			var win = window.top.ExportIframeWin(pid);
+			if(win && win.getCustPostJson){
+    			postJson = win.getCustPostJson();
+    			url = postJson["url"];
+    			type = postJson["type"];
+    			totalAmount = postJson["recordCount"];
+    			$("#totalCount").text(postJson["recordCount"]);
+    			$("#totalCount1").text(postJson["recordCount"]);
+    			$("#totalCount2").text(postJson["recordCount"]);
+			}
+			#foreach($feild in $!feilds)
+				$('#'+'$feild').attr("checked",true);
+			#end
+
+            /* 内容部分左右按钮滚动js调用  */
+            $('#easyScroll').itemScroll({
+                'oLeft':$('#leftBtn'),
+                'oRight':$('#rightBtn')
+            });
+			
+			//设置导出完成时的类型
+			if (type == "0") {
+            	$('#exportType').text("联系记录");
+				$('#exportType1').text("联系记录");
+            } else if (type == "1") {
+            	$('#exportType').text("通话记录");
+				$('#exportType1').text("通话记录");
+            } else if (type == "2") {
+                $('#exportType').text("座谈记录");
+				$('#exportType1').text("座谈记录");
+            } else if (type == "3") {
+                $('#exportType').text("拜访记录");
+				$('#exportType1').text("拜访记录");
+            } else {
+        		$('#exportType').text("联系记录");
+				$('#exportType1').text("联系记录");
+        	}
+			
+		});
+		
+		//跳到第二页
+		function exportCustomer(){
+			confirmMsg = 1;
+			var data="";
+    		$("input[type$='checkbox']").each(function(i){
+    			if(this.checked) data += this.value + ":";
+    		});
+			if(data==""){
+				banger.page.showMessageBox("请您选择要导出的字段！");
+			}else{
+				jQuery.post('../recordExport/exportRecordVerify.html?random='+Math.random()*10000,
+					{},
+					function(json){
+						if(json !=""){
+							banger.page.showMessageBox(json);
+						}else{
+            				$("#d1").css("display","none");
+            				$("#d2").css("display","block");
+            				$("#d3").css("display","none");
+            				writeExcel(data);
+            				proId = setInterval("progressBar()", 1000);
+						}
+				});
+			}
+		
+		}
+		
+		//写入excel
+		function writeExcel(data){
+			postJson["crmPostData"] = data;
+			jQuery.post( url,
+        				postJson,
+        				function(json){
+							if(json=="over"){
+								$('#download').removeAttr('title');
+								$('#download').attr('disabled',false);
+							}
+        				});
+		}
+		//导出进度
+		function progressBar(){
+		
+			jQuery.post('../recordExport/exportRecordBar.html?userId='+userId+'&random='+Math.random()*10000,
+						{},
+						function(json){
+							var curr;
+							var p;
+							var per;
+							var ds=jQuery.parseJSON(json);
+							if(ds["curr"]) {
+								curr = ds["curr"];
+							}
+							if(typeof(curr)=='undefined') curr = 0;
+							if(totalAmount==0){
+								per=100;
+								p = "100%";
+							}else{
+								per=Math.round(parseInt(curr) * 100 /parseInt(totalAmount));
+                				p = (per>100?100:per)+'%';
+							}
+                			$("#percent").text(p);
+                			$("#porgressBar").css("width",p);
+                			if(per >= 100){
+                				clearInterval(proId);
+                				$("#d1").css("display","none");
+                				$("#d2").css("display","none");
+                				$("#d3").css("display","block");
+								confirmMsg=2;
+                			}
+						
+						}
+			
+			);
+		
+			
+		}
+		//下载
+		function download(){
+			document.location.href="exportRecordExute.html?type="+type+"&random="+Math.random()*1000;
+		}
+		
+		function cfirm(){
+			if(confirmMsg == 1 && typeof(proId) != 'undefined'){
+    			if(confirm('正在导出联系记录，您确定要取消导出吗？')) {
+					clearInterval(proId);
+					jQuery.post('../recordExport/exportRecordStop.html',
+        				{},
+        				function(json){
+						
+        				});
+					return true;
+				}
+			}else return true;
+		}
+		
+	
+    </script>
+</head>
+ 
+<body>
+	<div id="d1" style="display:block">
+    	<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td>第 2 步</td>
+            	<td>完成</td>
+            </tr>
+        </table>
+        <h4 class="steptxt">
+        	第1步：选择导出字段
+        </h4>
+       <form name="exportForm"  id ="exportForm" action="" method="post" >
+            <div class="cr-fieldbox">
+                <h4>
+                	<label class="fl">基础字段</label>
+                    <a href="#2" class="all">全选</a>
+                    <a href="#2" class="none">全不选</a>
+                </h4>
+                <div class="cr-field-items">
+    				#foreach($param in ${baseColumn.keySet()})
+                    <div style="width: 160px;">
+                        <input type="checkbox" id="$param" class="chk" name="$param" value="$param"/>
+                        <label title="${baseColumn.get($param)}">${baseColumn.get($param)}</label>
+                    </div> 
+    				#end
+                </div>
+            </div>
+           <div class="easy-tabs" style="margin-top: 20px;">
+               <div style="position:relative;">
+                   <div class="easy-tabs-scroll">
+                       <ul class="easy-tabs-header" id="easyScroll">
+                        #foreach($template in $temp.getTemplates())
+                            <li><label title="$template.templateName">$template.templateName</label></li>
+                        #end
+                        </ul>
+                   </div>
+                   <!--// .easy-tabs-scroll-->
+                   <div class="x-panel-bar">
+                       <div class="x-panel-action x-panel-scroller-left" id="leftBtn"></div>
+                       <div class="x-panel-action x-panel-scroller-right" id="rightBtn"></div>
+                   </div>
+                   <!--// .x-panel-bar-->
+               </div>
+            <div class="easy-tabs-pages">
+    			
+    			#foreach($template in $temp.getTemplates())
+                <div class="easy-tabs-page">
+                    <div class="cr-fieldbox">
+                        <h4>
+                            <a href="#2" class="all">全选</a>
+                			<a href="#2" class="none">全不选</a>
+                        </h4>
+                        <div class="cr-field-items">
+							#foreach($field in $!template.fields)
+    							<div style="width: 160px;">
+    								#if($template.isBasic.equals(1))
+    									<input type="checkbox" class="chk" id="$!field.fieldName" name="$!field.fieldName" value="$template.isBasic,$!field.templateFieldName,$!field.fieldName"/>
+    								#else
+    									<input type="checkbox" class="chk" id="$!field.fieldName" name="$!field.fieldName" value="$template.isBasic,$template.templateName,$!field.templateFieldName,$!field.fieldName"/>
+									#end
+									<label title="$!field.templateFieldName">
+									   #set($str=$!field.templateFieldName) 
+                                       #if($str.length()>10)
+                                          #set($str=$str.substring(0,10))
+                                       $str ...
+                                       #else
+										  $!field.templateFieldName
+                                       #end 
+									 </label>
+                                </div>
+							#end
+                        </div>
+                    </div>
+                </div>
+               #end		
+            </div>
+        </div>
+    
+    		<hr style="margin-top: 20px;" />
+        
+            <div class="halign">
+            	<input type="button" id="export" class="btn6 btn6bg1" value="导出" />
+            	<input type="button" class="btn6 btn6bg3" onclick="tab.close(GetId(),false);" value="取消" />
+            </div>
+       </form>
+	</div>
+	
+	<div id="d2" style="display:none">
+		<table class="bartbl">
+    	<tr>
+        	<td class="over">第 1 步</td>
+        	<td class="over">第 2 步</td>
+        	<td>完成</td>
+        </tr>
+        </table>
+        <h4 class="steptxt">
+        	第2步：导出进度
+        </h4>
+        
+        <div class="pgrbar">
+        	<div class="ppt">
+            	<span class="fl">
+                    正在导出数据，共
+                    <label id="totalCount" class="dgreen bold"></label>
+                    条数据…
+                </span>
+                <span id="percent" class="fr">
+                </span>
+            </div>
+            <div class="bar" >
+                <div id="porgressBar"></div>
+            </div>
+        </div>
+	</div>
+	
+	<div id="d3" style="display:none">
+    	<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">完成</td>
+            </tr>
+        </table>
+        
+        <h4 class="steptxt">
+        	完成<label id="exportType"></label>导出
+        </h4>
+        
+        <dl class="sucppt">
+        	<dt><label id="exportType1"></label>导出已完成！</dt>
+            <dd class="img"></dd>
+            <dd>
+            	共
+                <span id="totalCount1"></span>
+                条数据，成功导出
+                <span id="totalCount2" class="green"></span>
+                条数据。
+        	</dd>
+        </dl>
+        
+        <hr />
+        
+        <div class="halign">
+        	<input type="button" title="正在写入文件，请稍后下载！" disabled="true" id="download" class="btn6 btn6bg1" value="另存导出结果" />
+        	<input type="button" class="btn6 btn6bg3" onclick="tab.close(GetId(),false);" value="关闭" />
+        </div>
+	</div>
+
+</body>
+</html>

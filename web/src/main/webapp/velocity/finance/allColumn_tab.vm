@@ -1,0 +1,28 @@
+<thead>
+    <tr>
+    	<th><label title="栏目名称">栏目名称</label></th>
+    	<th><label title="描述">描述</label></th>
+    	<th width="200"><label title="操作">操作</label></th>
+    </tr>
+</thead>
+
+<tbody>
+	<input id="count" name="count" type="hidden" value="$!feColumnList.size()"/>
+    #foreach($!feColumn in $!feColumnList)
+        <tr>
+    	<td><label title="">$!feColumn.columnName</label></td>
+    	<td><label title="">$!feColumn.columnDescription</label></td>
+    	<td>
+			#if($!feColumn.isStart==1)
+			<a class="ui-link-btn" href="javascript:void(0);" id="$!feColumn.columnId" onclick="ssColumn('$!feColumn.columnId');">停用</a>
+			#else
+			<a class="ui-link-btn" href="javascript:void(0);" id="$!feColumn.columnId" onclick="ssColumn('$!feColumn.columnId')">启用</a>
+			#end
+			<a class="ui-link-btn" href="javascript:void(0);" onclick="editColumn('$!feColumn.columnId');">编辑</a>
+			<a class="ui-link-btn" href="javascript:void(0);" onclick="delColumn('$!feColumn.columnId','$!feColumn.columnName');">删除</a>
+			<a class="ui-link-btn up" href="javascript:void(0);" onclick="upColumn('$!feColumn.columnId');">上移</a>
+			<a class="ui-link-btn down" href="javascript:void(0);" onclick="downColumn('$!feColumn.columnId');">下移</a>
+    	</td>
+        </tr>
+	#end
+</tbody>

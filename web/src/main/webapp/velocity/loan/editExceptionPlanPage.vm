@@ -1,0 +1,119 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑异常款项</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        div.ztree-box { height: 300px; border: 1px solid #ccc; padding: 2px; overflow: auto; margin-top:-1px; }
+        div.ztree-box .detailed{ margin:0px 10px; background-color:#F2F2F2; border:1px dashed #b1b1b1; height:180px; font-size:12px;}
+        div.ztree-box .detailed	p{ margin-left:5px; margin-top:10px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+    <script type="text/javascript">
+        jQuery(function(){
+            jQuery('#form1').validator();
+
+            floatInput('input[id=\'owedPrincipal\']',12,2);
+            floatInput('input[id=\'paidPrincipal\']',12,2);
+        });
+
+         function edit(loanId){
+             var bool = jQuery.validator({form : 'form1'});
+             if(!bool){
+                 return false;
+             }
+             var owedPrincipal = $('#owedPrincipal').val();
+             var paidPrincipal = $('#paidPrincipal').val();
+             owedPrincipal = owedPrincipal.replace(",","");
+             paidPrincipal = paidPrincipal.replace(",","");
+             jQuery.ajax({
+                 type:'POST',
+                 url: "${ctx}/loan/editExceptionSort.html?RandNum="+ Math.random()*1000+"&loanId="+loanId,
+                 data:{
+                     'owedPrincipal': owedPrincipal,
+                     'paidPrincipal': paidPrincipal
+                 } ,
+                 success:function(){
+                     window.returnValue ="success";
+                     window.close();
+                 }
+             });
+         }
+
+        function cancel(){
+            window.close();
+        }
+
+    </script>
+</head>
+<body>
+<form id="form1" name="form1">
+<p class="bold loan-ttlbg">编辑异常款项</p>
+<div class="ztree-box">
+    <p class="loan-lheight"><span class="bold">$!customerName</span>
+        #if($customerTitle != "" && $customerTitle)
+        ($!customerTitle)
+        #end
+    </p>
+    <div class="detailed">
+        <table class="htmltbl_1" >
+            <tbody>
+            <tr>
+                <td class="field" width="96">
+                    <label>本期还款日期：</label>
+                </td>
+                <td width="250">
+                    <label>$!date.format('yyyy-MM-dd',$!repaymentDate)</label>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            <tr>
+                <td class="field" width="96">
+                    <label>本期应还：</label>
+                </td>
+                <td width="250">
+                    <div class="ui-div-text">
+                        <input id="owedPrincipal" type="text" class="text" value="$!vmHelper.getUnityDecimalMoney($owedPrincipal)" rule="\S" tips='"本期应还"必须填写' />
+                    </div>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            <tr>
+                <td class="field" width="96">
+                    <label>本期已还：</label>
+                </td>
+                <td width="250">
+                    <div class="ui-div-text">
+                        <input id="paidPrincipal" type="text" class="text" value="$!vmHelper.getUnityDecimalMoney($paidPrincipal)" rule="\S" tips='"本期已还"必须填写'/>
+                    </div>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" onclick="edit($!loanId)" value="确认" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="cancel()" value="取消" />
+    </div>
+</div>
+</form>
+</body>
+</html>

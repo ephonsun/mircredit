@@ -1,0 +1,81 @@
+<div class="loan-bg">
+<p class="bold loan-lheight">基本信息</p>
+<table class="htmltbl_1" >
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户姓名：</label>
+        </td>
+        <td width="17%">
+#if($urlPermitUtil.hasPermission('browseCustomer'))
+    <label #if($!loan.loanStatusId != 2 || !$isLoan) class="slink"
+           onclick="newTab('browse', '$!lnLoanInfo.customerId')"
+    #end >$!lnLoanInfo.cusName</label>
+#else
+    <label>$!loanLoanInfo.cusName</label>
+#end
+        </td>
+        <td colspan="6"></td>
+    </tr>
+    <tr>
+        <td class="field" width="8%">
+            <label>联系电话：</label>
+        </td>
+        <td width="17%">
+            <label>$vmHelper.getHidePhoneNumber($!lnLoanInfo.cusMobilePhone)</label>
+        </td>
+        #if($urlPermitUtil.hasPermission('dialPhone') && ($!lnLoanInfo.loanStatusId != 2 || !$isLoan))
+            #if($!lnLoanInfo.loanStatusId == 6)
+                #if($lnLoanInfo.isNogood && $!lnLoanInfo.isNogood == 1)
+                    <td colspan="6">
+                        <i class="i phone"
+                           onclick="dial('$!lnLoanInfo.cusMobilePhone','$!loan.customerId','0000$!lnLoanInfo.loanId')" title="拨号">phone</i>
+                    </td>
+                #else
+                    <td colspan="6">
+                        <i class="i phone"
+                           onclick="dial('$!lnLoanInfo.cusMobilePhone','$!loan.customerId','000$!lnLoanInfo.loanId')" title="拨号">phone</i>
+                    </td>
+                #end
+            #else
+                <td colspan="6">
+                    <i class="i phone"
+                       onclick="dial('$!lnLoanInfo.cusMobilePhone','$!loan.customerId')" title="拨号">phone</i>
+                </td>
+            #end
+        #end
+    </tr>
+    <tr>
+        <td class="field" width="8%">
+            <label>身份证：</label>
+        </td>
+        <td colspan="2" width="34%">
+            <label>$vmHelper.getHideIdCard($!lnLoanInfo.cusIdcard)</label>
+        </td>
+        <td colspan="5"></td>
+    </tr>
+    <tr>
+        <td class="field" width="8%">
+            <label>贷款类型：</label>
+        </td>
+        <td width="17%">
+            <label>
+                $!appLoanTypeName
+            </label>
+        </td>
+        <td colspan="6"></td>
+    </tr>
+    <!--
+        <tr>
+            <td class="field" width="8%">
+                <label>申请金额：</label>
+            </td>
+            <td width="17%">
+                <label>$vmHelper.getDecimalWanMoney($!loan.loanMoney)元</label>
+            </td>
+            <td colspan="6"></td>
+        </tr>
+        -->
+    </tbody>
+</table>
+</div>

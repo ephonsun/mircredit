@@ -1,0 +1,101 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>修改执行者</title>
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+    	.b-bomb-box1 { display: block; }
+		.b-bomb-box1 .l { width: 200px; height: 314px; }
+		.b-bomb-box1 .r .collist { height: 299px; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	
+    <script type="text/javascript">
+		var setting = {
+			callback:{
+				onClick:treeOnclick
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				showIcon: showIconForTree
+			}
+			
+		};
+		var taskId=$!tskContact.contactId;
+ 		//点击节点查询本部门用户
+ 		function treeOnclick(event, treeId, treeNode) {
+    		initDeptUser(treeNode.id);
+		};
+		
+		function initDeptUser(trId){
+			jQuery.ajax({
+			    type:"post", //请求方式
+			    url:"getDeptUserListPage.html", //发送请求地址
+			    data:{ //发送给数据库的数据
+			  		'deptId':trId,
+					'tskContact.contactId':taskId
+			    },
+			    //请求成功后的回调函数
+			    success:function(html){
+					refreshGrid('deptGrid',html);
+			    }
+			});
+		}
+
+		//不显示节点图标
+		function showIconForTree(treeId, treeNode) {
+			return !treeNode;
+		};
+		
+		//默认选择第一个节点
+		function initNodeSelect(){
+    		var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    		var nodes = treeObj.getNodes();
+    		if (nodes.length>0) {
+    			treeObj.selectNode(nodes[0]);
+				initDeptUser(nodes[0].id);
+    		}
+		}
+		
+		//刷新
+		function refreshGrid(gridId,html)
+		{
+			$('#'+gridId).html(html);
+		}		
+		$(function(){
+    		//加载机构用户树
+    		jQuery.post('/tskContact/showDeptExcUserList.html?&random='+Math.random(),{
+    				'tskContact.contactId':taskId,
+    				'type':"dept"
+    		},function(data){
+    				data = jQuery.parseJSON(data);
+    				jQuery.fn.zTree.init($("#deptTree"),setting,data);
+    				initNodeSelect();
+    		});
+		});		
+	</script>
+</head>
+ 
+<body>
+	<div class="b-bomb-box1">
+    	<div class="fl l">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+        <div class="fl r" id="deptGrid">
+			#parse("/velocity/tskTask/tskExcUserList.vm")
+        </div>
+    </div>
+</body>
+</html>

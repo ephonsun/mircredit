@@ -1,0 +1,209 @@
+   <div class="loan-view-pad">
+        <span class="view-title">催收资料#if($loan.crmCustomer.customerName)
+            ($loan.crmCustomer.customerName)
+        #end</span>
+#if($lnDunLogList)
+    #foreach($dunLog in $lnDunLogList)
+    <span class="fr">$!date.format('yyyy-MM-dd HH:mm:ss',$!dunLog.dunDate)</span>
+    <div class="loan-view-box">
+        <div class="loan-view-inner loan-view-lender" style="width: 60%;">
+            <div class="loan-view-border">
+                <table class="datatbl" cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th width="15%"><label title="类型">类型</label></th>
+                        <th width="15%"><label title="类型名称">类型名称</label></th>
+                        <th width="15%"><label title="数量">数量</label></th>
+                        <th width="20%"><label title="催收方式">催收方式</label></th>
+                        <th width="35%"><label title="备注">备注</label></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!--
+                    <tr>
+                        <td><img src="../images/public/form.png" width="33" height="30" alt="附件"></td>
+                        <td><label title="附件">附件</label></td>
+                        <td>
+                            #set($form="${dunLog.customerDataId}4")
+                            #if($dunDataCountMap.get($form))
+                                <a class="ui-link-btn" href="#2"
+                                   onclick="showDunDataList('',4,$!loan.loanId,$!loan.crmCustomer.customerId,6,$dunDataCountMap.get($form),$dunLog.customerDataId)">
+                                    $dunDataCountMap.get($form)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                    </tr>         -->
+                    <tr>
+                        <td><img src="../images/public/audio.png" width="33" height="30" alt="录音"></td>
+                        <td><label title="录音">录音</label></td>
+                        <td>
+                            #set($audio="${dunLog.customerDataId}2")
+                            #if($dunDataCountMap.get($audio))
+                                <a class="ui-link-btn" href="#2"
+                                   onclick="showDunDataList('',2,$!loan.loanId,$!loan.crmCustomer.customerId,6,$dunDataCountMap.get($audio),$dunLog.customerDataId)">
+                                    $dunDataCountMap.get($audio)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                        <td rowspan="4">
+                            #if ($dunLog.dunType == 1)
+                                短信催收
+                            #end
+                            #if ($dunLog.dunType == 2)
+                                电话催收
+                            #end
+                            #if ($dunLog.dunType == 3)
+                                上门催收
+                            #end
+                            #if ($dunLog.dunType == 4)
+                                彩信催收
+                            #end
+                        </td>
+                        <td rowspan="4" style="white-space:normal; word-break: break-all;line-height: 1.5;padding:5px;">
+                            <p title="$!subString.replaceRemark($!dunLog.remark)">$!dunLog.remark</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><img src="../images/public/video.png" width="33" height="30" alt="视频"></td>
+                        <td><label title="视频">视频</label></td>
+                        <td>
+                            #set($video="${dunLog.customerDataId}3")
+                            #if($dunDataCountMap.get($video))
+                                <a class="ui-link-btn" href="#2"
+                                   onclick="showDunDataList('$!jsUtil.escapeJs($!loan.crmCustomer.customerName)',3,$!loan.loanId,$!loan.crmCustomer.customerId,6,$dunDataCountMap.get($video),$dunLog.customerDataId)">
+                                    $dunDataCountMap.get($video)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><img src="../images/public/photo.png" width="33" height="30" alt="照片"></td>
+                        <td><label title="照片">照片</label></td>
+                        <td>
+                            #set($photo="${dunLog.customerDataId}1")
+                            #if($dunDataCountMap.get($photo))
+                                <a class="ui-link-btn" href="#2" onclick="showPhotoList(6,$loan.loanId);">
+                                   ##onclick="showPhoto(6,$loan.loanId,$loan.crmCustomer.customerId);">
+								   
+                                    $dunDataCountMap.get($photo)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    #end
+#elseif($lnExceptionDunLogList)
+    #foreach($dunLog in $lnExceptionDunLogList)
+    <span class="fr">$!date.format('yyyy-MM-dd HH:mm:ss',$!dunLog.dunDate)</span>
+    <div class="loan-view-box">
+        <div class="loan-view-inner loan-view-lender" style="width: 60%;">
+            <div class="loan-view-border">
+                <table class="datatbl" cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th width="15%"><label title="类型">类型</label></th>
+                        <th width="15%"><label title="类型名称">类型名称</label></th>
+                        <th width="15%"><label title="数量">数量</label></th>
+                        <th width="20%"><label title="催收方式">催收方式</label></th>
+                        <th width="35%"><label title="备注">备注</label></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!--
+                    <tr>
+                        <td><img src="../images/public/form.png" width="33" height="30" alt="附件"></td>
+                        <td><label title="附件">附件</label></td>
+                        <td>
+                            #set($form="${dunLog.customerDataId}4")
+                            #if($dunDataCountMap.get($form))
+                                <a class="ui-link-btn" href="#2"
+                                   onclick="showDunDataList('',4,$!loan.loanId,$!loan.crmCustomer.customerId,6,$dunDataCountMap.get($form),$dunLog.customerDataId)">
+                                    $dunDataCountMap.get($form)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                    </tr>
+                    -->
+                    <tr>
+                        <td><img src="../images/public/audio.png" width="33" height="30" alt="录音"></td>
+                        <td><label title="录音">录音</label></td>
+                        <td>
+                            #set($audio="${dunLog.customerDataId}2")
+                            #if($dunDataCountMap.get($audio))
+                                <a class="ui-link-btn" href="#2"
+                                   onclick="showDunDataList('',2,$!loan.loanId,$!loan.crmCustomer.customerId,6,$dunDataCountMap.get($audio),$dunLog.customerDataId)">
+                                    $dunDataCountMap.get($audio)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                        <td rowspan="4">
+                            #if ($dunLog.dunType == 1)
+                                短信催收
+                            #end
+                            #if ($dunLog.dunType == 2)
+                                电话催收
+                            #end
+                            #if ($dunLog.dunType == 3)
+                                上门催收
+                            #end
+                            #if ($dunLog.dunType == 4)
+                                彩信催收
+                            #end
+                        </td>
+                        <td rowspan="4" style="white-space:normal; word-break: break-all;line-height: 1.5;padding:5px;">
+                            <span title="$!subString.replaceRemark($!dunLog.remark)">$!dunLog.remark</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><img src="../images/public/video.png" width="33" height="30" alt="视频"></td>
+                        <td><label title="视频">视频</label></td>
+                        <td>
+                            #set($video="${dunLog.customerDataId}3")
+                            #if($dunDataCountMap.get($video))
+                                <a class="ui-link-btn" href="#2"
+                                   onclick="showDunDataList('$!jsUtil.escapeJs($!loan.crmCustomer.customerName)',3,$!loan.loanId,$!loan.crmCustomer.customerId,6,$dunDataCountMap.get($video),$dunLog.customerDataId)">
+                                    $dunDataCountMap.get($video)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><img src="../images/public/photo.png" width="33" height="30" alt="照片"></td>
+                        <td><label title="照片">照片</label></td>
+                        <td>
+                            #set($photo="${dunLog.customerDataId}1")
+                            #if($dunDataCountMap.get($photo))
+                                <a class="ui-link-btn" href="#2" onclick="showPhotoList(6,$loan.loanId);">
+                                   ##onclick="showPhoto(6,$loan.loanId,$loan.crmCustomer.customerId);">
+                                    $dunDataCountMap.get($photo)
+                                </a>
+                            #else
+                                0
+                            #end
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    #end
+#end

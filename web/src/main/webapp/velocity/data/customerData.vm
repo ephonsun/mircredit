@@ -1,0 +1,687 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户资料</title>  
+	 #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css">
+    hr { margin-top:-3px; }
+    .mr{margin-right:10px; }
+	#division {_height: expression((document.documentElement.clientHeight || document.body.clientHeight) > 300 ? "300px" : "auto" );overflow: hidden;_width: expression((document.documentElement.clientWidth || document.body.clientWidth) > 400 ? "400px" : "auto" );overflow: hidden;}
+	<!-- 以下是短信彩信详情的样式 -->
+    .viewtbl { margin-top:20px; }
+    </style>
+	
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.photo-layer.js"></script>
+	
+	<script type="text/javascript">
+		var oldPostJson={};
+		var postJson = {};
+		var thePlayer;  //保存当前播放器以便操作  
+		
+		$(function(){
+            $('select').select();
+			initBelongTo();
+			init();
+    		initCombox();
+			getQueryJson();
+        });
+    	function initCombox(){
+			$('#comBox').combobox({
+    			array:["营销","申请","调查","审批","放贷","贷后","催收"]
+    		});
+    	}
+
+		//搜索条件封装
+    	function getQueryJson(){
+    		postJson['searchData.dataName'] = $('#dataName').val();
+			postJson['searchData.createStartDate'] = $('#createStartDate').val();
+			postJson['searchData.createEndDate'] = $('#createEndDate').val();
+			postJson['searchData.uploadStartDate'] = $('#uploadStartDate').val();
+			postJson['searchData.uploadEndDate'] = $('#uploadEndDate').val();
+			postJson['searchData.uploadUserId'] = $('#uploadUserId').val();
+			postJson['searchData.smsContent'] = $('#smsContent').val();
+			postJson['searchData.smsType'] = $('#smsType').val();
+			postJson['searchData.sendStartDate'] = $('#sendStartDate').val();
+			postJson['searchData.sendEndDate'] = $('#sendEndDate').val();
+			postJson['searchData.mmsContent'] = $('#mmsContent').val();
+			postJson['searchData.mmsType'] = $('#mmsType').val();
+			postJson['type'] = $!type;
+			postJson['customerId'] = $!customerId;
+			postJson['eventName'] = $('#eventName').val();
+			postJson['customerName'] = $('#s').text();
+			postJson['BelongToType'] = $('#BelongToType').val();
+			postJson['userIds'] = $('#userIds').val();
+			postJson['numRow'] = $('#numRow').val();
+            postJson['eventId'] = "";
+    		return postJson;
+    	}
+		
+		function sub(){
+    		var postJson=getQueryJson();
+			oldPostJson = postJson;
+			gotoPage(1);
+    	}
+		
+		function clean(){
+			$('select').each(function(){
+                this.selectedIndex = 0;
+                $(this).change().select();
+            });
+    		$('#dataForm :text').val('');
+    	}
+    	
+		
+		//分页跳转
+    	function gotoPage(page){
+			oldPostJson = postJson;
+    		goto(page,"queryDataByCusId.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+    	}
+    	
+    	//刷新Grid
+    	function refreshGrid(gridId,html)
+    	{
+    		$("#" + gridId).html(html);
+    		$('table.datatbl').table();
+    		var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+    	}
+    		
+    	//刷新
+    	function refresh(){
+			oldPostJson = postJson;
+    		goto(null,"queryDataByCusId.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+    	}
+		
+		
+		
+		//显示录音播放层
+		function showAudioDiv(obj,audioId,audioName,fileId,recordLength,customerName){
+			$('#dataId').val(audioId);//保存id
+        	if(recordLength==0||recordLength==""){
+    			banger.page.showMessageBox("对不起,录音在上传时损坏,无法播放！");
+    			return;
+        	}
+    		jQuery.post("isExistFileById.html", {"fileId": fileId}, function(result){
+    			if(result == "0"){
+    				banger.page.showMessageBox({"type":"error","content":"文件不存在！"});
+    				return;
+    			}else{
+					window.parent.showPopAudioDiv(customerName,audioName,fileId,audioId,GetId(),"data");
+    			}
+    		});
+        }
+		
+		//显示视频播放层  type：2
+		function showVideoDiv(obj,videoId,videoName,fileId,recordLength,customerName){  
+			$('#videoDataName').text(videoName);
+    		$('#dataId').val(videoId);//保存id
+        	if(recordLength==0||recordLength==""){
+    			banger.page.showMessageBox("对不起,录音在上传时损坏,无法播放！");
+    			return;
+        	}
+			jQuery.post("readFile.html", {"fileId": fileId}, function(result){
+    			if(result == ""){
+    				banger.page.showMessageBox({"type":"error","content":"文件不存在！"});
+    				return;
+    			}else{
+					window.parent.showPopVideoDiv(customerName,videoName,result,videoId,GetId(),"data");
+    			}
+    		});   
+        } 
+		
+		//构造短信详情显示层
+		function showSmsDiv(smsType,sendDate,smsContent){
+			if(smsType&&smsType==1){
+				$('#smsTypeDetail').text("即时短信");
+			}else if(smsType&&smsType==2){
+				$('#smsTypeDetail').text("定时短信");
+			}
+			$('#smsSendDateDetail').text(sendDate);
+			$('#smsContentDetail').text(smsContent);
+            document.getElementById('popSmsDiv').style.display='block';
+        }
+		
+        //构造彩信详情显示层
+		function showMmsDiv(mmsType,sendDate,mmsTitle,mmsContent){
+			if(mmsType&&mmsType==1){
+				$('#mmsTypeDetail').text("即时彩信");
+			}else if(mmsType&&mmsType==2){
+				$('#mmsTypeDetail').text("定时彩信");
+			}
+			$('#mmsSendDateDetail').text(sendDate);
+			$('#mmsTitleDetail').text(mmsTitle);
+			$('#mmsContentDetail').text(mmsContent);
+            document.getElementById('popMmsDiv').style.display='block';
+        }
+        
+		//构造照片详情显示层
+		function showPhotoDiv(photoName,photoId,numRow){
+			$('#numRow').val(numRow);//借助json将当前排序号传递到需要的页面
+			var eventId = "";
+			var eventName = oldPostJson['eventName'];
+			if(eventName){
+    			if (eventName.indexOf("营销")>=0){
+    				eventId +="1,";
+    			}
+    			if (eventName.indexOf("申请")>=0){
+    				eventId +="2,";
+    			}
+    			if (eventName.indexOf("调查")>=0){
+    				eventId +="3,";
+    			}
+    			if (eventName.indexOf("审批")>=0){
+    				eventId +="4,";
+    			}
+    			if (eventName.indexOf("贷后")>=0){
+    				eventId +="5,";
+    			}
+    			if (eventName.indexOf("催收")>=0){
+    				eventId +="6,";
+    			}
+    			if (eventName.indexOf("放贷")>=0){
+    				eventId +="7,";
+    			}
+				eventId = eventId.substring(0,eventId.length-1);
+			}
+			postJson['eventId'] = eventId;
+			window.top.aui.builder({
+        		title: photoName,
+        		url: '../data/queryPhotoDetail.html?photoId='+photoId+'&photoCount='+$('#queryCount').text()+'&customerId=$!customerId&eventId='+eventId+'&pid='+GetId()
+        	});
+        }
+		
+		//关闭层
+        function closeDiv(){
+            document.getElementById('popSmsDiv').style.display='none';
+			document.getElementById('popMmsDiv').style.display='none';
+        }
+		
+		//以下是所有人员树结构
+		function initBelongTo(){
+    		//加载下属树
+    		$('#userList').subtree({
+    			tid: 'subtree',
+    			showIcon: true,
+    			url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+    			buttons: [
+    				{ text: '确定', callback: onCheckUser },
+    				{ text: '取消' }
+    			]
+    		});
+    		
+    		$("#BelongToType").change(function(){
+    			changeBelongTo($(this).val());
+    		});
+    	}
+		
+		//改变归属
+    	function changeBelongTo(val){
+    		$('#userIds').val("");
+    		switch(val){
+    			case "brMine":
+    				$("#my").show();
+    				$('#showText').text(window.top.getUn());
+    				$("#userList").hide();
+    				break;
+    			case "brUser":
+    				$("#userList").show();
+    				$("#my").hide();
+    				break;
+    			default: 
+					$("#my,#userList").hide();
+					break;
+    		}
+    	}
+		
+		//初始化默认选项
+    	function init(){
+			//初始化设置title
+    		var v ;
+    		switch($!type){
+    			case 1 : v = "录音";
+    			break;
+    			case 2 : v = "照片";
+    			break;
+    			case 3 : v = "视频";
+    			break;
+    			case 4 : v = "短信";
+    			break;
+    			case 5 : v = "彩信";
+    			break;
+    			case 6 : v = "附件";
+    			break;
+    		}
+			tab.title(tab.self,"$!jsUtil.escapeJs($!customerName)"+" - "+v);
+			changeBelongTo("");
+			
+			//格式化日期时间格式为时分秒
+            $('.datetimeReset').datetimeReset({
+                timeFormat: 'HH:mm:ss'
+            });
+    	}
+		
+		//点击User
+    	function onCheckUser(treeId){
+    		var postJson = {};
+    		postJson = getCheckJson(treeId, 'U');
+    		$('#userIds').val(postJson.ids);
+    		$('#userText').val(postJson.names);
+    	}
+		
+		function getCheckJson(treeId, flag){
+        	var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+        	var nodes = treeObj.getCheckedNodes(true);
+        	var len = nodes.length;
+        	var uIds = "";
+        	var uName = "";
+        	for(var i=0; i<len; i++){
+        		if(flag=='U'){
+        			if(nodes[i].flag==flag){
+        				if(uIds==""){
+        					uIds = nodes[i].id;
+        					uName = nodes[i].name;
+        				}else{
+        					uIds = uIds + "," + nodes[i].id;
+        					uName = uName+ "," +nodes[i].name;
+        				}
+        			}
+        		}else{
+        			if(uIds==""){
+        				uIds = nodes[i].id;
+        				uName = nodes[i].name;
+        			}else{
+        				uIds = uIds + "," + nodes[i].id;
+        				uName = uName+ "," +nodes[i].name;
+        			}	
+        		}
+        	}
+        	var postJson = {};
+        	postJson['ids'] = uIds;
+        	postJson['names'] = uName;
+        	return postJson;
+        }	
+		
+		function uploadForm(fileId,fileName){
+			location.href = "downForm.html?fileId=" + fileId;
+		}
+		
+    </script>
+</head>
+<body>
+	<input type="hidden" id="dataId"/>
+	<input type="hidden" id="oldRemark"/>
+	<input type="hidden" id="numRow"/>
+	<form id="dataForm">
+	#if($!type != '4' && $!type != '5')
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>名称：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="dataName"/>
+                	</div>
+                </td>
+				#if($!type != '6')
+            	<td class="field" width="8%">
+                	<label>创建时间：</label>
+                </td>
+                <td width="25%">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset"  id="createStartDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="createEndDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            	<td class="field" width="8%">
+                	<label>提交时间：</label>
+                </td>
+				#else
+				<td class="field" width="8%">
+                	<label>上传时间：</label>
+                </td>
+				#end
+                <td width="25%">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="uploadStartDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="150">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="uploadEndDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            #if($!type != '6')
+				
+			</tr>
+            <tr>
+			#end
+				<td class="field" width="8%">
+                	<label>事件：</label>
+                </td>
+                <td width="17%">
+                	<div id="comBox" class="dtxt2">
+                        <input id="eventName" type="text" class="dtxt2-txt" value="#if(1 == $!eventId)营销#elseif(2==$!eventId)申请#elseif(3==$!eventId )调查#elseif(4==$!eventId)审批#elseif(5==$!eventId)贷后#elseif(6==$!eventId)催收#elseif(7==$!eventId)放贷#elseif($!eventName)$!eventName#end"/>
+                        <i class="dtxt2-ddl"></i>
+                    </div>
+                </td>
+				#if($!type == '6')
+					</tr>
+					<tr>
+					<td class="field" width="8%">
+                    	<label>上传人员：</label>
+                    </td>
+				#else
+            	<td class="field" width="8%">
+                	<label>提交人员：</label>
+                </td>
+				#end
+				<td colspan="3">
+                    <select id="BelongToType" name="BelongToType" style="width:120px;">
+						<option value=""></option>
+                    	<option value="brMine">我的</option>
+						#if($!dataCode == "3" && !$!dataAuth)
+							<option value="brUser">下属的</option>
+						#end
+                    </select>
+                	<span class="btn2 fl" id="my" style="display:none;margin-left:10px;">
+                		<input id="myUserId" type="hidden"/>
+                        <label class="btn2-txt" id="showText"></label>
+                    </span>
+                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;margin-left:10px;">
+                        <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+                        <input id="userIds" name="userIds" type="hidden" />
+                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                    </div>
+				</td>
+            </tr>
+        </tbody>
+    </table>
+	#elseif($!type == '4')
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>短信内容：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="smsContent"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>短信类型：</label>
+                </td>
+                <td width="17%">
+                    <select id="smsType">
+						<option></option>
+                        <option value="1">即时短信</option>
+						<option value="2">定时短信</option>
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>发送时间：</label>
+                </td>
+                <td colspan="2">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="sendStartDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="sendEndDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+				<td width="17%"></td>
+            </tr>
+        </tbody>
+    </table>
+	#elseif($!type == '5')
+		<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>彩信内容：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="mmsContent"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>彩信类型：</label>
+                </td>
+                <td width="17%">
+                    <select id="mmsType">
+						<option></option>
+                        <option value="1">即时彩信</option>
+						<option value="2">定时彩信</option>
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>发送时间：</label>
+                </td>
+                <td colspan="2">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="sendStartDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input type="text" class="text datetimeReset" id="sendEndDate" readonly="true"/>
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+				<td width="17%"></td>
+            </tr>
+        </tbody>
+    </table>
+	#end
+    </form>
+	
+    <div class="sz">
+		<label class="floatL bold dataSearch-count" ><span id="s">$!customerName</span><span>的#if($!type == '1')录音文件#elseif($!type == '2')照片#elseif($!type == '3')视频#elseif($!type == '4')短信#elseif($!type == '5')彩信#elseif($!type == '6')附件#end</span>(<span class="green" id="queryCount">$!count</span>)
+		</label>
+        <input type="button" class="ui-input-btn" value="清空" onclick="clean();"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="sub();"/>
+    </div>
+    
+	<div class="action-bar">
+        <a href="javascript:void(0);" class="btn2 fr" style=" margin-left: 5px;" onclick="refresh()">
+            <label class="btn2-txt">刷 新</label>
+        </a>
+    </div>
+    <div id="grid">
+		#if($!type == '1')
+			#parse("/velocity/data/customerAudioDataList.vm")
+		#elseif($!type == '2')
+			#parse("/velocity/data/customerPhotoDataList.vm")
+		#elseif($!type == '3')
+			#parse("/velocity/data/customerVideoDataList.vm")
+		#elseif($!type == '4')
+			#parse("/velocity/data/customerSmsDataList.vm")
+		#elseif($!type == '5')
+			#parse("/velocity/data/customerMmsDataList.vm")
+		#elseif($!type == '6')
+			#parse("/velocity/data/customerFormDataList.vm")
+		#end
+	</div>
+	<div id="popSmsDiv" class="mydiv" style="display:none; position:absolute; top:130px; left:400px; background:#FFF;">
+    	<p class="ttl-width" >短信详情<a href="#2" class="close"  onclick="closeDiv();">close</a></p>
+        <div class="ztree-box">
+            <table class="viewtbl tt">
+                <tbody>
+                    <tr>
+                        <td class="field" width="60">
+                            <label>短信类型：</label>
+                        </td>
+                        <td colspan="7">
+                            <label id="smsTypeDetail"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="60">
+                            <label>发送时间：</label>
+                        </td>
+                        <td colspan="7">
+                            <label id="smsSendDateDetail"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="60">
+                            <label>短信内容：</label>
+                        </td>
+                        <td colspan="7" height="60">
+							<div id="smsContentDetail" style="height:60px; width:300px; border:1px solid #b1b1b1; overflow:auto;">
+							</div>
+                        </td>
+                    </tr>                                
+                </tbody>
+             </table>
+             <div class="center" style="margin-top:5px;">
+                 <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="closeDiv();" value="关闭" />
+             </div>
+        </div>  
+    </div>    
+    <div id="popMmsDiv" class="mydiv" style="display:none; position:absolute; top:130px; left:400px; background:#FFF;">
+    	<p class="ttl-width" >彩信详情<a href="#2" class="close"  onclick="closeDiv();">close</a></p>
+        <div class="ztree-box">
+            <table class="viewtbl tt">
+                <tbody>
+                    <tr>
+                        <td class="field" width="50">
+                            <label>彩信类型：</label>
+                        </td>
+                        <td colspan="7">
+                            <label id="mmsTypeDetail"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="50">
+                            <label>发送时间：</label>
+                        </td>
+                        <td colspan="7">
+                            <label id="mmsSendDateDetail"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="field" width="50">
+                            <label>彩信标题：</label>
+                        </td>
+                        <td colspan="7" height="40">
+							<div id="mmsTitleDetail" style="height:40px; width:300px; border:1px solid #b1b1b1; overflow:auto;">
+							</div>
+                        </td>
+                    </tr> 
+					<tr>
+                        <td class="field" width="50">
+                            <label>彩信内容：</label>
+                        </td>
+                        <td colspan="7" height="60">
+							<div id="mmsContentDetail" style="height:60px; width:300px; border:1px solid #b1b1b1; overflow:auto;">
+							</div>
+                        </td>
+					</tr>     
+                </tbody>
+             </table>
+             <div class="center" style="margin-top:5px;">
+                 <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="closeDiv();" value="关闭" />
+             </div>
+        </div>  
+    </div>    
+	 <div style="height:160px;">
+	 <div id="popVideoDiv" class="data-video-box">
+        <p class="data-video-ttl-width"><span id="videoDataName"></span><a href="#2" onClick="closeVideoDiv();" class="close">close</a></p>
+        <div id="container"></div> 
+        <div class="data-video-viewtbl">
+            <table class="viewtbl tt">
+              <tbody>
+                  <tr>
+                      <td class="field" width="8%">
+                          <label">备注：</label>
+                      </td>
+                      <td colspan="7">
+                         <div class="ui-div-textarea" style="height:50px;">
+                             <textarea class="textarea" style="height:50px; _height:50px;" id="dataRemark" onKeyUp="javascript:var val = this.value;if(val.length>250){this.value=val.substring(0,250)}"></textarea>
+                         </div>
+                      </td>
+                  </tr>
+              </tbody>
+            </table>
+             <div class="center" style="margin-top:5px;">
+				<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" onclick="saveVideoDiv();"/>
+                 <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onClick="closeVideoDiv();"/>
+             </div>			
+        </div>
+    </div>
+	</div>
+</body>
+</html>

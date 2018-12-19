@@ -1,0 +1,444 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我的任务</title>
+
+    #styleLink("base")
+<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+<style type="text/css">
+    span.ml { margin-left: -1px; }
+    .color{color: #000; }
+</style>
+
+<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+
+
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+#scriptLink("page")
+
+<script type="text/javascript">
+$(function(){
+    $('select').select();
+    getQueryJson();
+
+    $("#customerName").tips({ msg: "姓名或电话" });
+});
+var oldPostJson ={};
+function getQueryJson(){
+    if($('#customerName').val()=="姓名或电话"){
+        $('#customerName').val("");
+    }
+    var postJson = {};
+    postJson['tskSchedule.scheduleId'] = jQuery.trim($('#scheduleId').val());
+    postJson['tskSchedule.pdtProductCustomerBean.mobilePhone1'] = jQuery.trim($('#mobilePhone1').val());
+    postJson['tskSchedule.pdtProductCustomerBean.customerName'] = jQuery.trim($('#customerName').val());
+    postJson['contactDateFrom']=jQuery.trim($('#contactDateFrom').val());
+    postJson['contactDateEnd']=jQuery.trim($('#contactDateEnd').val());
+    postJson['tskSchedule.contactType']=jQuery.trim($('#contactTypeId').val());
+    postJson['tskSchedule.commProgressId']=jQuery.trim($('#commProgressId').val());
+    postJson['tskSchedule.status']=jQuery.trim($('#status').val());
+    postJson['isPast']=jQuery.trim($('#isPast').val());
+    oldPostJson = postJson;
+    if($('#customerName').val()==''){
+        $("#customerName").tips({ msg: "姓名或电话" });
+    }
+    return postJson;
+}
+//搜索
+function query(){
+    var optJson = getQueryJson();
+    var isQueryWeek = $('#isQueryWeek').val();
+    var workSpace = '$!workSpace'; //是否是工作台点击查看更多时的情况
+    var urlStr = "${ctx}/tskSchedule/queryScheduleList.html?RandNum="+Math.random();
+    if(workSpace == "true"){
+        urlStr = "${ctx}/tskSchedule/queryScheduleList.html?workSpace="+workSpace+"&RandNum="+Math.random();
+    }
+    if(isQueryWeek){
+        urlStr = "${ctx}/tskSchedule/queryScheduleList.html?isQueryWeek=0&RandNum="+Math.random();
+    }
+    jQuery.ajax({
+        type:'POST',
+        url:urlStr,
+        data:optJson,
+        success:function(html){
+            refreshTab(html ,'queryScheduleList');
+            $('select').select();
+            oldPostJson = optJson ;
+        }
+    });
+}
+
+function refresh(){
+    var isQueryWeek = $('#isQueryWeek').val();
+    var url = "${ctx}/tskSchedule/queryScheduleList.html?RandNum="+Math.random();
+    if(isQueryWeek){
+        url = "${ctx}/tskSchedule/queryScheduleList.html?isQueryWeek=0&RandNum="+Math.random();
+    }
+    if(oldPostJson){
+        goto(
+                null,
+                url,
+                oldPostJson,
+                function(html){
+                    refreshTab(html, 'queryScheduleList');
+                    $('select').select();
+                });
+    }
+}
+//刷新tab
+function refreshTab(html,gridId){
+    $("#"+gridId).html(html);
+    $('table.datatbl').table();
+
+    var total = $("#total").val();
+    if(total != null){
+        $("#recordCount").text(total);
+    }else {
+        $("#recordCount").text(0);
+    }
+}
+
+//分页跳转
+function gotoPage(page){
+    var currentPage = jQuery.trim(document.getElementById('page.currentPage').value);
+
+    if(currentPage == "0" || currentPage == 0){
+        document.getElementById('page.currentPage').value = 1;
+    }
+    if(oldPostJson){
+        goto(
+                page,
+                "${ctx}/tskSchedule/queryScheduleList.html?RandNum"+Math.random(),
+                getQueryJson(),
+                function(html){
+                    refreshTab(html, 'queryScheduleList');
+                    $('select').select();
+                });
+    }
+}
+
+function queryBack(html,gridId){
+    $("#"+gridId).html(html);
+    $('table.datatbl').table();
+
+    var total = $('#total').val();
+    if(total != null){
+        $('#recordCount').text(total);
+    }else {
+        $('#recordCount').text(0);
+    }
+}
+
+//清空
+function resetCondition(){
+    $('#customerName').val("");
+    $('#customerPhone').val("");
+    $('#contactDateFrom').val("");
+    $('#contactDateEnd').val("");
+
+    $("select").each(function(index){
+        if(index>3) return false;
+        this.selectedIndex = 0;
+        $(this).select();
+    });
+    $("#customerName").tips({ msg: "姓名或电话" });
+}
+//编辑
+function openScheduleAlterWindow(scheduleId){
+    var url = "${ctx}/tskSchedule/loadOldScheduleInfo.html?scheduleId="+scheduleId+"&RandNum="+ Math.random();
+//    var result = banger.page.openDialog(url, '编辑日程', '640px','500px');
+    var result = window.showModalDialog(url,{window: window},'dialogWidth=640px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+    if(result){
+        query();
+//        jQuery.ajax({
+//            type:'POST',
+//            url:"../tskSchedule/queryScheduleList.html?RandNum="+ Math.random(),
+//            data:{},
+//            success:function(html){
+//                refreshTab(html ,'queryScheduleList');
+//                $('select').select();
+//            }
+//        });
+    }
+}
+
+//沟通进度编辑                             $('#contactType').val()
+function commProgressEdit(scheduleId,selectDom){
+    jQuery.ajax({
+        type:'POST',
+        url:"../tskSchedule/editSchedule.html?RandNum="+Math.random(),
+        data:{
+            'tskSchedule.commProgressId':jQuery.trim(selectDom.val()),
+            'tskSchedule.scheduleId':jQuery.trim(scheduleId)
+        },
+        success:function(){
+            refresh();
+        }
+    });
+}
+//完成情况编辑
+function statusEdit(scheduleId,selectDom){
+    var options = selectDom.context.options;
+    var selectedIndex = options.selectedIndex;
+    var selectedOption = selectDom.context.children[selectedIndex];
+    var selectText = jQuery.trim(selectedOption.innerText);
+    if(confirm("您确定将日程状态改为"+selectText+"吗？修改后日程将不能编辑！")){
+        jQuery.ajax({
+            type:'POST',
+            url:'../tskSchedule/editSchedule.html?Random='+Math.random(),
+            data:{
+                'tskSchedule.status':jQuery.trim(selectDom.val()),
+                'tskSchedule.scheduleId':jQuery.trim(scheduleId)
+            },
+            success:function(){
+                refresh();
+            }
+        });
+    }else{
+        refresh();
+    }
+}
+
+//查看详情
+function viewDetail(scheduleId,customerId){
+    var urls = "${ctx}/tskSchedule/viewDetail.html?tskSchedule.scheduleId="+scheduleId+"&tskSchedule.customerId="+
+            customerId+"&RandNum="+ Math.random();
+    var options = {id:"scheduleId"+scheduleId, pid:GetId, title: "查看详情", url: urls, lock: false};
+    tab.add(options);
+}
+//打开新增日程安排页面
+function toAddSchedulePlan(){
+    var userId = jQuery.trim($("#scheduleUserId").val());
+    var urls = "${ctx}/tskSchedule/tskAddSchedulePlan.html?RandNum="+ Math.random();
+    var options = {id:"newSchedule"+userId, pid:GetId(), title: "添加日程", url: urls, lock: false};
+    tab.add(options);
+}
+//点击客户输入框，取消默认值
+function clickCancel(dom){
+    dom.value = '';
+}
+//当用户没有输入任务信息到客户输入框，并且鼠标离开输入框，那么将输入框中的值重置为:'名称或电话'
+function blurResetForNull(dom){
+    var curValue = dom.value;
+    if(curValue == ""){
+        dom.value = '姓名或电话';
+    }
+}
+
+//查看客户详情
+function newTab(actionType, cusId){
+    if(actionType == "insert"){
+        var options = {id: "cusInsert"+cusId, pid: GetId(), title: "新建客户", url: "${ctx}/customer/addCustomer.html?actionType=insert", lock: false};
+        tab.add(options);
+    }
+    else if(actionType == "modify"){
+        var options = {id: "cusModify"+cusId, pid: GetId(), title: "编辑客户", url: "${ctx}/customer/editCustomer.html?actionType=modify&&crmCustomer.customerId="+cusId, lock: false};
+        tab.add(options);
+    }
+    else if(actionType == "browse"){
+        isDelete(cusId);
+    }
+}
+
+function isDelete(cusId){
+    jQuery.ajax({
+        type: 'POST',
+        url: "../customer/isDeleteCus.html?"+"random="+Math.random()*1000,
+        data: {"cusId":cusId},
+        success:function(data){
+            var obj = jQuery.parseJSON(data);
+            if(obj[0].isDel=='1'){
+                banger.page.showMessageBox('客户"'+obj[0].customerName+'"被删除，无法查看具体资料！');
+            }else{
+                if('$!isSelectCus'=='True'){
+                    window.top.aui.builder({
+                        title: '查看客户',
+                        url: '${ctx}/customer/browseCustomer.html?' + 'actionType=browse&&needLine=0&&isBrowseLayer=1&&crmCustomer.customerId=' + cusId
+                    });
+                }else{
+                    var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+                    tab.add(options);
+                }
+            }
+        }
+    });
+}
+
+//新建拜访记录
+function addVisitRecord_page(customerId,scheduleId){
+    var options = {id: "addVisitRecord_page", pid: GetId(), title: "新建拜访记录", url: "${ctx}/tskSchedule/showAddVisitRecordPage.html?crmCustomer.customerId="+customerId+"&tskSchedule.scheduleId="+scheduleId, lock: false};
+    tab.add(options);
+}
+
+//编辑拜访
+function editVisit(obj,id,calltype,customerId,customerName,scheduleId){
+//            $(obj).parents('tr').dblclick();
+    var v = "拜访记录";
+    if(calltype!=""){
+        var options = {id: "record_writeConnect"+id, pid: GetId(), title: "编辑"+v, url: "${ctx}/tskSchedule/showUpdateVisitRecordPage.html?type=$!type&calltype="+calltype+"&recordInfoId="+id+"&customerId="+customerId+"&customerName="+encodeURI(encodeURI(customerName))+"&tskSchedule.scheduleId="+scheduleId+"&random="+Math.random(), lock: false};
+        tab.add(options);
+    }
+}
+
+//编辑通话记录
+function writeConnect(obj,id,scheduleId,calltype){
+    $(obj).parents('tr').dblclick();
+    var v = "通话记录";
+    if(calltype!=""){
+        var options = {id: "record_writeConnect"+id, pid: GetId(), title: "编辑"+v, url: "${ctx}/record/queryRecordConnect.html?type=$!type&calltype="+calltype+"&recordId="+id+"&scheduleId="+scheduleId+"&random="+Math.random(), lock: false};
+        tab.add(options);
+    }
+}
+</script>
+</head>
+
+<body>
+<input type="hidden" value="$!tskSchedule.scheduleId"/>
+<input type="hidden" value="$!isQueryWeek" id="isQueryWeek"/>
+<!--
+    <input type="hidden" id="total" value="##$!scheduleCount"/>
+    -->
+<table class="htmltbl">
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <!--
+            <div class="ui-div-text">
+                <input type="text" id="customerName" class="text"/>
+            </div>
+            -->
+            <div class="dtxt1">
+                <input type="text" class="dtxt1-txt" id="customerName" maxlength="20"/>
+            </div>
+        </td>
+        <!--
+        <td class="field" width="8%">
+            <label>联系电话：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input type="text" id="customerPhone" class="text" />
+            </div>
+        </td>
+         -->
+        <td class="field" width="8%">
+            <label>联系方式：</label>
+        </td>
+        <td width="17%">
+            <select id="contactTypeId" style="width: 100%">
+                <option value="">&nbsp;</option>
+                <option value="1">电话联系</option>
+                <option value="2">上门拜访</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>联系时间：</label>
+        </td>
+        <td colspan="2">
+            <table class="celltbl" style="width: 100%;">
+                <tbody>
+                <tr>
+                    <td>
+                        <div class="ui-div-text">
+                            <input type="text" class="text datepicker" readonly="readonly" id="contactDateFrom"/>
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="20"><label>-</label></td>
+                    <td>
+                        <div class="ui-div-text">
+                            <input type="text" class="text datepicker"  readonly="readonly" name="conds" id="contactDateEnd" />
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+        <td width="17%"></td>
+    </tr>
+    <tr>
+        <td class="field" width="8%">
+            <label>是否过期：</label>
+        </td>
+        <td width="17%">
+            <select id="isPast" style="width: 100%">
+                <option value="">&nbsp;</option>
+                <option value="0">未过期</option>
+                <option value="1">已过期</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>沟通进度：</label>
+        </td>
+        <td width="17%">
+            <select id="commProgressId" style="width: 100%">
+                <option value="">&nbsp;</option>
+                #foreach($cp in $commProgressList)
+                    <option value="$cp.COMM_PROGRESS_ID">&nbsp;$cp.COMM_PROGRESS_NAME</option>
+                #end
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>完成情况：</label>
+        </td>
+        <td>
+            <select id="status" style="width:200px;">
+                <option value="">&nbsp;</option>
+                <option value="0">未完成</option>
+                <option value="1">已完成</option>
+                <option value="2">已作废</option>
+            </select>
+        </td>
+        <td colspan="2"></td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+
+        <span class="fl">
+            安排日程(<label class="green" id="recordCount" >$!scheduleCount</label>)
+        </span>
+
+    <input type="button" class="ui-input-btn" value="清空" onclick="resetCondition()" />
+    <input type="button" class="ui-input-btn" value="搜索" onclick="query()" />
+</div>
+
+<div class="action-bar">
+    #if($urlPermitUtil.hasPermission('addSchedule'))
+        <span class="ui-span-btn fl">
+            <label onclick="toAddSchedulePlan()">添加日程</label>
+        </span>
+    #end
+    <span class="ui-span-btn fr">
+        	<label onclick="refresh()">刷新</label>
+        </span>
+</div>
+
+<table class="datatbl" id="queryScheduleList">
+    #parse("/velocity/microTask/tskScheduleListTable.vm")
+</table>
+
+
+</body>
+<script type="text/javascript" >
+
+</script>
+</html>

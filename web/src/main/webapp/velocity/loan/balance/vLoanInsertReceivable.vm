@@ -1,0 +1,195 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加应收账款明细</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style tyle="text/css">
+		html, body{ overflow-y:hidden !important; }
+	</style>        
+    #scriptLink("core")
+    #scriptLink("page")
+   
+    <!--保存校验  Zhangfp-->
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+   <script type="text/javascript">
+     jQuery(document).ready(function () {
+    	 jQuery('#asset').validator();
+			jQuery("#btnOk").click(function () {
+              
+                var bool = jQuery.validator({form:'asset',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                } 
+             var reg=/^[0-9]+([.][0-9]{1,2}){0,1}$/
+			 var schkje=$("#schkje").val()
+			 if(!reg.test(schkje)&&schkje!=""){
+				alert("上次回款金额必须为数字")
+				return false;
+			 }
+			 var xchkje=$("#xchkje").val()
+			 if(!reg.test(xchkje)&&xchkje!=""){
+				alert("下次回款金额必须为数字")
+				return false;
+			 }
+			 
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",     
+                    url: "${ctx}/loan/insertReceivable.html",
+                    data: $("#asset").serialize(),
+                    success: function (data) {
+                        var json = eval( "(" + data + ")" );
+						if(json.success){
+							window.close();
+						 window.returnValue="success";
+						}
+                    }
+                });
+            });
+
+        });
+		//验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+     </script>	 
+    
+</head>
+
+<body style="height:400px;">
+  <form id="asset" method="post">
+  	 <input type="hidden" value="$!loanBalanceId" id="loanBalanceId" name="lnLoanBalanceReceivable.loanBalanceId">
+	 <input type="hidden" value="$!asset.loanBalanceReceivableId" id="loanBalanceAssetId" name="lnLoanBalanceReceivable.loanBalanceReceivableId">
+      <table class="htmltbl" style="table-layout:auto;width:100%">
+          <tbody>
+             <tr>
+                   <td class="field" width="8%" >
+					<label class="red">*</label> 
+                      <label>客户名称：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text"  name="lnLoanBalanceReceivable.kfxm" rule="\S" tips="客户名称为必填项" value="$!asset.kfxm"  maxlength="40"/>
+                      </div>
+                  </td>        
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label class="red">*</label>                  
+                      <label>金额：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtnum">
+                          <input type="text" name="lnLoanBalanceReceivable.je" value="$!asset.je"  class="text" maxlength="15"  rule="^[0-9]+([.][0-9]{1,2}){0,1}$"  tips="必须为数字"/>
+                      </div>
+                  </td>              
+              </tr>
+              <tr>
+                  <td class="field" width="8%" >
+                      <label>结款方式：</label>
+                  </td>
+                   <td phoneType="divGroup">
+					 <div class="ui-div-text">
+                       <select style="width:100%" class="text" name="lnLoanBalanceReceivable.jkfs">
+                        #foreach($dic in $!dictionary)
+                           #if($!dic.dictionaryValue==$!asset.jkfs)
+                    		<option value="$!dic.dictionaryValue" selected>$!dic.dictionaryValue</option>
+                    		#else
+								<option value="$!dic.dictionaryValue" >$!dic.dictionaryValue</option>
+                    		#end
+                    	#end
+                      </select>
+					 </div>
+                  </td>         
+              </tr>
+			  <tr>
+                  <td class="field" width="8%" >
+                      <label>发生日期：</label>
+                  </td>
+            		<td>
+                     <div class="ui-div-text">
+                            <input type="text"  name="lnLoanBalanceReceivable.fsrq" value="#if($!asset.fsrq)$date.format("yyyy-MM-dd HH:mm:ss",$!asset.fsrq)#end"  class="text datepicker"  readonly="readonly"  />
+                            <i class="date"></i>
+                        </div>
+                  </td>       
+              </tr>
+			  <tr>
+                  <td class="field" width="8%" >
+                      <label>业务关系存续：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text"  name="lnLoanBalanceReceivable.ywgxcx" value="$!asset.ywgxcx" id="txtAddress" maxlength="40"/>
+                      </div>
+                  </td>              
+              </tr>
+			  <tr>
+                  <td class="field" width="8%" >
+                      <label>付款方式：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text"  name="lnLoanBalanceReceivable.fkfs" value="$!asset.fkfs" id="txtAddress" maxlength="40"/>
+                      </div>
+                  </td>              
+              </tr>
+               <tr>
+                  <td class="field" width="8%" >
+                      <label>上次回款日期：</label>
+                  </td>
+				  <td>
+                     <div class="ui-div-text">
+                            <input type="text"  name="lnLoanBalanceReceivable.schkrq" value="#if($!asset.schkrq)$date.format("yyyy-MM-dd HH:mm:ss",$!asset.schkrq)#end"   class="text datepicker"  readonly="readonly"  />
+                            <i class="date"></i>
+                        </div>
+                  </td>     
+                           
+              </tr>
+				 <tr>
+                  <td class="field" width="8%" >
+                      <label>上次回款金额：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text num" maxlength="15"  name="lnLoanBalanceReceivable.schkje" value="$!asset.schkje"  id="schkje"   message="上次回款金额必须为数字"/>
+                      </div>
+                  </td>              
+              </tr>
+			 <tr>
+                  <td class="field" width="8%" >
+                      <label>下次回款日期：</label>
+                  </td>
+				   <td>
+                     <div class="ui-div-text">
+                            <input type="text"  name="lnLoanBalanceReceivable.xchkrq" value="#if($!asset.xchkrq)$date.format("yyyy-MM-dd HH:mm:ss",$!asset.xchkrq)#end"  class="text datepicker"  readonly="readonly"  />
+                            <i class="date"></i>
+                        </div>
+                  </td>    
+                       
+              </tr>
+				 <tr>
+                  <td class="field" width="8%" >
+                      <label>下次回款金额：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text num"  maxlength="15" name="lnLoanBalanceReceivable.xchkje" value="$!asset.xchkje" id="xchkje"/>
+                      </div>
+                  </td>              
+              </tr>
+          </tbody>
+      </table> 
+    </form> 
+   <hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>

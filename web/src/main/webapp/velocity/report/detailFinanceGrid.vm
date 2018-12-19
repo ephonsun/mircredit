@@ -1,0 +1,85 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>阅读统计明细</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		div.search-bar { margin-top:0; }
+	</style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+		$(function(){
+			$('#count a').click(function(){
+				$('#count a').removeAttr('class');
+				$(this).addClass('active');
+				return false;
+			});
+		});
+		
+		function openNewAtricle(articleId,title){
+			var url="/finance/readFeArticle.html";
+			url=url+"?articleId="+articleId;
+			var title=title;
+			var id="FeArticle_readFeArticle_report"+articleId;
+			tab.add({id: id, pid: GetId(), title: title, url: url, lock: false,confirm: false});
+		
+		}
+    </script>
+</head>
+
+<body>
+	<div class="search-bar">
+        <span class="fl bold">
+			#if($!startDate!=""&&$!endDate!="")
+        		$!startDate至$!endDate
+        	#elseif($!startDate!=""&&$!endDate=="")
+        		$!startDate之后
+        	#elseif($!startDate==""&&$!endDate!="")
+        		截止至$!endDate
+        	#end
+        	财经要点阅读情况统计表——客户经理
+			<label>"$!userName"</label>
+			明细，共(<label class="green">$!page.totalRowsAmount</label>)条记录
+        </span>
+    </div>
+	<div class="ui-news-list">
+		#foreach($article in $!articlePage.items)
+    	<dl>
+        	<dt>
+            	<a href="#2" onclick="openNewAtricle($!article.articleId,'$!article.articleTitle')">$!article.articleTitle</a>
+                <label>$!date.format("yyyy-MM-dd",$!article.publishDate)</label>
+            </dt>
+            <dd class="overview">
+            	<label>$!article.articleContent</label>
+                <a href="#2" onclick="openNewAtricle($!article.articleId,'$!article.articleTitle')">[全文]</a>
+            </dd>
+            <dd class="reminder">
+            	<label>安排阅读时间：$!date.format("yyyy-MM-dd",$!article.articleReadtimeBegin)~$!date.format("yyyy-MM-dd",$!article.articleReadtimeEnd)</label>
+                #if($!article.isMastread==0)
+					<i class="ui-news-mark optional">选读</i>
+				#else
+					<i class="ui-news-mark required">必读</i>
+				#end
+            </dd>
+        </dl>
+		#end
+    </div>
+    <div class="floatR">
+		<input type="hidden" name="userId" value="$!userId"/>
+		<input type="hidden" name="columnId" value="$!columnId"/>
+		<input type="hidden" name="aritcleFlag" value="$!aritcleFlag"/>
+		<input type="hidden" name="startDate" value="$!startDate"/>
+		<input type="hidden" name="endDate" value="$!endDate"/>
+        #parse("/velocity/page.vm")
+	</div>
+	<div style="margin-top:30px; padding-top:5px; text-align:center; border-top:1px solid #ccc;">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="tab.close(GetId(),false);"/>
+    </div>
+</body>
+</html>

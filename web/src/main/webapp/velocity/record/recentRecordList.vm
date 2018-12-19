@@ -1,0 +1,46 @@
+<div class="header">
+	<table>
+    	<thead>
+        	<tr>
+            	<th width="180"><label>客户（电话）</label></th>
+            	<th width="80"><label>联系类型</label></th>
+            	<th width="150"><label>开始时间</label></th>
+            	<th width="60"><label>时长</label></th>
+            	#if($urlPermitUtil.hasPermission('dialPhone'))
+            	<th width="60"><label>操作</label></th>
+            	#end
+            </tr>
+        </thead>
+    </table>
+</div>
+<div class="body">
+	<table width="100">
+    	<tbody>
+    		#foreach($record in $!recentRecords)
+	        	<tr>
+	        		#if($record.customerId!='' && $record.customerId>0 && $record.customerName)
+	        			#set($name = $!record.customerName+"("+$!record.defaultPhone+")")
+	            		<td width="180" style="text-align: left;">
+	            		#if($urlPermitUtil.hasPermission('browseCustomer'))
+	            		<a href="#2" onclick="showCust('$!record.customerId')" title="$!name" class="hand">$!name</a>
+	            		#else
+	            			<label title="$!name">$!name</label>
+	            		#end
+	            		</td>
+	            	#else
+	            		#set($name = "未知("+$!record.defaultPhone+")")
+	            		<td width="180" style="text-align: left;"><label title="$!name">$!name</label></td>
+	            	#end
+	            	<td width="80"><label title="$!record.callTypeName">$!record.callTypeName</label></td>
+	            	<td width="150"><label title="#if($!record.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!record.startDate)#end">#if($!record.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!record.startDate)#end</label></td>
+	            	<td width="60"><label title="$!record.formatCallTime">$!record.formatCallTime</label></td>
+	            	#if($urlPermitUtil.hasPermission('dialPhone'))
+	            	<td width="60">
+	            	<i class="phone" onclick="javascript:selPostDial('$!record.defaultPhone','$!record.customerId')" title="拨号">&nbsp;</i>
+	            	</td>
+	            	#end
+	            </tr>
+            #end
+        </tbody>
+    </table>
+</div>

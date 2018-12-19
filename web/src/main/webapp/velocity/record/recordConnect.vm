@@ -1,0 +1,348 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>联系记录</title>
+    
+    #styleLink("base")
+	<style>
+	.htmltbl tr td { height: 24px; }
+	</style>
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		//加载下拉选择框
+		$('select').select();
+		
+		if($!recordDetail.recordSource==1){
+			$("#showCard").css('display','block');
+		}
+	})
+	
+	function updateRecordIsCanceled(recordId,state){
+		var str="作废";
+		var value = "联系记录";
+        if ($('#type').val() == "0" || $('#type').val() == "0#2") {
+            value = "联系记录";
+        } else if ($('#type').val() == "1" || $('#type').val() == "1#2") {
+            value = "通话记录";
+        } else if ($('#type').val() == "2" || $('#type').val() == "2#2") {
+            value = "座谈记录";
+        } else if ($('#type').val() == "3" || $('#type').val() == "3#2") {
+            value = "拜访记录";
+        }
+		if(state=="1"){
+			str="恢复";
+			state=0;
+		}else{
+			state=1;
+		}
+		if(confirm("您确定要" + str + "此"+value+"吗？")){
+			location.href="updateRecordDetailIsCanceledById.html?type=$!type&recordId="+recordId+"&isCanceled="+state;
+		}
+	}
+	
+	function play(obj,id,fileId){
+		jQuery.post("../data/isExistFileById.html", {"fileId": fileId}, function (result) {
+            if (result == '0') {
+                banger.page.showMessageBox({"type": "error", "content": "文件不存在！"});
+                return;
+            } else {
+                window.parent.showAudioNoRemarkDiv(fileId);//jwplay播放器
+    			//jQuery.post("playVideo.html", {"recordInfo.fileName": name, "recordInfo.filePath": path}, function (result) {
+    				//new window.video.create(id, 310, 60, result, obj);
+                //});
+            }
+        });
+	}
+	
+	function sub(){
+		$('#winForm').submit();
+		var pid = GetPid();
+		var win = window.top.ExportIframeWin(pid);
+		if(win && win.refresh)	win.refresh();
+		tab.close(GetId(), false);
+	}
+	
+	function showCustomer(customerId,customerName){
+		jQuery.post("getCustomerIsDel.html", {"customerId": customerId}, function(result){
+			if(result=="0"){
+				banger.page.showMessageBox("客户“"+customerName+"”被删除，无法查看具体资料！");
+				return;
+			}else{
+        		var options = {id: "record_showCustomer", pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+        		tab.add(options);
+			}
+		});
+	}
+	
+	function download(fileId){
+    	jQuery.post("../data/readFile.html", {"fileId": fileId}, function (result) {
+            if (result == '') {
+                banger.page.showMessageBox({"type": "error", "content": "文件不存在！"});
+                return;
+            } else {
+                location.href = "download.html?path=$!rootPath/Records/"+result;
+            }
+        });
+	}
+	
+	//关联客户
+	function relation(id,phone,calltype){
+		var url="${ctx}/customer/customerSelect.html?selType=single&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,{"msg":"选择客户！"},1000,700);
+		var r;
+		if(result!=undefined){
+    		jQuery.ajax({//查询待关联的客户数据栏位是否已满
+    			type: 'POST',
+    			url: "../record/relationQuery.html",
+				data:{customerId:result,phone:phone,recordId:id,calltype:calltype},
+    			success:function(data){
+					if(data==1){//后台关联客户后刷新
+						refresh(id);
+					}else{
+						banger.page.openDialog("toCheckPhone.html?recordId="+id+"&customerId="+data+"&phone="+phone,{"msg":"关联客户"},500,200);
+						refresh(id);
+					}
+    		  	}
+    		});	
+    	}
+	}
+	
+	//取消关联
+	function cancelRelation(recordId,customerId,customerName,phone,calltype){
+		var value = "联系记录";
+        if ($('#type').val() == "0" || $('#type').val() == "0#2") {
+            value = "联系记录";
+        } else if ($('#type').val() == "1" || $('#type').val() == "1#2") {
+            value = "通话记录";
+        } else if ($('#type').val() == "2" || $('#type').val() == "2#2") {
+            value = "座谈记录";
+        } else if ($('#type').val() == "3" || $('#type').val() == "3#2") {
+            value = "拜访记录";
+        }
+		if(confirm("您确认要将“"+customerName+"”的"+value+"设置成未知客户吗？")){
+			jQuery.post("cancelRelation.html", {"recordId": recordId,"customerId":customerId,"customerName":customerName,"phone":phone,"calltype":calltype}, function(){
+				refresh(recordId);
+        	});
+		}
+	}
+	
+	//刷新
+	function refresh(recordId){
+		location.href="../record/refreshRecordConnect.html?recordId="+recordId+"&type="+$('#type').val();
+	}
+	
+	//查看客户-无客户则新建并关联
+	function createCustomer(obj,recordId,phone,calltype){
+		$(obj).parents('tr').dblclick();
+		var url="${ctx}/customer/addCustomer.html?actionType=insert";
+		if(calltype=="座谈记录"){
+			url+="&typeList=isScene&recId="+recordId+"&phoneNumber="+phone;
+		}else{
+			url+="&typeList=isNotScene&recId="+recordId+"&phoneNumber="+phone;
+		}
+		var options = {id: "cusInsert"+recordId, pid: GetId(), title: "新建客户", url: url, lock: false};
+		tab.add(options);
+	}
+	</script>
+</head>
+ 
+<body>
+	<div style="margin-bottom: 10px; text-align: right;">
+		#if($urlPermitUtil.hasPermission('recordPlayVideo'))
+    		#if($!recordDetail.fileId==''||!$!recordDetail.fileId)<a href="#2" style="color:gray;cursor: default;; text-decoration:none;" disabled="disabled">播放</a> 
+            #else<a class="slink" href="#2" onclick='play(this,$!recordDetail.recordInfoId,"$!recordDetail.fileId")'>播放</a>
+			#end
+		#end
+		#if($urlPermitUtil.hasPermission('recordDownload'))
+			#if($!recordDetail.fileId==''||!$!recordDetail.fileId)<a href="#2" style="color:gray;cursor: default; text-decoration:none;" disabled="disabled">下载</a> 
+			#else<a class="slink" href="#2" onclick="download('$!recordDetail.fileId');">下载</a>
+			#end
+		#end
+		#if($urlPermitUtil.hasPermission('recordRelation'))
+    		#if($!recordDetail.customerId==''||$!recordDetail.customerId==0)
+    	    	<a class="slink" href="#2" #if($!recordDetail.remotePhone!="" && ($!recordDetail.customerId!=""&&$!recordDetail.customerId!=0)) style="color:gray;cursor: default; text-decoration:none;"#else onclick="relation($!recordDetail.recordInfoId,'$!recordDetail.remotePhone','$!recordDetail.callTypeName');" #end>关联客户</a>
+    		#else
+    			<a class="slink" href="#2" #if($!recordDetail.remotePhone!="" && ($!recordDetail.customerId!=""&&$!recordDetail.customerId!=0)) style="color:gray;cursor: default; text-decoration:none;"#else onclick="cancelRelation($!recordDetail.recordInfoId,$!recordDetail.customerId,'$!recordDetail.customerName','$!recordDetail.remotePhone','$!recordDetail.callTypeName');" #end>取消关联</a>
+			#end
+		#end
+		#if($urlPermitUtil.hasPermission('recordUpdateRecordIsCanceled'))
+    		#if($!recordDetail.recordSource==2)
+    			<a class="slink" href="#2" onclick="updateRecordIsCanceled($!recordDetail.recordInfoId,'$!recordDetail.isCanceled')">设置为#if($!recordDetail.isCanceled==1)有效#end#if($!recordDetail.isCanceled==0)作废#end</a>
+    		#end
+		#end
+    </div>
+    
+	<form id="winForm" action="saveRecordConnect.html" method="post">
+        <table class="htmltbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="7%" class="field">
+	                    <label>客户：</label>
+	                </td>
+	            	<td width="43%">
+	            		<input type="hidden" id="type" value="$!type"/>
+                        #if($scheduleId)
+                            <input type="hidden" id="scheduleId" name="scheduleId" value="$!scheduleId"/>
+                        #end
+	            		<input type="hidden" id="type" name="recordDetail.recordInfoId" value="$!recordDetail.recordInfoId"/>
+    						#if(!$!recordDetail.customerId||$!recordDetail.customerId!=0)
+								#if($urlPermitUtil.hasPermission('browseCustomer'))
+        							<a href="#2" class="nm" onclick="showCustomer('$!recordDetail.customerId','$!jsUtil.escapeJs($!recordDetail.customerName)');">
+        							$!recordDetail.customerName
+        							#if($!recordDetail.defaultPhone!='') 
+        								#if($!recordDetail.customerName!=''||!$!recordDetail.customerName)
+        									($!recordDetail.defaultPhone)
+        								#else
+        								$!recordDetail.defaultPhone
+        								#end
+        							#end
+        							</a>
+								#else
+									$!recordDetail.customerName
+        							#if($!recordDetail.defaultPhone!='') 
+        								#if($!recordDetail.customerName!=''||!$!recordDetail.customerName)
+        									($!recordDetail.defaultPhone)
+        								#else
+        								$!recordDetail.defaultPhone
+        								#end
+        							#end
+								#end
+    						#elseif($!recordDetail.remotePhone!='')
+								#if($urlPermitUtil.hasPermission('addCustomer'))
+    							<a href="#2" class="nm" onclick="createCustomer(this,$!recordDetail.recordInfoId,'$!recordDetail.remotePhone','$!recordDetail.callTypeName');">
+    								$!recordDetail.defaultPhone
+                                </a>
+								#else
+									$!recordDetail.defaultPhone
+								#end
+    						#else
+								#if($urlPermitUtil.hasPermission('addCustomer'))
+    							<a href="#2" class="nm" onclick="createCustomer(this,$!recordDetail.recordInfoId,'$!recordDetail.remotePhone','$!recordDetail.callTypeName');">
+    								未知
+    							</a>
+								#else
+									未知
+								#end
+    						#end
+						<div class="icon">
+    						#if($!recordDetail.defaultPhone!="")
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+									 <i class="i phone" onclick="dial('$!recordDetail.defaultPhone','$!recordDetail.customerId')" title="拨号">phone</i>
+								#end
+								#if($!recordDetail.customerName!="")
+									#if($urlPermitUtil.hasPermission('tapePhone'))
+										<i class="i dsc" onclick="tape('$!recordDetail.customerId')" title="座谈" >dsc</i>
+									#end
+								#end
+    							#if($!recordDetail.defaultPhone.length()==11&&$!recordDetail.defaultPhone.substring(0, 1)=="1")
+                                    #if($urlPermitUtil.hasPermission('toAddSms'))
+                                    <i class="i sms" onclick="sendSms('$!recordDetail.defaultPhone','$!recordDetail.customerId')" title="短信">sms</i>
+                    				#end
+                    				#if($urlPermitUtil.hasPermission('toAddMms'))
+                    				<i class="i mms" onclick="sendMms('$!recordDetail.defaultPhone','$!recordDetail.customerId')" title="彩信">mms</i>
+    								#end
+    							#end
+    						#end
+                        </div>
+	                </td>
+					<td width="7%" class="field">
+	                    <label>类型：</label>
+	                </td>
+	            	<td width="43%">
+	                	<label>$!recordDetail.callTypeName</label>
+	                </td>
+	            </tr>
+	        	<tr>
+	        		<td width="7%" class="field">
+	                    <label>记录来源：</label>
+	                </td>
+	            	<td width="43%">
+	                	<label>#if($!recordDetail.recordSource==1)话机 #end#if($!recordDetail.recordSource==2)PAD #end</label>
+	                </td>
+	        		<td width="7%" class="field">
+	                    <label>状态：</label>
+	                </td>
+	            	<td width="43%">
+						#if($!recordDetail.isCanceled==0)<label>有效</label>#end
+						#if($!recordDetail.isCanceled==1)<label class="red bold">作废</label>#end
+	                </td>
+	            </tr>
+	        	<tr>
+	        		<td width="7%" class="field">
+	                    <label>操作者：</label>
+	                </td>
+	            	<td colspan="3">
+	                	<label>$!recordDetail.userName</label>
+	                </td>
+	            </tr>
+	        	<tr>
+	        		<td width="7%" class="field">
+	                    <label>开始时间：</label>
+	                </td>
+	            	<td width="43%">
+	                	<label>$date.format("yyyy-MM-dd HH:mm:ss",$!recordDetail.startDate)</label>
+	                </td>
+	        		<td width="7%" class="field">
+	                    <label>时长：</label>
+	                </td>
+	            	<td width="43%">
+	                	<label>$!recordDetail.callTime</label>
+	                </td>
+	            </tr>
+	        	<tr>
+	        		<td width="7%" class="field">
+	                    <label>业务类型：</label>
+	                </td>
+	            	<td width="43%">
+	                    <select id="bizType" name="recordDetail.bizType" style="width: 140px;">
+	                        <option value="0"></option>
+							#foreach($recbizType in $!recbizTypeList)
+							<option value="$!recbizType.bizTypeId"  #if($!recbizType.bizTypeName==$!recordDetail.bizType) selected=true #end>$!recbizType.bizTypeName</option>
+							#end
+	                    </select>
+	                </td>
+	        		<td width="7%" class="field">
+	                    <label>沟通进度：</label>
+	                </td>
+	            	<td width="43%">
+	                    <select id="commProgress" name="recordDetail.commProgress" style="width: 140px;">
+	                        <option value="0"></option>
+							#foreach($commProgress in $!commProgressList)
+							<option value="$!commProgress.commProgressId" #if($!commProgress.commProgressName==$!recordDetail.commProgress) selected=true #end>$!commProgress.commProgressName</option>
+							#end
+	                    </select>
+	                </td>
+	            </tr>
+	        	<tr>
+	            	<td width="7%" class="field">
+	                    <label>备注：</label>
+	                </td>
+	            	<td colspan="3">
+					<div class="dtxtarea1" style="width: 502px;">
+						<textarea id="remark" name="recordDetail.remark" style=" height: 80px;border: 0;" onKeyUp="javascript:var val = this.value;if(val.length>200){this.value=val.substring(0,200)}">$!recordDetail.remark</textarea>
+						<textarea id="oldRemark" name="oldRemark" style="display:none;">$!recordDetail.remark</textarea>
+					</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" onclick="sub();" value="保存" />
+        <input type="button" class="btn6 btn6bg3"  onclick="javascript:tab.close(GetId(), false);" value="取消" />
+    </div>
+</body>
+</html>
+

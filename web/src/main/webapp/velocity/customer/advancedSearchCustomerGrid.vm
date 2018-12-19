@@ -1,0 +1,66 @@
+<table id="dataList" class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+        	#if($selType!="single")
+            	<th width="30"><input type="checkbox" nm="chkall" /></th>
+            #else
+            	<th width="30"></th>
+            #end
+            <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+            <th><label title="客户类型">客户类型</label></th>
+            <th><label title="单位">单位</label></th>
+            <th><label title="归属机构">归属机构</label></th>
+            <th><label title="归属人员">归属人员</label></th>
+            #if($target=="")
+            	<th width="100"><label title="操作">操作</label></th>
+            #end
+        </tr>
+    </thead>
+	<tbody>
+		#foreach($customer in $!customerPage.items)
+    	<tr>
+    		#if($selType!="single")
+    			<td><input type="checkbox" nm="chkone" value={"custId":$!customer.customerId,"isShare":$!customer.isShare} /></td>
+    		#else
+    			<td><INPUT type="radio" name="radioBox" class="radio" value="$!customer.customerId" ></td>
+    		#end
+        	<td>
+        		#if($target=="")
+	        		#if($urlPermitUtil.hasPermission('toAddSms'))
+	                	#custCell($customer,true,true)
+	                #else
+	                	#custCell($customer,true,false)
+	                #end
+	            #else
+	            	#custCell($customer,false,false)
+	            #end
+            </td>
+            <td><label title="$!customer.customerTypeName">$!customer.customerTypeName</label></td>
+        	<td><label title="$!customer.company" >$!customer.company</label></td>
+        	<td><label title="$!customer.deptName" >$!customer.deptName</label></td>
+        	<td><label title="$!customer.userName" >$!customer.userName</label></td>
+        	#if($target=="")
+	        	<td>
+	        		#if($urlPermitUtil.hasPermission('editCustomer'))
+	        			<a class="slink" href="javascript:void(0)" onclick="editCust('$!customer.customerId')" >编辑</a>
+	        		#end
+	        		#if($urlPermitUtil.hasPermission('delCustomers'))
+	        			#if($!customer.isShare==1)
+        					<span style="color:gray">删除</span>
+        				#else
+        					<a class="slink" href="#2" onclick="delCustomers('single','$!customer.customerId','$!jsUtil.escapeJs($!customer.customerName)')" >删除</a>
+        				#end
+        			#end
+	            </td>
+            #end
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	#if($target=="")<td colspan="7">#else<td colspan="6">#end
+            	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

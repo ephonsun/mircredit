@@ -1,0 +1,47 @@
+<h4>
+    <label>
+		#if($!diffType == "name")
+			客户姓名
+		#end
+		#if($!diffType == "phone")
+			手机号码
+		#end
+		#if($!diffType == "idcard")
+			身份证
+		#end
+		#if($!diffType == "namephone")
+			客户姓名（固话）
+		#end
+		#if($!diffType == "namecompany")
+			客户姓名（单位）
+		#end
+    </label>
+</h4>
+<div class="list">
+    <ul>
+        #foreach($customerNameTemp in $!mayDiffCustomerNameList.items)
+			#set($className = "")
+			#set($firstId = "")
+			#if ($velocityCount == 1)
+				#set($className = "over")
+				#set($firstId = "firstId")
+				<input type="hidden" id="firstObjValue" value="$!customerNameTemp.customerName"/>
+			#end
+            <li id="$firstId" onclick="onNameClick(this, '$!jsUtil.escapeJs($!customerNameTemp.customerName)')" class="$className">
+                <label title="$!customerNameTemp.customerName">$!customerNameTemp.customerName ($!customerNameTemp.countNumber)</label>
+            </li>
+		#end
+    </ul>
+</div>
+<table class="datatbl" cellpadding="0" cellspacing="0">
+	<tfoot>
+        <tr>
+            <td colspan="8">
+                <div class="fr">
+                    #parse("/velocity/customer/mayDiffCustomerAjaxPage.vm")
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+

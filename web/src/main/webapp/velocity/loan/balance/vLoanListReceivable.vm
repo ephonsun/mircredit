@@ -1,0 +1,39 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+		    <thead>
+			<tr>
+			    <th><label title="客户名称">客户名称</label></th>
+			    <th><label title="金额">金额</label></th>
+			    <th><label title="结款方式">结款方式</label></th>
+			    <th><label title="发生日期">发生日期</label></th>
+			    <th><label title="业务关系存续">业务关系存续</label></th>
+			    <th><label title="付款方式">付款方式</label></th>
+			    <th><label title="上次回款日期">上次回款日期</label></th>
+			    <th><label title="上次回款金额">上次回款金额</label></th>
+			    <th><label title="下次回款日期">下次回款日期</label></th>
+			    <th><label title="下次回款金额">下次回款金额</label></th>
+			    <th><label title="操作">操作</label></th>
+			</tr>
+		    </thead>
+			<tbody>
+				<tr>
+					#foreach($lnLoanBalanceReceivable in $lnLoanBalanceReceivableList)
+					<tr>
+						<td><label title="$!lnLoanBalanceReceivable.kfxm">$!lnLoanBalanceReceivable.kfxm</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.je">$!lnLoanBalanceReceivable.je</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.jkfs">$!lnLoanBalanceReceivable.jkfs</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.fsrq">#if($!lnLoanBalanceReceivable.fsrq)$date.format("yyyy-MM-dd",$!lnLoanBalanceReceivable.fsrq)#end</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.ywgxcx">$!lnLoanBalanceReceivable.ywgxcx</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.fkfs">$!lnLoanBalanceReceivable.fkfs</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.schkrq">#if($!lnLoanBalanceReceivable.schkrq)$date.format("yyyy-MM-dd",$!lnLoanBalanceReceivable.schkrq)#end</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.schkje">$!lnLoanBalanceReceivable.schkje</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.xchkrq">#if($!lnLoanBalanceReceivable.xchkrq)$date.format("yyyy-MM-dd",$!lnLoanBalanceReceivable.xchkrq)#end</label></td>
+						<td><label title="$!lnLoanBalanceReceivable.xchkje">$!lnLoanBalanceReceivable.xchkje</label></td>
+						<td>
+							<a href="javascript:editLoanBalanceReceivable($!lnLoanBalanceReceivable.loanBalanceReceivableId,$!lnLoanBalanceReceivable.loanBalanceId)">编辑</a>
+							<a href="javascript:removeLoanBalanceReceivable($!lnLoanBalanceReceivable.loanBalanceReceivableId,$!lnLoanBalanceReceivable.loanBalanceId)">移除</a>
+						</td>
+					</tr>
+					#end
+				</tr>
+		    </tbody>
+		</table>

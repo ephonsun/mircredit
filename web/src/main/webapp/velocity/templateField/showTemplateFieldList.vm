@@ -1,0 +1,179 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<title>业务模板字段列表</title>
+	
+   	#styleLink("base")
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">	
+	function setstate(){
+			$('.listtbl tbody tr:first a.up').unbind();
+			$('.listtbl tbody tr:first a.up').removeAttr("href");
+			$('.listtbl tbody tr:last a.down').unbind();
+			$('.listtbl tbody tr:last a.down').removeAttr("href");
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+	}
+	
+	    	
+	jQuery(function(){    		
+		setstate();
+	});
+    //新建完成后重刷页面
+	function addData(code){
+		var url="toAddTemplateFieldPage.html?templateId="+code+"&random="+Math.random()*10000;
+		var result=banger.page.openDialog(url,"新建业务字段",640,500);
+		if(result==1){
+			//document.location.href="showTemplateFieldList.html?templateId="+code+"&random="+Math.random()*100000;
+			location.reload();
+		}
+	}
+	//编辑
+	function updateData(code){
+		var url="toUpdateTemplateFieldPage.html?templateFieldId="+code+"&random="+Math.random()*10000;
+		var result=banger.page.openDialog(url,"编辑业务字段",640,500);
+		if(result==1){
+			location.reload();
+		}
+	}
+	
+	function updatePopup(id,isPopup){
+		var isPopupVal = 0;
+		if(isPopup.checked){
+			isPopupVal = 1;
+		}
+		jQuery.ajax({
+			    type:"post", //请求方式
+			    url:"updateCrmTemplateFieldIsPopup.html", //发送请求地址
+			    data:{ //发送给数据库的数据
+			    'crmTemplateField.templateFieldId':id,
+			    'crmTemplateField.isPopUp':isPopupVal
+			    },//请求成功后的回调函数有两个参数
+			    //请求成功后的回调函数有两个参数
+			    success:function(data,textStatus){
+			 	  if(data!="SUCCESS"){
+			 	  	banger.page.showMessageBox({"content":data,"width":350});
+			 	  	isPopup.checked=false;
+			 	  }
+			    }
+				});
+	}
+	
+	function moveData(vid,vmoveType){
+    	var moveType;
+    	jQuery.ajax({
+		    type:"post", //请求方式
+		    url:"moveFieldItems.html", //发送请求地址
+		    data:{ //发送给数据库的数据
+		    'crmTemplateField.templateFieldId':vid,
+		    'crmTemplateField.templateId':$("#templateId").val(),
+		    moveType:vmoveType
+		    },//请求成功后的回调函数有两个参数
+		    //请求成功后的回调函数有两个参数
+		    success:function(data,textStatus){
+		 	  moveResult(data);
+		    }
+			});
+		}
+	//请求后的回调函数
+	function moveResult(msg)
+	{
+		if(msg!="SUCCESS"){
+			return;
+		}else{
+			//document.location.href="showTemplateFieldList.html?templateId="+msg+"&random="+Math.random()*100000;
+			location.reload();
+		}
+		
+	}
+	
+	function delData(id,name,extName,fieldType){
+		if(confirm("您确定要删除业务字段“"+name+"”吗")){
+	    	jQuery.ajax({
+			    type:"post", //请求方式
+			    url:"delTemplateField.html", //发送请求地址
+			    data:{ //发送给数据库的数据
+			    'crmTemplateField.templateFieldId':id,
+			    'crmTemplateField.templateId':$("#templateId").val(),
+			    'crmTemplateField.extFieldName':extName,
+			    'crmTemplateField.templateFieldType':fieldType
+			    },//请求成功后的回调函数有两个参数
+			    //请求成功后的回调函数有两个参数
+			    success:function(data,textStatus){
+			 	  delResult(data);
+			    }
+				});
+		}else{
+			return;
+		}
+	}
+	//请求后的回调函数
+	function delResult(msg)
+	{
+		if(msg!="SUCCESS"){
+			banger.page.showMessageBox(msg);
+			return;
+		}else{
+			//document.location.href="showTemplateFieldList.html?templateId="+msg+"&random="+Math.random()*100000;
+			location.reload();
+		}
+		
+	}
+	</script>
+</head>
+
+<body>
+	<form id="crmTemplateField">
+		<input type="hidden" id="templateId" name="templateId" value="$!templateId" />
+		
+		<div class="actrow" style="margin-top: 0px;">
+	    	<span onclick="addData('$!templateId');" class="btn2 fl">
+	            <label class="btn2-txt">添加字段</label>
+	        </span>
+	    </div>
+	    <table class="listtbl" cellpadding="0" cellspacing="0" >
+	    	<thead>
+	        	<tr>
+	            	<th><label>名称</label></th>
+	            	<th width="180"><label>类型</label></th>
+	            	<th width="100"><label>来电弹屏显示</label></th>
+	            	<th width="150"><label>操作</label></th>
+	            </tr>
+	        </thead>
+	    	<tbody>
+	    	#foreach($crmTemplateField in $!crmTemplateFieldList)
+        	<tr>
+            	<td><label>$!crmTemplateField.templateFieldName</label></td>
+            	<td width="180"><label>$!crmTemplateField.fieldTypeName</label></td>
+            	<td width="100">
+	            	#if($crmTemplateField.isPopUp==1)
+	            	<input type="checkbox" class="chk" checked="true" id="crmFieldIsPopup$!crmTemplateField.templateFieldId" onclick="updatePopup('$!crmTemplateField.templateFieldId',this)"/>
+	            	#else
+	            	<input type="checkbox" class="chk" id="crmFieldIsPopup$!crmTemplateField.templateFieldId" onclick="updatePopup('$!crmTemplateField.templateFieldId',this)"/>
+	            	#end
+               	</td>
+            	<td width="150">
+                	<a class="slink" href="javascript:void(0);" onclick="updateData('$!crmTemplateField.templateFieldId')" >编辑</a>
+                    <a class="slink" href="javascript:void(0);" onclick="delData('$!crmTemplateField.templateFieldId','$!crmTemplateField.templateFieldName','$!crmTemplateField.extFieldName','$!crmTemplateField.templateFieldType')">删除</a>
+                    <a href="javascript:void(0);" class="slink up" onclick="moveData('$!crmTemplateField.templateFieldId','Up')">上移</a>
+                    <a href="javascript:void(0);" class="slink down" onclick="moveData('$!crmTemplateField.templateFieldId','Down')">下移</a>
+                </td>
+            </tr>
+	        #end
+	        </tbody>
+	    </table>
+	    <div class="halign" style="margin-top: 20px;">
+	       <input type="button" onclick="javascript:tab.close(GetId(), false);" class="btn6 btn6bg3" value="关闭" />
+	    </div>
+	</form>
+</body>
+</html>

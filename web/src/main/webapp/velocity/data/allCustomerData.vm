@@ -1,0 +1,124 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>所有客户资料</title>  
+	 #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript">
+		var oldPostJson={};
+		var postJson = {};
+		
+		//搜索条件封装
+    	function getQueryJson(){
+    		postJson['customerData.customerName'] = $('#customerName').val();
+    		postJson['customerData.phone'] = $('#phone').val();
+    		return postJson;
+    	}
+		
+		function sub(){
+    		var postJson=getQueryJson();
+			oldPostJson = postJson;
+			gotoPage(1);
+    	}
+		
+		function clean(){
+    		$('#customerName').val('');
+			$('#phone').val('');
+			$('#eventName').val('');
+    	}
+		
+		//分页跳转
+    	function gotoPage(page){
+    		goto(page,"getAllCustomerDataPage.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+    	}
+    	
+    	//刷新Grid
+    	function refreshGrid(gridId,html)
+    	{
+    		$("#" + gridId).html(html);
+    		$('table.datatbl').table();
+    		var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+    	}
+    		
+    	//刷新
+    	function refresh(){
+    		goto(null,"getAllCustomerDataPage.html?fenye=1&random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+    	}
+		
+		//根据个数查看资料详情   type 1:录音，2:照片,3:视频,4:短信，5:彩信，6:附件
+		function queryData(type,customerId,customerName){
+			var options = {id: type+"Data_QueryData"+customerId, pid: GetId(), title: "", url: "${ctx}/data/queryDataByCusId.html?type="+type+"&customerId="+customerId+"&random="+Math.random(), lock: false};
+			tab.add(options);
+		}
+		
+		//进入客户详情
+    	function openCustomer(id,cusName){
+			jQuery.post("../record/getCustomerIsDel.html", {"customerId": id}, function(result){
+    			if(result=="0"){
+    				banger.page.showMessageBox("客户“"+cusName+"”被删除，无法查看具体资料");
+    				return;
+    			}else{
+            		var options = {id: "Data_queryCustomerById"+id, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+id+"&random="+Math.random(), lock: false};
+            		tab.add(options);
+    			}
+			});
+    	}
+    </script>
+</head>
+<body>
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>客户姓名：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="customerName"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>联系电话：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" id="phone"/>
+                	</div>
+                </td>
+				<td colspan="3"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="sz">
+        <label class="floatL bold dataSearch-count" ><span id="s">所有客户资料</span>(<span class="green" id="queryCount">$!count</span>)
+		</label>
+        <input type="button" class="ui-input-btn" value="清空" onclick="clean();"/>
+        <input type="button" class="ui-input-btn" value="搜索" onclick="sub();"/>
+    </div>
+    
+	<div class="action-bar">
+        <a href="javascript:void(0);" class="btn2 fr" style=" margin-left: 5px;" onclick="refresh()">
+            <label class="btn2-txt">刷 新</label>
+        </a>
+    </div>
+    <div id="grid">
+		 #parse("/velocity/data/allCustomerDataList.vm")
+	</div>
+</body>
+</html>
+

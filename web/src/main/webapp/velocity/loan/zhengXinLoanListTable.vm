@@ -1,0 +1,37 @@
+<thead>
+            <tr>
+                <th width="240" ><label title="客户姓名">客户姓名</label></th>
+                <th width="150"><label title="证件号码">证件号码</label></th>
+                <th><label title="提交时间">提交时间</label></th>
+                <th><label title="提交人">提交人</label></th>
+                <th><label title="状态">状态</label></th>
+               
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+     <tbody>
+    #foreach($data in $dataList)
+    <tr >
+
+        <td>
+       <label class="item cusTitle" title="$!data.customerName">
+                        $!data.customerName
+                    </label>
+  
+        </td>
+    
+    <td><label title="$vmHelper.getHideIdCard($!data.idCard)">$vmHelper.getHideIdCard($!data.idCard)</label></td>
+    <td><label title="$!date.format('yyyy-MM-dd HH:mm',$!data.requestDate)">$!date.format('yyyy-MM-dd HH:mm',$!data.requestDate)</label></td>
+    <td><label title="$!data.requestUser">$!data.requestName</label></td>
+    <td><label title="$!data.requestStatusValue">$!data.requestStatusValue </label></td>
+    <td><span onclick="viewZhengXin($!data.requestId)" class="link">查看</span> </td>	  
+    </tr>
+    #end
+</tbody>
+    <tfoot>
+    <tr>
+        <td colspan="6">
+            #parse("/velocity/ajaxPage.vm")
+        </td>
+    </tr>
+</tfoot>

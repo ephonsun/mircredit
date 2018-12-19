@@ -1,0 +1,250 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看贷款</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .tl p { margin-left:15px; margin-top:15px; font-size:14px; }
+        .loan-bg { padding-bottom:20px; }
+    </style>
+
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            var url = "../loan/vLoanView.html?RandNum="+ Math.random()+"&loanId="+$!loanId +"&isUpload=true&isEdit=false&isSurvey=onlyShow"+"&isApprove=chief" + "&isApproveRole=$!role";
+            $('#vLoanView').load(url,{},function(){
+
+            });
+
+            jQuery("#remark").validator();
+        });
+
+
+
+        function extendvalidator() {
+            var bool = true;
+            return bool;
+        }
+
+        function addUnAssessRemark(loanId){
+
+            jQuery('#isApprove').validator();
+            var bool = jQuery.validator({form:'isApprove',extend:true,extendhandler:extendvalidator});
+            if(!bool){
+                return false;
+            }
+
+            var flag = true;
+            var isApproveRole = $("#isApproveRole").val();
+            if(isApproveRole != "manager"){
+                var resultMoney = $("#resultMoney").val();
+                if(resultMoney == ""){
+                    alert("请输入决议金额");
+                    return false;
+                }else if (isNaN(resultMoney)) {
+                    alert("决议金额必须为数字");
+                    return false;
+                } else if (resultMoney <= 0) {
+                    alert("决议金额不能小于0");
+                    return false;
+                }
+
+                var resultLimitYear = $("#resultLimitYear").val();
+                if (resultLimitYear == "") {
+                    alert("决议期限不能为空！");
+                    return false;
+                }
+
+                var resultRate = $("#resultRate").val();
+                if(resultRate == ""){
+                    alert("决议利率不能为空！")
+                    return false;
+                }
+                var resultRepayDate = $("#resultRepayDate").val();
+                if(resultRepayDate == ""){
+                    alert("请选择决议还款日！");
+                    return false;
+                }
+
+                var resultVerdict = $("#resultVerdict").val();
+                if(resultVerdict == ""){
+                    alert("请选择审贷会决议！");
+                    return false;
+                }
+
+                var resultRepayWayId = $("#resultRepayWayId").val();
+                if(resultRepayWayId == ""){
+                    alert("请选择还款方式！");
+                    return false;
+                }
+
+                var resultPurpose = $("#resultPurpose").val();
+                if(resultPurpose == ""){
+                    alert("请选择贷款用途！");
+                    return false;
+                }
+
+                var isCrmTask = $("input[name='lnLoanInfo.isCrmTask']:checked").val();
+                if(undefined==isCrmTask||null==isCrmTask||""==isCrmTask||''==isCrmTask){
+                    alert("请选择是否算任务！");
+                    return false;
+                }
+
+                var advanceRepay = $("input[name='lnLoanInfo.advanceRepay']:checked").val();
+                if(undefined==advanceRepay||null==advanceRepay||""==advanceRepay||''==advanceRepay){
+                    alert("请选择是否同意提前还款！");
+                    return false;
+                }
+
+                var lnMode = $("input[name='lnLoanInfo.lnMode']:checked").val();
+                if(undefined==lnMode||null==lnMode||""==lnMode||''==lnMode){
+                    alert("请选择'新增'或'转发'贷款！");
+                    return false;
+                }
+
+                var lnBenefit = $("input[name='lnLoanInfo.lnBenefit']:checked").val();
+                if(undefined==lnBenefit||null==lnBenefit||""==lnBenefit||''==lnBenefit){
+                    alert("请选择是否利率优惠！");
+                    return false;
+                }
+
+                if("1"==lnBenefit){
+                    var originalRate = $("#originalRate").val();
+                    if(originalRate == ""){
+                        alert("请输入原利率！");
+                        return false;
+                    }
+                }else{
+                    var originalRate = $("#originalRate").val(resultRate);
+                }
+
+                //var isExcitForm4 = parseInt($("#isExcitForm4").val());
+                //if(isExcitForm4==null || isExcitForm4<=0){
+                //	alert("审批通过必须提交附件");
+                //	return ;
+                //}
+            }
+            if(isApproveRole == "center"){
+                var maxAppLoanMoney = $("#maxAppLoanMoney").val();
+                var resultMoney = $("#resultMoney").val();
+                var isDoubleApproval = $("#isDoubleApproval").val();
+                //if(parseFloat(resultMoney) >= parseFloat(maxAppLoanMoney)){
+                if(isDoubleApproval == "1"){
+                    //	if(confirm("当前决议金额已经超出单人审批金额，是否进行多人审批！")){
+                    var loanId = $("#loanId").val();
+                    var url = "../loan/centerUserTogetherApprove.html?loanId=" + loanId + "&random="  + Math.random() * 1000 ;
+                    var result = banger.page.openDialog(url, "贷款审批", 600, 480);
+                    if (result != undefined) {
+                        $("#isApproveRole").val("");
+                    }else{
+                        return;
+                    }
+                    //	}
+                }
+                var postJson2={}
+                postJson2['loanId'] = $("#loanId").val();
+                postJson2['adviceMoney'] = $("#resultMoney").val();
+                postJson2['limitYear']=$("#resultLimitYear").val();
+                postJson2['adviceRepayDate']=$("#resultRepayDate").val();
+                postJson2['repaRate']=$("#resultRate").val();
+                postJson2['resultRepayWayId']=$("#resultRepayWayId").val();
+
+                var urlStr = "../loan/jyToHkfs.html";
+                jQuery.ajax({
+                    type : 'POST',
+                    url : urlStr,
+                    data : postJson2,
+                    async : false,
+                    success : function(data) {
+                        if (data == "false") {
+                            flag = false;
+                            alert("数据已更新，请重新保存还款计划！");
+                        }
+                    }})
+
+            }
+
+            if(flag){
+                var bool = jQuery.validator({ form: 'remark'});
+                var lendRemark= $('#lendRemark').val();
+                var myFormDate = $("#myForm").serialize();
+                myFormDate+="&lnLoanInfo.resultVerdict="+resultVerdict;
+                myFormDate+="&lnLoanInfo.resultRepayWayId="+resultRepayWayId;
+                myFormDate+="&lnLoanInfo.resultPurpose="+resultPurpose;
+                if(bool){
+                    jQuery.ajax({
+                        type:'POST',
+                        url:'../loan/addUnAssessRemark.html?RandNum='+Math.random()+"&loanId="+$!loanId,
+                        data:myFormDate,
+                        success:function(html){
+
+                            banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+                            window.location.reload();
+                        }
+                    });
+                }else{
+                    return false;
+                }
+            }
+        }
+        function fun1(h, b){
+            return true;
+        }
+
+        function fun2(h, b){
+        }
+    </script>
+</head>
+<body>
+<p class="bold loan-lheight">贷款状态：贷款审批</p>
+    ##parse("/velocity/loan/baseLoanInfo.vm")
+	#* 
+<div class="loan-bg">
+    <p class="bold loan-lheight">备注</p>
+    <table class="htmltbl_1" style="table-layout: auto;">
+        <tbody>
+        <tr>
+            <td width="0.5%"></td>
+            <td align="center" width="99%">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;" id="remark">
+                    <textarea id="lendRemark" class="textarea" style="height: 100px; _height:100px;" rule="\S" tips="请填写备注信息" onKeyUp="javascript:var val = this.value;if(val.length>250){this.value=val.substring(0,250)}">$!verifyRemark</textarea>
+                </div>
+            </td>
+            <td width="0.5%"></td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="button" class="ui-span-btn button-table" onclick="addUnAssessRemark($!loanId)" value="保存" />
+</div>
+*#
+<div id="vLoanView">
+	
+</div>
+</body>
+</html>

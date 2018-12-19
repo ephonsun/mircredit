@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="system" extends="default" namespace="/system">
+
+		<!-- 客户类型列表页面 -->
+		<action name="showCrmCustomerTypeList"
+			class="crmCustomerTypeAction" method="showAllCrmCustomerType">
+			<result name="success">
+				/velocity/system/crmCustomerTypeList.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+
+		<!-- 删除客户类型列表 -->
+		<action name="deleteCrmCustomerType"
+			class="crmCustomerTypeAction" method="deleteCrmCustomerType">
+			<result name="success" type="redirectAction">
+				showCrmCustomerTypeList.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 添加客户类型列表 -->
+		<action name="addCrmCustomerType" class="crmCustomerTypeAction"
+			method="addCrmCustomerType">
+			<result name="success">showCrmCustomerTypeList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 编辑客户类型列表 -->
+		<action name="updateCrmCustomerType"
+			class="crmCustomerTypeAction" method="updateCrmCustomerType">
+			<result name="success">showCrmCustomerTypeList.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到编辑客户类型页面 -->
+		<action name="toUpdateCrmCustomerTypePage"
+			class="crmCustomerTypeAction" method="updateCrmCustomerTypePage">
+			<result name="success">
+				/velocity/system/updateCrmCustomerType.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 移动客户类型页面（上移和下移） -->
+		<action name="moveTypeItems" class="crmCustomerTypeAction"
+			method="moveTypeItems">
+			<result name="success" type="redirectAction">
+				showCrmCustomerTypeList.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+
+		<!-- 沟通进度列表 -->
+		<action name="showCommProList" class="commProgressAction"
+			method="showCommProListPage">
+			<result name="success">
+				/velocity/system/commProgressList.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除沟通进度 -->
+		<action name="deleteCommProgress" class="commProgressAction"
+			method="deleteCommProgress">
+			<result name="success" type="redirectAction">
+				showCommProList
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 添加沟通进度 -->
+		<action name="addCommProgress" class="commProgressAction"
+			method="addCommProgress">
+			<result name="success" type="redirectAction">
+				showCommProList
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑沟通进度 -->
+		<action name="updateCommProgress" class="commProgressAction"
+			method="updateCommProgress">
+			<result name="success" type="redirectAction">
+				showCommProList
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+
+		<!-- 移动沟通进度 -->
+		<action name="moveCommProgress" class="commProgressAction"
+			method="moveCommProgress">
+			<result name="success" type="redirectAction">
+				showCommProList
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 获取沟通进度 -->
+		<action name="getUpdateCommProgress" class="commProgressAction"
+			method="getUpdateCommProgress">
+			<result name="success">
+				/velocity/system/updateCommProgress.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 新增沟通进度的校验 -->
+		<action name="validateAddCommProgress"
+			class="commProgressAction" method="validateAddCommProgress">
+		</action>
+
+
+		<!-- 行业类型列表页面 -->
+		<action name="showCrmCustomerIndustryList"
+			class="crmCustomerIndustryAction"
+			method="showAllCrmCustomerIndustry">
+			<result name="success">
+				/velocity/system/crmCustomerIndustryList.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除行业类型列表 -->
+		<action name="deleteCrmCustomerIndustry"
+			class="crmCustomerIndustryAction"
+			method="deleteCrmCustomerIndustry">
+			<result name="success" type="redirectAction">
+				showCrmCustomerIndustryList.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加行业类型列表 -->
+		<action name="addCrmCustomerIndustry"
+			class="crmCustomerIndustryAction" method="addCrmCustomerIndustry">
+			<result name="success">
+				showCrmCustomerIndustryList.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑行业类型列表 -->
+		<action name="updateCrmCustomerIndustry"
+			class="crmCustomerIndustryAction"
+			method="updateCrmCustomerIndustry">
+			<result name="success">
+				showCrmCustomerIndustryList.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 跳转到编辑行业类型页面 -->
+		<action name="toUpdateCrmCustomerIndustryPage"
+			class="crmCustomerIndustryAction"
+			method="updateCrmCustomerIndustryPage">
+			<result name="success">
+				/velocity/system/updateCrmCustomerIndustry.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 移动行业类型页面（上移和下移） -->
+		<action name="moveIndustryTypeItems"
+			class="crmCustomerIndustryAction" method="moveTypeItems">
+			<result name="success" type="redirectAction">
+				showCrmCustomerIndustryList.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+
+		
+
+		
+		<!-- 列表页面 -->
+		<action name="showAllPurpose"
+			class="tskTaskPurposeAction" method="showAllPurpose">
+			<result name="success">
+				/velocity/system/purposeList.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除 -->
+		<action name="deletePurpose"
+			class="tskTaskPurposeAction" method="deletePurpose">
+			<result name="success" type="redirectAction">
+				showAllPurpose.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加 -->
+		<action name="addPurpose" class="tskTaskPurposeAction"
+			method="addPurpose">
+			<result name="success">showAllPurpose.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 跳转 -->
+		<action name="showUpdatePage"
+			class="tskTaskPurposeAction"
+			method="showUpdatePage">
+			<result name="success">
+				/velocity/system/updatePurpose.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑 -->
+		<action name="updatePurpose"
+			class="tskTaskPurposeAction" method="updatePurpose">
+			<result name="success">showAllPurpose.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--（上移和下移） -->
+		<action name="move" class="tskTaskPurposeAction"
+			method="move">
+			<result name="success" type="redirectAction">
+				showAllPurpose.html
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 启用/停用 -->
+		<action name="changeState" class="tskTaskPurposeAction"
+			method="changeState">
+			<result name="success" type="redirectAction">showAllPurpose.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>	
+		
+		<!-- 任务等级列表 -->
+		<action name="getTaskGradeForList" class="tskTaskGradeAction" method="getTaskGradeForList">
+			<result name="success">/velocity/system/taskGradeList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 删除任务等级 -->
+		<action name="deleteTaskGrade" class="tskTaskGradeAction"
+			method="deleteTaskGrade">
+		</action>
+		<!-- 添加任务等级-->
+		<action name="addTaskGrade" class="tskTaskGradeAction"
+			method="addTaskGrade">
+		</action>
+		<!-- 编辑任务等级 -->
+		<action name="updateTaskGrade" class="tskTaskGradeAction"
+			method="updateTaskGrade">
+		</action>
+		<!-- 跳转到编辑任务等级页面 -->
+		<action name="gotoTaskGradePage" class="tskTaskGradeAction"
+			method="gotoTaskGradePage">
+			<result name="success">/velocity/system/updateTaskGrade.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 任务等级页面（上移和下移） -->
+		<action name="moveTaskGradeItems" class="tskTaskGradeAction"
+			method="moveTaskGradeItems">
+		</action>
+		
+	</package>
+
+</struts>

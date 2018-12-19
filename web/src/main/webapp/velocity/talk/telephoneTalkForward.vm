@@ -1,0 +1,93 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>来电窗口</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.phone.js"></script>
+    #scriptLink("page")
+	<style type="text/css">
+		body { margin: 0; padding: 0;border:0px;overflow: hidden;}
+	</style>
+	<script>
+		jQuery(document).ready(function(){
+			telInput('#phoneExt');
+		});
+		//分页跳转
+		function gotoPage(page)
+		{
+			var url = "getCallForwardGrid.html?random="+Math.random()*1000000;
+			goto(page,url,{},function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			var elem = $(html);
+			var grid = $("#"+gridId);
+			grid[0].innerHTML="";
+			grid.append(elem);
+		}
+		
+		function selPhoneExt(elem)
+		{
+			$(elem).addClass('selected').siblings().removeAttr('class');
+			var ext = $(elem).attr("data");
+			$("#phoneExt").val(ext);
+		}
+		
+		function ok()
+		{
+			var ext = $("#phoneExt").val();
+			if(ext==null || ext=="")
+			{
+				banger.page.showMessageBox("分机号不能为空!");
+			}
+			window.returnValue = ext;
+			window.close();
+		}
+		
+		function cannel()
+		{
+			window.close();
+		}
+	</script>
+</head>
+
+<body>
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>
+                <td width="7%" class="field">
+                    <label>分机号：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" id="phoneExt" maxLength="10" class="dtxt1-txt" />
+                    </div>
+                </td>
+                <td colspan="6"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="sz">
+        <label class="fl bold">
+            请选择一个人员：
+        </label>
+    </div>
+    <div id="grid" >
+    	#parse("/velocity/talk/telephoneTalkForwardGrid.vm")
+    </div
+    <br />
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" onclick="javascript:ok()" value="确定" />
+    	<input type="button" class="btn6 btn6bg3" onclick="javascript:cannel()" value="取消" />
+    </div>
+</body>
+</html>

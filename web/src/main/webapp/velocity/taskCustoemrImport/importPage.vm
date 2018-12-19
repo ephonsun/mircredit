@@ -1,0 +1,390 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择导入列的对应关系</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+<style type="text/css">
+    	.pd { border: 0 !important;}
+		.ckh { vertical-align: middle; }
+		.arrow{border: 0 !important;}
+    </style>
+    
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+		var confirmMsg;
+		var type;
+    	$(function(){
+			//Painting an arrow pointing
+			var th = $('<th width=\'140\' height=\'30\'></th>');
+			var tr = $('<td rowspan=\'' + $('.pointtbl tbody tr').size() + '\' class=\'arrow\'></td>')
+			$('.pointtbl thead tr th:first').after(th);
+			$('.pointtbl tbody tr:first td:first').after(tr);
+			
+			/**
+			 * 加载下拉选择框
+			**/
+			$('select').select();
+		
+			if($!total){
+    			$("#totalCount").text("$!total");
+    		}
+    		if($!bathchCount){
+    			$("#bathchCount").attr("value",$!bathchCount);
+    		}
+    		var totalCount=$("#totalCount").text();
+    		if(totalCount<=0){
+     			 $("#importBtn").attr("disabled",true);
+    		}
+			type=$('#type').val();
+		});
+    </script>
+</head>
+ 
+<body>
+	<div id="d1" style="display:block">
+		<form name="importForm"  id ="importForm" enctype="multipart/form-data" method="post" onsubmit="return checkPast();">
+        	<input type="hidden" name="type" id="type" value="$!type">
+    	    <input type="hidden" name="filePath"  value="$!filePath" />
+        	<input type="hidden" id="errorFilePath" name="errorFilePath">
+        	<input type="hidden" id="bathchCount"  value="$!bathchCount" />
+        	<input type="hidden" id="total" value="$!total" />
+        	<table class="bartbl">
+            	<tr>
+                	<td class="over">第 1 步</td>
+                	<td class="over">第 2 步</td>
+                	<td>第 3 步</td>
+                	<td>完成</td>
+                </tr>
+            </table>
+            <h4 class="steptxt">
+            	第2步：导入客户基本设置
+            </h4>
+            <dl style="line-height: 24px; color:gray;">
+                <dt>说明：</dt>
+                <dd>1、系统将按照从【被导入的数据表】到【系统的数据表】，自左而右的列对应关系，导入数据</dd>
+                <dd>2、如果【系统的数据表】中的列，在【被导入的数据表】中没有列对应，则显示为空</dd>
+                <dd>3、您可以在【系统的数据表】中设置与【被导入的数据表】中列的对应关系</dd>
+            </dl>
+            
+            <div style="margin: 30px 0px;">
+            	<table class="pointtbl">
+                    <thead>
+                        <tr>
+                            <th width="150" height="30">被导入的数据表</th>
+                            <th width="150" height="30">系统的数据表</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       #set($index = 0)
+    				   #foreach($item in $!readColumnNames) 
+    						<tr>
+                            	<td align="left">
+                                	<label>$item</label>
+                                </td>
+                            	<td class="pd">
+    								<select name="combox$index" id="combox$index" style="width: 140px;" colname="$item">
+    									<option value=""></option>
+    									#foreach($param in ${baseColumn.keySet()})   
+    										<option value="$param" #if($item.equals(${baseColumn.get($param)})) selected="selected"#end>${baseColumn.get($param)}</option>
+    									#end 
+                                    </select>
+                                </td>
+                            </tr>
+    						#set($index = $index+1)
+    				   #end 
+                    </tbody>
+                </table>
+            </div>
+            
+            <hr />
+            
+            <div class="halign">
+            	<input type="button" class="btn6 btn6bg1" value="上一步" onclick="abovePage()"/>
+            	<input type="button" class="btn6 btn6bg1" value="导入" id="importBtn" onclick="exportCustomer()" />
+            	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:tab.close(GetId(), false);" />
+            </div>
+		</form>
+	</div>
+	
+	<div id="d2" style="display:none">
+		<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">第 3 步</td>
+            	<td>完成</td>
+            </tr>
+        </table>
+        <h4 class="steptxt">
+        	第3步：导入客户中
+        </h4>
+        
+        <div class="pgrbar">
+        	<div class="ppt">
+                <span class="fl">
+						正在导入数据，共
+                    <label class="dgreen bold" id="totalCount"></label>
+						条数据…
+                </span>
+                <span class="fr" id="percent">
+                </span>
+            </div>
+            <div class="bar" >
+                <div id="porgressBar" style="width:0px;"></div>
+            </div>
+        </div>
+	</div>
+	
+	<div id="d3" style="display:none">
+		<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">第 3 步</td>
+            	<td class="over">完成</td>
+            </tr>
+        </table>
+        
+        <h4 class="steptxt">
+        	完成客户导入
+        </h4>
+        
+        <dl class="sucppt">
+        	<dt>客户导入已完成！</dt>
+            <dd class="img"></dd>
+            <dd>
+            	共
+                <span>$!total</span>
+					条数据，成功
+                <span class="green" id="successRecordCount"></span>
+					条，失败 
+                <span class="red" id="failRecordCount"></span> 
+					条。
+        	</dd>
+        </dl>
+        <div id="d4" style="display:none">
+            <dl style="line-height: 24px;">
+                <dt>您可以另存导入失败的客户</dt>
+                <dd>1、根据失败原因，更改客户信息。</dd>
+                <dd>2、如果不需要再次导入失败的客户记录，可以删除这行。</dd>
+            </dl>
+            
+            <div style="margin: 20px 0px;">
+            	<input type="button" class="btn1" value="另存导入失败的客户" onclick="exportExcel()" />
+            </div>
+        </div>
+        <hr />
+        
+        <div class="halign">
+        	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="importClose()"/>
+        </div>
+     </div>
+
+</body>
+
+<script>
+	//上一步
+	function abovePage(){
+		document.location.href="selectImportPath.html?random="+Math.random()*100000;
+	}
+	
+	//提交验证
+	function checkPast(){
+		var ary = new Array();
+		var num = 0;
+    	$('select').each(function(){
+                ary.push($(this).children("option:selected").val());
+          });
+		return isRepeat(ary);  
+	}
+	function isRepeat(ary){     
+		var nary=ary.sort();   
+		var phoneNo="";
+		var customerNo="";
+		for(var i=0;i<ary.length;i++){
+			
+			if(nary[i]=="phoneNo"){
+				phoneNo="1";
+			}
+			if(nary[i]=="customerNo"){
+				customerNo="1";
+			}
+		}
+		var tempStr="";
+		$('select').each(function(){
+               tempStr+=$(this).children("option:selected").val();
+         });
+        if(tempStr.length==""){
+        	return false;
+        }
+		if(type=='outer' && phoneNo==""){
+			banger.page.showMessageBox("联系方式列没有对应");
+			return false;
+		}
+		if(type=='inner' && customerNo==""){
+			banger.page.showMessageBox("客户编号列没有对应");
+			return false;
+		}
+        for(var i=0;i<ary.length;i++){
+		 if(nary[i]!=""){
+             if (nary[i]==nary[i+1]){ 
+			 	var cname="";
+				var ctext="";
+			 	$('select').each(function(){
+               		if($(this).children("option:selected").val()==nary[i]){
+						cname+=$(this).attr("colname")+",";
+						ctext=$(this).children("option:selected").text();
+					}
+         		 });
+				cname=cname.substr(0,cname.length-1);
+				banger.page.showMessageBox("被导入的数据表中列'"+cname+"'列不能导入到同一个系统的数据表中字段'"+ctext+"'");
+             	return false;   
+            }
+		} 
+	  }  
+	  return true;  
+    }
+	
+	//点导入
+	function exportCustomer(){
+		if(checkPast()){
+    		confirmMsg = 1;
+			jQuery.post('importTaskCustVerify.html?random='+Math.random()*10000,
+						{},
+						function(json){
+						if(json !=""){
+							banger.page.showMessageBox(json);
+					}else{
+        				$("#d1").css("display","none");
+                		$("#d2").css("display","block");
+						$("#d3").css("display","none");
+						$("#d4").css("display","none");
+                		importExcel();
+                		proId = setInterval("progressBar()", 1000);
+    				}
+			});
+		}
+	}
+	
+	var outStr={};
+	//提交
+	function importExcel(){
+		var postJson =getPostJson();
+		jQuery.ajax({
+	    	type: 'post',
+			url:'execlToDataBaseTask.html',
+			data:postJson,
+			success:function(json){
+    			var outStr=jQuery.parseJSON(json);
+				if(outStr==""){
+					$('#failRecordCount').text(0);
+					$('#successRecordCount').text(0);
+				}else{
+					$('#failRecordCount').text(outStr['failRecordCount']);
+					$('#successRecordCount').text(outStr['successRecordCount']);
+					$("#errorFilePath").attr("value",outStr['errorFilePath']);
+				}
+			}
+    	});	
+	}
+	
+	//导入进度
+	function progressBar(){
+	    var totalAmount=$("#bathchCount").val();
+		jQuery.post('importCustomerTaskBar.html?random='+Math.random()*10000,
+						{},
+						function(json){
+							var curr, p, ds=jQuery.parseJSON(json);
+							if(ds["curr"]) {
+								curr = ds["curr"];
+							}
+							if(!curr) curr = 0;
+							if(totalAmount==0) 
+								p = "100%";
+                			else 
+								p = Math.round(parseInt(curr) * 100 /parseInt(totalAmount))+'%';
+                			$("#percent").text(p);
+                			$("#porgressBar").css("width",p);
+                			if(p == "100%"){
+								sleep(500);
+								$("#d1").css("display","none");
+                				$("#d2").css("display","none");
+                				$("#d3").css("display","block");
+								confirmMsg=2;
+								if($('#failRecordCount').text()!="0")
+                					$("#d4").css("display","block");
+                				else
+                					$("#d4").css("display","none");
+								clearInterval(proId);
+                			}
+						}
+			);
+	}
+	
+	
+    function sleep(numberMillis) {    
+        var now = new Date();    
+        var exitTime = now.getTime() + numberMillis;   
+        while (true) { 
+        now = new Date();       
+        if (now.getTime() > exitTime) 
+      	  return;    
+        } 
+    } 
+	
+	
+	
+	//意外关闭
+	function cfirm(){
+		if(confirmMsg == 1 && typeof(proId) != 'undefined'){
+			if(confirm('正在导入客户资料，您确定要取消导入吗？')) {
+				clearInterval(proId);
+				jQuery.post('importCustomerTaskStop.html',
+    				{},
+    				function(json){
+					
+    				});
+				return true;
+			}
+		}else if(confirmMsg == 2){
+    		var pid = GetPid();
+    		var win = window.top.ExportIframeWin(pid);
+			if(win && win.toRefresh)	win.toRefresh();
+			return true;
+		}else return true;
+	}
+	
+	//点关闭重置状态
+	function importClose(){
+		jQuery.post('importCustomerTaskStop.html',
+    				{},
+    				function(json){
+    				});
+		var pid = GetPid();
+		var win = window.top.ExportIframeWin(pid);
+		if(win && win.toRefresh) win.toRefresh();
+		tab.close(GetId(), false);
+	}
+	
+	
+	//导出失败文件
+	function exportExcel(){
+		var filePath=$("#errorFilePath").val();
+		if(filePath==""){
+			banger.page.showMessageBox("未找到失败文件路径！");
+		}
+		document.location.href="exportFailTaskExcel.html?filePath="+filePath+"&random="+Math.random()*100000;
+	}
+</script>
+
+</html>
+

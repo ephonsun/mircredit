@@ -1,0 +1,74 @@
+<table class="datatbl">
+    <thead>
+        <tr>
+            <th><label title="事件">事件</label></th>
+            <th><label title="录音">录音</label></th>
+            <th><label title="照片">照片</label></th>
+            <th><label title="视频">视频</label></th>
+            <!--<th><label title="短信">短信</label></th>
+            <th><label title="彩信">彩信</label></th>-->
+            <th><label title="附件">附件</label></th>
+        </tr>
+    </thead> 
+    <tbody>
+		 #foreach($data in $!cusDataList)
+        	<tr #if($!data.audioCount == 0 && $!data.photoCount == 0 && $!data.videoCount == 0 && $!data.formCount == 0) style="display:none;" #end>
+				<td><label title="$!data.eventName">$!data.eventName</label></td>
+				<td>
+					<label title="#if($!data.audioCount != 0)$!data.audioCount#end">
+						#if($!needLine=='1'&&$urlPermitUtil.hasPermission('queryDataAudio'))
+    						<a class="slink" href="#2" onclick="queryData(1,'$!data.eventId');">
+    							#if($!data.audioCount != 0)$!data.audioCount#end
+    						</a>
+						#else
+							#if($!data.audioCount != 0)$!data.audioCount#end
+						#end
+					</label>
+				</td>
+				<td>
+					<label title="#if($!data.photoCount != 0)$!data.photoCount#end">
+    						#if($!needLine=='1'&&$urlPermitUtil.hasPermission('queryDataPhoto'))
+        						<a class="slink" href="#2" onclick="queryData(2,'$!data.eventId');">
+        							#if($!data.photoCount != 0)$!data.photoCount#end
+        						</a>
+    						#else
+    							#if($!data.photoCount != 0)$!data.photoCount#end
+    						#end
+					</label>
+				</td>
+				<td>
+					<label title="#if($!data.videoCount != 0)$!data.videoCount#end">
+						#if($!needLine=='1'&&$urlPermitUtil.hasPermission('queryDataVideo'))
+    						<a class="slink" href="#2" onclick="queryData(3,'$!data.eventId');">
+    							#if($!data.videoCount != 0)$!data.videoCount#end
+    						</a>
+						#else
+							#if($!data.videoCount != 0)$!data.videoCount#end
+						#end
+					</label>
+				</td>
+            	<!--<td><label title="#if($!data.smsCount != 0)$!data.smsCount#end"><a class="slink" href="#2" onclick="queryData(4,'$!data.eventName');">#if($!data.smsCount != 0)$!data.smsCount#end</a></label></td>
+				<td><label title="#if($!data.mmsCount != 0)$!data.mmsCount#end"><a class="slink" href="#2" onclick="queryData(5,'$!data.eventName');">#if($!data.mmsCount != 0)$!data.mmsCount#end</a></label></td>-->
+				<td>
+					<label title="#if($!data.formCount != 0)$!data.formCount#end">
+						#if($!needLine=='1'&&$urlPermitUtil.hasPermission('queryDataForm'))
+    						<a class="slink" href="#2" onclick="queryData(6,'$!data.eventId');">
+    							#if($!data.formCount != 0)$!data.formCount#end
+    						</a>
+						#else
+							#if($!data.formCount != 0)$!data.formCount#end
+						#end
+					</label>
+				</td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+    </tfoot>
+</table>                       
+<script type="text/javascript">
+	function queryData(type,eventId){
+		var options = {id: type+"Data_QueryData"+$!dataCustomerId, pid: GetId(), title:"", url: "../data/queryDataByCusId.html?type="+type+"&eventId="+eventId+"&customerId=$!dataCustomerId&random="+Math.random(), lock: false};
+		tab.add(options);
+	}
+</script>

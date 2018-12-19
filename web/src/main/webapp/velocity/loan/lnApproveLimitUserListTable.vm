@@ -1,0 +1,37 @@
+<script type="text/javascript">
+	floatInput('input[name=\'limitMoney\']',12,2);
+</script>
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+            <th title="用户名">用户名</th>
+            <th title="姓名">姓名</th>
+            <th title="审批额度(万元)">审批额度(万元)</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($!lnApproveLimitUser in $!LnApproveLimitUserList.items)
+            <tr>
+                <td><label title="$!lnApproveLimitUser.account" name="account">$!lnApproveLimitUser.account</label></td>
+                <td><label title="$!lnApproveLimitUser.userName" name="userName">$!lnApproveLimitUser.userName</label></td>
+				<td align="center">
+                    <div class="ui-div-text m1">
+                        <input type="text" name="limitMoney"  id="limitMoney$!lnApproveLimitUser.limitUserId" class="text vertical-align" style="text-align:center;" value="$vmHelper.getUnityDecimalMoney($!lnApproveLimitUser.limitMoney)" onblur="updateLimitUser('$!lnApproveLimitUser.limitUserId',this.value,'$!lnApproveLimitUser.limitMoney','$!lnApproveLimitUser.userId');" />
+                    </div>                        
+                </td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="3">
+            	<div class="floatR">#parse("/velocity/deptPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<hr />
+<div class="center">
+    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"  onclick="tab.close(GetId(), false);"/>
+</div>
+<input id="totalAmount" type="hidden" name="totalAmount" value="$!totalAmount"/>

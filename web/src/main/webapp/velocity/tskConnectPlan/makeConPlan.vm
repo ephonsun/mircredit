@@ -1,0 +1,88 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>制定联系计划</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		div#panel { display: none; }
+		h4.plan-title { border-bottom: 1px solid #b1b1b1; margin-top: 10px; text-align: center; line-height: 40px; font-size: 14px; }
+    	span.ml { margin-left: -1px; }
+    </style>
+</head>
+ 
+<body>
+	<form  id="executePlan" name="executePlan" >
+    	<table class="htmltbl">
+        	<tbody>
+        		<tr>
+                	<td class="field" width="80">
+                    	<label>执行日期：</label>
+                    </td>
+                    <td width="150">
+                    	<div class="ui-div-text">
+                    		<input type="text" readonly="true" class="text datepicker" id="executeDate" value="$!date.format("yyyy-MM-dd",$!executeDate)" fun="dateFunction" rule="\S" name="executeDate" tips="“计划日期”必须填写"/>
+                            <i class="date"></i>
+                    	</div>
+						<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+                    </td>
+                    <td>
+            			<input type="button" onclick="initTableList(this);" class="ui-input-btn" value="确定" />
+                    </td>
+            	</tr>
+            </tbody>
+        </table>
+	</form>
+	<br />
+    <div id="panel">
+        <div id="loadPage"></div>
+    	<hr />
+        <div class="center">
+			<input type="button" class="ui-input-btn" onclick="tab.close(GetId(),false);" value="关闭" />
+        </div>
+    </div>
+</body>
+    
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		$('#executePlan').validator();
+	});
+	
+	//加载列表
+	function initTableList(obj){
+		if(!dateFunction(obj)) return false;
+		var planDate = $('#executeDate').val();
+		$('#loadPage').load('/tskConnectPlan/loadMakePlanList.html?planDate='+planDate+'&random='+Math.random()*1000,{});
+		$('#panel').css('display', 'block');
+	}
+	
+	function dateFunction(obj){
+		var systemDate=$("#systemTime").val();
+		var startDate=$("#executeDate").val();
+		if(startDate.length>0){
+			if(startDate<systemDate){
+				$(obj).attr('tips', '计划执行日期不能小于今天'); 
+				return false;
+			}else{
+				$(obj).attr('tips', '“计划日期”必须填写'); 
+				return true;
+			}
+		}else {
+			$(obj).attr('tips', '“计划日期”必须填写'); 
+			return false;
+		}
+	}
+	
+</script>
+</html>
+

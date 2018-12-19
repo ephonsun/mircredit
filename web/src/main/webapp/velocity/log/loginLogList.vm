@@ -1,0 +1,86 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>系统安全日志</title>
+
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+		function Query(){
+	    	var f=$("#loginLogForm");
+	    	f.action="showLoginLogListPage.html";
+			f.submit();
+	    }
+	</script>
+</head>
+
+<body>
+	<form id="loginLogForm" name="loginLogForm" action="showLoginLogListPage.html" method="post">
+		<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" align="right" nowrap="nowrap">操作时间：</td>
+	            	<td>
+	            		<div class="dtxt2 floatL" style="width: 100px;">
+                            <input type="text"name="startTime" value="$!startLogDate" id="datepicker1" class="dtxt2-txt"  />
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                        <label class="dash">—</label>
+						<div class="dtxt2 floatL" style="width: 100px;">
+                            <input type="text" name="endTime" value="$!endLogDate" id="datepicker2" class="dtxt2-txt" />
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                        
+                        <input type="button" value="搜 索" class="btn1 floatR" onclick="Query()"/>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+    </form>
+	 <p class="dataSearch">
+    <label class="floatL bold dataSearch-count">安全日志<span class="dgreen">（共$!logCount条）</span></label>
+    </p>
+	<div class="actrow" style="margin-top: 10px;">
+    	<a href="javascript:void(0);" class="btn2 floatL" onclick="filterPageForm_submit()">
+            <label class="btn2-txt">刷新</label>
+        </a>
+    </div>
+    <table class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+				<th width="5%"><label title="序号">序号</label></th>
+            	<th width="25%"><label title="操作时间">操作时间</label></th>
+            	<th width="25%"><label title="操作信息">操作信息</label></th>
+            	<th width="25%"><label title="操作者">操作者</label></th>
+            	<th width="25%"><label title="操作IP">操作IP</label></th>
+            </tr>
+        </thead>
+    	<tbody>
+			#foreach($logList in $!loginLogList.items)
+        	<tr>
+        		<td><label title="$velocityCount">$velocityCount</label></td>
+            	<td><label title="$date.format("yyyy-MM-dd HH:mm:ss",$!logList.logDate)">$date.format("yyyy-MM-dd HH:mm:ss",$!logList.logDate)</label></td>
+            	<td><label title="$!logList.logTypeName">$!logList.logTypeName</label></td>
+            	<td><label title="$!logList.account">$!logList.account</label></td>
+            	<td><label title="$!logList.logIp">$!logList.logIp</label></td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="5">
+                	<div class="floatR">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
+

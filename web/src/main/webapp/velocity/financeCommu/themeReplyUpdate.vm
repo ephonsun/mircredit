@@ -1,0 +1,73 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑回复</title>
+    <base target="_self" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			jQuery("#replyForm").validator();
+		});
+		function upReply(replyId){
+			var bool = jQuery.validator({ form: 'replyForm', extend: true,extendhandler:initContent});
+			if(bool){
+				jQuery.post('../commTheme/updateThemeReply.html?random='+Math.random(),{
+					'reply.replyId':replyId,
+					'replyFlag':2,
+					'reply.replyContent':$("#reptext").text()
+				},function(date){
+					if(date>0){
+						window.returnValue=1;
+						window.close();
+					}
+				});
+			}
+		}
+		
+		function initContent(obj){
+        		var value= jQuery.trim($("#reptext").text());
+        		//	var reg=new RegExp("&nbsp;","g");
+        		//	var p1=new RegExp("<P>","g");
+        		//	var p2=new RegExp("</P>","g");
+        		//	value=value.replace(reg,"").replace(/^\s+|\s+$/g,"");
+        		if(value.length==0){
+        			$("#reptext").parent().addClass('v-fails');
+        			$("#reptext").attr('tips', '帖子内容必须填写!'); return false;
+        		}else if(value.length<2){
+        			$("#reptext").parent().addClass('v-fails');
+        			$("#reptext").attr('tips', '帖子内容字数不能够小于2个字!'); return false;
+        		}else{$("#reptext").text(value);return true;} 
+        	}
+    </script>
+</head>
+
+<body>
+	<form id="replyForm" name="replyForm">
+	<table class="htmltbl">
+		<tbody>
+			<tr>
+				<td>
+					<div class="ui-div-textarea" style="height: 100px;">
+						<textarea class="textarea" fun="initContent" id="reptext" rule="\S" tips='回复内容必须填写'>$!reply.replyContent</textarea>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</form>
+	<hr />
+	<div style="text-align:center;">
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" onclick="upReply($!reply.replyId)"/>
+	</div>
+</body>
+</html>

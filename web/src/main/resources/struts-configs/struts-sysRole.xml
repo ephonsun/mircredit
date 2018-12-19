@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="sysrole" extends="default" namespace="/role">
+
+		<!--  角色列表页面 -->
+		<action name="showSysRolePage" class="sysRoleAction"
+			method="showSysRolePage">
+			<result name="success">/velocity/role/sysRole_list.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  角色列表分页 -->
+		<action name="getSysRolePage" class="sysRoleAction" method="getSysRolePage">
+			<result name="success">/velocity/role/sysRole_listTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  添加角色  -->
+		<action name="saveSysRole" class="sysRoleAction"
+			method="saveSysRole">
+			<result name="toAddPage">/velocity/role/sysRole_add.vm</result>
+			<result name="saveRole">/velocity/role/refreshPage.vm</result>
+			<result name="saveCreateRole" type="redirectAction">saveSysRole.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 验证角色是否存在 -->
+		<action name="validateRole" class="sysRoleAction"
+			method="validateRole">
+		</action>
+		
+		<!-- 编辑角色 -->
+		<action name="updateSysRole" class="sysRoleAction"
+			method="updateSysRole">
+			<result name="toUpdataPage">/velocity/role/sysRole_update.vm</result>
+			<result name="success">/velocity/role/refreshPage.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 删除验证是否在使用,执行删除 -->
+		<action name="validateDel" class="sysRoleAction"
+			method="validateDel">
+		</action>
+		
+		<!-- 查看角色 -->
+		<action name="getSysRoleDetail" class="sysRoleAction" method="getSysRoleDetail">
+			<result name="success">/velocity/role/sysRole_detail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+	</package>
+</struts>

@@ -1,0 +1,28 @@
+ <table class="datatbl">
+    <thead>
+        <tr>
+            <th><label title="短信类型">短信类型</label></th>
+            <th><label title="短信内容">短信内容</label></th>
+            <th><label title="发送时间">发送时间</label></th>
+            <th width="100"><label title="操作">操作</label></th>
+        </tr>
+        </tr>
+    </thead>
+	<tbody>
+         #foreach($sms in $!smsDataList.items)
+        	<tr>
+            	<td><label title="#if($!sms.smsType == '1')即时短信 #elseif($!sms.smsType == '2')定时短信#end">#if($!sms.smsType == '1')即时短信 #elseif($!sms.smsType == '2')定时短信#end</label></td>
+				<td><label title="$!sms.smsContent">$!sms.smsContent</label></td>
+				<td><label title="#if($!sms.sendDate)$date.format('yyyy-MM-dd HH:mm:ss',$!sms.sendDate)#end">#if($!sms.sendDate)$date.format("yyyy-MM-dd HH:mm:ss",$!sms.sendDate)#end</label></td>
+				<td><label><a class="slink" href="#2" onclick="javascript:showSmsDiv('$!sms.smsType','#if($!sms.sendDate)$date.format('yyyy-MM-dd HH:mm:ss',$!sms.sendDate)#end','$!sms.smsContent')">查看</a></label></td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+         <tr>
+        	<td colspan="4">
+            	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

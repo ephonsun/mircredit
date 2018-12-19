@@ -1,0 +1,71 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+    #styleLink("base")
+  	#scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			
+		});
+    	function exportExcel(){
+			var filePath=$("#filePath").val();
+    		document.location.href="exportFailExcel.html?filePath="+filePath+"&random="+Math.random()*100000;
+    	}
+    	function cfirm(){
+    		tab.close(GetId(), true);
+    	}
+    </script>
+</head>
+ 
+<body>
+	<input type="hidden" id="filePath" value="$!counterOutPintMessage.filePath" name="filePath">
+	<table class="bartbl">
+    	<tr>
+        	<td class="over">第 1 步</td>
+        	<td class="over">第 2 步</td>
+        	<td class="over">第 3 步</td>
+        	<td class="over">完成</td>
+        </tr>
+    </table>
+    
+    <h4 class="steptxt">
+    	完成购买记录导入
+    </h4>
+    
+    <dl class="sucppt">
+    	<dt>购买记录导入已完成！</dt>
+        <dd class="img"></dd>
+        <dd>
+        	共
+            <span>$!counterOutPintMessage.sumRecord</span>
+            条数据，成功
+            <span class="green">#if($!counterOutPintMessage.importSuccessCount)$!counterOutPintMessage.importSuccessCount #else 0 #end</span>
+            条，失败 
+            <span class="red">$!counterOutPintMessage.importFailCount</span> 
+            条。
+    	</dd>
+    </dl>
+   #if(!$!counterOutPintMessage.importFailCount.equals("0"))
+    <dl style="line-height: 24px;">
+        <dt>您可以另存导入失败的客户</dt>
+        <dd>1、根据失败原因，更改客户购买记录。</dd>
+        <dd>2、如果不需要再次导入失败的客户购买记录，可以删除这行。</dd>
+    </dl>
+    <div style="margin: 20px 0px;">
+    	<input type="button" class="btn1" value="另存导入失败的购买记录" onclick="exportExcel()" />
+    </div>
+    #end
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="javascript:tab.close(GetId(), true);" />
+    </div>
+</body>
+</html>

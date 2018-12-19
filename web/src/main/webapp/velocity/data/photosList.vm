@@ -1,0 +1,37 @@
+<script>
+$(function(){
+    $(".hide").hide();
+    $(".show").show();
+    $(".saveBtn").hide();
+});
+</script>
+<input type="hidden" id="photoTypeId" value="$!photoTypeId"></input>
+	<input id="count" type="hidden" name="count" value="$!photoList.size()"/>
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+			<th width="30"><input  type="checkbox" nm="chkall" class="chk hide" name="userIdsss" onclick="selectAll(this)"/></th>
+            <th width="250px">图片文件名</th>
+			<th width="150px">备注</th>
+            <th width="150px">上传者姓名</th>
+            <th width="200px">上传时间</th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($photo in $!photoList)
+			
+            <tr>
+				<td><input type="checkbox"  nm="chkone" class="chk hide" name="photoIds" value="$!photo.photoId"/></td>
+                <td><label title="$!photo.fileName" name="account">##$!eventId,$loanId,$photo.customerId
+							## #if($urlPermitUtil.hasPermission('showPhotoDiv'))
+						<a class="slink" href="#2" onclick="showPhotoDiv('$!eventId',$photo.customerId,$!loanId,$velocityCount,$!photo.photoTypeId,$!photo.photoId);">$!photo.fileName</a>
+							## #end
+						</label></td>
+                <td><label title="$!photo.remark">$!photo.remark</label></td>
+				<td><label title="$!photo.uploadUserName" name="userName">$!photo.uploadUserName</label></td>
+                <td><label title="$!date.format('yyyy-MM-dd HH:mm',$!photo.uploadDate)">$!date.format('yyyy-MM-dd HH:mm',$!photo.uploadDate)</label></td>
+            </tr>
+			
+		#end
+    </tbody>
+</table>

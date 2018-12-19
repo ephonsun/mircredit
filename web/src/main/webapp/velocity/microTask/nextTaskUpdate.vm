@@ -1,0 +1,145 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑下次联系任务</title>
+	<base target="_self" />
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	<style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+</head>
+<script>
+	var autoLogin = "$!autoLogin";
+	jQuery(document).ready(function(){
+		$('#tabs').easytabs();
+		jQuery("#taskCusForm").validator();
+		$('[name=\'check\'], [name=\'radio\']').click(function(){
+			extendvalidator();
+		});
+	});
+	function extendvalidator(){
+		var bool = true;
+		return bool;
+	}
+	function addSubmit(){
+		var bool = jQuery.validator({ form: 'taskForm', extend: true, extendhandler: extendvalidator });
+		if(!bool){
+			return false;
+		}
+		var isFinish=document.getElementById("isFinish");
+		if(isFinish.checked==true){
+			isFinish=1;
+		}else{
+			isFinish=0;
+		}
+		jQuery.post('updateNextContextTask.html?'+autoLogin+'random='+Math.random()*10000,{
+			'task.taskId':$('#taskId').val(),
+			'task.taskTitle':$('#taskTitle').val(),
+			'task.startDate':$('#datepicker1').val(),
+			'task.remark':$('#remark').val(),
+			'task.taskStatus':isFinish
+		},function(data){
+			window.returnValue=data;
+			window.close();
+		});
+	}
+	function checkDate(obj){
+		var date=$("#systemTime").val();
+    	var inputDate=obj.value;
+		if(date>inputDate){
+			$("#datepicker1").parent().addClass('v-fails');
+			$(obj).attr('tips', '下次联系时间不能早于今天'); return false;
+		}else{
+			$("#datepicker1").parent().removeClass('v-fails');
+			return true;
+		}
+    }	
+</script>
+<body style="padding-bottom: 0;">
+<form id="taskCusForm" name="taskCusForm">
+	<table border="0" width="100%" cellspacing="2" cellpadding="2" class="htmltbl">
+    	<thead>
+        	<tr>
+            	<th height="20" align="left" colspan="3">编辑下次联系任务<hr /></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="80" height="30" align="right">
+                	客户名称：
+                </td>
+                <td width="200">$!crmCustomer.customerName</td>
+            </tr>
+			<tr>
+                <td width="80" height="30" align="right">
+                	<span class="red">*</span>任务名称：
+                </td>
+                <td width="200">
+					<input type="hidden" id="taskId" value="$!task.taskId"/>
+					<div class="dtxt2" style="width: 445px;">
+					<input type="text" style="width: 445px;" id="taskTitle" value="$!task.taskTitle" class="dtxt2-txt" maxlength="200" rule="\S" tips="“任务名称”不能为空"/>
+					</div>
+				</td>
+            </tr>
+			<tr>
+				<td width="80" height="30" align="right">
+                	<span class="red">*</span>联系日期：
+                </td>
+                <td width="200">
+					<div class="dtxt2" style="width: 150px;">
+						<input type="text" readonly="readonly" value='$!date.format("yyyy-MM-dd",$!task.startDate)' class="dtxt2-txt" id="datepicker1" fun="checkDate" rule="\S" tips="“联系日期”不能为空"/>
+						<span class="dtxt2-date">date</span>
+					</div>
+					<input id="systemTime" type="hidden" value="$!dateString.getSystemTimes()"/>
+				</td>
+            </tr>
+			<tr>
+			<td width="80" align="right">
+                	任务备注：
+                </td>
+                <td>
+					<div class="dtxtarea1" style="width: 400px;" >
+						<textarea id="remark" style="height: 80px;"
+						onKeyUp="javascript:var val = this.value;if(val.length>500){this.value=val.substring(0,500)}">$!task.remark</textarea>
+					</div>
+				</td>
+            </tr>
+            <tr>
+                <td width="80" height="30" align="right">
+                	完成情况：
+                </td>
+                <td>
+					<input type="checkbox" id="isFinish" disabled="disabled" #if($!task.taskStatus==1) checked=true #end  class="chk" />
+                </td>
+            </tr>
+			
+        </tbody>
+        <tbody>
+            <tr>
+                <td colspan="4" align="center">
+                	<input type="button" value="保 存" onclick="addSubmit()" class="btn5 btn5bg1" />
+                	<input type="button" value="取 消" onclick="javascript:window.close();" class="btn5 btn5bg3" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,99 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看贷款</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .tl p { margin-left:15px; margin-top:15px; font-size:14px; }
+        .loan-bg { padding-bottom:20px; }
+    </style>
+
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            var url = "../loan/vLoanView.html?vVerifyView=vVerifyView&RandNum="+ Math.random()+"&loanId="+$!loanId +"&isVerify=isVerify";
+            $('#vLoanView').load(url,{},function(){
+
+            });
+
+            jQuery("#remark").validator();
+        });
+
+        function addVerifyRemark(loanId){
+            var bool = jQuery.validator({ form: 'remark'});
+            var verifyRemark= $('#verifyRemark').val();
+            if(bool){
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/addVerifyRemark.html?RandNum='+Math.random()+"&loanId="+$!loanId,
+                    data:{
+                        'verifyRemark' : verifyRemark
+                    },
+                    success:function(html){
+                        banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+                        window.location.reload();
+                    }
+                });
+            }else{
+                    return false;
+                }
+        }
+
+
+        function fun1(h, b){
+            return true;
+        }
+
+        function fun2(h, b){
+        }
+    </script>
+</head>
+<body>
+
+#parse("/velocity/loan/baseLoanInfo.vm")
+<div class="loan-bg">
+    <p class="bold loan-lheight">备注</p>
+    <table class="htmltbl_1" style="table-layout: auto;">
+        <tbody>
+        <tr>
+            <td width="0.5%"></td>
+            <td align="center" width="99%">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;" id="remark">
+                    <textarea id="verifyRemark" class="textarea" style="height: 100px; _height:100px;" rule="\S" tips="请填写备注信息" onKeyUp="javascript:var val = this.value;if(val.length>250){this.value=val.substring(0,250)}">$!verifyRemark</textarea>
+                </div>
+            </td>
+            <td width="0.5%"></td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="button" class="ui-span-btn button-table" onclick="addVerifyRemark($!loanId)" value="添加备注" />
+</div>
+<div id="vLoanView">
+</div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<table class="datatbl" width="100%" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="20"><input type="checkbox" nm="chkall" /></th>
+				<th><label title="客户编号">客户编号</label></th>
+            	<th width="240"><label title="客户姓名(电话)">客户姓名(电话)</label></th>
+            	<th><label title="规划名称">规划名称</label></th>
+            	<th><label title="规划日期">规划日期</label></th>
+            	<th><label title="规划类型">规划类型</label></th>
+            	<th><label title="客户经理">客户经理</label></th>
+            	<th><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+    	<tbody>
+    		#foreach($report in $!plnReportList.items)
+        	<tr>
+            	<td><input type="checkbox" nm="chkone" value="$!report.reportId" /></td>
+				<td><label title="$!report.customerNo">$!report.customerNo</label></td>
+            	<td>
+					<div class="datacus"  style="height:24px">
+                        <span class="slink" onclick="showCustomer('$!report.customerId','$!report.customerName');" title="$!report.customerName（$!report.phone）">$!report.customerName（$!report.phone）</span>
+                        <div class="icon">
+                        	<i class="i phone" onclick="dial('$!report.phone','$!report.customerId')" title="拨号">phone</i>
+                            <i class="i dsc" onclick="tape('$!report.customerId')" title="座谈" >dsc</i>
+                            #if($urlPermitUtil.hasPermission('toAddSms'))
+                            	<i class="i sms" onclick="sendMms('$!report.phone','$!report.customerId')" title="短信">sms</i>
+                            #end
+    		                #if($urlPermitUtil.hasPermission('toAddMms'))
+                            	<i class="i mms" onclick="sendMms('$!report.phone','$!report.customerId')" title="彩信">mms</i>
+                            #end
+                        </div>
+					</div>
+                </td>
+            	<td><label title="$!report.planName">$!report.planName</label></td>
+            	<td><label title="$date.format("yyyy-MM-dd",$!report.createDate)">$date.format("yyyy-MM-dd",$!report.createDate)</label></td>
+            	<td><label title="$!report.planTypeName">$!report.planTypeName</label></td>
+            	<td><label title="$!report.userName">$!report.userName</label></td>
+            	<td>
+            		#if($urlPermitUtil.hasPermission('exportPDF'))
+                	<a class="slink" href="#" onclick="downloadFile($!report.reportId)">下载</a>
+                	#end
+                </td>
+            </tr>
+            #end 
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="8">
+                	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <input type="hidden"  value="$!count"  id="count"/>

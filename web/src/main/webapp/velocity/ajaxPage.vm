@@ -1,0 +1,158 @@
+#**
+ * 该模板显示宝贝底部的分页的
+ * @asq					当前的AuctionSearchQuery
+ * @maxPage				100 最大显示的页数
+ * @ by yuancong 2009-7-27
+ **#
+##最多显示100页记录
+#set($maxPage = $page.totalPages)
+#set($currentPage = $page.currentPage)##int
+#if($currentPage > $page.totalPages)
+    #set($currentPage = $page.totalPages)
+#end
+#set($tPage = $page.totalPages)##int 总页数
+#set($tPage2 = $tPage)
+#if( $tPage > $maxPage  ) #set($tPage = $maxPage) #end
+#set($prePage = $currentPage - 1)
+#set($nextPage = $currentPage + 1)
+
+##--------------循环页码--------------
+#set($leftStart = 1)
+#set($leftEnd = 2)
+#set($mStart = $currentPage - 2)
+#set($mEnd = $currentPage + 2)
+#set($rStart = $tPage - 1)
+#set($rEnd = $tPage)
+
+
+<div class="pagination">
+    #if($page && $!page.totalPages>0)
+        #if ($currentPage <= 1)
+            <span class="page-prev">上一页</span>
+        #else
+            <a href="#2" onclick="javascript:gotoPage($prePage);" class="page-prev" title="上一页">上一页</a>
+        #end
+
+        #if($mStart <= $leftEnd)
+            #set($leftStart = 0)
+            #set($leftEnd = 0)
+            #set($mStart = 1)
+        #end
+
+        #if($mEnd >= $rStart)
+            #set($rStart = 0)
+            #set($rEnd = 0)
+            #set($mEnd = $tPage)
+        #end
+
+        #if($leftEnd > $leftStart)
+            #foreach($p in [${leftStart}..${leftEnd}])
+                <a href="#2" onclick="javascript:gotoPage($p);" class="page-no">$p</a>
+            #end
+            #if($mStart>3)
+                <span class="page-break">...</span>
+            #end
+        #end
+
+        #if($mStart > $mEnd)
+            #set($mStart = $mEnd)
+        #end
+
+        #foreach($p in [${mStart}..${mEnd}])
+            #if($p == $currentPage)
+                <span class="page-cur">$p</span>
+            #else
+                <a href="#2" onclick="javascript:gotoPage($p);" class="page-no">$p</a>
+            #end
+        #end
+
+        #if ($rEnd > $rStart)
+            <span class="page-break">...</span>
+            #foreach($p in [${rStart}..${rEnd}])
+                <a href="#2" onclick="javascript:gotoPage($p);" class="page-no">$p</a>
+            #end
+        #end
+
+        #if ($currentPage < $tPage || ($tPage2 > $tPage && $currentPage >= $tPage))
+            <a href="#2" onclick="javascript:gotoPage($nextPage);" title="下一页" class="page-next">下一页</a>
+        #else
+            <span class="page-next">下一页</span>
+        #end
+
+        <input type="hidden" name="page.pageSize" value="$!page.pageSize" />
+        <input type="hidden" id="total" name="total" value="$!page.totalRowsAmount" />
+		
+		<span class="page-skip">
+	   	 	<label>到第</label>
+	   	 	<input type="text" name="page.currentPage" id="page.currentPage" maxLength="8" class="inp" size="2" value="$!currentPage" style="ime-mode: disabled" onkeydown="return keyDown(this)" onbeforepaste="return textPaste(this)" />
+	   	 	<label>页</label>
+	    	<input type="button" class="button" onclick="javascript:gotoPage()" value="确定" />
+	    	<label>页数: $currentPage / $page.totalPages</label>
+		</span>
+    #else
+        <span>没有找到相关记录</span>
+        <input type="hidden" name="page.currentPage" id="page.currentPage" size="2" value="$!currentPage" />
+    #end
+</div>
+
+<script type="text/javascript">
+    function goto(page, url, json, fn){
+        if(page)document.getElementById('page.currentPage').value = page;
+
+        if(json != null){
+            json['page.currentPage'] = document.getElementById('page.currentPage').value;
+        }
+
+        var postJson = {};
+
+        if(url==null || url==''){
+            url = '$request.getRequestURL()';
+        }
+
+        if(json){
+            postJson = json;
+        }
+        else{
+            postJson = getPostJson();
+        }
+
+        jQuery.post(url, postJson, fn);
+    }
+
+    function keyDown(obj){
+        var e = window.event;
+        var key = e.keyCode || e.which;
+        var flag = (e.shiftKey && jQuery.keyboard.insert==key) || (e.ctrlKey && key==86) || (e.ctrlKey && key==67);
+        if(key==229)
+        {
+            banger.input.fn.imeKeyDown(obj,checkNumber);
+            return true;
+        }
+        else
+        {
+            if(!flag)
+            {
+                return banger.input.fn.textKeyDown(e,obj,checkNumber);
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    function textPaste(obj){
+        var e = window.event;
+        return banger.input.fn.textPasteNew(e,obj,checkNumber);
+    }
+
+    function checkNumber(text){
+        if(text=="")return false;
+        if(!inChars(text,"0123456789"))return false;
+        if(text.substr(0,1)=='0')return false;
+        var maxPage = $page.totalPages;
+        if(parseInt(text)>maxPage)return false;
+        return true;
+    }
+
+</script>

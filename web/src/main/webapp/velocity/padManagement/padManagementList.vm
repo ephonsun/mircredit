@@ -1,0 +1,386 @@
+#parse("/velocity/taglibs.vm")
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>移动终端管理</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson = {};
+		$(function(){
+            $('table.datatbl').table();
+            $('select').select();
+            $('.datetimepicker').datetimeReset({
+                timeFormat: 'HH:mm:ss'
+            });
+            $('#userList').atree({
+				setting: {
+					view: {
+						showIcon: true,
+						dblClickExpand: false
+					},
+					data: {
+						simpleData: {
+							enable: true
+						}
+					},
+					callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: null,
+						onCheck: onCheck
+					}
+				},
+				url: function(){return "../padManagement/getPadDeptUserTree.html?flag=add&random="+Math.random()*1000000;},
+				beforeClick: beforeClickUser,
+				okHandler: onClickUser
+			});
+			//搜索
+			$("#query").click(function(){
+				var postJson = getQueryJson();
+				var urlStr = "padInfoQuery.html?random="+ Math.random();
+				jQuery.ajax({
+				  type: 'POST',
+				  url: urlStr,
+				  data: postJson,
+				  success:function(html){
+				  	$("#dataList").html(html);
+					$('table.datatbl').table();
+				  	oldPostJson = getQueryJson();
+				  }
+				});	
+			});
+			//清空
+			$("#clear").click(function(){
+				$('.text').val('');
+		    	$("select").each(function(){
+		    		this.selectedIndex = 0;
+		    		$(this).select();
+		    	});
+		    	$('#userIds').val('');
+			});
+			//刷新
+			$("#refresh").click(function(){
+				if(oldPostJson){
+					goto( null,"padInfoQuery.html?random="+ Math.random(),oldPostJson,
+						function(html){
+							$("#dataList").html(html);
+							$('table.datatbl').table();
+					});
+		    	}
+			});
+        });
+        //点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#userIds').val(nodes[0].id);
+			$('#userId').val(nodes[0].name);
+		}
+		//树 下属的
+		function onCheck(e, treeId, treeNode){
+			var zTree = jQuery.fn.zTree.getZTreeObj(treeId), p = treeNode.getParentNode();
+			if(p != null){
+				var child = p.children, n = 0;
+				for(var i=0; i<child.length; i++){
+					if(child[i].checked){
+						n++;
+					}
+				}
+				if(n == child.length){
+					zTree.checkNode(p, true, null, null);
+				}
+				else{
+					zTree.checkNode(p, false, null, null);
+				}
+			}
+		}
+        //初始化pad品牌型号
+		function initPadBrand(val){
+			if(val){
+				buildBandModel(val);
+			}else{
+				var cSel=$("#bmodel");
+				cSel.empty();
+				var op=$("<OPTION></option>");
+				cSel.append(op);
+				cSel.select();
+			}
+		}
+		
+		function buildBandModel(val){
+			jQuery.ajax({
+                type: "post",
+                url: "getPadModelJson.html",
+                data: {"padModel.padTypeId": val},
+                success: function(json){
+                    var ds=jQuery.parseJSON(json);
+					var cSel=$("#bmodel");
+					var cityVal = cSel.attr("model");
+					cSel.empty();
+					var op=$("<OPTION></option>");
+					cSel.append(op);
+					for(var i=0;i<ds.length;i++)
+					{
+						var d=ds[i];
+						var selStr = (d["code"]==cityVal)?"selected":"";
+						var op=$("<OPTION VALUE='"+d["code"]+"' "+selStr+" >"+d["name"]+"</option>");
+						cSel.append(op);
+					}
+					cSel.select();
+                }
+            });
+		}
+		
+		function addPad(){
+			var options = {id: "add_padInfo", pid: GetId(), title: "添加PAD信息", url: "../padManagement/addPadInfo.html?isActived=1&random="+Math.random(), lock: false};
+    		tab.add(options);
+		}
+		
+		function getQueryJson(){
+	    	var postJson = {};
+			postJson['padInfoCopy.padCode']=jQuery.trim($('#padCode').val());
+			postJson['padInfoCopy.serialNumber'] = jQuery.trim($('#serialNumber').val());
+			postJson['padInfoCopy.brandType'] = $('#brandType').val();
+			postJson['padInfoCopy.brandSubType'] = $('#brandSubType').val();
+			postJson['padInfoCopy.userId'] = $('#userIds').val();
+			postJson['padInfoCopy.status'] = $('#status').val();
+            postJson['loginDate'] = jQuery.trim($('#loginDate').val());
+
+			postJson['startDate'] = jQuery.trim($('#startDate').val());
+			postJson['endDate']=jQuery.trim($('#endDate').val());
+			
+			oldPostJson = postJson;
+			return postJson;
+	    }
+	    
+	    function toUpdatePad(padInfoId){
+	    	var options = {id: "up_padInfo_"+padInfoId, pid: GetId(), title: "编辑PAD信息", url: "../padManagement/toUpdatePadInfo.html?isActived=1&padInfo.padInfoId="+padInfoId+"&random="+Math.random(), lock: false};
+    		tab.add(options);
+	    }
+	    function padDetail(padInfoId){
+	    	var options = {id: "view_padInfo_"+padInfoId, pid: GetId(), title: "查看PAD信息", url: "../padManagement/viewPadInfo.html?padInfo.padInfoId="+padInfoId+"&random="+Math.random(), lock: false};
+    		tab.add(options);
+	    }
+	    //启用、禁用、停用PAD
+	    function changePad(padInfoId,useStatus){
+	    	var urlPad="changePadStatus.html";
+	    	if(useStatus==1){
+	    		if(!confirm('您确定要启用pad吗?启用后,用户可以使用pad登陆并连接系统服务端')){
+	    			return false;
+	    		}
+	    	}else if(useStatus==2){
+	    		if(!confirm('您确定要禁用pad吗?禁用后,用户将不能使用pad登陆并连接系统服务端')){
+	    			return false;
+	    		}
+	    	}else if(useStatus==3){
+	    		urlPad="stopPad.html";
+	    		if(!confirm('您确定要停用pad吗?停用后,pad将被禁止使用,并且不能重新启用')){
+	    			return false;
+	    		}
+	    	}
+	    	jQuery.ajax({
+			  type: 'POST',
+			  url: urlPad,
+			  data: {'padInfo.padInfoId':padInfoId,'padInfo.useStatus':useStatus},
+			  success:function(){
+			  	if(oldPostJson){
+					goto( null,"padInfoQuery.html?random="+ Math.random(),oldPostJson,
+						function(html){
+							$("#dataList").html(html);
+							$('table.datatbl').table();
+					});
+		    	}
+			  }
+			});	
+	    }
+	    
+	    function gotoPage(page){
+	    	if(oldPostJson){
+				goto(page,"padInfoQuery.html?random="+ Math.random(),oldPostJson,
+					function(html){
+						$("#dataList").html(html);
+						$('table.datatbl').table();
+				});
+	    	}
+	    }
+	    
+	    //删除PAD
+	    function delPad(padInfoId,useStatus){
+	    	var urlPad="deletePadInfo.html";
+    		if(!confirm('您确定要删除该pad信息吗？')){
+    			return false;
+    		}
+	    	jQuery.ajax({
+			  type: 'POST',
+			  url: urlPad,
+			  data: {'padInfo.padInfoId':padInfoId,'padInfo.useStatus':useStatus},
+			  success:function(data){
+			    if(data==1){
+			    	banger.page.showMessageBox("该pad已有使用记录，不允许删除，您可选择停用pad！");
+			    	return false;
+			    }
+			  	if(oldPostJson){
+					goto( null,"padInfoQuery.html?random="+ Math.random(),oldPostJson,
+						function(html){
+							$("#dataList").html(html);
+							$('table.datatbl').table();
+					});
+		    	}
+			  }
+			});	
+	    }
+	</script>
+</head>
+
+<body>
+    <table class="htmltbl">
+        <tbody>
+            <tr>
+                <!--
+                <td class="field" width="8%">
+                    <label>编号：</label>
+                </td>
+                <td width="17%">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" id="padCode"/>
+                    </div>
+                </td>
+                -->
+                 <td class="field" width="8%">
+                    <label>序列号：</label>
+                </td>
+                <td width="17%">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" maxlength="50" id="serialNumber"/>
+                    </div>
+                </td>
+                 <td class="field" width="8%">
+                    <label>品牌：</label>
+                </td>
+                <td width="17%">
+
+                    <div class="ui-div-text">
+                        <input type="text" class="text" maxlength="50" id="brandType"/>
+                    </div>
+                   #* <select id="brand" onchange="initPadBrand(this.value)">
+                        <option value=""></option>
+                        #foreach($brand in $!brandList)
+                        	<option value="$brand.brandTypeId">$brand.brandType</option>
+                        #end
+                    </select>*#
+                </td>
+                <td class="field" width="8%">
+                    <label>型号：</label>
+                </td>
+                <td width="17%">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" maxlength="50" id="brandSubType"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label>使用人员：</label>
+                </td>
+                <td width="17%">
+                    <div id="userList" class="ui-div-text">
+	                    <input type="text" id="userId" class="text" readonly="readonly" />
+	                    <input id="userIds" type="hidden" />
+	                    <i class="ddl">ddl</i>
+	                </div>
+                </td>
+                <!--
+                 <td class="field" width="8%">
+                    <label>使用状态：</label>
+                </td>
+                <td width="17%">
+                    <select id="linkStatus">
+                        <option value=""></option>
+                        #foreach($param in $padLinkStatus.keySet())
+                        <option value="$param">$padLinkStatus.get($param)</option>
+                        #end
+                    </select>
+                </td>-->
+
+
+                <td class="field" width="8%">
+                    <label>最近登录时间：</label>
+                </td>
+                <td width="17%">
+                    <table class="celltbl">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="ui-div-text" style="width: 150px;">
+                                        <input type="text" class="text datetimepicker" id="startDate"/>
+                                        <i class="date"></i>
+                                    </div>
+                                </td>
+                                <td><label style="width: 20px;">-</label></td>
+                                <td>
+                                    <div class="ui-div-text" style="width: 150px;">
+                                        <input type="text" class="text datetimepicker" id="endDate"/>
+                                        <i class="date"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+
+
+                <td class="field" width="8%">
+                    <label>状态：</label>
+                </td>
+                <td width="17%">
+                    <select id="status">
+                        <option></option>
+						#foreach($param in $activedMap.keySet())
+                            <option value="$param">$activedMap.get($param)</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <input type="button" class="ui-input-btn" value="清空" id="clear"/>
+        <input type="button" class="ui-input-btn" value="搜索" id="query"/>
+    </div>
+    
+    <div class="action-bar">
+
+       #* <span class="ui-span-btn fl" onclick="addPad();">
+            <label>添加</label>
+        </span>*#
+
+        <span class="ui-span-btn fr" id="refresh">
+            <label>刷新</label>
+        </span>
+    </div>
+    <table id="dataList" class="datatbl" cellpadding="0" cellspacing="0">
+    	#parse("/velocity/padManagement/padmanagementListTable.vm")
+    </table>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="pdtProductCustomer" extends="default"
+		namespace="/pdtProductCustomer">
+
+		<!-- 产品意向客户列表页面 -->
+		<!-- 展示产品意向客户列表 -->
+		<action name="showPdtProductCustomerList" class="pdtProductCustomerAction" method="queryPdtProductCustomerList">
+			<result name="success">/velocity/microProduct/showPdtProductCustomerList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查询产品意向客户列表 -->
+		<action name="queryPdtProductCustomerList" class="pdtProductCustomerAction" method="queryPdtProductCustomerList">
+			<result name="success">/velocity/microProduct/pdtProductCustomerList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查询产品意向客户列表（编辑产品） -->
+		<action name="queryChildPdtProductCustomerList" class="pdtProductCustomerAction" method="queryChildPdtProductCustomerList">
+			<result name="success">/velocity/microProduct/childPdtProductCustomerList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查询产品意向客户列表（查看产品） -->
+		<action name="queryChildViewPdtProductCustomerList" class="pdtProductCustomerAction" method="queryChildPdtProductCustomerList">
+			<result name="success">/velocity/microProduct/childViewPdtProductCustomerList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 查询产品意向客户列表（查看产品） -->
+		<action name="delPdtProductCustomer" class="pdtProductCustomerAction" method="delPdtProductCustomer">
+		</action>
+		
+		<!-- 查询产品意向客户列表（查看产品） -->
+		<action name="toAddPdtProductCustomerPage" class="pdtProductCustomerAction" method="toAddPdtProductCustomerPage">
+			<result name="success">/velocity/microProduct/addPdtProductCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 添加意向客户（根据条件搜索客户信息） -->
+		<action name="initFindCustomerByConds" class="pdtProductCustomerAction" method="initFindCustomerByConds"></action>
+		
+		<!-- 保存意向客户（根据条件搜索客户信息） -->
+		<action name="savePdtProductCustomer" class="pdtProductCustomerAction" method="savePdtProductCustomer"></action>
+
+        <!--添加客户意向页面——小页卡-->
+        <action name="addPdtProductCusCardPage" class="pdtProductCustomerAction" method="addPdtProductCusCardPage">
+            <result name="success">/velocity/microProduct/addPdtProductCusCardPage.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="toChooseAddUpdate" class="pdtProductCustomerAction" method="toChooseAddUpdate">
+            <result name="success">/velocity/microProduct/chooseAddUpdate.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+	</package>
+
+</struts>

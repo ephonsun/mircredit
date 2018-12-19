@@ -1,0 +1,227 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>快速理财规划</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	var oldPostJson={};
+    	jQuery(function(){
+			//加载验证控件
+			jQuery("#plnFastPlan").validator();	
+			$('#reset').click(function(){
+				$(':text', $('form')).val('');
+			});
+		});
+		//批量删除快速规划
+		function deletePlnFastPlan(id,name){
+			var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+			if(obj.size() == 0){
+				banger.page.showMessageBox("请您选择要删除的规划");
+				return false;
+			}
+			var str = "";
+			obj.each(function(){
+				if(jQuery(this).attr("checked")){
+					if(!str){
+						str = jQuery(this).val();
+					}
+					else{
+						str = str +"," +jQuery(this).val();
+					}
+				}
+				
+			});
+			if(confirm("您确定要将选择的规划删除吗？")){
+		//		location.href="/plnFastPlan/deletePlnFastPlan.html?plnFastPlanId="+str;
+				jQuery.post('deletePlnFastPlan.html',
+				{'plnFastPlanId': str},
+				function(){
+					refreshForm();
+				});
+			}
+		}
+		//搜索
+		function search(){
+			var bool = jQuery.validator({ form: 'plnFastPlan', extend: false});
+    		if(!bool){
+    			return false;
+    		}
+			var postJson=getQueryJson();
+			oldPostJson = postJson;
+			jQuery.post("getAllPlnFastPlanInfoForQuery.html?random="+Math.random()*1000000,postJson,
+    					function(html){
+						 refreshGrid('grid',html);
+    					});	
+	    }
+	    //刷新Grid
+		function refreshGrid(gridId,html)
+		{
+			$("#" + gridId).html(html);
+			$('table.datatbl').table();
+			var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+		}
+		//刷新
+		function refreshForm(){
+			goto(null,"getAllPlnFastPlanInfoForQuery.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"getAllPlnFastPlanInfoForQuery.html?random="+Math.random()*1000000,oldPostJson,function(html){refreshGrid('grid',html);});
+		}
+	    //表单数据
+	    function getQueryJson(){
+        	var postJson = {};
+        	
+    		postJson['plnFastPlanInfo.customerNo']=jQuery.trim($('#plnFastPlanInfocustomerNo').val());
+    		postJson['plnFastPlanInfo.customerName']=jQuery.trim($('#plnFastPlanInfocustomerName').val());
+    		postJson['plnFastPlanInfo.planName']=jQuery.trim($('#plnFastPlanInfoplanName').val());
+    		postJson['startTime']=jQuery.trim($('#datepicker1').val());
+    		postJson['endTime']=jQuery.trim($('#datepicker2').val());
+    		
+    		
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+	    function newTab(){
+	    	var options = {id: "73", pid: GetId(), title: "新建快速规划", url: "/plnFastPlan/chooseCusType.html", lock: false};
+			tab.add(options);
+	    }
+	    function editPlan(id,name){
+	    	var options = {id: "updateFastPlan"+id, pid: GetId(), title: "编辑快速规划-"+name, url: "/plnFastPlan/goToUpdatePage.html?id="+id, lock: false};
+			tab.add(options);
+	    }
+	    function resetValue(){
+	    	$(':text').val('');
+	    }
+		
+		//结束日期校验
+		function checkDate(obj){
+			var bool = true;
+			var date1=$("#datepicker1").val();
+        	var date2=obj.value;
+			if(date2!=''){
+    			if(date1!=''&&date1>date2){
+        			$("#datepicker2").parent().addClass('v-fails');
+        			$(obj).attr('tips', '结束日期不能早于开始日期'); 
+    				bool = false;
+    			}else{
+        			$("#datepicker2").parent().removeClass('v-fails');
+        		}
+			}
+			return bool;
+		}
+		
+		
+		function showCustomer(customerId,customerName){
+    		jQuery.post("/plnReport/getReportCustomerIsDel.html", {"customerId": customerId}, function(result){
+    			if(result=="3"){
+    				banger.page.showMessageBox("该客户为非在行客户");
+    				return;
+    			}else if(result=="0"){
+    				banger.page.showMessageBox("客户“"+customerName+"”被删除，无法查看具体资料！");
+    				return;
+    			}else{
+            		var options = {id: "plnFastPlan_showCustomer", pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+            		tab.add(options);
+    			}
+    		});
+    	}
+    </script>
+</head>
+
+<body>
+	<form id="plnFastPlan" action="getAllPlnFastPlanInfo.html" method="post">
+    	<table class="htmltbl" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+					 <td width="7%" class="field">
+                        <label>客户编号：</label>
+                    </td>
+                    <td width="15%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" name="plnFastPlanInfo.customerNo" id="plnFastPlanInfocustomerNo" value="$!plnFastPlanInfo.customerNo" maxLength="20" />
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>客户姓名：</label>
+                    </td>
+                    <td width="15%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" name="plnFastPlanInfo.customerName" id="plnFastPlanInfocustomerName" value="$!plnFastPlanInfo.customerName" maxLength="20" />
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>规划名称：</label>
+                    </td>
+                    <td width="15%">
+                        <div class="dtxt1">
+                            <input type="text" class="dtxt1-txt" name="plnFastPlanInfo.planName" id="plnFastPlanInfoplanName" value="$!plnFastPlanInfo.planName" maxLength="20" />
+                        </div>
+                    </td>
+                    <td width="7%" class="field">
+                        <label>规划日期：</label>
+                    </td>
+                    <td width="33%">
+                        <div class="dtxt2 fl" style="width: 40%;">
+                            <input type="text" class="dtxt2-txt date" name="startTime" id="datepicker1" value="$!startTime" readonly="true"/>
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                        <label class="dash">—</label>
+                        <div class="dtxt2 fl" style="width: 40%;">
+                            <input type="text" class="dtxt2-txt date" name="endTime" id="datepicker2" fun="checkDate" value="$!endTime" readonly="true"/>
+                            <span class="dtxt2-date">date</span>
+                        </div>
+                    </td>
+					<td  class="field" colspan="2">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="sz">
+            <label class="fl bold">所有规划(<span id="queryCount" class="dgreen">$!count</span>)</label>
+            <input type="button" id="reset" value="清 空" class="btn1" onclick="resetValue()" />
+            <input type="button" value="搜 索" class="btn1" onclick="search()"/>
+        </div>
+    </form>
+    
+    <div class="actrow">
+    	#if($urlPermitUtil.hasPermission('chooseCusType'))
+    	<span class="btn2 fl" onclick="newTab()">
+            <label>新建规划</label>
+        </span>
+        #end
+        #if($urlPermitUtil.hasPermission('deletePlnFastPlan'))
+    	<span class="btn2 fl" style="margin-left: -1px;" onclick="deletePlnFastPlan('','')">
+            <label>删除</label>
+        </span>
+        #end
+    	<span class="btn2 fr" style="margin-left: -1px;" onclick="refreshForm()">
+            <label>刷新</label>
+        </span>
+    </div>
+     <div id="grid">
+		   #parse("/velocity/plnFastPlan/plnFastPlanListTable.vm")
+		</div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>编辑角色</title>
+    #styleLink("base")
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+</head>
+<script type="text/javascript">
+    var setting = {
+        check: {
+            enable: true,
+            chkStyle: "checkbox",
+            chkboxType: { "Y": "ps", "N": "ps" }
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        view: {
+            showIcon: false
+        }
+    };
+
+    var zNodes = $!fancAuthTreeJson;
+    var zMenuNodes = $!menuAuthTreeJson;
+    var zDataNodes = $!dataAuthTreeJson;
+
+    //初始化功能权限
+    function setInitFunc() {
+        var treeObj = jQuery.fn.zTree.getZTreeObj("funcAuthTree");
+        #foreach($node in $!nodeIds)
+            var currNode = treeObj.getNodeByParam("id",$node, null);
+            if(currNode!=null){
+    			currNode.checked = true;
+                treeObj.updateNode(currNode);
+			}
+        #end
+
+        var menuTreeObj = jQuery.fn.zTree.getZTreeObj("menuAuthTree");
+        #foreach($node in $!menuNodeIds)
+            var currNode = menuTreeObj.getNodeByParam("id",$node, null);
+            currNode.checked = true;
+            menuTreeObj.updateNode(currNode);
+        #end
+
+        var dataTreeObj = jQuery.fn.zTree.getZTreeObj("dataAuthTree");
+        #foreach($node in $!dataNodeIds)
+            var currNode = dataTreeObj.getNodeByParam("id",$node, null);
+            currNode.checked = true;
+            dataTreeObj.updateNode(currNode);
+        #end
+
+    }
+
+
+    function upRole() {
+        var bool = jQuery.validator({ form: 'roleForm', extend: false});
+        if (!bool) {
+            return false;
+        }
+        var treeObj = jQuery.fn.zTree.getZTreeObj("funcAuthTree");
+        var menuTreeObj = jQuery.fn.zTree.getZTreeObj("menuAuthTree");
+        var dataTreeObj = jQuery.fn.zTree.getZTreeObj("dataAuthTree");
+        var menuNodes = menuTreeObj.getCheckedNodes(true);
+        var nodes = treeObj.getCheckedNodes(true);
+        var dataNodes = dataTreeObj.getCheckedNodes(true);
+        var funcIds = new Array();
+
+
+        var j = 0;
+        for (var i = 0; i < nodes.length; i++) {
+            funcIds[j++] = nodes[i].id;
+        }
+        var fIds = funcIds.toString();
+        $("#funcIds").val(fIds);
+        funcIds.length = 0, j = 0, ids = "";//清空数据
+        for (var i = 0; i < menuNodes.length; i++) {
+            funcIds[j++] = menuNodes[i].id;
+        }
+        ids = funcIds.toString();
+        $("#menuIds").val(ids);
+        funcIds.length = 0, j = 0, ids = "";//清空数据
+        for (var i = 0; i < dataNodes.length; i++) {
+            funcIds[j++] = dataNodes[i].id;
+        }
+        ids = funcIds.toString();
+        $("#dataIds").val(ids);
+
+        var role_name = "";
+        jQuery.ajax({
+            type: 'post',
+            url: 'validateRole.html',
+            data: {'sysRole.roleName': $('#roleName').val().replace(/(^\s*)|(\s*$)/g, ""),
+                'oldName': $('#oldName').val().replace(/(^\s*)|(\s*$)/g, "")},
+            cache: false,
+            async: false,
+            success: function (data) {
+                var json = jQuery.parseJSON(data);
+                if (json['role_name']) role_name = json['role_name'];
+                if (role_name != "") {
+                    $('#d1').addClass('v-fails');
+                    $('#roleName').attr('tips', role_name);
+                } else {
+                    $('#d1').removeClass('v-fails');
+                }
+                if (role_name == "") {
+                    document.roleForm.submit();
+                }
+            }
+        });
+    }
+    jQuery(document).ready(function () {
+        maxInput('#remark', 200);
+        jQuery.fn.zTree.init($("#funcAuthTree"), setting, zNodes);
+        jQuery.fn.zTree.init($("#menuAuthTree"), setting, zMenuNodes);
+        jQuery.fn.zTree.init($("#dataAuthTree"), setting, zDataNodes);
+        $("#tabs").easytabs();
+        jQuery("#roleForm").validator();
+        setInitFunc();
+    });
+
+    function checkUnique(obj) {
+        if (obj.value == "") obj.tips = obj.tipworn;
+    }
+</script>
+<body>
+<form id="roleForm" name="roleForm" action="updateSysRole.html" method="post">
+    <input type="hidden" name="sysRole.roleId" value="$!sysRole.roleId"/>
+    <input type="hidden" id="oldName" value="$!sysRole.roleName"/>
+    <input type="hidden" id="funcIds" name="funcIds"/>
+    <input type="hidden" id="menuIds" name="menuIds"/>
+    <input type="hidden" id="dataIds" name="dataIds"/>
+    <table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td width="80" class="field">
+                <span class="red">*</span>
+                <label>角色名称：</label>
+            </td>
+            <td>
+                #if($!sysRole.roleTypeId==1)
+                    <label>$!sysRole.roleName</label>
+                    <input type="hidden" id="roleName" name="sysRole.roleName" value="$!sysRole.roleName"/>
+                #else
+                    <div id="d1" class="dtxt1" style="width: 400px;">
+                        <input type="text" maxLength="20" class="dtxt1-txt" id="roleName" name="sysRole.roleName"
+                               value="$!sysRole.roleName" rule="\S" onkeyup="checkUnique(this)" tips="“角色名称”必须填写"
+                               tipworn='“角色名称”必须填写'/>
+                    </div>
+                    <input type="text" style="display:none">
+                #end
+            </td>
+        </tr>
+        <tr>
+            <td width="80" class="field">
+                <label>角色备注：</label>
+            </td>
+            <td>
+                #if($!sysRole.roleTypeId==1)
+                    <label>$!sysRole.remark</label>
+                    <input type="hidden" id="remark" name="sysRole.remark" value="$!sysRole.remark"/>
+                #else
+                    <div class="dtxtarea1" style="width: 400px;">
+                        <textarea id="remark" name="sysRole.remark" style="height: 100px;">$!sysRole.remark</textarea>
+                    </div>
+                #end
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div id="tabs" class="easy-tabs" style="margin-top: 10px;">
+        <ul class="easy-tabs-header">
+            <li><label>菜单权限</label></li>
+            <li><label>功能权限</label></li>
+            <li><label>特殊数据权限</label></li>
+        </ul>
+        <div class="easy-tabs-pages">
+            <div class="easy-tabs-page">
+                <ul id="menuAuthTree" class="ztree"></ul>
+            </div>
+            <div class="easy-tabs-page">
+                <ul id="funcAuthTree" class="ztree"></ul>
+            </div>
+            <div class="easy-tabs-page">
+                <ul id="dataAuthTree" class="ztree"></ul>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 20px; text-align: center;">
+        <input type="button" value="保 存" onclick="upRole()" class="btn5 btn5bg1"/>
+        <input type="button" value="取 消" onclick="tab.close(GetId(),false);" class="btn5 btn5bg3"/>
+    </div>
+</form>
+</body>
+</html>

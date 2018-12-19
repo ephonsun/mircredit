@@ -1,0 +1,141 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>移动贷款平台 v2.0.0 — 登录</title>
+    <link type="text/css" href="${ctx}/css/login.css" rel="stylesheet" />
+</head>
+
+<body>
+	<div class="container">
+    	<h1 class="logo" title="移动贷款平台 v2.0.0">
+        	<div>&nbsp;</div><label>v2.0.0</label>
+        </h1>
+        <div class="m1 m-position m-login-skin">&nbsp;</div>
+        <div class="m1 m-position m-login">
+            <div class="m-login-html">
+            	<p id="atips" class="failed"></p>
+                <div class="field-item">
+                    <label class="field">用户名</label>
+                    <input type="text" id="account" class="text" />
+                </div>
+                <p id="ptips" class="failed"></p>
+                <div class="field-item">
+                    <label class="field">密&nbsp;&nbsp;码</label>
+                    <input type="password" id="password" class="text" maxlength="16" onpaste="javascript:return false;" oncopy="javascript:return false;" />
+                    <!--<a href="javascript:void(0);">忘记密码？</a>-->
+                </div>
+                <div class="field-item" style="margin-top:34px; height:36px;">
+                	<input type="button" id="login" class="button" value="登 录" />
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <a href="javascript:void(0);"></a>
+            <p>杭州百航信息技术有限公司 &copy; 2010-2015</p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+	var lib = {
+		login: function(){
+			var a = jQuery('#account').val(), p = jQuery('#password').val();
+			
+			var b = lib.isEmpty(jQuery.trim(a), jQuery.trim(p));
+			if(b){
+				lib.ajaxCheck({ account: a, password: p });
+			}
+		},
+		isEmpty: function(a, p){
+			var b = true;
+			
+			if(a == ''){
+    			jQuery('#atips').html('用户名不能为空！');
+    			b = false;
+    		}else{
+    			jQuery('#atips').html('');
+    		}
+    		
+    		if(p == ''){
+    			jQuery('#ptips').html('密码不能为空！');
+    			b = false;
+    		}else{
+    			jQuery('#ptips').html('');
+    		}
+    		
+    		return b;
+		},
+		ajaxCheck: function(o){
+			jQuery.ajax({
+    			type: 'POST',
+    			url: 'userLogin.html',
+    			data: o,
+    			success: function(d){
+    				lib.result(d);
+    			}
+    		});
+		},
+		result: function(d){
+			switch(d){
+				case 'passwordreset':
+					jQuery('#atips, #ptips').html('');
+					saveLoginAccount();
+					window.location.href = 'showconfirmPwd.html';
+					break;
+				case 'Pass':
+					jQuery('#atips, #ptips').html('');
+					saveLoginAccount();
+					window.location.href = 'getMainPage.html';
+					break;
+				case 'timeoutpasswordreset':
+					jQuery('#atips, #ptips').html('');
+					saveLoginAccount();
+					window.location.href = 'showTimeOutPwdSuccessPage.html';
+					break;
+				default: 
+					jQuery('#atips').html(d);
+					break;
+			}
+		}
+	};
+	
+	function saveLoginAccount(){			//记录登入帐号,踢人时用
+		var account = $("#account").val();
+		writeCookie("account",account,1);
+	}
+	
+	function writeCookie(name,value,days)
+	{
+		var expires = "";
+		if (days)
+		{
+			var date = new Date();
+			date.setTime(date.getTime()+(days*24*60*60*1000));
+			expires = "; expires="+date.toGMTString();
+		}
+	   	document.cookie = name + "=" + escape(value) + expires;
+	}
+	
+	jQuery(function(){
+		jQuery('#login').mousedown(function(){
+			$(this).removeClass('button-mousedown');
+			$(this).addClass('button-mousedown');
+		}).mouseup(function(){
+			$(this).removeClass('button-mousedown');
+		}).click(function(){
+			lib.login();
+		}).hover(function(){
+			$(this).addClass('button-hover');			
+		},function(){
+			$(this).removeClass('button-hover');	
+		})
+		jQuery('#account, #password').keydown(function(e){
+			if(e.keyCode == 13){
+				lib.login();
+			}
+		});
+	});
+</script>
+</html>

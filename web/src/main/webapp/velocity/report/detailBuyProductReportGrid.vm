@@ -1,0 +1,41 @@
+<h3 class="recenter-ttl" style="text-align: center;">
+	产品“$!productName”的产品销售明细
+</h3>
+<h4 class="recenter-sub" style="text-align: right;">
+	到期日期：#if($!productBean.expireDate)$date.format("yyyy-MM-dd",$!productBean.expireDate)#end
+    &nbsp; &nbsp; 
+    理财时长：$!productBean.duration天
+    &nbsp; &nbsp; 
+    预期收益：#if($!productBean.profitRateMin)$!productBean.profitRateMin%~#end#if($!productBean.profitRateMax)$!productBean.profitRateMax%#end
+</h4>
+<table class="recenter-tbl">
+	<thead>
+    	<tr>
+        	<th><label title="机构">机构</label></th>
+        	<th><label title="营销人员">营销人员</label></th>
+        	<th><label title="客户编号">客户编号</label></th>
+        	<th><label title="客户(电话)">客户(电话)</label></th>
+        	<th><label title="销售额($!unitName)">销售额($!unitName)</label></th>
+        	<th><label title="身份证">身份证</label></th>
+			<th><label title="账号">账号</label></th>
+			<th><label title="购买日期">购买日期</label></th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($!product in $!reportProductlist)
+    	<tr>
+        	<td><label title="$!product.deptName">$!product.deptName</label></td>
+        	<td><label title="$!product.userName"></label>$!product.userName</td>
+        	<td><label title="$!product.customerNo">$!product.customerNo</label></td>
+        	<td><label title="$!product.customerName（$!product.customerPhone）">$!product.customerName（$!product.customerPhone）</label></td>
+        	<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoney))">$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoney))</label></td>
+        	<td><label title="$!product.idCard">$!product.idCard</label></td>
+			<td><label title="$!product.account">$!product.account</label></td>
+        	<td><label title="#if($!product.buyDate)$date.format("yyyy-MM-dd",$!product.buyDate)#end">#if($!product.buyDate)$date.format("yyyy-MM-dd",$!product.buyDate)#end</label></td>
+        </tr>
+		#end
+    </tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+	制表人：$!userName &nbsp; &nbsp; 制表时间：#if($!reportTime)$date.format("yyyy-MM-dd HH:mm:ss",$!reportTime)#end
+</p>

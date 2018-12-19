@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="dept" extends="default" namespace="/dept" >
+		<global-results>
+			<result name="error">/velocity/error.vm</result>
+		</global-results>
+		 <!--显示部门用户列表页面 -->
+		<action name="showDeptList" class="deptAction" method="showDeptList">
+			<result name="success">/velocity/dept/deptList.vm</result>
+		</action>
+		
+		 <!--显示数据分析页面 -->
+		<action name="showDataList" class="deptAction" method="showDataList">
+			<result name="success">/velocity/dept/showDataList.vm</result>
+		</action>
+		
+		<action name="getSqlResultData" class="deptAction" method="getSqlResultData" >
+			<result name="toGrid">/velocity/dept/sqlResultGrid.vm</result>
+		</action>
+		<!--用户列表 -->
+		<action name="getUserPageList" class="deptAction" method="getUserPageList">
+			<result name="success">/velocity/dept/deptUserList.vm</result>
+		</action>
+		
+	   <!-- 插入机构 界面form-->
+	   <action name="deptInsertForm" class="deptAction" method="showDeptJson">
+	   		<result name="success">/velocity/dept/deptInsert.vm</result>
+	   </action>
+	  <!-- 新增机构 -->
+	  <action name="insertDept" class="deptAction" method="insertDept">
+	  	<result name="saveAndNew">/velocity/dept/deptInsert.vm</result>
+	  	<result name="save">/velocity/redirect/model.vm</result>
+	  </action>
+	  <!-- 新增验证 -->
+	  <action name="validateInsterDept" class="deptAction" method="validateInsterDept">
+	  </action>
+	  <!-- 编辑界面form -->
+	  <action name="deptUpdateForm" class="deptAction" method="deptUpdateForm">
+	  	 	<result name="success">/velocity/dept/deptUpdate.vm</result>
+	  </action>
+	  <!-- 编辑机构 -->
+	  <action name="updateDept" class="deptAction" method="updateDept">
+	  </action>
+	  <!-- 删除机构 -->
+	  <action name="deleteDept" class="deptAction" method="deleteDept">
+	  </action>
+	  <!-- 上移机构 -->
+	  <action name="upMovingDept" class="deptAction" method="upMovingDept">
+	  </action>
+	  <!-- 下移部门 -->
+	  <action name="downMovingDept" class="deptAction" method="downMovingDept">
+	  </action>
+	  
+	  
+	</package>
+
+</struts>

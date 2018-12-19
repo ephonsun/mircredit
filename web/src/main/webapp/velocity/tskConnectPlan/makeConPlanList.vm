@@ -1,0 +1,211 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>制定联系计划</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style type="text/css">
+		div#panel { display: none; }
+		h4.plan-title { border-bottom: 1px solid #b1b1b1; margin-top: 10px; text-align: center; line-height: 40px; font-size: 14px; }
+    	span.ml { margin-left: -1px; }
+    </style>
+</head>
+ 
+<body>
+<h4 class="plan-title">
+    <label>$!tableName</label>
+</h4>
+
+<div class="search-bar">
+    <span class="fl bold">
+        	计划联系量(<label class="green" id="queryCount">$!page.totalRowsAmount</label>)
+			<span id="effecCount" style="display:none;">，有效联系量(<label class="green">$!activeCount</label>)</span>
+
+    </span>
+</div>
+
+<div class="action-bar">
+    <span class="ui-span-btn fl" onclick="addContactCustomer()">
+        <label>添加任务客户</label>
+    </span>
+    <span class="ui-span-btn fl ml" onclick="addNoTskCustomer()">
+        <label>添加非任务客户</label>
+    </span>
+    <span class="ui-span-btn fl ml" onclick="delTskCustomer()">
+        <label>移除客户</label>
+    </span>
+</div>
+<div id="grid">
+   #parse("/velocity/tskConnectPlan/makeConPlanTable.vm")
+</div>
+<div id="close" style="display:none;">
+	<hr />   
+    <div class="center" >
+    	<input type="button" class="ui-input-btn" onclick="tab.close(GetId(),false);" value="关闭" />
+    </div>
+</div>
+
+<input type="hidden" id="userId" name="userId" value="$!userId" />
+<input type="hidden" id="planId" name="planId" value="$!planId"/>
+<input type="hidden" id="update" name="update" value="$!update"/>
+<input type="hidden" id="updatePlanDate" name="updatePlanDate" value="$!updatePlanDate"/>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript">
+	var planId = $('#planId').val();
+	var planDate= $('#executeDate').val();
+	var update = $('#update').val();
+	$(function(){
+		if(update == 'yes'){
+			$('#effecCount').show();
+			$('#close').show();
+			planDate = $('#updatePlanDate').val();
+		}
+		$('table.datatbl').table();
+	});
+
+	//复选框选中和取消
+	function selectAll(obj){   
+      var mm=document.getElementsByName("taskTargetId");
+	  	for(var i=0;i<mm.length;i++){
+			if(obj.checked==true && mm[i].disabled==false){
+				mm[i].checked=true;
+			}else{
+				mm[i].checked=false;
+			}
+		}
+    } 
+	//分页跳转
+	function gotoPage(page)
+	{
+		var postJson = {};
+		postJson['planId'] = $('#planId').val();
+		if(update == 'yes'){
+			postJson['update'] = 'yes';
+		}
+		goto(page,"getMakePlanTablePage.html?random="+Math.random()*1000000,postJson,function(html){refreshGrid('grid',html);});
+	}
+	//刷新Grid
+	function refreshGrid(gridId,html)
+	{
+		var elem=$(html);
+		var gridDiv = $("#"+gridId);
+		gridDiv[0].innerHTML="";
+		gridDiv.append(elem);
+		var total = $('#total').val();
+		if(total!=null){
+			$('#queryCount').text(total);
+		}
+		else {
+			$('#queryCount').text("0");
+		}
+		$('table.datatbl').table();
+	}
+	//添加联系客户
+	function addContactCustomer(){
+		var url = '/tskConnectPlan/showAddCustomerForm.html?planId='+planId+'&planDate='+planDate+'&random='+Math.random()*1000;
+		var result = banger.page.openDialog(url,"选择联系客户",980,650);
+		//window.showModalDialog(url, '选择联系客户', 'dialogWidth=980px;dialogHeight=650px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result!=undefined){
+			if(result=='all') gotoPage(1);//选择全部
+			else{
+    			jQuery.post("updateTaskTargetByTargetIds.html?random="+Math.random()*10000,{'taskTargetIds':result,'planId':planId,'planDate':planDate},
+        					function(html){
+        						gotoPage(1);
+        					});
+			}
+		}
+	}
+	 //添加非任务客户
+	function addNoTskCustomer(){
+		var url="/customer/customerSelect.html?batchType=tskPlan&targetId="+planId+"&random="+Math.random();
+		var result=banger.page.openDialog(url,"选择联系客户",960,620);
+		//window.showModalDialog(url, '请选择联系客户', 'dialogWidth=960px;dialogHeight=620px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		if(result!=undefined){
+			if(result=='success') gotoPage(1);//选择全部
+			else{
+    				jQuery.post("updateTaskTargetForNoTask.html?random="+Math.random()*10000,
+								{'customerIds':result,'planId':planId,'planDate':planDate},
+            					function(html){
+            						gotoPage(1);
+            					});
+			}
+		}
+	}
+	//移除客户     
+	function delTskCustomer(){
+		var mm=document.getElementsByName("taskTargetId");
+		var checkFlag=false;
+		var chestr="";
+		var n=0;
+		for(var i=0;i<mm.length;i++){
+			if(mm[i].checked==true){
+				checkFlag=true;
+				chestr+=mm[i].value+",";
+				n++; 
+			}
+		}
+		if(checkFlag==false){
+			banger.page.showMessageBox("请选择您要移除的客户。");
+			return ;
+		}else{
+			if(confirm("是否移除选中的"+n+"条记录？")){
+    			chestr = chestr.substring(0,chestr.length-1);
+    			//更新联系时间
+    			jQuery.post("delTskCustomerByIds.html?random="+Math.random()*10000,{'taskTargetIds':chestr,'planId':planId},
+        					function(html){
+        						gotoPage(1);
+        					});
+			}
+    		
+		}
+	}
+	
+	//查看客户
+	function customerDetail(customerId){
+		jQuery.ajax({
+			  type: 'POST',
+			  url: "/customer/isDeleteCus.html?random="+Math.random()*1000,
+			  data: {"cusId":customerId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox('客户'+obj[0].customerName+'被删除，无法查看具体资料！');
+			  		}else{
+						var options = {id: "task_Customer_detail_detail" + customerId , pid: GetId(), title: "客户详情", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+customerId+"&random="+Math.random(), lock: false};
+						tab.add(options);
+					}
+			  	}
+		});	
+	}
+	//查看联系记录
+	function customerContactRecDetail(customerId,number){
+		var url = "/record/showRecordListForTsk.html";
+		var id;
+		if(customerId>0) {
+			url = url+"?customerId="+customerId+"&random="+Math.random();
+			id = customerId;
+		}else if(number) {
+			url = url+"?number="+number+"&random="+Math.random();
+			id = number;	
+		}
+		var options = {id: "task_record_detail"+id , pid: GetId(), title: "联系记录", url: url, lock: false};
+    	tab.add(options);
+	}
+	//查看关联任务
+	function toRelatedTaskPageDetail(customerId){
+		var userId=$('#userId').val();
+    	var title="关联任务";
+    	var url="/tskContact/initRelatedTaskPage.html";
+    	url=url+"?tskCusId="+ customerId +"&exeUserId="+userId+"&detail=y"+"&random="+Math.random();
+    	var options = {id: "relatedTask"+customerId, pid: GetId(), title: title, url: url, lock: false};
+    	tab.add(options);
+	}
+</script>
+</html>

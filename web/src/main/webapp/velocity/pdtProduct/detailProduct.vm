@@ -1,0 +1,185 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看产品</title>   
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		div.mt { margin-top: 0 !important; }
+		span.ml { margin-left: -1px; }
+	</style>
+</head>
+
+<input type="hidden" name="pdtProduct.productId" id="productId" value="$!pdtProduct.productId"/>
+<input type="hidden" name="pdtProduct.productState" id="productState" value="$!pdtProduct.productState"/>
+<input type="hidden" name="pdtProduct.templateId" id="templateId" value="$!pdtProduct.templateId"/>
+<body>
+	<table class="htmltbl" style="table-layout: auto;">
+		<tbody>
+    		<tr>					
+            	<td class="field" width="10%">
+					<label>产品类型：</label>
+                </td>
+                <td width="15%">
+                	<label>$!pdtProduct.templateName</label>
+                </td>
+				<td class="field" width="10%">
+					<label>产品名称：</label>
+                </td>
+                <td width="15%">
+					<p style="word-break:break-all;">$!pdtProduct.productName</p>
+                </td>
+            	<td class="field" width="10%">
+                	<label>产品编号：</label>
+                </td>
+                <td width="15%">
+                	<label>$!pdtProduct.productCode</label>
+                </td>
+				<td width="10%">
+                </td>
+				<td width="15%">
+                </td>				
+            </tr>
+		</tbody>
+	</table>
+	<div id="tempField">
+    </div>
+	<table class="htmltbl" style="table-layout: auto;">
+		<tbody>
+			<tr>
+				<td class="field" width="10%">
+					<label>产品状态：</label>
+                </td>
+                <td colspan="7">
+                	<label>$!pdtProduct.pdtStateStr</label>
+                </td>
+			</tr>
+			<tr>
+				<td class="field" width="10%">
+					<label>上架日期：</label>
+				</td>
+                <td colspan="7">
+                   <label>$!date.format("yyyy-MM-dd",$!pdtProduct.saleStartDate)</label> 至 <label>$!date.format("yyyy-MM-dd",$!pdtProduct.saleEndDate)</label>
+                </td>
+			</tr>
+			<tr>
+				<td class="field" width="10%">
+					<label>附件管理：</label>
+				</td>					
+				<td colspan="7">
+					#foreach($attr in $!attrList)
+						<span class="fileName"><a href="#" onclick="downFile($attr.attachmentId)" class="attrFile">$!attr.fileName</a>&nbsp;&nbsp;<label class="gray">($!dateString.FormetFileSize("$attr.fileSize"))</label></span><span class="percentage"></span>
+					#end
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	#if($!saleState!=0)
+	<div class="etabs" style="margin-top:10px;">
+    	<div class="etabs-head">
+        	<div class="etabs-head-items">
+        		<ul id="etabs-items">
+                	<li><label>购买信息</label></li>
+                </ul>
+        	</div>
+        </div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child" id="pdtCustomer">
+        	</div>
+        </div>
+    </div>
+	#end
+	<hr />
+	
+	<div class="center">		
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="javascript:tab.close(GetId(),false);"value="关闭" />
+	</div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>	
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		tab.title(tab.self,'查看产品-'+'$!jsUtil.escapeJs($pdtProduct.productName)');
+		//初始化页卡
+		$('div.etabs').etabs({
+			'head': 'etabs-items',
+			'body': 'etabs-body',
+			'bar': 'etabs-bar'
+		});
+		//初始化自定义字段
+		loadField($!pdtProduct.templateId,$!flag);
+		//加载购买客户列表
+		if($!saleState!=0){
+			$('#pdtCustomer').load('/pdtProduct/loadPdtBuyCustomer.html?actionType=detail&random='+Math.random()*10000,{'pdtProduct.productId':$!pdtProduct.productId});
+		}
+	});
+	
+	//下载附件
+	function downFile(attrId){
+		location.href="/pdtProduct/downPdtFile.html?pdtAttr.attachmentId="+attrId;
+		return false;
+	}
+	
+	function loadField(tempId, flag){
+		if(tempId){
+			jQuery.post('/pdtProduct/onPdtTemplateChange.html',
+			{'tempId':tempId,
+			 'isSearch':'false',
+			 'flag':flag,
+			 'isNeedDel':"y",
+			 'productId':$('#productId').val()
+			 },function(html){
+				refreshField(html);
+				});
+		}else{
+			$('#tempField').html(' ');
+		}
+	}
+	
+	//刷新字段
+	function refreshField(html){
+		$('#tempField').html(' ');
+		$('#tempField').html(html);
+		$('#tempField table, #tempField table tr td').css({
+			'background':'#DFE0E3 !important'
+		});
+	}
+	
+	//刷新列表
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html).table();
+	}
+	
+	//分页跳转
+	function gotoPage(page)
+	{
+		var pdtId=$("#productId").val();
+		goto(page,'/pdtProduct/loadPdtBuyCustomer.html?random='+Math.random()*10000,{
+			"pdtProduct.productId":pdtId,
+			"actionType":"detail",
+			"page.currentPage":page
+		},function(html){refreshGrid('pdtCustomer',html);});
+	}
+	
+	//刷新
+	function refresh(){
+		var pdtId=$("#productId").val();
+		goto(null,'/pdtProduct/loadPdtBuyCustomer.html?random='+Math.random()*10000,{
+			"pdtProduct.productId":pdtId,
+			"actionType":"detail"
+		},function(html){
+			refreshGrid('pdtCustomer',html);
+			});
+	}
+</script>
+</html>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="microReport" extends="default" namespace="/microReport">
+		<!-- 财经要点报表统计页面 -->
+		<action name="initLoanTaskReport" class="microTaskReportAction" method="initLoanTaskReport">
+			<result name="success">/velocity/microReport/loanTaskReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="showLoanTaskReportList" class="microTaskReportAction" method="showLoanTaskReportList">
+			<result name="success">/velocity/microReport/loanTaskReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 导出贷款任务报表 -->
+		<action name="exprotLoanTaskReport" class="microTaskReportAction" method="exprotLoanTaskReport"></action>
+		
+		
+		<!-- 初始化任务完成情况报表 -->
+		<action name="initMicroTaskCompleteReport" class="microTaskReportAction" method="initMicroTaskCompleteReport">
+			<result name="success">/velocity/microReport/tskTaskCompleteReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="showMicroTaskCompleteList" class="microTaskReportAction" method="showMicroTaskCompleteList">
+			<result name="success">/velocity/microReport/tskTaskCompleteReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 初始化营销任务完成情况报表 -->
+		<action name="initMicroTaskMarketingReport" class="microTaskReportAction" method="initMicroTaskMarketingReport">
+			<result name="success">/velocity/microReport/microTaskMarketingReport.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="showMicroTaskMarketingList" class="microTaskReportAction" method="showMicroTaskMarketingList">
+			<result name="success">/velocity/microReport/microTaskMarketingReportGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 导出营销任务完成统计报表 -->
+		<action name="exprotMicroTskMarketingReport" class="microTaskReportAction" method="exprotMicroTskMarketingReport"></action>
+		
+		<action name="initTaskJsonMsg" class="microTaskReportAction" method="initTaskJsonMsg"></action>
+	</package>
+</struts>

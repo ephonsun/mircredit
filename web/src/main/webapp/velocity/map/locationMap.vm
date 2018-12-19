@@ -1,0 +1,507 @@
+#parse("/velocity/taglibs.vm")
+#set($mapIp=$mapIp)
+#set($mapKey=$mapKey)
+#set($mapVersion=$mapVersion)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    <style type="text/css">
+         body { margin:0; padding: 0px 10px; border:0; overflow:hidden; font-size:12px;}
+        .ml {margin-left: 15px;width: 70px;}
+    </style>
+    #scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script language="javascript" src="http://${mapIp}/apis?t=javascriptmap&v=${mapVersion}&key=${mapKey}"></script>
+    <script type="text/javascript" src="${ctx}/js/biz/banger.map.js"></script>
+	<script type="text/javascript" src="${ctx}/js/map/RMap5.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+
+    #scriptLink("page")
+</head>
+<body onload="initLocationPage();">
+<input type="hidden" id="custId" />
+<input type="hidden" id="custAddress" />
+<input type="hidden" id="custName" />
+<input type="hidden" id="gpsFlat" />
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="background:#fff;">
+    <tr>
+        <td style="width:auto;height:100%;">
+            <div class="map-box" id="mapObj" style="margin-right:10px;">
+                <div class="map-tips"></div>
+            </div>
+        </td>
+        <td style="width:260px;border:1px solid #ccc;" valign="top">
+            <div style="font-size:12px;height:550px;">
+                <div  style="height:225px">
+                    <p class="search-ttl-width">搜索</p>
+                    <table class="viewtbl" style="font-size:12px;">
+                        <tbody>
+                        <tr>
+                            <td width="40" class="field">
+                                <label>客户：</label>
+                            </td>
+                            <td width="200">
+                                <div class="ui-div-text">
+                                    <input type="text" class="text" id="customerName"/>
+                                </div>
+                            </td>
+                        </tr>
+                        #if($!roleStr.equals("inChargeOfDepartment"))
+                            <tr>
+                                <td width="40" class="field">
+                                    <label>用户：</label>
+                                </td>
+                                <td width="200">
+                                    <div class="ui-div-text">
+                                        <input type="text" class="text" id="userName" name="userName"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        #end
+                        ##<tr>
+                           ## <td width="40" class="field">
+                           ##     <label>地址：</label>
+                           ## </td>
+                           ## <td width="200">
+                            ##    <div class="ui-div-text">
+                                   ## <input type="text" class="text" id="address" name="address"/>
+                             ##   </div>
+                          ##  </td>
+                       ## </tr>
+                        <tr>
+                            <td class="field" width="40">
+                                <label>日期：</label>
+                            </td>
+                            <td colspan="2">
+                                <table class="celltbl">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="ui-div-text" style="width: 200px;">
+                                                <input type="text" class="text dateonlypicker"  readonly="true" id="beginTime" focusFlag='false'/>
+                                                <i class="date"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="40">
+                                <label>时间：</label>
+                            </td>
+                            <td colspan="2">
+                                <table class="celltbl">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="ui-div-text" style="width:90px;">
+                                                <input type="text" class="text timepicker" id="startTime"  readonly="true"/>
+                                                <i class="date"></i>
+                                            </div>
+                                        </td>
+                                        <td width="20"><label style="width: 20px;">-</label></td>
+                                        <td>
+                                            <div class="ui-div-text" style="width:90px;">
+                                                <input type="text" class="text timepicker" id="endTime" readonly="true"/>
+                                                <i class="date"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="right">
+                                <input type="button" class="ui-input-btn ml" value="清空" onclick="qingkong()"/>
+                                <input type="button" class="ui-input-btn ml" value="搜索" onclick="postQuery()"/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+               <!-- <div class="search-bar">
+                <span class="fl">
+                    所有客户(<label class="green" id="customerTotal">$!customerCount</label>)
+                    #if($!roleStr.equals("inChargeOfDepartment"))
+                    ，所有用户(<label class="green" id="userTotal">$!userCount</label>)
+                    #end
+                </span>
+                </div>-->
+                <div id="tabs" class="easy-tabs" style="margin-top: 10px;">
+                    <ul class="easy-tabs-header">
+                        <li onclick="showDiffTab(1);return false;"><label id="tab1">客户</label></li>
+                        #if($!roleStr.equals("inChargeOfDepartment"))
+                        <li onclick="showDiffTab(2);return false;"><label id="tab2">用户</label></li>
+                        #end
+                    </ul>
+                    <div class="easy-tabs-pages">
+                        <div class="easy-tabs-page">
+                            #parse("/velocity/map/customerTable.vm")
+                        </div>
+                        #if($!roleStr.equals("inChargeOfDepartment"))
+                        <div class="easy-tabs-page">
+                            #parse("/velocity/map/userTable.vm")
+                        </div>
+                        #end
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+//var autoLogin = "$!autoLogin";
+////////////////////取地图城市，经纬度begin//////////////////////////
+//var cityCoding ='$!cityCoding',cityLngLat= '$!cityLngLat';
+//var cityLng= cityLngLat.split(",")[0],cityLat=cityLngLat.split(",")[1];
+////////////////////取地图城市，经纬度end//////////////////////////
+
+var cityLngLat = '$!cityLngLat';
+var cityLng = cityLngLat.split(",")[0], cityLat = cityLngLat.split(",")[1];
+var mapIp = '$!mapIp';
+var postJson = {};
+var mapObj,inforWindow, markers = [], geo, tempAddress = "";
+var urlStr = '', obj = '';
+var iconPath;
+RMapConstant.MapRoot = "http://"+mapIp+"/PathUrl.ashx?path=/";
+window.map = new RMap(document.getElementById("mapObj"), cityLng, cityLat, 10, $('#mapObj').width(), $('#mapObj').height());
+mapObj = window.map;
+mapObj.show();
+$(function () {
+    $('#tabs').easytabs();
+    $("#custId").val($!customerId);
+    $("#custAddress").val('$!custAddress');
+    $("#custName").val('$!jsUtil.escapeJs($!custName)');
+    $("#gpsFlat").val('$!gpsFlat');
+    $("#customerName").tips({ msg: "姓名或联系电话" });
+    $("#userName").tips({ msg: "姓名或编号" });
+
+    //配置只显示日期
+    $('.dateonlypicker').datetimeReset({
+        showTimepicker: false
+    });
+    //配置只显示时间
+    $('.timepicker').datetimeReset({
+        timeOnly:true,
+        timeFormat:'HH:mm:ss',
+        currentText: '现在'
+    });
+    initCusAnduser();
+
+
+});
+
+mapObj.addEventListener(RMapEvent.MouseDoubleClickEvent, function(e){
+    mapObj.removeAllGraphics();
+    mapObj.removeAllMarker();
+    mapObj.setCenter(e.MouseCx, e.MouseCy);
+    initCusAnduser();
+});
+
+//加载地图中心十公里的客户和用户
+function initCusAnduser(){
+    var arr=new Array();//经纬度坐标数组
+    var arrayCustomer = ajaxQuery("getCustomerGpsByCondition.html");
+    var point = mapObj.getCenter();
+    var lng = point.Cx;
+    var lat = point.Cy;
+    for(var i=0;i<arrayCustomer.length;i++){
+        if(!(arrayCustomer[i]["gpsLng"]==null)){
+            arr.push({Cx:arrayCustomer[i]["gpsLng"],Cy:arrayCustomer[i]["gpsLat"]});
+            if (arrayCustomer[i]["loanFlat"] == 2){ //有贷款状态的用户为蓝色，无贷款为绿色
+                iconPath = "../images/icon/map_blue.png";
+            }else{
+                iconPath = "../images/icon/map_green.png";
+            }
+            var resultStr;
+            var html = newMoreCustomerPlan(arrayCustomer,resultStr,i);
+            var wnd = {width:100,height:100,detaX:-100,detaY:-175,html:html};
+            var pointMarker = new RSelfMarker( arrayCustomer[i]["gpsLng"], arrayCustomer[i]["gpsLat"],wnd ,iconPath, -10, -18, 20,20);
+            var a = MapUtils.calculateDistanceByMi(10000);
+
+            var r = RGeometry.isPointInCircle({Cx:lng,Cy:lat}, {Cx:lng,Cy:lat+a}, {Cx:arrayCustomer[i]["gpsLng"],Cy:arrayCustomer[i]["gpsLat"]});
+            if(!(r==0)){
+                //将标注添加入 rmap对象
+                mapObj.addMarker(pointMarker);
+            }
+        }
+    }
+    if(!($!roles==7)){
+        var arrayUser = ajaxQuery("getUserGpsByCondition.html");
+        for(var i=0;i<arrayUser.length;i++){
+            if(!(arrayUser[i]["gpsLng"]==null)){
+                arr.push({Cx:arrayUser[i]["gpsLng"],Cy:arrayUser[i]["gpsLat"]});
+                var resultStr=" ";
+                var html = newMoreUserPlan(arrayUser,resultStr,i);
+                var wnd = {width:100,height:100,detaX:-100,detaY:-175,html:html};
+                var pointMarker = new RSelfMarker( arrayUser[i]["gpsLng"], arrayUser[i]["gpsLat"],wnd ,"../images/icon/map_black.png", -10, -18, 20,20);
+                var a = MapUtils.calculateDistanceByMi(10000);
+                var r = RGeometry.isPointInCircle({Cx:lng,Cy:lat}, {Cx:lng,Cy:lat+a}, {Cx:arrayUser[i]["gpsLng"],Cy:arrayUser[i]["gpsLat"]});
+                if(!(r==0)){
+                    //将标注添加入 rmap对象
+                    mapObj.addMarker(pointMarker);
+                }
+            }
+        }
+    }
+}
+
+
+var urlStr = '', obj = '';
+function showDiffTab(num, lnglat) {//页卡切换
+    if (lnglat != "") {
+        postJson["lnglat"] = lnglat;
+    }else{
+        postJson["lnglat"] = "";
+    }
+    if (num == 1) {
+        if (postJson["customerName"] != ""||postJson["bounds"]!=""||postJson["customerId"] != "") {
+            urlStr='getCustomerList.html?random=' + Math.random();
+            obj=".easy-tabs-page:eq(0)";
+            $('#tabs').easytabs({"index": 0});
+            getCustomerList(urlStr);
+        }
+    } else {
+        if (postJson["userName"] != ""||postJson["bounds"]!="") {
+            urlStr='getUserList.html?random=' + Math.random();
+            obj=".easy-tabs-page:eq(1)";
+            $('#tabs').easytabs({"index": 1});
+            getUserList(urlStr);
+        }
+    }
+    $("#customerName").tips({ msg: "姓名或联系电话" });
+    $("#userName").tips({ msg: "姓名或编号" });
+}
+
+function getCustomerList(urlStr) {//刷新客户列表
+    jQuery.ajax({
+        type: 'POST',
+        async: false,
+        url: urlStr,
+        data: postJson,
+        success: function (html) {
+            $(".easy-tabs-page:eq(0)").html("");
+            $(".easy-tabs-page:eq(0)").html(html);
+        }
+    });
+}
+function getUserList(urlStr) {//刷新用户列表
+    jQuery.ajax({
+        type: 'POST',
+        async: false,
+        url: urlStr,
+        data: postJson,
+        success: function (html) {
+            $(".easy-tabs-page:eq(1)").html("");
+            $(".easy-tabs-page:eq(1)").html(html);
+        }
+    });
+}
+
+
+
+
+function getQueryJson(type) {//组装数据  type为查询类型  1为页面初始化,2为查询,其它为贷款跳转
+    postJson={};
+    if (type == 1) { //获取地图视野内西南，东北方向坐标
+        var bounds = mapObj.getBounds();
+        postJson["bounds"] = bounds.toString();
+        clearTips();
+    } else if (type == 2) {
+        clearTips();
+        postJson["bounds"]="";
+        postJson["customerId"]="";
+    } else {
+        postJson["customerId"] = jQuery.trim($("#custId").val());
+        postJson['customerName'] = "";
+        postJson['userName'] = "";
+        postJson["bounds"]="";
+        postJson['address']="";
+    }
+    return postJson;
+}
+
+function clearTips(){
+    if ($('#customerName').val() == "姓名或联系电话") {
+        $('#customerName').val("");
+        $('#customerName').attr("style", "color:#000;");
+    }
+    if ($('#userName').val() == "姓名或编号") {
+        $('#userName').val("");
+        $('#userName').attr("style", "color:#000;");
+    }
+    postJson['customerName'] = jQuery.trim($('#customerName').val());
+    postJson['userName'] = jQuery.trim($('#userName').val());
+    postJson['address'] = jQuery.trim($('#address').val());
+}
+function cleanParam() {//清空坐标，列表结果，统计个数
+    //$("#customerTotal").text(0);        //设置查询到的客户数
+   // $("#userTotal").text(0);                //设置查询到的用户数
+    mapObj.removeAllGraphics();
+    mapObj.removeAllMarker();
+    //mapObj.clearOverlaysByType('marker');
+    //mapObj.clearInfoWindow();
+    mapObj.setCenter(cityLng, cityLat);
+}
+
+function postQuery() {          //查询
+    closeWin();
+    resetTab();
+    cleanParam();
+    $("#gpsFlat").val("");
+    getQueryJson(1);
+    //alert("客户 ："+postJson['customerName']+" 用户:"+ postJson['userName']+" 地址: "+postJson['address']);
+    if (postJson['customerName'] == "" && postJson['userName'] == ""&&postJson['address'] == "") {
+        $("#customerName").tips({ msg: "姓名或联系电话" });
+        $("#userName").tips({ msg: "姓名或编号" });
+        mapObj.setCenter(cityLng, cityLat);
+        mapObj.setZoom(15);
+        mapObj.removeAllMarker();
+        //mapObj.clearOverlaysByType('marker');
+
+        //mapObj.clearInfoWindow();
+        getQueryJson(1);
+        var array = ajaxQuery("initCustomerOrUserGps.html");
+        showDiffTab(1, "");
+        analyzeResult(array);
+    } else {
+        getQueryJson(2);
+        if(postJson['address']!=""){
+            addressIsNotNull();
+        }else{
+            postJson["bounds"]="";
+            QueryUserOrCustomer();
+        }
+    }
+}
+function QueryUserOrCustomer(){ //根据不同的搜索条件，跳转不同的页卡
+    var array =ajaxQuery("getCustomerOrUserGps.html");
+    if (postJson["customerName"] == "" && postJson['userName'] != "") { //根据不同搜索条件显示不同的结果页页卡。
+        showDiffTab(2, "");
+    }else{
+        showDiffTab(1, "");
+    }
+    analyzeResult(array,"query");
+
+}
+
+function closeContent() {//闭关客户标记窗口
+    $('.div_content').hide();
+    $('.olay').hide();
+}
+
+
+mapObj.bind(mapObj, "dragend", function (e) {//拖动时触发
+    $("input").blur();
+    initLocationPage();
+});
+
+var timer = null;
+mapObj.bind(mapObj, "mousewheel", function (e) {//鼠标滚动时触发
+    e = e || window.event;
+    clearTimeout(timer);
+    if (e.wheelDelta < 0) {//地图缩小时触发查询，放大时更新列表
+        setTimeout(initLocationPage, 2000);
+    }else{
+        getQueryJson(1);
+        showDiffTab(1, "");
+    }
+});
+
+
+function getMarker(gpsId, type) {//得到标记的信息客户
+    mapObj.removeAllGraphics();
+    mapObj.removeAllMarker();
+    if (type == "1") {
+        gpsId = "user," + gpsId;
+    } else {
+        gpsId = "customer," + gpsId;
+    }
+    jQuery.ajax({
+        type: "post", //请求方式
+        async: false,
+        url: "getCustomerOrUserGps.html", //发送请求地址
+        data: {"gpsId": gpsId},
+        success: function (html) {
+            var bean = eval(html);
+            var resultStr;
+            var html = newCustomerPlan(bean,resultStr);
+            if (bean[0]["loanFlat"] == 2){ //有贷款状态的用户为蓝色，无贷款为绿色
+                iconPath = "../images/icon/map_blue.png";
+            }else{
+                iconPath = "../images/icon/map_green.png";
+            }
+            var wnd = {width:100,height:100,detaX:-100,detaY:-175,html:html};
+            var pointMarker = new RSelfMarker(bean[0]["gpsLng"],bean[0]["gpsLat"],wnd,iconPath,-10,-18,25,25);
+            mapObj.setCenter(bean[0]["gpsLng"],bean[0]["gpsLat"]);
+            mapObj.addMarker(pointMarker);
+            mapObj.refresh();
+        }
+    });
+}
+
+function getMarkeruser(gpsId) {//得到标记的信息用户轨迹
+    mapObj.removeAllGraphics();
+    mapObj.removeAllMarker();
+    var beginTime = document.getElementById("beginTime").value;
+    var endTime = document.getElementById("endTime").value;
+    var startTime = document.getElementById("startTime").value;
+    jQuery.ajax({
+        type: "post", //请求方式
+        async: false,
+        url: "../map/queryActivityLocus.html", //发送请求地址
+        data: {"gpsId": gpsId,"beginTime":beginTime,"startTime":startTime,"endTime":endTime},
+        success: function (html) {
+            var array = eval(html);
+            var arr=new Array();//经纬度坐标数组
+            if (array.length > 0) {
+                for (var i = 0; i < array.length; i++) {
+                    arr.push({Cx:array[i]["gpsLng"],Cy:array[i]["gpsLat"]});
+                    var date=array[i]["update"];
+                    var pointMarker = new RLabelMarker( array[i]["gpsLng"], array[i]["gpsLat"],date ,"../images/icon/map_black.png", -10, -18, 20,20);
+                    //将标注添加入 rmap对象
+                    mapObj.addMarker(pointMarker);
+                }
+            }
+
+            //创建一个图形
+            var shape =  new RLine( arr,3, "#FF0000", 1 );
+            //将图形添加到地图
+            mapObj.addGraphics(shape);
+            mapObj.setCenter(array[0]["gpsLng"],array[0]["gpsLat"]);
+            mapObj.setLevel(13);
+            //刷新地图
+            mapObj.refresh();
+        }
+    });
+}
+
+function gotoPage(page) {  //分页跳转
+    goto(
+            page,
+            urlStr,
+            postJson,
+            function (html) {
+                $(obj).html("");
+                $(obj).html(html);
+            });
+}
+
+</script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.lock-screen.js"></script>
+</body>
+</html>

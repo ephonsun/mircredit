@@ -1,0 +1,180 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑分区</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css">
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			$('select').select();
+			jQuery("#htmltbl").validator();
+			$('#ok').click(function(){
+    			fn.sure()
+    		});
+		
+    		$('#cancel').click(function(){
+    			fn.cancel();
+    		});
+			$('#okAndNew').click(function(){
+    			fn.okAndNew();
+    		});
+			
+			initBelongTo();
+		});
+		
+		var fn = {};
+    	fn.sure = function(){
+    		submit();
+    	};
+    	fn.cancel = function(){
+    		window.returnValue = "";
+    		window.close();
+    	};
+		fn.okAndNew = function(){
+		
+		
+		}
+	
+		//点击之前User
+		function beforeClickUser(treeId, treeNode){
+			if(treeNode.flag == 'D') return false;
+		}
+		function initBelongTo(){
+			var urlUser = "";
+			urlUser = function(){return "/customer/getCusBelongToJson.html?BelongToType=brShareUser&random="+Math.random()*1000000;};	
+			//加载下属树
+			$('#userList').atree({
+					setting: {
+						check: {
+							enable: false,
+							chkboxType: { "Y": "s", "N": "s" }
+						},
+						view: {
+							showIcon: true,
+							dblClickExpand: false
+						},
+						data: {
+							simpleData: {
+								enable: true
+							}
+						},
+						callback: {
+							beforeClick: null,
+							onClick: null,
+							beforeCheck: null,
+							onCheck: null
+						}
+					},
+					url: urlUser,
+					beforeClick: beforeClickUser,
+					okHandler: onClickUser
+				});
+		}
+		
+		//点击User
+		function onClickUser(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#userId').val(nodes[0].id);
+			$('#userText').val(nodes[0].name);
+		}
+		
+		function submit(){
+			var bool = jQuery.validator({ form: 'htmltbl', extend: false});
+    		if(!bool){
+    			return false;
+    		}		
+			var postJson = {};
+			postJson['commPartition.partitionId'] = $('#partitionId').val();
+			postJson['commPartition.partitionName'] = jQuery.trim($('#name').val());
+			postJson['commPartition.partitionDescription'] = jQuery.trim($('#partitionDescription').val());
+			postJson['commPartition.userId'] = $('#userId').val();
+    		jQuery.post("updatePartition.html?random="+Math.random()*1000000,postJson,
+    		function(msg){
+    			if(msg=='0'){
+					window.returnValue = "1";
+    				window.close();
+    			}else if(msg == '-2'){
+    				banger.page.showMessageBox('已存在相同的分区名，请重新输入!');
+    			}else{
+    				banger.page.showMessageBox('编辑分区失败!');
+    			}
+    			
+    		});
+		}
+    </script>
+</head>
+<body>
+    <table class="htmltbl" id="htmltbl">
+        <tbody>
+            <tr>
+                <td class="field" width="100">
+                    <label class="red">*</label>
+                    <label>分区名称：</label>
+                </td>
+                <td>
+                   <div class="ui-div-text" style="width:150px;">
+						<input type="hidden" value="$!commPartition.partitionId" id="partitionId"/>
+                    	<input type="text" class="text" rule="\S" id="name" tips='“分区名称”必须填写' maxlength="10" 
+							value="$!commPartition.partitionName" #if($!commPartition.isBuiltin ==1) Readonly="true" #end/>
+                    </div>
+                </td>
+            </tr>
+			 <tr>
+                <td class="field" width="100">
+                    <label class="red">*</label>
+                    <label>分区版主：</label>
+                </td>
+                <td>
+				<div id="userList" class="dtxt2 fl" style="width: 200px;">
+					 <input type="text" class="dtxt2-txt" readonly="readonly" rule="\S" id="userText" tips="“分区版主”必须填写" #if($!commPartition.userName != 'admin') value="$!commPartition.userName" #end/>
+                    <input id="userId" type="hidden" value="$!commPartition.userId" />
+					<span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                  </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="100">
+                    <label>描述：</label>
+                </td>
+                <td>
+                    <div class="ui-div-textarea" style="height: 100px;">
+                        <textarea class="textarea" id="partitionDescription" style="height: 100px;" onkeyup="this.value=this.value.slice(0, 500)">$!commPartition.partitionDescription</textarea>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <hr />
+    
+    <div class="center">
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" id="ok" value="保存"/>
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" id="cancel" value="取消" />
+    </div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择导入的对应关系</title>    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	.pd { padding: 0 !important; }
+		.ckh { vertical-align: middle; }
+    </style>    
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			//Painting an arrow pointing
+			var th = $('<th width=\'140\' height=\'30\'></th>');
+			var tr = $('<td rowspan=\'' + $('.pointtbl tbody tr').size() + '\' class=\'arrow\'></td>')
+			$('.pointtbl thead tr th:first').after(th);
+			$('.pointtbl tbody tr:first td:first').after(tr);
+			
+			$('select').select();
+		});
+    </script>
+</head>
+
+<body>
+	<table class="bartbl">
+    	<tr>
+        	<td>第 1 步</td>
+        	<td class="over">第 2 步</td>
+        	<td>第 3 步</td>
+        	<td>第 4 步</td>
+        </tr>
+    </table>
+    <h4 class="steptxt">
+    	第2步：导入客户基本设置
+    </h4>
+    
+    <dl style="line-height: 24px; color:gray;">
+        <dt>说明：</dt>
+        <dd>1、系统将按照从【被导入的数据表】到【系统的数据表】，自左而右的列对应关系，导入数据</dd>
+        <dd>2、如果【系统的数据表】中的列，在【被导入的数据表】中没有列对应，则显示为空</dd>
+        <dd>3、您可以在【系统的数据表】中设置与【被导入的数据表】中列的对应关系</dd>
+    </dl>
+    
+    <div style="margin: 30px 0px;">
+    	<table class="pointtbl">
+            <thead>
+                <tr>
+                    <th width="150" height="30">被导入的数据表</th>
+                    <th width="150" height="30">系统的数据表</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td align="left">
+                        <label>客户姓名</label>
+                    </td>
+                    <td class="pd">
+                    	<select>
+                        	<option>客户姓名</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left">
+                        <label>联系电话</label>
+                    </td>
+                    <td class="pd">
+                    	<select>
+                        	<option>联系电话</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left">
+                        <label>备注</label>
+                    </td>
+                    <td class="pd">
+                    	<select>
+                        	<option>备注</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>    
+    <hr />    
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="上一步" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="导入" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" />
+    </div> 
+</body>
+</html>

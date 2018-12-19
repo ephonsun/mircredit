@@ -1,0 +1,29 @@
+<thead>
+    <tr>
+        <th><label title="任务标题">任务标题</label></th>
+        <th><label title="联系目的">联系目的</label></th>
+        <th><label title="开始日期">开始日期</label></th>
+        <th><label title="结束日期">结束日期</label></th>
+        <th><label title="完成情况">完成情况</label></th>
+        <th><label title="分配者">分配者</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($relatedTaskBean in $!tskTaskPage.items)
+    <tr>
+        <td><label #if ($!isDetail=='y') class="ui-link-btn" onclick="detailTsk($!relatedTaskBean.contactId)" #elseif($!relatedTaskBean.isEmergency==1) class="red" #end title="$!relatedTaskBean.contactTitle">$!relatedTaskBean.contactTitle</label></td>
+        <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$!relatedTaskBean.taskPurpose">$!relatedTaskBean.taskPurpose</label></td>
+        <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$date.format("yyyy-MM-dd",$!relatedTaskBean.startDate)">#if($!relatedTaskBean.startDate)$date.format("yyyy-MM-dd",$!relatedTaskBean.startDate)#end</label></td>
+		<td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$date.format("yyyy-MM-dd",$!relatedTaskBean.endDate)">#if($!relatedTaskBean.endDate)$date.format("yyyy-MM-dd",$!relatedTaskBean.endDate)#end</label></td> 	
+        <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$!relatedTaskBean.HasfinishedTask/$!relatedTaskBean.totalTask">$moneyUtil.decimePercent($!relatedTaskBean.percent)%</label></td>
+        <td><label #if($!relatedTaskBean.isEmergency==1) class="red" #end  title="$!relatedTaskBean.assignName">$!relatedTaskBean.assignName</label></td>
+    </tr>
+	#end
+</tbody>
+<tfoot>
+  <tr>
+    <td colspan="6">
+        <div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+    </td>
+  </tr>
+</tfoot>

@@ -1,0 +1,137 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择客户</title>
+  
+  	#styleLink("base")
+  	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/dialog4.1.6/artDialog.source.js?skin=default"></script>
+    <script type="text/javascript" src="${ctx}/js/dialog4.1.6/_doc/highlight/highlight.pack.js"></script>
+    <script type="text/javascript" src="${ctx}/js/dialog4.1.6/_doc/highlight/languages/javascript.js"></script>
+    
+    <script type="text/javascript">
+    	var fn = {};
+		//实时更新可见框架的高度
+		fn.monitor = function(){
+			var iframe = jQuery('iframe:visible')[0];
+			
+			try{
+				iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 150 + 'px';
+			}
+			catch(e){
+			}
+			
+		    setTimeout('fn.monitor()', 100);
+		};
+    	
+    	jQuery(function(){
+    		//菜单鼠标单击和划过效果
+			jQuery('ul.menu li').click(function(){
+				if(jQuery(this).hasClass('active')){
+					return false;
+				}
+				else{
+					jQuery(this).addClass('active').siblings().removeClass('active');
+				}
+			}).hover(
+				function(){
+					if(!jQuery(this).hasClass('active')) jQuery(this).addClass('hover');
+				},
+				function(){
+					jQuery(this).removeClass('hover');
+				}
+			);
+			
+    		//设置第一个菜单项激活
+    		jQuery('ul.menu li').eq(0).click();
+			
+			//实时更新可见框架的高度
+			fn.monitor();
+    	});
+    	
+    	function btnOk(){
+    		var win = $('#frame')[0].contentWindow;
+    		if(win.getCondition)
+    		{
+	    		var json = win.getCondition();
+	    		if(json.id)
+	    		{
+	    			window.returnValue="{\"id\":"+json.id+",\"name\":\""+json.name+"\"}";
+	    			window.close();
+	    		}
+	    		else
+	    		{
+	    			dialog();
+	    		}
+    		}
+    	}
+    	
+    	function saveName(){
+    		var name = $("#resultName").val().replace(/(^\s*)|(\s*$)/g,"");
+    		var win = $('#frame')[0].contentWindow;
+    		var json = win.getCondition();
+    		json["query.queryName"]=name;
+    		if(name)
+    		{
+    			jQuery.post("../advancedCustomer/saveAdvancedQueryTempResult.html?random="+Math.random()*1000000,json,
+					function(data){
+						var jo =  jQuery.parseJSON(data);
+						window.returnValue= window.returnValue="{\"id\":"+jo.id+",\"name\":\""+jo.name+"\"}";
+						window.close();
+						
+				});
+    		}
+    		else
+    		{
+    			banger.page.showMessageBox('搜索名称不能为空');
+    			return false;
+    		}
+    	}
+    	
+    	function dialog(){
+    		art.dialog({
+				title: '搜索名称',
+				padding: '15px',
+				lock: true,
+				esc: false,
+				content: '<label style=\'float: left; margin-right: 5px; line-height: 24px; color: red;\'>*</label><label style=\'float: left; margin-right: 5px; line-height: 24px;\'>名称：</label><div class=\'dtxt1 fl\' style=\'width: 200px;\'><input type=\'text\' id=\'resultName\' class=\'dtxt1-txt\' /></div>',
+				ok: saveName,
+				okVal: '确定',
+				cancel: null,
+				close: null
+			});
+    	}
+    </script>
+</head>
+
+<body style="height: auto !important; height: 0px; min-height: 0px;">
+	<div class="b-common-body1">
+		<div class="l">
+            <div class="l-box">
+                <ul class="menu">
+                    <li><a href="../advancedCustomer/showCustomerPage.html?target=condition" target="frame">高级搜索客户</a></li>
+                    #foreach($query in $queryMenus)
+                    <li><a href="../advancedCustomer/showCustomerPage.html?target=condition&queryId=$!query.userQueryId" target="frame">$!query.queryName</a></li>
+                    #end
+                </ul>
+            </div>
+        </div>
+        <div class="r">
+            <div class="r-box">
+                <iframe id="frame" name="frame" src="../advancedCustomer/showCustomerPage.html?target=condition" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" onclick="btnOk()" value="确定" />
+    	<input type="button" class="btn6 btn6bg3" onclick="javascript:window.close();" value="取消" />
+    </div>
+</body>
+</html>

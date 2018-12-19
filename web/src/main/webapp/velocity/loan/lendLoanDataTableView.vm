@@ -1,0 +1,83 @@
+<div class="loan-view-pad">
+        <span class="view-title">放贷资料#if($loan.crmCustomer.customerName)
+            ($loan.crmCustomer.customerName)
+        #end</span>
+            <span class="fr">$!date.format('yyyy-MM-dd HH:mm:ss',$!loan.createDate)</span>
+        </div>
+<div class="loan-view-box">
+    <div class="loan-view-inner loan-view-lender">
+        <div class="loan-view-border">
+            <table class="datatbl" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th width="35%"><label title="类型">类型</label></th>
+                    <th width="35%"><label title="类型名称">类型名称</label></th>
+                    <th width="30%"><label title="数量">数量</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><img src="../images/public/form.png" width="33" height="30" alt="附件"></td>
+                    <td><label title="附件">附件</label></td>
+                    <td>
+                        #set($form="loanData${loan.crmCustomer.customerId}54")
+                        #if($cusDataOnLoanPerson.get($form))
+                            <a class="ui-link-btn" href="#2"
+                               onclick="showDataList('$!loan.crmCustomer.customerName',4,$!loan.loanId,$!loan.crmCustomer.customerId,5,$cusDataOnLoanPerson.get($form))">
+                                $cusDataOnLoanPerson.get($form)
+                            </a>
+                        #else
+                            0
+                        #end
+                    </td>
+                </tr>
+                <tr>
+                    <td><img src="../images/public/audio.png" width="33" height="30" alt="录音"></td>
+                    <td><label title="录音">录音</label></td>
+                    <td>
+                        #set($audio="loanData${loan.crmCustomer.customerId}52")
+                        #if($cusDataOnLoanPerson.get($audio))
+                            <a class="ui-link-btn" href="#2"
+                               onclick="showDataList('$!jsUtil.escapeJs($!loan.crmCustomer.customerName)',2,$!loan.loanId,$!loan.crmCustomer.customerId,5,$cusDataOnLoanPerson.get($audio))">
+                                $cusDataOnLoanPerson.get($audio)
+                            </a>
+                        #else
+                            0
+                        #end
+                    </td>
+                </tr>
+                <tr>
+                    <td><img src="../images/public/video.png" width="33" height="30" alt="视频"></td>
+                    <td><label title="视频">视频</label></td>
+                    <td>
+                        #set($video="loanData${loan.crmCustomer.customerId}53")
+                        #if($cusDataOnLoanPerson.get($video))
+                            <a class="ui-link-btn" href="#2"
+                               onclick="showDataList('$!jsUtil.escapeJs($!loan.crmCustomer.customerName)',3,$!loan.loanId,$!loan.crmCustomer.customerId,5,$cusDataOnLoanPerson.get($video))">
+                                $cusDataOnLoanPerson.get($video)
+                            </a>
+                        #else
+                            0
+                        #end
+                    </td>
+                </tr>
+                <tr>
+                    <td><img src="../images/public/photo.png" width="33" height="30" alt="照片"></td>
+                    <td><label title="照片">照片</label></td>
+                    <td>
+                        #set($photo="loanData${loan.crmCustomer.customerId}51")
+                        #if($cusDataOnLoanPerson.get($photo))
+                            <a class="ui-link-btn" href="#2"
+                               onclick="showPhotoList(5,$loan.loanId);">
+                                $cusDataOnLoanPerson.get($photo)
+                            </a>
+                        #else
+                            0
+                        #end
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

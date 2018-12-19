@@ -1,0 +1,256 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>落实贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('select').select();
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+            $('table.datatbl').table();
+
+            $("#clear").click(function(){
+                $('.text').val('');
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+                $("select").each(function(){
+                    this.selectedIndex = 0;
+                    $(this).select();
+                });
+            });
+
+            getQueryJson();
+
+            $("#query").click(function(){
+                var postJson = getQueryJson();
+                var urlStr = "${ctx}/loan/confirmLoanListQuery.html?RandNum="+ Math.random();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+                        queryBack(html, 'dataList');
+                        oldPostJson = getQueryJson();
+                    }
+                });
+            });
+
+
+
+            $("#refresh").click(function(){
+                    if(oldPostJson){
+                        goto(
+                                null,
+                                "${ctx}/loan/confirmLoanListQuery.html?RandNum="+ Math.random(),
+                                oldPostJson,
+                                function(html){
+                                    queryBack(html, 'dataList');
+                                });
+                    }
+            });
+
+        });
+
+        var oldPostJson = {};
+
+        function getQueryJson(){
+            if($('#customer').val()=="姓名、电话或身份证"){
+                $('#customer').val("");
+            }
+
+            var postJson = {};
+            postJson['customer']=jQuery.trim($('#customer').val());
+            postJson['loanType'] = jQuery.trim($('#loanType').val());
+            postJson['lendStartDate'] = jQuery.trim($('#lendStartDate').val());
+            postJson['lendEndDate']=jQuery.trim($('#lendEndDate').val());
+            postJson['loanIsCheckout'] = jQuery.trim($('#loanIsCheckout').val());
+            postJson['resultRepayDate'] = jQuery.trim($('#resultRepayDate').val());
+            postJson['monitored'] = jQuery.trim($('#monitored').val());
+            postJson['montype'] = jQuery.trim($('#montype').val());
+            postJson['nomontype'] = jQuery.trim($('#nomontype').val());
+            oldPostJson = postJson;
+
+            if($('#customer').val()==''){
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+            }
+
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "${ctx}/loan/confirmLoanListQuery.html?RandNum="+ Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryBack(html, 'dataList');
+                        });
+            }
+        }
+
+        function queryBack(html, gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+
+            var total = $('#total').val();
+            if(total!=null){
+                $("#recordCount").text(total);
+            }else {
+                $("#recordCount").text(0);
+            }
+        }
+
+        //查看已落实贷款
+        function loanNotConfirmEdit(loanId)
+        {
+        var options = {id: "loanNotConfirmEdit-"+loanId, pid: GetId(), title: "编辑贷款", url: "${ctx}/loan/confirmLoanEdit.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+        tab.add(options);
+        }
+
+        //查看贷款信息
+        function loanConfirmEdit(loanId)
+        {
+            var options = {id: "confirmLoanEdit-"+loanId, pid: GetId(), title: "编辑贷款", url: "${ctx}/loan/confirmLoanEdit.html?isConfirm=isConfirm&RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+            tab.add(options);
+        }
+
+        function loanConfirmView(loanId)
+        {
+            var options = {id: "loanConfirmView-"+loanId, pid: GetId(), title: "查看贷款", url: "${ctx}/loan/confirmLoanEdit.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+            tab.add(options);
+        }
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl" >
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>客户：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input id="customer" type="text" class="text" />
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>贷款类型：</label>
+                </td>
+                <td width="17%">
+                    <select id="loanType">
+                        <option></option>
+						#foreach($!dklx in $!checkBoxMessage.get("DKLX"))
+							<option value ="$!dklx.dictionaryKey" >&nbsp;$!dklx.dictionaryValue</option>
+						#end
+                    </select>
+                </td>
+                <td class="field" width="8%">
+                	<label>放贷时间：</label>
+                </td>
+                <td colspan="2">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                                <td width="120">
+                                    <div class="ui-div-text">
+                                        <input id="lendStartDate" type="text" readonly="readonly" class="text datepicker" />
+                                        <i class="date"></i>
+                                    </div>
+                                </td>
+                                <td width="20"><label>-</label></td>
+                                <td width="120">
+                                    <div class="ui-div-text">
+                                        <input id="lendEndDate" type="text" readonly="readonly" class="text datepicker" />
+                                        <i class="date"></i>
+                                    </div>
+                                </td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+            </tr>
+             <tr>
+            	<td class="field" width="8%">
+                	<label>贷后状态：</label>
+                </td>
+                <td width="17%">
+                    <select id="loanIsCheckout">
+                        <option></option>
+                        <option value ="6" >&nbsp;待催收</option>
+                        <option value ="7" >&nbsp;已还款</option>
+                    </select>
+                </td>
+                 <td class="field" width="8%">
+                     <label>决议还款日：</label>
+                 </td>
+                 <td width="7%">
+                     <select id="resultRepayDate">
+                         <option ></option>
+                         <option value="5">5</option>
+                         <option value="10">10</option>
+                         <option value="15">15</option>
+                         <option value="20">20</option>
+						 <option value="21">21</option>
+                         <option value="25">25</option>
+                     </select>
+                 </td>
+                 <td class="field" width="8%">
+                 <label>近期已监控：</label>
+             </td>
+                 <td width="17%">
+                     <select id="monitored">
+                         <option ></option>
+                         <option value="1">是</option>
+                         <option value="0">否</option>
+                     </select>
+                 </td>
+                 <td class="field" width="8%">
+                     <label>未完成监控类型：</label>
+                 </td>
+                 <td width="17%">
+                     <select id="nomontype">
+                         <option ></option>
+                         <option value="1">首次监控</option>
+                         <option value="0">半年监控</option>
+                         <option value="2">电话监控</option>
+                     </select>
+                 </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl">
+            贷款(<label id="recordCount" class="green">$!recordCount</label>)
+        </span>
+        <input id="clear" type="button" class="ui-input-btn" value="清空" />
+        <input id="query" type="button" class="ui-input-btn" value="搜索" />
+    </div>
+	<div class="action-bar">
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <table id="dataList" class="datatbl">
+        #parse("/velocity/loan/confirmLoanListTable.vm")
+    </table>  
+</body>
+  
+</html>

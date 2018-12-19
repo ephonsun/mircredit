@@ -1,0 +1,107 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看日程</title>
+	<base target="_self"></base>
+    #styleLink("base")
+
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript">
+		function dial(number,cusId){
+			window.parent.dialogArguments.dial(number,cusId);
+		}
+	</script>
+</head>
+
+<body style="padding-bottom: 0;">
+<form id="taskForm" name="taskForm" method="post" action="">
+	<table class="viewtbl" cellpadding="0" cellspacing="0">
+		<thead>
+        	<tr>
+            	<th height="20" align="left" colspan="4">查看日程<hr /></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="7%" class="field">
+                    <label>客户：</label>
+                </td>
+                <td colspan="3">
+				   <label class="fl">$!customer.customerName</label>
+			       <div class="icon">
+                    	#if($!customer.defaultPhoneType=='1')
+                        	<i class="i phone" onclick="dial('$!customer.mobilePhone1','$!customer.customerId')" title="拨号">phone</i>	
+                        #elseif($!customer.defaultPhoneType=='2')
+                        	<i class="i phone" onclick="dial('$!customer.mobilePhone2','$!customer.customerId')" title="拨号">phone</i>
+                        	
+                        #elseif($!customer.defaultPhoneType=='3')
+                        	<i class="i phone" onclick="dial('$!customer.phone','$!customer.customerId')" title="拨号">phone</i>
+                        	
+                        #elseif($!customer.defaultPhoneType=='4')
+                        	<i class="i phone" onclick="dial('$!customer.fax','$!customer.customerId')" title="拨号">phone</i>
+                        #end
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="7%" class="field">
+                    <label>任务标题：</label>
+                </td>
+                <td colspan="3">
+                	<label title="$!tskTask.taskTitle">$!tskTask.contactTitle</label>
+                </td>
+            </tr>
+			<tr>
+                <td width="7%" class="field">
+                    <label>联系目的：</label>
+                </td>
+                <td colspan="3">
+                	<label title="$!tskTask.contactPurposeName">$!tskTask.contactPurposeName</label>
+                </td>
+            </tr>
+            <tr>
+                <td width="7%" class="field">
+                    <label>开始日期：</label>
+                </td>
+                <td>
+                	$!date.format("yyyy-MM-dd",$!tskTask.startDate)
+                </td>
+				<td width="7%" class="field">
+                    <label>结束日期：</label>
+                </td>
+                <td>
+                	$!date.format("yyyy-MM-dd",$!tskTask.endDate)
+                </td>
+            </tr>
+            <tr>
+                <td width="7%" class="field">
+                    <label>任务概述：</label>
+                </td>
+                <td colspan="3">
+                	<label style="line-height: 20px;" title="$!subString.replaceRemark($!tskTask.remark)">$!tskTask.remark</label>
+                </td>
+            </tr>
+			<tr>
+                 <td class="field" width="8%">
+                    <label>是否紧急：</label>
+                </td>
+                <td colspan="3">
+					<input type="checkbox" class="checkbox" disabled="true" #if($!tskTask.isEmergency==1) checked="true" #end/>
+                    <label for="isEmergency">紧急任务</label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr />
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="javascript:window.close();"/>
+    </div>
+</form>
+</body>
+</html>

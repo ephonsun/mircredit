@@ -1,0 +1,300 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建知识</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+		div.mt { margin-top: 20px; }
+		.clear {
+            clear: both;
+        }
+    </style>
+    <script type="text/javascript" src="${ctx}/js/ueditor/ueditor.config.js"></script>
+	<script type="text/javascript" src="${ctx}/js/ueditor/ueditor.all.js"></script>
+</head>
+
+<body>
+<form id="addLeafPdtProduct" name="form1">
+	<input type="hidden" id="txtSNodeId" value="$!pPdtLibrary.libraryId"/>
+	<input type="hidden" id="txtSNodeName" value="$!pPdtLibrary.libTitle"/>
+	
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                    <label class="red">*</label>
+                	<label>知识标题：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" maxlength="60" id="txtLibTitle" rule="\S" tips='"知识标题"必须填写'/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                    <label class="red">*</label>
+                	<label>知识编号：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" maxlength="10" id="txtLibNo" rule="\S" tips='"知识编号"必须填写'/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                    <label class="red">*</label>
+                	<label>所属分类：</label>
+                </td>
+                <td width="17%">
+                	<div id="class" class="ui-div-text">
+                		<input type="text" class="text" value="$!pPdtLibrary.libTitle" rule="\S" tips='"所属分类"必须填写'/>
+                		<i class="ddl">&nbsp;</i>
+                	</div>
+                </td>
+                <td colspan="2"></td>
+    		<tr>
+        </tbody>
+    </table>
+    
+    <div class="bold" style="border-bottom:1px solid #b1b1b1; line-height:30px;">
+        <label class="red">*</label>
+    	知识内容
+    </div>
+    <div class="mt" >
+	    <script type="text/plain" id="txtLibContent">
+		</script>
+    </div>
+    <div class="clear"></div>
+    
+    <table class="viewtbl">
+    	<tbody>
+          <tr>
+              <td width="80">
+                  <label>上传附件：</label>
+              </td>
+              <td colspan="3">
+              		<input type="file" name="fileInput" id="fileInput" />
+
+					<div id="fileQueue"></div>
+              </td>
+          </tr>
+        </tbody>
+    </table>
+    <hr />
+    
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" id="btnSave"/>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:tab.close(GetId(), false);"/>
+    </div>
+</form>
+    #scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.ddmenuSelect-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+<script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+
+
+<!--保存校验  Zhangfp-->
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+
+<script type="text/javascript">
+    //获取当前url根节点(micro)
+    var urlRef = (window.location.href).replace('http://', '');
+    var urlStr = urlRef.substring(urlRef.indexOf('/'), urlRef.indexOf('/pdtLibrary'));
+
+    /**
+     * 加载ue编辑器
+     */
+    var ue=new UE.ui.Editor({
+        minFrameHeight:343,
+        wordCount:true,
+        maximumWords:5000,
+        imageUrl: urlStr+"/imageUpload",
+        imagePath: urlStr+"/showImage?fullPath=",
+        imageManagerUrl: urlStr+"/imageManager",
+        imageManagerPath: urlStr+"/showImage?fullPath=",
+    wordOverFlowMsg:'<span style="color:red;">你输入的字符个数已经超出最大允许值，服务器可能会拒绝保存！</span>'
+
+    });
+    ue.render('txtLibContent');
+
+    ue.addListener("selectionchange", function () {
+        var state = ue.queryCommandState( "source" );
+        var btndiv = document.getElementById( "btns" );
+        if ( btndiv && state == -1 ) {
+            disableBtn( "enable" );
+        }
+        //操作编辑器时，隐藏所属分类下拉框
+        if(jQuery('.ui-ddmenuSelect') && jQuery('.ui-ddmenuSelect').is(':visible')){
+            jQuery('.ui-ddmenuSelect').css({'display':'none'});
+        }
+    });
+    /**
+     * 关闭页卡确认框
+     */
+    function cfirm(){
+        if(sccCount!=count){
+            if(confirm('正在上传知识附件，您确认要关闭新建知识页卡吗？')) return true;
+        }else return true;
+    }
+
+    /**
+     * 上传附件
+     */
+    function uploadAttachment(){
+        var fileUpload = jQuery('input[name=fileInput]');
+        var isUpload = false;
+        if(fileUpload!=undefined){
+            jQuery('input[name=fileInput]').each(function(){
+                var fileQueue = jQuery('#fileQueue').text();
+                if(fileQueue!=""){
+                    jQuery(this).uploadifyUpload();
+                    isUpload = true;
+                }
+            });
+        }
+        //如果没有附件需要上传
+        if(!isUpload){
+            saveData();
+        }
+    }
+
+    /**
+     * ajax验证知识数据
+     */
+    function verifyData(){
+        var libraryId = jQuery("#txtSNodeId").val();
+        //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+        jQuery.ajax({
+            type: "post",
+            url: "verifyLeafPdtLibrary.html",
+            data: {'pdtLibrary.libraryId': -1,
+                'pdtLibrary.parentId': libraryId,
+                'pdtLibrary.isLeaf': 1,
+                'pdtLibrary.isDel': 0,
+                'pdtLibrary.libClip': jQuery.trim(jQuery("#txtLibClip").val()),
+                'pdtLibrary.libContent': ue.getContent(),
+                'pdtLibrary.libNo': jQuery("#txtLibNo").val(),
+                'pdtLibrary.libTitle': jQuery.trim(jQuery("#txtLibTitle").val()),
+                'pdtLibrary.remark': ''
+            },
+            success: function(data){
+                verifyResult(data);
+            }
+        });
+    }
+    function verifyResult(msg){
+        if(msg == 'SUCCESS'){
+            //btnSave保存按钮禁用
+            jQuery("btnSave").attr("disabled","disabled");
+            //验证数据是否正确，通过才上传附件
+            uploadAttachment();
+        }else{
+            banger.page.showMessageBox(msg);
+        }
+    }
+
+    /**
+     * 保存知识数据
+     */
+    function saveData(){
+        var libraryId = jQuery("#txtSNodeId").val();
+        var arr = [];
+        jQuery("input[name='fileAttachment']").each(function(i){
+            arr[i] = jQuery(this).val();
+        });
+        fileAttachments = arr.join(":");
+        //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+        jQuery.ajax({
+            type: "post",
+            url: "saveLeafPdtLibrary.html",
+            data: {'pdtLibrary.libraryId': -1,
+                'pdtLibrary.parentId': libraryId,
+                'pdtLibrary.isLeaf': 1,
+                'pdtLibrary.isDel': 0,
+                'pdtLibrary.libClip': jQuery.trim(jQuery("#txtLibClip").val()),
+                'pdtLibrary.libContent': ue.getContent(),
+                'pdtLibrary.libNo': jQuery("#txtLibNo").val(),
+                'pdtLibrary.libTitle': jQuery.trim(jQuery("#txtLibTitle").val()),
+                'pdtLibrary.remark': '',
+                'fileAttachments':fileAttachments
+            },
+            success: function(data){
+                saveResult(data);
+            }
+        });
+    }
+    function saveResult(msg){
+        if(msg == 'SUCCESS'){
+            tab.close(GetId(), true);
+        }else{
+            banger.page.showMessageBox(msg);
+        }
+    }
+
+    function saveNext() {
+        saveData();
+    }
+
+
+
+    jQuery(function(){
+        codeInput("#txtLibNo");
+        jQuery('#addLeafPdtProduct').validator();
+        /**
+         * 加载知识分类树
+         */
+        jQuery('#class').ddMenuSelect({
+            id: 'ztree',
+            url: 'loadPdtLibraryTreeJson.html',
+            onClick: function(e, treeId, treeNode){
+                jQuery('#class input[type=\'text\']').val(treeNode.name);
+                jQuery("#txtSNodeId").val(treeNode.id);
+                jQuery("#txtSNodeName").val(treeNode.name);
+            }
+        });
+
+        jQuery("#btnSave").click(function(){
+            var reg = new RegExp("[\r\t\n]", "g");
+            var bool = jQuery.validator({form : 'addLeafPdtProduct'});
+            if(!bool){
+                return false;
+            }
+            if(!ue){
+            	return false;
+            }
+            if(ue.getContentTxt().replace(reg,"").length >5000){
+                return false;
+            }
+            if(ue.getContentTxt().length <1 && ue.hasContents()!=true){
+                banger.page.showMessageBox('"知识内容"必须填写');
+                return false;
+            }
+            verifyData();
+        });
+
+        setFileUpload('../pdtLibrary/uploadPdtLibraryAttachment.html');//渲染附件上传功能
+
+    });
+
+
+
+    //验证知识编号指定的字符
+//    function clearIllegalChar(obj){
+//        if(event.keyCode!=37 && event.keyCode!=39 ){
+//            obj.value = obj.value.replace(/[^\d\w_-]/g,"");
+//        }
+//    }
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>联系记录</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	div.mt { margin-top: 0 !important; }
+    </style>
+</head>
+<body>
+	<input type="hidden" name="contactId" id="tskTaskId" value="$!contactId"/>
+	<input type="hidden" value="$!tskCusId" name="tskCusId" id="tskCusId"/>
+    <div class="search-bar mt">
+        <span class="fl bold">
+            "$!tskCustomerName"的联系记录(<label class="green">$!count</label>)
+        </span>
+    </div>
+    
+    <table class="datatbl" id="recTab">
+       #parse("/velocity/record/tskRecordListTab.vm")
+    </table>
+</body>    
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#recTab').table();	
+	});
+	//分页跳转
+   	function gotoPage(page)
+	{
+		var contactId = $("#tskTaskId").val();
+		var tskCusId=$("#tskCusId").val();
+		var url;
+		if(tskCusId == 0){
+			var number = '$!tskCustomerName';
+			url = "showRecordListForTsk.html?fenye=1&number="+ number+"&contactId="+contactId +"&random="+Math.random();
+		}else{
+			url = "showRecordListForTsk.html?fenye=1&customerId="+ tskCusId+"&contactId="+contactId +"&random="+Math.random();
+		}
+		goto(page,url,{
+			"page.currentPage":page
+		},function(html){
+				refreshGrid('recTab',html);
+				$('#recTab').table();	
+			}
+		);
+	}
+	//刷新
+	function refreshGrid(gridId,html)
+	{
+		$('#' + gridId).html(html).table();
+	}
+	
+	//播放录音
+	function play(obj,id,name,path,fileSize,fileId){
+		$(obj).parents('tr').dblclick();
+		jQuery.post("../data/isExistFileById.html", {"fileId": fileId}, function(result){
+			if(result == '0'){
+				banger.page.showMessageBox({"type":"error","content":"文件不存在！"});
+				return;
+			}else{
+				window.parent.showAudioNoRemarkDiv(fileId);//jwplay播放器
+				//jQuery.post("playVideo.html", {"recordInfo.fileName":name,"recordInfo.filePath":path}, function(result){
+        		//	new window.video.create(id, 310, 60,"../Records/"+result, obj);
+        		//});
+			}
+		});
+
+	}
+</script>
+</html>

@@ -1,0 +1,180 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>PAD品牌列表</title>
+    
+    #styleLink("base")
+    <style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+		function setstate(){
+			$('.listtbl tbody tr:first a.up').unbind();
+			$('.listtbl tbody tr:first a.up').removeAttr("href");
+			$('.listtbl tbody tr:last a.down').unbind();
+			$('.listtbl tbody tr:last a.down').removeAttr("href");
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+		}
+    	jQuery(function(){
+    		$('#tabs').easytabs();
+			jQuery("#loanType").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		setstate();
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		
+		function addData(){
+			var bool = jQuery.validator({ form: 'loanType', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+				jQuery.ajax({
+				    type: "post",
+				    url: "addPadBrands.html",
+				    data: {'brand.brandTypeName':jQuery.trim($("#loanTypeName").val())},
+				    //请求成功后的回调函数有两个参数
+				    success: function(data, textStatus){
+				 		addResult(data);
+				    }
+				});
+		}
+		function addResult(msg){
+		    if(msg=="exists"){
+              banger.page.showMessageBox("已存在相同的选项！");
+		    }
+		    else if(msg=="SUCCESS"){
+		     document.location.href = "padTypeList.html?random=" + Math.random()*1000;
+		    }
+		    else{
+		      banger.page.showMessageBox("新增失败！");
+		    }
+		}
+		
+		function moveData(vid, vmoveType){
+			 jQuery.ajax({
+				type: "post",
+				url: "movePadBrands.html",
+				data: {'brand.brandTypeId': vid, moveType: vmoveType},
+				success: function(){
+                  document.location.href = "padTypeList.html?random=" + Math.random()*1000;
+				}
+			});
+		}
+		
+		function updateData(code){
+			var url = "toUpdatePadBrands.html?brand.brandTypeId=" + code + "&random=" + Math.random()*1000;
+			var result=banger.page.openDialog(url,"编辑品牌",600,220);
+			if(result == 1){
+				document.location.href = "padTypeList.html?random=" + Math.random()*1000;
+			}
+		}
+
+        function deleteType(vid,loanTypeName) {
+            if (confirm('您确定要删除选项“'+loanTypeName+'”吗？')) {
+                jQuery.ajax({
+                    type: "post",
+                    url: "deletePadBrands.html",
+                    data: {'brand.brandTypeId': vid},
+                    success: function(data){
+                        document.location.href = "padTypeList.html?random=" + Math.random()*1000;
+                    }
+                });
+            }
+        }
+        
+        function isActivedPad(brandTypeId,isActived){
+        	var str="启用";
+        	if(isActived==0){
+        		str="停用";
+        	}
+        	if (confirm('您确定要'+str+'该选项吗？')) {
+                jQuery.ajax({
+                    type: "post",
+                    url: "isActivedPad.html",
+                    data: {'brand.brandTypeId': brandTypeId,'brand.isActived':isActived,padFlag:1},
+                    success: function(){
+                        document.location.href = "padTypeList.html?random=" + Math.random()*1000;
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+
+<body>
+	<form id="loanType" name="loanType" action="" method="post">
+		<table class="viewtbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" class="field"><label>名称：</label></td>
+	            	<td><label>PAD品牌</label></td>
+	            	<td width="70" class="field"><label>字段类型：</label></td>
+	            	<td><label>系统级</label></td>
+	            	<td width="70" class="field"><label>数据类型：</label></td>
+	            	<td><label>单选下拉框</label></td>
+	            </tr>
+	        </tbody>
+	    </table>
+		<div style="margin: 10px 0px;"><label>选项列表</label></div>
+		<div style="border: 1px solid #ccc; padding: 10px;">
+	    	<div class="sz" style="text-align: left;">
+	        	<label class="fl red">*</label>
+	        	<label class="fl">新选项：</label>
+	        	<div class="dtxt2 fl" id="recDiv" style="width: 150px; margin-right: 5px;">
+	            	<input type="text" name="loanTypeName" id="loanTypeName" class="dtxt2-txt" maxlength="20" rule="\S" tips="“品牌”必须填写" />
+	            </div>
+                <input type="text" style="display:none">
+	            <input type="button" value="添加" class="btn1 fl" onclick="addData();" />
+	        </div>
+	    	<table class="listtbl" cellpadding="0" cellspacing="0">
+	            <thead>
+	                <tr>
+	                    <th>选项名称</th>
+	                    <th width="150">操作</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	            	#foreach($brand in $!brandList)
+	                <tr>
+	                    <td><label>$brand.brandTypeName</label></td>
+	                    <td width="150">
+	                        <a class="slink" href="javascript:void(0);" onclick="updateData('$brand.brandTypeId')">编辑</a>
+	                        <a class="slink" href="javascript:void(0);" onclick="deleteType('$brand.brandTypeId','$brand.brandTypeName')">删除</a>
+	                        <a href="javascript:void(0);" class="slink up" onclick="moveData('$brand.brandTypeId','Up')">上移</a>
+	                        <a href="javascript:void(0);" class="slink down" onclick="moveData('$brand.brandTypeId','Down')">下移</a>
+	                        #if($brand.isActived==1)
+	                        	<a href="javascript:void(0);" class="slink" onclick="isActivedPad('$brand.brandTypeId',0)">停用</a>
+	                        #else
+	                        	<a href="javascript:void(0);" class="slink" onclick="isActivedPad('$brand.brandTypeId',1)">启用</a>
+	                        #end
+	                    </td>
+	                </tr>
+	                #end
+	            </tbody>
+	        </table>
+	    </div>
+	    <div class="halign" style="margin-top: 20px;">
+	       <input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+	    </div>
+	</form>
+</body>
+</html>
+

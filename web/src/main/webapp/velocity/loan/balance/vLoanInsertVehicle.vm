@@ -1,0 +1,122 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加机动车</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<style tyle="text/css">
+		html, body{ overflow:hidden !important; }
+	</style>
+    #scriptLink("core")
+    #scriptLink("page")
+    
+    <!--保存校验  Zhangfp-->
+     <!--保存校验  Zhangfp-->
+     <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+ 	 <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+     <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+   <script type="text/javascript">
+     jQuery(document).ready(function () {
+			jQuery('#asset').validator();
+			jQuery("#btnOk").click(function () {
+              
+                var bool = jQuery.validator({form:'asset',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }   
+                //执行后台数据库数据交互操作,执行成功则界面执行交换操作
+                jQuery.ajax({
+                    type: "post",
+                    url: "${ctx}/loan/insertVehicle.html",
+                    data: $("#asset").serialize(),
+                    success: function (data) {
+                        var json = eval( "(" + data + ")" );
+						if(json.success){
+							window.close();
+						  window.returnValue="success";
+						}
+                    }
+                });
+            });
+
+        });
+		//验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+     </script>	 
+    
+</head>
+
+<body style="height:220px;">
+  <form id="asset" method="post">
+  	 <input type="hidden" value="$!loanBalanceId" id="loanBalanceId" name="lnLoanBalanceVehicle.loanBalanceId">
+	 <input type="hidden" value="$!asset.loanBalanceVehicleId" id="loanBalanceAssetId" name="lnLoanBalanceVehicle.loanBalanceVehicleId">
+      <table class="htmltbl" style="table-layout:auto;width:100%">
+          <tbody>
+             <tr>
+                  <td class="field" width="8%">
+                      <label>购买日期：</label>
+                  </td>
+				  <td>
+                     <div class="ui-div-text">
+                            <input type="text" value="$!asset.buyDate" class="text datepicker" name="lnLoanBalanceVehicle.buyDate" readonly="readonly" id="endDate" />
+                            <i class="date"></i>
+                        </div>
+                  </td>    
+              </tr>
+              <tr>
+                  <td class="field" width="8%">
+                      <label>车辆状况：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtnum">
+                          <input type="text"  name="lnLoanBalanceVehicle.status" value="$!asset.status" intFlag="true" class="text" maxlength="6"/>
+                      </div>
+                  </td>              
+              </tr>
+              <tr>
+                  <td class="field" width="8%" >
+                      <label>单价：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text"  name="lnLoanBalanceVehicle.price" value="$!asset.price"  maxlength="20"/>
+                      </div>
+                  </td>              
+              </tr>
+				<tr>
+                  <td class="field" width="8%" >
+					 <label class="red">*</label>
+                      <label>车牌：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text" rule="\S"  name="lnLoanBalanceVehicle.vehicleNo" value="$!asset.vehicleNo" tip="车牌不能为空" maxlength="20"/>
+                      </div>
+                  </td>              
+              </tr>
+				<tr>
+                  <td class="field" width="8%" >
+                      <label>其他：</label>
+                  </td>
+                  <td>
+                      <div class="ui-div-text" id="schtxtaddr">
+                          <input type="text" class="text"  name="lnLoanBalanceVehicle.note" value="$!asset.note"  maxlength="40"/>
+                      </div>
+                  </td>              
+              </tr>
+              
+          </tbody>
+      </table> 
+    </form> 
+   <hr />
+    <div class="center">
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="确定" id="btnOk"/>
+    	<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" onclick="javascript:window.close()"/>
+    </div>
+</body>
+</html>

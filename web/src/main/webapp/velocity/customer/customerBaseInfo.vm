@@ -1,0 +1,812 @@
+﻿<table class="viewtbl" cellpadding="0" cellspacing="0">
+    <tbody>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>客户姓名：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" rule="\S" tips='“客户姓名”必须填写' class="dtxt1-txt"  name="crmCustomer.customerName" value="$!crmCustomer.customerName" id="cusName" maxlength="20" onchange="onSexblur('cus')"/>
+                </div>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>性别：</label>
+            </td>
+            <td width="18%">
+                <select name="crmCustomer.sex" rule="\S" tips='“性别”必须填写'  id="cusSex" onchange="onSexblur('sex')">
+                    <option ></option>
+                	<option value="男">男</option>
+                	<option value="女">女</option>
+                </select>
+            </td>
+            <td width="7%" class="field">
+                <label>称谓：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.customerTitle" value="$!crmCustomer.customerTitle" id="nickName" maxlength="22"/>
+                </div>
+            </td>
+            <td rowspan="4" valign="top" align="center">
+                <div class="avatar" id="headshow" headPath="$!crmCustomer.headshow">
+                    <img src="" />
+                </div>
+                <div class="addavatar">
+                    <label>更改头像</label>
+                    <input type="file" name="headImage" id="headImage" class="file" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>客户编号：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1" id="divCustomerNo" >
+                    <input type="text" rule="\S" tips='“客户编号”必须填写' class="dtxt1-txt" name="crmCustomer.customerNo" value="$!crmCustomer.customerNo" id="customerNo" maxlength="20"/>
+                </div>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>客户类型：</label>
+            </td>
+            <td width="18%">
+                <select name="crmCustomer.customerTypeId"  rule="\S" tips='“客户类型”必须填写' id="customerTypeId">
+                    <option ></option>
+                    #foreach($cusType in $cd.getCusTypes())  
+                	<option value ="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+                	#end
+                </select>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>所处行业：</label>
+            </td>
+            <td width="18%">
+                <select name="crmCustomer.customerIndustryId"  rule="\S" tips='“所处行业”必须填写' id="customerIndustryId">
+                    <option ></option>
+                    #foreach($cusIndustry in $cd.getCusIndustry())  
+                	<option value ="$cusIndustry.customerIndustryId" >$cusIndustry.customerIndustryName</option>
+                	#end
+                </select>
+            </td>
+        </tr>
+        <tr>
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>证件类型：</label>
+            </td>
+			<td width="18%">
+                <select name="crmCustomer.credentialTypeId"  rule="\S" tips='“证件类型”必须填写' id="credentialTypeId">
+    				<option ></option>
+    				#foreach($credentialType in $cd.getCredentialType())  
+                    	<option value ="$credentialType.credentialTypeId" >$credentialType.credentialTypeName</option>
+    				#end
+				</select>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>证件号码：</label>
+            </td>
+            <td colspan="3">
+                <div class="dtxt1">
+                    <input type="text" rule="\S" tips='“证件号码”必须填写' class="dtxt1-txt" name="crmCustomer.idCard" value="$!crmCustomer.idCard" id="idCard" maxlength="20" onBlur="iDCardExitEvent('idCard')"/>
+                </div>
+            </td>                
+        </tr>
+		<tr>
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>生日：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt2">
+                    <input type="text" class="validate[custom[date]] dtxt2-txt"  rule="\S" tips='“生日”必须填写' readonly="readonly" id="birthday" name="crmCustomer.birthday" value="$!date.format('yyyy-MM-dd',$!crmCustomer.birthday)" onblur="onBirthdayExit()"/>
+                    <span class="dtxt2-date"></span>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>年龄：</label>
+            </td>
+            <td width="18%">
+                <label name="crmCustomer.age" value="$!crmCustomer.age" id="age" intFlag="true">
+                #if(($!crmCustomer.age)&&($!crmCustomer.age>0)&&($!crmCustomer.age<=120))
+                	$!crmCustomer.age
+                	<label>周岁</label>
+                #end
+                </label>
+            </td>
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>学历：</label>
+            </td>
+			<td width="18%">
+				<select name="crmCustomer.educationalHistoryId" rule="\S" tips='“学历”必须填写' id="educationalHistoryId">
+				<option ></option>
+				#foreach($educationalHistory in $cd.getEducationalHistory())  
+                	<option value ="$educationalHistory.educationalHistoryId" >$educationalHistory.educationalHistoryName</option>
+				#end
+                </select>
+            </td>
+		</tr>
+		<tr>
+			<!--户籍所在地，住宅属性，家庭地址-->
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>户籍所在地：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.censusRegister" rule="\S" tips='“户籍所在地”必须填写'  value="$!crmCustomer.censusRegister" id="address" maxlength="30"/>
+                </div>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>住宅属性：</label>
+            </td>
+            <td width="18%">
+                <select id="houseatt" name="crmCustomer.houseatt" maxlength="20" rule="\S" tips='“住宅属性”必须填写' >
+                    <option ></option>
+                    #foreach($!msg in $!checkBoxMessage.get("CUSTOMER_HOUSEATT"))
+                        <option #if($!crmCustomer.houseatt == $!msg.dictionaryKey)selected #end value="$!msg.dictionaryKey">$!msg.dictionaryValue</option>
+                    #end
+                </select>
+            </td>
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>户籍地址：</label>
+            </td>
+			<td colspan="3">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.address"  rule="\S" tips='“家庭地址”必须填写'  value="$!crmCustomer.address" id="address" maxlength="50"/>
+                </div>
+            </td> 				
+		</tr>
+        <tr>
+			<!--居住状况，居住地址邮编，居住地址-->
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>居住状况：</label>
+            </td>
+            <td width="18%">
+                <select name="crmCustomer.livingConditionId" id="livingConditionId" rule="\S" tips='“居住状况”必须填写' >
+                    <option ></option>
+                    #foreach($livingCondition in $cd.getLivingCondition())
+                        <option value ="$livingCondition.livingConditionId" >$livingCondition.livingConditionName</option>
+                    #end
+                </select>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>居住地址邮编：</label>
+            </td>
+            <td>
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.dwellCode"  rule="\S" tips='“居住地址邮编”必须填写' value="$!crmCustomer.dwellCode" id="dwellCode" maxlength="50" onkeyup="value=value.replace(/[^\d.]/g,'')"/>
+                </div>
+            </td>
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>现居住地址：</label>
+            </td>
+			<td colspan="3">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.livingAddress" rule="\S" tips='“居住地址”必须填写'  value="$!crmCustomer.livingAddress" id="livingAddress" maxlength="50"/>
+                </div>
+            </td>
+		</tr>
+		<tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>工作单位：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.company" rule="\S" tips='“工作单位”必须填写' value="$!crmCustomer.company" id="company" maxlength="22"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>单位性质：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.unitProperty" value="$!crmCustomer.unitProperty" id="unitProperty" maxlength="22"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>工作岗位：</label>
+            </td>
+            <td width="18%">
+                <select id="position" name="crmCustomer.position" maxlength="20"  rule="\S" tips='“工作岗位”必须填写' >
+                    <option ></option>
+                    #foreach($!msg in $!checkBoxMessage.get("CUSTOMER_POSITION"))
+                        <option #if($!crmCustomer.position == $!msg.dictionaryKey)selected #end value="$!msg.dictionaryKey">$!msg.dictionaryValue</option>
+                    #end
+                </select>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>工作年限：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.workingSeniority" value="$!crmCustomer.workingSeniority" id="workingSeniority" maxlength="22" onkeyup="value=value.replace(/[^\d.]/g,'')"/>
+                </div>
+            </td>
+			
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>职称：</label>
+            </td>
+            <td width="18%">
+                <select id="rank" name="crmCustomer.rank" maxlength="20"  rule="\S" tips='“职称”必须填写'>
+                    <option ></option>
+                    #foreach($!msg in $!checkBoxMessage.get("CUSTOMER_RANK"))
+                        <option #if($!crmCustomer.rank == $!msg.dictionaryKey)selected #end value="$!msg.dictionaryKey">$!msg.dictionaryValue</option>
+                    #end
+                </select>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>职业：</label>
+            </td>
+            <td width="18%">
+                <select id="occupation" name="crmCustomer.occupation" maxlength="20"  rule="\S" tips='“职业”必须填写' >
+                    <option ></option>
+                    #foreach($!msg in $!checkBoxMessage.get("CUSTOMER_OCCUPATION"))
+                        <option #if($!crmCustomer.occupation == $!msg.dictionaryKey)selected #end value="$!msg.dictionaryKey">$!msg.dictionaryValue</option>
+                    #end
+                </select>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>工作起始年份：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.bgnyear" rule="[1-9]{1}[0-9]{3}" tips='“工作起始”必须是年份（2017）' value="$!crmCustomer.bgnyear" id="occupation" maxlength="4" onkeyup="value=value.replace(/[^\d.]/g,'')"/>
+                </div>
+            </td>
+            <td width="7%" class="field">
+                <label>单位电话：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.worktel" value="$!crmCustomer.worktel" id="worktel" maxlength="22"/>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>客户简介：</label>
+            </td>
+            <td colspan="7">
+                <div class="dtxtarea1">
+                    <textarea style="height: 80px; border: 0;" name="crmCustomer.remark" id="remark" maxlength="2000">$!crmCustomer.remark</textarea>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+ <hr />
+<table class="htmltbl" cellpadding="0" cellspacing="0">
+    <tbody>
+		<tr>
+			<td width="7%" class="field">
+                <label class="red">*</label>
+                <label>婚姻状况：</label>
+            </td>
+			<td width="18%">
+                <select name="crmCustomer.maritalStatusId" id="maritalStatusId"  rule="\S" tips='“婚姻状况”必须填写'>
+                	<option ></option>
+					#foreach($maritalStatus in $cd.getMaritalStatus())  
+						<option value ="$maritalStatus.maritalStatusId" >$maritalStatus.maritalStatusName</option>
+					#end
+				</select>
+            </td>
+            <td colspan="6" width="75%"></td>
+		</tr>
+    </tbody>
+</table>
+<div id="spouseDiv" style="display: none">
+    <table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody >
+            <tr>
+                <!--配偶姓名，身份证号码，手机-->
+                <td width="7%" class="field">
+                    <label class="red">*</label>
+                    <label>配偶姓名：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseName" value="$!crmCustomer.spouseName" id="spouseName" maxlength="20"/>
+                    </div>
+                </td>
+                <td width="7%" class="field">
+                    <label class="red">*</label>
+                    <label>性别：</label>
+                </td>
+                <td width="18%">
+                    <select name="crmCustomer.spouseSex" id="spouseSex">
+                        <option ></option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </td>
+                <td width="7%" class="field">
+                    <label class="red">*</label>
+                    <label>身份证号：</label>
+                </td>
+                <td colspan="3">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseIdCard" value="$!crmCustomer.spouseIdCard" id="spouseIdCard" maxlength="50"/>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="7%" class="field">
+                    <label class="red">*</label>
+                    <label>手机：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseMobilePhone" value="$!crmCustomer.spouseMobilePhone" id="spouseMobilePhone" maxlength="13"/>
+                    </div>
+                </td>
+                <!--固定电话，单位名称，工作年限，单位电话-->
+                <td width="7%" class="field">
+                    <label>固定电话：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spousePhone" value="$!crmCustomer.spousePhone" id="spousePhone" maxlength="20"/>
+                    </div>
+                </td>
+
+                <td width="7%" class="field">
+                    <label>单位名称：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseCompany" value="$!crmCustomer.spouseCompany" id="spouseCompany" maxlength="50"/>
+                    </div>
+                </td>
+
+                <td width="7%" class="field">
+                    <label>单位性质：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseUnitProperty" value="$!crmCustomer.spouseUnitProperty" id="spouseUnitProperty" maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="7%" class="field">
+                    <label>工作年限：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseWorkingSeniority" value="$!crmCustomer.spouseWorkingSeniority" id="spouseWorkingSeniority" maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')" />
+                    </div>
+                </td>
+                <td width="7%" class="field">
+                    <label>单位电话：</label>
+                </td>
+                <td width="18%">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseCompanyPhone" value="$!crmCustomer.spouseCompanyPhone" id="spouseCompanyPhone" maxlength="20"/>
+                    </div>
+                </td>
+                <td width="7%" class="field">
+                    <label>单位地址：</label>
+                </td>
+                <td colspan="3">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.spouseCompanyAddress" value="$!crmCustomer.spouseCompanyAddress" id="spouseCompanyAddress" maxlength="50"/>
+                    </div>
+                </td>
+
+            </tr>
+            <tr>
+                <!---->
+                <td width="7%" class="field">
+                    <label class="red">*</label>
+                    <label>工作岗位：</label>
+                </td>
+                <td width="18%">
+                    <select id="spousePosition" name="crmCustomer.spousePosition" maxlength="20" >
+                        <option ></option>
+                        #foreach($!msg in $!checkBoxMessage.get("CUSTOMER_POSITION"))
+                            <option #if($!crmCustomer.spousePosition == $!msg.dictionaryKey)selected #end value="$!msg.dictionaryKey">$!msg.dictionaryValue</option>
+                        #end
+                    </select>
+                </td>
+                <td width="7%" class="field">
+                    <label class="red">*</label>
+                    <label>职称：</label>
+                </td>
+                <td width="18%">
+                    <select id="spouseRank" name="crmCustomer.spouseRank" maxlength="20" >
+                        <option ></option>
+                        #foreach($!msg in $!checkBoxMessage.get("CUSTOMER_RANK"))
+                            <option #if($!crmCustomer.spouseRank == $!msg.dictionaryKey)selected #end value="$!msg.dictionaryKey">$!msg.dictionaryValue</option>
+                        #end
+                    </select>
+                </td>
+                <td colspan="6">
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+</div>
+<hr />
+<table class="htmltbl" cellpadding="0" cellspacing="0">
+    <tbody>            
+        <tr>
+            <td width="7%" class="field">
+                <label></label>
+            </td>
+            <td colspan="7">
+                <label class="gray">
+                    请至少填写一个联系电话：
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>手机一：</label>
+            </td>
+            <td colspan="7">
+                <table class="celltbl">
+                    <tr>
+                        <td width="150" style="text-align: left;">
+                            <div class="dtxt1" phoneType="divGroup" id="divMobilePhone1">
+                                <input type="text" phoneType="group" fun="checkMobilePhone" tips="请至少填写一个联系电话"  class="dtxt1-txt" maxLength="11" name="crmCustomer.mobilePhone1" value="$!crmCustomer.mobilePhone1" id="mobilePhone1" onKeyUp="ctrlDefaultNumberState('mobilePhone1','rdo1')"/>
+                            </div>
+                        </td>
+                        <td width="50">
+                            <label>备注 </label>
+                        </td>
+                        <td width="100" style="text-align: left;">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" name="crmCustomer.mobilePhone1Remark" value="$!crmCustomer.mobilePhone1Remark" id="mobilePhone1Remark" maxlength="20"/>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" id="rdo1" value="1"/>
+                            <label>
+                                默认
+                            </label>
+                        </td>
+                        <td width="100" style="padding-left: 20px;">
+                        	<div class="fl">
+                    			#if($!needLine && $!needLine==1)
+                    				#if($urlPermitUtil.hasPermission('dialPhone'))
+	                            	<i class="i phone" onclick="dial('$!crmCustomer.mobilePhone1','$!crmCustomer.customerId')">phone</i>
+	                                #end
+	                                #if($urlPermitUtil.hasPermission('tapePhone'))
+	                                <i class="i dsc" onclick="tape('$!crmCustomer.customerId')" title="座谈" >dsc</i>
+	                                #end
+                       			#end
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>手机二：</label>
+            </td>
+            <td colspan="7">
+                <table class="celltbl">
+                    <tr>
+                        <td width="150" style="text-align: left;">
+                            <div class="dtxt1" phoneType="divGroup" id="divMobilePhone2">
+                                <input type="text" phoneType="group" fun="checkMobilePhone" tips="请至少填写一个联系电话" class="dtxt1-txt" maxLength="11" name="crmCustomer.mobilePhone2" value="$!crmCustomer.mobilePhone2" id="mobilePhone2" onKeyUp="ctrlDefaultNumberState('mobilePhone2','rdo2')"/>
+                            </div>
+                        </td>
+                        <td width="50">
+                            <label>
+                                备注
+                            </label>
+                        </td>
+                        <td width="100" style="text-align: left;">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" name="crmCustomer.mobilePhone2Remark" value="$!crmCustomer.mobilePhone2Remark" id="mobilePhone2Remark" maxlength="20"/>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" id="rdo2" value="2"/>
+                            <label>
+                                默认
+                            </label>
+                        </td>
+                        <td width="100" style="padding-left: 20px;">
+                        	<div class="fl">
+                    			#if($!needLine && $!needLine==1)
+                    				#if($urlPermitUtil.hasPermission('dialPhone'))
+                                	<i class="i phone" onclick="dial('$!crmCustomer.mobilePhone2','$!crmCustomer.customerId')">phone</i>
+                                    #end
+                                    #if($urlPermitUtil.hasPermission('tapePhone'))
+                                    <i class="i dsc" onclick="tape('$!crmCustomer.customerId')" title="座谈" >dsc</i>
+                                    #end
+                        		#end
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>固定电话：</label>
+            </td>
+            <td colspan="7">
+                <table class="celltbl">
+                    <tr>
+                        <td width="150" style="text-align: left;">
+                            <div class="dtxt1" phoneType="divGroup">
+                                <input type="text" phoneType="group" fun="checkPhone" tips="请至少填写一个联系电话" class="dtxt1-txt" maxLength="20" name="crmCustomer.phone" value="$!crmCustomer.phone" id="phone" onKeyUp="ctrlPhoneExt('phone','rdo3','phoneExt')"/>
+                            </div>
+                        </td>
+                        <td width="50">
+                            <label>—</label>
+                        </td>
+                        <td width="100" style="text-align: left;">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" name="crmCustomer.phoneExt" value="$!crmCustomer.phoneExt" maxLength="10" id="phoneExt" validate[groupRequired[payments],custom[integer]/>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" id="rdo3" value="3"/>
+                            <label>
+                                默认
+                            </label>
+                        </td>
+                        <td width="100" style="padding-left: 20px;">
+                        	<div class="fl">
+                    			#if($!needLine && $!needLine==1)
+                    				#if($urlPermitUtil.hasPermission('dialPhone'))
+                        			<i class="i phone" onclick="dial('$!crmCustomer.phone','$!crmCustomer.customerId')">phone</i>
+                        			#end
+                        			#if($urlPermitUtil.hasPermission('tapePhone'))
+                        			<i class="i dsc" onclick="tape('$!crmCustomer.customerId')" title="座谈" >dsc</i>
+                        			#end
+                        		#end
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>传真：</label>
+            </td>
+            <td colspan="7">
+                <table class="celltbl">
+                    <tr>
+                        <td width="150" style="text-align: left;">
+                            <div class="dtxt1" phoneType="divGroup">
+                                <input type="text" phoneType="group" fun="checkPhone" tips="请至少填写一个联系电话" class="dtxt1-txt" name="crmCustomer.fax" maxLength="20" value="$!crmCustomer.fax" id="fax" onKeyUp="ctrlPhoneExt('fax','rdo4','faxExt')"/>
+                            </div>
+                        </td>
+                        <td width="50">
+                            <label>—</label>
+                        </td>
+                        <td width="100" style="text-align: left;">
+                            <div class="dtxt1">
+                                <input type="text" class="dtxt1-txt" maxLength="10" name="crmCustomer.faxExt" value="$!crmCustomer.faxExt" id="faxExt" />
+                            </div>
+                        </td>
+                        <td>
+                            <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" value="4" id="rdo4"/>
+                            <label>
+                                默认
+                            </label>
+                        </td>
+                        <td width="100" style="padding-left: 20px;">
+                        	<div class="fl">
+                    			#if($!needLine && $!needLine==1)
+                    				#if($urlPermitUtil.hasPermission('dialPhone'))
+                        			<i class="i phone" onclick="dial('$!crmCustomer.fax','$!crmCustomer.customerId')">phone</i>
+                       				#end
+                       				#if($urlPermitUtil.hasPermission('tapePhone'))
+                       				<i class="i dsc" onclick="tape('$!crmCustomer.customerId')" title="座谈" >dsc</i>
+                       				#end
+                       			#end
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>邮箱：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" fun="checkEmail" tips="“邮箱”的格式必须是xxx@xxx.xxx" class="dtxt1-txt" name="crmCustomer.email" id="email" value="$!crmCustomer.email" maxLength="50"/>
+                </div>
+            </td>
+            <td colspan="6"></td>
+        </tr>
+##        <tr>
+##            <td width="7%" class="field">
+##                <label>最近联系时间：</label>
+##            </td>
+##            <td colspan="7">
+##                <label>
+##                #if($actionType=='modify')
+##                    $!date.format('yyyy-MM-dd HH:mm:ss',$!crmCustomer.lastContactDate)#if($crmCustomer.lastContactType && $!crmCustomer.lastContactType != "")
+##                    ($!crmCustomer.lastContactType)
+##                #end
+##                #else
+##                	无
+##                #end
+##                </label>
+##            </td>
+##        </tr>
+        <input type="hidden" class="chk" id="allow" name="crmCustomer.isReceiveSms" value="0" />
+     </tbody>
+</table>
+<hr />
+<table class="htmltbl" cellpadding="0" cellspacing="0">
+	<tbody>
+		<tr>
+			<!--企业名称，经营范围，组织形式，开业日期-->
+			<td width="7%" class="field">
+                <label>企业名称：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.manageCompany" value="$!crmCustomer.manageCompany" id="manageCompany" maxlength="50"/>
+                </div>
+            </td>
+			<td width="7%" class="field">
+                <label>开业日期：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt2">
+                    <input type="text" class="validate[custom[date]] dtxt2-txt" readonly="readonly" id="openingDate" name="crmCustomer.openingDate" value="$!date.format('yyyy-MM-dd',$!crmCustomer.openingDate)"/>
+                    <span class="dtxt2-date"></span>
+                </div>			
+            </td>
+			<td width="7%" class="field">
+                <label>经营范围：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.manageScope" value="$!crmCustomer.manageScope" id="manageScope" maxlength="150"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>组织形式：</label>
+            </td>
+			<td width="18%">
+                <select name="crmCustomer.orgTypeId" id="orgTypeId">
+                	<option ></option>
+					#foreach($orgType in $cd.getOrgType())
+						<option value ="$orgType.orgTypeId">$orgType.orgTypeName</option>
+					#end
+				</select>
+            </td>
+			
+        </tr>
+		<tr>
+			<!--组织机构代码，营业执照代码，法律形式，法人代表-->
+			<td width="7%" class="field">
+                <label>组织机构代码：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.orgCode" value="$!crmCustomer.orgCode" id="orgCode" maxlength="30"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>营业执照代码：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.bussinessLicence" value="$!crmCustomer.bussinessLicence" id="bussinessLicence" maxlength="30"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>法律形式：</label>
+            </td>
+			<td width="18%">
+                <select name="crmCustomer.legalFormId" id="legalFormId">
+                	<option ></option>
+					#foreach($legalForm in $cd.getLegalForm())  
+						<option value ="$legalForm.legalFormId" >$legalForm.legalFormName</option>
+					#end
+				</select>
+            </td>
+			<td width="7%" class="field">
+                <label>法人代表：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.artificialPerson" value="$!crmCustomer.artificialPerson" id="artificialPerson" maxlength="20"/>
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<!--实际经营者，雇员人数，是否我行客户，电话号码-->
+			<td width="7%" class="field">
+                <label>实际经营者：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.marketingManager" value="$!crmCustomer.marketingManager" id="marketingManager" maxlength="20"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>雇员人数：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.employeeCount" value="$!crmCustomer.employeeCount" id="employeeCount" maxlength="20" onkeyup="value=value.replace(/[^\d.]/g,'')"/>
+                </div>
+            </td>
+			
+			<td width="7%" class="field">
+                <label>是否我行客户：</label>
+            </td>
+			<td width="18%">
+                <select name="crmCustomer.isInnerCustomer" id="isInnerCustomer">                    
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+            </td>
+			<td width="7%" class="field">
+                <label>电话号码：</label>
+            </td>
+            <td width="18%">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.managePhone" value="$!crmCustomer.managePhone" id="managePhone" maxlength="20"/>
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<!--实际经营地址-->
+			<td width="7%" class="field">
+                <label>实际经营地址：</label>
+            </td>
+			<td colspan="7">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.manageAddress" value="$!crmCustomer.manageAddress" id="manageAddress" maxlength="50"/>
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<!--备注-->
+			<td width="7%" class="field">
+                <label>备注：</label>
+            </td>
+			<td colspan="7">
+                <div class="dtxt1">
+                    <input type="text" class="dtxt1-txt" name="crmCustomer.manageRemark" value="$!crmCustomer.manageRemark" id="manageRemark" maxlength="50"/>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

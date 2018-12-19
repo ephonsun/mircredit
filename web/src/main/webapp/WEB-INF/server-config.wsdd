@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment xmlns="http://xml.apache.org/axis/wsdd/"
+	xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+
+	<handler name="LocalResponder"
+		type="java:org.apache.axis.transport.local.LocalResponder" />
+	<handler name="URLMapper" type="java:org.apache.axis.handlers.http.URLMapper" />
+	<handler name="Authenticate"
+		type="java:org.apache.axis.handlers.SimpleAuthenticationHandler" />
+
+	<!-- Start 注册WebServices服务 -->
+	<service name="mobile" provider="java:RPC">
+		<parameter name="allowedMethods" value="*" /><!--对外包暴露所有方法-->
+		<parameter name="className" value="com.banger.mobile.webservice.service.impl.RecordWebServicesImpl" />
+        <parameter name="className" value="com.banger.mobile.webservice.service.impl.LoanWebServiceImpl"/>   
+        <parameter name="className" value="com.banger.mobile.webservice.service.impl.CustomerWebServiceImpl"/>    
+        <parameter name="className" value="com.banger.mobile.webservice.service.impl.MapWebServiceImpl"/>   
+    </service>
+
+	<!-- End注册WebServices服务 -->
+
+	<transport name="http">
+		<requestFlow>
+			<handler type="URLMapper" />
+			<handler type="java:org.apache.axis.handlers.http.HTTPAuthHandler" />
+		</requestFlow>
+		<parameter name="qs:list"
+			value="org.apache.axis.transport.http.QSListHandler" />
+		<parameter name="qs:wsdl"
+			value="org.apache.axis.transport.http.QSWSDLHandler" />
+		<parameter name="qs.list"
+			value="org.apache.axis.transport.http.QSListHandler" />
+		<parameter name="qs.method"
+			value="org.apache.axis.transport.http.QSMethodHandler" />
+		<parameter name="qs:method"
+			value="org.apache.axis.transport.http.QSMethodHandler" />
+		<parameter name="qs.wsdl"
+			value="org.apache.axis.transport.http.QSWSDLHandler" />
+	</transport>
+	
+	<transport name="local">
+		<responseFlow>
+			<handler type="LocalResponder" />
+		</responseFlow>
+	</transport>
+</deployment>
+

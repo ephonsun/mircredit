@@ -1,0 +1,62 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+	
+    ##<script type="text/javascript">
+    ##    jQuery(function(){
+    ##        var w = jQuery('body').width();
+    ##        var obj = jQuery('#proxyWeb');
+    ##        obj.width(w-20).height(640);
+    ##    });
+    ##</script>
+</head>
+<body>
+##	
+##	<OBJECT style="position: relative;"
+##	        id="proxyWeb"
+##	        classid="clsid:DD4CCB1A-0D01-49A2-AED6-06DB384ECE7C"
+##	        codebase=""
+##	        align="center"
+##	        hspace="0"
+##	        vspace="0"
+##	        >
+##	</OBJECT>
+
+##<script language="javascript" event="OnMainJsCallBack(methodName,methodParam)" for="proxyWeb">
+##    if(typeof(methodName)=='string')
+##        eval(methodName)(methodParam);
+##</script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script language="javascript">
+
+    var urlRef = (window.location.href).replace('http://', '');
+    var urlStr = urlRef.substring(urlRef.indexOf('/'), urlRef.indexOf('/login'));
+    var urlStr=urlStr+window.top.getUrl();
+    var loginAccount ="$!loginAccount";
+    var autoLogin = (loginAccount != "") ? "autoLogin=true&account="+encodeURI(encodeURI(loginAccount)):"";
+    //var myobj = document.getElementById("proxyWeb");
+    //var flag=$!proxyFlag;
+    //if(flag){
+    //    myobj.SetProxy($!proxyFlag,"$!proxyIp");//设置代理参数方法，参数1：是否启动代理,参数2:代理地址+端口,如192.168.1.1:80
+    //}
+    var url="http://"+urlStr+"/map/toScaningInfoPage.html?"+autoLogin;
+
+    myobj.ExcuteCmd("openUrl",url);//打开页面,参数1 openUrl,参数2 页面URL地址
+	
+    function callPhone(param){
+        var value=param.split(",");
+        dial(value[0] ,value[1]);
+    }
+    //监听窗口大小改变时，调整相应宽度
+    //jQuery(window).resize(function() {
+    //    var w = jQuery('body').width();
+    //    var obj = jQuery('#proxyWeb');
+    //    obj.width(w).height(640);
+    //});
+</script>
+</body>
+</html>

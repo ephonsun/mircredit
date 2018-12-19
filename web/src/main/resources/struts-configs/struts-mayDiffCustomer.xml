@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="mayDiffCustomer" extends="default" namespace="/mayDiffCustomer" >
+		<!-- 所有客户 第一次加载 -->
+		<action name="FirstLoadMayDiffCustomer" class="mayDiffCustomerAction" method="FirstLoad">
+			<result name="success">/velocity/customer/mayDiffCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="FirstLoadMayDiffCustomerName" class="mayDiffCustomerAction" method="FirstLoadName">
+			<result name="success">/velocity/customer/mayDiffCustomerName.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 可能重复列表 查询-->
+		<action name="DoQueryDiffName" class="mayDiffCustomerAction" method="DoQueryDiffName">
+			<result name="success">/velocity/customer/diffTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 相同客户  查询-->
+		<action name="getSameCustomer" class="mayDiffCustomerAction" method="getSameCustomerList">
+			<result name="success">/velocity/customer/diffNameTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 取得合并客户  -->
+		<action name="getMergeCustomer" class="mergeCustomerAction" method="getMergeCustomerList">
+			<result name="success">/velocity/customer/mayDiffCustomerMerge.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 合并客户  -->
+		<action name="doMergeCustomer" class="mergeCustomerAction" method="mergeCustomer">
+			<result name="success">/velocity/customer/mayDiffCustomerMerge.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 合并客户校验  -->
+		<action name="checkMergeCustomer" class="mergeCustomerAction" method="checkMergeCustomer">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,345 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>任务执行页面</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css"/>
+    <style type="text/css">
+        span.ml {
+            margin-left: -1px;
+        }
+
+        div.line-warning {
+            margin-top: 10px;
+        }
+    </style>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.exedit-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+</head>
+
+<body>
+<table class="htmltbl">
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input id="customerQuery" type="text" class="text"/>
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>联系状态：</label>
+        </td>
+        <td width="17%">
+            <select id="isFinish">
+                <option value="">&nbsp;</option>
+                <option value="1">&nbsp;已联系</option>
+                <option value="0">&nbsp;未联系</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>通话时间：</label>
+        </td>
+        <td colspan="2">
+            <table class="celltbl">
+                <tbody>
+                <tr>
+                    <td width="159">
+                        <div class="ui-div-text">
+                            <input id="callDateFrom" type="text" class="text datepicker" readonly="readonly"/>
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                    <td width="22"><label>-</label></td>
+                    <td width="159">
+                        <div class="ui-div-text">
+                            <input id="callDateTo" type="text" class="text datepicker" readonly="readonly"/>
+                            <i class="date"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+        <td width="17%"></td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+            任务客户(<label id="recordCount" class="green">
+            #if($!recordCount)
+                $!recordCount
+            #else
+                0
+            #end
+        </label>)
+        </span>
+    <input type="button" class="ui-input-btn" value="清空" onclick="clearCondition()"/>
+    <input type="button" class="ui-input-btn" value="搜索" onclick="query()"/>
+    <input type="hidden" id="taskId" value="$!taskId"/>
+</div>
+
+<div class="action-bar">
+    #if($urlPermitUtil.hasPermission('addNotExpertCustomer'))
+        <span class="ui-span-btn fl" onclick="addExe()">
+                <label>非在行客户</label>
+            </span>
+    #end
+    #if($urlPermitUtil.hasPermission('addExpertCustomer'))
+        <span class="ui-span-btn fl ml" onclick="selCustomer()">
+        	<label>在行客户</label>
+        </span>
+    #end
+    #if($urlPermitUtil.hasPermission('tskimportCustomer'))
+        <span class="ui-span-btn fl ml" onclick="addCustomer()">
+        	<label>导入客户</label>
+        </span>
+    #end
+    <span class="ui-span-btn fr" onclick="refresh()">
+        	<label>刷新</label>
+        </span>
+</div>
+<div class="line-warning red">
+    执行任务时请在此列表拨号，否则影响考核！
+</div>
+<table id="dataList" class="datatbl">
+    #parse("/velocity/microTask/phoneTaskExeListTable.vm")
+</table>
+</body>
+
+<script type="text/javascript">
+$(document).ready(function () {
+    $('select').select();
+    getQueryJson();
+
+    $("#customerQuery").tips({ msg: "姓名、联系电话" });
+});
+
+var oldPostJson = {};
+function query() {
+    var postJson = getQueryJson();
+    var urlStr = "../tskMicroTaskTarget/queryPhoneTaskExeList.html?RandNum=" + Math.random();
+    jQuery.ajax({
+        type: 'POST',
+        url: urlStr,
+        data: postJson,
+        success: function (html) {
+            queryBack(html, 'dataList');
+            oldPostJson = getQueryJson();
+        }
+    });
+}
+
+function refresh() {
+    if (oldPostJson) {
+        goto(
+                null,
+                "../tskMicroTaskTarget/queryPhoneTaskExeList.html?RandNum=" + Math.random(),
+                oldPostJson,
+                function (html) {
+                    queryBack(html, 'dataList');
+                });
+    }
+}
+
+function queryBack(html, gridId) {
+    $("#" + gridId).html(html).table();
+
+    var total = $('#total').val();
+    if (total != null) {
+        $("#recordCount").text(total);
+    } else {
+        $("#recordCount").text(0);
+    }
+}
+
+function getQueryJson() {
+    var customerQuery = "";
+    if (jQuery("#customerQuery").val() != "姓名、联系电话") {
+        customerQuery = jQuery.trim(jQuery("#customerQuery").val());
+        jQuery("#customerQuery").val(customerQuery);
+    }
+    var postJson = {};
+    postJson['taskId'] = jQuery.trim($('#taskId').val());
+    postJson['customerQuery'] = customerQuery;
+    postJson['isFinish'] = jQuery.trim($('#isFinish').val());
+    postJson['callDateFrom'] = jQuery.trim($('#callDateFrom').val());
+    postJson['callDateTo'] = jQuery.trim($('#callDateTo').val());
+    oldPostJson = postJson;
+    return postJson;
+}
+//分页跳转
+function gotoPage(page) {
+    if (oldPostJson) {
+        goto(
+                page,
+                "../tskMicroTaskTarget/queryPhoneTaskExeList.html?RandNum=" + Math.random(),
+                oldPostJson,
+                function (html) {
+                    queryBack(html, 'dataList');
+                });
+    }
+}
+
+function clearCondition() {
+    $(':text').val('');
+    $("select").each(function () {
+        this.selectedIndex = 0;
+        $(this).select();
+    });
+    $("#customerQuery").tips({ msg: "姓名、联系电话" });
+}
+
+//点击User
+function onCheckUser(treeId) {
+    var postJson = {};
+    postJson = getCheckJson(treeId, 'U');
+    $('#userIds').val(postJson.ids);
+    $('#userText').val(postJson.names);
+}
+
+function getCheckJson(treeId, flag) {
+    var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+    var nodes = treeObj.getCheckedNodes(true);
+    var len = nodes.length;
+    var uIds = "";
+    var uName = "";
+    for (var i = 0; i < len; i++) {
+        if (flag == 'U') {
+            if (nodes[i].flag == flag) {
+                if (uIds == "") {
+                    uIds = nodes[i].id;
+                    uName = nodes[i].name;
+                } else {
+                    uIds = uIds + "," + nodes[i].id;
+                    uName = uName + "," + nodes[i].name;
+                }
+            }
+        } else {
+            if (uIds == "") {
+                uIds = nodes[i].id;
+                uName = nodes[i].name;
+            } else {
+                uIds = uIds + "," + nodes[i].id;
+                uName = uName + "," + nodes[i].name;
+            }
+        }
+    }
+    var postJson = {};
+    postJson['ids'] = uIds;
+    postJson['names'] = uName;
+    return postJson;
+}
+
+//查看客户
+function browseCustomer(cusId) {
+    jQuery.ajax({
+        type: 'POST',
+        url: "../customer/isDeleteCus.html?random=" + Math.random() * 1000,
+        data: {"cusId": cusId},
+        success: function (data) {
+            var obj = jQuery.parseJSON(data);
+            if (obj[0].isDel == '1') {
+                banger.page.showMessageBox('客户“' + obj[0].customerName + '”被删除，无法查看具体资料！');
+            } else {
+                var options = {id: "cusBrowse" + cusId, pid: GetId(), title: "查看客户", url: "../customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId=" + cusId, lock: false};
+                tab.add(options);
+            }
+        }
+    });
+}
+
+function addExe() {
+    var taskId = jQuery.trim($('#taskId').val());
+    var url = "toAddPhoneTaskExe.html?taskId=" + taskId + "&random=" + Math.random() * 10000;
+    //var result = window.showModalDialog(url, '新建任务目标', 'dialogWidth=600px;dialogHeight=350px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+    var result=banger.page.openDialog(url,"新建任务目标",600,350);
+    if (result != undefined) {
+        refresh();
+    }
+}
+
+
+//选择客户 url: "../customer/selectCusByIds.html",
+function selCustomer() {
+    var taskId = jQuery.trim($('#taskId').val());
+    var url = "../customer/customerSelect.html?isVonExe="+"my"+"&random=" + Math.random() * 10000;
+    //var result = window.showModalDialog(url, '请选择要添加的客户！', 'dialogWidth=960px;dialogHeight=620px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+    var result=banger.page.openDialog(url,"请选择要添加的客户",960,620);
+    if (result != undefined) {
+        jQuery.ajax({
+            type: "post",
+            url: "addPhoneTaskSel.html",
+            data: {'customerIds': result,
+                'taskId': taskId
+            },
+            success: function (data) {
+                selectResult(data);
+            }
+        });
+    }
+}
+function selectResult(msg) {
+    if (msg != "") {
+        var errMSG = "";
+        var dd = jQuery.parseJSON(msg);
+        for (var i = 0; i < dd.length; i++) {
+            if (dd[i].remark == "1") {
+                errMSG= ("客户“"+dd[i].customerName+"”不是您的归属客户，不允许添加为任务目标！<br>");
+            }
+            if (dd[i].remark=="3") {
+                errMSG=("您选择的客户部分已存在于任务目标，本次操作只对未添加的客户生效！<br>");
+            }
+            if (dd[i].remark=="2") {
+                errMSG= ("任务目标“"+ dd[i].customerName+"”已存在，不能重复添加！<br>");
+            }
+        }
+        banger.page.showMessageBox(errMSG);
+    }
+    refresh();
+}
+
+
+function play(obj,fileId) {
+    jQuery.post("../data/isExistFileById.html", {"fileId": fileId}, function (result) {
+        if (result == '0') {
+            banger.page.showMessageBox({"type": "error", "content": "文件不存在！"});
+            return;
+        } else {
+            window.parent.showAudioNoRemarkDiv(fileId);//jwplay播放器
+        }
+    });
+}
+
+<!--跳转到导入客户界面-->
+function addCustomer() {
+    var vUrl = "../taskCustomerImport/toImportPage.html?taskTarget.taskId=" +$!taskId;
+    var options = {id: "toImportCustomer", pid: GetId(), title: "导入客户", url: vUrl, lock: false, confirm: true};
+    tab.add(options);
+    refresh();
+}
+</script>
+
+</html>

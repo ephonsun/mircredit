@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="tskMicroTask" extends="default" namespace="/tskMicroTask">
+		<!-- 所有任务 -->
+		<action name="allTaskList" class="tskMicroTaskListAction"
+			method="allTaskList">
+			<result name="success">/velocity/microTask/allTaskList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="allTaskListQuery" class="tskMicroTaskListAction"
+			method="allTaskListQuery">
+			<result name="success">/velocity/microTask/allTaskListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 我执行的任务 -->
+		<action name="myTaskList" class="tskMicroTaskListAction"
+			method="myTaskList">
+			<result name="success">/velocity/microTask/myTaskList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="myTaskListQuery" class="tskMicroTaskListAction"
+			method="myTaskListQuery">
+			<result name="success">/velocity/microTask/myTaskListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="delTask" class="tskMicroTaskListAction" method="delTask">
+		</action>
+		<action name="stopTask" class="tskMicroTaskListAction" method="stopTask">
+		</action>
+		<action name="restartTask" class="tskMicroTaskListAction"
+			method="restartTask">
+		</action>
+
+		<!-- 中止任务 -->
+		<action name="allTaskListStop" class="tskMicroTaskListStopAction"
+			method="allTaskListStop">
+			<result name="success">/velocity/microTask/allTaskListStop.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="allTaskListStopQuery" class="tskMicroTaskListStopAction"
+			method="allTaskListStopQuery">
+			<result name="success">/velocity/microTask/allTaskListStopTable.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="restartTask" class="tskMicroTaskListStopAction"
+			method="restartTask">
+		</action>
+
+		<!-- 跳转到新建任务页面 -->
+		<action name="toAddTskMicroTaskPage" class="tskMicroTaskAction"
+			method="toAddTskMicroTaskPage">
+			<result name="success">/velocity/microTask/addTskMicroTask.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到新建任务分配页面 -->
+		<action name="toAddTskMicroTaskNextPage" class="tskMicroTaskAction"
+			method="toAddTskMicroTaskNextPage">
+			<result name="success">/velocity/microTask/addTskMicroTaskNext.vm
+			</result>
+			<result name="relax">/velocity/microTask/refreshEditTskMicroTaskLoan.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到编辑任务页面创建者(relax..是刷新) -->
+		<action name="toEditTskMicroTaskByAssignPage" class="tskMicroTaskAction"
+			method="toEditTskMicroTaskByAssignPage">
+			<result name="success">/velocity/microTask/editTskMicroTaskByAssign.vm
+			</result>
+			<result name="relax">/velocity/microTask/refreshEditTskMicroTaskLoan.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到编辑任务页面执行者 -->
+		<action name="toEditTskMicroTaskByExecutorPage" class="tskMicroTaskAction"
+			method="toEditTskMicroTaskByExecutorPage">
+			<result name="success">/velocity/microTask/editTskMicroTaskByExecutor.vm
+			</result>
+			<result name="relax">/velocity/microTask/refreshEditTskMicroTaskLoan.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到查看任务页面 -->
+		<action name="toViewTskMicroTaskPage" class="tskMicroTaskAction"
+			method="toViewTskMicroTaskPage">
+			<result name="success">/velocity/microTask/viewTskMicroTask.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 保存任务（新建、编辑） -->
+		<action name="saveTskMicroTask" class="tskMicroTaskAction"
+			method="saveTskMicroTask">
+		</action>
+		<!-- 任务进度 -->
+		<action name="taskProgressQuery" class="tskMicroTaskAction"
+			method="taskProgressQuery">
+		</action>
+
+		<!-- 跳转到新建营销任务页面 -->
+		<action name="toAddTskMicroTaskMarketingPage" class="tskMicroTaskAction"
+			method="toAddTskMicroTaskMarketingPage">
+			<result name="success">/velocity/microTask/addTskMicroTaskMarketing.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到新建营销任务分配页面 -->
+		<action name="toAddTskMicroTaskMarketingNextPage" class="tskMicroTaskAction"
+			method="toAddTskMicroTaskMarketingNextPage">
+			<result name="success">/velocity/microTask/addTskMicroTaskMarketingNext.vm
+			</result>
+			<result name="relax">/velocity/microTask/refreshEditTskMicroTaskMarketing.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到编辑营销任务页面创建者 -->
+		<action name="toEditTskMicroTaskMarketingByAssignPage" class="tskMicroTaskAction"
+			method="toEditTskMicroTaskMarketingByAssignPage">
+			<result name="success">/velocity/microTask/editTskMicroTaskMarketingByAssign.vm
+			</result>
+			<result name="relax">/velocity/microTask/refreshEditTskMicroTaskMarketing.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到编辑营销任务页面执行者 -->
+		<action name="toEditTskMicroTaskMarketingByExecutorPage" class="tskMicroTaskAction"
+			method="toEditTskMicroTaskMarketingByExecutorPage">
+			<result name="success">/velocity/microTask/editTskMicroTaskMarketingByExecutor.vm
+			</result>
+			<result name="relax">/velocity/microTask/refreshEditTskMicroTaskMarketing.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到查看营销任务页面 -->
+		<action name="toViewTskMicroTaskMarketingPage" class="tskMicroTaskAction"
+			method="toViewTskMicroTaskMarketingPage">
+			<result name="success">/velocity/microTask/viewTskMicroTaskMarketing.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 跳转到查看电话营销任务页面 -->
+		<action name="toViewPhoneTskMicroTaskMarketingPage" class="tskMicroTaskAction"
+			method="toViewPhoneTskMicroTaskMarketingPage">
+			<result name="success">/velocity/microTask/viewPhoneTskMicroTaskMarketing.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+
+		<!-- 查询查看营销任务营销录音列表 -->
+		<action name="queryTaskTargetPage" class="tskMicroTaskAction"
+			method="queryTaskTargetPage">
+			<result name="success">/velocity/microTask/tskMicroTaskMarketingTargetList.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 查询查看电话营销任务营销录音列表 -->
+		<action name="queryPhoneTaskTargetPage" class="tskMicroTaskAction"
+			method="queryPhoneTaskTargetPage">
+			<result name="success">/velocity/microTask/phoneTskMicroTaskMarketingTargetList.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 工作台 任务提醒 -->
+		<action name="getTaskToWorkPlace" class="tskMicroTaskAction"
+			method="getTaskToWorkPlace">
+			<result name="success">/velocity/login/taskWB.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 工作台 任务提醒 -->
+		<action name="queryTodayOrOutDateTask" class="tskMicroTaskAction"
+			method="queryTodayOrOutDateTask">
+			<result name="success">/velocity/login/taskWBList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+        <!-- 个人日志录入-->
+        <action name="addTeamLog" class="teamLogAction" method="addTeamLog">
+            <result name="success">/velocity/microTask/addTeamLog.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!-- 保存个人日志录入-->
+        <action name="saveTeamLog" class="teamLogAction" method="saveTeamLog">
+            <result name="success" type="redirectAction">addTeamLog.html</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="showTeamLog" class="teamLogAction" method="showTeamLog">
+            <result name="success">/velocity/microTask/showTeamLog.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="getUserPageList" class="teamLogAction" method="getUserPageList">
+            <result name="success">/velocity/microTask/teamLogList.vm</result>
+        </action>
+
+        <action name="lookTeamLog" class="teamLogAction" method="lookTeamLog">
+            <result name="success">/velocity/microTask/lookTeamLog.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <action name="exportTeamLog" class="teamLogAction" method="exportTeamLog">
+        </action>
+	</package>
+</struts>

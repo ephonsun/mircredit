@@ -1,0 +1,862 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+	
+	<bean id="baseAction" class="com.banger.mobile.webapp.action.BaseAction"
+		scope="prototype">
+		<!--  <property name="operateLogManager" ref="operateLogManager" /> -->
+	</bean>
+
+	<!-- 录音Action-->
+	<bean id="recordInfoAction"
+		class="com.banger.mobile.webapp.action.record.RecordInfoAction"
+		scope="prototype" parent="baseAction">
+		<property name="recordInfoService" ref="recordInfoService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+		<property name="temp" ref="crmTemplateService" />
+		<property name="recordExportService" ref="recordExportService" />
+	</bean>
+	
+	<!-- 安全日志Action-->
+	<bean id="loginLogAction"
+		class="com.banger.mobile.webapp.action.log.LoginLogAction"
+		scope="prototype" parent="baseAction">
+		<property name="loginLogService" ref="loginLogService" />
+	</bean>
+	<!-- 操作日志Action-->
+	<bean id="opeventLogAction"
+		class="com.banger.mobile.webapp.action.log.OpeventLogAction"
+		scope="prototype" parent="baseAction">
+		<property name="opeventLogService" ref="opeventLogService" />
+	</bean>
+	<!-- 系统日志Action-->
+	<bean id="opeventLoginLogAction"
+		class="com.banger.mobile.webapp.action.log.OpeventLoginLogAction"
+		scope="prototype" parent="baseAction">
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+	</bean>
+	
+	<!-- 全局参数Action-->
+	<bean id="sysParamAction"
+		class="com.banger.mobile.webapp.action.param.SysParamAction"
+		scope="prototype" parent="baseAction">
+		<property name="sysParamService" ref="sysParamService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+		<property name="sysWebFlowControlService" ref="sysWebFlowControlService" />
+	</bean>
+
+	
+	<!-- 机构action -->
+	<bean id="deptAction" class="com.banger.mobile.webapp.action.dept.DeptAction"
+		scope="prototype" parent="baseAction">
+		<property name="sysUserService" ref="sysUserService" />
+		<property name="deptService" ref="deptService"></property>
+		<property name="deptFacadeService" ref="deptFacadeService" />
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+	</bean>
+	<!-- 下属管理action -->
+	<bean id="belongDeptAction" class="com.banger.mobile.webapp.action.user.BelongDeptAction"
+		scope="prototype" parent="baseAction">
+		<property name="sysUserService" ref="sysUserService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="deptService" ref="deptService"></property>
+		<property name="sysRoleService" ref="sysRoleService"></property>
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+	</bean>
+	<!-- 客户类型Action-->
+	<bean id="crmCustomerTypeAction"
+		class="com.banger.mobile.webapp.action.system.CrmCustomerTypeAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmCustomerTypeService" ref="crmCustomerTypeService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+	</bean> 
+	<!-- 业务模板Action-->
+	<bean id="crmTemplateAction"
+		class="com.banger.mobile.webapp.action.template.CrmTemplateAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmTemplateService" ref="crmTemplateService" />
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+		<property name="crmTemplateFieldService" ref="crmTemplateFieldService" />
+	</bean>
+	
+	<!-- 产品模板Action-->
+	<bean id="pdtCrmTemplateAction"
+		class="com.banger.mobile.webapp.action.pdtTemplate.PdtCrmTemplateAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmTemplateService" ref="crmTemplateService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+		<property name="crmTemplateFieldService" ref="crmTemplateFieldService" />
+	</bean>
+	 
+	<!-- 客户列表Action --> 
+	<bean id="crmCustomerAction"
+		class="com.banger.mobile.webapp.action.customer.CustomerAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="crmCustomerTypeService" ref="crmCustomerTypeService" />
+		<property name="deptFacadeService" ref="deptFacadeService" />
+		<property name="cd" ref="codetableService" ></property>
+		<property name="temp" ref="crmTemplateService" ></property>
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" ></property>
+		<property name="recordInfoService" ref="recordInfoService" />
+		<property name="crmCustomerShareService" ref="crmCustomerShareService" />
+		<property name="customerExportService" ref="customerExportService" />
+		<property name="crmModuleExportService" ref="crmModuleExportService" />
+		<property name="lnLoanService" ref="lnLoanService" />
+	</bean>
+	
+	<!-- 亲友信息Action --> 
+	<bean id="customerRelativesAction"
+		class="com.banger.mobile.webapp.action.customer.CustomerRelativesAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmCustomerRelativesService" ref="crmCustomerRelativesService" />
+	</bean>
+	
+	<!-- 重复客户Action --> 
+	<bean id="mayDiffCustomerAction"
+		class="com.banger.mobile.webapp.action.customer.MayDiffCustomerAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+	
+	<!-- 合并客户Action --> 
+	<bean id="mergeCustomerAction"
+		class="com.banger.mobile.webapp.action.customer.MergeCustomerAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+	
+
+	<!-- 业务类型Action -->
+	<bean id="recbizTypeAction"
+		class="com.banger.mobile.webapp.action.recbiztype.RecbizTypeAction"
+		scope="prototype" parent="baseAction">
+		<property name="recbizTypeService" ref="recbizTypeService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+	</bean>
+	<!-- 用户登录Action -->
+	<bean id="userLoginAction"
+		class="com.banger.mobile.webapp.action.user.UserLoginAction"
+		scope="prototype" parent="baseAction">
+		<property name="funcAuthService" ref="funcAuthService" />
+		<property name="sysUserService" ref="sysUserService" />
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+		<property name="recordInfoService" ref="recordInfoService" />
+		<property name="phoneService" ref="personalConfigService" />
+		<property name="menuAuthService" ref="menuAuthService" />
+		<property name="sysUserOnlineService" ref="sysUserOnlineService" />
+		<property name="sysParamService" ref="sysParamService" />
+		<!--<property name="smsChannelBizServiceFactoryImpl" ref="smsChannelBizServiceFactoryImpl" />-->
+		<property name="deptFacadeService" ref="deptFacadeService" />
+		<!--<property name="smsReceiveLogService" ref="smsReceiveLogService" />-->
+		<property name="sysRunDaysService" ref="sysRunDaysService" />
+		<!--<property name="smsSendHistoryService" ref="smsSendHistoryService" />-->
+		<!--<property name="smsBasicInfoService" ref="smsBasicInfoService" />-->
+		<!--<property name="mmsPopupService" ref="mmsPopupService" />-->
+		<property name="sysTalkLimitConfigService" ref="sysTalkLimitConfigService" />
+	</bean>
+	<!-- 用户管理Action -->
+	<bean id="sysUserAction"
+		class="com.banger.mobile.webapp.action.user.SysUserAction"
+		scope="prototype" parent="baseAction">
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+		<property name="sysUserService" ref="sysUserService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="phoneConfigService" ref="phoneConfigService" />
+		<property name="remindConfigService" ref="remindConfigService" />
+		<property name="answerConfigService" ref="answerConfigService" />
+		<property name="sysRoleService" ref="sysRoleService" />
+		<property name="crmRecordRemindService" ref="crmRecordRemindService" />
+		<property name="crmRingSettingService" ref="crmRingSettingService" />
+		<property name="sysRoleMemberService" ref="sysRoleMemberService" />
+		<property name="sysDeptAuthService" ref="sysDeptAuthService" />
+		<property name="deptFacadeService" ref="deptFacadeService" />
+		<property name="sysRoleAuthService" ref="sysRoleAuthService" />
+		<property name="crmRecordSettingService" ref="crmRecordSettingService" />
+	</bean>
+	
+    <!-- 沟通进度action-->
+	<bean id="commProgressAction"
+		class="com.banger.mobile.webapp.action.system.CommProgressAction"
+		scope="prototype" parent="baseAction">
+		<property name="commProgressService" ref="commProgressService"/>
+		<property name="recordInfoService" ref="recordInfoService"/>
+		<property name="opeventLogService" ref="opeventLogService"/>		
+	</bean>
+	
+	<!-- 角色Action -->
+	<bean id="sysRoleAction"
+		class="com.banger.mobile.webapp.action.role.SysRoleAction"
+		scope="prototype" parent="baseAction">
+		<property name="sysRoleService" ref="sysRoleService" />
+		<property name="funcAuthService" ref="funcAuthService"/>
+        <property name="specialDataAuthService" ref="specialDataAuthService"/>
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+	</bean>
+	<!-- 团队Action -->
+	<bean id="sysTeamAction"
+		class="com.banger.mobile.webapp.action.team.SysTeamAction"
+		scope="prototype" parent="baseAction">
+		<property name="sysTeamService" ref="sysTeamService" />
+		<property name="deptService" ref="deptService" />
+		<property name="sysTeamUserService" ref="sysTeamUserService" />
+	</bean>
+	
+	<!-- 高级搜索客户Action -->
+	<bean id="advancedCustomerAction"
+		class="com.banger.mobile.webapp.action.customer.AdvancedCustomerAction"
+		scope="prototype" parent="baseAction">
+		<property name="cd" ref="codetableService" ></property>
+		<property name="dept" ref="deptFacadeService"></property>
+		<property name="temp" ref="crmTemplateService"></property>
+		<property name="customerExportService" ref="customerExportService" />
+		<property name="crmModuleExportService" ref="crmModuleExportService" />
+	</bean>
+	<!-- 行业类型Action-->
+	<bean id="crmCustomerIndustryAction"
+		class="com.banger.mobile.webapp.action.system.CrmCustomerIndustryAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmCustomerIndustryService" ref="crmCustomerIndustryService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+	</bean> 
+	
+	<!-- 录音下载Action -->
+	<bean id="downloadAction" class="com.banger.mobile.webapp.action.record.DownLoadAction" scope="prototype">
+		<!-- <property name="opeventLogFacade" ref="opeventLogFacade"></property> -->
+	</bean>
+	
+	<!-- 业务模板字段列表Action-->
+	<bean id="crmTemplateFieldAction"
+		class="com.banger.mobile.webapp.action.templateField.CrmTemplateFieldAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmTemplateFieldService" ref="crmTemplateFieldService" />
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+		<property name="crmFieldCodeDataService" ref="crmFieldCodeDataService" />
+		<property name="crmFieldTypeService" ref="crmFieldTypeService" />
+	</bean>
+	
+	<!-- 产品模板字段列表Action-->
+	<bean id="pdtCrmTemplateFieldAction"
+		class="com.banger.mobile.webapp.action.pdtTemplateField.PdtCrmTemplateFieldAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmTemplateFieldService" ref="crmTemplateFieldService" />
+		<property name="opeventLogService" ref="opeventLogService" />
+		<property name="crmFieldCodeDataService" ref="crmFieldCodeDataService" />
+		<property name="crmFieldTypeService" ref="crmFieldTypeService" />
+	</bean>
+	
+	<!-- 拜访记录Action-->
+	<bean id="visitRecordAction" class="com.banger.mobile.webapp.action.visitRecord.VisitRecordAction"
+		scope="prototype" parent="baseAction">
+		<property name="visitRecordService" ref="visitRecordService" />
+		<property name="crmCustomerSerivce" ref="crmCustomerService" />
+		<property name="recbizTypeService" ref="recbizTypeService" />
+		<property name="commProgressService" ref="commProgressService" />
+		<property name="recordInfoService" ref="recordInfoService" />
+	
+	</bean>
+	<!-- 通话配置Action-->
+	<bean id="phoneConfigAction" class="com.banger.mobile.webapp.action.phoneConfig.PhoneConfigAction"
+		scope="prototype" parent="baseAction">
+		<property name="phoneConfigService" ref="phoneConfigService" />
+	</bean>
+	<!-- 消息提醒配置Action-->
+	<bean id="remindConfigAction" class="com.banger.mobile.webapp.action.remindConfig.RemindConfigAction"
+		scope="prototype" parent="baseAction">
+		<property name="remindConfigService" ref="remindConfigService" />
+	</bean>
+	<!-- 客户资料同步设置Action -->
+	<bean id="syncSettingAction" class="com.banger.mobile.webapp.action.syncSetting.SyncSettingAction" 
+		scope="prototype" parent="baseAction">
+		<property name="syncSettingService" ref="syncSettingService"/>
+	</bean>
+
+	<!-- 答录配置Action-->
+	<bean id="answerConfigAction" class="com.banger.mobile.webapp.action.answerConfig.AnswerConfigAction"
+		scope="prototype" parent="baseAction">
+		<property name="answerConfigService" ref="answerConfigService" />
+	</bean>
+	<!-- 通话 -->
+	<bean id="telephoneTalkAction" class="com.banger.mobile.webapp.action.talk.TelephoneTalkAction"
+		scope="prototype" parent="baseAction">
+		<property name="cd" ref="codetableService" ></property>
+		<property name="dept" ref="deptFacadeService"></property>
+		<property name="temp" ref="crmTemplateService"></property>
+		<property name="talk" ref="telephoneTalkService" ></property>
+		<property name="login" ref="sysUserService" ></property>
+		<property name="bizType" ref="recbizTypeService" />
+		<property name="progress" ref="commProgressService" />
+		<property name="recordService" ref="recordInfoService" />
+		<property name="phoneConfigService" ref="phoneConfigService" />
+		<property name="status" ref="sysUserStatusService" ></property>
+	</bean>
+	
+	<!-- 上次联系 -->
+	<bean id="dailNumberAction" class="com.banger.mobile.webapp.action.talk.DailNumberAction"
+		scope="prototype" parent="baseAction">
+		<property name="talk" ref="telephoneTalkService" ></property>
+		<property name="phoneConfigService" ref="phoneConfigService" />
+		<property name="recordInfoService" ref="recordInfoService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="deptFacadeService" ref="deptFacadeService"></property>
+		<property name="login" ref="sysUserService" ></property>
+	</bean>
+	
+	<!-- 上传 -->
+	<bean id="uploadFileAction" class="com.banger.mobile.webapp.action.record.UploadFileAction"  scope="prototype">
+		<property name="opeventLogService" ref="opeventLogService" />
+	</bean>
+
+	<!-- 理财规划报告模板action -->
+	<bean id="plnReportTemplateAction" class="com.banger.mobile.webapp.action.PlnReportTemplate.PlnReportTemplateAction" 
+		scope="prototype" parent="baseAction">
+		<property name="plnReportTemplateService" ref="plnReportTemplateService" />
+		<property name="opeventLoginLogService" ref="opeventLoginLogService" />
+		<property name="plnReportService" ref="plnReportService"/>
+	</bean>
+	
+	<!-- 快速规划Action-->
+	<bean id="plnFastPlanAction" class="com.banger.mobile.webapp.action.fastPlan.PlnFastPlanAction"
+		scope="prototype" parent="baseAction">
+		<property name="plnFastPlanService" ref="plnFastPlanService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="cardTypeService" ref="cardTypeService" />
+		<property name="deptFacadeService" ref="deptFacadeService"/>
+		<property name="crmCustomerShareService" ref="crmCustomerShareService" />
+	</bean>
+	
+	<!-- 报表导出图片 -->
+	<bean id="exportReportAction" class="com.banger.mobile.webapp.action.report.ExportReportAction"  scope="prototype">
+		
+	</bean>
+
+	<!-- 新增客户统计报表 -->
+	<bean id="addCustomerReportAction" class="com.banger.mobile.webapp.action.report.AddCustomerReportAction"  scope="prototype">
+		<property name="report" ref="addCustReportService" />
+		<property name="dept" ref="deptFacadeService" />
+	</bean>
+	
+	<!-- 客户联系跟进统计报表 -->
+	<bean id="contactCustomerReportAction" class="com.banger.mobile.webapp.action.report.ContactCustomerReportAction"  scope="prototype">
+		<property name="report" ref="contactCustReportService" />
+		<property name="cd" ref="codetableService" ></property>
+		<property name="dept" ref="deptFacadeService" />
+	</bean>
+	
+	<!-- 活动量统计报表 -->
+	<bean id="recordActivityReportAction" class="com.banger.mobile.webapp.action.report.RecordActivityReportAction"  scope="prototype">
+		<property name="report" ref="recordReportService" />
+		<property name="dept" ref="deptFacadeService" />
+	</bean>
+	
+	<!-- 活动量统计报表 -->
+	<bean id="recordActivityTrendReportAction" class="com.banger.mobile.webapp.action.report.RecordActivityTrendReportAction"  scope="prototype">
+		<property name="report" ref="recordReportService" />
+		<property name="dept" ref="deptFacadeService" />
+	</bean>
+	<!-- 理财规划报告 -->
+	<bean id="plnReportAction" class="com.banger.mobile.webapp.action.plnReport.PlnReportAction"  scope="prototype">
+		<property name="plnReportService" ref="plnReportService" />
+		<property name="deptFacadeService" ref="deptFacadeService" />
+		<property name="crmCustomerService" ref="crmCustomerService" />
+	</bean>
+	
+
+	<bean id="pdfExportAction" class="com.banger.mobile.webapp.action.plnReport.PdfExportAction"  scope="prototype">
+		<property name="plnReportService" ref="plnReportService" />
+	</bean>
+	
+	<!-- 客户归属数据 -->
+	<bean id="belongToAction" class="com.banger.mobile.webapp.action.customer.CustomerBelongToAction"  scope="prototype">
+		<property name="dept" ref="deptFacadeService" />
+		<property name="user" ref="sysUserService" />
+	</bean>
+	
+	<!-- 客户导出 action-->
+	<bean id="customerExportAction" class="com.banger.mobile.webapp.action.customerExport.CustomerExportAction" scope="prototype">
+		<property name="crmCustomerService" ref="crmCustomerService" />
+		<property name="customerExportService" ref="customerExportService" />
+		<property name="temp" ref="crmTemplateService" />
+		<property name="crmModuleExportService" ref="crmModuleExportService" />
+	</bean>
+	
+
+	<!-- 在线用户管理action -->
+	<bean id="userOnlineAction" class="com.banger.mobile.webapp.action.user.UserOnlineAction"
+		scope="prototype" parent="baseAction">
+		<property name="sysUserService" ref="sysUserService" />
+		<property name="deptService" ref="deptService"></property>
+		<property name="deptFacadeService" ref="deptFacadeService"></property>
+		<property name="cdSystemService" ref="codetableService"></property>
+		<property name="sysUserOnlineService" ref="sysUserOnlineService"></property>
+	</bean>
+	<!-- 线路号码配置action -->
+	<bean id="lineNumberConfigAction" class="com.banger.mobile.webapp.action.lineNumberConfig.LineNumberConfigAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+	<!-- 铃声设置action -->
+	<bean id="crmRingSettingAction" class="com.banger.mobile.webapp.action.crmRingSetting.CrmRingSettingAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmRingSettingService" ref="crmRingSettingService" />
+	</bean>
+	<!-- 录音提示音action -->
+	<bean id="crmRecordRemindAction" class="com.banger.mobile.webapp.action.crmRecordRemind.CrmRecordRemindAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmRecordRemindService" ref="crmRecordRemindService" />
+	</bean>
+
+	<!-- 录音设置Action -->
+	<bean id="crmRecordSettingAction" class="com.banger.mobile.webapp.action.crmRecordSetting.CrmRecordSettingAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmRecordSettingService" ref="crmRecordSettingService" />
+		<property name="funcAuthService" ref="funcAuthService" />
+	</bean>
+	<!-- 柜台人员Action -->
+	<bean id="crmCounterUserAction" class="com.banger.mobile.webapp.action.crmCounterUser.CrmCounterUserAction"
+		scope="prototype" parent="baseAction">
+		<property name="crmCounterUserService" ref="crmCounterUserService" />
+		<property name="deptService" ref="deptService"></property>
+		<property name="sysUserService" ref="sysUserService"></property>
+	</bean>
+	
+	<!-- 联系记录导出 action-->
+	<bean id="recordExportAction" class="com.banger.mobile.webapp.action.record.RecordExportAction" scope="prototype">
+		<property name="recordExportService" ref="recordExportService" />
+		<property name="crmModuleExportService" ref="crmModuleExportService" />
+		<property name="temp" ref="crmTemplateService" />
+	</bean>
+	<!-- 更新基础业务数据Action -->
+	<bean id="updateBasicDataAction" class="com.banger.mobile.webapp.action.updateBasicData.UpdateBasicDataAction" 
+		scope="prototype" parent="baseAction">
+	</bean>
+	
+
+	<!-- AD域帐号同步Action -->
+	<bean id="adsyncAction" class="com.banger.mobile.webapp.action.adsync.AdsyncAction"
+		scope="prototype" parent="baseAction">
+		<property name="adUserSyncService" ref="adUserSyncService" />
+		<property name="adSyncConfigService" ref="adSyncConfigService" />
+	</bean>
+	
+	<!-- 联系目的action -->
+	<bean id="tskTaskPurposeAction" class="com.banger.mobile.webapp.action.system.TskTaskPurposeAction"
+		scope="prototype" parent="baseAction">
+		<property name="tskTaskPurposeService" ref="tskTaskPurposeService" />
+	</bean>
+	
+	<!-- 任务等级action -->
+	<bean id="tskTaskGradeAction" class="com.banger.mobile.webapp.action.system.TskTaskGradeAction"
+		scope="prototype" parent="baseAction">
+		<property name="taskGradeService" ref="taskGradeService" />
+	</bean>
+		
+	<!-- 有效通话量配置action -->
+	<bean id="sysTalklimitConfigAction" class="com.banger.mobile.webapp.action.system.SysTalklimitConfigAction" 
+		scope="prototype" parent="baseAction">
+		<property name="sysTalkLimitConfigService" ref="sysTalkLimitConfigService" />
+	</bean>
+
+	<!-- 财经要点报表action -->
+	<bean id="financeReportAction" class="com.banger.mobile.webapp.action.report.FinanceReportAction" 
+		scope="prototype" parent="baseAction">
+		<property name="financeReportService" ref="financeReportService" />
+	</bean>
+
+	<!-- 知识库action -->
+	<bean id="feKnowLedgeBaseAction" class="com.banger.mobile.webapp.action.finance.FeKnowLedgeBaseAction"
+		scope="prototype" parent="baseAction">
+		<property name="feKnowledgeTypeService" ref="feKnowledgeTypeService"/>
+		<property name="feKnowLedgeContentService" ref="feKnowLedgeContentService"/>
+		<property name="feUserRelationService" ref="feUserRelationService"/>
+		<property name="feArticleService" ref="feArticleService"/>			
+	</bean>
+	<!-- 财经要点文章action -->
+	<bean id="feArticleAction" class="com.banger.mobile.webapp.action.finance.FeArticleAction" 
+		scope="prototype" parent="baseAction">
+		<property name="feArticleService" ref="feArticleService" />
+		<property name="feArticleAttachmentService" ref="feArticleAttachmentService" />
+		<property name="sysParamService" ref="sysParamService" />
+		<property name="feColumnService" ref="feColumnService"/>
+		<property name="deptFacadeService" ref="deptFacadeService"/>
+		<property name="feUserRelationService" ref="feUserRelationService"/>		
+	</bean>
+
+
+	<!-- 栏目action -->
+	<bean id="feColumnAction" class="com.banger.mobile.webapp.action.finance.FeColumnAction"
+		scope="prototype" parent="baseAction">
+		<property name="feColumnService" ref="feColumnService"/>
+		<property name="feArticleService" ref="feArticleService"/>
+	</bean>
+	<!-- 评论和回复action -->
+	<bean id="feDiscessAction" class="com.banger.mobile.webapp.action.finance.FeDiscessAction"
+		scope="prototype" parent="baseAction">
+		<property name="feArticleDiscessService" ref="feArticleDiscessService"/>
+		<property name="feArticleReplyService" ref="feArticleReplyService"/>
+		<property name="feArticleService" ref="feArticleService"/>
+	</bean>
+	<!-- 交流主题Action -->
+	<bean id="commThemeAction" class="com.banger.mobile.webapp.action.communication.CommThemeAction" 
+		scope="prototype" parent="baseAction">
+		<property name="commThemeService" ref="commThemeService" />
+		<property name="commThemeReplyService" ref="commThemeReplyService" />
+		<property name="commUserRelationService" ref="commUserRelationService" />
+		<property name="commThemeOptionService" ref="commThemeOptionService" />
+	</bean>	
+	
+	<!-- 交流分区维护Action -->
+	<bean id="commPartitionAction" class="com.banger.mobile.webapp.action.communication.CommPartitionAction" 
+		scope="prototype" parent="baseAction">
+		<property name="partitionService" ref="partitionService" />
+		<property name="commonTemplateService" ref="commonTemplateService" />
+		<property name="commThemeService" ref="commThemeService" />
+	</bean>
+
+
+	<!-- 产品 Action-->
+	<bean id="pdtProductAction"
+		class="com.banger.mobile.webapp.action.microProduct.PdtProductAction"
+		scope="prototype" parent="baseAction">
+		<property name="pdtProductService" ref="pdtProductService" />
+		<property name="pdtProductCustomerService"
+			ref="pdtProductCustomerService" />
+		<property name="deptFacadeService" ref="deptFacadeService" />
+	</bean>
+	<!-- 产品产品知识库 Action-->
+	<bean id="pdtLibraryAction"
+		class="com.banger.mobile.webapp.action.microProduct.PdtLibraryAction"
+		scope="prototype" parent="baseAction">
+		<property name="pdtLibraryService" ref="pdtLibraryService" />
+		<property name="pdtLibraryAttachmentService"                          			ref="pdtLibraryAttachmentService" />
+	</bean>
+	<!-- 产品产品意向客户 Action-->
+	<bean id="pdtProductCustomerAction"
+		class="com.banger.mobile.webapp.action.microProduct.PdtProductCustomerAction"
+		scope="prototype" parent="baseAction">
+		<property name="pdtProductCustomerService"
+			ref="pdtProductCustomerService" />
+		<property name="pdtProductService" ref="pdtProductService" />
+		<property name="deptFacadeService" ref="deptFacadeService" />
+	</bean>
+
+	<!-- 产品通知 Action-->
+	<bean id="pdtNoticeAction"
+		class="com.banger.mobile.webapp.action.microProduct.PdtNoticeAction"
+		scope="prototype" parent="baseAction">
+		<property name="pdtNoticeService" ref="pdtNoticeService" />
+	</bean>
+	
+	<!-- 任务 日程管理 -->
+	<bean id="tskScheduleAction" class="com.banger.mobile.webapp.action.microTask.TskScheduleAction"
+		scope="prototype" parent="baseAction">
+		<property name="tskScheduleService" ref="tskScheduleService"></property>
+		<property name="crmCustomerService" ref="crmCustomerService"></property>
+	</bean>
+	
+	<!-- 任务 列表 Action -->
+	<bean id="tskMicroTaskListAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskListAction"
+		scope="prototype" parent="baseAction">
+	</bean>	
+	<!-- 任务 Action -->
+	<bean id="tskMicroTaskAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskAction"
+		scope="prototype" parent="baseAction">
+		<property name="tskMicroTaskService" ref="tskMicroTaskService"></property>
+	</bean>
+	<!-- 任务附件 Action -->
+	<bean id="tskMicroTaskAttachmentAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskAttachmentAction"
+		scope="prototype" parent="baseAction">
+		<property name="tskMicroTaskAttachmentService" ref="tskMicroTaskAttachmentService"></property>
+	</bean>
+	<!-- 任务执行者 Action -->
+	<bean id="tskMicroTaskTargetAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskTargetAction"
+		scope="prototype" parent="baseAction">
+		<property name="tskMicroTaskTargetService" ref="tskMicroTaskTargetService"></property>
+	</bean>
+	<!-- 任务目标客户 Action -->
+	<bean id="tskMicroTaskExecuteAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskExecuteAction"
+		scope="prototype" parent="baseAction">
+		<property name="tskMicroTaskExecuteService" ref="tskMicroTaskExecuteService"></property>
+	</bean>
+	<!-- 中止任务 列表 Action -->
+	<bean id="tskMicroTaskListStopAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskListStopAction"
+		scope="prototype" parent="baseAction">
+	</bean>	
+	
+	<!-- 资料 Action-->
+	<bean id="dataAction"
+		class="com.banger.mobile.webapp.action.data.DataAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+	<!-- 资料视频 Action -->
+	<bean id="videoAction"
+		class="com.banger.mobile.webapp.action.data.VideoAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+	<!-- 资料录音 Action -->
+	<bean id="audioAction"
+		class="com.banger.mobile.webapp.action.data.AudioAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+	<!-- 资料照片 Action -->
+	<bean id="photoAction"
+		class="com.banger.mobile.webapp.action.data.PhotoAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+
+	<!-- 资料表 Action -->
+	<bean id="formAction"
+		class="com.banger.mobile.webapp.action.data.FormAction"
+		scope="prototype" parent="baseAction">
+	</bean>
+
+    <!--贷款详情 Action-->
+    <bean id="viewLoanDetailAction" class="com.banger.mobile.webapp.action.loan.ViewLoanDetailAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--贷款同步 Action-->
+    <bean id="loanSyncAction" class="com.banger.mobile.webapp.action.loan.LoanSyncAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--所有贷款 Action-->
+    <bean id="needSubmitLoanAction" class="com.banger.mobile.webapp.action.loan.NeedSubmitLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--未分配贷款 Action-->
+    <bean id="allLoanAction" class="com.banger.mobile.webapp.action.loan.AllLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+
+
+    <!--未分配贷款 Action-->
+    <bean id="allotingLoanAction" class="com.banger.mobile.webapp.action.loan.AllotingLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+    
+     <!--申请贷款 Action-->
+    <bean id="askLoanAction" class="com.banger.mobile.webapp.action.loan.AskLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+	<!--上下游 Action-->
+	<bean id="inBusinessReachesAction" class="com.banger.mobile.webapp.action.loan.InBusinessReachesAction"
+		  scope="prototype" parent="baseAction">
+	</bean>
+<!--偏差分析 Action-->
+	<bean id="lnDeviationAnalsysisAction" class="com.banger.mobile.webapp.action.loan.LnDeviationAnalsysisAction"
+		  scope="prototype" parent="baseAction">
+	</bean>
+
+    <!--贷款类型维护 Action-->
+    <bean id="loanTypeAction" class="com.banger.mobile.webapp.action.loan.LoanTypeAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--未放贷 贷款Action-->
+    <bean id="notMakeLoanAction" class="com.banger.mobile.webapp.action.loan.NotMakeLoanAction"
+          scope="prototype" parent="baseAction">
+          <property name="develop" value="${system.isDevelop.setting}" />
+    </bean>
+    
+    <!--贷款落实Action-->
+    <bean id="confirmLoanAction" class="com.banger.mobile.webapp.action.loan.ConfirmLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--待调查贷款Action-->
+    <bean id="unExamLoanAction" class="com.banger.mobile.webapp.action.loan.UnExamLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--拒绝客户管理-->
+    <bean id="rejectCustomerAction" class="com.banger.mobile.webapp.action.loan.RejectCustomerAction"
+          scope="prototype" parent="baseAction">
+
+    </bean>
+    <!--待审批贷款Action-->
+    <bean id="unAssessLoanAction" class="com.banger.mobile.webapp.action.loan.UnAssessLoanAction"
+            scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--撤销贷款Action-->
+    <bean id="cancelLoanAction" class="com.banger.mobile.webapp.action.loan.CancelLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--贷款催收Action-->
+	<bean id="dunLoanAction" class="com.banger.mobile.webapp.action.loan.DunLoanAction"
+		  scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--异常贷款催收Action-->
+    <bean id="exceptionDunLoanAction" class="com.banger.mobile.webapp.action.loan.ExceptionDunLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--我的异常贷款催收Action-->
+    <bean id="myExceptionDunLoanAction" class="com.banger.mobile.webapp.action.loan.MyExceptionDunLoanAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+    
+    <!-- 催收设置Action -->
+    <bean id="lnDunSetingAction" class="com.banger.mobile.webapp.action.loan.LnDunSetingAction"
+           scope="prototype" parent="baseAction">
+    	<property name="lnDunSetingService" ref="lnDunSetingService" />
+    	<!--<property name="smsChannelBizServiceFactoryImpl" ref="smsChannelBizServiceFactoryImpl" />-->
+    	<property name="sysParamService" ref="sysParamService" />
+    </bean>
+    
+    <!--审批额度配置Action-->
+    <bean id="lnApproveLimitAction" class="com.banger.mobile.webapp.action.loan.LnApproveLimitAction"
+          scope="prototype" parent="baseAction">
+          <property name="lnApproveLimitUserService" ref="lnApproveLimitUserService"></property>
+          <property name="lnApproveLimitRoleService" ref="lnApproveLimitRoleService"></property>
+    </bean>
+    
+    <!-- 维护撤销原因字段 -->
+    <bean id="editCanReaFieldAction" class="com.banger.mobile.webapp.action.loan.LoanCancelReasonAction"
+    scope="prototype" parent="baseAction"></bean>
+    
+    <!-- 维护贷款子类型 -->
+    <bean id="typeSubAction" class="com.banger.mobile.webapp.action.loan.LoanTypeSubAction"
+    scope="prototype" parent="baseAction"></bean>
+    
+    <!-- 导入客户名单 -->
+    <bean id="taskCustomerImportAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskImportAction"
+    scope="prototype" parent="baseAction"> 
+    </bean>
+
+    <!-- 扫街信息-->
+    <bean id="scaningInfoAction" class="com.banger.mobile.webapp.action.map.ScaningInfoAction"
+          scope="prototype" parent="baseAction"></bean>
+
+    <!-- 地图定位信息-->
+    <bean id="mapManagerAction" class="com.banger.mobile.webapp.action.map.MapManagerAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+
+    <!-- 审计模块所有贷款-->
+    <bean id="lnVerifyAllLoanAction" class="com.banger.mobile.webapp.action.loan.LnVerifyAllLoanAction"
+             scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--未审计贷款 -->
+    <bean id="notVerifyLoanAction" class="com.banger.mobile.webapp.action.loan.NotVerifyLoanAction"
+             scope="prototype" parent="baseAction">
+    </bean>
+
+    <!--审计未通过贷款 -->
+    <bean id="verifyNotPassAction" class="com.banger.mobile.webapp.action.loan.VerifyNotPassAction"
+          scope="prototype" parent="baseAction">
+    </bean>
+    
+    <!--导入任务分配情况 Action-->
+    <bean id="taskAssignImportAction" class="com.banger.mobile.webapp.action.microTask.TskMicroTaskAssignImportAction" 
+          scope="prototype" parent="baseAction">
+    </bean>
+    
+    <!-- PAD管理Action -->
+    <bean id="padManagementAction" class="com.banger.mobile.webapp.action.padManagement.PadManagementAction" 
+          scope="prototype" parent="baseAction">
+          <property name="padTypeService" ref="padTypeService" />
+          <property name="padInfoService" ref="padInfoService" />
+          <property name="sysPadLogService" ref="sysPadLogService" />
+    </bean>
+    <bean id="padTypeAction" class="com.banger.mobile.webapp.action.padManagement.PadTypeAction" 
+          scope="prototype" parent="baseAction">
+          <property name="padTypeService" ref="padTypeService" />
+    </bean>
+
+    <!--贷款量统计表-->
+    <bean id="loanCountReportAction" class="com.banger.mobile.webapp.action.report.LoanCountReportAction"
+          scope="prototype" parent="baseAction">
+          <property name="sysUserService" ref="sysUserService" />
+          </bean>
+    <!-- 在线反馈 -->
+    <bean id="feedBackAction" class="com.banger.mobile.webapp.action.feedBack.FeedBackAction"
+          scope="prototype" parent="baseAction"></bean>
+
+    <!-- 个人日志录入 团队日志查看 -->
+    <bean id="teamLogAction" class="com.banger.mobile.webapp.action.microTask.TeamLoagAction"
+            scope="prototype" parent="baseAction">
+    </bean>
+    <!-- 通告 -->
+    <bean id="informAction" class="com.banger.mobile.webapp.action.inform.InformAction"
+          scope="prototype" parent="baseAction"></bean>
+    
+    <bean id="crRequestAction" class="com.banger.mobile.webapp.action.loan.CrRequestAction"
+          scope="prototype" parent="baseAction"></bean>
+         <!-- 经营贷经营模式 -->
+    <bean id="lnBusinessModeAction" class="com.banger.mobile.webapp.action.loan.LnBusinessModeAction" 
+          scope="prototype" parent="baseAction">
+                   <property name="businessModelService" ref="lnBusinessmodelService" />
+        </bean>
+          <!-- 消费贷访谈记录 -->
+    <bean id="lnRecordInterviewAction" class="com.banger.mobile.webapp.action.loan.LnRecordInterviewAction" 
+          scope="prototype" parent="baseAction">
+        </bean>
+          <!-- 消费贷发展历史 -->
+    <bean id="lnLoanHistoryAction" class="com.banger.mobile.webapp.action.loan.LnLoanHistoryAction" 
+          scope="prototype" parent="baseAction">
+        </bean>
+        <!-- 资产负债表 -->
+        <bean id="lnLoanBalanceAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+        <!-- 资产负债表  资产 -->
+        <bean id="lnLoanBalanceAssetAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceAssetAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+        <!-- 资产负债表  负债 -->
+        <bean id="lnLoanBalanceDebtAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceDebtAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+         <!-- 资产负债表  房产 -->
+        <bean id="lnLoanBalanceHousingAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceHousingAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+         <!-- 资产负债表  其它检验 -->
+        <bean id="lnLoanBalanceOtherAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceOtherAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+         <!-- 资产负债表  应收账-->
+        <bean id="lnLoanBalanceReceivableaAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceReceivableaAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+         <!-- 资产负债表  机动车-->
+        <bean id="lnLoanBalanceVehicleAction" class="com.banger.mobile.webapp.action.loan.LnLoanBalanceVehicleAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+        
+         <!-- 损益表  主表--> 
+        <bean id="lnLoanProfitandlossAction" class="com.banger.mobile.webapp.action.loan.LnLoanProfitandlossAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+         <!-- 损益表  消费贷详情--> 
+                  
+        <bean id="lnLoanProfitandlossXfDetailAction" class="com.banger.mobile.webapp.action.loan.LnLoanProfitandlossXfDetailAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+        <!-- 损益表  经营贷详情--> 
+        <bean id="lnLoanProfitandlossJyDetailAction" class="com.banger.mobile.webapp.action.loan.LnLoanProfitandlossJyDetailAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+        
+        
+        <bean id="LoadrunnerTestAction" class="com.banger.mobile.webapp.action.log.LoadrunnerTestAction" 
+          scope="prototype" parent="baseAction">             
+        </bean>
+
+		<bean id="lnBalanceAction" class="com.banger.mobile.webapp.action.loan.LnBalanceAction" scope="prototype" parent="baseAction">
+			<property name="lnBalanceService" ref="lnBalanceService" />
+			<property name="lnProfitLossBaseService" ref="lnProfitLossBaseService" />
+			<property name="lnProfitLossProdService" ref="lnProfitLossProdService" />
+			<property name="lnLoanInfoDictionaryService" ref="lnLoanInfoDictionaryService" />
+		</bean>
+        
+</beans>

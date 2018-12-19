@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="padManagement" extends="default" namespace="/padManagement" >
+	    <global-results>
+	  	  <result name="error">/velocity/error.vm</result>
+	    </global-results>
+	  
+		<!--PAD管理列表 -->
+		<action name="padManagementList" class="padManagementAction" method="padManagementList">
+			<result name="success">/velocity/padManagement/padManagementList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加PAD信息 -->
+		<action name="addPadInfo" class="padManagementAction" method="addPadInfo">
+			<result name="toAddPadInfo">/velocity/padManagement/addPadInfo.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 使用人员机构用户树 -->
+		<action name="getPadDeptUserTree" class="padManagementAction" method="getPadDeptUserTree"></action>
+		<!--PAD管理列表查询 -->
+		<action name="padInfoQuery" class="padManagementAction" method="padInfoQuery">
+			<result name="success">/velocity/padManagement/padmanagementListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--跳转编辑pad信息页面 -->
+		<action name="toUpdatePadInfo" class="padManagementAction" method="toUpdatePadInfo">
+			<result name="success">/velocity/padManagement/updatePadInfo.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="updatePadInfo" class="padManagementAction" method="updatePadInfo"></action>
+		<!-- 查看pad信息 -->
+		<action name="viewPadInfo" class="padManagementAction" method="viewPadInfo">
+			<result name="success">/velocity/padManagement/padInfoDetail.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="changePadStatus" class="padManagementAction" method="changePadStatus"></action>
+		<!-- PAD使用记录 -->
+		<action name="padUseLog" class="padManagementAction" method="padUseLog">
+			<result name="success">/velocity/padManagement/padInfoLog.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="stopPad" class="padManagementAction" method="stopPad"></action>
+		<action name="deletePadInfo" class="padManagementAction" method="deletePadInfo"></action>
+		
+		
+		<!-- PAD品牌 -->
+		<action name="padTypeList" class="padTypeAction" method="padTypeList">
+			<result name="success">/velocity/padManagement/padType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加PAD品牌 -->
+		<action name="addPadBrands" class="padTypeAction" method="addPadBrands"></action>
+		<!-- 跳转编辑PAD品牌页面 -->
+		<action name="toUpdatePadBrands" class="padTypeAction" method="toUpdatePadBrands">
+			<result name="success">/velocity/padManagement/updatePadType.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑PAD品牌 -->
+		<action name="updatePadBrands" class="padTypeAction" method="updatePadBrands"></action>
+		<!-- 删除PAD品牌 -->
+		<action name="deletePadBrands" class="padTypeAction" method="deletePadBrands"></action>
+		<!-- 上移、下移PAD品牌 -->
+		<action name="movePadBrands" class="padTypeAction" method="movePadBrands"></action>
+		
+		<!-- PAD型号 -->
+		<action name="padModelList" class="padTypeAction" method="padModelList">
+			<result name="success">/velocity/padManagement/padSubTypes.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="changePadModel" class="padTypeAction" method="changePadModel">
+			<result name="success">/velocity/padManagement/padSubTypesTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 添加PAD型号-->
+		<action name="addPadModel" class="padTypeAction" method="addPadModel"></action>
+		<!-- 跳转修改PAD型号页面 -->
+		<action name="toUpdatePadModel" class="padTypeAction" method="toUpdatePadModel">
+			<result name="success">/velocity/padManagement/updatePadSubtypes.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 编辑PAD型号 -->
+		<action name="updatePadModel" class="padTypeAction" method="updatePadModel"></action>
+		<!-- 删除PAD型号 -->
+		<action name="deletePadModel" class="padTypeAction" method="deletePadModel"></action>
+		<!-- 上移、下移PAD型号 -->
+		<action name="movePadModel" class="padTypeAction" method="movePadModel"></action>
+		<!-- 返回pad型号的JSON数据 -->
+		<action name="getPadModelJson" class="padTypeAction" method="getPadModelJson"></action>
+		
+		<action name="isActivedPad" class="padTypeAction" method="isActivedPad"></action>
+	</package>
+</struts>

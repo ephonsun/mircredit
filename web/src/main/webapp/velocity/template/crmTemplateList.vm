@@ -1,0 +1,136 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>业务模板</title>
+ 	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    #scriptLink("page")	
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script language="javascript">
+       function moveData(vid,vmoveType){
+	    	jQuery.ajax({
+			    type:"post", //请求方式
+			    url:"moveCrmTemplat.html", //发送请求地址
+			    data:{ //发送给数据库的数据
+			    id:vid,
+			    moveType:vmoveType
+			    },//请求成功后的回调函数有两个参数
+			    //请求成功后的回调函数有两个参数
+			    success:function(data,textStatus){
+			 	  moveResult(data);
+			 	  
+			    }
+			});
+		}
+		//请求后的回调函数
+		function moveResult(msg)
+		{ 
+			if(msg!="SUCCESS"){
+				return;
+			}else{ 
+				//document.location.href="showCrmTemplatListPage.html?random="+Math.random()*100000;
+				document.location.replace("showCrmTemplatListPage.html?random="+Math.random()*100000);
+			}
+			
+		}
+		
+		function add(){
+			var urls="../template/jumpCrmTemplat.html?random="+Math.random()*10000;
+			var options = {id: "template_add", pid: GetId(), title: "新增客户业务模板", url: urls, lock: false};
+			tab.add(options);
+		}
+		
+	    function delData(id,name){
+			if(confirm("您确定要删除客户业务模板“"+name+"”吗?删除会连同“"+name+"”下的所有模板字段一同删除")){
+		    	jQuery.ajax({
+				    type:"post", //请求方式
+				    url:"delCrmTemplat.html?tempid="+id, //发送请求地址
+				    data:{ //发送给数据库的数据
+				    'tempid':id
+				    },//请求成功后的回调函数有两个参数
+				    //请求成功后的回调函数有两个参数
+				    success:function(data,textStatus){
+				 	  delResult(data);
+				    }
+					});
+			}else{
+				return;
+			}
+		}
+		function delResult(msg){
+			if(msg!="SUCCESS"){
+				banger.page.showMessageBox(msg);
+				return;
+			}else{ 
+				//document.location.href="showCrmTemplatListPage.html?random="+Math.random()*100000;
+				document.location.replace("showCrmTemplatListPage.html?random="+Math.random()*100000);
+			}
+		}
+		
+		function editTemp(templateId){
+			var urls="../template/crmTemplatDetail.html?tempid="+templateId;
+			var options = {id: "template_update", pid: GetId(), title: "编辑客户业务模板", url: urls, lock: false};
+			tab.add(options);
+		}
+		
+		//分页跳转
+		function gotoPage(page){
+		var postJson={'templateTypeId': 1};
+			goto(
+				page,
+				"../template/queryCrmTemplatListPage.html?RandNum="+ Math.random(),
+				postJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		function queryResult(html){
+			jQuery("#templateList").html(html);
+			jQuery('#templateList table').table();
+			
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".dgreen").text(total);
+			}else {
+				jQuery(".dgreen").text("0");
+			}
+		}
+		
+		function toTemplateField(templateId,templateName){
+			var urls="../templateField/showTemplateFieldList.html?templateId="+templateId;
+			var options = {id: "templateField_list" + templateId, pid: GetId(), title: "模板字段-"+templateName, url: urls, lock: false};
+			tab.add(options);
+		}
+
+
+    </script>
+</head>
+
+<body>
+	<form  id="showCrmTemplateList" name="showCrmTemplateList" action="showCrmTemplatListPage.html"  method="post">
+        <input type="text" style="display: none;"/>
+		<input type="hidden" id="templateTypeId" name="template.templateTypeId" value="1" />
+	    <div class="sz">
+            <span class="fl bold">
+            	所有客户办理业务模板(<label class="dgreen">$!count</label>)
+            </span>
+        </div>
+		
+	 	<div class="actrow">
+	    	<span onclick="add()" class="btn2 fl"><label id="newTemplate" class="btn2-txt">新建</label></span>
+	    </div>
+	    <div id="templateList">
+        	#parse("/velocity/template/templateList.vm")
+        </div>
+	</form>
+</body>
+</html>

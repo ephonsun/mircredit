@@ -1,0 +1,55 @@
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+    <tr>
+        <th width="200">角色名称</th>
+        <th>描述</th>
+        <th width="200" class="th-last">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($role in $!rolePage.items)            
+            <tr>
+                <td width="200"><label>$!role.roleName</label></td>
+                <td align="left"><label title="$!subString.replaceRemark($!role.remark)">$!role.remark</label></td>
+                <td width="200" class="td-last">
+                    #if($!adminOrDeptAdimn == 1)
+                        <a class="slink" href="javascript:void(0);"
+                           onclick="addTab('detail',$!role.roleId,'$!role.roleName')">查看</a>
+						   
+                        #if($!role.roleId.equals(1) || $!role.roleId.equals(2)
+							||$!role.roleId.equals(3) || $!role.roleId.equals(4)
+							||$!role.roleId.equals(5) || $!role.roleId.equals(6)
+							||$!role.roleId.equals(7))
+                            <!--<span href="#" disabled="true" style="cursor: default;">编辑</span>-->
+							<a class="slink" href="javascript:void(0);"
+                               onclick="addTab('update',$!role.roleId,'$!role.roleName')">编辑</a>
+                        #else
+                            <a class="slink" href="javascript:void(0);"
+                               onclick="addTab('update',$!role.roleId,'$!role.roleName')">编辑</a>
+						#end
+						
+                        #if($!role.roleTypeId!=1)
+                            <a class="slink" href="javascript:void(0);"
+                               onclick="delById($!role.roleId,'$!role.roleName')">删除</a>
+                        #else
+                            <span href="#" disabled="true" style="cursor: default;">删除</span>
+                        #end
+                    #end
+                    #if($!adminOrDeptAdimn == 2)
+                        <a class="slink" href="javascript:void(0);"
+                           onclick="addTab('detail',$!role.roleId,'$!role.roleName')">查看</a>
+                        <span href="#" disabled="true" style="cursor: default;">编辑</span>
+                        <span href="#" disabled="true" style="cursor: default;">删除</span>
+                    #end
+                </td>
+            </tr>
+        #end
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="3">
+            <div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+        </td>
+    </tr>
+    </tfoot>
+</table>

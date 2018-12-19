@@ -1,0 +1,184 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>任务等级列表</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+     <style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+	#scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	//设置第一行 上移 按钮禁用；最后一行 下移 按钮禁用
+		function setstate(){
+			$('.listtbl tbody tr:first a.up').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:first a.up').css({cursor:"default",textDecoration:"none"});
+			$('.listtbl tbody tr:last a.down').attr('disabled', 'disabled');
+			$('.listtbl tbody tr:last a.down').css({cursor:"default",textDecoration:"none"});
+		}
+    	jQuery(function(){
+			jQuery("#taskGradeList").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		setstate();
+		});
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+		//添加任务等级
+		function addData(){
+			var bool = jQuery.validator({ form: 'taskGradeList', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			jQuery.ajax({
+			    type:'post',
+			    url:'addTaskGrade.html?random='+Math.random(),
+			    data:{'taskGrade.marketingGradeName':$("#marketingGradeName").val()},
+			    success:function(data){
+			 		if(data!="true"){
+						banger.page.showMessageBox("任务等级名称已存在!");
+					}
+					else{
+						document.location.href = "getTaskGradeForList.html?random=" + Math.random();
+					}
+			    }
+			});
+		}
+		//操作返回结果
+		function handleResult(msg){
+			if(msg != "true"){
+				banger.page.showMessageBox("操作失败");
+			}
+			else{
+				document.location.href = "getTaskGradeForList.html?random=" + Math.random();
+			}
+		}
+		//上移/下移
+		function moveData(taskGradeId,sortNo,moveType,isActived){
+			jQuery.ajax({
+				type: "post",
+				url: "moveTaskGradeItems.html",
+				data: {'taskGrade.marketingGradeId':taskGradeId,
+						'taskGrade.sortNo':sortNo,
+						'moveType': moveType,
+						'taskGrade.isActived':isActived},
+				success: function(data){
+					handleResult(data);
+				}
+			});
+		}
+	
+		//编辑
+		function updateData(code){
+			var url = "gotoTaskGradePage.html?taskGradeId=" + code + "&random=" + Math.random();
+			var result = banger.page.openDialog(url,"编辑任务等级",600,220);
+			//window.showModalDialog(url, "编辑任务等级", "dialogWidth=600px;dialogHeight=220px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no;");
+			if(result == 1){
+				location.reload();
+			}
+		}
+		//启用/停用
+		function actived(taskGradeId,state){
+			var str="启用";
+			var isActived = 1;
+			if(state==0){
+				str="停用";
+				isActived = 0;
+			}
+			if(confirm("您确定要"+str+"该选择项吗？")){
+				jQuery.ajax({
+    				type: "post",
+    				url: "updateTaskGrade.html",
+    				data: {'taskGrade.marketingGradeId':taskGradeId,
+						   'taskGrade.isActived':isActived,
+						   'handelActive':1
+						},
+    				success: function(data){
+    					handleResult(data);
+    				}
+    			});
+			}
+		}
+		//删除
+		function delTaskGrade(taskGradeId){
+			if(confirm("确定删除当前任务等级？")){
+				jQuery.ajax({
+    				type: "post",
+    				url: "deleteTaskGrade.html",
+    				data: {'taskGrade.marketingGradeId':taskGradeId},
+    				success: function(data){
+    					handleResult(data);
+    				}
+    			});
+			}
+		}
+    </script>
+</head>
+
+<body>
+	<form id="taskGradeList" name="taskGradeList" action="" method="post">
+		<table class="viewtbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" class="field"><label>名称：</label></td>
+	            	<td><label>任务等级</label></td>
+	            	<td width="70" class="field"><label>字段类型：</label></td>
+	            	<td><label>系统级</label></td>
+	            	<td width="70" class="field"><label>数据类型：</label></td>
+	            	<td><label>单选下拉框</label></td>
+	            </tr>
+	        </tbody>
+	    </table>
+		<div style="margin: 10px 0px;"><label>选项列表</label></div>
+		<div style="border: 1px solid #ccc; padding: 10px;">
+	    	<div class="sz" style="text-align: left;">
+	        	<label class="fl">新选项：</label>
+	        	<div class="dtxt2 fl" style="width: 150px; margin-right: 5px;">
+	            	<input type="text" name="marketingGradeName" id="marketingGradeName" class="dtxt2-txt" maxlength="20" rule="\S" tips='"任务等级"必须填写' focusFlag="false" />
+	            </div>
+	            <input type="button" value="添 加" class="btn1" onclick="addData()"/>
+	        </div>
+	    	<table class="listtbl" cellpadding="0" cellspacing="0">
+	            <thead>
+	                <tr>
+	                    <th>选项名称</th>
+	                    <th width="150">操作</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	            	#foreach($tg in $!taskGradeList)
+	                <tr>
+	                    <td><label>$!tg.marketingGradeName</label></td>
+	                    <td width="150">
+	                        <a class="slink" href="javascript:void(0);" onclick="updateData('$!tg.marketingGradeId')">编辑</a>
+	                        <a class="slink" href="javascript:void(0);" onclick="delTaskGrade('$!tg.marketingGradeId')">删除</a>
+	                        <a href="javascript:void(0);" class="slink up" onclick="moveData('$!tg.marketingGradeId','$!tg.sortNo','up','$!tg.isActived')">上移</a>
+	                        <a href="javascript:void(0);" class="slink down" onclick="moveData('$!tg.marketingGradeId','$!tg.sortNo','down','$!tg.isActived')">下移</a>
+	                        #if($!tg.isActived.equals(1))
+    						<a class="slink" href="#" onclick="actived('$!tg.marketingGradeId',0)">停用</a>
+    						#else
+    						<a class="slink" href="#" onclick="actived('$!tg.marketingGradeId',1)">启用</a>
+    					#end
+	                    </td>
+	                </tr>
+	                #end
+	            </tbody>
+	        </table>
+	    </div>
+	    <div class="halign" style="margin-top: 20px;">
+	       <input type="button" value="关 闭" class="btn1" onclick="window.location.href='../velocity/system/basicsdatalist.vm'" />
+	    </div>
+	</form>
+</body>
+</html>

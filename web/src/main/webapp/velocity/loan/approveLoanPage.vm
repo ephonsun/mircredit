@@ -1,0 +1,412 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑贷款</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+        .m1{ margin-left:15px;}
+        .font-size{ font-size:14px; }
+        .tl p { margin-left:15px; margin-top:10px; }
+        #if($loan && $!loan.isReject == 1)
+        #draggable {background-color:#FFF; width:165px; padding:5px 0px 5px 10px; position:absolute; right:12px; top:120px; float:left; z-index:99999; }
+        #else
+        #draggable {background-color:#FFF; width:165px; padding:5px 0px 5px 10px; position:absolute; right:12px; top:11px; float:left; z-index:99999; }
+        #end
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+
+            maxTextArea("textarea[maxlength]");
+
+            //初始化输入框为空的验证
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+
+            jQuery("#remark").validator();
+
+            var url = "../loan/vLoanView.html?isEdit=true&RandNum="+ Math.random()+"&loanId="+$!loan.loanId;
+            $('#viewLoan').load(url,{},function(){
+            });
+
+            var loanId = '$!loan.loanId';
+            var customerId = '$!loan.crmCustomer.customerId';
+            var loanStatusId = '$!loan.loanStatusId';
+            var loanCusId = loanId+","+customerId+","+4;
+            var configObj = {
+                'action': '../loan/autoUploadAttachment.html?loanCusId='+loanCusId,
+                'queueId':'fileQueue',
+                'loanId':loanId,
+                'customerId':customerId,
+                'loanStatusId':loanStatusId,
+                'auto':true
+            }
+            setFileUploadByParams(configObj);//渲染附件上传功能
+        });
+
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+
+        function checkNull(){
+            if(jQuery.trim($('#approveRemark').val()) != ""){
+                var bool = jQuery.validator({form:'remark'});
+                if(!bool){
+                    return false;
+                }
+            }
+        }
+
+        //判断贷款状态是否被改变
+        function queryLoanStatusById(loanId,loanStatusId,flag,customerId){
+            if(flag == "approveReject"){
+                var approveRemark = $('#approveRemark');
+                approveRemark.attr("rule","\\S");
+                approveRemark.attr("tips",'"驳回原因"必须填写');
+                var bool = jQuery.validator({form:'remark'});
+                if(!bool){
+                    return false;
+                }
+            } else {
+                var approveRemark = $('#approveRemark');
+                approveRemark.attr("rule","");
+                var bool = jQuery.validator({form:'remark'});
+                if(!bool){
+                    return false;
+                }
+            }
+            var url = "${ctx}/loan/unAssessLoanStatusChanged.html?loanId="+loanId+"&RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:url,
+                data:{},
+                success:function(retVal){
+//                    var arr = [];
+//                    var fileIdArr = [];
+//                    jQuery("input[name='fileAttachment']").each(function(i){
+//                        var fileInfo = jQuery(this).val();
+//                        arr[i] = fileInfo;
+//                        var fileInfos = fileInfo.split("|");
+//                        fileIdArr[i] = fileInfos[2];
+//                    });
+//                    var fileAttachments = arr.join(":");
+//                    var fileIds = fileIdArr.join(":");
+
+                    if(retVal == 0 || retVal == "0"){
+                        //审批备注
+                        var approveRemark = jQuery.trim($('#approveRemark').val());
+                        if(flag == "approveRefuse"){
+                            //点击了‘撤销’
+                            cancelUnAssessLoan(loanId,loanStatusId,customerId);
+                        } else {
+                            //当前贷款状态没有改变
+                            var result = openCommApprovePersonPage(loanId);
+                            if(result != null && result.indexOf("1") == 0){
+                                //共同审批人信息(用户名和密码)输入正确,开始审批
+
+                                var resultArray = result.split("&");
+                                //主审批人的审批时间
+                                var approvePerson1Date = resultArray[1];
+                                //共同审批人ID
+                                var approvePerson2Id = resultArray[2];
+                                //共同审批人姓名
+                                var approvePerson2Name = resultArray[3];
+
+                                if(flag == "approvePass"){
+                                    //点击了‘审批通过’
+                                    approvePass(loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,customerId);
+                                }else if(flag == "approveReject"){
+                                    //点击了‘审批驳回’
+                                    approveReject(loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,customerId);
+                                }else if(flag == "approveFail"){
+                                    //点击了‘审批失败’
+                                    approveFail(loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,customerId);
+                                }
+                            }
+                        }
+                    }else if(retVal > 0){
+                        //当前贷款状态已经改变
+                        //刷新当前页面
+                        banger.page.showMessageBox("贷款列表数据已被人更改，请重新搜索!");
+                    }
+                }
+            });
+        }
+
+        //审批通过
+        function approvePass(loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,customerId){
+            var url = "${ctx}/loan/approvePass.html?loanId="+loanId+"&RandNum="+Math.random();
+            approveAjax(url,loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,5,customerId,"审批通过");
+        }
+
+        //审批驳回
+        function approveReject(loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,customerId){
+            var url = "${ctx}/loan/approveReject.html?loanId="+loanId+"&RandNum="+Math.random();
+            approveAjax(url,loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,3,customerId,"审批驳回");
+        }
+
+        //审批失败
+        function approveFail(loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemar,customerIdk){
+            var url = "${ctx}/loan/approveFail.html?loanId="+loanId+"&RandNum="+Math.random();
+            approveAjax(url,loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,10,customerId);
+        }
+
+        function approveAjax(url,loanId,approvePerson1Date,approvePerson2Id,approvePerson2Name,approveRemark,loanStatusId,customerId,approvalInfo){
+            jQuery.ajax({
+                type:'POST',
+                url:url,
+                data:{
+                    'approvePerson2Id':approvePerson2Id,
+                    'approvePerson1Date':approvePerson1Date,
+                    'approvePerson2Name':approvePerson2Name,
+                    'loanStatusId':loanStatusId,
+                    'approveRemark':approveRemark,
+                    'customerId':customerId
+                },
+                success:function(data){
+                    if(data){
+                        banger.page.showMessageBox(data);
+                    }else{
+                        banger.page.showMessageBox({"type":"success","content":approvalInfo + "!"});
+                        tab.close(GetId(),true);
+                    }
+                }
+            });
+        }
+
+        //审批拒绝
+        function refuseApproveLoan(loanId,loanStatusId,customerId,remark){
+            var url = "../loan/cancelLoanPage.html?approveRefuse=true&RandNum="+Math.random();
+            var result = window.showModalDialog(url,{window: window},'dialogWidth=550px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            if(result){
+                jQuery.ajax({
+                    type:'post',
+                    url:'saveFileAttachments.html',
+                    data:{
+                        'loanId':loanId,
+                        'customerId':customerId
+                    }
+                })
+            }
+            return result;
+        }
+
+        //撤销贷款
+        function cancelUnAssessLoan(loanId,loanStatusId,customerId){
+           jQuery.ajax({
+                type:'POST',
+                url:'${ctx}/loan/hasAudio.html?loanId='+loanId+'&customerId='+customerId+'&RanNum='+Math.random(),
+                data:{},
+                success:function(data){
+                    if(data){
+                        banger.page.showMessageBox(data);
+                    }else{
+                        var approveRemark = jQuery.trim($('#approveRemark').val());
+                        var refuseParam = refuseApproveLoan();
+                        if(refuseParam){
+                            refuseParam['remark'] = approveRemark;
+                            refuseParam['loanId'] = loanId;
+                            refuseParam['beforeStatusId'] = loanStatusId;
+                            refuseParam['customerId'] = customerId;
+                            var surveyUserId = '$!loan.surveyUserId';
+                            var result = openCommApprovePersonPage(loanId);
+                            if(result != null && result.indexOf("1") == 0){
+                                //共同审批人信息(用户名和密码)输入正确,开始审批
+                                var resultArray = result.split("&");
+                                //主审批人的审批时间
+                                var approvePerson1Date = resultArray[1];
+                                //共同审批人ID
+                                var approvePerson2Id = resultArray[2];
+                                //共同审批人姓名
+                                var approvePerson2Name = resultArray[3];
+                                //审批备注
+                                var approveRemark = jQuery.trim($('#approveRemark').val());
+                                refuseParam['approvePerson2Id'] = approvePerson2Id;
+                                refuseParam['approvePerson1Date'] = approvePerson1Date;
+                                refuseParam['approveRemark'] = approveRemark;
+                                refuseParam['loanId'] = loanId;
+                                refuseParam['customerId'] = customerId;
+                                refuseParam['beforeStatusId'] = loanStatusId;
+                                refuseParam['commApprovePersonName'] = approvePerson2Name;
+
+                                jQuery.ajax({
+                                    type:'POST',
+                                    url:'../loan/cancelLoan.html?RandNum='+Math.random(),
+                                    data:refuseParam,
+                                    success:function(){
+                                        jQuery.ajax({
+                                            type:'POST',
+                                            url:'../loan/unExamLoanListQuery.html?RandNum='+Math.random(),
+                                            data:{},
+                                            success:function(html){
+                                                    tab.close(GetId(),true);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            })
+
+        }
+
+        var rDrag = {
+
+            o:null,
+
+            init:function(o){
+                o.onmousedown = this.start;
+            },
+            start:function(e){
+                var o;
+                e = rDrag.fixEvent(e);
+                e.preventDefault && e.preventDefault();
+                rDrag.o = o = this;
+                o.x = e.clientX - rDrag.o.offsetLeft;
+                o.y = e.clientY - rDrag.o.offsetTop;
+                document.onmousemove = rDrag.move;
+                document.onmouseup = rDrag.end;
+            },
+            move:function(e){
+                e = rDrag.fixEvent(e);
+                var oLeft,oTop;
+                oLeft = e.clientX - rDrag.o.x;
+                oTop = e.clientY - rDrag.o.y;
+                rDrag.o.style.left = oLeft + 'px';
+                rDrag.o.style.top = oTop + 'px';
+            },
+            end:function(e){
+                e = rDrag.fixEvent(e);
+                rDrag.o = document.onmousemove = document.onmouseup = null;
+            },
+            fixEvent: function(e){
+                if (!e) {
+                    e = window.event;
+                    e.target = e.srcElement;
+                    e.layerX = e.offsetX;
+                    e.layerY = e.offsetY;
+                }
+                return e;
+            }
+        }
+
+        window.onload = function(){
+//            var obj = document.getElementById('draggable');
+//            rDrag.init(obj);
+        }
+
+        //录音功能方法
+        function recording()
+        {
+            element=document.getElementById('myimage');
+            if (element.src.match("bulbon"))
+            {
+                element.src="../images/public/eg_bulboff.gif";
+            }
+            else
+            {
+                element.src="../images/public/eg_bulbon.gif";
+            }
+        }
+    </script>
+</head>
+<body>
+<!--
+<div id="draggable">
+    <div class="fl"><img id="myimage" onclick="recording()" src="../images/public/eg_bulboff.gif" tips="abc"></div>
+    <div class="line-recording fl">
+        <p>00:00:00</p>
+    </div>
+</div> -->
+<p class="bold loan-lheight">贷款状态：贷款审批</p>
+#parse("/velocity/loan/baseLoanInfo.vm")
+#if($loan && $!loan.isReject == 1)
+<div class="loan-bg-one tl">
+    <p class="bold font-size">上次驳回情况描述</p>
+    <p class="red" style="margin-bottom:10px;" >驳回原因：$!loan.approveRemark</p>
+    <!--
+    <span class="atable m1">决议表</span>
+    <span class="atable m1">审贷表</span>
+    -->
+</div>
+#end
+<div class="loan-bg-one" id="attachmentDiv">
+    <p class="bold loan-lheight">审批贷款</p>
+    <!--
+    <span class="atable m1">决议表</span>
+    <span class="atable m1">审贷表</span>
+    -->
+    <!--添加附件部分-->
+    <p class="loan-exam-attachment">
+    #if($urlPermitUtil.hasPermission('lnApproveUpload'))
+        <input type="file" name="fileInput" id="fileInput" />
+    #end
+    <div id="attachmentList" class="datatbl" style="text-align:left;padding-left:10px;">
+        #parse("/velocity/loan/attachmentList.vm")
+    </div>
+        <div id="fileQueue"></div>
+    </p>
+    <!--添加附件部分-->
+    <p class="loan-lheight dashed">审批备注</p>
+    <table class="htmltbl_2" style="table-layout: auto;">
+        <tbody>
+        <tr>
+            <td width="0.5%"></td>
+            <td align="center" width="99%">
+                <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;" id="remark">
+                    <textarea onblur="checkNull();" maxlength="250" id="approveRemark" class="textarea" style="height: 100px; _height:100px;" tips=""></textarea>
+                </div>
+            </td>
+            <td width="0.5%"></td>
+        </tr>
+        </tbody>
+    </table>
+    #if($urlPermitUtil.hasPermission('lnApprovePass'))
+    <input type="button" class="ui-span-btn button-table" value="审批通过" onclick="queryLoanStatusById($!loan.loanId,4,'approvePass',$!loan.crmCustomer.customerId);" />
+    #end
+    #if($urlPermitUtil.hasPermission('lnApproveFail'))
+    <input type="button" class="ui-span-btn button-table" value="审批驳回" onclick="queryLoanStatusById($!loan.loanId,4,'approveReject',$!loan.crmCustomer.customerId);" />
+    #end
+    <!--
+    <input type="button" class="ui-span-btn button-table" value="审批失败" onclick="queryLoanStatusById($!loan.loanId,4,'approveFail');" />
+    -->
+    #if($urlPermitUtil.hasPermission('lnApproveReject'))
+    <input type="button" class="ui-span-btn button-table" value="审批拒绝" onclick="queryLoanStatusById($!loan.loanId,4,'approveRefuse',$!loan.crmCustomer.customerId);"/>
+    #end
+</div>
+<div id="viewLoan"></div>
+</body>
+</html>

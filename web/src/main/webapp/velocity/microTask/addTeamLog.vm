@@ -1,0 +1,170 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>个人日志录入</title>
+
+    <style type="text/css">
+        .v-fails {
+            border: 1px solid red;
+            background-color: #fff7f7;
+        }
+
+        .v-fails input {
+            color: red;
+        }
+
+        .v-tips {
+            position: absolute;
+            border: 1px solid #a6c9e2;
+            background-color: white;
+            padding: 4px 7px;
+            line-height: 20px;
+        }
+
+        .v-tips img {
+            position: absolute;
+            top: -10px;
+            border: 0;
+        }
+
+        div.tabs-header {
+            height: auto !important;
+        }
+
+        div.tabs-items-zone {
+            white-space: normal;
+        }
+    </style>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css"/>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css"/>
+
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    #scriptLink("page")
+    <script type="text/javascript">
+        var canSave = true;
+        //判断所有input框有没有填
+        function isOk() {
+            $("input[type=text]").each(function () {
+                if (!this.readonly) {
+                    if (this.value == "") {
+                        canSave = false;
+                        return;
+                    }
+                }
+            });
+        }
+
+        function saveTeamLog() {
+            //判断必填项是否已经都填写
+            isOk();
+            if (canSave == true) {
+                //可以提交
+                document.sTeamLog.submit();
+            } else {
+                //不可以提交
+                alert("请填写所有信息！并确认按要求填写！")
+            }
+        }
+
+        function checkedInput(obj) {
+            var value = jQuery(obj).val();
+            if (value.replace(/\ /g, "") == "") {
+                alert("不能为空！")
+                canSave = false;
+                return;
+            }
+            if (!value.match("^\\d+$")) {
+                alert("请输入整数")
+                jQuery(obj).val("")
+                canSave = false;
+                return;
+            }
+            canSave=true;
+        }
+
+        //可以输负数
+        function checkedInput3(obj) {
+            var value = jQuery(obj).val();
+            if (value.replace(/\ /g, "") == "") {
+                alert("不能为空！")
+                canSave = false;
+                return;
+            }
+            if (!value.match("^+|-\\d+$")) {
+                alert("请输入整数")
+                jQuery(obj).val("")
+                canSave = false;
+                return;
+            }
+            canSave=true;
+        }
+
+        function checkedInput2(obj) {
+            var value = jQuery(obj).val();
+            if (value.replace(/\ /g, "") == "") {
+                alert("不能为空！")
+                canSave = false;
+                return;
+            }
+            if (!value.match("^\\+?(\\d*\\.?\\d{0,2})$")) {
+                alert("请输入保留2位小数")
+                canSave = false;
+                jQuery(obj).val("");
+                return;
+            }
+            canSave=true;
+        }
+
+        //可以输入负值
+        function checkedInput4(obj) {
+            var value = jQuery(obj).val();
+            if (value.replace(/\ /g, "") == "") {
+                alert("不能为空！")
+                canSave = false;
+                return;
+            }
+            if (!value.match("^\\+|-?(\\d*\\.?\\d{0,2})$")) {
+                alert("请输入保留2位小数")
+                canSave = false;
+                jQuery(obj).val("");
+                return;
+            }
+            canSave=true;
+        }
+    </script>
+</head>
+
+<body>
+<form name="sTeamLog" class="formular" method="post" action="saveTeamLog.html">
+    <div id="tabs-pages" class="tabs-pages">
+        <div class="tabs-page">
+            #parse("/velocity/microTask/teamLogInfo.vm")
+        </div>
+    </div>
+    <hr style="margin: 20px 0px;"/>
+
+    <p class="halign">
+        <input type="button" value="保 存" class="btn6 btn6bg1" onclick="saveTeamLog()"/>
+        <input type="button" value="取 消" class="btn6 btn6bg3"
+               onclick="javascript:if(confirm('您当前的信息未保存，您确定要放弃保存吗？')) tab.close(GetId(), false);"/>
+    </p>
+</form>
+</body>
+</html>

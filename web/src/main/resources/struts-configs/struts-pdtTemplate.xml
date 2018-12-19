@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="pdtTemplate" extends="default" namespace="/pdtTemplate" > 	 
+		 <!--  业务模板列表页面 -->
+		<action name="showPdtCrmTemplatListPage" class="pdtCrmTemplateAction" method="showCrmTemplatListPage">
+			<result name="success">/velocity/pdtTemplate/crmTemplateList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  删除业务模板 -->
+		<action name="delPdtCrmTemplat" class="pdtCrmTemplateAction" method="delCrmTemplat">
+			<result name="success" type="redirectAction">showPdtCrmTemplatListPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  新增业务模板 -->
+		<action name="addPdtCrmTemplat" class="pdtCrmTemplateAction" method="addCrmTemplat">
+			<result name="success" type="redirectAction">showPdtCrmTemplatListPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  新增业务模板并继续 -->
+		<action name="addPdtCrmTemplateAndContinue" class="pdtCrmTemplateAction" method="addCrmTemplateAndContinue">
+			<result name="success" type="redirectAction">jumpPdtCrmTemplat</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  跳转新增业务模板 -->
+		<action name="jumpPdtCrmTemplat" class="pdtCrmTemplateAction" method="jumpCrmTemplat">
+			<result name="success">/velocity/pdtTemplate/addCrmTemplate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  编辑业务模板 -->
+		<action name="editPdtCrmTemplat" class="pdtCrmTemplateAction" method="editCrmTemplat">
+			<result name="success" type="redirectAction">showPdtCrmTemplatListPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!--  编辑业务模板并继续 -->
+		<action name="editPdtCrmTemplateAndContinue" class="pdtCrmTemplateAction" method="editCrmTemplateAndContinue">
+			<result name="success" type="redirectAction">jumpPdtCrmTemplat</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		 
+		<!--  查看业务模板 -->
+		<action name="crmPdtTemplatDetail" class="pdtCrmTemplateAction" method="crmTemplatDetail">
+			<result name="success" >/velocity/pdtTemplate/editCrmTemplate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 移动 -->
+		<action name="movePdtCrmTemplat" class="pdtCrmTemplateAction" method="moveCrmTemplat">
+			<result name="success"  type="redirectAction">showPdtCrmTemplatListPage</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<action name="validatePdtUpdate" class="pdtCrmTemplateAction" method="validateUpdate">
+		</action> 
+		<action name="validatePdtAdd" class="pdtCrmTemplateAction" method="validateAdd">
+		</action> 
+	</package>
+
+</struts>

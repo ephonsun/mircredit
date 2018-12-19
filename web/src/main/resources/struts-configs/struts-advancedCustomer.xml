@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="advancedCustomer" extends="default" namespace="/advancedCustomer">
+
+		<!--  高级客户列表页面 -->
+		<action name="showCustomerPage" class="advancedCustomerAction"
+			method="showCustomerPage">
+			<result name="success">/velocity/customer/advancedSearchCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="getCityJson" class="advancedCustomerAction" method="getCityJson">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<action name="getAdvancedCustomerGrid" class="advancedCustomerAction" method="getAdvancedCustomerGrid">
+			<result name="success">/velocity/customer/advancedSearchCustomerGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 保存自定义查询结果 -->
+		<action name="saveAdvancedQueryResult" class="advancedCustomerAction" method="saveAdvancedResult">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 保存自定义查询临时结果 -->
+		<action name="saveAdvancedQueryTempResult" class="advancedCustomerAction" method="saveAdvancedQueryTempResult">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 复盖自定义查询结果  -->
+		<action name="editAdvancedQueryResult" class="advancedCustomerAction" method="editAdvancedResult">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 自定义搜索管理页面  -->
+		<action name="getUserQueryList" class="advancedCustomerAction" method="getUserQueryList">
+			<result name="success">/velocity/customer/advancedSearchResultList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 自定义搜索管理列表  -->
+		<action name="getUserQueryListGrid" class="advancedCustomerAction" method="getUserQueryList">
+			<result name="success">/velocity/customer/advancedSearchResultGrid.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 删除自定义搜索  -->
+		<action name="delAdvancedQueryResult" class="advancedCustomerAction" method="delAdvancedQueryResult">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 上移自定义搜索  -->
+		<action name="upAdvancedQueryResult" class="advancedCustomerAction" method="upAdvancedQueryResult">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 下移自定义搜索  -->
+		<action name="downAdvancedQueryResult" class="advancedCustomerAction" method="downAdvancedQueryResult">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 导出客户数据 -->
+		<action name="showExportCustomer" class="advancedCustomerAction" method="showExportCustomer">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 选取全部客户数据 -->
+		<action name="getAllSelectCustomer" class="advancedCustomerAction" method="getAllSelectCustomer">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+	</package>
+</struts>

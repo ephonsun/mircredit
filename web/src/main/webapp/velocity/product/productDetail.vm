@@ -1,0 +1,182 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看产品</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript">
+		var postJson = {};
+    	jQuery(function(){
+			$("#tabs").tabs();
+			if(tab){
+				tab.title(tab.self,'查看产品详情-'+'$!productObj.productName');
+			}
+			getQueryJson();
+		});
+    	//进入客户详情
+    	function openCustomer(id){
+			jQuery.post("../record/getCustomerIsDel.html", {"customerId": id}, function(result){
+    			if(result=="0"){
+    				banger.page.showMessageBox("该客户已删除,无法查看客户！");
+    				return;
+    			}else{
+            		var options = {id: "productDetail_queryCustomerById"+id, pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&crmCustomer.customerId="+id+"&random="+Math.random(), lock: false};
+            		tab.add(options);
+    			}
+			});
+    	}
+		
+		function getQueryJson(){
+    		postJson['productId']=$('#productId').val();
+    		return postJson;
+    	}
+		
+		//分页跳转
+		function gotoPage(page)
+		{
+			goto(page,"queryProductById.html?fenye=1&random="+Math.random()*1000000,postJson,function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新Grid
+    	function refreshGrid(gridId,html)
+    	{
+    		$("#" + gridId).html(html);
+    		$('table.datatbl').table();
+    		var total = $('#total').val();
+    		if(total!=null){
+    			$('#queryCount').text(total);
+    		}
+    		else {
+    			$('#queryCount').text("0");
+    		}
+    	}
+		
+		//刷新
+		function refresh(){
+    		goto(null,"queryProductById.html?fenye=1&random="+Math.random()*1000000,postJson,function(html){refreshGrid('grid',html);});
+		}
+    </script>
+</head>
+
+<body>
+	<h4 class="size12">
+    	基本信息
+    </h4>
+    
+    <hr />
+    
+    <table class="viewtbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label>产品名称：<input type="hidden"  id="productId" value="$!productObj.productId"/></label>
+                </td>
+                <td colspan="7">
+                	<label>$!productObj.productName</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label>产品编号：</label>
+                </td>
+                <td width="17%">
+                	<label>$!productObj.productCode</label>
+                </td>
+            	<td width="8%" class="field">
+                	<label>产品类型：</label>
+                </td>
+                <td width="17%">
+                	<label>$!productObj.productTypeName</label>
+                </td>
+            	<td width="8%" class="field">
+                	<label>收益类型：</label>
+                </td>
+                <td width="17%">
+                	<label>$!productObj.profitTypeName</label>
+                </td>
+            	<td width="8%" class="field">
+                	<label>预期收益率：</label>
+                </td>
+                <td width="17%">
+                	<label>#if($!productObj.profitRateMin)$!productObj.profitRateMin%~#end#if($!productObj.profitRateMax)$!productObj.profitRateMax%#end</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label>发售期：</label>
+                </td>
+                <td colspan="3">
+                	<label>#if($!productObj.saleStartDate)$date.format("yyyy-MM-dd",$!productObj.saleStartDate)~#end#if($!productObj.saleEndDate)$date.format("yyyy-MM-dd",$!productObj.saleEndDate)#end</label>
+                </td>
+            	<td width="8%" class="field">
+                	<label>理财时长：</label>
+                </td>
+                <td width="17%">
+                	<label>$!productObj.duration天</label>
+                </td>
+            	<td width="8%" class="field">
+                	<label>到期日：</label>
+                </td>
+                <td width="17%">
+                	<label>#if($!productObj.expireDate)$date.format("yyyy-MM-dd",$!productObj.expireDate)#end</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label>募集上限：</label>
+                </td>
+                <td colspan="7">
+                	<label>$moneyUtil.decimeMoney($typeUtil.changeType($!productObj.raiseUpperLimit))$!productObj.moneyUnitName</label>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="8%" class="field">
+                	<label>到期提醒设置：</label>
+                </td>
+                <td colspan="7">
+                	<label>
+                    	产品到期提前
+						$!productObj.remindDays
+                        天自动提醒
+                    </label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h4 class="size12" style="margin-top: 20px;">
+    	购买信息
+    </h4>
+    
+    <hr />
+    
+    <div class="sz">
+        <label class="fl bold">
+            购买客户(<span id="queryCount" class="dgreen">$!count</span>)
+        </label>
+    </div>
+    <div class="actrow">
+		<a href="javascript:void(0);" class="btn2 fr" onclick="refresh()">
+            <label class="btn2-txt">刷 新</label>
+        </a>
+    </div>
+	<div id="grid">
+		 #parse("/velocity/product/productDetailTable.vm")
+	</div>
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="tab.close(GetId(), false);"/>
+    </div>
+</body>
+
+</html>

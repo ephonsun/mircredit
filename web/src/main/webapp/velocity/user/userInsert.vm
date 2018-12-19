@@ -1,0 +1,600 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>用户新增</title>
+<base target="_self"/>
+    #styleLink("base")
+<link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    #scriptLink("core")
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    #scriptLink("page")
+<style type="text/css">
+    .left {
+        text-align: left !important;
+    }
+
+    .pr {
+        padding-right: 5px !important;
+    }
+
+    .separator {
+        background-color: white !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+    .separator h4 {
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+    }
+
+    .separator h4.mt {
+        margin-top: 10px;
+    }
+</style>
+<script type="text/javascript">
+$(function () {//页面初始化
+    maxInput('#remark', 200);
+    telInput('#phoneExt');
+    telInput('#approvalValue');
+    escapeInput('#account');
+   // escapeInput('#userName');
+    unsignedIntInput('#buessRank');
+	if('$!sysUser.leaveTag'){
+	$("#leaveTag").val('$!sysUser.leaveTag');
+	}
+    var str = window.top.tempDeptName;
+    var arr = str.split(",");
+    $("#belongDeptId").val(arr[0]);
+    $("#deptId").val(arr[1]);
+    jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+    jQuery.fn.zTree.init($("#dataAuthTree"), settingData, zDataNodes);
+
+    var bussTreeObj = jQuery.fn.zTree.getZTreeObj("dataAuthTree");
+    var bussNodes = bussTreeObj.getNodes();    ;
+    for (var j = 0; j < bussNodes.length; j++) {
+        if (bussNodes[j].name == arr[0]) {
+            $('#' + bussNodes[j].tId + '_check').click();
+            break;
+        }
+    }
+    tab.refresh(GetPid());
+    $("select").each(function () {
+        $(this).select({scroll: 10});
+    });
+    $('#userForm').validator();
+    $('#bussPlan').hide();
+
+    var str = "$!roleNames", arr = new Array();
+    str.length > 0 ? arr = str.split(",") : arr = [];
+    jQuery("#combox1").combobox({
+        allcheck: true,
+        clear: true,
+        rev: true,
+        array: arr
+    });
+    #if(!$!account.equals("admin"))
+        $("input[name='roleType']:checkbox").each(function () {
+            #foreach($item in $!sysRoleAuthList)
+                var temp = $(this).val();
+                var roleId =$item.roleId;
+                if (temp == roleId)
+                    $(this).attr("disabled", true);
+            #end
+        })
+        $("input[name='roleType']:checkbox").each(function () {
+            if ($(this).attr("disabled")) {
+                $(this).attr("disabled", false);
+            } else {
+                $(this).attr("disabled", true);
+                $(this).next('label').attr("disabled", true);
+            }
+        })
+    #end
+
+    //机构输入框获取焦点时，显示下拉框 add by wuxj
+    $("#belongDeptId, #deptRange").focus(function(){
+        $(this).next('span').click();
+    });
+});
+
+var setting = {
+    data: {
+        simpleData: {
+            enable: true
+        }
+    },
+    callback: {
+        onClick: onClick
+    },
+    view: {
+        dblClickExpand: false,
+        showIcon: false
+    }
+
+};
+var zNodes = $!deptJson;
+function onClick(e, treeId, treeNode) {
+    var zTree = jQuery.fn.zTree.getZTreeObj("deptTree"),
+            nodes = zTree.getSelectedNodes(),
+            v = "";
+    nodes.sort(function compare(a, b) {
+        return a.id - b.id;
+    });
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        v += nodes[i].name + ",";
+    }
+    if (v.length > 0) v = v.substring(0, v.length - 1);
+    var obj = $("#belongDeptId");
+    obj.attr("value", v);
+    $("#deptId").attr("value", treeNode.id);
+}
+function showMenu() {
+    var cityObj = $("#belongDeptId");
+    var cityOffset = $("#belongDeptId").offset();
+    $("#menuContent").css({left: cityOffset.left + "px", top: cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+    $("body").bind("mousedown", onBodyDown);
+}
+function hideMenu() {
+    $("#menuContent").fadeOut("fast");
+    $("body").unbind("mousedown", onBodyDown);
+}
+function onBodyDown(event) {
+    if (!(event.target.id == "menuBtn" || event.target.id == "belongDeptId" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length > 0)) {
+        hideMenu();
+    }
+}
+var settingData = {
+    check: {
+        enable: true,
+        chkStyle: "checkbox",
+        chkboxType: { "Y": "s", "N": "s" }
+    },
+    data: {
+        simpleData: {
+            enable: true
+        }
+    },
+    callback: {
+        onCheck: onAuthClick,
+        beforeCheck: beforeAuthcheck
+    },
+    view: {
+        showIcon: false
+    }
+};
+var zDataNodes = $!deptManagerJson;
+//业务主管树选中
+function onAuthClick(e, treeId, treenode) {
+    var tree = jQuery.fn.zTree.getZTreeObj("dataAuthTree"),
+            nodes = treenode.children;
+    var bool = treenode.checked;
+    if (bool && typeof(nodes) != 'undefined') {
+        for (var i = 0; i < nodes.length; i++) {
+            tree.setChkDisabled(nodes[i], bool);
+        }
+    }
+    var vid = "";
+    var d = tree.getCheckedNodes(), v = '';
+    jQuery.each(d, function (i) {
+        if (!d[i].chkDisabled) {
+            v += d[i].name + ',';
+            vid += d[i].id + ',';
+        }
+    });
+    if (v.length > 0) v = v.substring(0, v.length - 1);
+    var cityObj = $("#deptRange");
+    cityObj.attr("value", v);
+    $("#bussdept").attr("value", vid);
+}
+function beforeAuthcheck(treeid, treenode) {
+    var tree = jQuery.fn.zTree.getZTreeObj("dataAuthTree"),
+            nodes = treenode.children;
+    var bool = treenode.checked;
+    if (bool && typeof(nodes) != 'undefined') {
+        for (var i = 0; i < nodes.length; i++) {
+            tree.setChkDisabled(nodes[i], !bool);
+        }
+    }
+}
+
+function showDataPlan() {
+    var cityObj = $("#deptRange");
+    var cityOffset = $("#deptRange").offset();
+    $("#menuContent2").css({left: cityOffset.left + "px", top: cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+
+    $("body").bind("mousedown", onBodyDown2);
+}
+function hideDataPlan() {
+    $("#menuContent2").fadeOut("fast");
+    $("body").unbind("mousedown", onBodyDown2);
+}
+function onBodyDown2(event) {
+    if (!(event.target.id == "menuBtn" || event.target.id == "deptRange" || event.target.id == "menuContent2" || $(event.target).parents("#menuContent2").length > 0)) {
+        hideDataPlan();
+    }
+}
+//保存
+function addSubmit() {
+    //验证是否通过
+    var bool = jQuery.validator({ form: 'userForm', extend: true, extendhandler: extendvalidator });
+    var value=$('#conroleids').val();
+    if($('#roleType_2').is(':checked')){
+    	if($('#dataType').val()==3&&value==""){
+	        banger.page.showMessageBox("您选择的用户数据权限为机构的，请至少为用户选择一个管理机构！");
+	        bool=false;
+	    }
+    }
+    if (bool) {
+        var str = "";
+        $("input[name='roleType']:checked").each(function(){
+            str = $(this).val() 
+        })
+        //$('#dataType').val()==3?str+="3":str+="4";
+        $('#roleids').val(str);
+        $('#flag').val("0");
+        if (checkUser()) {
+            jQuery.ajax({
+                type: 'post',
+                url: 'checkUserCount.html',
+                data: {
+                    'sysUser.userCode': $('#userCode').val()
+                }, success: function (data) {
+                    if (data != "") {
+                        banger.page.showMessageBox(data);
+                    } else {
+                        document.userForm.submit();
+                    }
+                }
+            });
+        }
+    } else {
+        return false;
+    }
+}
+
+//表单扩展验证
+function extendvalidator(){
+    returnStr="请为用户选择角色！";
+    var bool = true;
+    if($('[name=\'roleType\']:checked').length < 1){
+        $('[name=\'roleType\']').each(function(){
+            if (!$(this).attr('disabled')) {
+                    $(this).addClass('v-fails');
+                    $(this).attr('tips', returnStr);
+                }
+            if ($(this).val() == "2") {
+                if (!$('#celltblId').attr('disabled')) {
+                    $(this).addClass('v-fails');
+                    $(this).attr('tips', returnStr);
+                }else{
+                    $('[name=\'roleType\']').removeClass('v-fails');
+                }
+            }
+        });
+        bool = false;
+    }else{
+        $('[name=\'roleType\']').removeClass('v-fails');
+    }
+    return bool;
+}
+//保存并新建
+function SaveAndNew() {
+    //验证是否通过
+    var bool = jQuery.validator({ form: 'userForm',extend: true, extendhandler: extendvalidator });
+    var value=$('#conroleids').val();
+    if($('#roleType_2').is(':checked')){
+    	if($('#dataType').val()==3&&value==""){
+	        banger.page.showMessageBox("您选择的用户数据权限为机构的，请至少为用户选择一个管理机构！");
+	        bool=false;
+	    }
+    }
+    if (bool) {
+
+        var str = "";
+        $("input[name='roleType']:checked").each(function(){
+            str = $(this).val()
+        })
+//        $('#dataType').val()==3?str+="3":str+="4";
+        $('#roleids').val(str);
+        $('#flag').val("1");
+        if (checkUser()) {
+            jQuery.ajax({
+                type: 'post',
+                url: 'checkUserCount.html',
+                data: {
+                    'sysUser.userCode': $('#userCode').val()
+                }, success: function (data) {
+                    if (data != "") {
+                        banger.page.showMessageBox(data);
+                    } else {
+                        document.userForm.submit();
+                    }
+                }
+            });
+        }
+    } else {
+        return false;
+    }
+}
+
+//验证用户编号是否存在
+function checkUser() {
+    var bool = true;
+    jQuery.ajax({
+        type: 'post',
+        async: false,
+        url: 'valationAOrUserCode.html',
+        data: {
+            'sysUser.userCode': $('#userCode').val(),
+            'sysUser.account': $('#account').val()
+        }, success: function (data) {
+            if (data != "") {
+                var str = data.split(",");
+                if (str.length > 1) {
+                    $('#userCode').parent().addClass('v-fails');
+                    $('#userCode').attr('tips', str[0].split(":")[1]);
+
+                    $('#account').parent().addClass('v-fails');
+                    $('#account').attr('tips', str[1].split(":")[1]);
+                } else {
+                    if (str[0].split(":")[0] == "code") {
+                        $('#userCode').parent().addClass('v-fails');
+                        $('#userCode').attr('tips', str[0].split(":")[1]);
+                    } else {
+                        $('#account').parent().addClass('v-fails');
+                        $('#account').attr('tips', str[0].split(":")[1]);
+                    }
+                }
+                bool = false;
+            } else {
+                $('#userCode').parent().removeClass('v-fails');
+                bool = true;
+            }
+        }
+    });
+    return bool;
+}
+function checkUserCode(obj) {//人员编号非空验证。
+    var bool = true;
+    var value = jQuery(obj).val();
+    if (value.replace(/\ /g, "") == "") {
+        jQuery(obj).attr('tips', "\"人员编号\"必须填写");
+        bool = false;
+    }
+    return bool;
+}
+function checkoperateCode(obj) {//信贷编号非空验证。
+    var bool = true;
+    var value = jQuery(obj).val();
+    if (value.replace(/\ /g, "") == "") {
+        jQuery(obj).attr('tips', "\"信贷操作编号\"必须填写");
+        bool = false;
+    }
+    return bool;
+}
+function checkjgm(obj) {//信贷机构非空验证。
+    var bool = true;
+    var value = jQuery(obj).val();
+    if (value.replace(/\ /g, "") == "") {
+        jQuery(obj).attr('tips', "\"信贷机构编号\"必须填写");
+        bool = false;
+    }
+    return bool;
+}
+function changeBussDis(obj) {//数据权限选择机构时
+    if (obj.value == "3") {
+        $('#bussPlan').show();
+        var str = window.top.tempDeptName;
+        var arr = str.split(",");
+        $('#deptRange').attr('value', arr[0]);
+        $('#bussdept').attr('value',arr[1]);
+        $('#celltblId').removeAttr('disabled');
+        $('#combox1').removeAttr('disabled');
+    } else {
+        $('#deptRange').attr('value', "");
+        $('#bussdept').attr('value','');
+        $('#bussPlan').hide();
+        $('#celltblId').attr("disabled","disabled");
+        $('#combox1').attr("disabled","disabled");
+        $('#conroleids').attr('value', '');
+        $('#roleType_2').attr('checked', false);
+        jQuery.fn.zTree.init($("#dataAuthTree"), settingData, zDataNodes);
+    }
+}
+function checkAccount(obj) {//用户名非空验证。
+    var bool = true;
+    var value = jQuery(obj).val();
+    if (value.replace(/\ /g, "") == "") {
+        jQuery(obj).attr('tips', "\"用户名\"必须填写");
+        bool = false;
+    }
+    return bool;
+}
+
+
+</script>
+</head>
+
+<body>
+<form name="userForm" id="userForm" action="addSysUser.html" method="post">
+    <input type="hidden" name="roleNames" id="roleNames" value="$!roleNames">
+    <input type="hidden" name="deptId" id="deptId" value="$!deptId">
+    <input type="hidden" name="roleids" id="roleids">
+    <input type="hidden" name="bussdept" id="bussdept">
+    <input type="hidden" name="flag" id="flag">
+    <table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td colspan="4" class="separator">
+                <h4>人员信息</h4>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>姓名：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt1">
+                    <input type="text" name="sysUser.userName" id="userName" maxlength="20" class="dtxt1-txt" rule="\S"
+                           tips='“姓名”必须填写'/>
+                </div>
+            </td>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>人员编号：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt1">
+                    <input type="text" name="sysUser.userCode" id="userCode" maxlength="20" class="dtxt1-txt"
+                           fun="checkUserCode" tips=''/>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>归属机构：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt2">
+                    <input name="deptParentName" id="belongDeptId" readOnly="true" type="text"
+                           class="dtxt2-txt" rule="\S" tips='“归属机构”必须填写'/>
+                    <span class="dtxt2-ddl" onclick="showMenu();">ddl</span>
+                </div>
+            </td>
+            <td width="7%" class="field">
+                <label>内部分机：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt1">
+                    <input type="text" name="sysUser.phoneExt" id="phoneExt" maxlength="10" onpaste='return false'
+                           class="dtxt1-txt">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>角色：</label>
+            </td>
+            <td colspan="3">
+                <div style="border:1px solid #b1b1b1; padding: 10px;">
+					<table class="celltbl">
+                        #set ($i=0)
+                        #foreach($item in $!sysRolelist)
+                            #if($!item.roleId!=1)
+                                #if($i%4==0)
+                                <tr>
+                                #end
+                                <td width="10%" style="text-align: left; line-height: 24px; white-space: normal;">
+                                    <input type="radio" colname="$!item.roleName" name="roleType"
+                                           id="roleType_$!item.roleId" tips="" value="$!item.roleId"/>
+                                    <label for="roleType_$!item.roleId">$!item.roleName</label>
+                                </td>
+                                #if($i%4)
+                                </tr>
+                                #end
+                                #set($i=$i+1)
+                            #end
+                        #end
+                    </table>
+                </div>
+            </td>
+        </tr>
+		<tr>
+            <td width="7%" class="field">
+                <label>是否请假：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt2">
+                    	 <select name="sysUser.leaveTag" id="leaveTag" >
+                     <option value ="0" >否</option>
+                	<option value ="1" >是</option>
+					
+                </select>
+                </div>
+            </td>
+			   
+            <td width="7%" class="field">
+                <label>审批金额上限：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt1">
+                    <input type="text" name="sysUser.approvalValue" id="approvalValue" maxlength="20" 
+				 	#if($!sysUser.approvalValue) value="$!sysUser.approvalValue" #else value="0.0000" #end
+                           class="dtxt1-txt" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label>人员备注：</label>
+            </td>
+            <td colspan="3">
+                <div class="dtxtarea1">
+                    <textarea class="txt" id="remark" name="sysUser.remark"></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="separator">
+                <h4 class="mt">用户信息</h4>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>用户名：</label>
+            </td>
+            <td width="43%">
+                <div class="dtxt1">
+                    <input type="text" id="account" name="sysUser.account" maxlength="20" fun="checkAccount" tips=''
+                           class="dtxt1-txt"/>
+                </div>
+            </td>
+            <td colspan="2">
+                <label class="gray">
+                    默认密码“111111”
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td width="7%" class="field">
+                <label class="red">*</label>
+                <label>状态：</label>
+            </td>
+            <td colspan="3" height="24">
+                #sradio("list=activedMap" "value=1" "name=sysUser.isActived" "cssClass=rdo")
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr/>
+    <div class="halign">
+        <input type="button" value="保 存" onclick="addSubmit()" class="btn5 btn5bg1"/>
+        <input type="button" value="保存并新建" onclick="SaveAndNew()" class="btn5 btn5bg2"/>
+        <input type="button" value="取 消" onclick="javascript:tab.close(GetId(),false);" class="btn5 btn5bg3"/>
+    </div>
+</form>
+<div id="menuContent" class="menuContent"
+     style="position:absolute; display:none; width:160px; height: 370px; overflow-x:auto; overflow-y:auto; border:1px solid #ccc; background-color:#fff; padding-bottom:20px;">
+    <ul id="deptTree" class="ztree"></ul>
+</div>
+<div id="menuContent2" class="menuContent"
+     style="position:absolute; display:none; width:160px; height: 370px; overflow-x:auto; overflow-y:auto; border:1px solid #ccc; background-color:#fff; padding-bottom:20px;">
+    <ul id="dataAuthTree" class="ztree"></ul>
+</div>
+</body>
+</html>

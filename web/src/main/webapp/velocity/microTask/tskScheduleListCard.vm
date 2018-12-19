@@ -1,0 +1,180 @@
+#parse("/velocity/taglibs.vm")
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+#scriptLink("page")
+<script type="text/javascript">
+    $(function(){
+        $('table.datatbl').table();
+        autoSelect();
+        $('select').select();
+        getQueryJson();
+    });
+
+    //自动绑定Select标签数据
+    function autoSelect(){
+        $(".autoSelected").each(function (){
+            var v = $(this).find("input").first().val();
+            if(v){
+                $(this).find("select").val(v);
+            }
+        });
+    }
+
+    var oldPostJson ={};
+    function getQueryJson(){
+        var postJson = {};
+        postJson['customerId'] = $!customerId;
+        oldPostJson = postJson;
+        return postJson;
+    }
+
+    //刷新tab
+    function refreshTab(html,gridId){
+        $("#"+gridId).html(html);
+        $('table.datatbl').table();
+
+//            var total = $("#total").val();
+        var total = $('#scheduleRecordCount').val();
+        if(total != null){
+            $("#tskScheduleRecordCount").text(total);
+        }else {
+            $("#tskScheduleRecordCount").text(0);
+        }
+    }
+
+    function refresh(){
+        var customerId = $!customerId;
+        var url = "../tskSchedule/queryScheduleListCard.html?customerId="+customerId+"&RandNum="+Math.random();
+        var hasPermission = "$!hasPermission";
+        if(hasPermission != ""){
+            url = "../tskSchedule/queryScheduleListCard.html?edit=edit&customerId="+customerId+"&RandNum="+Math.random();
+        }
+        if(oldPostJson){
+            gotoSchedule(
+                    null,
+                    url,
+                    oldPostJson,
+                    function(html){
+                        refreshTab(html, 'scheduleListTableCard');
+                        autoSelect();
+                        $('select').select();
+                    });
+        }
+    }
+
+    //沟通进度编辑                             $('#contactType').val()
+    function commProgressEdit(scheduleId,selectDom){
+//            if(confirm("确实需要修改日程沟通进度"))
+        jQuery.ajax({
+            type:'POST',
+            url:"../tskSchedule/editSchedule.html?RandNum="+Math.random(),
+            data:{
+                'tskSchedule.commProgressId':jQuery.trim(selectDom.val()),
+                'tskSchedule.scheduleId':jQuery.trim(scheduleId)
+            },
+            success:function(){
+                refresh();
+            }
+        });
+    }
+    //完成情况编辑
+    function statusEdit(scheduleId,selectDom){
+        var options = selectDom.context.options;
+        var selectedIndex = options.selectedIndex;
+        var selectedOption = selectDom.context.children[selectedIndex];
+        var selectText = jQuery.trim(selectedOption.innerText);
+        if(confirm("您确定将日程状态改为"+selectText+"吗？修改后日程将不能编辑！")){
+            jQuery.ajax({
+                type:'POST',
+                url:'../tskSchedule/editSchedule.html?Random='+Math.random(),
+                data:{
+                    'tskSchedule.status':jQuery.trim(selectDom.val()),
+                    'tskSchedule.scheduleId':jQuery.trim(scheduleId)
+                },
+                success:function(){
+                    refresh();
+                }
+            });
+        }else {
+            refresh();
+        }
+    }
+
+    //分页跳转
+    function gotoPageSchedule(page){
+        var url = "../tskSchedule/queryScheduleListCard.html?RandNum"+Math.random();
+        var hasPermission = "$!hasPermission";
+        if(hasPermission != ""){
+            url = "../tskSchedule/queryScheduleListCard.html?edit=edit&RandNum"+Math.random();
+        }
+        if(oldPostJson){
+            gotoSchedule(
+                    page,
+                    url,
+                    getQueryJson(),
+                    function(html){
+                        refreshTab(html, 'scheduleListTableCard');
+                        autoSelect();
+                        $('select').select();
+                    });
+        }
+    }
+
+    function addSchedule(customerId){
+        var url = "../tskSchedule/toTskNewScheduleCard.html?customerId="+customerId+"&RandNum="+ Math.random();
+        //var result = window.showModalDialog(url, '安排日程', 'dialogWidth=640px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+        var result=banger.page.openDialog(url,"安排日程",640,500);
+        if(result){
+            jQuery.ajax({
+                type:'POST',
+                url:"../tskSchedule/queryScheduleListCard.html?edit=edit&RandNum="+ Math.random(),
+                data:getQueryJson(),
+                success:function(html){
+                    refreshTab(html,'scheduleListTableCard');
+                    autoSelect();
+                    $('select').select();
+                }
+            });
+        }
+    }
+
+    //编辑
+    function openScheduleAlterWindow(scheduleId){
+        var url = "../tskSchedule/loadOldScheduleInfo.html?scheduleId="+scheduleId+"&RandNum="+ Math.random();
+        //var result = window.showModalDialog(url, '编辑日程', 'dialogWidth=640px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+        var result=banger.page.openDialog(url,"编辑日程",640,500);
+        if(result){
+            jQuery.ajax({
+                type:'POST',
+                url:"../tskSchedule/queryScheduleListCard.html?edit=edit&RandNum="+ Math.random(),
+                data:getQueryJson(),
+                success:function(html){
+                    refreshTab(html ,'scheduleListTableCard');
+                    autoSelect();
+                    $('select').select();
+                }
+            });
+        }
+    }
+</script>
+<input type="hidden" id="cardCustomerId" value="$!customerId"/>
+<div class="sz">
+        <span class="bold fl">
+            安排日程(<label class="green" id="tskScheduleRecordCount">$!scheduleCount</label>)
+        </span>
+</div>
+<div class="actrow" style="clear:both;">
+    #if($urlPermitUtil.hasPermission('tskPlanSchedulePlan'))
+        #if($hasPermission && $!hasPermission == 1 && $isManagedCustomer && $!isManagedCustomer == 1)
+            <span class="btn2 fl" onclick="">
+            <label class="btn2-txt" onclick="addSchedule($!customerId);">安排日程</label>
+        </span>
+        #end
+    #end
+    <span class="ui-span-btn fr">
+        <label onclick="refresh();">刷新</label>
+    </span>
+</div>
+<table class="datatbl" id="scheduleListTableCard">
+    #parse("/velocity/microTask/tskScheduleListTableCard.vm")
+</table>

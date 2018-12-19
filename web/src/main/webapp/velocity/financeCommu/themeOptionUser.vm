@@ -1,0 +1,95 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看参与投票的会员</title>
+	<base target="_self" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		span.ml { margin-left: -1px; }
+		div.mt { margin-top: 0 !important; }
+		.inp{ width: 30px; border: 1px solid #ccc; }
+    </style>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript">
+    	var fn = {};
+		fn.cancel = function(){
+			window.returnValue=1;
+			window.close();
+		};
+    	$(function(){
+			$('select').select();
+			$('#cancel').click(function(){
+				fn.cancel();
+			});
+			
+			$("#optionSelect").change(function () { 
+				var isOptionSelect = $("#optionSelect").val() > 0?$("#optionSelect").val():'';
+				var themeId = $!theme.themeId;
+				jQuery.post('/commTheme/showVoteUserPage.html',{
+						'theme.themeId':themeId,
+						'showVoteFlag':1,
+						'isOptionSelect':isOptionSelect
+					},function(data){
+						var optionHtml = '';
+						data = eval(data);
+                      for(var i=0; i<data.length; i++)
+                      {
+						 optionHtml = optionHtml + '<p style="height:22px;">'+data[i].userName+'</p>';
+                      }
+					  $('#userList').html(optionHtml);
+					});
+			});
+		});
+	
+    </script>
+</head>
+
+<body>
+	<table class="htmltbl">
+    	<tbody>
+			<tr>
+				<td class="field center" colspan="3">
+					<h4>查看参与投票的会员</h4>
+				</td>
+			</tr>
+    		<tr>
+				<td class="field" width="8%">
+					<label>查看：</label>
+				</td>
+                <td style="border-right:0;">
+                	<select id="optionSelect">
+						<option value="0">全部</option>
+						#foreach($option in $!optionList)
+						<option value="$!option.optionId">$!option.optionContent</option>
+						#end
+					</select>
+                </td>
+				<td class="field left" style=" border-left:0;background:none;">
+					<label>选项的投票人</label>
+				</td>
+            </tr>
+			<tr>
+				<td colspan="3" id="userList">
+					#foreach($userRelation in $!urList)
+						<p style="height:22px;">
+						$!userRelation.userName
+						</p>
+					#end
+				</td>
+			</tr>
+        </tbody>
+    </table>
+    <hr />
+    
+    <div class="center">
+        <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" />
+    </div>
+</body>
+</html>

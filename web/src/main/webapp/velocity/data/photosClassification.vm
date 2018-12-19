@@ -1,0 +1,328 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>照片分类</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+   <style type="text/css">
+    	.Agency-left { float: left; width: 220px; }
+		.Agency-left h4 { height: 30px; border: 1px solid #ccc; padding: 0px 5px; line-height: 30px; font-size: 12px; font-family: Microsoft Yahei; }
+		.Agency-left h4 label { float: left;}
+		.Agency-left h4 p { float: right; }
+		.Agency-left h4 p a { float: left; width: 20px; overflow: hidden; text-indent: -1000px; }
+		.Agency-left h4 p a.edi-add { background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-up { background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-down { background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-del { background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-edi { background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent; }
+		.Agency-left .Agency-tree {width:99%; display: block; height: 500px; border: 1px solid #ccc; margin-top: 2px; overflow: auto; }
+		
+		.Agency-right { min-height: 534px; height: auto !important; height: 534px; margin-left: 230px; }
+		.zz{background-color:#F2F2F2;}
+		.zz li{ border: 1px solid #bfbfbf;padding: 5px 5px;height: 25px;cursor:pointer; font-family: Microsoft Yahei; }
+		.hover{background-color: #fff;}
+   </style>
+
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.photo-layer.js"></script>
+	
+    <script type="text/javascript">
+	
+    function showPhoto(eventId, loanId, customerId,photoTypeId) {
+		if($("#count").val()==0){
+		  banger.page.showMessageBox("该分类下没有图片！");
+			return ;
+		}
+        window.top.aui.builder1({
+            url: '../loan/queryPhotoAll.html?photoLoanId=' + loanId + '&photoEventId=' + eventId + '&photoTypeId=' + $("#photoTypeId").val() + '&customerId=' + customerId + '&pid=' + GetId()+'&isAll=true'+'&random='+ Math.random() * 1000
+        });
+    }     
+	
+	function showPhotoDiv(eventId,customerId,loanId,Num,photoTypeId,photoId){
+		if($("#count").val()==0){
+		  banger.page.showMessageBox("该分类下没有图片！");
+			return ;
+		}
+//		alert('photoLoanId=' + loanId + '&photoEventId=' + eventId + '&photoTypeId=' + $("#photoTypeId").val() + '&customerId=' + customerId + '&Num=' + Num+ '&pid=' + GetId());
+        window.top.aui.builder1({
+		    url: '../loan/queryPhotoDetail.html?photoLoanId=' + loanId + '&photoEventId=' + eventId + '&photoTypeId=' + $("#photoTypeId").val() + '&customerId=' + customerId + '&Num=' + Num+ '&pid=' + GetId()+'&photoId=' + photoId+'&random='+ Math.random() * 1000
+            //url: '../loan/changeLoanPhoto.html?photoLoanId=' + loanId + '&photoEventId=' + eventId + '&photoTypeId=' + $("#photoTypeId").val() + '&customerId=' + customerId + '&photoRowNum=' + photoRowNum+ '&pid=' + GetId()
+        });
+    }
+	//构造照片详情显示层
+		function qshowPhotoDiv(eventId,numRow,customerId){
+		
+			$('#numRow').val(numRow);//借助json将当前排序号传递到需要的页面
+			window.top.aui.builder({
+        		title: photoName,
+        		url: '../data/queryPhotoDetail.html?photoId='+photoId+'&photoCount='+1+'&customerId='+customerId+'&eventId='+eventId+'&pid='+GetId()+'&random='+ Math.random() * 1000
+        	});
+        }
+	 function showEdit(){
+	 	$(".hide").show();
+		$(".show").hide();
+	 }
+	 
+	  function showSaveBtn(){
+	 	$(".saveBtn").show();
+	 }
+	  function hideEdit(){
+	 	$(".show").show();
+		$(".hide").hide();
+		$(".saveBtn").hide();
+	 }
+	  //得到被选择的选择框的值
+        function getCheckedLoan(obj){
+            var str = "";
+            obj.each(function(){
+                if(jQuery(this).attr("checked")){
+                    if(!str){
+                        str = jQuery(this).val();
+                    }else{
+                        str = str + "," + jQuery(this).val();
+                    }
+                }
+            })
+            return str;
+        }
+
+	function choosePhotosType(){
+		var postJson={};
+		var ftype = $('#photoTypeIdSelect1').val();
+		if(ftype==""){
+            $('#photoTypeIdSelect').hide();
+			return false;
+		}
+		postJson['ftype']= ftype;
+		postJson['loanId'] = $('#loanId').val();
+		postJson['eventId'] = $('#eventId').val();
+		var urlStr = "${ctx}/data/choosePhotosType.html?RandNum="+ Math.random();
+        jQuery.ajax({
+            type: 'POST',
+            url: urlStr,
+            data: postJson,
+            success:function(html){
+                $('#photoTypeIdSelect').show();
+               $('#photoTypeIdSelect').html(html);
+            }
+        });
+
+	}
+	  function savePhotosType(){
+	 	 var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+            if(obj.size() == 0){
+                banger.page.showMessageBox("您没有选择要分配的图片，请先选择图片！");
+                return false;
+            }
+			if($("#photoTypeIdSelect").val() == ""){
+                banger.page.showMessageBox("您没有选择要分配的类型，请先选择类型！");
+                return false;
+            }
+            var photoIds = getCheckedLoan(obj);
+			var postJson = {};
+            postJson['photoIds']=photoIds;
+			postJson['photoTypeId'] = $("#photoTypeIdSelect").val();
+			 var urlStr = "${ctx}/data/updatePhotosType.html?RandNum="+ Math.random();
+			 jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+					 	banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+						window.location.reload();
+                    }
+                });
+	 }
+	  function deleteAll(){
+         if(confirm("是否确认删除")){
+	 	 var obj = jQuery(".datatbl").find("input[type=checkbox][nm=chkone]:checked");
+            if(obj.size() == 0){
+                banger.page.showMessageBox("您没有选择要删除的图片，请先选择图片！");
+                return false;
+            }
+            var photoIds = getCheckedLoan(obj);
+			var postJson = {};
+            postJson['photoIds']=photoIds;
+			 var urlStr = "${ctx}/data/deletePhotos.html?RandNum="+ Math.random();
+			 jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+					 	banger.page.showMessageBox({"type":"success","content":"操作成功!"});
+						window.location.reload();
+                    }
+                });
+          }
+	 }
+	var oldnum = 0;
+	function showSrotNo(num){
+		if(num!=oldnum){
+			$('.sortPhoto').hide();
+            $('#sortNO'+num).show();
+            oldnum=num;
+		}else{
+			if($('#sortNO'+num).css('display') !='none'){
+                $('#sortNO'+num).hide();
+			}else{
+                $('#sortNO'+num).show();
+			}
+
+		}
+
+	}
+
+	 $(function(){
+
+	 $(".hide").hide();
+	 $(".saveBtn").hide();
+		$("li").click(function(){
+			$("li").removeClass('hover');
+			$(this).addClass('hover');
+			$("#photoTypeId").val($(this).attr("id"));
+			var photoTypeId = $(this).attr("id");
+			if(photoTypeId==undefined){
+				return false;
+			}
+			var postJson = {};
+            postJson['loanId']=jQuery.trim($('#loanId').val());
+            postJson['eventId'] = jQuery.trim($('#eventId').val());
+			 postJson['photoTypeId'] = photoTypeId;
+                var urlStr = "${ctx}/data/showPhotosList.html?RandNum="+ Math.random();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+					 $("#deptGrid").html(html);
+           			 $('table.datatbl').table();
+                    }
+                });
+            });
+     });
+
+	</script>
+</head>
+ 
+<body>
+	<input id="loanId" type="hidden" name="loanId" value="$!loanId"/>
+	<input id="eventId" type="hidden" name="eventId" value="$!eventId"/>
+	<input id="photoTypeId" type="hidden" name="photoTypeId" value="0"/>
+	<div class="Agency-left">
+        	<ul id="deptTree" name="deptTree"  class="zz" style="margin-top: 20px;" >
+				<li id="0" class="hover" style="font-size: 15px">未分类 &nbsp;(<span style="color: red">$!photoNoTypeCount</span>)</li>
+
+                <li  style="font-size: 15px" onclick="showSrotNo(1);">借款人资料&nbsp;(<span style="color: red">$!n1</span>)
+                </li>
+                	<div class="sortPhoto" style="display: none" id="sortNO1">
+						#foreach($photoMenu in $!photoMenuList)
+							#if($photoMenu.photoTypeId=='1'||$photoMenu.photoTypeId=='2'||$photoMenu.photoTypeId=='18'||$photoMenu.photoTypeId=='19'||$photoMenu.photoTypeId=='20'||
+								$photoMenu.photoTypeId=='3'||$photoMenu.photoTypeId=='4'||$photoMenu.photoTypeId=='11'||$photoMenu.photoTypeId=='15'||$photoMenu.photoTypeId=='16'||
+								$photoMenu.photoTypeId=='17'||$photoMenu.photoTypeId=='29'||$photoMenu.photoTypeId=='30'||$photoMenu.photoTypeId=='31'||$photoMenu.photoTypeId=='32'||
+								$photoMenu.photoTypeId=='33'||$photoMenu.photoTypeId=='36'||$photoMenu.photoTypeId=='38'||$photoMenu.photoTypeId=='39'||$photoMenu.photoTypeId=='40'||
+								$photoMenu.photoTypeId=='41'||$photoMenu.photoTypeId=='42')
+                        		<li id="$photoMenu.photoTypeId">&emsp;&emsp;$photoMenu.photoTypeName &nbsp;(<span style="color: red">$photoMenu.photoCount</span>)</li>
+							#end
+						#end
+                    </div>
+
+                <li  style="font-size: 15px" onclick="showSrotNo(2);">担保人资料&nbsp;(<span style="color: red">$!n2</span>)
+                </li>
+                <div class="sortPhoto" style="display: none" id="sortNO2">
+					#foreach($photoMenu in $!photoMenuList)
+						#if($photoMenu.photoTypeId=='21'||$photoMenu.photoTypeId=='22'||$photoMenu.photoTypeId=='23')
+                        	<li id="$photoMenu.photoTypeId">&emsp;&emsp;$photoMenu.photoTypeName &nbsp;(<span style="color: red">$photoMenu.photoCount</span>)</li>
+						#end
+					#end
+                </div>
+
+                <li  style="font-size: 15px" onclick="showSrotNo(3);">经营实体资料&nbsp;(<span style="color: red">$!n3</span>)
+                </li>
+                <div class="sortPhoto" style="display: none" id="sortNO3">
+					#foreach($photoMenu in $!photoMenuList)
+						#if($photoMenu.photoTypeId=='5'||$photoMenu.photoTypeId=='6'||$photoMenu.photoTypeId=='7'||$photoMenu.photoTypeId=='8'||$photoMenu.photoTypeId=='9'||
+							$photoMenu.photoTypeId=='10'||$photoMenu.photoTypeId=='12'||$photoMenu.photoTypeId=='14'||$photoMenu.photoTypeId=='24'||$photoMenu.photoTypeId=='25'||
+							$photoMenu.photoTypeId=='43'||$photoMenu.photoTypeId=='44'||$photoMenu.photoTypeId=='45'||$photoMenu.photoTypeId=='46')
+                        	<li id="$photoMenu.photoTypeId">&emsp;&emsp;$photoMenu.photoTypeName &nbsp;(<span style="color: red">$photoMenu.photoCount</span>)</li>
+						#end
+					#end
+                </div>
+
+                <li  style="font-size: 15px" onclick="showSrotNo(4);">抵押物资料&nbsp;(<span style="color: red">$!n4</span>)
+                </li>
+                <div class="sortPhoto" style="display: none" id="sortNO4">
+					#foreach($photoMenu in $!photoMenuList)
+						#if($photoMenu.photoTypeId=='34'||$photoMenu.photoTypeId=='35')
+                        	<li id="$photoMenu.photoTypeId">&emsp;&emsp;$photoMenu.photoTypeName &nbsp;(<span style="color: red">$photoMenu.photoCount</span>)</li>
+						#end
+					#end
+                </div>
+                <li  style="font-size: 15px" onclick="showSrotNo(5);">内部调查&nbsp;(<span style="color: red">$!n5</span>)
+                </li>
+                <div class="sortPhoto" style="display: none" id="sortNO5">
+					#foreach($photoMenu in $!photoMenuList)
+						#if($photoMenu.photoTypeId=='13'||$photoMenu.photoTypeId=='26'||$photoMenu.photoTypeId=='27'||$photoMenu.photoTypeId=='28')
+                        	<li id="$photoMenu.photoTypeId">&emsp;&emsp;$photoMenu.photoTypeName &nbsp;(<span style="color: red">$photoMenu.photoCount</span>)</li>
+						#end
+					#end
+                </div>
+			</ul>
+    </div>
+       <div class="Agency-right">
+		 <div class="actrow" style="margin-top: 20px;" >
+				<a href="javascript:void(0);" class="btn2 fl saveBtn"  id="userAdd" ">
+    	           <td width="200">
+				   <select id="photoTypeIdSelect1" onchange="choosePhotosType();">
+                        <option value=""></option>
+##                        #foreach($photo in $photoMenuList)
+##                            <option value="$photo.photoTypeId">$photo.photoTypeName</option>
+##                        #end
+                       <option value="1">借款人资料</option>
+                       <option value="2">担保人资料</option>
+                       <option value="3">经营实体资料</option>
+                       <option value="4">抵押物资料</option>
+                       <option value="5">内部调查</option>
+                    </select>
+                    <select id="photoTypeIdSelect" style="display: none">
+
+                    </select>
+
+					</td>
+    	        </a>
+				
+				<a href="javascript:void(0);" class="btn2 fl saveBtn"  id="userAdd" onclick="savePhotosType();">
+    	            <label class="btn2-txt">保存</label>
+    	        </a>
+				<a href="javascript:void(0);" class="btn2 fr show"  id="userAdd" onclick="showEdit();">
+    	            <label class="btn2-txt">编辑</label>
+    	        </a>
+				<a href="javascript:void(0);" class="btn2 fr hide" id="cs"  onclick="hideEdit()">
+    	            <label class="btn2-txt">取消</label>
+    	        </a>
+    	    	<a href="javascript:void(0);" class="btn2 fr hide" id="edit"  onclick="showSaveBtn()">
+    	            <label class="btn2-txt">分类</label>
+    	        </a>
+				<a href="javascript:void(0);" class="btn2 fr hide" style="margin-left: -1px;"  onclick="deleteAll();">
+    	            <label class="btn2-txt">删 除</label>
+    	        </a>
+				<a href="javascript:void(0);" class="btn2 fl show"  id="userWatch" onclick="showPhoto($!eventId,$!loanId,$!customerId,0,1);">
+    	            <label class="btn2-txt">浏览全部</label>
+    	        </a>
+    	    </div>
+    	   <div id="deptGrid">
+			#parse("/velocity/data/photosList.vm")
+           </div>
+    </div>
+</body>
+</html>

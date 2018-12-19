@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="taskCustomerImport" extends="default"
+		namespace="/taskCustomerImport">
+		<!-- 跳转到导入页面 -->
+		<action name="toImportPage" class="taskCustomerImportAction"
+			method="toImportPage">
+			<result name="success">/velocity/microTask/importTskCustomerPath.vm
+			</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 下载模板 -->
+		<action name="tskExportTemp" class="taskCustomerImportAction"
+			method="tskExportTemp">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+
+		<!-- 数据对比 -->
+		<action name="importContrast" class="taskCustomerImportAction"
+			method="importContrast">
+			<result name="success">/velocity/microTask/importTskCustomerColumns.vm
+			</result>
+			<result name="error">/velocity/microTask/importTskCustomerPath.vm
+			</result>
+		</action>
+
+		<!-- 导入验证 -->
+		<action name="importTskCustVerify" class="taskCustomerImportAction"
+			method="importTskCustVerify">
+		</action>
+
+		<!-- 导入数据库 -->
+		<action name="execlToDataBase" class="taskCustomerImportAction"
+			method="execlToDataBase">
+		</action>
+
+		<!-- 进度条 -->
+		<action name="importTskCustomerBar" class="taskCustomerImportAction"
+			method="importTskCustomerBar">
+		</action>
+
+		<!-- 终止导入 -->
+		<action name="importTskCustomerStop" class="taskCustomerImportAction"
+			method="importTskCustomerStop">
+		</action>
+
+		<!-- 导出失败 -->
+		<action name="exportFailTaskExcel" class="taskCustomerImportAction"
+			method="exportFailTaskExcel">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,74 @@
+<h3 class="recenter-ttl" style="text-align: center;">
+	#if($!startDate!=""&&$!endDate!="")
+		$!startDate至$!endDate
+	#elseif($!startDate!=""&&$!endDate=="")
+		$!startDate之后
+	#elseif($!startDate==""&&$!endDate!="")
+		截止至$!endDate
+	#end
+	产品销售明细统计表
+</h3>
+<table class="recenter-tbl">
+	<thead>
+    	<tr>
+        	<th><label title="执行对象">执行对象</label></th>
+			<th><label title="产品编号">产品编号</label></th>
+			<th><label title="产品名称">产品名称</label></th>
+			<th><label title="销售额(万元)">销售额(万元)</label></th>
+        </tr>
+    </thead>
+    <tbody>
+		#foreach($user in $!userList)
+			#set($count=$!user.parentId+1)
+			<tr>
+				<td rowspan="$count"><label title="$!user.name">$!user.name</label></td>
+			</tr>
+			#foreach($t in $!typeList)
+				#if($!user.id==$!t.userId)
+    				#foreach($sub in $!subTypeList)
+        				#if($!user.id==$!sub.userId && $!t.templateId==$!sub.fartherId)
+							#if($!sub.templateId)
+                				#foreach($pro in $!productList)
+                        			#if($!user.id==$!pro.userId && $!t.templateId==$!pro.templateId && $!sub.templateId==$!pro.templateFieldId)
+                            		<tr>
+                            			<td><label title="$!pro.productCode">$!pro.productCode</label></td>
+                            			<td><label class="ui-link-btn" title="$!pro.productName" onclick="detailProduct($!pro.productId)">$!pro.productName</label></td>
+                            			<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!pro.buyMoney))" class="fr">$moneyUtil.decimeMoney($typeUtil.changeType($!pro.buyMoney))</label></td>
+                            		</tr>
+            						#end
+            					#end
+							#end
+							#if(!$!sub.templateId)
+            					#foreach($pro in $!productList)
+                        			#if($!user.id==$!pro.userId && $!t.templateId==$!pro.templateId && !$!pro.templateFieldId)
+            							<tr>
+                                			<td><label title="$!pro.productCode">$!pro.productCode</label></td>
+                                			<td><label class="ui-link-btn" title="$!pro.productName" onclick="detailProduct($!pro.productId)">$!pro.productName</label></td>
+                                			<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!pro.buyMoney))" class="fr">$moneyUtil.decimeMoney($typeUtil.changeType($!pro.buyMoney))</label></td>
+                                		</tr>
+            						#end
+            					#end
+        					#end
+        				<tr bgcolor="#007700" class="bold">
+                			<td><label>小计</label></td>
+                			<td><label title="$!sub.templateName">$!sub.templateName</label></td>
+                			<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!sub.buyMoney))" class="fr">$moneyUtil.decimeMoney($typeUtil.changeType($!sub.buyMoney))</label></td>
+                		</tr>
+        				#end
+    				#end
+				<tr bgcolor="#00ffff" class="bold">
+        			<td><label>合计</label></td>
+        			<td><label title="$!t.templateName">$!t.templateName</label></td>
+        			<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!t.buyMoney))" class="fr">$moneyUtil.decimeMoney($typeUtil.changeType($!t.buyMoney))</label></td>
+        		</tr>
+				#end
+			#end
+		#end
+    </tbody>
+</table>
+
+<p class="recenter-footnote" style="text-align: right;">
+	制表人：$!userName
+    &nbsp; &nbsp; 
+    制表时间：#if($!reportTime)$date.format("yyyy-MM-dd HH:mm:ss",$!reportTime)#end
+</p>

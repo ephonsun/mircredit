@@ -1,0 +1,47 @@
+<div class="contact-amount" id="planShow">
+	<label>产品指标：</label><label class="green" style="max-width:110px;-width:110px; vertical-align:middle;display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="$!productTarget">$!productTarget</label>
+	<label class="ml">营销目标：</label> 
+	<label class="green">$vmHelper.getDecimalWanMoney($!marketingTarget)万元</label>
+	<label class="ml">日均剩余营销额：</label> 
+	<label class="green">$vmHelper.getDecimalWanMoney($!daysRemainTarget)万元</label>
+</div>
+<table class="datatbl">
+	<thead>
+		<tr>
+			<th width="20"><input type="checkbox" rel="all" />
+			</th>
+			<th><label title="产品类型">产品类型</label>
+			</th>
+			<th><label title="客户归属">产品编号</label>
+			</th>
+			<th><label title="关联任务">产品名称</label>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		#foreach($data in $!dataList)
+		<tr>
+			##<td><input name="productId" value="$!data.productId" type="checkbox" rel="row" /></td>
+			<td><input name="productIdMaiketingId" value="$!data.productId=$!data.marketingId" type="checkbox" rel="row" /></td>
+			<td><label title="$!data.templateName">$!data.templateName</label>
+			</td>
+			<td><label title="$!data.productCode">$!data.productCode</label>
+			</td>
+			<td><label title="$!data.productName">$!data.productName</label>
+			</td>
+		</tr>
+		#end
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan="4">
+				<div class="pagination">
+					#parse("/velocity/ajaxPage.vm")
+				</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>
+<script>
+	$('table.datatbl').table();	
+</script>

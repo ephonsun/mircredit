@@ -1,0 +1,36 @@
+<table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+    <tr>
+        <th width="200">团队名称</th>
+        <th>团队主管</th>
+		<th>后台人员</th>
+		<th>客户经理</th>
+        <th width="200" class="th-last">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($team in $!teamPage.items)            
+            <tr>
+                <td width="200"><label>$!team.teamName</label></td>
+                <td ><label >$!team.teamLeaderUserName</label></td>
+				<td ><label >$!team.backgroundUserNames</label></td>
+				<td ><label >$!team.clientManageUserNames</label></td>
+                <td width="200" class="td-last">
+                    <span href="#" disabled="true" style="cursor: default;">
+						<a class="slink" href="javascript:void(0);"
+                               onclick="addTab('update',$!team.teamId,'$!team.teamName')">编辑</span>
+                    <span href="#"  disabled="true" style="cursor: default;">
+						  <a class="slink" href="javascript:void(0);"
+                               onclick="delById($!team.teamId,'$!team.teamName')">删除</a></span>
+                </td>
+            </tr>
+        #end
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="5">
+            <div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+        </td>
+    </tr>
+    </tfoot>
+</table>

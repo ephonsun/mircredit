@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="productimport" extends="default" namespace="/productimport" >
+		<!-- 初始化选择客户导入路径页面-->
+		<action name="initImportPath" class="productImportAction" method="initImportPath">
+			<result name="success">/velocity/product/productImportPath.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 导入验证 -->
+		<action name="importbuyCustVerify" class="productImportAction" method="importbuyCustVerify">
+		</action>
+		<!--初始化选择客户导入对应列页面-->
+		<action name="initImportColumn" class="productImportAction" method="initImportColumn">
+			<result name="success">/velocity/product/protductImportColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+			<!--初始化选择客户导入成功对应列页面-->
+		<action name="importExcel" class="productImportAction" method="importExcel">
+			<result name="success">/velocity/product/protductImportColumn.vm</result>
+			<result name="error">/velocity/error.vm</result>
+			<result name="failure">/velocity/product/productImportPath.vm</result>
+		</action>
+		<!--导入Execl数据到数据库-->
+		<action name="execlToDataBase" class="productImportAction" method="execlToDataBase">
+			<result name="success">/velocity/product/queueProgress.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--下载EXECL模版-->
+		<action name="exportExcel" class="productImportAction" method="exportExcel">
+			<result name="success">/velocity/product/importPath.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+			<!--下载失败后的EXECL-->
+		<action name="exportFailExcel" class="productImportAction" method="exportFailExcel">
+			<result name="success">/velocity/product/importSuccess.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		<!-- 进度条 -->
+		<action name="exportCustomerBar" class="productImportAction" method="exportCustomerBar">
+		</action>
+		<!-- 导出终止 -->
+		<action name="importCustomerStop" class="productImportAction" method="importCustomerStop">
+		</action>
+
+	
+	</package>
+</struts>

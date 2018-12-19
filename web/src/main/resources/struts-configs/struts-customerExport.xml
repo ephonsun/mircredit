@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="customerExport" extends="default" namespace="/customerExport" >
+		<global-results>
+			<result name="error">/velocity/error.vm</result>
+		</global-results>
+		<!-- 导出客户第一步 -->
+		<action name="showExportPage" class="customerExportAction" method="showExportPage">
+			<result name="success">/velocity/customerExport/exportFirst.vm</result>
+		</action>
+		<!-- 导出验证 -->
+		<action name="exportCustVerify" class="customerExportAction" method="exportCustVerify">
+		</action>
+		<!-- 执行导出 -->
+		<action name="exportCustomerExute" class="customerExportAction" method="exportCustomerExute">
+		</action>
+		<!-- 导出进度条 -->
+		<action name="exportCustomerBar" class="customerExportAction" method="exportCustomerBar">
+		</action>
+		<!-- 导出终止 -->
+		<action name="exportCustomerStop" class="customerExportAction" method="exportCustomerStop">
+		</action>
+		
+	</package>
+</struts>

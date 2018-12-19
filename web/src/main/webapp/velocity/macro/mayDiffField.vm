@@ -1,0 +1,131 @@
+#macro(ctrld,$field,$val,$flag)
+	#if ($field.templateFieldType == 'Text')
+		#textboxd($field,$val)
+	#elseif ($field.templateFieldType == 'Date')
+		#if($flag>0)
+			#datespand($field,$val)
+		#else
+			#dateboxd($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'Number')
+		#if($flag>0)
+			#numspand($field,$val)
+		#else
+			#numboxd($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'TextArea')
+		#if($flag>0)
+			#textboxd($field,$val)
+		#else
+			#textaread($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'Select')
+		#if($flag>0)
+			#mutlcomboboxd($field,$val)
+		#else
+			#comboboxd($field,$val)
+		#end
+	#elseif ($field.templateFieldType == 'MultipleSelect')
+		#mutlcomboboxd($field,$val)
+	#elseif ($field.templateFieldType == 'YesNo')
+		#checkboxd($field,$val)
+	#end
+#end
+
+#macro(detaild,$field,$val,$flag)
+	#if ($field.templateFieldType == 'YesNo')
+		#set($valName="")
+		#if($val.length()>0)
+			#set($valName="是")
+		#else
+			#set($valName="否")
+		#end
+		#label($field,$valName)
+	#else
+		#label($field,$val)
+	#end
+#end
+
+#macro(labeld,$field,$val)
+<label id="$!field.extFieldName" name="cusFiled_$!field.extFieldName" >$val</label><label>$!field.measurement</label>
+#end
+
+#macro(textboxd,$field,$val)
+<div class="dtxt1">
+    <input type="text" name="cusFiled_$!field.extFieldName" value="$val" id="$!field.extFieldName" class="dtxt1-txt" maxLength="20" />
+</div>
+#end
+
+#macro(dateboxd,$field,$val)
+<div class="dtxt2">
+	<input type="text" name="cusFiled_$!field.extFieldName" id="$!field.extFieldName" value="$val" maxLength=10 class="validate[custom[date]] dtxt2-txt" dateFlag="true" />
+    <span class="dtxt2-date">date</span>
+</div>
+#end
+
+#macro(datespand,$field,$val)
+<div class="dtxt2 floatL" style="width: 100px;">
+	<input type="text" name="cusFiled_$!field.extFieldName" value="$val" id="$!field.extFieldName" maxLength=10 class="validate[custom[date]] dtxt2-txt" dateFlag="true" />
+    <span class="dtxt2-date">date</span>
+</div>
+<label class="dash">—</label>
+<div class="dtxt2 floatL" style="width: 100px;">
+	<input type="text" name="cusFiled_$!field.extFieldNameEnd" value="$val" id="$!field.extFieldNameEnd" maxLength=10 class="validate[custom[date]] dtxt2-txt" dateFlag="true" />
+    <span class="dtxt2-date">date</span>
+</div>
+#end
+
+#macro(checkboxd,$field,$val)
+#if($val.length()>0)
+	#set($checkedStr = "CHECKED")
+#else
+	#set($checkedStr = "")
+#end
+<input type="checkbox" $checkedStr name="cusFiled_$!field.extFieldName" value="yes" id="$!field.extFieldName" class="chk" />
+#end
+
+#macro(numboxd,$field,$val)
+<input type="text" name="cusFiled_$!field.extFieldName" maxLength="19" value="$val" id="$!field.extFieldName" floatFlag="true" class="validate[custom[integer]] txt" style="width: 100px;" />
+$!field.measurement
+#end
+
+#macro(numspand,$field,$val)
+<input type="text" name="cusFiled_$!field.extFieldName" maxLength="19" class="validate[custom[integer]] txt" floatFlag="true" id="$!field.extFieldName" style="width: 100px;" />
+<label>—</label>
+<input type="text" name="cusFiled_$!field.extFieldNameEnd" maxLength="19" class="validate[custom[integer]] txt" floatFlag="true" id="$!field.extFieldNameEnd" style="width: 100px;" />
+$!field.measurement
+#end
+
+#macro(textaread,$field,$val)
+<div class="dtxtarea1">
+	<textarea style="height: 80px; border: 0;" name="cusFiled_$!field.extFieldName" id="$!field.extFieldName" maxLength="400">$val</textarea>
+</div>
+#end
+
+#macro(comboboxd,$field,$val)
+<select name="cusFiled_$!field.extFieldName" id="$!field.extFieldName">
+    <option value=""></option>
+    #foreach($code in $field.codes)
+    	#if($code.fieldCodeDataValue==$val)
+    		<option value ="$code.fieldCodeDataKey" SELECTED >$code.fieldCodeDataValue</option>
+    	#else
+    		<option value ="$code.fieldCodeDataKey" >$code.fieldCodeDataValue</option>
+    	#end
+    #end
+</select>
+#end
+
+#macro(mutlcomboboxd,$field,$val)
+#set($codes = "")
+#foreach($code in $field.codes)
+	#if($codes == "")
+		#set($codes = $code.fieldCodeDataKey)
+	#else
+		#set($codes = $codes+","+$code.fieldCodeDataKey)
+	#end
+#end
+<div class="dtxt2" comboFlag="true" codes="$codes">
+	<input type="text" name="cusFiled_$!field.extFieldName" value="$val" readOnly="true" id="$!field.extFieldName" class="dtxt2-txt" data-prompt-position="centerRight" />
+    <span class="dtxt2-ddl">ddl</span>
+</div>
+#end

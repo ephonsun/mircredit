@@ -1,0 +1,16 @@
+#set($ctx="$!request.contextPath")
+#set($imageService="$!controlUtil.getDomainName($!session.servletContext)")
+#set($loginUser="$!{pageContext.request.remoteUser}")
+#set($datePattern=$date.format)
+#if($domainURL)
+#set($httpURL=$!domainURL+$!ctx)
+#else
+#set($httpURL="$!requestUtil.getHttpURL($request)")
+#end
+#if($needHttps)
+#set($httpsURL=$!domainHttpsURL+$!ctx)
+#set($httpsURLCommon=$!{stringUtil.httpsUrlCommon($!httpURL)})
+#else
+#set($httpsURL="$!httpURL")
+#set($httpsURLCommon="$!{httpURL}")
+#end

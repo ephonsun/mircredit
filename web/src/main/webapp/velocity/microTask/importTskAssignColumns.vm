@@ -1,0 +1,366 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择导入列的对应关系</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+<style type="text/css">
+    	.pd { border: 0 !important;}
+		.ckh { vertical-align: middle; }
+		.arrow{border: 0 !important;}
+    </style>
+    
+    #scriptLink("core")
+	#scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript">
+		var confirmMsg;
+		var templateId;
+    	$(function(){
+			//Painting an arrow pointing
+			var th = $('<th width=\'140\' height=\'30\'></th>');
+			var tr = $('<td rowspan=\'' + $('.pointtbl tbody tr').size() + '\' class=\'arrow\'></td>')
+			$('.pointtbl thead tr th:first').after(th);
+			$('.pointtbl tbody tr:first td:first').after(tr);
+			
+			/**
+			 * 加载下拉选择框
+			**/
+			$('select').select();
+		
+			if($!total){
+    			$("#totalCount").text("$!total");
+    		}
+    		if($!bathchCount){
+    			$("#bathchCount").attr("value",$!bathchCount);
+    		}
+    		var totalCount=$("#totalCount").text();
+    		if(totalCount<=0){
+     			 $("#importBtn").attr("disabled",true);
+     			 banger.page.showMessageBox("您导入的Excel数据为空，请重新导入！");
+    		}
+			templateId=$('#templateId').val();
+		});
+    </script>
+</head>
+ 
+<body oncontextmenu="return false">
+	<div id="d1" style="display:block">
+		<form name="importForm"  id ="importForm" enctype="multipart/form-data" method="post" onsubmit="true">
+    	    <input type="hidden" name="filePath"  value="$!filePath" />
+        	<input type="hidden" id="errorFilePath" name="$!errorFilePath">
+        	<input type="hidden" id="bathchCount"  value="$!bathchCount" />
+        	<input type="hidden" id="total" value="$!total" />
+			<input type="hidden" name="templateId" id="templateId">
+			<input type="hidden" id="nullCount"  value="$!nullCount" />
+			<input type="hidden" id="taskId"     value="$!taskId"/>
+			<input type="hidden" id="imType"     value="$!imType"/>
+        	<table class="bartbl">
+            	<tr>
+                	<td class="over">第 1 步</td>
+                	<td class="over">第 2 步</td>
+                	<td>第 3 步</td>
+                	<td>完成</td>
+                </tr>
+            </table>
+            <h4 class="steptxt">
+            	第2步：导入任务信息
+            </h4>
+            <dl style="line-height: 24px; color:gray;">
+                <dt>说明：</dt>
+                <dd>1、系统将按照从【被导入的数据表】到【系统的数据表】，自左而右的列对应关系，导入数据</dd>
+                <dd>2、如果【系统的数据表】中的列，在【被导入的数据表】中没有列对应，则显示为空</dd>
+                <dd>3、您可以在【系统的数据表】中设置与【被导入的数据表】中列的对应关系</dd>
+            </dl>
+            
+            <div style="margin: 30px 0px;">
+            	<table class="pointtbl">
+                    <thead>
+                        <tr>
+                            <th width="150" height="30">被导入的数据表</th>
+                            <th width="150" height="30">系统的数据表</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       #set($index = 0)
+    				   #foreach($item in $!excelHeaders) 
+    						<tr>
+                            	<td align="left">
+                                	<label>$item</label>
+                                </td>
+                            	<td class="pd">
+    								<select name="combox$index" id="combox$index" style="width: 140px;" onchange="selChange(this)" colname="$item">
+    									<option value=""></option>
+			                           #foreach($!sys in $!{initSysField.keySet()})
+			                            <option value="$!sys" #if($item.equals($!{initSysField.get($!sys)})) selected="selected"#end>$!{initSysField.get($!sys)}</option>
+			                           #end
+                                    </select>
+                                </td>
+                            </tr>
+    						#set($index = $index+1)
+    				   #end 
+                    </tbody>
+                </table>
+            </div>
+            
+            <hr />
+            
+            <div class="halign">
+            	<input type="button" class="btn6 btn6bg1" value="上一步" onclick="abovePage()"/>
+            	<input type="button" class="btn6 btn6bg1" value="导入" id="importBtn" onclick="checkPast('$!excelFileName')" />
+            	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:tab.close(GetId(), false);" />
+            </div>
+		</form>
+	</div>
+	
+	<div id="d2" style="display:none">
+		<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">第 3 步</td>
+            	<td>完成</td>
+            </tr>
+        </table>
+        <h4 class="steptxt">
+        	第3步：导入任务分配中
+        </h4>
+        
+        <div class="pgrbar">
+        	<div class="ppt">
+                <span class="fl">
+						正在导入数据，共
+                    <label class="dgreen bold" id="totalCount"></label>
+						条数据…
+                </span>
+                <span class="fr" id="percent">
+                </span>
+            </div>
+            <div class="bar" >
+                <div id="porgressBar" style="width:0px;"></div>
+            </div>
+        </div>
+	</div>
+	
+	<div id="d3" style="display:none">
+		<table class="bartbl">
+        	<tr>
+            	<td class="over">第 1 步</td>
+            	<td class="over">第 2 步</td>
+            	<td class="over">第 3 步</td>
+            	<td class="over">完成</td>
+            </tr>
+        </table>
+        
+        <h4 class="steptxt">第4步：完成任务分配导入</h4>
+        
+        <dl class="sucppt">
+        	<dt>任务分配导入已完成！</dt>
+            <dd class="img"></dd>
+            <dd>
+            	共<span>$!total</span>条数据，成功<span class="green" id="successRecordCount"></span>条，失败<span class="red" id="failRecordCount"></span>条。
+        	</dd>
+        </dl>
+        <div id="d4" style="display:none">
+            <dl style="line-height: 24px;">
+                <dt>您可以另存导入失败的任务分配</dt>
+                <dd>1、根据失败原因，更改任务分配信息。</dd>
+                <dd>2、如果不需要再次导入失败的任务分配信息，可以删除这行。</dd>
+            </dl>
+            
+            <div style="margin: 20px 0px;">
+            	<input type="button" class="btn1" value="另存导入失败的任务分配" onclick="exportExcel()" />
+            </div>
+        </div>
+        <hr />
+        
+        <div class="halign">
+        	<input type="button" class="btn6 btn6bg3" value="关闭" onclick="importClose()"/>
+        </div>
+     </div>
+
+</body>
+
+<script>
+	function checkPast(excelFileName){
+	  var boolString='';
+	  var indexV='';
+	  var postJson={};
+	  var boolJson={};
+	   $('select').each(function(){
+	     indexV=$(this).children("option:selected").val();
+	     boolString+=indexV;
+	     if(boolJson[indexV]!=null&&boolJson[indexV]!=''){
+	       banger.page.showMessageBox('"'+indexV+'"被重复选择！');
+	       return false;
+	     }
+	     boolJson[indexV]=indexV;
+	     if(indexV=='assignOb'){
+	       postJson[this.name]='assignOb';
+	     }
+	     if(indexV=='assignTa'){
+	       postJson[this.name]='assignTa';
+	     }
+	     if(indexV!='assignOb'&&indexV!='assignTa'){
+	       postJson[this.name]=$(this).find("option:selected").text();
+	     }
+	   });
+	    if(boolString==''){
+	      banger.page.showMessageBox("您没有选择任何选项！");
+	      return false;
+	    }else if(boolJson['assignTa']==null||boolJson['assignOb']==null){
+	      banger.page.showMessageBox('"分配对象"和"任务目标"必须同时被选取！');
+	      return false;
+	    }else{
+	      checkLogicVerify(postJson,excelFileName);
+	    }
+	}
+	
+	//在选取是判断是否重复
+	function selChange(obj){
+	  var key=obj.value;
+	  var indexV='';
+	    $('select').each(function(){
+	      indexV=$(this).children("option:selected").val();
+	    if(obj.value==indexV&&obj.name!=this.name&&indexV!=''){
+	      banger.page.showMessageBox('"'+$(this).children("option:selected").text()+'"已经被选择！');
+	      $('#'+obj.name).get(0).options[0].selected=true;
+          return false;
+        }
+	    });
+	}
+	//验证是否有导入正在进行
+	function checkLogicVerify(postJson,excelFileName){
+	   postJson['tskMicTask.taskId']=$!taskId;
+	   postJson['imType']='$!imType';
+    		confirmMsg = 1;
+			jQuery.post('../taskAssignImport/logicVerify.html?excelFileName='+excelFileName,
+						postJson,
+						function(json){
+						if(json !=""){
+							banger.page.showMessageBox(json);
+					}else{
+        				$("#d1").css("display","none");
+                		$("#d2").css("display","block");
+						$("#d3").css("display","none");
+						$("#d4").css("display","none");
+                		importExcel(postJson,excelFileName,$!taskId,'$!imType');
+                		proId = setInterval("progressBar()", 1000);
+    				}
+			});
+	}
+	//提交数据
+	function importExcel(postJson,excelFileName,taskId,imType){
+		postJson['taskId']=taskId;
+		postJson['imType']=imType;
+		jQuery.ajax({
+	    	type: 'post',
+			url:'../taskAssignImport/excelToDataBase.html?excelFileName='+excelFileName,
+			data:postJson,
+			success:function(json){
+    			var outStr=jQuery.parseJSON(json);
+				if(outStr==""){
+					$('#failRecordCount').text(0);
+					$('#successRecordCount').text(0);
+				}else{
+					$('#failRecordCount').text(outStr['failRecordCount']);
+					$('#successRecordCount').text(outStr['successRecordCount']);
+					$("#errorFilePath").attr("value",outStr['errorFilePath']);
+				}
+			}
+    	});	
+	}
+	
+	//导入进度
+	function progressBar(){
+	var bc=$("#total").val();
+	var nc=$("#nullCount").val();
+	    var totalAmount=parseInt(bc)+parseInt(nc);
+		jQuery.post('../taskAssignImport/tskAssignBar.html?random='+Math.random()*10000,
+						{},
+						function(json){
+							var curr, p, ds=jQuery.parseJSON(json);
+							if(ds["curr"]) {
+								curr = ds["curr"];
+							}
+							if(!curr) curr = 0;
+							if(totalAmount==0) 
+								p = "100%";
+                			else 
+								p = Math.round(parseInt(curr) * 100 /parseInt(totalAmount))+'%';
+                			$("#percent").text(p);
+                			$("#porgressBar").css("width",p);
+                			if(p == "100%"){
+								sleep(500);
+								$("#d1").css("display","none");
+                				$("#d2").css("display","none");
+                				$("#d3").css("display","block");
+								confirmMsg=2;
+								if($('#failRecordCount').text()!="0")
+                					$("#d4").css("display","block");
+                				else
+                					$("#d4").css("display","none");
+								clearInterval(proId);
+                			}
+						}
+			);
+	}
+	  //暂停
+	 function sleep(numberMillis) {    
+        var now = new Date();    
+        var exitTime = now.getTime() + numberMillis;   
+        while (true) { 
+        now = new Date();       
+        if (now.getTime() > exitTime) 
+      	  return;    
+        } 
+    } 
+	
+	//意外关闭
+	function cfirm(){
+		if(confirmMsg == 1 && typeof(proId) != 'undefined'){
+			if(confirm('正在导入任务分配，您确定要取消导入吗？')) {
+				clearInterval(proId);
+				jQuery.post('../taskAssignImport/interruptTskAssign.html',
+    				{},
+    				function(json){
+					
+    				});
+				return true;
+			}
+		}else return true;
+	}
+	
+	//点关闭重置状态
+	function importClose(){
+		jQuery.post('../taskAssignImport/interruptTskAssign.html',
+    				{},
+    				function(json){
+    				});
+		tab.close(GetId(), false);			
+	}
+	
+	
+	//导出失败文件
+	function exportExcel(){
+		var filePath=$("#errorFilePath").val();
+		if(filePath==""){
+			banger.page.showMessageBox("未找到失败文件路径！");
+			return;
+		}
+		document.location.href="../taskAssignImport/exportFileData.html?filePath="+filePath+"&random="+Math.random()*100000;
+	}
+	
+	//上一步
+	function abovePage(){
+	   var taskId=$!taskId;
+	   var sysType='$!imType';
+	   document.location.href="../taskAssignImport/transTskImportPage.html?taskId="+taskId+"&sysType="+sysType;
+	}
+</script>

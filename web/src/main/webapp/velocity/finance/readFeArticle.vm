@@ -1,0 +1,140 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>文章阅读</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    
+</head>
+
+<body>
+	<div class="ui-news-content">
+		<h4 class="ui-news-header">
+			$!feArticle.articleTitle
+		</h4>
+		
+		<hr class="dbline" />
+		
+		<div class="ui-news-tip">
+			<span class="newsouce">
+				#set($publishDate=$date.format("yyyy-MM-dd HH:mm:ss",$!feArticle.publishDate))
+				<label class="time">发布于$publishDate</label>
+				<label class="source">来源于：<a #if($!feArticle.articleAddress=="") href="javascript:void(0);" #else href="$!feArticle.articleAddress" target="_blank" #end>$!feArticle.articleSource</a></label>
+			</span>
+			<span class="newstip">
+				#set($startDate=$date.format("yyyy-MM-dd",$!feArticle.articleReadtimeBegin))
+				#set($endDate=$date.format("yyyy-MM-dd",$!feArticle.articleReadtimeEnd))
+				<label>安排阅读时间：$startDate~$endDate</label>
+				#if($!feArticle.isMastread == 0)
+					<i class="ui-news-mark optional">【选读】</i>
+				#else
+					<i class="ui-news-mark required">【必读】</i>
+				#end
+			</span>
+		</div>
+		
+		<div class="ui-news-details">
+			<label>
+				$!feArticle.articleContent
+			</label>
+		</div>
+		
+		<hr class="line" />
+		
+		<dl class="ui-news-minort">
+			<dt>
+				<label class="bold">附件：</label>
+			</dt>
+			#foreach($attr in $!attrList)
+				<dd class="file">
+				<a class="name" href="javascript:downFile($attr.attachmentId);" hideFocus="true">$!attr.fileName</a>
+				<label class="size">($!dateString.FormetFileSize("$attr.fileSize"))</label>
+			</dd>				
+			#end
+			<dd class="footer">
+				<a href="javascript:void(0);" class="ui-news-view" hideFocus="true" onclick="showUsers($!feArticle.articleId,'collect');return false;">已有<label class="red" id="colCount">$!feArticle.articleCollectCount</label>个收藏，点击查看</a>
+				#if($!isCollect!=1)
+					<a href="javascript:void(0);" id="collect" class="ui-news-button" hideFocus="true" onclick="collect($!feArticle.articleId);return false;">收藏</a>
+				#else
+					<label>已收藏</label>
+				#end
+			</dd>
+		</dl>
+		
+		<hr />
+		
+		<dl class="ui-news-minor">
+			<dt>
+				<label class="bold fl">评论：</label>
+				<a href="javascript:void(0);" class="ui-news-view" hideFocus="true" onclick="toDiscess($!feArticle.articleId);return false;">
+					已有<label class="red" id="disCount">$!feArticle.articleDiscessCount</label>条评论，共<label class="red">$!feArticle.articlePartakeCount</label>人参与，点击查看
+				</a>
+			</dt>
+			<dd class="words" id="discess">
+				<div class="ui-div-textarea" style="height:50px;">
+					<textarea class="textarea" id="disContent" tips="" maxlength="500" style="height:50px;"></textarea>
+				</div>
+			</dd>
+			<dd class="footer">
+				<a href="javascript:void(0);" class="ui-news-button" hideFocus="true" onclick="addDiscess();return false;">发表评论</a>
+			</dd>
+		</dl>
+	</div>
+</body>
+#scriptLink("core")
+#scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.url.js"></script>
+    <script type="text/javascript">
+		function downFile(attrId){
+    		location.href="downArticleFile.html?articleAttr.attachmentId="+attrId;
+    		return false;
+		}
+		
+		function toDiscess(id){			
+			var url = window.url('/finance/showArticleDiscessPage.html?feArticle.articleId='+id, "random", Math.random());
+        	window.location.href = url;
+		}
+		$(function(){		
+			tab.title(tab.self,'$!jsUtil.escapeJs($feArticle.articleTitle)');
+			maxTextArea("textarea[maxlength]");
+		});
+		
+		function addDiscess(){
+			if(jQuery.trim($('#disContent').val())){
+    			jQuery.post('addArticleDiscess.html',
+    				{'feArticleDiscess.articleId':$!feArticle.articleId,
+    				'feArticleDiscess.discessContent':jQuery.trim($('#disContent').val().replace(/(^\s*)|(\s*$)/g,""))},
+    				function(data){
+						banger.page.showMessageBox({"type":"success","content":"评论成功!"});
+						$('#disContent').val("");
+    					$('#disCount').text(data);						
+    				});
+			}else{
+			}
+		}
+		
+		function collect(id){
+			var url='/finance/toAddKnowContent.html?knowContent.articleId='+id+'&random='+Math.random();
+			result=window.showModalDialog(url, {window: window}, 'dialogWidth=480px;dialogHeight=320px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+			if(result){
+				$('#colCount').text(result);
+				$('#collect').attr("class","").removeAttr("onclick");
+				$('#collect').text('已收藏');
+			}
+		}
+		
+		//查看已收藏，未阅读，已阅读
+		function showUsers(id,type){
+			var url='/finance/showFinanceUsersPage.html?feArticle.articleId='+id+'&actionType='+type+'&random='+Math.random()*1000000;
+			window.showModalDialog(url, {window: window,"title":'已收藏'}, 'dialogWidth=540px;dialogHeight=420px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+		}
+    </script>
+</html>

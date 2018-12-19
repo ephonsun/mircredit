@@ -1,0 +1,160 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>经营/消费性贷统计报表</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+	<style type="text/css" media="print"> 
+        .Noprint{ display:none; }
+        .PageNext{ page-break-after:always; }
+		.NOPRINT { font-size:9pt; font-family:'宋体'; }
+        .tdp { border-bottom:1px solid #000; border-left:1px solid #000; border-right:1px solid #fff; border-top:1px solid #fff; } 
+        .tabp { border-width:2px 2px 1px 1px; border-style: solid; border-color: #000 #000 #000 #000; }
+    </style>
+    <style type="text/css">
+        .recenter-tbl thead tr th {background-color: #ffffff;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+
+</head>
+
+<body>
+<h3 class="recenter-ttl" style="text-align: center;">
+	 经营/消费性贷统计表
+</h3>
+	<table class="recenter-tbl">
+        <thead>
+			<tr>
+				<th rowspan="3"><label title="贷款类型">贷款类型</label></th>
+                <th colspan="6"><label title="期限">期限</label></th>
+                <th rowspan="2" colspan="3"><label title="月末金额(万元)">月末金额(万元)</th>
+##                <th rowspan="2" colspan="3"><label title="总计">总计</th>
+			</tr>
+			<tr>
+                <th colspan="2"><label title="一年以内">一年(含)以下</label></th>
+                <th colspan="2"><label title="一年以上(含)三年以下">一年以上(含)三年以下</label></th>
+                <th colspan="2"><label title="三年以上">三年以上</label></th>
+			</tr>
+			<tr>
+                <th><label title="笔数">笔数</label></th>
+				<th><label title="总金额(万元)">总金额(万元)</label></th>
+
+                <th><label title="笔数">笔数</label></th>
+                <th><label title="总金额(万元)">总金额(万元)</label></th>
+
+                <th><label title="笔数">笔数</label></th>
+                <th><label title="总金额(万元)">总金额(万元)</label></th>
+
+                <th><label title="笔数">笔数</label></th>
+                <th><label title="总金额(万元)">总金额(万元)</label></th>
+                <th><label title="月底余额(万元)">月底余额(万元)</label></th>
+
+##                <th><label title="笔数">笔数</label></th>
+##                <th><label title="总金额(万元)">总金额(万元)</label></th>
+##                <th><label title="总金额(万元)">总余额(万元)</label></th>
+
+
+
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><label title="经营贷">经营贷</label></td>
+				#foreach($reportBean in $jydList)
+                    <td><label>$!reportBean.loanTotal</label></td>
+                    <td><label>
+                        #if($!reportBean.totalAmount)
+                            $!reportBean.totalAmount
+                        #else
+                            0
+                        #end</label></td>
+                #end
+                <td><label>
+                    #if($!jydLoanBal)
+                        $!jydLoanBal
+                    #else
+                        0
+                    #end
+                </label></td>
+			</tr>
+            <tr>
+                <td><label title="消费贷">消费贷</label></td>
+                #foreach($reportBean in $xfdList)
+                    <td><label>$!reportBean.loanTotal</label></td>
+                    <td><label>
+                        #if($!reportBean.totalAmount)
+                            $!reportBean.totalAmount
+                        #else
+                            0
+                        #end</label></td>
+
+                #end
+                <td><label>
+                    #if($!xfdLoanbal)
+                        $!xfdLoanbal
+                    #else
+                        0
+                    #end
+                </label></td>
+            </tr>
+            <tr>
+                <td colspan="10"><a href="${ctx}/report/downLoanInfoStatisticsTable.html?random="+Math.random() * 1000>导出表格</a></td>
+            </tr>
+		</tbody>
+	</table>
+<br/><br/>
+<h3 class="recenter-ttl" style="text-align: center;">
+    卡贷宝贷统计表
+
+</h3>
+    <table class="recenter-tbl">
+        <thead>
+        <tr>
+            <th rowspan="2"><label title="贷款类型">贷款类型</label></th>
+            <th colspan="3"><label title="月末金额(万元)">月末金额</th>
+        </tr>
+
+        <tr>
+            <th><label title="笔数">笔数</label></th>
+            <th><label title="总金额(万元)">总金额(万元)</label></th>
+            <th><label title="月底余额(万元)">月底余额(万元)</label></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><label title="经营贷">经营贷(卡贷宝)</label></td>
+            <td><label>$!jydBean.loanTotal</label></td>
+            <td><label>$!jydBean.totalAmount</label></td>
+            <td><label>$!jydBean.lonAmount</label></td>
+        </tr>
+        <tr>
+            <td><label title="消费贷">消费贷(卡贷宝)</label></td>
+            <td><label>$!xfdBean.loanTotal</label></td>
+            <td><label>$!xfdBean.totalAmount</label></td>
+            <td><label>$!xfdBean.lonAmount</label></td>
+        </tr>
+        <tr>
+            <td colspan="4"><a href="${ctx}/report/downKDBStatisticsTable.html?random="+Math.random() * 1000>导出表格</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

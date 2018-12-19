@@ -1,0 +1,485 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户联系跟进统计报表</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/LodopFuncs.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop32.exe"></embed>
+		<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="${ctx}/js/report/install_lodop64.exe"></embed>
+	</object> 
+<style media=print> 
+.Noprint{display:none;} 
+.PageNext{page-break-after: always;} 
+</style> 
+
+<style> 
+.tdp 
+{ 
+    border-bottom: 1 solid #000000; 
+    border-left: Ł solid #000000; 
+    border-right: ŀ solid #ffffff; 
+    border-top: 0 solid #ffffff; 
+} 
+.tabp 
+{ 
+    border-color: #000000 #000000 #000000 #000000;
+    border-style: solid;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+} 
+.NOPRINT { 
+font-family: "宋体"; 
+font-size: 9pt; 
+} 
+
+</style> 
+<script>
+var oldJson;
+var containSub = '1';
+var oldcontactCount = 1;
+jQuery(document).ready(function(){
+	$("#query").click(function(){
+		queryReport();
+	});
+	$("#export").click(function(){
+		exportReport();
+	});
+	$("#print").click(function(){
+		openPrintPage();
+	});
+	
+	$("#dateBegin").val("");
+	$("#dateEnd").val("");
+	
+	$("input[dateFlag$='true']").each(function(i){
+		initDate(this.id);
+	});
+	
+	$("#belongTo").change(function(){
+		changeBelongTo($(this).val());
+	});
+			
+	//加载下属树
+	$('#userList').subtree({
+		tid: 'subtree',
+		showIcon: true,
+		url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+		buttons: [
+			{ text: '确定', callback: onCheckUser },
+			{ text: '取消' }
+		]
+	});
+	//加载机构树
+	$('#deptList').agetree({
+		tid: 'agetree',
+		url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+		buttons: [
+			{ text: '确定', callback: onCheckDept },
+			{ text: '取消' }
+		]
+	});
+	
+	changeBelongTo('my');
+	
+	jQuery("#combox1").combobox({
+		button:false,
+		array: $!typeArray,
+		optionClick: function(checkbox, self){
+			if(checkbox.filter(':checked').length>3){
+				self.checked = false;
+			}else if(checkbox.filter(':checked').length<1){
+				self.checked = true;
+			}
+		}
+	});
+			
+	$("select[render='sel']").each(function(){
+		$(this).select();
+	})
+	
+	numInput("input[intFlag$='true']");
+	jQuery('#form1').validator();
+});
+
+//点击User
+function onCheckUser(treeId){
+	var postJson = {};
+	postJson = getCheckJson(treeId, 'U');
+	$('#userIds').val(postJson.ids);
+	$('#userNames').val(postJson.names);
+}
+//点击Dept
+function onCheckDept(treeId, checkbox){
+	var postJson = {};
+	postJson = getCheckJson(treeId, 'D');
+	$('#deptIds').val(postJson.ids);
+	$('#deptNames').val(postJson.names);
+	if(checkbox.checked){
+		containSub = '1';
+	}else{
+		containSub = '0';
+	}
+}
+function getCheckJson(treeId, flag){
+	var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+	var nodes = treeObj.getCheckedNodes(true);
+	var len = nodes.length;
+	var uIds = "";
+	var uName = "";
+	for(var i=0; i<len; i++){
+		if(flag=='U'){
+			if(nodes[i].flag==flag){
+				if(uIds==""){
+					uIds = nodes[i].id;
+					uName = nodes[i].name;
+				}else{
+					uIds = uIds + "," + nodes[i].id;
+					uName = uName+ "," +nodes[i].name;
+				}
+			}
+		}else{
+			if(uIds==""){
+				uIds = nodes[i].id;
+				uName = nodes[i].name;
+			}else{
+				uIds = uIds + "," + nodes[i].id;
+				uName = uName+ "," +nodes[i].name;
+			}	
+		}
+	}
+	var postJson = {};
+	postJson['ids'] = uIds;
+	postJson['names'] = uName;
+	return postJson;
+}
+
+//查询报表
+function queryReport()
+{
+	var bool = jQuery.validator({ form: 'form1', extend: false});
+	if(!bool){
+		return;
+	}
+	$("#reportBody").html('<div class=\'ui-loadbar\'><div class=\'icon\'>数据加载中，请耐心等待...</div></div>');
+	var json = getConditionJson();
+	jQuery.post("showContactCustomerReport.html?random="+Math.random()*1000000,json,
+		function(html){
+		 refreshReport(html);
+	});
+}
+
+function showDetail(type, conFlag, contactCount, id,dateBegin,dateEnd,name,title)
+{
+	var idType = $("#idType").val();
+	var userId="";
+	var deptId="";
+	var sub="";
+	if(idType=="dept"){
+		deptId=id;
+		for(var nm in oldJson)
+		{
+			if(nm=='condition.containSub'){
+				sub = oldJson[nm];
+				break;
+			}
+		}
+	}else{
+		userId=id;
+	} 
+	var url = "../report/showContactCustomerReportDetail.html?containSub="+sub+"&detail.userId="+
+		userId+"&detail.deptId="+deptId+"&detail.dateBegin="+dateBegin+
+		"&detail.dateEnd="+dateEnd+"&detail.name="+encodeURI(encodeURI(name))+
+		"&detail.title="+encodeURI(encodeURI(title))+
+		"&detail.type="+ encodeURI(encodeURI(type)) + 
+		"&detail.conFlag=" + encodeURI(encodeURI(conFlag))+
+		"&detail.contactCount=" + oldcontactCount;
+	var key = id+dateBegin+dateEnd;
+	tab.add({"id":"showContactCustDetail"+key,"pid":GetId(),"title":"客户联系跟进明细","url":url,"lock":false});
+}
+
+function changeBelongTo(val){
+	switch(val){
+		case "my":
+			$("#my").show();
+			$("#userList, #deptList").hide();
+			break;
+		case "sub":
+			$("#userList").show();
+			$("#my, #deptList").hide();
+			break;
+		case "dept":
+			$("#deptList").show();
+			$("#my, #userList").hide();
+			break;
+		default: break;
+	}
+}
+
+function getConditionJson()
+{
+	var json = getPostJson();
+	var belongTo = $("#belongTo").val();
+	switch(belongTo)
+	{
+		case "my":
+			json["condition.userIds"]=$("#myUserId").val();
+			break;
+		case "sub":
+			json["condition.userIds"]=$("#userIds").val();
+			break;
+		case "dept":
+			json["condition.deptIds"]=$("#deptIds").val();
+			json["condition.containSub"]=containSub;
+			break;
+	}
+	oldJson = json;
+	return json;
+}
+
+function refreshReport(html)
+{
+	var elem = $(html);
+	var grid = $("#reportBody");
+	grid[0].innerHTML="";
+	grid.append(elem);
+}
+
+function exportReport(html)
+{
+	var json = oldJson;
+	if(!json){
+		banger.page.showMessageBox("没有可导出的数据！");
+		return;
+	}
+	var params = "";
+	for(var nm in json)
+	{
+		if(nm=='condition.customerTypeName'){
+			params +="&"+nm+"="+encodeURI(encodeURI(json[nm]));
+		}else{
+			params +="&"+nm+"="+json[nm];
+		}
+	}
+	location.href="exportContactCustomerReport.html?random="+Math.random()*1000000+params;
+}
+
+function CheckIsInstall() {	
+	var bool = true;
+	try{
+	     var LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+		if ((LODOP==null)||(typeof(LODOP.VERSION)=="undefined")||(typeof(LODOP.VERSION)=="unknown")) 
+			bool = false;
+	 }catch(err){
+		bool = false;
+	 }
+	 return bool;
+}
+
+function openPrintPage()
+{
+	var json = oldJson;
+	if(!json){
+		banger.page.showMessageBox("没有可打印的数据！");
+		return;
+	}
+	
+	if(CheckIsInstall()){
+		prn1_preview();
+	}else{
+		//动态生成一个div 下载框64还是32
+		if (navigator.userAgent.indexOf('Win64')>=0){
+			path = '${ctx}/js/report/install_lodop64.exe';
+		}else{
+			path = '${ctx}/js/report/install_lodop32.exe';
+		}
+		loadPrintActiveX();
+	}
+}
+
+//打印预览支持控件路径
+var path = '';
+
+function loadPrintActiveX(){
+	var installHTML = '<div class=\'ui-model-install\'>'
+				+ '<h4 style=\'\'>请安装安全报表打印控件，已保证打印预览正常使用！</h4>'
+				+ '<p style=\'\'><label>控件安装完成后，请重启浏览器！</label></p>'
+				+ '<div style=\'\'><a href=\'' + path + '\' target=\'_self\'>立即下载</a></div>'
+				+ '</div>';
+	art.dialog({
+		id: 'loadPrintActiveX',
+		title: '安全报表打印控件下载',
+		content: installHTML
+	});
+}
+
+function prn1_preview() {	
+	CreateOneFormPage();	
+	LODOP.PREVIEW();	
+};
+	
+function CreateOneFormPage(){
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	var strStyleCSS="#parse('/velocity/taglibs.vm')"
+		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/base.css' />"
+		+ "<link type='text/css' rel='stylesheet' href='${ctx}/css/common.css' />";
+	var strFormHtml=strStyleCSS+"<body>"+document.getElementById("reportBody").innerHTML+"</body>";
+		
+	LODOP.PRINT_INIT("");
+	LODOP.SET_PRINT_PAGESIZE(2,0,0,"A4");
+	LODOP.ADD_PRINT_HTM(20,0,"100%","100%",strFormHtml);
+};	
+
+/*验证下属和机构是否为空*/
+function executeUserFunction(obj){
+	var belongTo=$("#belongTo").val();
+	if(belongTo=="sub"){
+		var text=$("#userNames").val();
+		if(text.length==0){
+			$(obj).attr('tips', '“统计对象下属”必须填写'); return false;
+		}
+	}else if(belongTo=="dept"){
+		var text=$("#deptNames").val();
+		if(text.length==0){
+			$(obj).attr('tips', '“统计对象机构”必须填写'); return false;
+		}
+	}
+		return true;
+}
+/*验证开始日期*/
+function searchStartDateFun(obj){
+	var startDate=$("#dateBegin").val();
+	var endDate=$("#dateEnd").val();
+	if(endDate.length>0&&startDate.length>0){
+		if(endDate<startDate){
+			$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+		}else{
+			$('#endDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+/*验证结束日期*/
+function searchEndDateFun(obj){
+	var startDate=$("#dateBegin").val();
+	var endDate=$("#dateEnd").val();
+	if(endDate.length>0&&startDate.length>0){
+		if(startDate>endDate){
+			$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+		}else{
+			$('#startDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+
+/*验证联系次数*/
+function searchContactCountFun(obj){
+	var contactCount=$("#contactCount").val();
+	
+	if(contactCount.length<=0){
+		$(obj).attr('tips', '联系次数不能为空'); return false;
+	}else if(contactCount.length>0){
+		if(parseInt(contactCount)<=0){
+			$(obj).attr('tips', '联系次数必须大于零'); return false;
+		}else{
+			$('#startDiv').removeClass('v-fails');
+			return true;
+		}
+	}else return true;
+}
+</script>
+</head>
+<body>
+	<form id="form1" method="post">
+		<center class="Noprint" >
+	    <div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">统计对象：</label>
+                <select id="belongTo" name="condition.belongTo" render="sel" style="width: 120px;">
+                    <option value="my">我的</option>
+                    #if($hasBelongTo)
+                    	<option value="sub">下属的</option>
+                    	<option value="dept">机构的</option>
+                    #end
+                </select>
+                <span id="my" class="btn2 fl" style="display: none; margin-left: 5px;">
+                	<input id="myUserId" type="hidden" value="$!userId" />
+                    <label class="btn2-txt">$!userName</label>
+                </span>
+                <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                    <input type="text" id="userNames" fun="executeUserFunction" class="dtxt2-txt" readonly="readonly" />
+                    <input id="userIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+                <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+                    <input type="text" id="deptNames" fun="executeUserFunction" class="dtxt2-txt" readonly="readonly" />
+                    <input id="deptIds" type="hidden" />
+                    <span class="dtxt2-ddl">ddl</span>
+                </div>
+            </div>
+        </div>
+    	<div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">开始日期：</label>
+                <div class="dtxt2 fl" id="startDiv" style="width: 150px;">
+                    <input type="text" id="dateBegin" fun="searchStartDateFun" readonly="readonly" name="condition.dateBegin" dateFlag="true" class="dtxt2-txt date" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">结束日期：</label>
+                <div class="dtxt2 fl" id="endDiv" style="width: 150px;">
+                    <input type="text" id="dateEnd" fun="searchEndDateFun" readonly="readonly" name="condition.dateEnd" dateFlag="true" class="dtxt2-txt date" />
+                    <span class="dtxt2-date">date</span>
+                </div>
+            </div>
+        </div>
+        <div class="condi-row">
+        	<div class="condi-i">
+            	<label class="condi-i-field">客户类型：</label>
+            	<div id="combox1" class="dtxt2 fl" style="width: 150px;">
+			        <input name="condition.customerTypeName" readOnly="true" type="text" class="dtxt2-txt" style="width: 120px;" value="空"/>
+			        <span class="dtxt2-ddl">ddl</span>
+			    </div>
+            </div>
+            <div class="condi-i">
+            	<label class="condi-i-field">联系次数>=</label>
+                <div class="dtxt1 fl" style="width: 114px;">
+                    <input type="text" id="contactCount" fun="searchContactCountFun" name="condition.contactCount" value="1" intFlag="true" class="dtxt1-txt" style="-position:static;" />
+                </div>
+            </div>
+        </div>
+        <div class="sz">
+            <input id="query" type="button" class="btn1" value="搜 索" />
+            #if($urlPermitUtil.hasPermission('exportAddCustomerReport'))
+            <input id="export" type="button" class="btn1" value="导 出" />
+            #end
+            #if($urlPermitUtil.hasPermission('getAddCustomerReportPrint'))
+            <input id="print" type="button" class="btn1" value="打 印" />
+            #end
+        </div>
+        </center>
+        <div id="reportBody" class="recenter">
+	    	
+    	</div>
+    </form>
+</body>
+</head>

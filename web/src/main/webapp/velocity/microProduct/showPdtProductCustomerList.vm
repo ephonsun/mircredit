@@ -1,0 +1,247 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>意向客户</title> 
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+
+    <script type="text/javascript">
+    	var oldPostJson={};	//上一个搜索条件
+    	
+    	/**
+		 * 分页跳转
+		 */
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "../pdtProductCustomer/queryPdtProductCustomerList.html?RandNum="+ Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryResult(html,'tblList');
+                        });
+            }
+        }
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+        function queryResult(html,gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+            //更新记录数
+//            var total = $('#total').val();
+            var total = $('#recordCount').val();
+            if(total!=null){
+                $("#pdtCusCount").text(total);
+            }else {
+                $("#pdtCusCount").text(0);
+            }
+        }
+
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var postJson={};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+    	//查看客户
+		function browseCustomer(cusId){
+        	jQuery.ajax({
+    			  type: 'POST',
+    			  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+    			  data: {"cusId":cusId},
+    			  success:function(data){
+    			  		var obj = jQuery.parseJSON(data);
+    			  		if(obj[0].isDel=='1'){
+    			  			banger.page.showMessageBox('客户"'+obj[0].customerName+'"被删除，无法查看具体资料！');
+    			  		}else{
+    			  			var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+    						tab.add(options);
+    			  		}
+    			  	}
+    			});	
+        }
+
+		/**
+	   	 * 删除产品意向客户
+	   	 */
+		function delPdtProductCustomer(productCustomerId,customerName){
+			if(confirm("您确定要将客户\""+customerName+"\"从意向客户列表中删除吗？")){
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "delPdtProductCustomer.html",
+			    	data: {'pdtProductCustomer.productCustomerId': productCustomerId
+			    	},
+			    	success: function(data){
+			 	  		delPdtProductCustomerResult(data);
+			    	}
+				});
+			}
+		}
+		
+		/**
+		 * 删除产品意向客户数据结果
+		 */
+		function delPdtProductCustomerResult(msg){
+			if(msg == 'SUCCESS'){
+				jQuery("#btnRefresh").trigger("click");//执行刷新操作
+			}else{
+				banger.page.showMessageBox(msg);
+			}
+		}
+		
+		jQuery(function(){
+			jQuery('select').select();
+			
+			jQuery("#btnClear").click(function(){
+				jQuery("input[name='conds']").each(function(){
+					jQuery(this).val("");
+				});
+				jQuery('#selProduct')[0].selectedIndex = 0;
+				jQuery('#selProduct').select();
+			});
+			
+			jQuery("#btnSearch").click(function(){
+				var productId = jQuery("#selProduct").val();
+				var customerName = jQuery.trim(jQuery("#txtCustomerName").val());
+				var cphNumber = jQuery.trim(jQuery("#txtCPhNomber").val());
+				var remark = jQuery.trim(jQuery("#txtPurposeRemark").val());
+				var userName = jQuery.trim(jQuery("#txtUserName").val());
+				var belongUserName = jQuery.trim(jQuery("#txtBelongUserName").val());
+				
+				var postJson={'pdtProductCustomerBean.productId':productId,
+							  'pdtProductCustomerBean.customerName': customerName,
+							  'pdtProductCustomerBean.cphNumber': cphNumber,
+						  	  'pdtProductCustomerBean.remark': remark,
+						  	  'pdtProductCustomerBean.userName': userName,
+						  	  'pdtProductCustomerBean.belongUserName': belongUserName
+				};
+				oldPostJson = postJson;  //记录OldPostJson
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "queryPdtProductCustomerList.html",
+			    	data: postJson,
+			    	success: function(data){
+			 	  		queryResult(data,'tblList');
+			    	}
+				});
+			});
+			
+			jQuery("#btnAddPdtProductCustomer").click(function(){
+				var url = "../pdtProductCustomer/toAddPdtProductCustomerPage.html?&random="+Math.random()*10000;
+				//var result=window.showModalDialog(url, '添加意向客户', 'dialogWidth=800px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+                var result=banger.page.openDialog(url,"添加意向客户",780,350);
+                if(result != undefined){
+   					jQuery("#btnRefresh").trigger("click");//执行刷新操作
+   				}
+			});
+			
+			jQuery("#btnRefresh").click(function(){
+				goto(null,"../pdtProductCustomer/queryPdtProductCustomerList.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html,'tblList');});
+			});
+			
+			initQueryJson();
+			
+			jQuery('#tblList').table();
+		});
+    </script>
+</head>
+<body>
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>客户姓名：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" name="conds" id="txtCustomerName"/>
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>联系电话：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input type="text" class="text" name="conds" id="txtCPhNomber"/>
+                	</div>
+                </td>
+                 <td class="field" width="8%">
+                	<label>&nbsp;意向产品：</label>
+                </td>
+                <td width="17%" >
+                	<select id="selProduct">
+                    	<option value="-1"></option>
+                    	#foreach($pdtProduct in $!pdtProductList)
+                    		<option value="$!pdtProduct.productId">$!pdtProduct.productName</option>
+                    	#end
+                    </select>
+                </td>
+				<td colspan="2"></td>
+            </tr>
+            <tr>
+            	<td class="field" width="8%">
+					<label>意向说明：</label>
+				</td>
+				<td>
+					<div class="ui-div-text">
+						<input type="text" class="text" name="conds" id="txtPurposeRemark"/>
+					</div>
+				</td>
+            	<td class="field" width="8%">
+					<label>归属人员：</label>
+				</td>
+				<td>
+					<div class="ui-div-text">
+						<input type="text" class="text" name="conds" id="txtBelongUserName"/>
+					</div>
+				</td>
+				<td class="field" width="8%">
+					<label>添加人员：</label>
+				</td>
+				<td>
+					<div class="ui-div-text">
+						<input type="text" class="text" name="conds" id="txtUserName"/>
+					</div>
+				</td>
+				<td colspan="2"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl">
+            意向客户(<label class="green" id="pdtCusCount">$!recordCount</label>)
+        </span>
+        <input type="button" class="ui-input-btn" value="清空" id="btnClear"/>
+        <input type="button" class="ui-input-btn" value="搜索" id="btnSearch"/>
+    </div>
+	<div class="action-bar">
+        <span class="ui-span-btn fl" id="btnAddPdtProductCustomer">
+        	<label>添加意向客户</label>
+        </span>
+        <span class="ui-span-btn fr" id="btnRefresh">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <div id="tblList" class="datatbl">
+        #parse("/velocity/microProduct/pdtProductCustomerList.vm")
+    </div>
+</body>
+</html>

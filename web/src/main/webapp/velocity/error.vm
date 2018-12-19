@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>系统异常</title>
+    
+    <link type="text/css" rel="stylesheet" href="../css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="../css/public.css" />
+	<style type="text/css">
+    	div.b-abnormal-infor { margin-bottom:20px; }
+    	div.b-abnormal-infor i { float:left; width:52px; height:52px; }
+    	div.b-abnormal-infor i.err { background:url(../images/icon/icon-error.gif) no-repeat center center; }
+    	div.b-abnormal-infor i.war { background:url(../images/icon/icon-warning.png) no-repeat center center; }
+		div.b-abnormal-infor img { float:left; border:0; width:52px; height:52px; }
+		div.b-abnormal-infor dl { float:left; margin-left:15px; line-height:2; }
+		div.b-abnormal-infor dl dt { color:#f60; font-size:14px; }
+		div.b-abnormal-infor dl dd { }
+		div.b-abnormal-save { display:none; margin-bottom:20px; }
+		div.b-abnormal-save p { line-height:2; text-align:right; }
+		div.b-abnormal-save div.details { height:150px; border:1px solid #7f9db9; padding:3px 5px; overflow:auto; word-wrap:break-word; line-height:1.5; }
+		dl.b-abnormal-cause { margin-bottom:40px; line-height:2; }
+		dl.b-abnormal-cause dt { font-weight:bold; }
+		a { color:#00f; text-decoration:underline; }
+    </style>
+</head>
+
+<body>
+	<div class="b-abnormal-infor clearfix">
+		<i class="err">&nbsp;</i>
+        <dl>
+        	<dt>由于线程退出或应用程序请求，已放弃 I/O 操作。</dt>
+        	<!--<dd><a id="detail" href="javascript:void(0);">详细</a></dd>-->
+        </dl>
+    </div>
+    <div id="save" class="b-abnormal-save">
+    	<p><a href="javascript:void(0);" onclick="jsonf.save();return false;">另存</a></p>
+        <div contentEditable="true" class="details">
+        	<!--这里读取异常详细信息-->
+        </div>
+    </div>
+    <dl class="b-abnormal-cause">
+    	<dt>可能的原因：</dt>
+        <dd>1、操作系统问题导致程序异常，请重新操作</dd>
+		<dd>2、未知问题，请联系 <span>系统管理员</span></dd>
+        <!--<dd>2、未知问题，请联系 <a href="mailto:admin@baihang-china.com">系统管理员</a></dd>-->
+    </dl>
+    
+    <div class="center">
+    	<input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭" onclick="jsonf.cancel();" />
+    </div>
+</body>
+<script type="text/javascript" src="../js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="../js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="../js/banger/banger.tabs-v1.0.js"></script>
+<script type="text/javascript" src="../js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript">
+	var jsonf = {
+		display: function(b, obj){
+			var bool = obj.is(':hidden');
+			if(bool){
+				obj.css('display', 'block'); b.text('摘要');
+			}
+			else{
+				obj.css('display', 'none'); b.text('详细');
+			}
+		},
+		save: function(){
+			//code here...
+		},
+		cancel: function(){
+			if(window.dialogArguments){
+				window.close();
+			}
+			else{
+				tab.close(GetId(), false);
+			}
+		}
+	};
+</script>
+</html>

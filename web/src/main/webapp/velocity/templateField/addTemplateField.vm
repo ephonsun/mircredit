@@ -1,0 +1,296 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建业务字段</title>
+    
+	#styleLink("base")
+	
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	function setstate1(){
+    			$("#Optbl1 tbody tr:first a[nm='up']").attr('disabled', 'disabled');
+    			$("#Optbl1 tbody tr:first a[nm='up']").css({cursor:"default",textDecoration:"none"});
+    			
+    			$("#Optbl1 tbody tr:last a[nm='down']").attr('disabled', 'disabled');
+    			$("#Optbl1 tbody tr:last a[nm='down']").css({cursor:"default",textDecoration:"none"});
+    	}
+    	
+    	function setstate2(){
+    			$("#Optbl2 tbody tr:first a[nm='up']").attr('disabled', 'disabled');
+    			$("#Optbl2 tbody tr:first a[nm='up']").css({cursor:"default",textDecoration:"none"});
+    			
+    			$("#Optbl2 tbody tr:last a[nm='down']").attr('disabled', 'disabled');
+    			$("#Optbl2 tbody tr:last a[nm='down']").css({cursor:"default",textDecoration:"none"});
+    	}
+    	jQuery(function(){
+    		jQuery('select').select();
+    		
+			escapeInput("#templateFieldName");
+			escapeInput("#Option2");
+    		
+    		$("#templateFieldType").change(function(){
+				switch($(this).val()){
+					case "Text":
+						jQuery(".unit-item").hide(); break;
+					case "TextArea":
+						jQuery(".unit-item").hide(); break;
+					case "Number":
+						jQuery(".unit-item").hide(); jQuery("#unit").show(); break;
+					case "Date":
+						jQuery(".unit-item").hide(); break;
+					case "YesNo":
+						jQuery(".unit-item").hide(); break;
+					case "Select":;
+						jQuery(".unit-item").hide(); jQuery("#sltbox1").show(); break;
+					case "MultipleSelect":
+						jQuery(".unit-item").hide(); jQuery("#sltbox2").show(); break;
+					default:
+						jQuery(".unit-item").hide(); break;
+				}
+			});
+			
+			setstate1();
+			setstate2();
+			
+			jQuery("#addFieldForm").validator();
+			
+			$("#btnAdd1").click(function(){
+				$("#Optbl1 tbody tr:last a[nm='down']").removeAttr('disabled');
+				$("#Optbl1 tbody tr:last a[nm='down']").css({cursor:"auto",textDecoration:"underline"});
+				Shared(jQuery("#Optbl1"), jQuery("#Option1"));
+				setstate1();
+			});
+			$("#btnAdd2").click(function(){
+				$("#Optbl2 tbody tr:last a[nm='down']").removeAttr('disabled');
+				$("#Optbl2 tbody tr:last a[nm='down']").css({cursor:"auto",textDecoration:"underline"});
+				Shared(jQuery("#Optbl2"), jQuery("#Option2"));
+				setstate2();
+			});
+			
+			function Shared(obj, objOption){
+				var val = jQuery.trim(objOption.val());
+				if(val.length==0){
+					banger.page.showMessageBox("新选项值不能为空！");
+					return false;
+				}
+				if(obj.find("tbody").find("label[title='" + val + "']").length > 0){
+					banger.page.showMessageBox("已存在相同选项！");
+					return false;
+				}
+				var tr = $("<tr><td><label title=\"" + val + "\">" + val + "</label></td><td>" + BuildHtml() + "</td></tr>");
+				tr.appendTo(obj.find("tbody"));
+				tr.find("a[nm='del']").bind("click", function(){
+					tr.remove();
+					setstate1();
+					setstate2();
+				});
+				tr.find("a[nm='up']").bind("click", function(){
+					if(tr.prevAll().length != 0){
+						if(tr.prevAll().length == 1){
+							tr.prev().find("a[nm='up']").removeAttr('disabled');
+							tr.prev().find("a[nm='up']").css({cursor:"auto",textDecoration:"underline"});
+						}
+						if(tr.prevAll().length > 1){
+							tr.find("a[nm='down']").removeAttr('disabled');
+							tr.find("a[nm='down']").css({cursor:"auto",textDecoration:"underline"});
+						}
+						tr.prev().before(tr);
+						setstate1();
+						setstate2();
+					}
+				});
+				tr.find("a[nm='down']").bind("click", function(){
+					if(tr.nextAll().length != 0){
+						if(tr.nextAll().length == 1){
+							tr.next().find("a[nm='down']").removeAttr('disabled');
+							tr.next().find("a[nm='down']").css({cursor:"auto",textDecoration:"underline"});
+						}
+						if(tr.nextAll().length > 1){
+							tr.find("a[nm='up']").removeAttr('disabled');
+							tr.find("a[nm='up']").css({cursor:"auto",textDecoration:"underline"});
+						}
+						tr.before(tr.next());
+						setstate1();
+						setstate2();
+					}
+				});
+				objOption.val("");
+			}
+			function BuildHtml(){
+				var btn = "<a href='#2' nm='del'>删除</a> "
+						+ "<a href='#2' nm='up'>上移</a> "
+						+ "<a href='#2' nm='down'>下移</a>";
+				return btn;
+			}
+		});
+	</script>
+	
+    <script type="text/javascript">
+		function addData(code){
+			var bool = jQuery.validator({ form: 'addFieldForm'});
+			if(!bool){
+				return false;
+			}	
+			
+			var result = "";
+			if(jQuery("#templateFieldType").val() == "Select"){
+				var arr = [];
+				jQuery("#Optbl1 tbody").find("tr").each(function(i){
+					arr[i] = jQuery(this).find("label").text();
+				});
+				result = arr.join(",");
+			}else if(jQuery("#templateFieldType").val() == "MultipleSelect")
+			{
+				var arr = [];
+				jQuery("#Optbl2 tbody").find("tr").each(function(i){
+					arr[i] = jQuery(this).find("label").text();
+				});
+				result = arr.join(",");
+			}
+		
+    		jQuery.ajax({
+		    	type: "post",
+		    	url: "addCrmTemplateField.html",
+		    	data: {'crmTemplateField.templateFieldName': $("#templateFieldName").val(),
+		    		   'crmTemplateField.templateFieldType': $("#templateFieldType").val(),
+		    		   'crmTemplateField.templateId': $("#templateId").val(),
+		    		   'crmTemplateField.measurement': $("#measurement").val(),
+		    		   codeData: result,
+		    		   saveType: code
+		    	},
+		    	success: function(data, textStatus){
+		 	  		addResult(data);
+		    	}
+			});
+		}
+		function addResult(msg){
+			if(msg == "SUCCESS"){
+				window.returnValue = 1; 
+				window.close();
+			}
+			else if(msg == "Continue"){
+				jQuery("#templateFieldName").val("");
+				jQuery("#templateFieldType").val("请选择");	
+				jQuery("#measurement").val("");
+				jQuery(".unit-item").hide();
+			}
+			else{
+				banger.page.showMessageBox(msg);
+			}
+		}
+		function  funMeasurement(){
+			var bool = true;
+			if(jQuery("#templateFieldType").val() == "Number"){
+				if(jQuery("#measurement").val() == ""){
+					jQuery("#measurement").parent().addClass('v-fails');
+					bool = false;
+				}else{
+					jQuery("#measurement").removeClass('v-fails');
+					bool = true;
+				}
+			}
+			return bool;
+		}
+	</script>
+</head>
+
+<body>
+	<form id="addFieldForm">
+		<input type="hidden" value="$!templateId" name="templateId" id="templateId" />
+		
+		<table class="htmltbl" cellpadding="0" cellspacing="0">
+	    	<tbody>
+	        	<tr>
+	            	<td width="70" class="field">
+	            		<label class="red">*</label><label>名称：</label>
+	            	</td>
+	            	<td>
+	            		<div class="dtxt1" style="width:200px">
+	                        <input type="text" name="crmTemplateField.templateFieldName" id="templateFieldName" class="dtxt1-txt" maxlength="20" tips='"名称"必须填写' rule="\S"/>
+	                    </div>
+	            	</td>
+	            </tr>
+	        	<tr>
+	            	<td width="70" class="field">
+	            		<label class="red">*</label><label>数据类型：</label>
+	            	</td>
+	            	<td>
+                        <select id="templateFieldType" name="crmTemplateField.templateFieldType" style="width:200px">
+	                    	#foreach($crmFieldType in $!crmFieldTypeList)
+	                    	<option value="$!crmFieldType.fieldTypeId">$!crmFieldType.fieldTypeName</option>
+	                    	#end
+                		</select>
+	                </td>
+	            </tr>
+	        	<tr id="unit" class="unit-item hide">
+	            	<td width="70" class="field">
+	            		<label class="red">*</label><label>单位：</label>
+	            	</td>
+	            	<td>
+	                    <div class="dtxt1 fl" style="width: 200px;">
+	                        <input type="text" name="crmTemplateField.measurement" id="measurement" maxlength="4" class="dtxt1-txt" tips='"单位"必须填写' fun="funMeasurement"/>
+	                    </div>
+	                    <label class="red fl" style="margin-left: 10px; line-height: 24px;">如：个等计量单位，将显示为XXX个</label>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+	    
+	    <div id="sltbox1" class="unit-item hide">
+	    	<div style="margin: 10px 0px;"><label>选项列表</label></div>
+			<div style="border: 1px solid #ccc; padding: 10px;">
+		    	<div class="sz" style="text-align: left;">
+		        	<label>新选项：</label>
+		            <input type="text" id="Option1" class="txt" maxlength="20" />
+		            <input type="button" value="添 加" id="btnAdd1" class="btn1" />
+		        </div>
+		        <div style="height: 200px; overflow-y: auto;">
+		        	<table id="Optbl1" class="listtbl" cellpadding="0" cellspacing="0">
+			            <thead>
+			                <tr>
+			                    <th>选项名称</th>
+			                    <th width="150">操作</th>
+			                </tr>
+			            </thead>
+			            <tbody></tbody>
+			        </table>
+		        </div>
+		    </div>
+	    </div>
+	    
+	    <div id="sltbox2" class="unit-item hide">
+	    	<div style="margin: 10px 0px;"><label>选项列表</label></div>
+			<div style="border: 1px solid #ccc; padding: 10px;">
+		    	<div class="sz" style="text-align: left;">
+		        	<label>新选项：</label>
+		            <input type="text" id="Option2" class="txt" maxlength="20" />
+		            <input type="button" value="添 加" id="btnAdd2" class="btn1" />
+		        </div>
+		        <div style="height: 200px; overflow-y: auto;">
+			    	<table id="Optbl2" class="listtbl" cellpadding="0" cellspacing="0">
+			            <thead>
+			                <tr>
+			                    <th>选项名称</th>
+			                    <th width="150">操作</th>
+			                </tr>
+			            </thead>
+			            <tbody></tbody>
+			        </table>
+		        </div>
+		    </div>
+	    </div>
+	    
+	    <div class="halign" style="margin-top: 20px;">
+	    	<input type="button" value="保 存" class="btn6 btn6bg1" onclick="addData('Save');" />
+	        <input type="button" value="取 消" class="btn6 btn6bg3" onclick="javascript:window.returnValue=0;window.close();" />
+	    </div>
+	</form>
+</body>
+</html>

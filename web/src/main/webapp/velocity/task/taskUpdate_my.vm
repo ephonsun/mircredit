@@ -1,0 +1,240 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑我的任务</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/validation/validationEngine.jquery.css" />
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script src="${ctx}/js/plugins/jquery.validationEngine.js" type="text/javascript" charset="utf-8"></script>
+	<script src="${ctx}/js/plugins/jquery.validationEngine-zh_CN.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script>
+		jQuery(document).ready(function(){
+			$("#tabs").easytabs();
+			
+    		jQuery("#taskForm").validationEngine();
+    	});
+		
+		function addTask(){
+			if(jQuery("#taskForm").validationEngine('validate')){
+				if($("#isUsed").length>0){ 
+					document.taskForm.submit();
+					tab.close(GetId(), true);
+				}else{
+					banger.page.showMessageBox("请选择任务的联系客户!");
+				}
+			}
+		}
+		
+		function toInitCustomer(){
+			var url="";
+			if($("#isUsed").length>0){ 
+				var isused=document.getElementsByName("isUsed");
+				var chestr="";
+				for(var i=0;i<isused.length;i++){
+					chestr+=isused[i].value+",";
+				}
+				url="initAddCustomer.html?isUsed="+chestr+"&taskFlag=$!taskFlag&random="+Math.random()*10000;
+			}else{
+				url="initAddCustomer.html?taskFlag=$!taskFlag&random="+Math.random()*100000;
+			} 
+    		var result=banger.page.openDialog(url,null,1004,550);
+    		if(result!=undefined&&result!=""){
+				jQuery.each(result,function(index, value){
+					$("#cusTab").find("tbody").append("<tr><td><input type=hidden id=isUsed name=isUsed value='"+value.customerId+"'/>"+value.customerName+"("+value.mobilePhone+")</td><td>"+isUndefined(value.customerTypeName)+"</td><td>"+isUndefined(value.deptName)+"</td><td>"+isUndefined(value.userName)+"</td><td>"+showFinish(value.isFinish,index)+"</td><td class='td-last'><a href='#' onclick=customerDetail("+value.customerId+")>查看客户</a>&nbsp;&nbsp;<a href='#' onclick=delRow(this)>删除</a></td></tr>");
+				})
+			}
+		}
+		
+		function showFinish(customerId,flag,index){
+			var finish="";
+			if(flag==1){
+				finish="checked=true";
+			}
+			return "<input "+finish+" type=checkbox name=checkFinishFlag id=isFinsh"+index+" onclick=changeIsFinish("+customerId+","+index+") />";
+		}
+		
+		function isUndefined(data){
+			var exp ="";   
+            if (typeof data != "undefined"){   
+				exp=data;
+            }
+			return exp;
+		}
+		
+		function getParentUn(){
+			return window.top.getUn();
+		}
+		
+		function delRow(obj)
+        {
+			$(obj).parent().parent().remove()
+		}
+		
+		function initCustomer(){
+			var url="addCustomerMsg.html?random="+Math.random();
+			jQuery.getJSON(url,{'isUsed':$("#isUsed_up").val(),'task.taskId':$('#taskId').val()},function(data){
+				jQuery.each(data,function(index, value){
+					$("#cusTab").find("tbody").append("<tr><td><input type=hidden id=isUsed name=isUsed value='"+value.customerId+"'/>"+isUndefined(value.customerName)+"("+isUndefined(value.mobilePhone)+")</td><td>"+isUndefined(value.customerTypeName)+"</td><td>"+isUndefined(value.deptName)+"</td><td>"+isUndefined(value.userName)+"</td><td>"+showFinish(value.customerId,value.isFinish,index)+" </td><td class='td-last'><a href='#' onclick=customerDetail("+value.customerId+")>查看客户</a></td></tr>");
+				})
+			});
+		}
+		
+		function  changeIsFinish(customerId,index){
+			var finishId="";
+			var isFinsh=document.getElementById("isFinsh"+index);
+			if(isFinsh.checked==true){
+				finishId=1;
+			}else{
+				finishId=0;
+			}
+			jQuery.post('changeTargetIsFinish.html',{
+				'target.taskId':$('#taskId').val(),
+				'target.customerId':customerId,
+				'target.isFinish':finishId
+			},function(data){
+				if(data==-1){
+					banger.page.showMessageBox("更改联系状态失败!");
+				}else{
+					checkTrueFinish($('#taskId').val());
+				}
+			});
+		} 
+		function checkTrueFinish(taskId){
+			//jQuery.post("isCheckFinish.html",{'task.taskId':taskId},function(data){
+			//	if(data == "true")
+			//		$("#checkFinish").attr("checked", true);
+			//	else
+			//		$("#checkFinish").removeAttr("checked");
+			//});
+			var mm=document.getElementsByName("checkFinishFlag");
+    		var sum=0;
+    		for(i=0;i<mm.length;i++){
+    			if(mm[i].checked){
+    				sum=sum+1;    
+    			}
+    		} 
+			var checkFlag=0;
+			if(sum==mm.length){
+				$("#checkFinish").attr("checked", true);
+				checkFlag=1;
+			}else{
+				$("#checkFinish").removeAttr("checked");
+			}
+			jQuery.post("isCheckTaskFinish.html",{
+				'task.taskId':taskId,
+				'task.isFinish':checkFlag
+				},function(data){
+			});
+		}
+		
+		//查看客户
+		function customerDetail(customerId){
+			var options = {id: "task_Customer_detail_upmy", pid: GetId(), title: "查看客户", url: "/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+customerId, lock: false};
+			tab.add(options);
+		}
+	</script>
+</head>
+
+<body>
+	<div id="tabs" class="easy-tabs">
+    	<ul class="easy-tabs-header">
+        	<li><label>任务基本信息</label></li>
+        	<li><label>联系客户列表</label></li>
+        </ul>
+        <div class="easy-tabs-pages">
+			<form id="taskForm" name="taskForm" method="post" action="updateTask.html?submitType=1&taskFlag=$!taskFlag">
+        	<div class="easy-tabs-page">
+            	<table class="ediTable" width="100%" border="0" cellpadding="2" cellspacing="2">
+                    <tbody>
+                        <tr>
+                            <td width="70" align="right">任务标题:</td>
+                            <td colspan="3">
+								<input type="hidden" id="isUsed_up" value="$!isUsed"/>
+								<input type="hidden" id="taskId" name="task.taskId" value="$!task.taskId"/>
+								<label title="$!task.taskTitle">$!task.taskTitle</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="70" align="right">执行日期:</td>
+                            <td width="190">
+                                   $date.format("yyyy-MM-dd",$!task.executeDate)
+                            </td>
+                            <td width="70" align="right">执行者:</td>
+                            <td>
+								<label id="excName">
+									$!task.executeName
+								</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="70" align="right">任务备注:</td>
+                            <td colspan="3">
+								<label title="$!subString.replaceRemark($!task.remark)">$!task.remark</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="70" align="right">分配者:</td>
+                            <td colspan="3">
+                                <label name="task.assignName">
+                                    $!task.assignName
+								</label>
+                            </td>
+                        </tr>
+                        <tr  id="finshState" >
+                            <td width="70" align="right">完成情况:</td>
+                            <td colspan="3">
+                                <input type="checkbox" id="checkFinish" name="task.isFinish" #if($!task.isFinish==1) checked=true #end value="1" class="chk" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="easy-tabs-page">
+                <table id="cusTab" class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="220">客户姓名（电话）</th>
+                            <th width="110">客户类型</th>
+                            <th>归属机构</th>
+                            <th width="90">归属人员</th>
+                            <th width="90">联系情况</th>
+            				<th width="150" class="th-last">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+		
+		<div>
+        		<table class="ediTable" width="100%" border="0" cellpadding="2" cellspacing="2">
+        			<tbody>
+						<tr>
+                            <td align="center" colspan="2">
+                                <input type="submit" value="保 存" class="btn1" />
+                                <input type="button" value="取 消" onclick="javascript:tab.close(GetId(), true);" class="btn1" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+		</form>
+    </div>
+    <script>
+		if($('#isUsed_up').val()!=""){
+			initCustomer();
+		}
+	</script>
+</body>
+</html>

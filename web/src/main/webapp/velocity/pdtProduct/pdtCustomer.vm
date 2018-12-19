@@ -1,0 +1,89 @@
+<div class="sz" style="margin:10px;">
+	<label class="bold fl">
+		购买客户数(<label class="green">$page.getTotalRowsAmount()</label>)
+	</label>
+	<label class="bold fl" style="margin-left:10px;">
+		已销售额(万元)(<label class="green">$moneyUtil.decimeMoney($typeUtil.changeType($!totalSales))</label>)
+	</label>
+</div>
+#if($!saleState==1&&$!actionType=="edit")
+<div class="action-bar">
+	<span class="ui-span-btn fl" onclick="add();">
+		<label>添加购买客户</label>
+	</span>
+	<span class="ui-span-btn fl" onclick="importBase();">
+		<label>导入购买客户</label>
+	</span>
+	#if($!isIncharge==1)
+	<span class="ui-span-btn fl" onclick="updateSellUser();">
+		<label>修改营销人员</label>
+	</span>
+	#end
+	<span class="ui-span-btn fr" onclick="refresh();">
+		<label>刷新</label>
+	</span>
+</div>
+#end
+<table id="cusTab" class="datatbl" cellpadding="0" cellspacing="0">
+	<thead>
+	<tr>
+		#if($!saleState==1&&$!actionType=="edit")
+		<th width="3%"><input type="checkbox" rel="all" /></th>
+		#end
+		<th><label title="客户编号">客户编号</label></th>
+		<th><label title="身份证">身份证</label></th>
+		<th><label title="客户姓名">客户姓名</label></th>
+		<th><label title="销售额(万元)">销售额(万元)</label></th>
+		<th><label title="单位">单位</label></th>
+		<th><label title="联系电话">联系电话</label></th>
+		<th><label title="账号">账号</label></th>
+		<th><label title="购买日期">购买日期</label></th>
+		<th><label title="营销人员">营销人员</label></th>
+		#if($!actionType=="edit")
+		<th width="10%"><label title="操作">操作</label></th>
+		#end
+	</tr>
+</thead>
+    <tbody>
+    	#foreach($!customer in $!buyCustomerList.items)
+    	<tr>
+			#if($!saleState==1&&$!actionType=="edit")
+    		<td><input type="checkbox" rel="row" pcId="$!customer.productCustomerId" name="chkone" nm="chkone" value="$!customer.productCustomerId"/></td>
+			#end
+    		<td><label title="$!customer.customerNo">$!customer.customerNo</label></td>
+    		<td><label title="$!customer.idCard">$!customer.idCard</label></td>
+    		<td><label title="$!customer.customerName">$!customer.customerName</label></td>
+    		<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!customer.buyMoney))">$moneyUtil.decimeMoney($typeUtil.changeType($!customer.buyMoney))</label></td>
+    		<td><label title="$!customer.company">$!customer.company</label></td>
+			<td><label title="$!customer.phone">$!customer.phone</label></td>
+    		<td><label title="$!customer.bankAccount">$!customer.bankAccount</label></td>
+    		<td><label title="$!date.format("yyyy-MM-dd",$!customer.buyDate)">$!date.format("yyyy-MM-dd",$!customer.buyDate)</label></td>
+    		<td><label title="$!customer.userName">$!customer.userName</label></td>
+    		#if($!actionType=="edit")
+			<td><span class="link" #if($!saleState.equals(2)) style="color:gray;cursor: default; text-decoration:none;" #else onclick="deleteBuyCustomer('$!customer.productCustomerId','$!customer.userId');" #end>移除</span></td>
+			#end
+		</tr>
+    	#end
+    </tbody>
+    <tfoot>
+    	<tr>
+			#if($!actionType=="edit")				
+    			#if($!saleState==1)
+    				<td colspan="11">
+    			#else
+    				<td colspan="10">		
+    			#end
+			#else
+				<td colspan="9">
+			#end
+                <div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+	
+<script type="text/javascript">
+	$(function(){
+		$('#cusTab').table();
+	});
+</script>

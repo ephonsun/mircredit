@@ -1,0 +1,167 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新建理财规划模板</title>
+    
+    #styleLink("base")
+    <link rel="stylesheet" type="text/css" href="${ctx}/js/editor/themes/default/ueditor.css"/>
+    
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/editor/editor-config.js"></script>
+    <script type="text/javascript" src="${ctx}/js/editor/editor-all.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    jQuery(function(){
+		jQuery("#planTemplateInsert").validator();
+	});
+	//保存	
+	function addsubmit(){
+		var bool = jQuery.validator({ form: 'planTemplateInsert', extend: false});
+		if(!bool){
+			return false;
+		}
+		 var value= window.content_html.getHTML();
+		 var nameMsg="";
+		 var noMsg="";
+		 var error="";
+         jQuery.ajax({
+		 			 type:'post',
+					 url:'savePlanTemplate.html',
+            		 data:{ 
+        				  'plnReportTemplate.templateName':$('#templateName').val().replace(/(^\s*)|(\s*$)/g,""),
+        				  'plnReportTemplate.templateNo':$('#templateNo').val().replace(/(^\s*)|(\s*$)/g,""),
+        				  'plnReportTemplate.intervalTypeId':$('#intervalTypeId').val().replace(/(^\s*)|(\s*$)/g,""),
+        				  'plnReportTemplate.planTypeId':$('#planTypeId').val().replace(/(^\s*)|(\s*$)/g,""),
+        				  'plnReportTemplate.isActived':$('#isActived').val().replace(/(^\s*)|(\s*$)/g,""),
+        				  'plnReportTemplate.content':value
+        				  },
+					 cache: false,
+					 async: false,
+                     success:function(data){
+            				 	var json=jQuery.parseJSON(data);
+            					if(json['nameMsg'])nameMsg=json['nameMsg'];
+								if(json['noMsg']) noMsg = json['noMsg'];
+								if(json['error']) error = json['error'];
+								if(nameMsg!= ""){
+    								$('#d1').addClass('v-fails');
+        	  						$('#templateName').attr('tips', nameMsg); 
+            					}
+								if(noMsg!= ""){
+    								$('#d2').addClass('v-fails');
+        	  						$('#templateNo').attr('tips', noMsg); 
+            					}
+								if(error!= ""){
+									$("input[type='text']", $('#isActived')[0].object).parent().addClass('v-fails');
+    								$("input[type='text']", $('#isActived')[0].object).attr('tips', error); 
+            					}
+								if(nameMsg == "" && noMsg=="" && error==""){
+                					if(json["id"]) $('#templateId').val(json["id"]);
+                	    			tab.close(GetId(),true);
+								}
+        					}
+           });
+    	  
+	}
+	
+	function checkUnique(obj){
+		if(obj.value == "") obj.tips = obj.tipworn;
+	}
+	
+	function checkValue(obj){
+		var bool=true;
+		if(obj.value == ""){
+			obj.tips="“状态”必须填写";
+			bool=false;
+		}
+		return bool;
+	}
+    </script>
+</head>
+ 
+<body>
+	<form id="planTemplateInsert" name="planTemplateInsert" action="" method="post">
+		<input type="hidden" id="templateId" name="templateId" value="$!templateId" />  
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>模板名称：</label>
+                </td>
+            	<td colspan="7">
+                	<div id="d1" class="dtxt1">
+                        <input type="text" maxLength="90" class="dtxt1-txt" id="templateName" name="plnReportTemplate.templateName" rule="\S" onkeyup="checkUnique(this)" tips='“模板名称”必须填写' tipworn='“模板名称”必须填写'/>
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+            	<td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>模板编号：</label>
+                </td>
+            	<td width="18%">
+                	<div id="d2" class="dtxt1">
+                        <input type="text" maxLength="30" class="dtxt1-txt" id="templateNo" name="plnReportTemplate.templateNo" rule="\S" onkeyup="checkUnique(this)" tips='“模板编号”必须填写' tipworn='“模板编号”必须填写'/>
+                    </div>
+                </td>
+            	<td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>适合对象：</label>
+                </td>
+            	<td width="18%">
+                        <select id="intervalTypeId" name="plnReportTemplate.intervalTypeId" render="select" rule="\S" onkeyup="checkUnique(this)" tips='“适合对象”必须填写' tipworn='“适合对象”必须填写'>
+                           <option value=""></option>
+    						#foreach($rsk in $!rskIntervalTypeList)
+            				<option value="$rsk.typeId">$rsk.typeName</option>
+    						#end
+                        </select>
+                </td>
+            	<td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>规划类型：</label>
+                </td>
+            	<td width="18%">
+                        <select id="planTypeId" name="plnReportTemplate.planTypeId" render="select" rule="\S" onkeyup="checkUnique(this)" tips='“规划类型”必须填写' tipworn='“规划类型”必须填写'>
+                            <option value=""></option>
+    						#foreach($planType in $!planTypeList)
+    						<option value="$!planType.planTypeId">$!planType.planTypeName</option>
+    						#end
+                        </select>
+                </td>
+            	<td width="7%" class="field">
+                	<label class="red">*</label>
+                    <label>状态：</label>
+                </td>
+            	<td width="18%">
+                        <select id="isActived" name="plnReportTemplate.isActived" render="select" fun="checkValue"  tips=''>
+                            <option value=""></option>
+    						<option value="1">启用</option>
+    						<option value="0">停用</option>
+                        </select>
+                </td>
+            </tr>
+            <tr>
+            	<td width="7%" class="field" vAlign="top">
+                    <label>报告主本：</label>
+                </td>
+            	<td colspan="7">
+                        <TEXTAREA style="display:none" id="content" name="plnReportTemplate.content"></TEXTAREA>  
+						<IFRAME ID="eWebEditor1" name="content_html" src="$req.contextPath/eWebEditor/eWebEditor.jsp?id=content&style=standard" frameborder="0" scrolling="no" width="100%" height="600"></IFRAME> 
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+	<hr/>
+    <div class="halign">
+        <input type="button" value="保存" onclick="addsubmit()" class="btn6 btn6bg1"/>
+        <input type="button" value="取消" onclick="tab.close(GetId(),false);" class="btn6 btn6bg3"/>
+    </div>
+	
+</body>
+</html>

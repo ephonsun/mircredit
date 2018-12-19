@@ -1,0 +1,46 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看已阅读</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript">
+		document.title = window.dialogArguments.title;
+		$(function(){
+			
+		});
+		
+		function gotoPage(page){
+			goto(page,'/finance/showFinanceUsersList.html?random='+Math.random()*1000000,
+			{'feArticle.articleId': $('#articleId').val(),
+			 'actionType':$('#actionType').val()},
+			function(html){refreshGrid('grid',html);});
+		}
+		
+		//刷新
+    	function refreshGrid(gridId,html)
+    	{
+    		$('#' + gridId).html(html);
+    	}
+    </script>
+</head>
+<body>
+	<div id="grid">
+		#parse("/velocity/finance/financeUser_tab.vm")
+    </div>
+    
+    <hr />
+	
+	<div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" onclick="javascript:window.close()" value="关闭" />
+    </div>
+	<input type="hidden" id="articleId" value="$!feArticle.articleId"/>
+	<input type="hidden" id="actionType" value="$!actionType"/>
+</body>
+</html>

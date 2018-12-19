@@ -1,0 +1,100 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>审批撤回</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+	      body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script >
+		$(function(){
+		
+		
+			$("#submit").click(function(){
+				var resultNote = $("#resultNote").val();
+				
+				if(resultNote == ""){
+					alert("请输入撤回理由！");
+					return;
+				}
+				
+				var loanId = $("#loanId").val();
+				var postJson = {};
+				postJson['resultNote'] = resultNote;
+				postJson['loanId'] = loanId;
+				
+				var urlStr = "../loan/backRejectSubmit.html";
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+						if(data == "success"){
+                            window.returnValue="success";
+                            window.close();
+						}
+                    }
+                });
+				
+				
+				
+			});
+			
+			
+			$("#cancel").click(function(){
+				if(confirm("是否要取消撤回！")){
+					 window.close();
+				}
+			
+			});
+		});
+    </script>
+</head>
+<body>
+    <input type="hidden" id="loanId" value="$!loanId"/>
+	<input type="hidden" id="refuseReasonTypeId" value="$!refuseReasonTypeId"/>
+
+    <p class="bold loan-ttlbg">审批撤回</p>
+    <div class="loan-add-box">
+      <table class="viewtbl" style="table-layout: auto;" id="coLoanPerson">
+          <tbody>
+			<tr>
+                  <td class="field" width="8%">
+					撤回理由
+                  </td>
+                  <td colspan="7">
+                    <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+						<textarea maxlength="250" rule="\S" tips='"撤回理由"必须填写' class="textarea" id="resultNote" name="lnLoanInfo.resultNote" style="height: 100px; _height:100px;">$!lnLoanInfo.resultNote</textarea>
+					</div>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+      </div>
+      <hr />
+      <div class="center">
+          <input type="button" id="submit" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+          <input type="button" id="cancel" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+      </div>
+</body>
+</html>

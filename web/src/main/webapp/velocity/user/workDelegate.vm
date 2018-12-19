@@ -1,0 +1,121 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>工作托管</title>
+	#styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+		.title { margin-bottom: 10px; line-height: 24px; }
+		.mtree { width: 600px; height: 360px; border: 1px solid #ccc; overflow: auto; font-size: 13px; line-height: 20px; }
+    	.halign { margin-top: 20px; }
+    </style>
+    #scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+	#scriptLink("page") 
+    <script type="text/javascript">
+    var setting = {
+		
+			callback:{
+				onClick:treeOnclick
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			},
+			view: {
+				showIcon: false
+			}
+		};
+		//json树数据
+		var zNodes = $!deptJson; 
+	
+		//点击节点查询本部门用户
+ 		function treeOnclick(event, treeId, treeNode) {
+			var zTree = jQuery.fn.zTree.getZTreeObj("deptTree"),
+			nodes = zTree.getSelectedNodes(),
+			v = "";
+			vid = "";
+			for (var i=0, l=nodes.length; i<l; i++) {
+				v += nodes[i].name ;
+				vid = nodes[i].id;
+			}
+			$('#shareUserId').val(vid);
+			var shareUserId=vid;
+			jQuery.post('../belongDept/checkUserDepartment.html',{
+            			'shareUserId':shareUserId
+                		},function(data){
+            				if(data!="")
+								 $("#workDelegateBtn").attr("disabled",true);
+							else
+								 $("#workDelegateBtn").attr("disabled",false);
+                		});
+		}
+ 		//机构树加载
+		$(document).ready(function(){
+			jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+		});
+		
+		//工作托管
+		function workDelegate(){
+			var shareUserId=$('#shareUserId').val();
+        	if(shareUserId!=""){
+        		jQuery.post('../belongDept/valationWorkDelegate.html',{
+    				'userId':$('#userId').val(),
+                    'shareUserId':shareUserId
+        			},function(data){
+        				if(data==""){//返回空值
+                			jQuery.post('../belongDept/execWorkDelegate.html',{
+                        			'userId':$('#userId').val(),
+                        			'shareUserId':shareUserId
+                        		},function(data){
+                					window.returnValue=1;    
+                        			window.close(); 
+                        		});
+        				}else{
+							var returnStr=data.split("|");
+							if(returnStr.length>1){
+								if(confirm(returnStr[1])){
+									jQuery.post('../belongDept/execWorkDelegate.html',{
+                        			'userId':$('#userId').val(),
+                        			'shareUserId':shareUserId
+                            		},function(data){
+                    					window.returnValue=1;    
+                            			window.close(); 
+                            		});
+								}
+							}
+							else{
+									banger.page.showMessageBox(data);
+							}
+        				}
+            	});
+			}else{
+				banger.page.showMessageBox( "请您选择具体的托管人！");
+		    }
+		}
+    </script>
+</head>
+ 
+<body>
+	<input type="hidden" name="userId" id="userId" value="$!userId">
+	<input type="hidden" name="shareUserId" id="shareUserId">
+    <div class="bold title">
+        <label>$!userName</label>
+        的工作托管给
+    </div>
+	<div class="mtree" >
+    	<ul id="deptTree" class="ztree"></ul>
+    </div>
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" id="workDelegateBtn" value="工作托管" onclick="workDelegate()"/>
+    	<input type="button" class="btn6 btn6bg3" value="取消"  onclick="javascript:window.close();"/>
+    </div>
+</body>
+</html>
+

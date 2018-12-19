@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="recbiztype" extends="default" namespace="/recbiztype">
+
+		<!--  业务类型列表页面 -->
+		<action name="showRecbizTypePage" class="recbizTypeAction"
+			method="showRecbizTypePage">
+			<result name="success">/velocity/recbiztype/recbizTypeList.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 启用/停用 -->
+		<action name="checkActived" class="recbizTypeAction"
+			method="checkActived">
+			<result name="success" type="redirectAction">showRecbizTypePage.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 单个删除业务类型(伪删除)-->
+		<action name="delRecbizTypeById" class="recbizTypeAction"
+			method="delRecbizTypeById">
+			<result name="success" type="redirectAction">showRecbizTypePage.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 判断业务类型是否在使用 -->
+		<action name="isByTypeUse" class="recbizTypeAction"
+			method="isByTypeUse">
+		</action>
+		
+		<!-- 跳转新建业务类型页面 -->
+		<action name="toAddPage" class="recbizTypeAction"
+			method="toAddPage">
+			<result name="success">/velocity/recbiztype/recbizTypeAdd.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 新建业务类型 -->
+		<action name="addRecbizType" class="recbizTypeAction"
+			method="addRecbizType">
+			<result name="success" type="redirectAction">showRecbizTypePage.html</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 判断业务类型是否在存在 -->
+		<action name="valationType" class="recbizTypeAction"
+			method="valationType">
+		</action>
+		
+		<!-- 跳转编辑业务类型页面 -->
+		<action name="toUpdatePage" class="recbizTypeAction"
+			method="toUpdatePage">
+			<result name="success">/velocity/recbiztype/recbizTypeUpdate.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 编辑验证业务名称是否存在 -->
+		<action name="updateValidate" class="recbizTypeAction"
+			method="updateValidate">
+		</action>
+		
+		<!-- 编辑业务类型 -->
+		<action name="updateRecbizType" class="recbizTypeAction"
+			method="updateRecbizType">
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!-- 业务类型上移、下移 -->
+		<action name="upOrDown" class="recbizTypeAction"
+			method="upOrDown">
+		</action>
+	</package>
+</struts>

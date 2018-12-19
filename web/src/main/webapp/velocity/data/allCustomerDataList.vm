@@ -1,0 +1,111 @@
+ <table class="datatbl">
+        <thead>
+            <tr>
+                <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+                <th width="240"><label title="联系地址">联系地址</label></th>
+				<th><label title="归属机构">归属机构</label></th>
+                <th><label title="归属人员">归属人员</label></th>
+                <th><label title="录音">录音</label></th>
+                <th><label title="照片">照片</label></th>
+                <th><label title="视频">视频</label></th>
+                <th><label title="附件">附件</label></th>
+            </tr>
+        </thead>
+        <tbody>
+            #foreach($customerData in $!customerDataList.items)
+        	<tr>
+    			<td>
+                	<div class="datacus" title="$!customerData.customerName ($!customerData.phone)">
+						#if($urlPermitUtil.hasPermission('browseCustomer'))
+							<a href="#2" class="slink nm" onclick="openCustomer($!customerData.customerId,'$!jsUtil.escapeJs($!customerData.customerName)');">$!customerData.customerName ($!customerData.phone)</a>
+						#else
+							<a href="#2" style="cursor:default;color:#000;text-decoration:none;">
+								$!customerData.customerName ($!customerData.phone)
+                            </a>
+						#end
+                        <div class="icon">
+    						#if($!customerData.phone!="")
+								#if($urlPermitUtil.hasPermission('dialPhone'))
+									<i class="i phone" onclick="dial('$!customerData.phone','$!customerData.customerId')" title="拨号">phone</i>
+								#end
+								#if($urlPermitUtil.hasPermission('tapePhone'))
+									<i class="i dsc" onclick="tape('$!customerData.customerId')" title="座谈" >dsc</i>
+								#end
+    							#if($!customerData.phone.length()==11&&$!customerData.phone.substring(0, 1)=="1")
+									#if($urlPermitUtil.hasPermission('toAddSms'))
+                                    <i class="i sms" onclick="sendSms('$!customerData.phone','$!customerData.customerId')" title="短信">sms</i>
+									#end
+                    				#if($urlPermitUtil.hasPermission('toAddMms'))
+                    				<i class="i mms" onclick="sendMms('$!customerData.phone','$!customerData.customerId')" title="彩信">mms</i>
+									#end
+    							#end
+    						#end
+                        </div>
+                        <div class="other">
+                        	<label class="item cusTitle" title="$!customerData.customerTitle">
+                            	$!customerData.customerTitle
+                            </label>
+                            <label class="item">
+                            	$!customerData.sex
+                            </label>
+                            <label class="item">
+                            	#if($!customerData.age) $!customerData.age岁 #end
+                            </label>
+							 #if($!customerData.isNoGood==1)
+                            <label class="item red">
+                            	（不良客户）
+                            </label>
+                            #end
+                        </div>
+                    </div>
+                </td>
+            	<td><label title="$!customerData.address">$!customerData.address</label></td>
+				<td><label title="$!customerData.belongDeptName">$!customerData.belongDeptName</label></td>
+				<td><label title="$!customerData.belongUserName">$!customerData.belongUserName</label></td>
+				<td><label title="#if($!customerData.audioCount!='0')$!customerData.audioCount#end">
+					#if($!customerData.audioCount!='0')
+    					#if($urlPermitUtil.hasPermission('queryDataAudio'))
+    						<a class="slink" href="#2" onclick="queryData(1,$!customerData.customerId,'$!jsUtil.escapeJs($!customerData.customerName)')">$!customerData.audioCount</a>
+    					#else
+    						$!customerData.audioCount
+    					#end
+					#end
+					</label></td>
+				<td><label title="#if($!customerData.photoCount!='0')$!customerData.photoCount#end">
+					#if($!customerData.photoCount!='0')
+						#if($urlPermitUtil.hasPermission('queryDataPhoto'))
+							<a class="slink" href="#2" onclick="queryData(2,$!customerData.customerId,'$!jsUtil.escapeJs($!customerData.customerName)')">$!customerData.photoCount</a>
+						#else
+							$!customerData.photoCount
+						#end
+					#end
+					</label></td>
+				<td><label title="#if($!customerData.videoCount!='0')$!customerData.videoCount#end">
+					#if($!customerData.videoCount!='0')
+						#if($urlPermitUtil.hasPermission('queryDataVideo'))
+							<a class="slink" href="#2" onclick="queryData(3,$!customerData.customerId,'$!jsUtil.escapeJs($!customerData.customerName)')">$!customerData.videoCount</a>
+						#else
+							$!customerData.videoCount
+						#end
+					#end
+					</label></td>
+				<td><label title="#if($!customerData.formCount!='0')$!customerData.formCount#end">
+					#if($!customerData.formCount!='0')
+						#if($urlPermitUtil.hasPermission('queryDataForm'))
+							<a class="slink" href="#2" onclick="queryData(6,$!customerData.customerId,'$!jsUtil.escapeJs($!customerData.customerName)')">$!customerData.formCount</a>
+						#else
+							$!customerData.formCount
+						#end
+					#end
+					</label></td>
+            </tr>
+    		#end
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="8">
+                	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

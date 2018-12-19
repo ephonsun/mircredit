@@ -1,0 +1,163 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户照片资料</title>  
+	 
+	 #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+   // <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+    	body{padding:0; margin:0;}
+		div.photo-mydiv { margin:0; padding:0; position: absolute; top: 0; left: 0;z-index:150; border:1px solid #ccc;width: 1284px; }
+div.photo-mydiv p.photo-ttl-width  {background-color: #E4E4E4; border-bottom: 1px solid #b1b1b1;font-weight: bold;line-height: 40px;font-size: 14px;padding-left: 13px;}
+div.photo-mydiv p.photo-ttl-width label.photo-ttl-width-title{width:1160px; height:40px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+div.photo-mydiv div.photo-mydiv-box{ height:540px; float:left;padding:10px 0px; }
+div.photo-mydiv div.photo-mydiv-box div.photo-img-btn{ height:380px;width: 60px;float: left; }
+div.photo-mydiv div.photo-mydiv-box div.photo-img-btn a.prev { width:30px; height:48px; background:url(../images/public/feature_left.gif) no-repeat center top; position:relative; top:210px; left:15px; text-indent:-9999px; display:block;}
+div.photo-mydiv div.photo-mydiv-box div.photo-img-btn a.next { width:30px; height:48px; background: url(../images/public/feature_right.gif) no-repeat center top; position:relative; top:210px; left:15px;  text-indent:-9999px; display:block; }
+div.photo-mydiv div.photo-mydiv-box div.photo-img-btn .prev:hover, .prev-hover { background-position: 0px -48px; }
+div.photo-mydiv div.photo-mydiv-box div.photo-img-btn .next:hover, .next-hover { background-position: 0px -48px; }
+div.photo-mydiv div.photo-mydiv-box div.img-position {border: 1px solid #ddd; width:960px; height:540px;float: left; font-size:0;}
+div.photo-mydiv div.photo-mydiv-info{ border-left:1px solid #ccc; height:540px; width:180px; float:left;padding:10px; }
+div.photo-mydiv div.photo-mydiv-info label.photo-mydiv-info-title{ line-height:1.5;white-space:normal; word-break: break-all; }
+    </style>
+	
+	#scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/photoView/taskprocess_image.js"></script>
+    <script type="text/javascript" src="${ctx}/js/photoView/jquery.rotate.1.1.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+
+    <script type="text/javascript">
+   /*   window.onload=function(){
+          window.moveTo(0,0);
+          window.resizeTo(screen.availWidth,screen.availHeight);
+      }*/
+
+
+		var postJson = {};//存放查询数据
+		var pid;
+		var win;
+        $(function(){
+            $('.ui-artZoom-left').click(function(){
+                rotateLeftClick();
+            });
+
+            $('.ui-artZoom-right').click(function(){
+                rotateRightClick();
+            });
+
+            $('.ui-artZoom-zoomout').click(function(){
+                zoomoutClick();
+            });
+
+            $('.ui-artZoom-zoomin').click(function(){
+                zoominClick();
+            });
+
+            $('.ui-artZoom-source').click(function(){
+                realSizeClick();
+            });
+
+            defaultZoom();
+        });
+
+        function closediv(){
+            window.top.aui.close();
+
+        }
+        var angleValue = 0; //for rotate
+        var scale = 0.5;  //for zoom
+    </script>
+</head>
+<body>
+	<input type="hidden" id="photoId" value="$!photoId"></input>
+    <input type="hidden" id="oldRemark" value="$!remark"></input>
+    <input type="hidden" id="photoLoanId" value="$!photoLoanId"></input>
+    <input type="hidden" id="photoEventId" value="$!photoEventId"></input>
+	<input type="hidden" id="photoTypeId" value="$!photoTypeId"></input>
+	<input type="hidden" id="Num" value="$!Num"></input>
+    <input type="hidden" id="pid" value="$!pid"></input>
+    <input type="hidden" id="photoCount" value="$!photoCount"></input>
+	<input type="hidden" id="photoCount1" value="$!photoCount1"></input>
+    <input type="hidden" id="photoRowNum" value="$!photoRowNum"></input>
+	
+    <div id="popDiv" class="photo-mydiv"  >
+      <p class="photo-ttl-width ">
+      	<label class="photo-ttl-width-title" title="$!customerName - 照片$!photoCount1">$!customerName&nbsp;-&nbsp;照片</label>
+      	<a href="#2" onclick="closediv()" class="close">close</a>
+
+      </p>
+      <div class="photo-mydiv-box">
+     <div class="photo-img-btn"><a href="#2" class="prev" onClick="lxfLast()" hidefocus="false">Previous</a></div>
+          <div class="img-position">
+              <div id="imageDiv" style="width:960px;height:540px; overflow:scroll; border:0px solid #DCDCDC; z-index:1">
+                  <img name="img" id="img" src="../Records/$!file" />
+              </div>
+
+              <div style="padding-top: 0px;padding-bottom: 0px;text-align: center">
+                <span>
+                    <a href="#" class="ui-artZoom-source"><img src="../images/public/real_size.png" /></a>
+                    <a href="#" class="ui-artZoom-zoomin"><img src="../images/public/zoomin.png" /></a>
+                    <a href="#" class="ui-artZoom-zoomout"><img src="../images/public/zoomout.png" /></a>
+                    <a href="#" class="ui-artZoom-left"><img src="../images/public/rotate_left.png" /> </a>
+                    <a href="#" class="ui-artZoom-right"><img src="../images/public/rotate_right.png" /></a>
+                </span>
+              </div>
+          </div>
+        <div  class="photo-img-btn"><a href="#2" class="next" onClick="lxfNext()" hidefocus="false">Next</a></div>
+      </div>
+      <div class="photo-mydiv-info">
+          <table class="viewtbl">
+            <thead>
+              <tr>
+                <th colspan="2" style="text-align: left;border-bottom:1px solid #ccc; height:48px;">
+                	<label class="photo-mydiv-info-title" id="photoName" title="$!photoName">$!photoName</label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+				#*<tr id="rdtr" #if(!$!recordDate)style="display:none;"#end>
+                    <td colspan="2">
+                        <label>创建时间：<br/></label><label id="recordDate">$!recordDate</label>
+					</td>
+                </tr>*#
+				<tr>
+                    <td colspan="2">
+                        <label>提交时间：<br/></label><label id="uploadDate">$!uploadDate</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <label>提交人员：</label><label id="uploadUserName">$!uploadUserName</label>
+                    </td>
+                </tr>
+                 <tr>
+                    <td colspan="2">
+                       <div class="ui-div-textarea" style="height:100px;">
+                          <textarea class="textarea" id="remark" style="height:100px;">$!remark</textarea>
+                       </div>
+                    </td>
+                </tr>
+                <tr>
+                 <td colspan="2" style="text-align: center;">
+##
+##        <span class="ui-footer-btn2 ui-footer-btn2-save" style="margin-right:10px;" onClick="save();">
+##                      <label>保存</label>
+##                    </span>
+                  #*  <span class="ui-footer-btn2 ui-footer-btn2-cancel" onClick="closediv();">
+                      <label>取消</label>*#
+                    </span>
+                  </td>
+                </tr>
+            </tbody>
+          </table>
+      </div>
+    </div>
+</body>
+</html>

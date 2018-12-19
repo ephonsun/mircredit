@@ -1,0 +1,31 @@
+<div class="ui-fe-list">
+		 #foreach($!feArticle in $!feArticleList.items)
+    	<dl>
+        	<dt>
+            	<a href="#" onclick="openNewAtricle('$!feArticle.articleId','$!feArticle.articleTitle');">$!feArticle.articleTitle</a>
+                <label>
+					 #if($!feArticle.isMastread == 0)
+					<i class="ui-fe-read optional">【选读】</i>
+					#else
+					 <span class="ui-fe-read required">【必读】</span>
+					 #end
+                	#if($!feArticle.publishDate != "")$date.format("yyyy-MM-dd HH:mm:ss",$!feArticle.publishDate) #end
+                </label>
+            </dt>
+            <dd class="overview">
+            	<label>$!feArticle.articleContent</label>
+                <a href="#" onclick="openNewAtricle('$!feArticle.articleId','$!feArticle.articleTitle');">[全文]</a>
+            </dd>
+			 <dd class="action">
+				<label onclick="showUsers($!feArticle.articleId,'read')">已阅读($!feArticle.readCount)</label>
+				<label onclick="showUsers($!feArticle.articleId,'unread')">未阅读($!feArticle.unReadCount)</label>
+				<label onclick="toDiscess($!feArticle.articleId)">已评论($!feArticle.articleDiscessCount)</label>
+				<label onclick="showUsers($!feArticle.articleId,'collect')">已收藏($!feArticle.articleCollectCount)</label>
+            </dd>
+        </dl>
+		#end
+    </div>
+    <hr />
+    <div class="ui-fe-footer">
+    	#parse("/velocity/ajaxPage.vm")
+    </div>

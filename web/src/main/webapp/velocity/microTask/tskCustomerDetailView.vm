@@ -1,0 +1,338 @@
+<table class="htmltbl" cellpadding="0" cellspacing="0">
+    <tbody>
+    <tr>
+        <td width="7%" class="field">
+            <label class="red">*</label>
+            <label>客户姓名：</label>
+        </td>
+        <td width="18%">
+            <div class="dtxt1">
+                <input type="text" rule="\S" tips='“客户姓名”必须填写' class="dtxt1-txt"  name="crmCustomer.customerName" value="$!crmCustomer.customerName" id="customerName" maxlength="20"/>
+            </div>
+        </td>
+        <td width="7%" class="field">
+            <label>性别：</label>
+        </td>
+        <td width="18%">
+            <select name="crmCustomer.sex" id="cusSex"">
+                <option value="男">男</option>
+                <option value="女">女</option>
+            </select>
+        </td>
+        <td width="7%" class="field">
+            <label>称谓：</label>
+        </td>
+        <td width="18%">
+            <div class="dtxt1">
+                <input type="text" class="dtxt1-txt" name="crmCustomer.customerTitle" value="$!crmCustomer.customerTitle" id="customerTitle" maxlength="20"/>
+            </div>
+        </td>
+        <td rowspan="4" valign="top" align="center">
+            <div class="avatar" id="headshow" headPath="$!crmCustomer.headshow">
+                <img src="" />
+            </div>
+            <div class="addavatar">
+                <label>更改头像</label>
+                <input type="file" name="headImage" id="headImage" class="file" />
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="7%" class="field">
+            <label>客户编号：</label>
+        </td>
+        <td width="18%">
+            <div class="dtxt1" id="divCustomerNo" >
+                <input type="text" tips="" class="dtxt1-txt" name="crmCustomer.customerNo" value="$!crmCustomer.customerNo" id="customerNo" maxlength="20"/>
+            </div>
+        </td>
+        <td width="7%" class="field">
+            <label>客户类型：</label>
+        </td>
+        <td width="18%">
+            <label>$!crmCustomer.customerTypeName</label>
+            <!--
+            <select name="crmCustomer.customerTypeId" id="customerTypeId">
+                <option value=""></option>
+                #foreach($cusType in $cd.getCusTypes())
+                    <option value ="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+                #end
+            </select>
+            -->
+        </td>
+        <td width="7%" class="field">
+            <label>所处行业：</label>
+        </td>
+        <td width="18%">
+            <label>$!crmCustomer.customerIndustryName</label>
+            <!--
+            <select name="crmCustomer.customerIndustryId" id="customerIndustryId">
+                <option value=""></option>
+                #foreach($cusIndustry in $cd.getCusIndustry())
+                    <option value ="$cusIndustry.customerIndustryId" >$cusIndustry.customerIndustryName</option>
+                #end
+            </select>
+            -->
+        </td>
+    </tr>
+    <tr>
+        <td width="7%" class="field">
+            <label>身份证：</label>
+        </td>
+        <td colspan="3">
+            <div class="dtxt1">
+                <input type="text" class="dtxt1-txt" name="crmCustomer.idCard" value="$!crmCustomer.idCard" id="idCard" maxlength="20" onBlur="iDCardExitEvent('idCard')"/>
+            </div>
+        </td>
+        <td width="7%" class="field">
+            <label>生日：</label>
+        </td>
+        <td width="18%">
+            <div class="dtxt2">
+                <input type="text" class="validate[custom[date]] dtxt2-txt" readonly="readonly" id="birthday" name="crmCustomer.birthday" value="$!date.format('yyyy-MM-dd',$!crmCustomer.birthday)" onblur="onBirthdayExit()"/>
+                <span class="dtxt2-date"></span>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="7%" class="field">
+            <label>单位：</label>
+        </td>
+        <td colspan="3">
+            <div class="dtxt1">
+                <input type="text" class="dtxt1-txt" name="crmCustomer.company" value="$!crmCustomer.company" id="company" maxlength="50"/>
+            </div>
+        </td>
+        <td width="7%" class="field">
+            <label>年龄：</label>
+        </td>
+        <td width="18%">
+            <label name="crmCustomer.age" value="$!crmCustomer.age" id="age" intFlag="true">
+                #if(($!crmCustomer.age)&&($!crmCustomer.age>0)&&($!crmCustomer.age<=120))
+                    $!crmCustomer.age
+                    <label>周岁</label>
+                #end
+            </label>
+        </td>
+    </tr>
+    <tr>
+        <td width="7%" class="field">
+            <label>客户简介：</label>
+        </td>
+        <td colspan="6">
+            <div class="dtxtarea1">
+                <textarea style="height: 80px; border: 0;" name="crmCustomer.remark" id="remark" maxlength="2000">$!crmCustomer.remark</textarea>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<hr />
+<table class="htmltbl" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+    <td width="7%" class="field">
+        <label>省份：</label>
+    </td>
+    <td width="18%">
+        <label>$!crmCustomer.province</label>
+        <!--
+        <select name="crmCustomer.province" id="province">
+            <option value=""></option>
+            #foreach($provinces in $cd.getProvinces())
+                <option value ="$provinces.code" >$provinces.shortName</option>
+            #end
+        </select>
+        -->
+    </td>
+    <td width="7%" class="field">
+        <label>城市：</label>
+    </td>
+    <td width="18%">
+        <select id="city" name="crmCustomer.city" city="$!crmCustomer.city">
+            <option value=""></option>
+        </select>
+    </td>
+    <td width="7%" class="field">
+        <label>联系地址：</label>
+    </td>
+    <td colspan="3">
+        <div class="dtxt1">
+            <input type="text" class="dtxt1-txt" type="text" name="crmCustomer.address" id="address" value="$!crmCustomer.address" maxlength="50"/>
+        </div>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label></label>
+    </td>
+    <td colspan="7">
+        <label class="gray">
+            请至少填写一个联系电话：
+        </label>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label>手机一：</label>
+    </td>
+    <td colspan="7">
+        <table class="celltbl">
+            <tr>
+                <td width="150" style="text-align: left;">
+                    <div class="dtxt1" phoneType="divGroup" id="divMobilePhone1">
+                        <input type="text" phoneType="group" fun="checkMobilePhone" tips="请至少填写一个联系电话"  class="dtxt1-txt" maxLength="11" name="crmCustomer.mobilePhone1" value="$!crmCustomer.mobilePhone1" id="mobilePhone1" onKeyUp="ctrlDefaultNumberState('mobilePhone1','rdo1')"/>
+                    </div>
+                </td>
+                <td width="50">
+                    <label>
+                        备注
+                    </label>
+                </td>
+                <td width="100" style="text-align: left;">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.mobilePhone1Remark" value="$!crmCustomer.mobilePhone1Remark" id="mobilePhone1Remark" maxlength="20"/>
+                    </div>
+                </td>
+                <td>
+                    <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" id="rdo1" value="1"/>
+                    <label>
+                        默认
+                    </label>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label>手机二：</label>
+    </td>
+    <td colspan="7">
+        <table class="celltbl">
+            <tr>
+                <td width="150" style="text-align: left;">
+                    <div class="dtxt1" phoneType="divGroup" id="divMobilePhone2">
+                        <input type="text" phoneType="group" fun="checkMobilePhone" tips="请至少填写一个联系电话" class="dtxt1-txt" maxLength="11" name="crmCustomer.mobilePhone2" value="$!crmCustomer.mobilePhone2" id="mobilePhone2" onKeyUp="ctrlDefaultNumberState('mobilePhone2','rdo2')"/>
+                    </div>
+                </td>
+                <td width="50">
+                    <label>
+                        备注
+                    </label>
+                </td>
+                <td width="100" style="text-align: left;">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.mobilePhone2Remark" value="$!crmCustomer.mobilePhone2Remark" id="mobilePhone2Remark" maxlength="20"/>
+                    </div>
+                </td>
+                <td>
+                    <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" id="rdo2" value="2"/>
+                    <label>
+                        默认
+                    </label>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label>固定电话：</label>
+    </td>
+    <td colspan="7">
+        <table class="celltbl">
+            <tr>
+                <td width="150" style="text-align: left;">
+                    <div class="dtxt1" phoneType="divGroup">
+                        <input type="text" phoneType="group" fun="checkPhone" tips="请至少填写一个联系电话" class="dtxt1-txt" maxLength="20" name="crmCustomer.phone" value="$!crmCustomer.phone" id="phone" onKeyUp="ctrlPhoneExt('phone','rdo3','phoneExt')"/>
+                    </div>
+                </td>
+                <td width="50">
+                    <label>—</label>
+                </td>
+                <td width="100" style="text-align: left;">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" name="crmCustomer.phoneExt" value="$!crmCustomer.phoneExt" maxLength="10" id="phoneExt" validate[groupRequired[payments],custom[integer]/>
+                    </div>
+                </td>
+                <td>
+                    <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" id="rdo3" value="3"/>
+                    <label>
+                        默认
+                    </label>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label>传真：</label>
+    </td>
+    <td colspan="7">
+        <table class="celltbl">
+            <tr>
+                <td width="150" style="text-align: left;">
+                    <div class="dtxt1" phoneType="divGroup">
+                        <input type="text" phoneType="group" fun="checkPhone" tips="请至少填写一个联系电话" class="dtxt1-txt" name="crmCustomer.fax" maxLength="20" value="$!crmCustomer.fax" id="fax" onKeyUp="ctrlPhoneExt('fax','rdo4','faxExt')"/>
+                    </div>
+                </td>
+                <td width="50">
+                    <label>—</label>
+                </td>
+                <td width="100" style="text-align: left;">
+                    <div class="dtxt1">
+                        <input type="text" class="dtxt1-txt" maxLength="10" name="crmCustomer.faxExt" value="$!crmCustomer.faxExt" id="faxExt" />
+                    </div>
+                </td>
+                <td>
+                    <input type="radio" class="rdo" name="crmCustomer.defaultPhoneType" value="4" id="rdo4"/>
+                    <label>
+                        默认
+                    </label>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label>邮箱：</label>
+    </td>
+    <td width="18%">
+        <div class="dtxt1">
+            <input type="text" fun="checkEmail" tips="“邮箱”的格式必须是xxx@xxx.xxx" class="dtxt1-txt" name="crmCustomer.email" id="email" value="$!crmCustomer.email" maxLength="50"/>
+        </div>
+    </td>
+    <td colspan="6"></td>
+</tr>
+<tr>
+    #set($lastContact = $!date.format('yyyy-MM-dd HH:mm:ss',$!crmCustomer.lastContactDate)+'('+ $!crmCustomer.lastContactType +')')
+    <td width="7%" class="field">
+        <label>最近联系时间：</label>
+    </td>
+    <td colspan="7">
+        <label>
+            #if($actionType=='modify')
+                $!lastContact
+            #else
+                无
+            #end
+        </label>
+    </td>
+</tr>
+<tr>
+    <td width="7%" class="field">
+        <label>短信/彩信：</label>
+    </td>
+    <td colspan="7">
+        <input type="checkbox" class="chk" id="allow" name="crmCustomer.isReceiveSms"
+            #if($!crmCustomer.isReceiveSms==0) checked=true value="0" #else value="1" #end/>
+        <label for="allow">
+            不愿意接收
+        </label>
+    </td>
+</tr>
+</tbody>
+</table>

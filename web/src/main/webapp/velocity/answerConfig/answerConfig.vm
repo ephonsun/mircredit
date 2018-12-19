@@ -1,0 +1,233 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>答录音配置</title>
+    #styleLink("base")
+    <style type="text/css">
+    	p { margin-bottom: 10px; }
+		p.halign { margin-top: 20px; }
+    </style>
+     <style type="text/css">
+		table { width: 100%; }
+		table tr td { height: 30px; }
+		.halign { margin-top: 50px; }
+		
+		.choose { position: absolute; top: -1px; right: -1px; -right: -2px; }
+		#file { position: absolute; top: 0; width: 100%; height: 24px; filter: alpha(opacity:0); opacity: 0; }
+    </style>
+    #scriptLink("core")
+    #scriptLink("page")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.file.js"></script>
+     <script type="text/javascript">
+	 	jQuery(document).ready(function(){
+			$('#file').change(function(){
+				checkFileType(this);
+			});
+			$("#answerConfigForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+			
+			inputRule("#ringTimes",function(text){
+				if(!inChars(text,"3456789"))return false;
+					else return true;
+			},true);
+		});
+		
+		
+		function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+    	$(function(){
+			if($("#answerConfigIsMute").val()==1){//静音
+				$("#answerConfigIsMuteCheckBox").attr("checked", true);
+			}
+			else{
+				$("#answerConfigIsMuteCheckBox").attr("checked", false);
+			}
+    		
+    		//设置静音
+			$("#answerConfigIsMuteCheckBox").click(function(){
+				var flag = $(this).attr("checked");
+				if(flag){
+					$("#answerConfigIsMute").val(1);
+				}
+				else{
+					$("#answerConfigIsMute").val(0);
+				}
+			});
+			})
+			
+			//提交，上传
+		function submitAnswerConfig(){
+			var bool = jQuery.validator({ form: 'answerConfigForm', extend: false});
+    		if(!bool){
+    			return false;
+    		}
+			if($("#text").val()==""){
+    			banger.page.showMessageBox("请先选择答录音文件!");
+    			return;
+    		}
+			upLoadFile();
+		}
+			
+		function checkFileType(obj){
+			var str=obj.value;
+        	var pos = str.lastIndexOf(".");
+        	var lastname = str.substring(pos,str.length);
+        	var resultName=lastname.toLowerCase();
+        	$("#localFilename").val('');
+        	$('#text').val('');
+        	if (resultName.toString()!='.wav'){
+        		banger.page.showMessageBox("只能上传.wav音频文件，您上传的文件类型为"+lastname+"，请重新上传");
+    		}else{
+    			var localFilename = file.val(obj);
+				$('#text').val(localFilename);
+				$("#localFilename").val(localFilename);
+    		}
+		}
+    	
+		//播放留言
+		function playVoicePath(obj){
+			var serverFilePath=$("#answerConfigvoiceFilePath").val()+"";
+			var localFilename = $("#localFilename").val()+"";
+			if(localFilename!="")
+			{
+				new window.video.create(1, 310, 60,localFilename, obj);
+			} else if(serverFilePath!=""){
+				jQuery.post("isFile.html", {"afilePath": serverFilePath}, function(result){
+    				new window.video.create(1, 310, 60,"../Records/"+result, obj);
+				});
+			}else {
+				banger.page.showMessageBox("服务器无文件，请选取本地文件！");
+				return;
+			}
+		}
+		
+		function setPhoneFile(filename)
+    	{
+    		var ck = $("#answerConfigIsMuteCheckBox").attr("checked");
+    		
+    		var phone = window.parent.getPhone();
+			if(phone)
+			{
+				if(filename){
+					return phone.setAnsweringVoice(filename,(ck=="checked")?true:false);
+				}
+			}
+    	}
+    	
+    	function setPhoneRingTimes()
+    	{
+    		var count = $("#ringTimes").val()+"";
+    		var phone = window.parent.getPhone();
+			if(phone)
+			{
+				if(count!="" && parseInt(count)>0)phone.setAnsweringRingTimes(count);
+			}
+    	}
+    	
+    	//上传文件
+    	function upLoadFile(){
+    		var localFileName = $("#localFilename").val()+"";
+    		var isMute = $("#answerConfigIsMute").val();
+    		var ringTimes = $("#ringTimes").val();
+    		
+    		setPhoneRingTimes();
+    		
+    		if(localFileName!=""){
+				var error = setPhoneFile(localFileName);
+				if(error){
+					var msgError = error+"";
+					banger.page.showMessageBox(msgError);
+				}
+				else{
+    				ajaxFileUpload({
+						url:"../answerConfig/doUpload.html?localFileName="+encodeURI(encodeURI(localFileName))+"&answerConfig.isMute="+isMute+"&answerConfig.ringCount="+ringTimes+"&random="+Math.random()*10000,
+				        id:'file',
+				        callback:function(){
+				        	document.location.replace("../answerConfig/showAnswerConfigPage.html?random="+Math.random()*10000);
+				        	banger.page.showMessageBox({"type":"success","content":"答录设置成功"});
+				        }
+				    });
+			    }
+			}
+			else
+			{
+				jQuery.post('../answerConfig/updateAnswerConfig.html',{'answerConfig.isMute':isMute,'answerConfig.ringCount':ringTimes},
+				function(){
+					document.location.replace("../answerConfig/showAnswerConfigPage.html?random="+Math.random()*10000);
+					banger.page.showMessageBox({"type":"success","content":"答录设置成功"});
+				});
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<form id="answerConfigForm" name="answerConfigForm" method="post" enctype="MULTIPART/FORM-DATA" >
+	<input type="hidden" id="localFilename" value="" />
+	<input type="hidden" id="answerConfigvoiceFilePath"  value="$!answerConfig.voiceFilePath"/>
+    <input type="hidden" id="answerConfigId"  value="$!answerConfig.answerConfigId" name="answerConfig.answerConfigId"/>
+	<table border="0" width="100%" cellspacing="2" cellpadding="2">
+		<thead>
+        	<tr>
+            	<th height="50" align="left" colspan="3">答录音设置<hr /></th>
+            </tr>
+        </thead>
+    	<tbody>
+    		<tr>
+            	<td width="1%">
+                	<span class="red">*</span>
+                </td>
+            	<td>
+                	<div style="position: relative;">
+                    	<div class="dtxt2">
+                            <input type="text" id="text" class="dtxt2-txt" value="$!answerConfig.fileName"/>
+                            <input type="button" class="btn1 choose" value="选择声音" />
+                        </div>
+                        <input type="file" id="file" name="uploadFile"/>
+                    </div>
+                </td>
+                <td width="1%">
+                    <input type="button" class="btn1" value="试听留言" onclick="playVoicePath(this)" />
+                </td>
+            </tr>
+    		<tr>
+    			<td width="1%">
+                	<span class="red">*</span>
+                </td>
+                <td height="40" colspan="2">
+                	<div class="dtxt2" style="width: 31px; higth:5px; float:left">
+                    	<input type="text" id="ringTimes" maxLength="1" class="dtxt2-txt" style="width: 30px;" name="answerConfig.ringCount" value="$!answerConfig.ringCount" rule="\S" tips="“振铃次数”必须填写"/>
+                    </div>
+					<div style="line-height:24px;">次振铃后开始语音留言<font class="gray">(只能输入3-9的数字)</font></div>
+                </td>
+            </tr>
+    		<tr >
+    			<td width="1%"></td>
+                <td height="40" colspan="2">
+                    <input type="checkbox" id="answerConfigIsMuteCheckBox" class="chk" />
+                     <input type="hidden" id="answerConfigIsMute" name="answerConfig.isMute" value="$!answerConfig.isMute"/>
+                    <label for="chk1">答录时，对方留言静音</label>
+                </td>
+            </tr>
+    	</tbody>
+    </table>
+    <p class="halign"><input type="button" value="保 存" class="btn1" onclick="submitAnswerConfig()"/></p>
+    </form>
+</body>
+</html>

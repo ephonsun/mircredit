@@ -1,0 +1,150 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>工作台-任务提醒-更多任务</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	#scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+</head>
+
+<body>
+    <p class="dataSearch">
+    	<label class="floatL bold dataSearch-count">
+			#if($!workTskFlag==10) 今天未完成#else 过期#end的任务(<span class="dgreen">$!page.totalRowsAmount</span>)</label>
+        <label #if($!workTskFlag==10) class="bold" #end><a style="text-decoration:none;" href="#2" onclick="changeTaskMore(10)">今天</a></label>
+		<label #if($!workTskFlag==5) class="bold" #end><a style="text-decoration:none;" href="#2" onclick="changeTaskMore(5)">已过期</a></label>
+    </p>
+   
+    <table class="datatbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+				<th width="8%">任务类型</th>
+            	<th>任务名称</th>
+            	<th width="13%">开始时间</th>
+				<th width="13%">结束时间</th>
+				<th width="8%">任务备注</th>
+            	<th width="20%">执行者</th>
+            	<th width="8%">操作</th>
+            </tr>
+        </thead>
+		
+    	<tbody>
+			#foreach($task in $!tskTaskPage.items)
+				<tr>
+                <td>
+					#foreach($taskType in $taskTypeMap.entrySet()) 
+						#if($!task.taskType.equals($!taskType.key)) 
+							$!taskType.value
+						#end
+                    #end 
+				</td>
+                <td align="left"><label title="$!task.taskTitle">
+					<a href="#" onclick="detailTsk($!task.taskId,$!task.taskType,$!task.isNextContact)">$!task.taskTitle</a></label>
+				</td>
+            	<td><label title='$!date.format("yyyy-MM-dd",$!task.startDate)'>$!date.format("yyyy-MM-dd",$!task.startDate)</label></td>
+				<td><label title='$!date.format("yyyy-MM-dd",$!task.endDate)'>$!date.format("yyyy-MM-dd",$!task.endDate)</label></td>
+				<td>
+					#if($!task.taskStatus==0)
+						未完成
+					#elseif($!task.taskStatus==1)
+						已完成
+					#elseif($!task.taskStatus==2)
+						已中止
+					#end
+				</td>
+                <td align="left"><label title="$!task.executeName">$!task.executeName</label></td>
+            	<td style="font-weight: normal;">
+                	<a href="javascript:void(0);" onclick="updateTask($!task.taskType,$!task.taskId,$!task.isNextContact,this)" style="display:">编辑</a>
+                </td>
+            </tr>
+			#end
+        </tbody>
+		 
+        <tfoot>
+        	<tr>
+            	<td colspan="7">
+					<input type="hidden" name="workTskFlag" value="$!workTskFlag"/>
+					<div class="floatR">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
+<script type="text/javascript">
+		//查看任务
+		function detailTsk(taskId,taskFlag,isNext){
+			if(isNext==1){
+				var url="../tskTask/detailTask.html?tskTask.taskId="+taskId+"&tskTask.taskType=3&random="+Math.random();
+				banger.page.openDialog(url,"查看任务",470,320);
+			}else{
+				var title="";
+    			var id="";
+				var url="";
+    			if(taskFlag==1){
+    				title="查看联系任务";
+    				id="TaskContactDetailPage"+taskId;
+					url="../tskTask/detailTask.html?tskTask.taskId="+taskId+"&tskTask.taskType="+taskFlag;
+    			}else{
+    				title="查看营销任务";
+    				id="TaskMarketDetailPage"+taskId;
+					url="../tskTask/getByTaskMarket.html?tskTask.taskId="+taskId+"&marketType=3";
+    			}
+    			var options = {id: id, pid: GetId(), title: title, url: url, lock: false};
+    			tab.add(options);
+			}
+		}
+		//编辑任务
+		function updateTask(taskFlag,taskId,isNext,obj){
+			jQuery.post("../tskTask/isStopTask.html?random="+Math.random(),{
+				'tskTask.taskId':taskId
+			},function(data){
+				if(data>0){
+					banger.page.showMessageBox(obj.parentNode.parentNode.childNodes[1].innerText+"被中止,不能编辑!");
+					return false;
+				}
+				
+				if(isNext==1){
+    				var url="../tskTask/detailTask.html?tskTask.taskId="+taskId+"&tskTask.taskType=4&random="+Math.random();
+        			var result=banger.page.openDialog(url,"编辑任务",470,340);
+        			if(result==1&&result!=undefined){
+        				var url = window.location.href;
+        				window.location.href = cropurl(url, "random", Math.random());
+    					return true;
+        			}
+    			}else{
+    				var url="";
+        			var title="";
+        			var id="";
+        			if(taskFlag==1){
+        				title="编辑联系任务";
+        				id="TaskContactPage_update"+taskId;
+        				url="../tskTask/toTskTaskUpdatePage.html";
+						url=url+"?tskTask.taskType="+taskFlag+"&tskTask.taskId="+taskId;
+            			var options = {id: id, pid: GetId(), title: title, url: url, lock: false,confirm: true};
+            			tab.add(options);
+        			}else{
+        				title="编辑营销任务";
+        				id="TaskMarketPage_update"+taskId;
+        				url="../tskTask/getByTaskMarket.html";
+						url=url+"?tskTask.taskType="+taskFlag+"&tskTask.taskId="+taskId;
+            			var options = {id: id, pid: GetId(), title: title, url: url, lock: false};
+            			tab.add(options);
+        			}
+    			}
+			});
+		}
+		function changeTaskMore(flag){
+			document.location.href="../tskTask/getMoreTask.html?workTskFlag="+flag;
+		}
+	</script>

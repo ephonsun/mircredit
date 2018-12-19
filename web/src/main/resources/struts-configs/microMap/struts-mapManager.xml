@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="mapManager" extends="default" namespace="/mapManager" >
+        <!--地图定位页面初始化-->
+        <action name="toLocationMapPage" class="mapManagerAction" method="toLocationMapPage">
+            <result name="success">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--OCX代理中转页面初始化-->
+        <action name="toLocationMap" class="mapManagerAction" method="toLocationMap">
+            <result name="success">/velocity/map/toLocationMap.vm</result>
+            <result name="notproxy">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--所有贷款到跳转到地图定位-->
+        <action name="loanToLocationMapPage" class="mapManagerAction" method="loanToLocationMapPage">
+            <result name="success">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--地图定位查询-->
+        <action name="getCustomerOrUserGps" class="mapManagerAction" method="getCustomerOrUserGps">
+            <result name="success">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--标记信息查询-->
+        <action name="getMarkerInfo" class="mapManagerAction" method="getMarkerInfo">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--标记信息查询-->
+        <action name="getMapUserGpsList" class="mapManagerAction" method="getMapUserGpsList">
+            <result name="success">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--标记多客户信息查询-->
+        <action name="getMapCustomerGpsList" class="mapManagerAction" method="getMapCustomerGpsList">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--客户信息查询-->
+        <action name="getCustomerGpsByCondition" class="mapManagerAction" method="getCustomerGpsByCondition">
+            <result name="success">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--用户信息查询-->
+        <action name="getUserGpsByCondition" class="mapManagerAction" method="getUserGpsByCondition">
+            <result name="success">/velocity/map/locationMap.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--新增客户坐标-->
+        <action name="addMapCustomerGps" class="mapManagerAction" method="addMapCustomerGps">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--初始化地图定位页面-->
+        <action name="initCustomerOrUserGps" class="mapManagerAction" method="initCustomerOrUserGps">
+            <result name="error">/velocity/error.vm</result>
+        </action>
+        <!--显示客户列表信息-->
+        <action name="getCustomerList" class="mapManagerAction" method="getCustomerList">
+            <result name="success">/velocity/map/customerTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+
+        <!--显示用户列表信息-->
+        <action name="getUserList" class="mapManagerAction" method="getUserList">
+            <result name="success">/velocity/map/userTable.vm</result>
+            <result name="error">/velocity/error.vm</result>
+        </action>
+	</package>
+
+</struts>

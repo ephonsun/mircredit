@@ -1,0 +1,1488 @@
+
+
+<!--贷款申请 登记信息开始 -->
+<!--startprint2-->
+<div class="loan-bg">
+    <p class="bold loan-lheight">登记信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>微贷事业中心：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <select id="registerMicroBizCenterBak" maxlength="20" >
+                            <option value=""></option>
+							#foreach($!sysTeam in $!sysTeamList)
+								<option #if("$!lnLoanInfoBak.lnLoanInfo.registerMicroBizCenter" == "$!sysTeam.teamId")selected #end value="$!sysTeam.teamId">$!sysTeam.teamName</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>推荐支行：</label>
+                </td>
+                <td width="200">
+                    <div class="dtxt2">
+                           <input  id="registerRecommendBank" readOnly="true" class="dtxt2-txt" value="$!lnLoanInfoBak.lnLoanInfo.registerRecommendBank"
+                           type="text" class="dtxt2-txt" />
+                    <span class="dtxt2-ddl" onclick="showMenu();">ddl</span>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>申请日期：</label>
+                </td>
+				<!--
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text"  value="#if($!lnLoanInfo.registerApplyDate)$date.format("yyyy-MM-dd",$!lnLoanInfo.registerApplyDate)#end" maxlength="20" onblur="checkDate(this.value)"/><p>格式2014-01-01</p>
+                    </div>
+                </td>
+				-->
+				<td width="200">
+					<div class="ui-div-text" >
+						<input type="text" class="text datepicker" readonly="readonly" id="registerApplyDate" name="lnLoanInfo.registerApplyDate" value="$!date.format('yyyy-MM-dd',$!lnLoanInfo.registerApplyDate)" onblur="checkDate(this.value)" />
+                        <i class="date"></i>
+                    </div>
+				</td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>需要贷款日期：</label>
+                </td>
+				<td width="200">
+					<div class="ui-div-text" >
+						<input type="text" class="text datepicker" readonly="readonly" id="registerLoanDate" name="lnLoanInfo.registerLoanDate" value="$!date.format('yyyy-MM-dd',$!lnLoanInfo.registerLoanDate)" onblur="checkDate(this.value)" />
+                        <i class="date"></i>
+                    </div>
+				</td>
+				<!--
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="#if($!lnLoanInfo.registerLoanDate)$date.format("yyyy-MM-dd",$!lnLoanInfo.registerLoanDate)#end" maxlength="20" onblur="checkDate(this.value)"/><p>格式2014-01-01</p>
+                    </div>
+                </td>
+				-->
+            </tr>
+			<tr style="height:10px">
+				<td colspan="8"></td>
+			</tr>
+			<!--
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>信息来源：</label>
+                </td>
+					<td style="text-align:right">
+                    <input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" id="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("1") == 1) checked #end value="1" maxlength="20"/>直接营销
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;
+                </td>
+				<td style="width:400;" colspan="3">
+					<input type="text" class="text" id="registerDirectMarketBak" name="lnLoanInfo.registerDirectMarket" value="$!lnLoanInfoBak.lnLoanInfo.registerDirectMarket"  style=" display:none"/>
+                </td>
+				<td style="text-align:right">
+                    <input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("4") == 1) checked #end value="4" maxlength="20"/>现有客户介绍 &nbsp;
+                </td>
+				<td style="width:400;" colspan="2" >
+					<input type="text" class="text" id="registerExistCusIntroductBak" name="lnLoanInfo.registerExistCusIntroduct"  value="$!lnLoanInfoBak.lnLoanInfo.registerExistCusIntroduct" style=" display:none"/>
+                </td>
+            </tr>
+			<tr style="height:10px">
+				<td></td>
+                <td class="field" style="text-align:right">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("2") == 1) checked #end value="2" maxlength="20"/>报纸 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("3") == 1) checked #end value="3" maxlength="20"/>电视&nbsp;
+				</td>
+				<td class="field" style="width:94px">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("5") == 1) checked #end value="5" maxlength="20"/>第三方推荐&nbsp;
+				</td>
+				<td class="field"  style="width:94px">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("6") == 1) checked #end value="6" maxlength="20"/>网站&nbsp;&nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("7") == 1) checked #end value="7" maxlength="20"/>广播 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("8") == 1) checked #end value="8" maxlength="20"/>广告牌&nbsp;
+				</td>
+				<td class="field" style="width:94px">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("9") == 1) checked #end value="9" maxlength="20"/>网店宣传 &nbsp;&nbsp;
+				</td>
+				<td class="field" style="width:230px;text-align:center;">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("10") == 1) checked #end value="10" maxlength="20"/>内行员工推荐 &nbsp;
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("11") == 1) checked #end value="11" maxlength="20"/>微信微博 &nbsp;&nbsp;
+				</td>
+				<td class="field" style="width:128px;text-align:left;" colspan="2">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("12") == 1) checked #end value="12" maxlength="20"/>其他 &nbsp;
+					<input type="text" class="text" id="registerInfoSourceOtherBak" name="lnLoanInfo.registerInfoSourceOther" value="$!lnLoanInfoBak.lnLoanInfo.registerInfoSourceOther" style="display:none"/>
+				</td>
+			</tr>
+			-->
+        </table>
+    </div>
+</div>
+
+<div class="loan-bg">
+	<p class="bold loan-lheight">信息来源</p>
+	<div id="" class="applyMessage">
+		<table class="htmltbl">
+			<tr>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("7") == 1) checked #end id="" value="7" />广播
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("2") == 1) checked #end id="" value="2" />报纸
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("3") == 1) checked #end id="" value="3" />电视
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("8") == 1) checked #end id="" value="8" />广告牌
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("13") == 1) checked #end id="" value="13" />公交车
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("14") == 1) checked #end id="" value="14" />影院
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("15") == 1) checked #end id="" value="15" />高铁站
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("16") == 1) checked #end id="" value="16" />续贷
+				    </div>
+				</td>
+			</tr>
+			
+			<tr>				
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("9") == 1) checked #end id="" value="9" />网点宣传
+				    </div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("5") == 1) checked #end id="" value="5" />第三方推荐
+				    </div>
+				</td>
+				
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerExistCusIntroductBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("4") == 1) checked #end id="" value="4" />放款客户介绍
+				    </div>
+				</td>
+				<td colspan="1" width="12.5%">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerExistCusIntroductBak" name="lnLoanInfo.registerExistCusIntroduct"  value="$!lnLoanInfoBak.lnLoanInfo.registerExistCusIntroduct" #if($!sourcesIdsBak.get("4") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1" width="12.5%">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("6") == 1) checked #end id="" value="6" />网站
+				    </div>
+				</td>
+				
+				<td style="text-align:left" colspan="2">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceFFKKHJSBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("17") == 1) checked #end id="" value="17" />非放款客户/朋友/同学介绍
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceFFKKHJSBak" name="lnLoanInfo.registerSourceFFKKHJS" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceFFKKHJS"  #if($!sourcesIdsBak.get("17") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+		
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceWXBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("11") == 1) checked #end id="" value="11" />微信
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceWXBak" name="lnLoanInfo.registerSourceWX" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceWX"  #if($!sourcesIdsBak.get("11") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceMMBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("18") == 1) checked #end id="" value="18" />陌陌
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceMMBak" name="lnLoanInfo.registerSourceMM" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceMM" #if($!sourcesIdsBak.get("18") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceCCKBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("19") == 1) checked #end id="" value="19" />插车卡
+				    </div>
+				</td>
+				<td colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceCCKBak" name="lnLoanInfo.registerSourceCCK" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceCCK"  #if($!sourcesIdsBak.get("19") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceHNYGJSBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("10") == 1) checked #end id="" value="10" />行内员工介绍
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceHNYGJSBak" name="lnLoanInfo.registerSourceHNYGJS" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceHNYGJS"  #if($!sourcesIdsBak.get("10") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+			
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerDirectMarketBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("1") == 1) checked #end id="" value="1" />客户经理营销
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerDirectMarketBak" name="lnLoanInfo.registerDirectMarket" value="$!lnLoanInfoBak.lnLoanInfo.registerDirectMarket"  #if($!sourcesIdsBak.get("1") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceDHYXBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("20") == 1) checked #end id="" value="20" />电话营销
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceDHYXBak" name="lnLoanInfo.registerSourceDHYX" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceDHYX"  #if($!sourcesIdsBak.get("20") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceHZSHTJBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("21") == 1) checked #end id="" value="21" />合作商户推荐
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceHZSHTJBak" name="lnLoanInfo.registerSourceHZSHTJ" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceHZSHTJ"  #if($!sourcesIdsBak.get("21") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+				
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerSourceZXSQBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("22") == 1) checked #end id="" value="22" />在线申请
+				    </div>
+				</td>
+				<td  colspan="1">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerSourceZXSQBak" name="lnLoanInfo.registerSourceZXSQ" value="$!lnLoanInfoBak.lnLoanInfo.registerSourceZXSQ"  #if($!sourcesIdsBak.get("22") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align:left" colspan="1">
+				    <div class="checkbox-div">
+					<input type="checkbox" class="checkbox" onclick="textOclick('registerInfoSourceOtherBak',this)" name="registerInfoSourceIdBak" #if($!sourcesIdsBak.get("12") == 1) checked #end id="" value="12" />其他
+				    </div>
+				</td>
+				<td  colspan="3">
+					<div class="checkbox-div">
+						<input maxlength="20" type="text" class="text" id="registerInfoSourceOtherBak" name="lnLoanInfo.registerInfoSourceOther" value="$!lnLoanInfoBak.lnLoanInfo.registerInfoSourceOther"  #if($!sourcesIdsBak.get("12") == 1) style=" display:block" #else style=" display:none" #end />
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<!--贷款申请 登记信息结束 -->
+
+<!--申请信息开始 -->
+<div class="loan-bg">
+    <p class="bold loan-lheight">申请信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>贷款类型：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <select id="appLoanTypeIdBak" maxlength="20" >
+                            <option value=""></option>
+							#foreach($!dklx in $!checkBoxMessage.get("DKLX"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.appLoanTypeId == $!dklx.dictionaryKey) selected #end value="$!dklx.dictionaryKey">$!dklx.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>申请金额(元)：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.appMoney" id="appMoney" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>申请期限(月)：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.appLimitYear" id="appLimitYear"  maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>月可支配收入(元)</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.appRepaymentMonth"  maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>贷款用途：</label>
+                </td>
+                <td width="200" colspan="3" >
+                    <div class="ui-div-text">
+						<input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.appLoanPurpose" style="width:300px"/>
+                    </div>
+                </td>
+            </tr>
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+                    <label>担保方式：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                       <select id="appGuarantorWayIdBak" maxlength="20" >
+							<option value=""></option>
+							#foreach($!dbfs in $!checkBoxMessage.get("DBFS"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.appGuarantorWayId == $!dbfs.dictionaryKey) selected #end value="$!dbfs.dictionaryKey">$!dbfs.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				
+				<td class="field zyBak" width="100" style="text-align: right;display:none">
+                    <label>质押：</label>
+                </td>
+                <td class="zyBak" width="200" style="display:none">
+                    <div class="ui-div-text">
+                       <select id="appMortgageIdBak" maxlength="20" >
+                            <option value=""></option>
+							#foreach($!zy in $!checkBoxMessage.get("ZY"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.appMortgageId == $!zy.dictionaryKey) selected #end value="$!zy.dictionaryKey">$!zy.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				
+				<td class="field dyBak" width="100" style="text-align: right;display:none">
+                <label>抵押：</label>
+                </td>
+                <td class="dyBak" width="200" style="display:none">
+                    <div class="ui-div-text">
+                       <select id="appPledgeIdBak" maxlength="20" >
+                            <option value=""></option>
+							#foreach($!dy in $!checkBoxMessage.get("DY"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.appPledgeId == $!dy.dictionaryKey) selected #end value="$!dy.dictionaryKey">$!dy.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				##抵押其他
+				<td class="zyOtherBak" style="display:none">
+					<div class="ui-div-text">
+                       <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.appPledgeOther" maxlength="20"/>
+                    </div>
+                </td>
+				##质押其他
+				<td class="dyOtherBak" style="display:none">
+					<div class="ui-div-text">
+                       <input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.appMortgageOther"  value maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!--申请信息结束-->
+
+
+<!--个人信息开始 -->
+<div class="loan-bg">
+    <p class="bold loan-lheight">个人信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>申请人姓名：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" id="schtxtname">
+                        <input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.cusName" />
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>出生日期：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusBirthday"  maxlength="20" onblur="checkDate(this.value)"/><p>格式2014-01-01</p>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>性    别</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                     <select  maxlength="20" >
+                            <option #if($!lnLoanInfoBak.lnLoanInfo.cusSex == "男") selected #end value="男">男</option>
+							<option #if($!lnLoanInfoBak.lnLoanInfo.cusSex == "女") selected #end value="女">女</option>
+                        </select>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>证件类型:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <select maxlength="20" >
+                            <option value=""></option>
+							#foreach($!zjlx in $!checkBoxMessage.get("ZJLX"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.cusIdtypeId == $!zjlx.dictionaryKey)selected #end value="$!zjlx.dictionaryKey">$!zjlx.dictionaryValue</option>
+							#end
+                      </select>
+                    </div>
+                </td>
+            </tr>
+			<tr style="height:10px">
+				<td colspan="8"></td>
+			</tr>
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>证件号码：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" id="schtxtidcard">
+                        <input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.cusIdcard" />
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>手    机：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text" id="schtxtnum">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMobilePhone"   maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>固定电话:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                       <input type="text" class="text" rule="\S" tips='"联系电话"必须填写' name="lnLoanInfo.cusPhone" maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>教育程度:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <select  maxlength="20" >
+                            <option value=""></option>
+							#foreach($!jycd in $!checkBoxMessage.get("JYCD"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.cusEducationId == $!jycd.dictionaryKey)selected #end value="$!jycd.dictionaryKey">$!jycd.dictionaryValue</option>
+							#end
+                      </select>
+                    </div>
+                </td>
+            </tr>
+			
+			
+			<tr>
+                <td class="field" width="100" style="text-align: right">
+                    <label>居住状况: </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<select maxlength="20" >
+                            <option value=""></option>
+							#foreach($!jzzk in $!checkBoxMessage.get("JZZK"))
+								<option #if($!lnLoanInfoBak.lnLoanInfo.cusLivingStatusId == $!jzzk.dictionaryKey)selected #end value="$!jzzk.dictionaryKey">$!jzzk.dictionaryValue</option>
+							#end
+						</select>
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>家庭住址: </label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusAddress" maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                   <label>婚姻状况:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                     <select id="cusMarriageBak" maxlength="20" >
+							<option > </option>
+							#foreach($!hyzk in $!checkBoxMessage.get("HYZK"))
+								<option  #if($!lnLoanInfoBak.lnLoanInfo.cusMarriage == $!hyzk.dictionaryKey) selected #end  value="$!hyzk.dictionaryKey">$!hyzk.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr>
+				
+				<td class="field bizType" width="100" style="text-align: right;display:none">
+                    <label>共同经营者: </label>
+                </td>
+                <td class="bizType" style="display:none" width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusCommonOperaterName" maxlength="20" />
+                    </div>
+                </td>
+				
+				<td class="field bizType" width="100" style="text-align: right;display:none">
+                    <label>共同经营者身份证号:</label>
+                </td>
+                <td class="bizType" width="200" style=" display:none">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusCommonOperaterIdcard" />
+                    </div>
+                </td>
+				<td class="field bizType" width="100" style="text-align: right;display:none">
+                    <label>共同经营者手机号：</label>
+                </td>
+				<td class="bizType" width="200" style=" display:none">
+                    <div class="ui-div-text">
+						<input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.cusCommonOperaterMobilePhone" maxlength="20" />
+                    </div>
+                </td>
+			</tr>
+			
+			<tr class="consumType" style="display:none">
+				<td class="field" width="100" style="text-align: right">
+                    <label>现居地址:</label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusLivingAddress" maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+			</tr>
+			
+			
+			<tr class="isMarriageBak" style="display:none">
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶姓名：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateName"  value=""/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶身份证号:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateIdcard" value=""/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶手机号: </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateMobilePhone" maxlength="20"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶固定号码: </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMatePhone" maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr  class="cusMateCompanyBak" style="display:none">
+                <td class="field" width="100" style="text-align: right">
+                    <label>配偶单位名称: </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusCompanyName" />
+                    </div>
+                </td>
+				 <td class="field" width="100" style="text-align: right">
+                    <label>配偶单位电话: </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateCompanyBakPhone" />
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶月收入水平: </label>
+                </td>
+                <td width="200">
+						<select maxlength="20" >
+                            <option value=""></option>
+    						#foreach($!ysrcp in $!checkBoxMessage.get("YSRSP"))
+    							<option #if($!lnLoanInfoBak.lnLoanInfo.cusMateMonthlyIncomingId == $!ysrcp.dictionaryKey)selected #end value="$!ysrcp.dictionaryKey">$!ysrcp.dictionaryValue</option>
+							#end
+						</select>
+                </td>
+            </tr>
+			
+			<tr class="cusMateCompanyBak" style="display:none"> 
+                <td class="field" width="100" style="text-align: right">
+                    <label>配偶工作岗位: </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateJob" />
+                    </div>
+                </td>
+                <td class="field" width="100" style="text-align: right">
+                    <label>配偶工作年限:  </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateWorkYear"  maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>配偶单位地址:  </label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusMateAddress"  maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+				
+            </tr>
+			
+			
+			<tr class="consumType" style="display:none">
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>子女情况:  </label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusChdInfo"   maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>家庭人数:  </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusFamilyNum"  maxlength="20"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr class="consumType" style="display:none">
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>父母情况:  </label>
+                </td>
+                <td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusParentInfo" maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>本地居住年限:  </label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+			 		<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cusLocalYear" maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')"/>
+                    </div>
+                </td>
+            </tr>
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>第一印象:</label>
+                </td>
+                <td width="200" colspan="6">
+                    <div class="ui-div-textarea" style="height: 100px; margin-bottom:15px;">
+						<textarea maxlength="250" class="textarea"  style="height: 100px; _height:100px;">$!lnLoanInfoBak.lnLoanInfo.cusFirstImpress</textarea>
+					</div>
+                </td>
+				
+            </tr>
+			
+        </table>
+    </div>
+</div>
+
+<!--个人信息结束-->
+
+<!-- 工作信息开始 -->
+<div class="loan-bg consumType" style="display:none"> 
+    <p class="bold loan-lheight">工作信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+            <tr>
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>工作单位：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                        <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.companyName" />
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>工作岗位：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.companyJob"  />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>工作年限:</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.companyWorkYear"  maxlength="20" onkeyup="this.value=this.value.replace(/\D/g,'')"/>
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>月收入水平：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                       <select maxlength="20" >
+                            <option value=""></option>
+							#foreach($!ysrcp in $!checkBoxMessage.get("YSRSP"))
+    							<option #if("$!lnLoanInfoBak.lnLoanInfo.companyMonthlyIncoming" == $!ysrcp.dictionaryKey) selected #end value="$!ysrcp.dictionaryKey">$!ysrcp.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				
+				
+            </tr>
+			
+			<tr>
+				
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>单位地址：</label>
+                </td>
+                <td width="200" colspan="3" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.companyAddress"  style="width:300px"/>
+                    </div>
+                </td>
+				
+            </tr>
+        </table>
+    </div>
+</div>
+<!-- 工作信息结束-->
+
+<!-- 生意信息开始 -->
+<div class="loan-bg bizType" style="display:none">
+    <p class="bold loan-lheight">生意信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>企业名称：</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizCompany" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>经营范围：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizScope" maxlength="150"/>
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+                    <label>营业执照号码：</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizLicenseNum" />
+                    </div>
+                </td>
+				
+				 <td class="field" width="100" style="text-align: right">
+                    <label>实际经营者：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizActualOperator"  />
+                    </div>
+                </td>
+               
+            </tr>
+			
+			<tr>
+				
+				 <td class="field" width="100" style="text-align: right">
+                    <label>组织形式：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                       <select id="bizOrgIdBak" maxlength="20" >
+                            <option value=""></option>
+							#foreach($!zzxs in $!checkBoxMessage.get("ZZXS"))
+    							<option #if($!lnLoanInfoBak.lnLoanInfo.bizOrgId == $!zzxs.dictionaryKey) selected #end value="$!zzxs.dictionaryKey">$!zzxs.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				
+				<td class="field bizOrgId" width="100" style="text-align: right;display:none">
+					<label class="red">*</label>
+                    <label>法人实体-非法人实体：</label>
+                </td>
+                <td width="200" class="bizOrgId" style="display:none">
+                    <div class="ui-div-text">
+                       <select id="gtgshBak" maxlength="20" >
+                            <option value=""></option>
+    						<option #if("$!lnLoanInfoBak.lnLoanInfo.bizOrgCode" != "")selected #end value="01">组织机构代码</option>
+							<option #if("$!lnLoanInfoBak.lnLoanInfo.bizSocialCreditNum" != "")selected #end value="02">社会信用号码</option>
+                        </select>
+                    </div>
+                </td>
+				
+				<td class="field bizOrgCodeBak" width="100" style="text-align: right;display:none">
+					<label class="red">*</label>
+                    <label>组织机构代码：</label>
+                </td>
+				<td width="200" class="bizOrgCodeBak" style="display:none">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizOrgCode" />
+                    </div>
+                </td>
+				
+                <td class="field bizSocialCreditNumBak" width="100" style="text-align: right;display:none">
+					<label class="red">*</label>
+                    <label>社会信用号码：</label>
+                </td>
+				<td width="200" class="bizSocialCreditNumBak"  style="display:none" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizSocialCreditNum"  />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>股东占比情况：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizShareholderProportion"  />
+                    </div>
+                </td>
+            </tr>
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+                    <label>实际经营地址：</label>
+                </td>
+				<td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizAddress"  maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>经营场所：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<select  maxlength="20" >
+                            <option value=""></option>
+							#foreach($!jysc in $!checkBoxMessage.get("JYCS"))
+    							<option #if($!lnLoanInfoBak.lnLoanInfo.bizPlaceId == $!jysc.dictionaryKey)selected #end value="$!jysc.dictionaryKey">$!jysc.dictionaryValue</option>
+							#end
+                        </select>
+                    </div>
+                </td>
+				
+            </tr>
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+                    <label>法律形式：</label>
+                </td>
+				<td width="200">
+                   <select  maxlength="20" >
+                        <option value=""></option>
+						#foreach($!flxs in $!checkBoxMessage.get("FLXS"))
+							<option #if($!lnLoanInfoBak.lnLoanInfo.bizLawFormId == $!flxs.dictionaryKey)selected #end value="$!flxs.dictionaryKey">$!flxs.dictionaryValue</option>
+						#end
+                    </select>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>法人代表：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<div class="ui-div-text">
+							<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizLeagl"/>
+						</div>
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>电话号码：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizLeaglMobilePhone"  />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>雇员人数：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizEmployeeNum" onkeyup="value=value.replace(/[^\d.]/g,'')"/>
+                    </div>
+                </td>
+				
+            </tr>
+			
+			<tr>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>开业日期：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="#if($!lnLoanInfoBak.lnLoanInfo.bizOpenDate) $!lnLoanInfoBak.lnLoanInfo.bizOpenDate #end" />
+                    </div>
+                </td>
+				
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>是否我行客户：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<select  maxlength="20" >
+                            <option value=""></option>
+    						<option #if($!lnLoanInfoBak.lnLoanInfo.bizIsBelongMybank == "是") selected #end value="是">是</option>
+							<option #if($!lnLoanInfoBak.lnLoanInfo.bizIsBelongMybank == "否") selected #end value="否">否</option>
+                        </select>
+                    </div>
+                </td>
+				
+               <td class="field myBank" width="100" style="text-align: right;display:none">
+                    <label>我行的银行卡号：</label>
+                </td>
+                <td width="200" style="display:none" class="myBankBak">
+                    <div class="ui-div-text">
+                      <input type="text" class="text"   value="$!lnLoanInfoBak.lnLoanInfo.bizMybankNo" maxlength="20" />
+                    </div>
+                </td>
+				
+            </tr>
+			<tr style="height:10px">
+				<td colspan="8"></td>
+			</tr>
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+                    <label>备 注：</label>
+                </td>
+				<td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.bizNote"  maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+            </tr>
+        </table>
+	</div>
+</div>
+<!-- 生意信息结束 -->
+
+<!-- 财务信息开始 -->
+<div class="loan-bg bizType" style="display:none">
+    <p class="bold loan-lheight">财务信息</p>
+    <div id="dksqb1">
+        <table class="htmltbl">
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>月销售额(元)：</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafMonthlySales" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>旺    季(月)：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafBusySeason" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+                    <label>淡    季(月)：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafLowSeason" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>应收账款(元)：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafReceivableMoney" />
+                    </div>
+                </td>
+            </tr>
+			
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+                    <label>毛利率(%)：</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafGrossMargin" />
+                    </div>
+                </td>
+				
+				<td class="field" width="100" style="text-align: right">
+                    <label>净利率(%)：</label>
+                </td>
+				<td width="200">
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafNetMargin" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>存    货(元)：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafInventory" />
+                    </div>
+                </td>
+				
+                <td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>负    债(元)：</label>
+                </td>
+                <td width="200">
+                    <div class="ui-div-text">
+                      <input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafDebt"  />
+                    </div>
+                </td>
+				
+            </tr>
+			<tr>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>总 资 产(元)：</label>
+                </td>
+				<td width="200" >
+                    <div class="ui-div-text">
+						<input type="text" class="text" value="$!lnLoanInfoBak.lnLoanInfo.cafTotalMoney"   />
+                    </div>
+                </td>
+				<td class="field" width="100" style="text-align: right">
+					<label class="red">*</label>
+                    <label>其它收入(元)：</label>
+                </td>
+				<td width="200" colspan="3">
+                    <div class="ui-div-text">
+						<input type="text" class="text"  value="$!lnLoanInfoBak.lnLoanInfo.cafOther" maxlength="20" style="width:200"/>
+                    </div>
+                </td>
+			</tr>
+			
+        </table>
+	</div>
+</div>
+
+<!-- 共同借款人开始 -->
+<div class="loan-bg">
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">共同借款人</span>
+    <div id="coList">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td><label title="姓名">姓名</label></td>
+                    <td><label title="身份证">身份证</label></td>
+                    <td><label title="联系电话">联系电话</label></td>
+                    <td><label title="企业/工作单位">企业/工作单位</label></td>
+                    <td><label title="经营/单位地址">经营/单位地址</label></td>
+					<td><label title="与申请人关系">与申请人关系</label></td>
+                </tr>
+            </thead>
+			<tbody>
+				<tr>
+					 #foreach($loanCoBorrower in $lnLoanInfoBak.lnLoanCoBorrowerList)
+                        <tr>
+                            <td><label title="$!loanCoBorrower.customerName">$!loanCoBorrower.customerName</label></td>
+                            <td><label title="$!loanCoBorrower.idCard">$!loanCoBorrower.idCard</label></td>
+							<td><label title="$!loanCoBorrower.cphNumber">$!loanCoBorrower.cphNumber</label></td>
+                            <td><label title="$!loanCoBorrower.company">$!loanCoBorrower.company</label></td>
+                			<td><label title="$!loanCoBorrower.companyAddress">$!loanCoBorrower.companyAddress</label></td>
+                			<td><label title="$!loanCoBorrower.petitionerRelate">$!loanCoBorrower.petitionerRelate</label></td>
+                        </tr>
+                       #end
+                </tr>
+            </tbody>
+        </table>
+	</div>
+</div>
+<!-- 共同借款人结束 -->
+<!-- 保证人开始 -->
+<div class="loan-bg">
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">保证人</span>
+    <div  id="guList">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td><label title="姓名">姓名</label></td>
+                    <td><label title="身份证">身份证</label></td>
+                    <td><label title="联系电话">联系电话</label></td>
+                    <td><label title="企业/工作单位">企业/工作单位</label></td>
+                    <td><label title="经营/单位地址">经营/单位地址</label></td>
+					<td><label title="与申请人关系">与申请人关系</label></td>
+                </tr>
+            </thead>
+			<tbody>
+				<tr>
+					 #foreach($loanGuarantor in $lnLoanInfoBak.lnLoanGuarantorList)
+                        <tr>
+                            <td><label title="$!loanGuarantor.customerName">$!loanGuarantor.customerName</label></td>
+							<td><label title="$!loanGuarantor.idCard">$!loanGuarantor.idCard</label></td>
+							<td><label title="$!loanGuarantor.cphNumber">$!loanGuarantor.cphNumber</label></td>
+                            <td><label title="$!loanGuarantor.company">$!loanGuarantor.company</label></td>
+                			<td><label title="$!loanGuarantor.companyAddress">$!loanGuarantor.companyAddress</label></td>
+                			<td><label title="$!loanGuarantor.petitionerRelate">$!loanGuarantor.petitionerRelate</label></td>
+                        </tr>
+                      #end
+                </tr>
+            </tbody>
+        </table>
+	</div>
+</div>
+<!-- 保证人结束 -->
+<!-- 信贷历史开始 -->
+<div class="loan-bg">
+    <span class="bold" style="line-height:40px;font-size:14px;width:100px">信贷历史</span>
+    <div id="chList">
+        <table class="datatbl" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td><label title="融资来源">融资来源</label></td>
+                    <td><label title="用途">用途</label></td>
+                    <td><label title="贷款金额">贷款金额</label></td>
+                    <td><label title="放款日期">放款日期</label></td>
+                    <td><label title="期限">期限</label></td>
+					<td><label title="月还款额">月还款额</label></td>
+					<td><label title="逾期信息">逾期信息</label></td>
+					<td><label title="余额">余额</label></td>
+                </tr>
+            </thead>
+			<tbody>
+				<tr>
+					#foreach($lnCreditHistory in $lnLoanInfoBak.creditHistoryList)
+                        <tr>
+                            <td><label title="$!lnCreditHistory.finaceSource">$!lnCreditHistory.finaceSource</label></td>
+                			<td><label title="$!lnCreditHistory.loanPurpose">$!lnCreditHistory.loanPurpose</label></td>
+                			<td><label title="$!lnCreditHistory.loanMoney">$!lnCreditHistory.loanMoney</label></td>
+                			<td><label title="$!lnCreditHistory.loanDate">$!lnCreditHistory.loanDate</label></td>
+                			<td><label title="$!lnCreditHistory.loanLimitYear">$!lnCreditHistory.loanLimitYear</label></td>
+                			<td><label title="$!lnCreditHistory.repayMonth">$!lnCreditHistory.repayMonth</label></td>
+                			<td><label title="$!lnCreditHistory.overdueInformation">$!lnCreditHistory.overdueInformation</label></td>
+                			<td><label title="$!lnCreditHistory.balanceMoney">$!lnCreditHistory.balanceMoney</label></td>
+                        </tr>
+                    #end
+                </tr>
+            </tbody>
+        </table>
+	</div>
+</div>
+<!-- 信贷历史结束 -->
+<!--申请资料开始 -->
+
+#if("$!lnLoanInfoBak.lnLoanInfo.signInfoPath" != "")
+	<div class="loan-bg">
+		<p class="bold lo	an-lheight">客户签名</p>
+    <p class="loan-exam-attachment">
+		本人向中山农商银行保证提供的所有信息和资料真实、合法、有效，并承诺一旦信息出现变更，将及时通知银行。本人同意中山农商银行向相关有关单位收集并查证信息，并同意该银行在电脑中处理和保存相关信息。本人同时授权中山农商银行获取、使用和保存任何其他相关信息或参考资料，含第三方或第三方企业的资料或参考资料，其中包括向央行征信系统报告相关信用信息。中山农商银行有权决定是否批准贷款，本人同意银行保存本申请表及附带资料文档。
+		</br>
+##		<img src="/micro/showImage?fullPath=$!lnLoanInfoBak.lnLoanInfo.signInfoPath" style="width:100px;height:100px"/>
+    </p>
+    </div>
+#end
+<!--申请资料结束 -->
+<!--endprint2-->
+<script >
+    $(function(){
+
+        $("#cusMarriageBak").change(function() {
+            var selectId = $("#cusMarriageBak").find("option:selected").val();
+            var appLoanTypeId = $("#appLoanTypeIdBak").find("option:selected").val();
+            if (selectId == "02") {
+                $(".isMarriageBak").css("display", "");
+                if(appLoanTypeId == "2"){
+                    $(".cusMateCompanyBak").css("display","");
+                }
+            } else {// 未婚或者没有选择
+                $(".isMarriageBak").css("display", "none");
+                $(".cusMateCompanyBak").css("display","none");
+            }
+
+        });
+
+        $("#bizIsBelongMybank").change(function() {
+
+            var selectId = $("#bizIsBelongMybank").find("option:selected").val();
+            if (selectId == "是") {
+                $(".myBankBak").css("display", "");
+            } else {
+                $(".myBankBak").css("display", "none");
+            }
+
+        });
+
+        $("#bizOrgIdBak").change(function(){
+
+            var selectId = $("#bizOrgIdBak").find("option:selected").val();
+            if (selectId == "02") {
+                $(".bizOrgIdBak").css("display", "");
+            } else {
+                $(".bizOrgIdBak").css("display", "none");
+                $(".bizSocialCreditNumBak").css("display", "none");
+                $(".bizOrgCodeBak").css("display", "none");
+            }
+        });
+
+        $("#gtgshBak").change(function(){
+
+            var selectId = $("#gtgshBak").find("option:selected").val();
+            if (selectId == "01") {
+                $(".bizOrgCodeBak").css("display", "");
+                $(".bizSocialCreditNumBak").css("display", "none");
+            } else if(selectId == "02") {
+                $(".bizSocialCreditNumBak").css("display", "");
+                $(".bizOrgCodeBak").css("display", "none");
+            }else{
+                $(".bizSocialCreditNumBak").css("display", "none");
+                $(".bizOrgCodeBak").css("display", "none");
+            }
+        });
+
+
+        $("#appGuarantorWayIdBak").change(function() {
+
+            var selectId = $("#appGuarantorWayIdBak").find("option:selected").val();
+            if (selectId == "02") {// 质押
+                $(".zyBak").css("display", "");
+            } else {
+                $(".zyBak").css("display", "none");
+                $(".zyOtherBak").css("display", "none");
+            }
+
+            if (selectId == "01") {// 抵押
+                $(".dyBak").css("display", "");
+            } else {
+                $(".dyBak").css("display", "none");
+                $(".dyOtherBak").css("display", "none");
+            }
+
+        });
+
+        $("#appMortgageIdBak").change(function() {
+            var selectId = $("#appMortgageIdBak").find("option:selected").val();
+            if (selectId == "06") {// 质押其他
+                $(".zyOtherBak").css("display", "");
+            } else {
+                $(".zyOtherBak").css("display", "none");
+            }
+        });
+
+        $("#appPledgeIdBak").change(function() {
+            var selectId = $("#appPledgeIdBak").find("option:selected").val();
+            if (selectId == "07") {// 抵押其他
+                $(".dyOtherBak").css("display", "");
+            } else {
+                $(".dyOtherBak").css("display", "none");
+            }
+        });
+
+
+        $("input[name='registerInfoSourceIdBak']")
+                .change(
+                function() {
+                    var selectId = $("input:checkbox[name='registerInfoSourceIdBak']:checked");
+                    var registerInfoSourceId = "";
+                    var directMarket = 0;
+                    var introduct = 0;
+                    var sourceOther = 0;
+                    var i = 0;
+                    selectId.each(function() {
+                        if ($(this).val() == "1") {
+                            $("#registerDirectMarketBak").show();
+                            directMarket = 1;
+                        }
+
+                        if ($(this).val() == "4") {
+                            $("#registerExistCusIntroductBak").show();
+                            introduct = 1
+                        }
+
+                        if ($(this).val() == "12") {
+                            $("#registerInfoSourceOtherBak").show();
+                            sourceOther = 1
+                        }
+
+                        if (i == 0) {
+                            registerInfoSourceId = $(this).val();
+                            i = 1;
+                        } else {
+                            registerInfoSourceId += "," + $(this).val();
+                        }
+
+                    });
+
+                    if (directMarket == 0) {
+                        $("#registerDirectMarketBak").val("");
+                        $("#registerDirectMarketBak").hide();
+                    }
+
+                    if (introduct == 0) {
+                        $("#registerExistCusIntroductBak").val("");
+                        $("#registerExistCusIntroductBak").hide();
+                    }
+
+                    if (sourceOther == 0) {
+                        $("#registerInfoSourceOtherBak").val("");
+                        $("#registerInfoSourceOtherBak").hide();
+                    }
+
+                });
+
+        $("input[name='registerInfoSourceIdBak']").change();
+        $("#cusMarriageBak").change();
+        $("#appGuarantorWayIdBak").change();
+        $("#appMortgageIdBak").change();
+        $("#appPledgeIdBak").change();
+        $("#bizOrgIdBak").change();
+        $("#gtgshBak").change();
+    });
+
+    //打印
+    jQuery('#print1').click(function () {
+        var oper = 1;
+        preview(oper);
+    });
+
+
+
+    function preview(oper) {
+        if (oper < 10){
+            bdhtml=window.document.body.innerHTML;//获取当前页的html代码
+            sprnstr="<!--startprint"+oper+"-->";//设置打印开始区域
+            eprnstr="<!--endprint"+oper+"-->";//设置打印结束区域
+            prnhtml=bdhtml.substring(bdhtml.indexOf(sprnstr)+18); //从开始代码向后取html
+
+            prnhtml=prnhtml.substring(0,prnhtml.indexOf(eprnstr));//从结束代码向前取html
+            window.document.body.innerHTML=prnhtml;
+            window.print();
+            document.location.reload(true)
+
+        }
+        else{
+            window.print();
+        }
+
+    }
+
+
+</script>
+<div class="center">
+    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/><input type="button" id="print2" class="ui-footer-btn1 ui-footer-btn1-save" value="打印"  onclick=preview(2) />
+</div>

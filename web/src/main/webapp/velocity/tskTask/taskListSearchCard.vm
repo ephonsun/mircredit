@@ -1,0 +1,73 @@
+    <div class="actrow">
+		<span class="btn2 fl" onclick="newPage(1)">
+            <label>新建联系任务</label>
+        </span>
+		#if($!userLoginDeptId==3&&$!roleType==0)
+		<span class="btn2 fl" style="margin-left: -1px;" onclick="newPage(2)">
+            <label>新建营销任务</label>
+        </span>
+		#end
+    	<span class="btn2 fr" id="refresh" style="margin-left: -1px;">
+            <label>刷新</label>
+        </span>
+    </div>
+	<table class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+				<th width="8%">任务类型</th>
+            	<th width="16%">任务标题</th>
+            	<th width="8%">分配者</th>
+            	<th width="10%">开始日期</th>
+				<th width="10%">结束日期</th>
+				<th>任务备注</th>
+            	<th width="15%">执行者</th>
+            	<th width="12%">操作</th>
+            </tr>
+        </thead>
+		
+    	<tbody>
+			#foreach($task in $!tskTaskPage.items)
+				#set($execDate=$date.format("yyyy-MM-dd",$!task.endDate))
+				#set($result=$!dateString.getSystemDate($execDate))
+				#set($classtxt='')
+				#if($result==1) 
+					#set($classtxt='class=yellow') 
+				#end 
+				<tr $!classtxt>
+                <td>
+					#foreach($taskType in $taskTypeMap.entrySet()) 
+						#if($!task.taskType.equals($!taskType.key)) 
+							$!taskType.value
+						#end
+                    #end 
+				</td>
+                <td align="left"><label title="$!task.taskTitle">
+					<a href="#" onclick="detailTsk($!task.taskId,$!task.taskType,$!task.isNextContact)">$!task.taskTitle</a></label>
+				</td>
+            	<td>$!task.assignName</td>
+                <td><label title='$!date.format("yyyy-MM-dd",$!task.startDate)'>$!date.format("yyyy-MM-dd",$!task.startDate)</label></td>
+				<td><label title='$!date.format("yyyy-MM-dd",$!task.endDate)'>$!date.format("yyyy-MM-dd",$!task.endDate)</label></td>
+				<td align="left"><label title="$!subString.replaceRemark($!task.remark)">$!task.remark</label></td>
+                <td align="left"><label title="$!task.executeName">$!task.executeName</label></td>
+            	<td style="font-weight: normal;">
+                	<a href="javascript:void(0);" onclick="updateTask($!task.taskType,$!task.taskId,$!task.isNextContact,this)" style="display:">编辑</a>
+					#if($!task.assignName.equals($!userLoginName))
+    					<a href="javascript:void(0);" style="display:" onclick="stopTask($!task.taskId,this)">中止</a>
+    					<a href="javascript:void(0);" onclick="delTskTask($!task.taskId,this)" style="display:">删除</a>
+					#else
+						<span href="#" disabled="true" style="cursor: default;">中止</span>
+						<span href="#" disabled="true" style="cursor: default;">删除</span>
+					#end
+                </td>
+            </tr>
+			#end
+        </tbody>
+		 
+        <tfoot>
+        	<tr>
+            	<td colspan="8">
+					<div class="floatR">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

@@ -1,0 +1,184 @@
+<thead>
+            <tr>
+                <th width="240"><label title="客户（电话）">客户（电话）</label></th>
+                <th width="150"><label title="身份证">身份证</label></th>
+                <th><label title="申请金额">申请金额(元)</label></th>
+                <th><label title="放贷时间">放贷时间</label></th>
+                <th><label title="贷款类型">贷款类型</label></th>
+                <th><label title="贷款状态">还款状态</label></th>
+                ##<th><label title="贷后状态">贷后状态</label></th>
+                <th width="100"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+        <tbody>
+#foreach($data in $dataList)
+    #if($!data.isWillPast && $!data.isWillPast ==1 )
+    <tr class="orange" >
+    #else
+    <tr>
+    #end
+    <td>
+        <div class="customer-infor">
+        #if($urlPermitUtil.hasPermission('browseCustomer'))
+            #if($!data.crmCustomer.defaultPhoneType=='1')
+                <span class="link" onclick="newTab('browse', '$!data.crmCustomer.customerId')" title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone1)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone1)）</span>
+            #elseif($!data.crmCustomer.defaultPhoneType=='2')
+                <span class="link" onclick="newTab('browse', '$!data.crmCustomer.customerId')" title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone2)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone2)）</span>
+            #elseif($!data.crmCustomer.defaultPhoneType=='3')
+                <span class="link" onclick="newTab('browse', '$!data.crmCustomer.customerId')" title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.phone)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.phone)）</span>
+            #elseif($!data.crmCustomer.defaultPhoneType=='4')
+                <span class="link" onclick="newTab('browse', '$!data.crmCustomer.customerId')" title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.fax)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.fax)）</span>
+            #end
+        #else
+            #if($!data.crmCustomer.defaultPhoneType=='1')
+                <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone1)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone1)）</span>
+            #elseif($!data.crmCustomer.defaultPhoneType=='2')
+                <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone2)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.mobilePhone2)）</span>
+            #elseif($!data.crmCustomer.defaultPhoneType=='3')
+                <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.phone)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.phone)）</span>
+            #elseif($!data.crmCustomer.defaultPhoneType=='4')
+                <span title="$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.fax)）">$!data.crmCustomer.customerName（$vmHelper.getHidePhoneNumber($!data.crmCustomer.fax)）</span>
+            #end
+        #end
+            <div class="icon">
+                #if($!data.crmCustomer.defaultPhoneType=='1')
+                    #if($urlPermitUtil.hasPermission('dialPhone'))
+                    <i class="i phone" onclick="dial('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="拨号">phone</i>
+                        #end
+                    #if($urlPermitUtil.hasPermission('tapePhone'))
+                    <i class="i dsc" onclick="tape('$!data.crmCustomer.customerId')" title="座谈" >dsc</i>
+                        #end
+                    #if($urlPermitUtil.hasPermission('toAddSms'))
+                        <i class="i sms" onclick="sendSms('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="短信">sms</i>
+                    #end
+                    #if($urlPermitUtil.hasPermission('toAddMms'))
+                        <i class="i mms" onclick="sendMms('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="彩信">mms</i>
+                    #end
+                #elseif($!data.crmCustomer.defaultPhoneType=='2')
+                    #if($urlPermitUtil.hasPermission('dialPhone'))
+                    <i class="i phone" onclick="dial('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="拨号">phone</i>
+                        #end
+                    #if($urlPermitUtil.hasPermission('tapePhone'))
+                    <i class="i dsc" onclick="tape('$!data.crmCustomer.customerId')" title="座谈" >dsc</i>
+                        #end
+                    #if($urlPermitUtil.hasPermission('toAddSms'))
+                        <i class="i sms" onclick="sendSms('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="短信">sms</i>
+                    #end
+                    #if($urlPermitUtil.hasPermission('toAddMms'))
+                        <i class="i mms" onclick="sendMms('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="彩信">mms</i>
+                    #end
+                #elseif($!data.crmCustomer.defaultPhoneType=='3')
+                    #if($urlPermitUtil.hasPermission('dialPhone'))
+                    <i class="i phone" onclick="dial('$!data.crmCustomer.phone','$!data.crmCustomer.customerId')" title="拨号">phone</i>
+                        #end
+                    #if($urlPermitUtil.hasPermission('tapePhone'))
+                    <i class="i dsc" onclick="tape('$!data.crmCustomer.customerId')" title="座谈" >dsc</i>
+                        #end
+                    #if($data.crmCustomer.mobilePhone1 && $!data.crmCustomer.mobilePhone1 != '')
+                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                            <i class="i sms" onclick="sendSms('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="短信">sms</i>
+                        #end
+                        #if($urlPermitUtil.hasPermission('toAddMms'))
+                            <i class="i mms" onclick="sendMms('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="彩信">mms</i>
+                        #end
+                    #elseif($data.crmCustomer.mobilePhone2 && $!data.crmCustomer.mobilePhone2 != '')
+                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                            <i class="i sms" onclick="sendSms('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="短信">sms</i>
+                        #end
+                        #if($urlPermitUtil.hasPermission('toAddMms'))
+                            <i class="i mms" onclick="sendMms('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="彩信">mms</i>
+                        #end
+                    #end
+                #elseif($!data.crmCustomer.defaultPhoneType=='4')
+                    #if($urlPermitUtil.hasPermission('dialPhone'))
+                    <i class="i phone" onclick="dial('$!data.crmCustomer.fax','$!data.crmCustomer.customerId')" title="拨号">phone</i>
+                        #end
+                    #if($urlPermitUtil.hasPermission('tapePhone'))
+                    <i class="i dsc" onclick="tape('$!data.crmCustomer.customerId')" title="座谈" >dsc</i>
+                        #end
+                    #if($data.crmCustomer.mobilePhone1 && $!data.crmCustomer.mobilePhone1 != '')
+                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                            <i class="i sms" onclick="sendSms('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="短信">sms</i>
+                        #end
+                        #if($urlPermitUtil.hasPermission('toAddMms'))
+                            <i class="i mms" onclick="sendMms('$!data.crmCustomer.mobilePhone1','$!data.crmCustomer.customerId')" title="彩信">mms</i>
+                        #end
+                    #elseif($data.crmCustomer.mobilePhone2 && $!data.crmCustomer.mobilePhone2 != '')
+                        #if($urlPermitUtil.hasPermission('toAddSms'))
+                            <i class="i sms" onclick="sendSms('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="短信">sms</i>
+                        #end
+                        #if($urlPermitUtil.hasPermission('toAddMms'))
+                            <i class="i mms" onclick="sendMms('$!data.crmCustomer.mobilePhone2','$!data.crmCustomer.customerId')" title="彩信">mms</i>
+                        #end
+                    #end
+                #end
+            </div>
+            <div class="other">
+                <label class="item cusTitle" title="$!data.crmCustomer.customerTitle">
+                    $!data.crmCustomer.customerTitle
+                </label>
+                <label class="item">
+                    $!data.crmCustomer.sex
+                </label>
+                <label class="item">
+                    #if($data.crmCustomer.age)
+                        		$!data.crmCustomer.age岁
+                        	#end
+                </label>
+                #if($data.crmCustomer.isNoGood && $!data.crmCustomer.isNoGood==1)
+                    <label class="item red">
+                        （不良客户）
+                    </label>
+                #end
+            </div>
+        </div>
+    </td>
+    <td><label title="$vmHelper.getHideIdCard($!data.crmCustomer.idCard)">$vmHelper.getHideIdCard($!data.crmCustomer.idCard)</label></td>
+    <td><label title="$vmHelper.getUnityDecimalMoney($!data.loanMoney)">$!data.lnLoanInfoBean.appMoney</label></td>
+    <td><label title="$!date.format('yyyy-MM-dd HH:mm',$!data.lendContractCheckDate)">$!date.format('yyyy-MM-dd HH:mm',$!data.lendContractCheckDate)</label></td>
+    <td><label title="$!data.lnLoanTypeBean.loanTypeName">$!data.lnLoanTypeBean.loanTypeName</label></td>
+    <td><label title="$!data.lnLoanStatus.loanStatusName">#if($!data.loanStatusName=="结清") 已还款 #else 待催收  #end </label></td>
+	<td><span onclick="loanNotConfirmEdit($!data.loanId)" class="link">编辑</span></td>
+ #*    #if($!data.isCheckout==0)
+        <td><label title="否">未落实</label></td>
+        <td>
+            #if($urlPermitUtil.hasPermission('lnMakeEdit'))
+                #if($!data.surveyUserId == $!sysUserId)
+                    <span onclick="loanNotConfirmEdit($!data.loanId)" class="link">编辑</span>
+                #else
+                    <span disabled="true" style="cursor: default;color:gray;">编辑</span>
+                #end
+            #else
+                <span disabled="true" style="cursor: default;color:gray;">编辑</span>
+            #end
+        </td>
+    #else
+        <td><label title="是">已落实</label></td>
+        <td>
+            #if($!data.isNogood && $!data.isNogood==1)
+                #if($urlPermitUtil.hasPermission('lnMakeView'))
+                    <span onclick="loanConfirmView($!data.loanId)" class="link">查看</span>
+                #else
+                    <span disabled="true" style="cursor: default;color:gray;">查看</span>
+                #end
+            #else
+                #if($urlPermitUtil.hasPermission('lnMakeEdit'))
+                    #if($!data.surveyUserId == $!sysUserId)
+                        <span onclick="loanConfirmEdit($!data.loanId)" class="link">编辑</span>
+                    #else
+                        <span disabled="true" style="cursor: default;color:gray;">编辑</span>
+                    #end
+                #else
+                    <span disabled="true" style="cursor: default;color:gray;">编辑</span>
+                #end
+            #end
+        </td>
+        #end *#
+    </tr>
+#end
+    </tbody>
+    <tfoot>
+        <td colspan="7">
+        #parse("/velocity/ajaxPage.vm")
+        </td>
+    </tfoot>

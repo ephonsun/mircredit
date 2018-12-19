@@ -1,0 +1,885 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>查看电话营销任务</title>
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	#styleLink("base")
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css"/>
+    <style type="text/css">
+    .hide {
+        display: none !important;
+    }
+
+    .Agency-left {
+        position: absolute;
+        left: 10px;
+        width: 170px;
+    }
+
+    .Agency-left h4 {
+        height: 30px;
+        border: 1px solid #ccc;
+        padding: 0px 5px;
+        line-height: 30px;
+        font-size: 12px;
+        font-family: Microsoft Yahei;
+    }
+
+    .Agency-left h4 label {
+        float: left;
+    }
+
+    .Agency-left h4 p {
+        float: right;
+    }
+
+    .Agency-left h4 p a {
+        float: left;
+        width: 20px;
+        overflow: hidden;
+        text-indent: -1000px;
+    }
+
+    .Agency-left h4 p a.edi-add {
+        background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent;
+    }
+
+    .Agency-left h4 p a.edi-up {
+        background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent;
+    }
+
+    .Agency-left h4 p a.edi-down {
+        background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent;
+    }
+
+    .Agency-left h4 p a.edi-del {
+        background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent;
+    }
+
+    .Agency-left h4 p a.edi-edi {
+        background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent;
+    }
+
+    .Agency-left .Agency-tree {
+        width: 99%;
+        display: block;
+        height: 500px;
+        border: 1px solid #ccc;
+        margin-top: 2px;
+        overflow: auto;
+    }
+
+</style>
+    <style type="text/css">
+		.over { background-color: #E3EAF4; }
+	</style>
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.tabletree-v1.0-micro.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.pie.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.core-3.2.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/ztree/jquery.ztree.exedit-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/js/report/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+
+	<script type="text/javascript">
+		var oldPostJson={};	//上一个搜索条件
+		
+		/**
+		 * 分页跳转
+		 */
+		function gotoPage(page){
+			goto(
+				page,
+				"${ctx}/tskMicroTask/queryPhoneTaskTargetPage.html?RandNum="+ Math.random(),
+				oldPostJson,
+				function(html){
+					queryResult(html);
+				});
+		}
+		
+		/**
+		 * 分页跳转或者查询结果
+		 */
+		function queryResult(html){
+			jQuery("#tblList").html(html).table();
+			//更新记录数
+			var total = jQuery('#total').val();
+			if(total!=undefined){
+				jQuery(".green").text(total);
+			}else {
+				jQuery(".green").text("0");
+			}
+		}
+		
+		/*
+		 * 初始化oldPostJson查询数据
+		 */
+		function initQueryJson(){
+			var taskId = $('#txtTaskId').val();
+			var postJson={'tskMicroTask.taskId':taskId,'BelongToType':'brAll'};
+	   		oldPostJson = postJson;
+	   		return postJson;
+	   	}
+	   	
+    	//查看客户
+		function browseCustomer(cusId){
+        	jQuery.ajax({
+    			  type: 'POST',
+    			  url: "../customer/isDeleteCus.html?random="+Math.random()*1000,
+    			  data: {"cusId":cusId},
+    			  success:function(data){
+    			  		var obj = jQuery.parseJSON(data);
+    			  		if(obj[0].isDel=='1'){
+    			  			banger.page.showMessageBox('客户“'+obj[0].customerName+'”被删除，无法查看具体资料！');
+    			  		}else{
+    			  			var options = {id: "cusBrowse"+cusId, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+cusId, lock: false};
+    						tab.add(options);
+    			  		}
+    			  	}
+    			});	
+        }
+        
+       function play(obj,fileId) {
+            jQuery.post("../data/isExistFileById.html", {"fileId": fileId}, function (result) {
+                if (result == '0') {
+                    banger.page.showMessageBox({"type": "error", "content": "文件不存在！"});
+                    return;
+                } else {
+                    window.parent.showAudioNoRemarkDiv(fileId);//jwplay播放器
+                }
+            });
+        }
+		
+		$(function(){
+			$('select').select();
+			
+			$('div.etabs').etabs({
+				'index': 0,
+				'head': 'etabs-items',
+				'body': 'etabs-body',
+				'bar': 'etabs-bar',
+				'beforeOnclick': fun1,
+				'onclick': fun2
+			});
+			
+			var setting = {afterUpdate:fun3};
+			$('.tabletree').tabletree(setting);
+			
+			$("#customerQuery").tips({ msg: "姓名、联系电话" });
+			
+			$("#btnSearch").click(function(){
+				var taskId = $('#txtTaskId').val();
+				var customerQuery = "";
+				if(jQuery("#customerQuery").val() != "姓名、联系电话"){
+					customerQuery = jQuery.trim(jQuery("#customerQuery").val());
+					jQuery("#customerQuery").val(customerQuery);
+				}
+				var callDateFrom = jQuery("#txtCallStartDate").val();
+				var callDateTo = jQuery("#txtCallEndDate").val();
+				var isFinish = jQuery("#isFinish").val();
+				var inChargeUserIds = $('#userIds').val();
+				var BelongToType = $('#BelongToType').val();
+			
+				
+				var postJson={'tskMicroTask.taskId':taskId,
+							  'customerQuery': customerQuery,
+							  'callStartDate': callDateFrom,
+						  	  'callEndDate': callDateTo,
+						  	  'isFinish': isFinish,
+						  	  'inChargeUserIds': inChargeUserIds,
+							  'BelongToType':BelongToType
+				};
+				oldPostJson = postJson;  //记录OldPostJson
+				jQuery.ajax({
+			    	type: "post",
+			    	url: "queryPhoneTaskTargetPage.html",
+			    	data: postJson,
+			    	success: function(data){
+			 	  		queryResult(data);
+			    	}
+				});
+			});
+			
+			$("#btnClear").click(function(){
+				jQuery("input[name='conds']").each(function(){
+					jQuery(this).val("");
+				});
+				$('#userIds').val("");//清空选中的执行者
+                $('#userText').val("");
+                $('#deptText').val("");
+				$("#customerQuery").tips({ msg: "姓名、联系电话" });
+				$("select").each(function(){
+					this.selectedIndex = 0;
+					$(this).select();
+				}); 
+				$("#BelongToType").val("brAll");
+				changeBelongTo('brAll');
+				
+				//jQuery('#selProduct')[0].selectedIndex = 0;
+				//jQuery('#selProduct').select();
+			});
+			
+			jQuery("#btnRefresh").click(function(){
+				goto(null,"../tskMicroTask/queryPhoneTaskTargetPage.html?RandNum="+ Math.random(),oldPostJson,function(html){queryResult(html);});
+			});
+			
+			initQueryJson();
+			
+			jQuery('#tblList').table();
+			
+			initBelongTo();
+		});
+		
+		function initBelongTo(){
+		$("#BelongToType").val("brAll");
+		
+		//加载下属树
+		$('#userList').subtree({
+			tid: 'subtree',
+			showIcon: true,
+			url: function(){ return "../customer/getCusBelongToJson.html?BelongToType=brUser&random=" + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckUser },
+				{ text: '取消' }
+			]
+		});
+		//加载机构树
+		$('#deptList').agetree({
+			tid: 'agetree',
+			url: function(){ return "../customer/getCusBelongToJson.html?BelongToType=brDept&random=" + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckDept },
+				{ text: '取消' }
+			]
+		});
+		
+		$("#BelongToType").change(function(){
+				changeBelongTo($(this).val());
+			});
+			changeBelongTo('brAll');
+		}
+		//点击User
+		function onCheckUser(treeId){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'U');
+			$('#userIds').val(postJson.ids);
+			$('#userText').val(postJson.names);
+		}
+		//点击Dept
+		function onCheckDept(treeId, checkbox){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'D');
+			$('#deptIds').val(postJson.ids);
+			$('#deptText').val(postJson.names);
+			if(checkbox.checked){
+				containSub = '1';
+			}else{
+				containSub = '0';
+			}
+		}
+		function getCheckJson(treeId, flag){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getCheckedNodes(true);
+			var len = nodes.length;
+			var uIds = "";
+			var uName = "";
+			for(var i=0; i<len; i++){
+				if(flag=='U'){
+					if(nodes[i].flag==flag){
+						if(uIds==""){
+							uIds = nodes[i].id;
+							uName = nodes[i].name;
+						}else{
+							uIds = uIds + "," + nodes[i].id;
+							uName = uName+ "," +nodes[i].name;
+						}
+					}
+				}else{
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}	
+				}
+			}
+			var postJson = {};
+			postJson['ids'] = uIds;
+			postJson['names'] = uName;
+			return postJson;
+		}	
+		//改变归属
+		function changeBelongTo(val){
+			$('#userIds').val("");
+			$('#deptIds').val("");
+			$('#userText').val("");
+			$('#deptText').val("");
+			switch(val){
+				case "brAll":
+					$("#my, #userList, #deptList").hide();	
+					break;
+				case "brMine":
+					$("#my").show();
+					$('#showText').text('$!userName');
+					$("#userList, #deptList").hide();
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#my, #deptList").hide();
+					break;
+				case "brDept":
+					$("#deptList").show();
+					$("#my, #userList").hide();
+					break;
+				case "brUnAllocate":
+					$("#my, #userList, #deptList").hide();	
+					break;
+				default: break;
+			}
+		}
+	
+		function fun3(trObj){
+			var taskId = jQuery("#txtTaskId").val();
+			var deptId = 0;
+			var userId = 0;
+			var targetUser = 0;
+			var targetDept = 0;
+			var targetDeptUnassign = 0;
+			var rs = trObj.attr("mode") - 0 - 3;
+			if(rs < 0){
+				deptId = trObj.attr("id");
+				targetDept = trObj.children("td").eq(1).find("label").text();
+				targetDeptUnassign = trObj.children("td").eq(3).find("label").text();
+			}else{
+				deptId = trObj.attr("epid");
+				userId = trObj.attr("id");
+				targetUser = trObj.children("td").eq(1).find("label").text();
+			}
+			//执行后台数据库数据交互操作,执行成功则界面执行交换操作
+			jQuery.ajax({
+		    	type: "post",
+		    	url: "../tskMicroTaskExecute/saveTskMicroTaskExecute.html",
+		    	data: {'tskMicroTaskExecute.taskId': taskId,
+		    		   'tskMicroTaskExecute.deptId': deptId,
+				       'tskMicroTaskExecute.userId': userId,					       
+				       'tskMicroTaskExecute.targetUser': targetUser,
+				       'tskMicroTaskExecute.targetDept': targetDept,
+				       'tskMicroTaskExecute.targetDeptUnassign': targetDeptUnassign
+		    	},
+		    	success: function(data){
+		 	  		editResult(data);
+		    	}
+			});
+		}
+		
+		function editResult(msg){
+			if(msg != 'SUCCESS'){
+				banger.page.showMessageBox(msg);
+			}
+		}
+		
+		function fun1(h, b){
+			return true;
+		}
+		function fun2(h, b){
+		}
+
+
+		var setting = {
+    callback:{
+        beforeClick:selectFirst,
+        onClick:treeOnclick
+    },
+    data:{
+        simpleData:{
+            enable:true
+        }
+    },
+    view:{
+        showIcon:true
+    }
+
+};
+
+//点击树选中rdo 第一选项
+   function selectFirst(){
+       $("#curve").attr('checked','true');
+   }
+
+//json树数据
+var zNodes = $!deptJson;
+
+//默认选择第一个节点
+function initNodeSelect() {
+    var treeObj = jQuery.fn.zTree.getZTreeObj("deptTree");
+    var nodes = treeObj.getNodes();
+    if (nodes.length > 0) {
+        treeObj.selectNode(nodes[0]);
+    	onClick:treeOnclick("","",nodes[0]);
+    }else{
+    	$("#columnar").attr('disabled','true');
+    	$("#curve").attr('disabled','true');
+    }
+}
+
+//延迟器
+var timer = null;
+
+
+function delay() {
+    initNodeSelect();
+
+    clearTimeout(timer);
+}
+
+
+//点击节点查询本部门用户
+function treeOnclick(event, treeId, treeNode) {
+    var taskId = "";
+    //没有分配任务(没有节点)
+    if(treeNode==null || treeNode==''){
+      return;
+    }
+    if (treeNode.flag == "U") {
+        jQuery.ajax({
+            type:"post", //请求方式
+            url:"taskProgressQuery.html", //发送请求地址
+            data:{ //发送给数据库的数据
+                taskId:jQuery("#txtTaskId").val(),
+                userId:treeNode.id,
+		rdo:$("input[name='rdo']:checked").val()
+            },
+            //请求成功后的回调函数
+            success:function (json) {
+
+                if($("input[name='rdo']:checked").val()=="curve"){
+                    var jsonText = jQuery.parseJSON(json);
+                    if(jsonText.pieMsg){
+                        json=jsonText.pieMsg;
+                        if(jsonText.finishCount <1){
+                            $("#columnar").attr('disabled','true');
+                        }else{
+                            $("#columnar").removeAttr('disabled');
+                        }
+                    }
+                }
+                chart = new Highcharts.Chart({
+                    chart:{
+                        renderTo:'container',
+                        plotBackgroundColor:null,
+                        plotBorderWidth:null,
+                        plotShadow:false
+                    },
+                    title:{
+                        text:'任务进度'
+                    },
+                    tooltip:{
+                        formatter:function () {
+                             return '<b>' + this.point.name + '</b>: ' + this.percentage.toFixed(1) + ' %';
+                        }
+                    },
+                    plotOptions:{
+                        pie:{
+                            allowPointSelect:true,
+                            cursor:'pointer',
+                            dataLabels:{
+                                enabled:true,
+                                color:'#000000',
+                                connectorColor:'#000000',
+                                formatter:function () {
+                                    return '<b>' + this.point.name + '</b>: ' +Highcharts.numberFormat(this.y, 0, ',');
+                                }
+                            }
+                        }
+                    },
+                    series:[{
+                            type:'pie',
+                            name:'Browser share',
+                            data:eval(json)
+                        }]
+                });
+            }
+        });
+    }
+    else {
+        jQuery.ajax({
+            type:"post", //请求方式
+            url:"taskProgressQuery.html", //发送请求地址
+            data:{ //发送给数据库的数据
+                taskId:jQuery("#txtTaskId").val(),
+                deptId:treeNode.id,
+		rdo:$("input[name='rdo']:checked").val()
+            },
+            //请求成功后的回调函数
+            success:function (json) {
+
+                if($("input[name='rdo']:checked").val()=="curve"){
+                    var jsonText = jQuery.parseJSON(json);
+                    if(jsonText.pieMsg){
+                        json=jsonText.pieMsg;
+                        if(jsonText.finishCount <1){
+                            $("#columnar").attr('disabled','true');
+                        }else{
+                            $("#columnar").removeAttr('disabled');
+                        }
+                    }
+                }
+                chart = new Highcharts.Chart({
+                    chart:{
+                        renderTo:'container',
+                        plotBackgroundColor:null,
+                        plotBorderWidth:null,
+                        plotShadow:false
+                    },
+                    title:{
+                        text:'任务进度'
+                    },
+                    tooltip:{
+                        formatter:function () {
+                             return '<b>' + this.point.name + '</b>: ' + this.percentage.toFixed(1) + ' %';
+                        }
+                    },
+                    plotOptions:{
+                        pie:{
+                            allowPointSelect:true,
+                            cursor:'pointer',
+                            dataLabels:{
+                                enabled:true,
+                                color:'#000000',
+                                connectorColor:'#000000',
+                                formatter:function () {
+                                    return '<b>' + this.point.name + '</b>: ' +Highcharts.numberFormat(this.y, 0, ',');
+                                }
+                            }
+                        }
+                    },
+                    series:[{
+                            type:'pie',
+                            name:'Browser share',
+                            data:eval(json)
+                        }]
+                });
+            }
+    });
+}
+}
+
+
+$(function () {
+    $(document).ready(function () {
+        jQuery.fn.zTree.init($("#deptTree"), setting, zNodes);
+        timer = setTimeout(delay, 100);
+    });
+
+    $('.rdo').bind('click', function() {
+    var zTree=jQuery.fn.zTree.getZTreeObj("deptTree");
+    var nodes = zTree.getSelectedNodes();
+    onClick:treeOnclick("","",nodes[0])
+    });
+
+$('#loanStatus').change(function(){
+    var zTree=jQuery.fn.zTree.getZTreeObj("deptTree");
+    var nodes = zTree.getSelectedNodes();
+    onClick:treeOnclick("","",nodes[0])
+    });
+});
+    </script>
+</head>
+
+<body>
+<input type="hidden" id="txtTaskId" value="$!tskMicroTask.taskId"/>
+<div class="etabs">
+    	<div class="etabs-head">
+    		<div class="etabs-head-items">
+    			<ul id="etabs-items">
+		        	<li><label>任务基本信息</label></li>
+		        	<li id="liAssign"><label>任务明细</label></li>
+		        	<li><label>营销录音</label></li>
+		        	<li><label>进度</label></li>
+		        </ul>
+    		</div>
+    	</div>
+        <div id="etabs-body" class="etabs-body">
+        	<div class="etabs-body-child">
+        		<table class="viewtbl" style="table-layout: auto;">
+                    <tbody>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>任务名称：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!tskMicroTask.taskTitle</label>
+                            </td>
+                        </tr>                                           
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>开始日期：</label>
+                            </td>
+                            <td width="15%">
+                                <label>$!date.format("yyyy-MM-dd",$!tskMicroTask.startDate)</label>
+                            </td>
+                            <td class="field" width="8%">
+                                <label>结束日期：</label>
+                            </td>
+                            <td  width="15%">
+                                <label>$!date.format("yyyy-MM-dd",$!tskMicroTask.endDate)</label>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>任务类型：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>
+                                #if($!tskMicroTask.taskType == 2)
+                                	营销任务-电话营销
+                                #else
+                                	营销任务-实地营销
+                                #end
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>任务目标：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!tskMicroTask.taskTarget个</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>新客户比例：</label>
+                            </td>
+                            <td colspan="5">
+                                 
+                                <label>#if($!tskMicroTask.newCustomerPercent) $!tskMicroTask.newCustomerPercent #else 0 #end &#37;</label>
+                            </td>
+                        </tr>  
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>老客户比例：</label>
+                            </td>
+                            <td colspan="5">       
+                                <label>#if($!tskMicroTask.oldCustomerPercent) $!tskMicroTask.oldCustomerPercent #else 0 #end &#37;</label>
+                            </td>
+                        </tr>                        
+                        <tr>
+                            <td class="field" width="8%" valign="top">
+                                <label>任务备注：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!tskMicroTask.remark</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="8%" class="field">
+                                <label>创建者：</label>
+                            </td>
+                            <td colspan="5">
+                                <label>$!assignName</label><label class="red">$!assignflag</label>
+                            </td>
+                        </tr>  
+                    </tbody>
+                </table> 
+                <hr />
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+                </div>     
+            </div>
+            <div class="etabs-body-child">
+            	<div class="ztree-box">
+					<table id="table" class="tabletree" cellpadding="0" cellspacing="0">
+						<thead>
+							<tr>
+								<th><label title="分配对象">分配对象</label></th>
+								<th><label title="任务目标(个)">任务目标(个)</label></th>
+								<th><label title="已分配任务(个)">已分配任务(个)</label></th>
+								<th><label title="未分配任务(个)">未分配任务(个)</label></th>
+								<th><label title="已分配任务比率">已分配任务比率</label></th>
+								<th><label title="已完成个数(个)">已完成个数(个)</label></th>
+								<th><label title="完成进度">完成进度</label></th>
+							</tr>
+						</thead>
+						<tbody>
+						#foreach($tskAssign in $!tskAssignList)
+							<tr id="$!tskAssign.id" pid="$!tskAssign.pid" mode="1" epid="$!tskAssign.epid">
+								<td><label title="$!tskAssign.assignObjName">$!tskAssign.assignObjName</label></td>
+								<td>
+                                    <label class="col1" title="$!tskAssign.assignTotalTarget">$!tskAssign.assignTotalTarget</label>
+                                    <input type="hidden" id="assignTotalTarget" value="$!tskAssign.assignTotalTarget" />
+                                </td>
+								<td><label class="col2" title="$!tskAssign.assignTarget">$!tskAssign.assignTarget</label></td>
+								<td><label #if($!tskAssign.unAssignTarget!=0) class="col3 red" #else class="col3" #end title="$!tskAssign.unAssignTarget">$!tskAssign.unAssignTarget</label></td>
+								<td><label class="col4" title="$!tskAssign.assignPc">$!tskAssign.assignPc</label></td>
+								<td><label class="col5" title="$!tskAssign.comTskNum">$!tskAssign.comTskNum</label></td>
+								<td><label class="col6" title="$!tskAssign.comPc">$!tskAssign.comPc</label></td>
+						   </tr>
+						#end
+						</tbody>
+					</table>
+                </div>
+                <hr />
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+                </div>
+            </div>
+            <div class="etabs-body-child">
+                <table class="htmltbl">
+   				 	<tbody>
+                        <tr>
+                            <td class="field" width="8%">
+                                <label>客户：</label>
+                            </td>
+                            <td width="25%">
+                                <div class="ui-div-text">
+                                    <input type="text" class="text" id="customerQuery" name="conds"/>
+                                </div>
+                            </td>
+                            <td class="field" width="8%">
+                                <label>联系状态：</label>
+                            </td>
+                            <td width="25%">
+                               <select id="isFinish">
+			                		<option value="">&nbsp;</option>
+			                    	<option value="1">&nbsp;已联系</option>
+			                        <option value="0">&nbsp;未联系</option>
+			                    </select>
+                            </td>
+                            <td class="field" width="8%">
+                                <label>通话时间：</label>
+                            </td>
+                            <td colspan="3">
+                                <table class="celltbl">
+                                    <tbody>
+                                        <tr>
+                                            <td width="159">
+                                                <div class="ui-div-text">
+							                    	<input type="text" class="text datepicker" name="conds" id="txtCallStartDate" readonly="readonly" />
+													<i class="date"></i>
+							                    </div>
+                                            </td>
+                                            <td width="22"><label>-</label></td>
+                                            <td width="159">
+                                                <div class="ui-div-text">
+							                    	<input type="text" class="text datepicker" name="conds" id="txtCallEndDate" readonly="readonly" />
+													<i class="date"></i>
+							                    </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                             <td class="field" width="8%">
+                                <label>执行者：</label>
+                            </td>
+                            <td width="25%">
+	                                <select id="BelongToType" name="BelongToType">
+										<option value="brAll"></option>
+										<option value="brMine">我的</option>
+										#if($!isDeptManger == 1)
+											<option value="brUser">下属的</option>
+										#end
+									</select>
+                            </td>                            
+                            <td colspan="4">
+								<span class="btn2 fl" id="my">
+									<input id="myUserId" type="hidden"/>
+									<label class="btn2-txt" id="showText">
+										
+									</label>
+								</span>
+								<div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+									<input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+									<input id="userIds" name="userIds" type="hidden" />
+									<span class="dtxt2-ddl" id="ddlchange">ddl</span>
+								</div>
+								<div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+									<input type="text" class="dtxt2-txt" readonly="readonly" id="deptText"/>
+									<input id="deptIds" name="deptIds" type="hidden" />
+									<span class="dtxt2-ddl" id="ddlchange">ddl</span>
+								</div>
+							</td>
+                        </tr>
+                    </tbody>
+   			    </table>
+                <div class="search-bar">
+                    <span class="fl">
+                        电话营销录音(<label class="green">$!count</label>)
+                    </span>
+                    <input type="button" class="ui-input-btn" value="清空" id="btnClear"/>
+                    <input type="button" class="ui-input-btn" value="搜索" id="btnSearch"/>
+                </div>
+                
+                <div class="action-bar">
+                    <span class="ui-span-btn fr" id="btnRefresh">
+                        <label>刷新</label>
+                    </span>
+                </div>
+                <table id="tblList" class="datatbl">
+	                #parse("/velocity/microTask/phoneTskMicroTaskMarketingTargetList.vm")
+	            </table>
+	            <hr />
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+                </div>
+            </div>    
+             <div class="etabs-body-child">
+            <div class="ui-panel-box2">
+                <div class="Agency-left">
+                    <h4>
+                        <label>分配者树</label>
+                    </h4>
+
+                    <div class="Agency-tree">
+                        <ul id="deptTree" class="ztree"></ul>
+                    </div>
+                </div>
+                <div class="r">
+                    <table class="viewtbl">
+                        <tbody>
+                        <tr>
+                            <td colspan="3"></td>
+                            <td class="field" width="8%">
+                                <label>客户：</label>
+                            </td>
+                            <td width="32%">
+                                <input type="radio" id="curve" name="rdo" class="rdo" checked="true" value="curve"/>
+                                <label>全部</label>
+                                <input type="radio" id="columnar" name="rdo" class="rdo" value="columnar"/>
+                                <label>新老客户比例</label>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+                </div>
+            </div>
+            <hr />
+                <div class="center">
+                    <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="关闭" onclick="javascript:tab.close(GetId(), false);"/>
+                </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

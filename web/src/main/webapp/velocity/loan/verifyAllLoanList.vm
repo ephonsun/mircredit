@@ -1,0 +1,380 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>所有贷款</title>
+
+    #styleLink("base")
+<link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+<link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+<link type="text/css" rel="stylesheet" href="${ctx}/css/ztree/ztree.css" />
+<!--
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/base.css" />
+    -->
+
+    #scriptLink("core")
+    #scriptLink("page")
+<script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+<script type="text/javascript" src="${ctx}/js/banger/banger.page.js"></script>
+<script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+
+<script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+<script type="text/javascript">
+    var autoLogin = "$!autoLogin";
+    var containSub = '1';
+    $(function(){
+        initBelongTo();
+        $('select').select();
+        $("#customer").tips({msg:"姓名、电话或身份证"});
+        $('table.datatbl').table();
+
+        getQueryJson();
+
+        //查询
+        $("#query").click(query);
+
+        //清除
+        $('#clear').click(function(){
+            $('.text').val('');
+            $("select").each(function(){
+                this.selectedIndex = 0;
+                $(this).select();
+            });
+            changeBelongTo('brMine');
+            changeBelongTo('brMine');
+            changeBelongTo('brAll');
+            $("#userText").val("");
+            $("#deptText").val("");
+            $("#customer").tips({msg:"姓名、电话或身份证"});
+        })
+
+        //刷新
+        $("#refresh").click(function(){
+            if(oldPostJson){
+                goto(
+                        null,
+                        "../loan/verifyAllLoanListQuery.html?RandNum="+Math.random(),
+                        oldPostJson,
+                        function(html){
+                            queryBack(html,'dataList');
+                        }
+                );
+            }
+        });
+    });
+
+    var oldPostJson = {};
+
+    function getQueryJson(){
+        if($("#customer").val() == "姓名、电话或身份证"){
+            $('#customer').val("");
+        }
+
+        var postJson = {};
+        postJson['customer'] = jQuery.trim($('#customer').val());
+        postJson['loanStatus'] = jQuery.trim($('#loanStatus').val());
+        postJson['verifyStatus'] = jQuery.trim($('#verifyStatus').val());
+        postJson['checkoutStatus'] = jQuery.trim($('#checkoutStatus').val());
+        postJson['userIds'] = jQuery.trim($('#userIds').val());
+        postJson['startDate'] = jQuery.trim($('#startDate').val());
+        postJson['endDate'] = jQuery.trim($('#endDate').val());
+
+        postJson['BelongToType']=jQuery.trim($('#BelongToType').val());
+        postJson['userIds'] = jQuery.trim($('#userIds').val());
+        postJson['deptIds'] = jQuery.trim($('#deptIds').val());
+
+        oldPostJson = postJson;
+
+        if($('#customer').val() == ''){
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+        }
+
+        return postJson;
+    }
+
+    //查询
+    function query(){
+        var postJson = getQueryJson();
+        var urlStr = "${ctx}/loan/verifyAllLoanListQuery.html?RanNum="+Math.random();
+        jQuery.ajax({
+            type:'POST',
+            url:urlStr,
+            data:postJson,
+            success:function(html){
+                queryBack(html,'dataList');
+                oldPostJson = getQueryJson();
+            }
+        });
+    }
+
+
+    function getCheckJson(treeId,flag){
+        var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+        var nodes = treeObj.getCheckedNodes(true);
+        var len = nodes.length;
+        var uIds = "";
+        var uName = "";
+        for(var i=0; i<len; i++){
+            if(flag=='U'){
+                if(nodes[i].flag==flag){
+                    if(uIds==""){
+                        uIds = nodes[i].id;
+                        uName = nodes[i].name;
+                    }else{
+                        uIds = uIds + "," + nodes[i].id;
+                        uName = uName+ "," +nodes[i].name;
+                    }
+                }
+            }else{
+                if(uIds==""){
+                    uIds = nodes[i].id;
+                    uName = nodes[i].name;
+                }else{
+                    uIds = uIds + "," + nodes[i].id;
+                    uName = uName+ "," +nodes[i].name;
+                }
+            }
+        }
+        var postJson = {};
+        postJson['ids'] = uIds;
+        postJson['names'] = uName;
+        return postJson;
+    }
+
+    //分页跳转
+    function gotoPage(page){
+        if(oldPostJson){
+            goto(
+                    page,
+                    "${ctx}/loan/verifyAllLoanListQuery.html?RanNum="+Math.random(),
+                    oldPostJson,
+                    function(html){
+                        queryBack(html,'dataList');
+                    }
+            );
+        }
+    }
+
+    function queryBack(html,gridId){
+        $("#"+gridId).html(html);
+        $('table.datatbl').table();
+        var total = $('#total').val();
+        if(total != null){
+            $("#recordCount").text(total);
+        }else{
+            $("#recordCount").text(0);
+        }
+    }
+
+    function getCheckedLoan(obj){
+        var str = "";
+        obj.each(function(){
+            if(jQuery(this).attr("checked")){
+                if(!str){
+                    str = jQuery(this).val();
+                }else{
+                    str = str + "," + jQuery(this).val();
+                }
+            }
+        })
+        return str;
+    }
+
+    function initBelongTo(){
+        $("#BelongToType").val("brAll");
+
+        //加载下属树
+        $('#userList').subtree({
+            tid: 'subtree',
+            showIcon: true,
+            url: function(){ return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brUser&random=" + Math.random(); },
+            buttons: [
+                { text: '确定', callback: onCheckUser },
+                { text: '取消' }
+            ]
+        });
+        //加载机构树
+        $('#deptList').agetree({
+            tid: 'agetree',
+            url: function(){ return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brDept&random=" + Math.random(); },
+            buttons: [
+                { text: '确定', callback: onCheckDept },
+                { text: '取消' }
+            ]
+        });
+
+        $("#BelongToType").change(function(){
+            changeBelongTo($(this).val());
+        });
+        changeBelongTo($("#BelongToType").val());
+    }
+
+    //点击user
+    function onCheckUser(treeId){
+        var postJson = {};
+        postJson = getCheckJson(treeId,'U');
+        $('#userIds').val(postJson.ids);
+        $('#userText').val(postJson.names);
+    }
+    //点击Dept
+    function onCheckDept(treeId, checkbox){
+        var postJson = {};
+        postJson = getCheckJson(treeId, 'D');
+        $('#deptIds').val(postJson.ids);
+        $('#deptText').val(postJson.names);
+        if(checkbox.checked){
+            containSub = '1';
+        }else{
+            containSub = '0';
+        }
+    }
+
+    function changeBelongTo(val){
+        $('#userIds').val("");
+        $('#deptIds').val("");
+        switch(val){
+            case "brAll":
+                $("#my, #userList, #deptList").hide();
+                break;
+            case "brMine":
+                $("#my").show();
+                $('#showText').text('$!userName');
+                $("#userList, #deptList").hide();
+                break;
+            case "brUser":
+                $("#userList").show();
+                $("#my, #deptList").hide();
+                break;
+            case "brDept":
+                $("#deptList").show();
+                $("#my, #userList").hide();
+                break;
+            case "brUnAllocate":
+                $("#my, #userList, #deptList").hide();
+                break;
+            default: break;
+        }
+    }
+
+    function viewVerifyLoan(loanId){
+        var options = {id:"verifyAllLoanList-"+loanId,pid:GetId(), title: "查看贷款", url: "${ctx}/loan/verifyAllLoanView.html?RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+        tab.add(options);
+    }
+</script>
+</head>
+
+<body>
+<table class="htmltbl" >
+    <tbody>
+    <tr>
+        <td class="field" width="8%">
+            <label>客户：</label>
+        </td>
+        <td width="17%">
+            <div class="ui-div-text">
+                <input type="text" class="text" id="customer" />
+            </div>
+        </td>
+        <td class="field" width="8%">
+            <label>贷款状态：</label>
+        </td>
+        <td width="17%">
+            <select id="loanStatus">
+                <option value=""></option>
+                #foreach($loanStatus in $statusList)
+                    #if($loanStatus.loanStatusId != 1)
+                        <option value="$loanStatus.loanStatusId">&nbsp;$loanStatus.loanStatusName</option>
+                    #end
+                #end
+            </select>
+        </td>
+        <td colspan="2"></td>
+    </tr>
+    <tr>
+        <td class="field" width="8%">
+            <label>审计状态：</label>
+        </td>
+        <td width="17%">
+            <select id="verifyStatus">
+                <option value=""></option>
+                <option value="0">&nbsp;未审计</option>
+                <option value="2">&nbsp;审计通过</option>
+                <option value="3">&nbsp;不合规</option>
+            </select>
+        </td>
+        <td class="field" width="8%">
+            <label>归属人员：</label>
+        </td>
+        <td width="17%">
+            <select id="BelongToType" name="BelongToType">
+                <option value="brAll"></option>
+                <option value="brMine">我的</option>
+                #if($dataCode && $!dataCode=="3")
+                    <option value="brUser">下属的</option>
+                    <option value="brDept">机构的</option>
+                    <option value="brUnAllocate">待分配的</option>
+                #end
+            </select>
+        </td>
+        <td width="17%">
+            <span class="btn2 fl" id="my">
+                <input id="myUserId" type="hidden"/>
+                <label class="btn2-txt" id="showText">
+
+                </label>
+            </span>
+            <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                <input type="text" class="dtxt2-txt text" readonly="readonly" id="userText"/>
+                <input id="userIds" name="userIds" type="hidden" />
+                <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+            </div>
+            <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+                <input type="text" class="dtxt2-txt text" readonly="readonly" id="deptText"/>
+                <input id="deptIds" name="deptIds" type="hidden" />
+                <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="search-bar">
+        <span class="fl">
+            所有贷款(<label class="green" id="recordCount">$!recordCount</label>)
+        </span>
+    <input type="button" class="ui-input-btn" value="清空" id="clear"/>
+    <input type="button" class="ui-input-btn" value="搜索" id="query"/>
+</div>
+<div class="action-bar">
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+</div>
+<table class="datatbl" id="dataList">
+    #parse("/velocity/loan/verifyAllLoanListTable.vm")
+</table>
+</body>
+
+</html>

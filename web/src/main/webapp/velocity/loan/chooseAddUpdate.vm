@@ -1,0 +1,63 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择添加客户信息方式</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+
+    </style>
+    #scriptLink("core")
+
+    <script type="text/javascript">
+        $(function(){
+            $("#msg").html(getMsg());
+
+            //确定
+            jQuery('#add').click(function(){
+                window.returnValue="add";
+                window.close();
+            });
+
+            jQuery('#update').click(function(){
+                window.returnValue="update";
+                window.close();
+            });
+        });
+
+        function getMsg() {
+//            var customerName = window.dialogArguments.window.document.getElementById("txtCustomerName").value;
+            var customerName = window.dialogArguments.window.document.getElementById("txtOldCustomerName").value;
+            var type= $("#type").val();
+            if (type==1) {
+                return "贷款人“"+customerName+"”信息已变更，是否更新原客户信息？";
+            }
+            if (type==2) {
+                return "共同借贷人“"+customerName+"”信息已变更，是否更新原客户信息？";
+            }
+            if (type==3) {
+                return "担保人“"+customerName+"”信息已变更，是否更新原客户信息？";
+            }
+            if (type == 4){
+                return "客户"+customerName+"信息已变更，是否更新原客户信息？";
+            }
+        }
+    </script>
+</head>
+<body>
+    <input type="hidden" id="type" value="$!type" />
+    <p id="msg" class="bold loan-ttlbg">
+
+    </p>
+    <div class="ztree-box">
+
+      <hr />
+      <div class="center">
+          <input type="button" id="add" class="ui-footer-btn1 ui-footer-btn1-cancel button" style="width:100px;" value="新建客户" />
+          <input type="button" id="update" class="ui-footer-btn1 ui-footer-btn1-cancel button" style="width:100px;" value="更新原客户" />
+      </div>
+    </div>
+</body>
+</html>

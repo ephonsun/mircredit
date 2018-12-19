@@ -1,0 +1,68 @@
+#parse("/velocity/taglibs.vm")
+<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+<script>
+	$(function(){
+		jQuery('#tskCount').text('(0)');
+	});
+	
+	function toPlan(){
+		var url = '../tskConnectPlan/detailTaskPlan.html?menuDetail=mine&random='+Math.random()*1000;
+		tab.add({id: "TskPlan", pid: GetId(), title: "当天的联系计划", url: url, lock: false});
+	}
+	function taskCount(){
+		var url = '../tskContact/tskTaskUnFinishPage.html?excType=0&isTaskFinished=3&random='+Math.random()*1000;
+		tab.add({id: "TaskCount", pid: GetId(), title: "所有的联系任务", url: url, lock: false});
+	}
+	function toMarketPlan(){
+		var url = '../tskMarketingPlan/planDetailList.html?random='+Math.random()*1000;
+		tab.add({id: "toMarketPlan", pid: GetId(), title: "当天执行的营销计划", url: url, lock: false, confirm: true});
+	}
+	
+	function toAllMarketTask(){
+		var url = '../tskMarketing/showTskMarketingList.html?random='+Math.random()*1000;
+		tab.add({id: "toMarketTask", pid: GetId(), title: "所有营销任务", url: url, lock: false});
+	}
+	function toMyMarketTask(){
+		var url = '../tskMarketing/showTskMarketingListMyExecute.html?random='+Math.random()*1000;
+		tab.add({id: "toMarketTask", pid: GetId(), title: "我执行的营销任务", url: url, lock: false});
+	}
+	
+	function toUnAssign(){
+		var url = '../tskMarketing/showTskMarketingListNotAssign.html?random='+Math.random()*1000;
+		tab.add({id: "toUnAssign", pid: GetId(), title: "未分配营销任务", url: url, lock: false});
+	}
+</script>
+<table class="reminder-list">
+	<tbody>
+		#if($!roleTypeMain==1)
+		<tr>
+            <td>
+				<label style="float:left;">今天联系计划：(<a href="#2" onclick="toPlan()">$!planCountRemind</a>)</label>
+			</td>
+        </tr>
+		#end
+		<tr>
+            <td>
+                <label style="float:left;">执行中联系任务：(<a href="#2" onclick="taskCount()">$!taskCountRemind</a>)</label>
+			</td>
+        </tr>
+		#if($!isIncharge==1)
+			<tr>
+            <td>
+				<label style="float:left;">未分配营销任务：(<a href="#2" onclick="toUnAssign()">$!markeUnAssCount</a>)</label>
+			</td>
+        </tr>				
+		#else
+		<tr>
+            <td>
+				<label style="float:left;">今天营销计划：(<a href="#2" onclick="toMarketPlan()">$!marketPlanCount</a>)</label>
+			</td>
+        </tr>	
+		#end			
+		<tr>
+            <td>
+				<label style="float:left;">执行中营销任务：(<a href="#2" #if($!isIncharge==1) onclick="toAllMarketTask();" #else onclick="toMyMarketTask();"   #end>$!marketExecCount</a>)</label>
+			</td>
+        </tr>
+    </tbody>
+</table>

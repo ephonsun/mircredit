@@ -1,0 +1,50 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>移动贷款平台 v2.0.0 — 重置密码</title>
+    <link type="text/css" href="${ctx}/css/login.css" rel="stylesheet" />
+</head>
+
+<body>
+	<div class="container">
+    	<h1 class="logo" title="移动贷款平台 v2.0.0">
+        	<div>&nbsp;</div><label>v2.0.0</label>
+        </h1>
+        <div class="m2 m-position m-reset-skin">&nbsp;</div>
+        <div class="m2 m-position m-reset">
+        	<h4 class="m-reset-tips">
+            	<label>密码修改成功！</label>
+            </h4>
+            <dl class="m-timer">
+            	<dt>用户 <label>$!Account</label> 密码设置成功，请牢记！</dt>
+            	<dd>
+					( <label id="seconds">5</label> 秒后自动
+					<a href="getMainPage.html" target="_self">进入系统</a> )
+				</dd>
+            </dl>
+        </div>
+        <div class="copyright">
+        	<label>杭州百航信息技术有限公司 &copy; 2010-2013</label>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+	var lib = {
+		seconds: 4,
+		obj: document.getElementById('seconds'),
+		url: 'getMainPage.html',
+		timer: setInterval(function(){
+			lib.obj.innerHTML = lib.seconds;
+			
+			if(lib.seconds-- == 0){
+				clearInterval(lib.timer);
+				window.location.href = lib.url;
+			}
+		}, 1000)
+	};
+	
+	lib.timer;
+</script>
+</html>

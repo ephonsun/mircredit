@@ -1,0 +1,273 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加借贷人</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+	    .viewtbl{ margin-top:20px; }
+	      body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <link type="text/css" rel="stylesheet" href="../bootstrap/css/bootstrap.min.css" />
+
+    <script type="text/javascript">
+
+
+        $(function(){
+            jQuery('#coLoanPerson').validator();
+            jQuery('#txtSellingPrice').change(function(){
+                var sellPrice = $('#txtSellingPrice').val();
+                if(sellPrice!="") {
+                    if (sellPrice != "") {
+                        if (isNaN(sellPrice)) {
+//                            alert("销售价格只能为数字!");
+                        } else{
+                            var costPrice = $('#txtCostPrice').val();
+                            if(costPrice!=""){
+                                var value = sellPrice - costPrice;
+                                $('#txtGrossValue').html(value);
+                                var rate = value/sellPrice*100;
+                                $('#txtGrossRate').html(rate.toFixed(2));
+                            }else{
+                                $('#txtGrossValue').html(0);
+                                $('#txtGrossRate').html(0);
+                            }
+                        }
+                    }else{
+                        $('#txtGrossValue').html(0);
+                        $('#txtGrossRate').html(0);
+                    }
+                    }
+
+            });
+            //2
+            jQuery('#txtCostPrice').change(function(){
+                var costPrice = $('#txtCostPrice').val();
+                if(costPrice!=""){
+                    if(isNaN(costPrice)){
+//                        alert('请输入数字！');
+                    }else{
+                        var sellPrice = $('#txtSellingPrice').val();
+                        if(sellPrice!=""){
+                            var value = sellPrice - costPrice;
+                            $('#txtGrossValue').html(value);
+                            var rate = value/sellPrice*100;
+                            $('#txtGrossRate').html(rate.toFixed(2));
+                        }else{
+                            $('#txtGrossValue').html(0);
+                            $('#txtGrossRate').html(0);
+                        }
+                    }
+                }else{
+                    $('#txtGrossValue').html(0);
+                    $('#txtGrossRate').html(0);
+                }
+            });
+
+//            jQuery('#txtSellingRate').change(function(){
+//                var value = $('#txtSellingRate').val();
+//                if(value!=""){
+//                    if(isNaN(value)){
+//                        alert("销售比例只能为数字!");
+//                    }else if(value>100){
+//                        alert("销售比例应小于等于100!");
+//                    }else if(value<0){
+//                        alert("销售比例应大于0!");
+//                    }else if(value.toString().split(".")[1].length>2){
+//                        alert("销售比例小数只能保证后两位!");
+//                    }
+//                }
+//            }
+//        );
+
+            //确定
+            jQuery('.ui-footer-btn1-save').click(function(){
+//                jQuery('#coLoanPerson').validator();
+                var bool = jQuery.validator({form:'coLoanPerson',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+//                var isOk = saveBaseInfo(2);
+//                if (!isOk) {
+//                    return false;
+//                }
+                var postJson = {};
+                postJson['loanId']=$("#txtLoanIdId").val();
+                postJson['productName']=$("#txtProductName").val();
+				postJson['sellingPrice'] = $("#txtSellingPrice").val();
+				postJson['grossValue'] = $("#txtGrossValue").html();
+                postJson['grossRate']=$("#txtGrossRate").html();
+                postJson['sellingRate']=$("#txtSellingRate").val();
+                postJson['remark'] = $("#txtRemark").val();
+                postJson['costPrice'] = $("#txtCostPrice").val();
+                //添加跳转的url
+                var urlStr = "${ctx}/loan/addPro.html";
+//                alert(urlStr);
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(data){
+						if(data == "success"){
+                            window.returnValue="success";
+                            window.close();
+						}else{
+							alert(data);
+						}
+                    }
+                });
+
+            });
+
+            jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+        });
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <input type="hidden" id="txtLoanIdId" value="$!loanId"/>
+
+
+    <p class="bold loan-ttlbg">添加加权损益率</p>
+    <form id="coLoanPerson">
+        <label>产品名称：</label>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtProductName" maxlength="20" rule="\S" placeholder="请输入产品名称！"/>
+        </div>
+        <label>销售价格(元)：</label>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtSellingPrice" maxlength="16" rule="^(0|[1-9]\d{0,13})(\.\d{0,2})?$" placeholder="请输入销售价格,[13位].[2位]！"/>
+        </div>
+        <label>成本价格(元)：</label>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtCostPrice" maxlength="16" rule="^(0|[1-9]\d{0,13})(\.\d{0,2})?$" placeholder="请输入成本价格,[13位].[2位]！"/>
+        </div>
+
+        <p><label>毛利润(元)：</label><span id="txtGrossValue" class="btn btn-info"></span>&nbsp;&nbsp;&nbsp;<label>毛利率(%)：</label><span id="txtGrossRate" class="btn btn-info"></span></p>
+        <label>销售比例(%)：</label>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtSellingRate" maxlength="6" rule="^\d\.([1-9]{1,2}|[0-9][1-9])$|^[1-9]\d{0,1}(\.\d{1,2}){0,1}$|^100(\.0{1,2}){0,1}$" placeholder="请输入销售比例,<=100！"/>
+        </div>
+        <label>备注：</label>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtRemark" maxlength="500"/>
+        </div>
+
+
+    </form>
+##    <div class="loan-add-box">
+##      <table class="viewtbl" style="table-layout: auto;" id="coLoanPerson">
+##          <tbody>
+##              <tr>
+##                  <td class="field" width="8%">
+##                      <label class="red">*</label>
+##                      <label>产品名称：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text" >
+##                          <input type="text" class="text" id="txtProductName" maxlength="20" rule="\S" tips='"产品名称"必须填写'/>
+##                      </div>
+##                  </td>
+##              </tr>
+##              <tr>
+##                  <td class="field" width="8%">
+##                      <label class="red">*</label>
+##                      <label>销售价格(元)：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text">
+##                          <input type="text" class="text" id="txtSellingPrice" maxlength="16" rule="^(0|[1-9]\d{0,13})(\.\d{0,2})?$" tips='"销售价格"必须填写,[13位].[2位]'/>
+##                      </div>
+##                  </td>
+##              </tr>
+##              <tr>
+##                  <td class="field" width="8%">
+##                      <label class="red">*</label>
+##                      <label>成本价格(元)：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text" >
+##                          <input type="text" class="text" id="txtCostPrice" maxlength="16" rule="^(0|[1-9]\d{0,13})(\.\d{0,2})?$" tips='"销售价格"必须填写,[13位].[2位]'/>
+##                      </div>
+##                  </td>
+##              </tr>
+##			  <tr>
+##                  <td class="field" width="8%">
+##                      <label>毛利润(元)：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text" >
+##                          <label id="txtGrossValue"></label>
+##                      </div>
+##                  </td>
+##              </tr>
+##			  <tr>
+##                  <td class="field" width="8%">
+##                      <label>毛利率(%)：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text">
+##                          <label id="txtGrossRate"></label>
+##                      </div>
+##                  </td>
+##              </tr>
+##			  <tr>
+##                  <td class="field" width="8%">
+##                      <label class="red">*</label>
+##                      <label>销售比例(%)：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text">
+##                          <input type="text" class="text" id="txtSellingRate" maxlength="6" rule="^\d\.([1-9]{1,2}|[0-9][1-9])$|^[1-9]\d{0,1}(\.\d{1,2}){0,1}$|^100(\.0{1,2}){0,1}$" tips='"销售比例"必须填写（<=100）'/>
+##                      </div>
+##                  </td>
+##              </tr>
+##			  <tr>
+##                  <td class="field" width="8%">
+##
+##                      <label>备注：</label>
+##                  </td>
+##                  <td colspan="7">
+##                      <div class="ui-div-text" >
+##                          <input type="text" class="text" id="txtRemark" maxlength="500"/>
+##                      </div>
+##                  </td>
+##              </tr>
+##
+##          </tbody>
+##      </table>
+
+
+      </div>
+      <hr />
+      <div class="center">
+          <button  class="btn btn-success ui-footer-btn1-save">确定</button>
+          <button  class="btn btn-default ui-footer-btn1-cancel">取消</button>
+      </div>
+</body>
+</html>

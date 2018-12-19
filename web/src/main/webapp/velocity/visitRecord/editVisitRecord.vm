@@ -1,0 +1,184 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑拜访记录</title>
+
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript">
+    	jQuery(document).ready(function(){
+    		$('select').select();
+   			$('#tabs').easytabs();
+			jQuery("#updvisitRecordForm").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+    		//initTask();
+    	});
+    	function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+    	
+		function submiteditRecord(){
+			var bool = jQuery.validator({ form: 'updvisitRecordForm', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			jQuery.post('updateVisitRecord.html',
+						{
+							'type':$("#type").val(),
+							'visitRecord.startDate':$("#startDate").val(),
+							'visitRecord.recordInfoId':$("#visitRecordRecordInfoId").val(),
+							'visitRecord.commProgress':$("#commProgress").val(),
+							'visitRecord.remark':$("#visitRecordRemark").val(),
+							'task.taskId':$("#taskId").val()
+						},
+						function(){
+							tab.close(GetId(),true);
+			});
+	    }
+	    function closeTab(){
+			tab.close(GetId(),false);
+		}	
+		var nextTaskJson={};
+	    function toAdd(src,customerId){
+			if(src=='editor' || src.checked){
+        		var url="../tskContact/editorNextContactTask.html?customerId="+customerId+"&random="+Math.random();
+        		var obj = banger.page.openDialog(url,nextTaskJson,530,500);
+				//window.showModalDialog(url, nextTaskJson, 'dialogWidth=530px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+    			if(obj!=null){
+    				if(obj['tskTask.startDate']==null || obj['tskTask.startDate']=='' || 
+    					obj['tskTask.endDate']==null || obj['tskTask.endDate']=='' ){
+    					$('#nextConTaskContent').hide();
+    					$('#nextTask').attr('checked',false);
+    				}else{
+            			$('#nextConTaskContent').show();
+            			$('#tskStartDate').text(obj['tskTask.startDate']);
+    					$('#tskEndDate').text(obj['tskTask.endDate']);
+    				}
+        			nextTaskJson= obj;
+        		}else{
+        			$('#nextConTaskContent').hide();
+    				$('#nextTask').attr('checked',false);
+        		}
+    		}
+	    }
+		//初始化时加载任务
+	    function initTask(){
+			jQuery.post('../tskContact/initNextContextTask.html?random='+Math.random(),{
+				customerId:$!visitRecordInfo.customerId
+			},function(result){
+				if(result){
+					//var str=result.split(",");
+					//$('#spa').show();
+				}else{
+					
+				}
+			});
+		}
+	    function checkDate(obj){
+	    	var date=$("#systemTime").val();
+        	var inputDate=obj.value;
+    		if(date<inputDate){
+    			$("#startDate").parent().addClass('v-fails');
+    			$(obj).attr('tips', '拜访时间不能晚于今天'); return false;
+    		}else{
+    			$("#startDate").parent().removeClass('v-fails');
+    			return true;
+    		}
+	    }
+	</script>
+</head>
+<body>
+	<form id="updvisitRecordForm" name="visitRecordForm" action="updateVisitRecord.html" method="post">
+	<input type="hidden" name="visitRecord.recordInfoId" id="visitRecordRecordInfoId" value="$!visitRecordInfo.recordInfoId"></input>
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+            	<td width="80" class="field">
+            		<label>客户姓名：<input type="hidden" name="type" id="type" value="$!type"/></label>
+					<input id="systemTime" type="hidden" value="$!dateString.getNowTimeString()"/>
+            	</td>
+            	<td><label name="" value="">$!visitRecordInfo.customerName</label></td>
+            </tr>
+            <tr>
+            	<td width="80" class="field">
+		            	<label class="red">*</label>
+		            	<label>拜访时间：</label>
+	            </td>
+            	<td>
+                	<div class="ui-div-text" style="width: 150px;">
+                    	<input type="text" name="visitRecord.startDate" id="startDate" value="$date.format("yyyy-MM-dd HH:mm:ss",$!visitRecordInfo.startDate)" class="text datepicker" fun="checkDate" rule="\S" tips="“拜访时间”必须填写" readonly="true" focusFlag="false" />
+                        <i class="date"></i>
+                    </div>
+                	
+                </td>
+            </tr>
+            <tr>
+            	<td width="80" class="field">
+	            	<label>沟通进度：</label>
+	            </td>
+            	<td>
+                    <select name="visitRecord.commProgress" id="commProgress" style="width: 150px;">
+                        <option value="0"></option>
+                    	#foreach($CommProgress in $commProgressList)  
+                    	<option value ="$CommProgress.commProgressId" #if($!CommProgress.commProgressName==$!visitRecordInfo.commProgressName) selected=true #end>$CommProgress.commProgressName</option>
+                    	#end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+            	<td width="80" class="field">
+	            		<label class="red">*</label>
+		            	<label>拜访备注：</label>
+	            </td>
+				<td>
+					<div class="dtxtarea1" style="width: 400px;" >
+						<textarea class="" id="visitRecordRemark" name="visitRecord.remark" onKeyUp="javascript:var val = this.value;if(val.length>200){this.value=val.substring(0,200)}" rule="\S" tips="“拜访备注”必须填写" style="height: 80px; border: 0;">$!visitRecordInfo.remark</textarea>
+                    </div>
+				</td>
+            </tr>
+            
+             <tr style="display:none;">
+            	<td width="80" class="field"></td>
+            	<td>
+                	<input type="checkbox" id="nextContactId" class="chk" onclick="toAdd(this,$!visitRecordInfo.customerId)"/>
+                    <label for="chk-nextContact">下次联系
+                    <span id="spa" style="display:none;">
+                      （与<span  class="blue">$!visitRecordInfo.customerName</span>客户拜访确认下次联系 <span class="blue" id="finish"></span> <span id="excDate"></span>）
+                    <a href="#" onclick="edit($!visitRecordInfo.customerId)" class="blue">编辑</a>
+                    </span></label>
+					<input type="hidden" id="taskId" name="task.taskId"/>
+                </td>
+            </tr>
+            
+            
+            <tr>
+            	<td colspan="2" align="center">
+                	<input type="button" value="保 存" class="btn6 btn6bg1" onclick="submiteditRecord()"/>
+                	<input type="button" value="取 消" class="btn6 btn6bg3" onclick="closeTab()"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	</form>
+</body>
+</html>
+

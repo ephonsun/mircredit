@@ -1,0 +1,43 @@
+﻿#macro(custCell $cust $op $sms)				##显示客户详细的单元格
+<div class="datacus">
+   #if($urlPermitUtil.hasPermission('browseCustomer'))
+   <a href="#2" class="ui-link-btn" onclick="showCust('$!cust.customerId')" style="hander:pointer;"><label title="$!cust.customerName（$!cust.defaultPhone）">$!cust.customerName（$!cust.defaultPhone）</label></a>
+   #else
+   	<a href="#2" style="cursor:default;color:#000;text-decoration:none;"><label title="$!cust.customerName（$!cust.defaultPhone）">$!cust.customerName（$!cust.defaultPhone）</label></a>
+   #end
+   #if($op)
+	   <div class="icon">
+	   		#if($urlPermitUtil.hasPermission('dialPhone'))
+		   		#if($cust.defaultPhone!="")
+		        	<i class="i phone" onclick="dial('$!cust.defaultPhone','$!cust.customerId')" title="拨号">phone</i>
+		        #end
+	        #end
+	        #if($urlPermitUtil.hasPermission('tapePhone'))
+	        <i class="i dsc" title="座谈" onclick="tape('$!cust.customerId')" >dsc</i>
+	        #end
+	        #if($sms)
+		        #if($cust.smsPhone!="")
+			        <i class="i sms" onclick="sendSms('$!cust.smsPhone','$!cust.customerId')" title="短信">sms</i>
+			        <i class="i mms" onclick="sendMms('$!cust.smsPhone','$!cust.customerId')" title="彩信">mms</i>
+			    #end
+		    #end
+	    </div>
+    #end
+    <div class="other">
+    	<label class="item cusTitle" title="$!cust.customerTitle">
+        	$!cust.customerTitle
+        </label>
+        <label class="item">
+        	$!cust.sex
+        </label>
+        <label class="item">
+        	$!cust.autoAge
+        </label>
+        #if($!cust.isNoGood==1)
+        <label class="item red">
+        	（不良客户）
+        </label>
+        #end
+    </div>
+</div>
+#end

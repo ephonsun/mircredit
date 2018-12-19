@@ -1,0 +1,233 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>编辑贷款</title>
+
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/uploadify/uploadify.css"/>
+    <style type="text/css">
+        .m1{ margin-left:15px;}
+        .m2{ margin-top:-1px;}
+        .m3 { margin-bottom:3px; }
+        .w1 { width:100px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/swfobject.js"></script>
+    <script type="text/javascript" src="${ctx}/uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.upload.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/player/jwplayer.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+   
+	<script type="text/javascript">
+ $(function(){
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+            var url = "../loan/vLoanView.html?isEdit=true&confirm=confirm&RandNum="+ Math.random()+"&loanId="+$!loanId;
+            $('#viewLoan').load(url,{},function(){
+
+            });
+            maxTextArea("textarea[maxlength]");
+            jQuery("#remark").validator();
+
+            var loanId = '$!loanId';
+            var customerId = '$!lnLoanInfo.customerId';
+            var loanCusId = loanId+","+customerId+","+6;
+            var configObj = {
+                'action': '../loan/autoUploadAttachment.html?loanCusId='+loanCusId,
+                'queueId':'fileQueue',
+                'loanId':loanId,
+                'customerId':customerId,
+                'loanStatusId':6,
+                'auto':true
+            }
+            setFileUploadByParams(configObj);//渲染附件上传功能
+        });
+
+        $(function(){
+			$('.loan-exam-info-div').show();
+			$('.loan-exam-spread').addClass('loan-exam-tuckup');
+            $('.loan-exam-tuckup').removeClass('loan-exam-spread');
+        		 //收起和展开
+                    $('.loan-exam-tuckAndspread').click(function () {
+                         if ($(this).hasClass('loan-exam-spread')) {
+                    $(this).addClass('loan-exam-tuckup');
+                    $(this).removeClass('loan-exam-spread');
+                    $(this).parent().next('.loan-exam-info-div').show();
+                    //$(this).attr('title','展开');
+                } else {
+                    $(this).addClass('loan-exam-spread');
+                    $(this).removeClass('loan-exam-tuckup');
+                    $(this).parent().next('.loan-exam-info-div').hide();
+                    //$(this).attr('title','收起');
+                }
+            });
+            $('div.etabs').etabs({
+                'head': 'etabs-items',
+                'body': 'etabs-body',
+                'bar': 'etabs-bar',
+                'beforeOnclick': fun1,
+                'onclick': fun2
+            });
+
+            $(".ui-footer-btn1-cancel").click(function(){
+                tab.close(GetId(), false);
+            });
+            //初始化显示当前事件下的资料
+            var eventId = "$!loan.eventId";
+            $(".event").hide();
+            $("#event"+eventId).show();
+        });
+		
+        function fun1(h, b){
+            return true;
+        }
+        function fun2(h, b){
+        }
+		 $(function(){
+		 	$(".etabs-active").attr("class","");
+		 	$("#hkjh").attr("class","etabs-active");
+			$(".etabs-body-child").attr("style","display: none");
+			$("#hkjhlist").attr("style","display: block");
+		 });
+    </script>
+</head>
+<body>
+<p class="bold loan-lheight">贷款状态：贷款催收
+    </p>
+##parse("/velocity/loan/baseLoanInfo.vm")
+#if(!$loan.isNogood || $loan.isNogood!=1)
+<div class="loan-bg-one">
+    <!--
+    <span class="atable m1">上会分析表</span>
+    <span class="atable m1">调查引导表</span>
+    -->
+    <!--添加附件部分-->
+    #if(!$isConfirm)
+    <p class="bold loan-lheight">贷后管理</p>
+    <p class="loan-exam-attachment">
+        ##if($urlPermitUtil.hasPermission('lnResearchUpload'))
+            <input type="file" name="fileInput" id="fileInput"/>
+        ##end
+    <div id="attachmentList" class="datatbl" style="text-align:left;padding-left:10px;">
+        #parse("/velocity/loan/attachmentList.vm")
+    </div>
+    <div id="fileQueue"></div>
+    </p>
+    #end
+</div>
+#end
+    <input type="hidden" id="isConfirm" value="$!isConfirm"/>
+<div class="etabs">
+<div class="etabs-head">
+    <div class="etabs-head-items">
+        <ul id="etabs-items">
+            <li><label>贷款信息</label></li>
+            <li><label>贷款资料</label></li>
+            <li><label>贷款历史操作</label></li>
+            <li><label>贷后监控</label></li>
+			<li id="hkjh" class="etabs-active" ><label>还款计划</label></li>
+			##<li><label>催收记录</label></li>
+        </ul>
+    </div>
+</div>
+<div id="etabs-body" class="etabs-body">
+<div class="etabs-body-child">
+    ##if($lnLoanInfo)
+        <div class="loan-bg">
+           ##if($consume)
+            ##parse("/velocity/loan/consumeLoanInfo.vm")
+        ##else
+                #parse("/velocity/loan/customerLoanInfo.vm")
+            ##end
+        </div>
+    ##end
+   </div>
+</div>
+<div class="etabs-body-child">
+   #parse("/velocity/loan/lnLoanData.vm")
+</div>
+<div class="etabs-body-child">
+    #foreach($his in $hisList)
+        <div class="spacing">
+            <p class="fl m3">$!date.format('yyyy-MM-dd HH:mm:ss',$!his.opHistoryDate)<span
+                    class="m1">$!his.userName #if($his.account)（$!his.account） #else 系统#end</span></p>
+
+            <p class=" #if($his.beforeStatusName && $!his.beforeStatusName != '') line-arrow #end green bold fr">$!his.afterStatusName</p>
+            #if($his.beforeStatusName && $!his.beforeStatusName != "")
+                <p class="fr">$!his.beforeStatusName</p>
+            #end
+            <p class="loan-p-three">操作内容：$!his.content</p>
+            <!--
+                <p class="loan-p-three">备注：$!his.remark</p>
+                -->
+            <p class="loan-p-three">备注：
+                #if ($his.remark && $!his.remark != "")
+                    #if($his.preRemark && $!his.preRemark != "")
+                        $!his.preRemark<br/>
+                    #end
+                    $!his.sufRemark
+                #end
+            </p>
+        </div>
+    #end
+    <hr style="clear:both;"/>
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+    </div>
+</div>
+    <div class="etabs-body-child">
+	##贷后监控
+       #parse("/velocity/loan/loanMonitoring.vm")
+        <hr style="clear:both;"/>
+        <div class="center">
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+        </div>
+    </div>
+    <div class="etabs-body-child"  id="hkjhlist">
+		##还款计划
+       #parse("/velocity/loan/repaymentPlanList.vm")
+        <hr style="clear:both;"/>
+        <div class="center">
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+        </div>
+    </div>
+    <div class="etabs-body-child">
+		##还款计划
+       #parse("/velocity/loan/collectionRecords.vm")
+        <hr style="clear:both;"/>
+        <div class="center">
+            <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="关闭"/>
+        </div>
+    </div>
+</div>
+</div>
+<div id="tapeVideoDiv" style="display: none;">
+    #parse("/velocity/loan/cusDataListTable.vm")
+</div>
+
+
+</body>
+</html>

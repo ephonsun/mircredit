@@ -1,0 +1,1236 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>高级搜索</title>
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" >
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/biz/banger.operation.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.pagecheck.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.customer.js"></script>
+
+    <style type="text/css">
+	.htmltbl { margin-bottom: 10px; }
+	/* 号码规则 */
+	.num-rules { position: absolute; z-index: 100000; display: none; width: 420px; border: 1px solid #b1b1b1; background-color: #f1f1f1; padding: 10px; }
+	.num-rules .rule { width: 100%; }
+	.num-rules .rule tr td { height: 30px; }
+	.num-rules .colheader { width: 100%; border-collapse: collapse; margin-top: 10px; }
+	.num-rules .colheader thead tr th { border: 1px solid #ccc; line-height: 20px; }
+	.num-rules .list { height: 184px; border: 1px solid #ccc; background-color: #fff; margin-top: -1px; overflow: auto; }
+	.num-rules .list table { border-collapse: collapse; }
+	.num-rules .list table tbody tr td { border-bottom: 1px solid #dedede; line-height: 20px; text-align: center; }
+	.num-rules .button { margin-top: 10px; text-align: right; }
+	/* 保存搜索结果 */
+	.save-bomb-box { position: absolute; z-index: 100000; display: none; border: 1px solid #ccc; background-color: #f1f1f1; padding: 10px; }
+	.save-bomb-box .main { border: 1px solid #e1e1e1; background-color: white; padding: 20px; }
+	.save-bomb-box .main span { padding-right: 10px; line-height: 24px; }
+	.save-bomb-box .main .w { width: 300px; }
+	.save-bomb-box .bottom { margin-top: 10px; text-align: right; }
+	/* 折叠器 */
+	.folder-box { overflow: hidden; display:block;}
+	.folder { height: 26px; border-top: 1px solid #b1b1b1; margin-top: 10px; }
+	.folder i { position: relative; cursor: pointer; width: 94px; display: block; height: 26px; margin: 0 auto; margin-top: -1px; }
+    .folder i.less { background: url(${ctx}/images/common/switch1-1.gif) no-repeat; }
+	.folder i.expan { background: url(${ctx}/images/common/switch1.gif) no-repeat; }
+    
+   	ul.easy-tabs-header{  white-space:nowrap; overflow:hidden;}
+   	ul.easy-tabs-header li{ text-align:center; }
+   	ul.easy-tabs-header li label{ width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+    /* 滚动按钮小图标  */
+    .x-panel-bar{ position: absolute; top:0px; right: 0px; }
+    .x-panel-bar .x-panel-action { float: left; cursor: pointer; width: 20px; height: 20px; margin: 3px; text-indent: -1000px; overflow: hidden; }
+    .x-panel-bar div.x-panel-scroller-left { background: url(../images/index/left.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/left.png"); }
+    .x-panel-bar div.x-panel-scroller-right { background: url(../images/index/right.png) no-repeat; _background: none; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/index/right.png"); }
+
+    .easy-tabs .easy-tabs-scroll{ position:relative; overflow:hidden; height:30px; margin-right:120px;}
+    </style>
+    
+	<script type="text/javascript">
+	var autoLogin = "$!autoLogin";
+	
+	jQuery(function(){
+		//折叠器
+		$('.folder i').click(function(){
+			if($(this).hasClass('less')){
+				$(this).attr('class', 'expan');
+				$('.folder-box').hide();
+				$('.num-rules').hide();
+			}
+			else{
+				$(this).attr('class', 'less');
+				$('.folder-box').show('','',function(){
+                    //add by wuxj
+                    /* 内容部分左右按钮滚动js调用  */
+                    $('#easyScroll').itemScroll({
+                        'oLeft':$('#leftBtn'),
+                        'oRight':$('#rightBtn')
+                    });
+                });
+				$('.num-rules').hide();
+
+
+			}
+		});
+		
+		//加载内部页卡
+		
+		
+		#if($target!="condition" && $target!="edit")
+			setPageCheck("dataList",0);
+		#end
+		
+		$("#belongTo").change(function(){
+			changeBelongTo($(this).val());
+		});
+		
+		$("input[dateFlag$='true']").each(function(i){
+	   		initDate(this.id);
+	 	});
+	 		
+	 	dateInput("input[dateFlag$='true']");
+		numInput("input[intFlag$='true']");
+		floatInput("input[floatFlag$='true']");
+		maxTextArea("textarea[maxlength]");
+		
+		jQuery("#refresh").click(function(){
+			refresh();
+		});
+		jQuery("#clean").click(function(){
+			clear();
+		});
+		jQuery("#search").click(function(){
+			search();
+		});
+		
+		$('#createUserTree').atree({
+			url: function(){return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brUser&belongDeptId=3&belongUserId="+$("#createUser").val()+"&random="+Math.random()*1000000;},
+			beforeClick: function(treeId,treeNode){if(treeNode.flag == 'D') return false;},
+			okHandler: function(treeId){var node=jQuery.fn.zTree.getZTreeObj(treeId).getSelectedNodes();if(node[0]){$("#createUserName").val(node[0].name);$("#createUser").val(node[0].id);}}
+		});
+		
+		
+		$('#updateUserTree').atree({
+			url: function(){return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brUser&belongDeptId=3&belongUserId="+$("#updateUser").val()+"&random="+Math.random()*1000000;},
+			beforeClick: function(treeId,treeNode){if(treeNode.flag == 'D') return false;},
+			okHandler: function(treeId){var node=jQuery.fn.zTree.getZTreeObj(treeId).getSelectedNodes();if(node[0]){$("#updateUserName").val(node[0].name);$("#updateUser").val(node[0].id);}}
+		});
+		
+		//加载下属树
+		$('#userList').subtree({
+			url: function(){return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brUser&random="+Math.random()*1000000;},
+			tid: 'ztreea',
+			showIcon: true,
+			buttons: [
+				{ text: '确定', callback: subok },
+				{ text: '取消' }
+			]
+		});
+		
+		var subFlag = ('$!condition.containSub'=='1')?true:false;
+	  	$("#deptList").agetree({
+			url: function(){return "../customer/getCusBelongToJson.html?"+autoLogin+"BelongToType=brDept&random="+Math.random()*1000000;},
+			subChecked: true,
+			tid: 'ztreeb',
+			subChecked:subFlag,
+			buttons: [
+					{ text: '确定', callback: agencyok },
+					{ text: '取消' }
+				]
+		});
+		
+		//号码规则
+		$('#numberRule').click(function(){
+			buildRuleList();
+			if($('.num-rules').is(':hidden')){
+				var offset = $(this).offset(),
+					t = offset.top + $(this).outerHeight(true) - 1,
+					l = offset.left;
+				
+				$('.num-rules').css({
+					top: t + 'px',
+					left: l + 'px'
+				}).show();
+			}
+			else{
+				$('.num-rules').hide();
+			}
+		});
+		
+		//号码规则层 添加 按钮事件
+		$('.add', $('.num-rules')).click(addRule);
+		
+		buildRuleList();
+		
+		//保存搜索结果
+		$('#saveResult').click(function(e){
+			$('.num-rules').hide();
+			if($('.save-bomb-box').is(':hidden')){
+				var offset = $(this).offset(),
+					t = offset.top - $('.save-bomb-box').outerHeight(true),
+					l = offset.left;
+				
+				$('.save-bomb-box').css({
+					top: t + 'px',
+					left: l + 'px'
+				}).show();
+			}
+			else{
+				$('.save-bomb-box').hide();
+			}
+			e.stopPropagation();
+		});
+		
+		//保存搜索结果 新增 按钮事件
+		$('.add', $('.save-bomb-box')).click(addQueryResult);
+		$('.save', $('.save-bomb-box')).click(addQueryResult);
+		
+		//保存搜索结果 覆盖 按钮事件
+		$('.cover', $('.save-bomb-box')).click(editQueryResult);
+		
+		//保存搜索结果 确定 按钮事件
+		$('.close', $('.save-bomb-box')).click(function(){
+			$('.save-bomb-box').hide();
+		});
+		
+		//导出客户
+		$("#exportCustomer").click(exportCustomer);
+		
+		initProvince('$!condition.province');
+		initMonth("month","day",'$!condition.month');
+		initDay("month","day",'$!condition.day');
+		initMonth("monthEnd","dayEnd",'$!condition.monthEnd');
+		initDay("monthEnd","dayEnd",'$!condition.dayEnd');
+		
+		#if($InChargeof)
+			changeBelongTo('$!condition.belongTo');
+		#else
+			changeBelongTo('my');
+		#end
+		mobileInput('#ruleMB');				//控制手机输入
+		//idInput('#idCard');
+		emailInput('#email');
+		telInput('#tel');
+	
+		$("select[render='sel']").each(function(){
+			$(this).select();
+		});
+		
+		$("div[comboFlag$='true']").each(function(i){
+	 			var codes = $(this).attr("codes");
+	 			var list = codes.split(",");
+	   			jQuery(this).combobox({"array":list,"button":true});
+	 		});
+		
+		
+		setExportJson();
+
+        //add by wuxj
+        /* 内容部分左右按钮滚动js调用  */
+        $('#easyScroll').itemScroll({
+            'oLeft':$('#leftBtn'),
+            'oRight':$('#rightBtn')
+        });
+	});
+
+    setTimeout(function(){hideSomething();},100);
+
+    function hideSomething() {
+        var queryId = '$!queryId';
+        if(queryId!="" && parseInt(queryId)>0){
+            $("#expend").attr('class', 'expan');
+            $('.folder-box').hide();
+        }else{
+            $("#expend").attr('class', 'less');
+            $('.folder-box').show();
+        }
+    }
+
+	function setShareTo()     //设置共享类型
+	{
+		var r1 = $("#attrcus").attr("checked");
+		var r2 = $("#sharecus").attr("checked");
+		
+		if(r1 && r2)
+		{
+			$("#shareTo").val("all");
+		}
+		else if(r1 && !r2)
+		{
+			$("#shareTo").val("unShare");
+		}
+		else
+		{
+			$("#shareTo").val("share");
+		}
+	}
+	
+	function editCust(cusId)
+	{
+		var options = {id: "cusModify"+cusId, pid: GetId(), title: "编辑客户", url: "${ctx}/customer/editCustomer.html?actionType=modify&&crmCustomer.customerId="+cusId, lock: false};
+		tab.add(options);
+	}
+	
+	function buildRuleList()
+	{
+		var ruleStr = $("#numberRules").val();
+		var len = $("#ruleTable")[0].rows.length;
+		for(var i=0;i<len;i++)$("#ruleTable")[0].deleteRow();
+		if(ruleStr!="")
+		{
+			var rules = ruleStr.split(",");
+			for(var i=0;i<rules.length;i++)
+			{
+				var html = $('<tr data='+rules[i]+' ><td width=\'101\'>' + (i + 1) + '</td><td width=\'201\'>' + rules[i] + '</td><td width=\'93\'><a href=\'javascript:void(0);\' onclick=\"javascript:deleteRule(this)\">删除</a></td></tr>');
+				$('.num-rules .list tbody').append(html);
+			}
+			setRules(getRules());
+		}
+	}
+	
+	function deleteRule(elem)
+	{
+		var tr = $(elem).parents('tr');
+		tr.remove();
+		refreshIndex();
+	}
+	
+	//新增保存自定义查询
+	function addQueryResult()
+	{
+		var name = $("#resultName").val().replace(/(^\s*)|(\s*$)/g,"");
+		if(name=="")
+		{
+			banger.page.showMessageBox("搜索名称不能为空！");
+			return;
+		}
+		if($("#oldName").val()==name)
+		{
+			banger.page.showMessageBox("搜索名称未修改，不可新增搜索！");
+			return;
+		}
+		var postJson=getPostJson();
+		/*
+		if(isEmptyConditon(postJson)){
+			banger.page.showMessageBox("搜索名称不能为空！");
+			return;
+		}
+		*/
+		postJson["query.queryName"]=name;
+		jQuery.post("saveAdvancedQueryResult.html?random="+Math.random()*1000000,postJson,
+			function(msg){
+				if(msg=="samename")
+				{
+					banger.page.showMessageBox("存在相同的搜索名称"+name);
+				}else{
+		 			 $("#resultName").val('');
+		 			$('.save-bomb-box').hide();
+		 			var id = msg;
+		 			addMenuItem(id,name);
+		 			banger.page.showMessageBox({content:"保存搜索 "+name+" 成功",type:"success"});
+		 		}
+		});
+	}
+	
+	function isEmptyConditon(postJson){
+		for(var nm in postJson){
+			if(postJson[nm] && (nm.indexOf("condition")>-1 || nm.indexOf("exField")>-1) && nm!="condition.shareTo" && nm!="condition.belongTo"){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	//修改自定义结果
+	function editCondition()
+	{
+		var name = $("#conditionName").val().replace(/(^\s*)|(\s*$)/g,"");
+		if(name=="")
+		{
+			banger.page.showMessageBox("搜索名称不能为空！");
+			return;
+		}
+		var queryId = $("#queryId").val();
+		var postJson=getPostJson();
+		/*
+		if(isEmptyConditon(postJson)){
+			banger.page.showMessageBox("搜索名称不能为空！");
+			return;
+		}
+		*/
+		postJson["query.queryName"]=name;
+		postJson["query.userQueryId"]=queryId;
+		jQuery.post("editAdvancedQueryResult.html?random="+Math.random()*1000000,postJson,
+			function(msg){
+		 		if(msg=="samename")
+				{
+					banger.page.showMessageBox("存在相同的搜索名称 ："+name);
+				}
+		 		else
+		 		{
+		 			tab.refresh(GetPid());
+		 			editMenuItem(queryId,name);
+		 			tab.title(tab.self,name);
+		 			$("#conditionName").val(name);
+		 			tab.close(GetId(),false);
+		 		}
+		});
+	}
+	
+	//复盖保存自定义查询
+	function editQueryResult()
+	{
+		var name = $("#resultName").val().replace(/(^\s*)|(\s*$)/g,"");
+		if(name=="")
+		{
+			banger.page.showMessageBox("搜索名称不能为空！");
+			return;
+		}
+		var queryId = $("#queryId").val();
+		var postJson=getPostJson();
+		/*
+		if(isEmptyConditon(postJson)){
+			banger.page.showMessageBox("搜索名称不能为空！");
+			return;
+		}
+		*/
+		postJson["query.queryName"]=name;
+		postJson["query.userQueryId"]=queryId;
+		jQuery.post("editAdvancedQueryResult.html?random="+Math.random()*1000000,postJson,
+			function(msg){
+		 		if(msg=="samename")
+				{
+					banger.page.showMessageBox("存在相同的搜索名称 ："+name);
+				}
+		 		else
+		 		{
+		 			$('.save-bomb-box').hide();
+		 			editMenuItem(queryId,name);
+		 			tab.title(tab.self,name);
+		 			$("#resultName").val(name);
+		 			banger.page.showMessageBox({content:"修改搜索 "+name+" 成功",type:"success"});
+		 		}
+		});
+	}
+	
+	function showCustPage(custId)
+	{
+		var options = {id: "cusBrowse"+custId, pid: GetId(), title: "查看客户", url: "${ctx}/customer/browseCustomer.html?actionType=browse&&crmCustomer.customerId="+custId, lock: false};
+		tab.add(options);
+	}
+	
+	function showCustPopup(custId)
+	{
+		if(window.top.aui){
+			window.top.aui.builder({
+        		title: '查看客户',
+        		url: '${ctx}/customer/browseCustomer.html?' + autoLogin + 'actionType=browse&&isBrowseLayer=1&&needLine=0&&crmCustomer.customerId=' + custId + '&random=' + Math.random()
+        	});
+		}
+	}
+	
+	function showCust(custId)
+	{
+		var target = $("#target").val();
+		if(target!="")
+		{
+			showCustBofore(custId,showCustPopup);
+		}
+		else
+		{
+			showCustBofore(custId,showCustPage);
+		}
+	}
+	
+	function showCustBofore(custId,fn)
+	{
+    	jQuery.ajax({
+			  type: 'POST',
+			  url: "../customer/isDeleteCus.html?"+autoLogin+"random="+Math.random()*1000,
+			  data: {"cusId":custId},
+			  success:function(data){
+			  		var obj = jQuery.parseJSON(data);
+			  		if(obj[0].isDel=='1'){
+			  			banger.page.showMessageBox("客户"+obj[0].customerName+"被删除，无法查看具体资料！");
+			  		}else{
+			  			fn(custId);
+			  		}
+			  }
+		});
+	}
+	
+	function initMonth(mId,dId,val){
+		var mSel=$("#"+mId);
+		mSel.bind("change",{id:dId},function(e){
+			buildDay(this.selectedIndex,e.data["id"]);
+		});
+		if(val)mSel.val(val);
+	}
+
+	function buildDay(m,dId)
+	{
+		var dSel=$("#"+dId);
+		var days=[31,31,29,31,30,31,30,31,31,30,31,30,31];	//没有年份，不考虑润年
+		dSel.empty();
+		if(m>0)
+		{
+			for(var i=1;i<days[m]+1;i++)
+			{
+				var op=$("<OPTION VALUE='"+i+"'>"+i+"日</option>");
+				dSel.append(op);
+			}
+		}
+		dSel.select();
+	}
+	
+	function initDay(mId,dId,val){
+		
+		var mSel=$("#"+mId);
+		if(val)
+		{
+			buildDay(mSel[0].selectedIndex,dId);
+			var dSel=$("#"+dId);
+			setTimeout(function(){dSel.val(val);},100);
+		}
+	}
+	
+	function checkRule()
+	{
+		var s = $('.s', $('.num-rules')).val()+"";
+		var e = $('.e', $('.num-rules')).val()+"";
+		if(s=="" && e=="")
+		{
+			banger.page.showMessageBox("首号匹配和尾号匹配必须填一项!");
+			return false;
+		}
+		
+		var len = ((s=="")?0:s.length)+((e=="")?0:e.length);
+		if(len>11)
+		{
+			banger.page.showMessageBox("手机号码查询条件不能超过11位!");
+			return false;
+		}
+
+		var str = (s=="" || e=="")?s+e:s+"+"+e;
+		var rows = $('#ruleTable')[0].rows;
+		for(var i=0;i<rows.length;i++)
+		{
+			var tr = rows[i];
+			if(str==tr.getAttribute('data'))
+			{
+				banger.page.showMessageBox("已经存在规则"+str+",不能添加重复项!");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	function closeRule(){
+		$('.num-rules').hide();
+	}
+	
+	//添加规则
+	function addRule(){
+		if(!checkRule())return;
+		var s = $('.s', $('.num-rules')).val()+"";
+		var e = $('.e', $('.num-rules')).val()+"";
+		var str = (s=="" || e=="")?s+e:s+"+"+e;
+		idx = $('#ruleTable')[0].rows.length;
+		
+		var html = $('<tr data='+str+' ><td width=\'101\'>' + (idx + 1) + '</td><td width=\'201\'>' + str + '</td><td width=\'93\'><a href=\'javascript:void(0);\' onclick=\"javascript:deleteRule(this)\">删除</a></td></tr>');
+		$('.num-rules .list tbody').append(html);
+		
+		$('.s', $('.num-rules')).val('');
+		$('.e', $('.num-rules')).val('');
+		$('.e', $('.num-rules')).select();
+	}
+	
+	function getRules(){
+		var rules = "";
+		var rows = $('#ruleTable')[0].rows;
+		for(var i=0;i<rows.length;i++)
+		{
+			var tr = rows[i];
+			rules += (rules!="")?","+tr.getAttribute('data'):tr.getAttribute('data');
+		}
+		return rules;
+	}
+	
+	//刷新规则列表的序号
+	function refreshIndex(){
+		var rows = $('#ruleTable')[0].rows;
+		for(var i=0;i<rows.length;i++)
+		{
+			var tr = rows[i];
+			$('td:first',$(tr)).text(i+1);
+		}
+	}
+	
+	function saveRules()
+	{
+		setRules(getRules());
+		$('.num-rules').hide();
+	}
+	
+	//清空所有规则
+	function clearRules(){
+		var rows = $('#ruleTable')[0].rows;
+		for(var i=0;i<rows.length;i++)
+		{
+			$('#ruleTable')[0].deleteRow(0);
+		}
+		setRules("");
+	}
+	
+	//设置规则的值
+	function setRules(rules){
+		if(rules!="")
+		{
+			$("#numberRules").val(rules);
+			$("#tel").attr({"readonly":true});
+			$("#tel").val("启用号码规则");
+		}
+		else
+		{
+			$("#numberRules").val("");
+			$("#tel").attr({"readonly":false});
+			var telStr = $("#tel").val();
+			if(telStr=="启用号码规则")$("#tel").val("");
+		}
+	}
+
+	function clear(){
+		var pageSize = document.getElementById("page.currentPage");
+		var page = (pageSize)?pageSize.value:1;
+		$("input[type$='text'][clearFlag!='false']").val("");
+		$("input[type$='checkbox'][clearFlag!='false']").removeAttr("checked");
+		if(pageSize)pageSize.value=page;
+		$("#day").empty();
+		$("#dayEnd").empty();
+		$("#city").empty();
+		$("select:not([clearFlag='false'])").val('');
+		
+		$("#createUser").val('');
+		$("#updateUser").val('');
+		
+		clearRules();
+		#if($showBelongTo)
+			$("#belongTo").val("all");
+			changeBelongTo('all');
+
+		#else
+			$("#belongTo").val("my");
+			changeBelongTo('my');
+		#end
+		$("#belongTo").select();
+	}
+	
+	//查询
+	function search(){
+		document.getElementById("page.currentPage").value = 1; 
+		var postJson=getPostJson();
+		jQuery.post("getAdvancedCustomerGrid.html?"+autoLogin+"random="+Math.random()*1000000,postJson,
+					function(html){
+						clearPageCheck();
+					 	refreshGrid('grid',html,true);
+					});
+	}
+	
+	function refresh(){
+		var postJson = exportJson;
+		jQuery.post("getAdvancedCustomerGrid.html?"+autoLogin+"random="+Math.random()*1000000,postJson,
+			function(html){
+		 		refreshGrid('grid',html);
+		});
+	}
+	
+	//刷新Grid
+	function refreshGrid(gridId,html,flag)
+	{
+		var elem = $(html);
+		var grid = $("#"+gridId);
+		grid[0].innerHTML="";
+		grid.append(elem);
+		var total = $('#total').val();
+		if(total!=null){
+			$('#queryCount').text(total);
+		}
+		else {
+			$('#queryCount').text("0");
+		}
+		if(flag)setExportJson();
+		setPageCheck("dataList",0);
+	}
+	
+	function initProvince(val){
+		var pSel=$("#province");
+		pSel.bind("change",function(e){
+			if(this.value)
+			{
+				buildCity(this.value);
+			}
+			else
+			{
+				var cSel=$("#city");
+				cSel.empty();
+				var op=$("<OPTION></option>");
+				cSel.append(op);
+				cSel.select();
+			}
+		});
+		if(val)
+		{
+			buildCity(val);
+			pSel.val(val);
+		}
+	}
+	
+	function buildCity(val)
+	{
+		jQuery.post("getCityJson.html?"+autoLogin+"provCode="+val,{},
+			function(json){
+				var ds=jQuery.parseJSON(json);
+				var cSel=$("#city");
+				var cityVal = cSel.attr("city");
+				cSel.empty();
+				var op=$("<OPTION></option>");
+				cSel.append(op);
+				for(var i=0;i<ds.length;i++)
+				{
+					var d=ds[i];
+					var selStr = (d["code"]==cityVal)?"selected":"";
+					var op=$("<OPTION VALUE='"+d["code"]+"' "+selStr+" >"+d["name"]+"</option>");
+					cSel.append(op);
+				}
+				$("#city").select();
+		});
+	}
+
+	//分页跳转
+	function gotoPage(page)
+	{
+		var postJson = exportJson;
+		goto(page,"getAdvancedCustomerGrid.html?"+autoLogin+"random="+Math.random()*1000000,postJson,function(html){refreshGrid('grid',html);});
+	}
+	
+	//保存查询条件并返回
+	function getCondition()
+	{
+		#if($queryId>0)
+			return {"id":$!queryId,"name":"$!query.queryName"};
+		#else
+			return getPostJson();
+		#end
+	}
+	
+	function getSelectCus(flag)
+	{
+		var cks = getPageCheckValues();
+		var selIds = "";
+		if(cks.length>0)
+		{
+			for(var i=0;i<cks.length;i++)
+			{
+				var obj = jQuery.parseJSON(cks[i]);
+				selIds += (selIds!="")?","+obj.custId:obj.custId;
+			}
+		}
+		return selIds;
+	}
+	
+	function getSelectSingleCus()
+	{
+		var cusId = $("input[type$='radio']:checked").val();
+		return cusId;
+	}
+	
+	//共享客户
+    function shareCustomer(){
+    
+		var cks = getPageCheckValues();
+		if(cks.length==0)
+		{
+			banger.page.showMessageBox("请您选择要共享的客户！");
+			return;
+		}
+		var selIds = "";
+		var hasShare = false;
+		for(var i=0;i<cks.length;i++)
+		{
+			var item = jQuery.parseJSON(cks[i]);
+			if(item.isShare!=1){
+				selIds += (selIds!="")?","+item.custId:item.custId;
+			}
+			else{
+				hasShare=true;
+			}
+		}
+		var flag = "isAllMine";
+		if(hasShare)
+		{
+			flag = (selIds!="")?"isAll":"isAllShare";
+		}
+		
+		if(flag == "isAllShare"){
+			banger.page.showMessageBox("别人共享的客户不能被共享！");
+			return;
+		}else if(flag == "isAll"){
+			if(!confirm("您确定要将选择的客户，共享出去吗？注意：此操作只对归属客户生效。")){return;}
+		}
+		
+		var url="../customer/showShareCustomer.html?cusIds=" + selIds + "&actionType=insert&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,"选择共享",1000,700);
+		if(result!=undefined){
+			clearPageCheck();
+			search();
+		}
+    }
+    
+    //设置客户归属
+    function setCusBelongTo(){
+    	var cks = getPageCheckValues();
+		if(cks.length==0)
+		{
+			banger.page.showMessageBox("请您选择要分配的客户！");
+			return;
+		}
+		
+		var selIds = "";
+		var hasShare = false;
+		for(var i=0;i<cks.length;i++)
+		{
+			var item = jQuery.parseJSON(cks[i]);
+			if(item.isShare!=1){
+				selIds += (selIds!="")?","+item.custId:item.custId;
+			}
+			else{
+				hasShare=true;
+			}
+		}
+		var flag = "isAllMine";
+		if(hasShare)
+		{
+			flag = (selIds!="")?"isAll":"isAllShare";
+		}
+		if(flag == "isAllShare"){
+			banger.page.showMessageBox("别人共享的客户不能重新分配！");
+			return;
+		}else if(flag == "isAll"){
+			if(!confirm("您确定要将选择的客户，重新分配吗？注意：此操作只对归属客户生效。")){return;}
+		}
+		
+		var url="../customer/showCusBelongTo.html?cusIds="+selIds+"&random="+Math.random()*1000;
+		var result=banger.page.openDialog(url,"分配客户归属",700,630);
+		if(result!=undefined){
+			var index = result.indexOf(",");
+			var belongDeptId = result.substring(0, index);
+			var belongUserId = result.substring(index+1, result.length);	
+			
+			var postJson = {};
+			postJson['cusIds']=selIds;
+			postJson['belongDeptId']=belongDeptId;
+			postJson['belongUserId']=belongUserId;
+			var urlStr = "../customer/modifyCusBelongTo.html";
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(data){
+			  		clearPageCheck();
+			  		search();
+			  	}
+			});	
+		}
+    }
+    
+    //删除客户至垃圾箱
+    function delCustomers(type, customerIds, cusName){
+    	if(type=='single'){
+    		if(customerIds){
+    			if(confirm("您确定要删除客户“"+cusName+"”至垃圾箱吗？")){
+    				ajaxDelCus(type,customerIds);
+    			}
+    		}
+    	}
+    	else{
+    		var cks = getPageCheckValues();
+			if(cks.length==0)
+			{
+				banger.page.showMessageBox("请您选择要删除的客户！");
+				return;
+			}
+			var selIds = "";
+			var hasShare = false;
+			for(var i=0;i<cks.length;i++)
+			{
+				var item = jQuery.parseJSON(cks[i]);
+				if(item.isShare!=1){
+					selIds += (selIds!="")?","+item.custId:item.custId;
+				}
+				else{
+					hasShare=true;
+				}
+			}
+			var flag = "isAllMine";
+			if(hasShare)
+			{
+				flag = (selIds!="")?"isAll":"isAllShare";
+			}
+			
+			switch(flag){
+				case "isAllShare":
+					banger.page.showMessageBox("别人共享的客户不能够删除！");
+					break;
+				case "isAllMine":
+					if(confirm("您确定要将选择的客户，删除至垃圾箱吗？")){
+		 				ajaxDelCus(type,selIds);}
+					break;
+				case "isAll":
+					if(confirm("您确定要将选择的客户，删除至垃圾箱吗？注意：此操作只对归属客户生效！")){
+		 				ajaxDelCus(type,selIds);}
+					break;
+				default: break;
+			}
+		}
+    }
+    
+    function ajaxDelCus(type,customerIds){
+    	var postJson = {};
+		postJson['customerIds']=customerIds;
+		var urlStr = "../customer/delCustomers.html";
+		jQuery.ajax({
+		  type: 'POST',
+		  url: urlStr,
+		  data: postJson,
+		  success:function(){
+		  	clearPageCheck();
+		  	refresh();
+		  }
+		});
+    }
+    
+    function editMenuItem(queryId,name)
+    {
+    	var menuId = parseInt(queryId)+1000;
+    	window.top.menu.setname(menuId,name);
+    }
+	
+	function addMenuItem(queryId,name)
+	{
+		var menuId = parseInt(queryId)+1000;
+		var menuItems =  window.top.menu.exsit();
+		if(menuItems.length<20)
+		{
+			window.top.menu.add({
+				previd:'29',
+				modelname:name,
+				id:menuId,
+				pid:'',
+				title:name,
+				url:"../advancedCustomer/showCustomerPage.html?queryId="+queryId,
+				lock:false,
+				sort:"custom",
+				confirm: false
+			});
+		}
+		else
+		{
+			var newItems = [];
+			newItems.push({sort:'custom',modelname:name,id:menuId,pid:'',title:name, url:"../advancedCustomer/showCustomerPage.html?queryId="+queryId,lock: false});
+			for(var i=0;i<19;i++)
+			{
+				var item = menuItems[i];
+				var id = parseInt(item.id)-1000;
+				newItems.push({sort:'custom',modelname:item.modelname,id:item.id,pid:'',title:item.modelname, url:"../advancedCustomer/showCustomerPage.html?queryId="+id,lock: false});
+			}
+			window.top.menu.reset('29',newItems);
+		}
+	}
+	
+	//下属树形控件 确定 按钮
+	function subok(tid){
+		var zTree = jQuery.fn.zTree.getZTreeObj(tid), nodes = zTree.getCheckedNodes(true), txt = [],ids = [];
+		
+		for(var i=0, l=nodes.length; i<l; i++){
+			if(nodes[i].flag=="U")
+			{
+				txt.push(nodes[i].name);
+				ids.push(nodes[i].id);
+			}
+		}
+		
+		$('#userNames').val(txt.join(','));
+		$('#userIds').val(ids.join(','));
+	}
+	
+	var exportJson = {};
+	
+	function setExportJson(selFlag){
+		exportJson = getPostJson();
+		exportJson["url"] = "../advancedCustomer/showExportCustomer.html?random="+Math.random()*1000000;
+		exportJson["selUrl"] = "";
+		var total = $('#total').val();
+		if(total!=null){
+			exportJson["recordCount"] = total;
+		}
+		else {
+			exportJson["recordCount"] = 0;
+		}
+	}
+	
+	//导出客户
+	function exportCustomer(){
+		var obj = jQuery(".datatbl tbody tr");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("没有可导出的客户！");
+			return false;
+		}
+		var option = {id: "exportCusAdvance", pid: GetId(), title: "导出客户", url: "${ctx}/customerExport/showExportPage.html?random="+Math.random()*1000, lock: false, confirm: true,refresh:false};
+		tab.add(option);
+		
+    }
+	//导出客户数据组装
+	function getCustPostJson(){
+		return exportJson;
+	}
+	
+	function getSelectAllCustJson(){
+		exportJson["url"]="../advancedCustomer/getAllSelectCustomer.html?random="+Math.random()*1000000;
+		return exportJson;
+	}
+	
+	//机构树形控件 确定 按钮
+	function agencyok(tid,ck){
+		var zTree = jQuery.fn.zTree.getZTreeObj(tid), nodes = zTree.getCheckedNodes(true), txt = [],ids = [];
+			
+		for(var i=0, l=nodes.length; i<l; i++){
+			txt[i] = nodes[i].name;
+			ids[i] = nodes[i].id;
+		}
+		if(ck && ck.checked)$('#containSub').val("1");
+		else $('#containSub').val("0");
+		$('#deptNames').val(txt.join(','));
+		$('#deptIds').val(ids.join(','));
+	}
+
+    </script>
+</head>
+	
+<body>
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+        	#if($target=="edit")
+	        	<tr>
+	                <td width="7%" class="field">
+	                    <label>搜索名称：</label>
+	                </td>
+	                <td>
+		                <div class="dtxt1" style="width: 200px;">
+		                	<input type="text" class="dtxt1-txt" id="conditionName" clearFlag="false" maxLength="10" value="$!query.queryName" />
+		                </div>
+	                </td>
+	            </tr>
+            #end
+            <tr>
+                <td width="7%" class="field">
+                    <label>客户分类：</label>
+                </td>
+                <td>
+	                <select id="belongTo" name="condition.belongTo" clearFlag="false" render="sel" class="fl" style="width: 120px;">
+					    	#if($showBelongTo)
+					    		#if($condition.belongTo=='all')
+					    			<option value="all" selected ></option>
+					    		#else
+					    			<option value="all"></option>
+					    		#end
+					    	#end
+					    	#if($condition.belongTo=='my')
+					        	<option value="my" selected >我的</option>
+					        #else
+					        	<option value="my">我的</option>
+					        #end
+					        #if($showBelongTo)
+					        	#if($condition.belongTo=='sub')
+						        	<option value="sub" selected >下属的</option>
+						        #else
+						        	<option value="sub">下属的</option>
+						        #end
+						        #if($condition.belongTo=='dept')
+						        	<option value="dept" selected >机构的</option>
+						        #else
+						        	<option value="dept">机构的</option>
+						        #end
+						        #if($condition.belongTo=='un')
+						        	<option value="un" selected >待分配</option>
+						        #else
+						        	<option value="un">待分配</option>
+						        #end
+						    #end
+					    </select>
+					    <span id="my" class="btn2 fl" style="display: none; margin-left: 5px;">
+					    	<input id="myUserId" type="hidden" value="$!userId" />
+					        <label class="btn2-txt">$!userName</label>
+					    </span>
+					    <div id="userList" class="dtxt2 fl" style="display: none;width: 400px; margin-left: 5px;">
+					        <input type="text" id="userNames" class="dtxt2-txt" readonly="readonly" />
+					        <input id="userIds" name="condition.userIds" value="$!condition.subUserIds" type="hidden" />
+					        <span class="dtxt2-ddl">ddl</span>
+					    </div>
+					    <div id="deptList" class="dtxt2 fl" style="display: none;width: 400px; margin-left: 5px;">
+					        <input type="text" id="deptNames" class="dtxt2-txt" readonly="readonly" />
+					        <input id="deptIds" name="condition.deptIds" value="$!condition.subDeptIds" type="hidden" />
+					        <span class="dtxt2-ddl">ddl</span>
+					    </div>
+					    
+                		<div style="float: left; padding-left: 10px; line-height: 24px;">
+                			#if($condition.shareTo=="share")
+		                    	<input type="checkbox" class="chk group" id="attrcus" clearFlag="false" disabled="disabled" style="margin: 3px 0px;" />
+		                    #else
+		                    	<input type="checkbox" class="chk group" id="attrcus" clearFlag="false" disabled="disabled" checked="checked" style="margin: 3px 0px;" />
+		                    #end
+		                    <label for="attrcus">归属客户</label>
+                		</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+	<div class="folder-box">
+		<div id="tabs" class="easy-tabs">
+            <div style="position:relative;">
+                <div class="easy-tabs-scroll" id="easy-tabs-scroll">
+                    <ul class="easy-tabs-header" id="easyScroll">
+                        <li><label title="基本信息">基本信息</label></li>
+                        #foreach($template in $temp.getAllCrmTemplate())
+                            #if($template.isBasic == 0)
+                                <li><label title="$template.templateName">$template.templateName</label></li>
+                            #end
+                        #end
+                    </ul>
+                </div>
+                <!--// .easy-tabs-scroll-->
+                <div class="x-panel-bar">
+                    <div class="x-panel-action x-panel-scroller-left" id="leftBtn"></div>
+                    <div class="x-panel-action x-panel-scroller-right" id="rightBtn"></div>
+                </div>
+                <!--// .x-panel-bar-->
+            </div>
+			<div class="easy-tabs-pages">
+	        	<div class="easy-tabs-page">
+				#parse("/velocity/customer/advancedSearchCustomerCondition.vm")
+				#foreach($template in $temp.getTemplates())
+					#if($template.isBasic > 0)
+						#tabOption($template.fields,$exField,1)
+						#parse("/velocity/customer/advancedSearchCustomerConditionFoot.vm")
+						</div>
+					#else
+						<div class="easy-tabs-page" >
+							#tabOption($template.fields,$exField,1)
+						</div>
+					#end
+				#end
+				
+	       </div>
+            <script>$("#tabs").easytabs({beforeOnclick:function(){$('.num-rules').hide();return true;}});</script>
+		</div>
+	</div>
+	<div class="folder"><i id="expend" class="less"></i></div>
+	#if($target!="condition" && $target!="edit")
+	    <div class="sz">
+	    	<span class="fl bold">
+		    	高级搜索客户(<label id="queryCount" class="dgreen">$!page.totalRowsAmount</label>)
+	    	</span>
+	        <input type="button" id="clean" class="btn1" value="清空" />
+	        <input type="button" id="search" class="btn1" value="搜索" />
+	    </div>
+	    <div class="actrow">
+	    	#if($target=="")
+				<!--
+	    		#if($urlPermitUtil.hasPermission('showCusBelongTo'))
+		    		#if($InChargeof)
+				        <span class="btn2 fl" onclick="setCusBelongTo()" >
+				            <label class="btn2-txt"  >分配客户</label>
+				        </span>
+					#end
+				#end
+				-->
+				#if($urlPermitUtil.hasPermission('showShareCustomer'))
+    		        <span class="btn2 fl" style="margin-left: -1px;" onclick="shareCustomer()" >
+    		            <label class="btn2-txt" >共享客户</label>
+    		        </span>
+				#end
+				#if($urlPermitUtil.hasPermission('showExportPage'))
+    		        <span class="btn2 fl" id="exportCustomer" style="margin-left: -1px;">
+    		            <label class="btn2-txt">导出客户</label>
+    		        </span>
+				#end
+				#if($urlPermitUtil.hasPermission('saveAdvancedQueryResult'))
+		        <span class="btn2 fl" id="saveResult" style="margin-left: -1px;">
+		            <label class="btn2-txt">保存搜索结果</label>
+		        </span>
+		        #end
+		        #if($urlPermitUtil.hasPermission('delCustomers'))
+		        <span class="btn2 fl" style="margin-left: -1px;" onclick="delCustomers('multi','','')" >
+		            <label class="btn2-txt" >删除</label>
+		        </span>
+		        #end
+	        #end
+	        <span class="btn2 fr" id="refresh" >
+	            <label class="btn2-txt">刷新</label>
+	        </span>
+	    </div>
+	    <div id="grid">
+	    	#parse("/velocity/customer/advancedSearchCustomerGrid.vm")
+	    </div>
+    #end
+    
+    #if($target=="edit")
+	    <hr />
+	    
+	    <div class="halign">
+	    	<input type="button" class="btn6 btn6bg1" onclick="editCondition()" value="保存" />
+	        <input type="button" class="btn6 btn6bg3" onclick="tab.close(GetId(),false)" value="取消" />
+	    </div>
+    #end
+    
+    #parse("/velocity/customer/advancedSearchNumberRule.vm")
+    <!--保存搜索结果-->
+    <div class="save-bomb-box">
+    	<div class="main">
+        	<span>
+                <label class="red">*</label>
+                <label>搜索名称</label>
+            </span>
+            <input type="text" class="txt w" id="resultName" maxLength="10" clearFlag="false" value="$!query.queryName"  />
+        </div>
+        <div class="bottom">
+        	#if($queryId>0)
+	        	<input type="button" class="btn1 add" id="resultAdd" value="新增" />
+	        	<input type="button" class="btn1 cover" id="resultEdit" value="覆盖" />
+        	#else
+        		<input type="button" class="btn1 save" id="resultSave" value="保存" />
+        	#end
+        	<input type="button" class="btn1 close" id="resultCanncel" value="取消" />
+        </div>
+    </div>
+    <input type="hidden" id="queryId" value="$!queryId" >
+    <input type="hidden" id="oldName" value="$!query.queryName"  />
+    <input type="hidden" id="target" name="target" value="$!target" />
+    <input type="hidden" id="selType" name="selType" value="$!selType" />
+    <input type="hidden" id="shareTo" name="condition.shareTo" value="$!condition.shareTo" />
+    <input type="hidden" id="containSub" name="condition.containSub" value="$!condition.containSub" />
+</body>
+</html>

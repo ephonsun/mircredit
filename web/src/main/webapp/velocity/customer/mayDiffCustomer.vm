@@ -1,0 +1,337 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">  
+    <title>可能重复客户</title>
+    
+	#styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    
+    #scriptLink("core")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    var containSub = '1';
+    
+	$(document).ready(function(){
+	  	if($isInChargeof){
+			initBelongTo();
+		}
+		$('select').select();
+		$("#customer").tips({ msg: "姓名、编号等" });
+		$('#tabs').easytabs();
+		$('.easy-tabs-page:eq(0)').load('../mayDiffCustomer/FirstLoadMayDiffCustomerName.html?BelongToType=brAll&diffType=name&random='+Math.random());
+	});
+	
+	function resetTab() {
+		$('.easy-tabs-page').each(function(i){
+			$(this).html("");
+     	});
+	}
+	
+	var currentTab = 1;
+	function showDiffTab(num, type) {
+		if (num == currentTab) {
+			if (type != 'query'){
+				return;
+			}
+		}
+		currentTab = num;
+		//resetTab();
+		
+		var customerQuery = "";
+    	if(jQuery("#customer").val() != "姓名、编号等"){
+    		customerQuery = jQuery.trim(jQuery("#customer").val());
+    	}	
+		
+		var postJson = {};
+		postJson['crmCustomer.customerTypeId'] = jQuery.trim($('#CustomerType').val());
+		postJson['crmCustomer.customerName'] = customerQuery;
+		if($isInChargeof){
+			postJson['BelongToType']=jQuery.trim($('#BelongToType').val());
+		}else{
+			postJson['BelongToType']='brMine';	
+		}
+		postJson['userIds'] = jQuery.trim($('#userIds').val());
+		postJson['deptIds'] = jQuery.trim($('#deptIds').val());
+		postJson['containSub'] = containSub;
+		postJson['searchFlag'] = "1";			
+		var urlStr = '';
+		var obj = '';
+		
+		if (num == 1) {
+			urlStr = '../mayDiffCustomer/FirstLoadMayDiffCustomerName.html?diffType=name&random=' + Math.random();
+			obj = '.easy-tabs-page:eq(0)';
+		}
+		if (num == 2) {
+			urlStr = '../mayDiffCustomer/FirstLoadMayDiffCustomerName.html?diffType=phone&random=' + Math.random();
+			obj = '.easy-tabs-page:eq(1)';
+		} 
+		if (num == 3) {
+			urlStr = '../mayDiffCustomer/FirstLoadMayDiffCustomerName.html?diffType=idcard&random=' + Math.random();
+			obj = '.easy-tabs-page:eq(2)';
+		} 
+		if (num == 4) {
+			urlStr = '../mayDiffCustomer/FirstLoadMayDiffCustomerName.html?diffType=namephone&random=' + Math.random();
+			obj = '.easy-tabs-page:eq(3)';
+		} 
+		if (num == 5) {
+			urlStr = '../mayDiffCustomer/FirstLoadMayDiffCustomerName.html?diffType=namecompany&random=' + Math.random();
+			obj = '.easy-tabs-page:eq(4)';
+		}
+		
+		jQuery.ajax({
+		  type: 'POST',
+		  url: urlStr,
+		  data: postJson,
+		  success:function(html){
+		  	resetTab();
+		  	$(obj).html(html);
+		  }
+		});	
+	}
+	
+	function onQuery(){
+		resetTab();
+		showDiffTab(currentTab, 'query');
+	}
+		
+	function initBelongTo(){
+		$("#BelongToType").val("brAll");
+		
+		//加载下属树
+		$('#userList').subtree({
+			tid: 'subtree',
+			showIcon: true,
+			url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brUser&random=' + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckUser },
+				{ text: '取消' }
+			]
+		});
+		//加载机构树
+		$('#deptList').agetree({
+			tid: 'agetree',
+			url: function(){ return '../customer/getCusBelongToJson.html?BelongToType=brDept&random=' + Math.random(); },
+			buttons: [
+				{ text: '确定', callback: onCheckDept },
+				{ text: '取消' }
+			]
+		});
+		
+		$("#BelongToType").change(function(){
+			changeBelongTo($(this).val());
+		});
+		changeBelongTo($("#BelongToType").val());
+	}
+	//点击User
+	function onCheckUser(treeId){
+		var postJson = {};
+		postJson = getCheckJson(treeId, 'U');
+		$('#userIds').val(postJson.ids);
+		$('#userText').val(postJson.names);
+	}
+	//点击Dept
+	function onCheckDept(treeId, checkbox){
+		var postJson = {};
+		postJson = getCheckJson(treeId, 'D');
+		$('#deptIds').val(postJson.ids);
+		$('#deptText').val(postJson.names);
+		if(checkbox.checked){
+			containSub = '1';
+		}else{
+			containSub = '0';
+		}
+	}
+	function getCheckJson(treeId, flag){
+		var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+		var nodes = treeObj.getCheckedNodes(true);
+		var len = nodes.length;
+		var uIds = "";
+		var uName = "";
+		for(var i=0; i<len; i++){
+			if(flag=='U'){
+				if(nodes[i].flag==flag){
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}
+				}
+			}else{
+				if(uIds==""){
+					uIds = nodes[i].id;
+					uName = nodes[i].name;
+				}else{
+					uIds = uIds + "," + nodes[i].id;
+					uName = uName+ "," +nodes[i].name;
+				}	
+			}
+		}
+		var postJson = {};
+		postJson['ids'] = uIds;
+		postJson['names'] = uName;
+		return postJson;
+	}	
+	//改变归属
+	function changeBelongTo(val){
+		$('#userIds').val("");
+		$('#deptIds').val("");
+		switch(val){
+			case "brAll":
+				$("#my, #userList, #deptList").hide();	
+				break;
+			case "brMine":
+				$("#my").show();
+				$('#showText').text('$!userName');
+				$("#userList, #deptList").hide();
+				break;
+			case "brUser":
+				$("#userList").show();
+				$("#my, #deptList").hide();
+				break;
+			case "brDept":
+				$("#deptList").show();
+				$("#my, #userList").hide();
+				break;
+			case "brUnAllocate":
+				$("#my, #userList, #deptList").hide();	
+				break;
+			default: break;
+		}
+	}
+	var deteCode='$!dataCode';	
+	var dateFlag='$!dataflag';	
+	function ClearCondition()
+    {
+    	$("#customer").val("");
+    	$("select").each(function(){
+    		this.selectedIndex = 0;
+    		$(this).select();
+    	}); 
+    	if(dateFlag=="true"){
+    		changeBelongTo('brMine');
+    	}else{
+    		if(deteCode=="4"){
+	    		changeBelongTo('brMine');
+	    	}else{
+		    	$("#BelongToType").val("brAll");
+		    	changeBelongTo('brAll');
+	    	}
+    	}
+    	$("#userText").val("");
+    	$("#deptText").val("");
+		$("#customer").tips({ msg: "姓名、编号等" });
+    }
+		
+        </script>
+</head>
+
+<body>
+	<form id="form1" method="post">
+        <table class="htmltbl" width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td width="7%" class="field">
+                        <label>客户类型：</label>
+                    </td>
+                    <td width="18%">
+                    <select id="CustomerType" name="crmCustomer.customerTypeId">
+                        <option value=""></option>
+                        #foreach($cusType in $cusTypelist)  
+                    	<option value ="$cusType.customerTypeId" >$cusType.customerTypeName</option>
+                    	#end
+                    </select>
+                	</td>
+                    <td width="7%" class="field">
+                        <label>客户：</label>
+                    </td>
+                    <td width="18%">
+                        <div class="dtxt1">
+                        	<input type="text" class="dtxt1-txt" id="customer" name="crmCustomer.customerName" value="$!parameterMap.get("customerName")" maxlength="20" />
+                        </div>
+                    </td>
+                    
+                    <td width="7%" class="field">
+                    	#if ($isInChargeof)
+                        <label>客户分类：</label>
+                        #end
+                    </td>
+                    <td width="18%">
+                    	#if ($isInChargeof)
+                        <select id="BelongToType" name="BelongToType">
+                        	#if(!$!dataflag && $!dataCode=="3")
+	                        <option value="brAll"></option>
+	                        #end
+	                    	<option value="brMine">我的</option>
+	                    	#if(!$!dataflag && $!dataCode=="3")
+	                    	<option value="brUser">下属的</option>
+	                    	<option value="brDept">机构的</option>
+	                    	<option value="brUnAllocate">待分配的</option>
+	                    	#end
+	                    </select>
+	                    #end
+                    </td>
+                    #if ($isInChargeof)
+                    <td colspan="2">
+	                	<span class="btn2 fl" id="my">
+	                		<input id="myUserId" type="hidden"/>
+	                        <label class="btn2-txt" id="showText">
+	                        	
+	                        </label>
+	                    </span>
+	                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+	                        <input id="userIds" name="userIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+	                    <div id="deptList" class="dtxt2 fl" style="display: none; width: 200px;">
+	                        <input type="text" class="dtxt2-txt" readonly="readonly" id="deptText"/>
+	                        <input id="deptIds" name="deptIds" type="hidden" />
+	                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+	                    </div>
+	                </td>
+	                #end
+                </tr>
+            </tbody>
+        </table>
+		<div class="sz">
+        <input type="button" class="btn1" value="清 空" onclick="ClearCondition()"/>
+        <input type="button" class="btn1" value="搜 索" onclick="onQuery()"/>
+    </div>
+    </form>
+	
+    <div id="tabs" class="easy-tabs" style="margin-top: -15px;">
+    	<ul class="easy-tabs-header">
+        	<li onclick="showDiffTab(1)"><label id="tab1">姓名相同($!tabNum1)</label></li>
+        	<li onclick="showDiffTab(2)"><label id="tab2">手机号码相同($!tabNum1)</label></li>
+        	<li onclick="showDiffTab(3)"><label id="tab3">身份证相同($!tabNum1)</label></li>
+        	<li onclick="showDiffTab(4)"><label id="tab4">姓名和固话相同($!tabNum1)</label></li>
+        	<li onclick="showDiffTab(5)"><label id="tab5">姓名和单位相同($!tabNum1)</label></li>
+        </ul>
+        <div class="easy-tabs-pages">
+        	<div class="easy-tabs-page">
+            </div>
+			<div class="easy-tabs-page">
+            </div>
+			<div class="easy-tabs-page">
+            </div>
+			<div class="easy-tabs-page">
+            </div>
+			<div class="easy-tabs-page">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

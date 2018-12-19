@@ -1,0 +1,198 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+
+    <script type="text/javascript">
+
+        $(function () {
+            if($!appLoanTypeId=="1"){
+                $(".jydprofit").show();
+                $(".jydprofit").each(function(){
+                    var flag = $(this).attr("flag");
+                    var type = $(this).attr("type");
+                    var div = $(this).attr("id");
+                    getProfitTable(flag,type,div);
+                })
+            }else if($!appLoanTypeId=="2"){
+                $(".xfdprofit").show();
+                $(".xfdprofit").each(function(){
+                    var flag = $(this).attr("flag");
+                    var type = $(this).attr("type");
+                    var div = $(this).attr("id");
+                    getProfitTable(flag,type,div);
+                })
+            }
+        });
+
+
+        //table
+        function getProfitTable(flag,type,div) {
+            var postJson = {};
+            postJson['loanId'] = $("#loanId").val();
+            postJson['flag'] = flag;
+            postJson['type'] = type;
+            postJson['div'] = div;
+            postJson['write']=$("#write").val();
+            if($('#appLoanTypeId').val()=="1") {
+                postJson['beginTime'] = $('#bsm').val();
+                postJson['endTime'] = $('#bem').val();
+                postJson['monthNumber'] = $('#monthNumber').html();
+            }
+            if($('#appLoanTypeId').val()=="2"){
+                postJson['xfdNum']=$('#xfdNum').val();
+            }
+            jQuery.ajax({
+                type: 'post',
+                url: '${ctx}/loan/getProfitTable.html',
+                data: postJson,
+                success: function (data) {
+                    $("#" + div).html(data);
+//                    getTotalAmount();
+                }
+            });
+        }
+
+        function saveProfitPage(flag,type,div,id){
+            var url = '${ctx}/loan/getSaveProfitPage.html' + "?loanId=" + $("#loanId").val()
+                    + "&flag=" + flag
+                    + "&type=" + type
+                    + "&itemId=" + id
+                    + "&random=" + Math.random() * 1000;
+            var result = banger.page.openDialog(url, "添加损益", 500,500);
+            if (result != undefined) {
+                getProfitTable(flag,type,div);
+            }
+        }
+
+        //table
+        function showIetmIfo(flag,type,div,id,year,month,num){
+            var url = '${ctx}/loan/showIetmIfo.html' + "?loanId=" + $("#loanId").val()
+                    + "&flag=" + flag
+                    + "&type=" + type
+                    + "&id=" + id
+                    + "&year=" + year
+                    + "&month=" +month
+                    + "&num=" +num
+                    + "&random=" + Math.random() * 1000;
+            var result = banger.page.openDialog(url, "明细", 500,500);
+            if (result != undefined) {
+                getProfitTable(flag,type,div);
+            }
+        }
+
+        //table
+        function showDetailIfo(flag,type,div,id,num) {
+            var url = '${ctx}/loan/showIetmIfo.html' + "?loanId=" + $("#loanId").val()
+                    + "&flag=" + flag
+                    + "&type=" + type
+                    + "&id=" + id
+                    + "&num=" + num
+                    + "&random=" + Math.random() * 1000;
+            var result = banger.page.openDialog(url, "明细", 500, 500);
+            if (result != undefined) {
+                getProfitTable(flag,type,div);
+            }
+        }
+        //table
+        function removeProfit(flag,type,div,id) {
+            var postJson = {};
+            postJson['id'] = id;
+            postJson['flag'] = flag;
+            jQuery.ajax({
+                type: 'post',
+                url: '${ctx}/loan/removeProfit.html',
+                data: postJson,
+                success: function (data) {
+                    getProfitTable(flag,type,div);
+                }
+            });
+        }
+
+//        function updatDetails(){
+//
+//        }
+        //table
+//        function getTotalAmount() {
+//            var appLoanTypeId = $("#appLoanTypeId").val();
+//            if(appLoanTypeId=="1"){
+//                //资产
+//                var totalAmount = parseFloat($(".cashList1").text())+parseFloat($(".accountList1").text())+parseFloat($(".accountList2").text())+parseFloat($(".fixedList2").text())
+//                        +parseFloat($(".fixedList1").text())+parseFloat($(".cashList2").text())+parseFloat($(".cashList3").text())+parseFloat($(".cashList4").text());
+//                //负债
+//                var totalDebt = parseFloat($(".accountList3").text())+parseFloat($(".accountList4").text())+parseFloat($(".debtList1").text())+parseFloat($(".debtList2").text())
+//                        +parseFloat($(".cashList5").text());
+//
+//                $("#totalAmount").text(totalAmount);
+//                $("#totalDebt").text(totalDebt);
+//
+//
+//            }else if(appLoanTypeId=="2"){
+//                //资产
+//                var totalAmount = parseFloat($(".cashList1").text())+parseFloat($(".cashList6").text())+parseFloat($(".cashList7").text())+parseFloat($(".cashList8").text())
+//                        +parseFloat($(".fixedList1").text())+parseFloat($(".cashList4").text());
+//                //负债
+//                var totalDebt = parseFloat($(".debtList1").text())+parseFloat($(".debtList2").text())+parseFloat($(".debtList3").text())+parseFloat($(".debtList4").text())
+//                        +parseFloat($(".debtList5").text())+parseFloat($(".debtList6").text());
+//
+//                $("#totalAmount").text(totalAmount);
+//                $("#totalDebt").text(totalDebt);
+//            }
+//
+//        }
+
+
+    </script>
+
+</head>
+<body>
+        <input type="hidden" id="loanId" name="loanId" value="$!loanId"/>
+        <input type="hidden" id="appLoanTypeId" name="appLoanTypeId" value="$!appLoanTypeId"/>
+        <input type="hidden" id="bsm" name="beginTime" value="$!beginTime"/>
+        <input type="hidden" id="bem" name="endTime" value="$!endTime"/>
+        <input type="hidden" id="xfdNum" name="xfdNum" value="$!xfdNum"/>
+        <input type="hidden" id="write" name="write" value="$!write"/>
+
+
+
+        <div class="ln-bg-balance">
+            ##经营贷
+            ##1营业收入
+            <div id="jydpro1" flag="prod1" type="1" class="jydprofit" style="display: none">
+            </div>
+            ##2固定成本支出
+            <div id="jydpro2" flag="prod1" type="2" class="jydprofit" style="display: none">
+            </div>
+            ##3所得税支出
+            <div id="jydpro3" flag="prod1" type="3" class="jydprofit" style="display: none">
+            </div>
+            ##4其他收入
+            <div id="jydpro4" flag="prod1" type="4" class="jydprofit" style="display: none">
+            </div>
+            ##5其他支出
+            <div id="jydpro5" flag="prod1" type="5" class="jydprofit" style="display: none">
+            </div>
+
+            ##消费贷
+            ##1家庭收入
+            <div id="xfdpro1" flag="prod2" type="6" class="xfdprofit" style="display: none">
+            </div>
+            ##2固定支出
+            <div id="xfdpro2" flag="prod2" type="7" class="xfdprofit" style="display: none">
+            </div>
+            ##3个人所得
+            <div id="xfdpro3" flag="prod2" type="8" class="xfdprofit" style="display: none">
+            </div>
+            ##4其他收入
+            <div id="xfdpro4" flag="prod2" type="4" class="xfdprofit" style="display: none">
+            </div>
+            ##5其他支出
+            <div id="xfdpro5" flag="prod2" type="5" class="xfdprofit" style="display: none">
+                </div>
+
+        </div>
+
+</body>
+</html>

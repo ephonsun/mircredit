@@ -1,0 +1,188 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>添加抵质押物</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+        .viewtbl{ margin-top:20px; }
+        body{ margin:0 14px 10px 2px; overflow-x:hidden; }
+        /* 头像 */
+        .avatar { border: 1px solid #ccc; background-color: #fff; padding: 1px; width: 125px; height: 125px; margin-bottom: 5px; }
+        .avatar img { width: 124px; height: 124px; border: 0; }
+        .m2{ width:74px;}
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.file.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.dfilter-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            jQuery('#coLoanPerson').validator();
+            //确定
+            jQuery('.ui-footer-btn1-save').click(function(){
+                var bool = jQuery.validator({form:'coLoanPerson',extend:true,extendhandler:extendvalidator});
+                if(!bool){
+                    return false;
+                }
+
+                var data = $("#myForm").serialize();
+
+                var url = $("#myForm").attr("action") + "?random="+Math.random()*1000;
+                jQuery.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: data,
+                    success:function(data){
+                        window.returnValue="success";
+                        window.close();
+                    }
+                });
+
+            });
+
+            jQuery('.ui-footer-btn1-cancel').click(function(){
+                window.close();
+            });
+        });
+
+        //验证必须输入项是否有输入数据
+        function extendvalidator(){
+            var bool = true;
+            return true;
+        }
+
+        function paramsName(){
+            return 'customerName=' + jQuery('#txtCustomerName').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function paramsNum(){
+            return 'cphNumber=' + jQuery('#txtCphNumber').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function paramsAddr(){
+            return 'idCard=' + jQuery('#txtIDCard').val()+ "&customerIds="+$("#customerIds").val();
+        }
+
+        function getGoodsAmount(){
+            var goodsValue = $("#goodsValue").val();
+            var goodsAmount = $("#goodsAmount").val();
+            if(null==goodsValue||""==goodsValue||''==goodsValue||undefined==goodsValue){
+                goodsValue = "0";
+            }
+            if(null==goodsAmount||""==goodsAmount||''==goodsAmount||undefined==goodsAmount){
+                goodsAmount = "0";
+            }
+            var pledgeRate = parseFloat(goodsAmount)/parseFloat(goodsValue)*100;
+            $("#pledgeRate").val(pledgeRate.toFixed(2));
+        }
+    </script>
+</head>
+<body>
+<form id="myForm" action="${ctx}/loan/addPledge.html">
+    <input type="hidden" name="lnPledge.loanId" id="loanId" value="$!loanId"/>
+
+    <p class="bold loan-ttlbg">添加抵质押物</p>
+    <div class="loan-add-box">
+        <table class="viewtbl" style="table-layout: auto;" id="coLoanPerson">
+            <tbody>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>物品：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="schtxtname">
+                        <input type="text" class="text" id="goods" name="lnPledge.goods" maxlength="20" rule="\S" tips='"物品"必须填写'/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>抵押物估价：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="schtxtnum">
+                        <input type="text" class="text" id="goodsValue" name="lnPledge.goodsValue" maxlength="20" rule="\S" tips='"抵押物估价"必须填写' onpropertychange="getGoodsAmount()" oninput="getGoodsAmount()"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+
+                    <label>抵押（元）：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="schtxtAmount"  >
+                        <input type="text" class="text" id="goodsAmount" name="lnPledge.goodsAmount" maxlength="20" rule="\S" tips='"抵押（元）"必须填写' onpropertychange="getGoodsAmount()" oninput="getGoodsAmount()"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>抵押率(%)：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="schtxtnum">
+                        <input type="text" class="text" id="pledgeRate" name="lnPledge.pledgeRate" maxlength="20" readonly  />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>所有者：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="schtxtidcard">
+                        <input type="text" class="text" id="ownerName" name="lnPledge.ownerName" maxlength="20" rule="\S" tips='"所有者"必须填写'/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>产权证：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-text" id="schtxtidcard">
+                        <input type="text" class="text" id="ownerName" name="lnPledge.titleCertificate" maxlength="20" rule="\S" tips='"产权证"必须填写'/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="8%">
+                    <label class="red">*</label>
+                    <label>描述：</label>
+                </td>
+                <td colspan="7">
+                    <div class="ui-div-textarea" id="schtxtRemark"  style="height: 100px; margin-bottom:15px;">
+                        <textarea maxlength="300" id="goodsRemark" name="lnPledge.goodsRemark" class="textarea" style="height: 100px; _height:100px;" rule="\S" tips='"描述"必须填写'></textarea>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <hr />
+    <div class="center">
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save button" value="确认" />
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel button" value="取消" />
+    </div>
+</form>
+</body>
+</html>

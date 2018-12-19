@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="record" extends="default" namespace="/record" >
+	
+		 <!--  所有记录列表页面 -->
+		<action name="showRecordInfoListPage" class="recordInfoAction" method="showRecordInfoListPage">
+			<result name="success">/velocity/record/recordList.vm</result>
+			<result name="toPage">/velocity/record/recordListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+	   	<action name="showRecordListForTsk" class="recordInfoAction" method="showRecordListForTsk">
+			<result name="success">/velocity/record/tskRecordList.vm</result>
+			<result name="toPage">/velocity/record/tskRecordListTab.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+	   	<!--  通话记录列表页面 -->
+		<action name="showTelInfoListPage" class="recordInfoAction" method="showRecordInfoListPage">
+			<result name="success">/velocity/record/recordList.vm</result>
+			<result name="toPage">/velocity/record/recordListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  现场录音记录列表页面 -->
+		<action name="showSceneInfoListPage" class="recordInfoAction" method="showRecordInfoListPage">
+			<result name="success">/velocity/record/recordList.vm</result>
+			<result name="toPage">/velocity/record/recordListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+		
+		<!--  拜访记录列表页面 -->
+		<action name="showVisitInfoListPage" class="recordInfoAction" method="showRecordInfoListPage">
+			<result name="success">/velocity/record/recordList.vm</result>
+			<result name="toPage">/velocity/record/recordListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+		</action>
+	   	 
+	   	 <!-- 归档录音列表 -->
+	   	 <action name="showArchiveRecordInfoListPage" class="recordInfoAction" method="showArchiveRecordInfoListPage">
+	   	 	<result name="success">/velocity/record/recordArchiveList.vm</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	   	 </action>
+	  
+	  	<!-- 删除录音 -->
+	  	<action name="deleteRecordInfoById" class="recordInfoAction" method="deleteRecordInfoById"> 
+	  	</action>
+	  	
+	  	<!-- 修改录音是否作废 -->
+	  	<action name="updateRecordIsCanceledById" class="recordInfoAction" method="updateRecordIsCanceledById"> 
+	  		<result name="success" type="redirect">/record/showRecordInfoListPage.html?type=${type}</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	  	<!-- 录音详情 -->
+	  	<action name="queryRecordById" class="recordInfoAction" method="queryRecordById">
+	  		<result name="success">/velocity/record/recordDetail.vm</result>
+	  		<result name="tobf">/velocity/visitRecord/detailVisitRecord.vm</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	  	<!-- 录音详情修改是否有效 -->
+	  	<action name="updateRecordDetailIsCanceledById" class="recordInfoAction" method="updateRecordDetailIsCanceledById">
+	  		<result name="success">/velocity/record/recordConnect.vm</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+        <!-- 归档录音详情 -->
+	  	<action name="queryArchiveRecordById" class="recordInfoAction" method="queryArchiveRecordById">
+	  		<result name="success">/velocity/record/recordArchiveDetail.vm</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	  	</action>
+        
+        <!-- 删除多条录音 -->
+	  	<action name="deleteAll" class="recordInfoAction" method="deleteAll"> 
+	  	</action>
+	  	
+	  	<!-- 修改是否已读状态 单 -->
+	  	<action name="readedRec" class="recordInfoAction" method="readedRec"> 
+	  	</action>
+	  	
+	  	<!-- 修改是否已读状态 多 -->
+	  	<action name="readedRecs" class="recordInfoAction" method="readedRecs"> 
+	  	</action>
+	  	
+	  	<!-- 播放录音前将录音放到临时播放目录下 -->
+	  	<action name="playVideo" class="recordInfoAction" method="openRecord"></action>
+	  	
+	  	<!-- 编辑记录 -->
+	  	<action name="queryRecordConnect" class="recordInfoAction" method="queryRecordConnectById">
+	  		<result name="success">/velocity/record/recordConnect.vm</result>
+	  		<result name="tovisitRecord" type="redirect">/visitRecord/showUpdateVisitRecordPage.html?type=${type}&amp;recordInfoId=${recordId}</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	  	<!-- 编辑界面刷新 -->
+	  	<action name="refreshRecordConnect" class="recordInfoAction" method="refreshRecordConnect">
+	  		<result name="success">/velocity/record/recordConnect.vm</result>
+	   	 	<result name="error">/velocity/error.vm</result>
+	  	</action>
+	  	
+	  	<!-- 保存编辑记录 -->
+	  	<action name="saveRecordConnect" class="recordInfoAction" method="saveRecordConnect">
+	  	</action>
+	  	
+	  	<!-- 导出excel -->
+	  	<action name="downExcel" class="recordInfoAction" method="downExcel">
+	  	</action>
+	  	
+	  	<!-- 下载 -->
+	   <action name="download" class="downloadAction">
+		      <result name="success" type="stream">
+		      <param name="contentType">application/octet-stream;charset=ISO8859-1</param>
+		      <param name="inputName">targetFile</param>
+		      <param name="contentDisposition">attachment;filename="${downloadFileName}"</param>
+		      <param name="bufferSize">4096</param>
+		      </result>
+        </action> 
+        
+        <!-- 所有未读留言和未接来电接口 -->
+       	<action name="queryAllNotReadAndNotThrough" class="recordInfoAction" method="queryAllNotReadAndNotThrough">
+	  		<result name="success" type="redirect" >/record/showRecordInfoListPage.html?type=${type}&amp;toType=${toType}</result>
+			<result name="error">/velocity/error.vm</result>
+	  	</action>
+        
+        <!-- 返回客户对应的联系信息 -->
+        <action name="queryAllByCustomerId" class="recordInfoAction" method="queryAllByCustomerId">
+        	<result name="success">/velocity/customer/customerRecordCard.vm</result>
+			<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 根据客户id查询客户是否删除 -->
+        <action name="getCustomerIsDel" class="recordInfoAction" method="getCustomerIsDel"></action>
+        
+        <!-- 查询短信和彩信列表页面 -->
+        <action name="showSMSList" class="recordInfoAction" method="showSMSList">
+        	<result name="success">/velocity/record/MSSandSMSList.vm</result>
+        	<result name="toPage">/velocity/record/MSSandSMSListTable.vm</result>
+			<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 关联客户 查询 -->
+        <action name="relationQuery" class="recordInfoAction" method="relationQuery"></action>
+        
+        <!-- 取消关联客户 -->
+        <action name="cancelRelation" class="recordInfoAction" method="cancelRelation"></action>
+        
+        <!-- 关联客户 选择替换电话 -->
+        <action name="toCheckPhone" class="recordInfoAction" method="toCheckPhone">
+        	<result name="success">/velocity/record/relationCustomer.vm</result>
+			<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 关联客户 选择完待替换电话替换 -->
+        <action name="relationPhone" class="recordInfoAction" method="relationPhone"></action>
+        
+        <!-- 查询待导入的数据 -->
+        <action name="queryRecordInfosByMap" class="recordInfoAction" method="queryRecordInfosByMap"></action>
+        
+        <!-- 导入文件第一步 -->
+        <action name="exportRecs" class="recordInfoAction" method="exportRecs">
+        	<result name="success">/velocity/record/exportFile.vm</result>
+			<result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 导出录音验证 -->
+        <action name="exportRecordFileVerify" class="recordInfoAction" method="exportRecordFileVerify">
+        	<result name="error">/velocity/error.vm</result>
+        </action>
+        <!-- 导出录音进度条 -->
+        <action name="exportRecordFileBar" class="recordInfoAction" method="exportRecordFileBar">
+        	<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 导出录音文件 -->
+        <action name="exportFile" class="recordInfoAction" method="exportFile">
+        	<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 下载导出的文件 -->
+        <action name="exportFileDown" class="recordInfoAction" method="exportFileDown">
+        	<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 导出终止 -->
+        <action name="exportRecordFileStop" class="recordInfoAction" method="exportRecordFileStop">
+        	<result name="error">/velocity/error.vm</result>
+        </action>
+        
+        <!-- 最新10条联系记录 -->
+        <action name="getRecentlyTalkRecord" class="recordInfoAction" method="getRecentlyTalkRecord">
+        	<result name="error">/velocity/error.vm</result>
+        	<result name="success">/velocity/record/recentRecordList.vm</result>
+        </action>
+        
+        <!-- 查询录音文件是否存在 -->
+        <action name="haveRec" class="recordInfoAction" method="haveRec">
+        </action>
+        
+	  	
+	</package>
+
+</struts>

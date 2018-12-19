@@ -1,0 +1,249 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>申请贷款</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+
+    #scriptLink("core")
+    #scriptLink("page")
+
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date-time.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.viewCustomer.js"></script>
+
+	<script type="text/javascript">
+        $(function(){
+            $('select').select();
+            $("#customer").tips({ msg: "姓名、电话或身份证" });
+            $('table.datatbl').table();
+
+            getQueryJson();
+
+            $("#query").click(function(){
+                var postJson = getQueryJson();
+                var urlStr = "needSubmitLoanListQuery.html?RandNum="+ Math.random();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: urlStr,
+                    data: postJson,
+                    success:function(html){
+                        queryBack(html, 'dataList');
+                        oldPostJson = getQueryJson();
+                    }
+                });
+            });
+
+            $("#clear").click(function(){
+                $('.text').val('');
+                $("select").each(function(){
+                    this.selectedIndex = 0;
+                    $(this).select();
+                });
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+            });
+
+            $("#refresh").click(function(){
+                if(oldPostJson){
+                    goto(
+                            null,
+                            "${ctx}/loan/needSubmitLoanListQuery.html?RandNum="+ Math.random(),
+                            oldPostJson,
+                            function(html){
+                                queryBack(html, 'dataList');
+                            });
+                }
+            });
+
+            $("#addLoan").click(function(){
+                var options = {id: "addLoan", pid: GetId(), title: "申请贷款", url: "${ctx}/loan/toAskLoanpage.html", lock: false,confirm: true};
+                tab.add(options);
+            });
+        });
+
+        var oldPostJson = {};
+
+        function getQueryJson(){
+            if($('#customer').val()=="姓名、电话或身份证"){
+                $('#customer').val("");
+            }
+
+            var postJson = {};
+            postJson['customer']=jQuery.trim($('#customer').val());
+            postJson['loanType'] = jQuery.trim($('#loanType').val());
+            postJson['startDate'] = jQuery.trim($('#startDate').val());
+            postJson['endDate']=jQuery.trim($('#endDate').val());
+
+            oldPostJson = postJson;
+
+            if($('#customer').val()==''){
+                $("#customer").tips({ msg: "姓名、电话或身份证" });
+            }
+
+            return postJson;
+        }
+
+        //分页跳转
+        function gotoPage(page){
+            if(oldPostJson){
+                goto(
+                        page,
+                        "${ctx}/loan/needSubmitLoanListQuery.html?RandNum="+ Math.random()*10000,
+                        oldPostJson,
+                        function(html){
+                            queryBack(html, 'dataList');
+                        });
+            }
+        }
+
+        function queryBack(html, gridId){
+            $("#"+gridId).html(html);
+            $('table.datatbl').table();
+
+            var total = $('#total').val();
+            if(total!=null){
+                $("#recordCount").text(total);
+            }else {
+                $("#recordCount").text(0);
+            }
+        }
+
+        //拒绝贷款
+        function refuseApplyLoan(){
+            var url = "../loan/cancelLoanPage.html?RandNum="+Math.random();
+            var result = window.showModalDialog(url,{window: window},'dialogWidth=550px;dialogHeight=500px;toolbar=no;menubar=no;scrollbars=no;resizable=no;location=no;status=no');
+            return result;
+        }
+
+        //申请贷款撤销
+        function localRefuseLoan(loanId,loanStatusId){
+            var radioValue = refuseApplyLoan();
+            if(radioValue){
+                radioValue['loanId'] = loanId;
+                radioValue['beforeStatusId'] = loanStatusId;
+                jQuery.ajax({
+                    type:'POST',
+                    url:'../loan/cancelLoan.html?RandNum='+Math.random(),
+                    data:radioValue,
+                    success:function(){
+                        jQuery.ajax({
+                            type:'POST',
+                            url:'${ctx}/loan/needSubmitLoanListQuery.html?RandNum='+Math.random(),
+                            data:{},
+                            success:function(html){
+                                queryBack(html,"dataList");
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        //判断贷款状态
+        function queryLoanStatusById(loanId,flag,loanStatusId){
+            var url = "${ctx}/loan/queryLoanStatusById.html?loanId="+loanId+"&loanStatusId="+loanStatusId+"&RandNum="+Math.random();
+            jQuery.ajax({
+                type:'POST',
+                url:url,
+                data:{},
+                success:function(value){
+                    if(value == "true"){
+                        if(flag == "edit"){
+                            //点击“编辑”
+                            editLoan(loanId);
+                        }else if(flag == "refuse"){
+                            //点击”拒绝“
+                            localRefuseLoan(loanId,loanStatusId);
+                        }
+                    }else if(value == "false") {
+                        //当前贷款状态已不是待分配(可能数据库当中的状态已经被其他用户所更改)，必须重新刷新页面
+                        banger.page.showMessageBox("贷款列表数据已被人更改，请重新刷新列表!");
+                    }
+                }
+            });
+        }
+    </script>  
+</head>
+
+<body>
+	<table class="htmltbl" >
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>客户：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input id="customer" type="text" class="text" />
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>贷款类型：</label>
+                </td>
+                <td width="17%">
+                    <select id="loanType">
+                        <option value=""></option>
+                        #foreach($loanType in $typeList)
+                            <option value ="$loanType.dictionaryKey" >&nbsp;$loanType.dictionaryValue</option>
+                        #end
+                    </select>
+                </td>
+                <td class="field" width="8%">
+                	<label>创建时间：</label>
+                </td>
+                <td colspan="2">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input id="startDate" type="text" readonly="readonly" class="text datepicker" />
+                                        <i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text">
+				                		<input id="endDate" type="text" readonly="readonly" class="text datepicker" />
+                                        <i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+				<td width="17%"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="search-bar">
+        <span class="fl">
+            申请贷款(<label id="recordCount" class="green">$!recordCount</label>)
+        </span>
+        <input id="clear" type="button" class="ui-input-btn" value="清空" />
+        <input id="query" type="button" class="ui-input-btn" value="搜索" />
+    </div>
+	<div class="action-bar">
+		#if($urlPermitUtil.hasPermission('lnAddLoan'))
+        <span id="addLoan" class="ui-span-btn fl">
+        	<label>申请贷款</label>
+        </span>
+        #end
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <table id="dataList" class="datatbl">
+        #parse("/velocity/loan/needSubmitLoanListTable.vm")
+    </table>  
+</body>
+  
+</html>

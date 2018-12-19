@@ -1,0 +1,24 @@
+<thead>
+    <tr>
+        <th width="20"><input type="checkbox" rel="all" /></th>
+        <th><label title="文件名称">文件名称</label></th>
+        <th><label title="更新时间">更新时间</label></th>
+    </tr>
+</thead> 
+<tbody>
+#foreach($pdtNotice in $!pdtNoticePage.items)
+    <tr #if($!pdtNotice.isRead!=1)  class="bold" #end>
+        <td><input type="checkbox" rel="row" nid="$!pdtNotice.noticeId"/></td>
+        <td><a class="ui-link-btn" href="#" title="$!pdtNotice.noticeName" onclick="downFileAttr('$!pdtNotice.noticeId')">$!pdtNotice.noticeName</a></td>
+        <td><label title="$date.format("yyyy-MM-dd HH:mm:ss",$!pdtNotice.noticeUpdateDate)">$date.format("yyyy-MM-dd HH:mm:ss",$!pdtNotice.noticeUpdateDate)</label></td>
+    </tr>
+#end
+</tbody>
+<tfoot>
+   <tr>
+       <td colspan="3">
+           #parse("/velocity/ajaxPage.vm")
+       </td>
+   </tr>
+</tfoot>
+   

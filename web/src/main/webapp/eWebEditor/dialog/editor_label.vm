@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>标签导航</title>
+	<link type="text/css" rel="stylesheet" href="../../css/base.css" />
+    <link type="text/css" rel="stylesheet" href="../../css/common.css" />
+    
+    <script type="text/javascript" src="../../js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="../../js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript">
+    	jQuery(function(){
+			$("#easy-tabs").easytabs();
+		});
+    </script>
+
+</head>
+<body>
+    <SCRIPT type=text/javascript>
+	window.onerror = ResumeError;
+	function ResumeError() {
+        return true;
+    }
+    var selectedItem = null;
+    var targetWin;
+
+    document.onclick = handleClick;
+    document.onmouseover = handleOver;
+    document.onmouseout = handleOut;
+    document.onmousedown = handleDown;
+    document.onmouseup = handleUp;
+    document.write(writeSubPadding(10));  
+
+    function handleClick() {
+        el = getReal(window.event.srcElement, "tagName", "DIV");
+        
+        if ((el.className == "topFolder") || (el.className == "subFolder")) {
+            el.sub = eval(el.id + "Sub");
+            if (el.sub.style.display == null) el.sub.style.display = "none";
+            if (el.sub.style.display != "block") { 
+                if (el.parentElement.openedSub != null) {
+                    var opener = eval(el.parentElement.openedSub + ".opener");
+                    ChangeFolderImg(opener,1)
+                    hide(el.parentElement.openedSub);
+                    if (opener.className == "topFolder")
+                        outTopItem(opener);
+                }
+                el.sub.style.display = "block";
+                el.sub.parentElement.openedSub = el.sub.id;
+                el.sub.opener = el;
+                ChangeFolderImg(el,2)
+            }
+            else {
+                hide(el.sub.id);
+                ChangeFolderImg(el,1)
+            }
+        }    
+        if ((el.className == "subItem") || (el.className == "subFolder")) {
+            if (selectedItem != null)
+                restoreSubItem(selectedItem);
+            highlightSubItem(el);
+        }
+        if ((el.className == "topItem") || (el.className == "topFolder")) {
+            if (selectedItem != null)
+                restoreSubItem(selectedItem);
+        }
+        if ((el.className == "topItem") || (el.className == "subItem")) {
+            if ((el.href != null) && (el.href != "")) {
+                if ((el.target == null) || (el.target == "")) {
+                    if (window.opener == null) {
+                        if (document.all.tags("BASE").item(0) != null)
+                            window.open(el.href, document.all.tags("BASE").item(0).target);
+                        else 
+                            window.location = el.href;                    
+                    }
+                    else {
+                        window.opener.location =  el.href;
+                    }
+                }
+                else {
+                    window.open(el.href, el.target);
+                }
+            }
+        }
+        var tmp  = getReal(el, "className", "favMenu");
+        if (tmp.className == "favMenu") fixScroll(tmp);
+    }
+    function handleOver() {
+        var fromEl = getReal(window.event.fromElement, "tagName", "DIV");
+        var toEl = getReal(window.event.toElement, "tagName", "DIV");
+        if (fromEl == toEl) return;
+        el = toEl;
+        if ((el.className == "topFolder") || (el.className == "topItem")) overTopItem(el);
+        if ((el.className == "subFolder") || (el.className == "subItem")) overSubItem(el);
+        if ((el.className == "topItem") || (el.className == "subItem")) {
+            if (el.href != null) {
+                if (el.oldtitle == null) el.oldtitle = el.title;
+                if (el.oldtitle != "")
+                    el.title = el.oldtitle + "\n" + el.href;
+                else
+                    el.title = el.oldtitle + el.href;
+            }
+        }
+        if (el.className == "scrollButton") overscrollButton(el);
+    }
+    function handleOut() {
+        var fromEl = getReal(window.event.fromElement, "tagName", "DIV");
+        var toEl = getReal(window.event.toElement, "tagName", "DIV");
+        if (fromEl == toEl) return;
+        el = fromEl;
+        if ((el.className == "topFolder") || (el.className == "topItem")) outTopItem(el);
+        if ((el.className == "subFolder") || (el.className == "subItem")) outSubItem(el);
+        if (el.className == "scrollButton") outscrollButton(el);
+    }
+    function handleDown() {
+        el = getReal(window.event.srcElement, "tagName", "DIV");
+        if (el.className == "scrollButton") {
+            downscrollButton(el);
+            var mark = Math.max(el.id.indexOf("Up"), el.id.indexOf("Down"));
+            var type = el.id.substr(mark);
+            var menuID = el.id.substring(0,mark);
+            eval("scroll" + type + "(" + menuID + ")");
+        }
+    }
+    function handleUp() {
+        el = getReal(window.event.srcElement, "tagName", "DIV");
+        if (el.className == "scrollButton") {
+            upscrollButton(el);
+            window.clearTimeout(scrolltimer);
+        }
+    }
+    ////////////////////// EVERYTHING IS HANDLED ////////////////////////////
+    function hide(elID) {
+        var el = eval(elID);
+        el.style.display = "none";
+        el.parentElement.openedSub = null;
+    }
+    function writeSubPadding(depth) {
+        var str, str2, val;
+        var str = "<style type='text/css'>\n";
+        for (var i=0; i < depth; i++) {
+            str2 = "";
+            val  = 0;
+            for (var j=0; j < i; j++) {
+                str2 += ".sub "
+                val += 18;    //子栏目左边距数值
+
+            }
+            str += str2 + ".subFolder {padding-left: " + val + "px;}\n";
+            str += str2 + ".subItem   {padding-left: " + val + "px;}\n";
+        }
+        str += "</style>\n";
+        return str;
+    }
+    function overTopItem(el) {
+        with (el.style) {
+            background   = "#f8f8f8";
+            paddingBottom = "0px";
+        }
+    }
+    function outTopItem(el) {
+        if ((el.sub != null) && (el.parentElement.openedSub == el.sub.id)) { 
+            with(el.style) {
+                background = "#ffffff";
+            }
+        }
+        else {
+            with (el.style) {
+                background = "#ffffff";
+                padding = "0px";
+            }
+        }
+    }
+    function overSubItem(el) {
+            el.style.background = "#F6F6F6";
+        el.style.textDecoration = "underline";
+    }
+    function outSubItem(el) {
+                el.style.background = "#ffffff";
+        el.style.textDecoration = "none";
+    }
+    function highlightSubItem(el) {
+        el.style.background = "#ffffff";
+        el.style.color      = "#ff0000"; 
+        selectedItem = el;
+    }
+    function restoreSubItem(el) {
+        el.style.background = "#ffffff";
+        el.style.color      = "menutext";
+        selectedItem = null;
+    }
+    function overscrollButton(el) {
+        overTopItem(el);
+        el.style.padding = "0px";
+    }
+    function outscrollButton(el) {
+        outTopItem(el);
+        el.style.padding = "0px";
+    }
+    function downscrollButton(el) {
+        with (el.style) {
+            borderRight   = "0px solid buttonhighlight";
+            borderLeft  = "0px solid buttonshadow";
+            borderBottom    = "0px solid buttonhighlight";
+            borderTop = "0px solid buttonshadow";
+        }
+    }
+    function upscrollButton(el) {
+        overTopItem(el);
+        el.style.padding = "0px";
+    }
+    function getReal(el, type, value) {
+        var temp = el;
+        while ((temp != null) && (temp.tagName != "BODY")) {
+            if (eval("temp." + type) == value) {
+                el = temp;
+                return el;
+            }
+            temp = temp.parentElement;
+        }
+        return el;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Fix the scrollbars
+    var globalScrollContainer;    
+    var overflowTimeout = 1;
+
+    function fixScroll(el) {
+        globalScrollContainer = el;
+        window.setTimeout('changeOverflow(globalScrollContainer)', overflowTimeout);
+    }
+    function changeOverflow(el) {
+        if (el.offsetHeight > el.parentElement.clientHeight)
+            window.setTimeout('globalScrollContainer.parentElement.style.overflow = "auto";', overflowTimeout);
+        else
+            window.setTimeout('globalScrollContainer.parentElement.style.overflow = "hidden";', overflowTimeout);
+    }
+    function ChangeFolderImg(el,type) {
+        var FolderImg = eval(el.id + "Img");
+        if (type == 1) {
+            FolderImg.src="$req.contextPath/eWebEditor/buttonimage/standard/foldericon1.gif"
+        }
+        else {
+            FolderImg.src="$req.contextPath/eWebEditor/buttonimage/standard/foldericon2.gif"
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // 标签调用
+    //普通标签
+
+    function InsertLabel(label){
+		dialogArguments.insertHTML(label);
+		window.returnValue = null;
+		window.close();
+    }
+
+
+    //函数标签调用
+    function showColumnNewListDialog(url,width,height){
+	
+	  showModelessDialog('edit_NewsList.jsp', "", "dialogWidth:"+width+"px; dialogHeight:"+height+"px; help: no; scroll:no; status: no"); 
+	  // window.open   ('edit_NewsList.jsp',   'newwindow',   'height=550,   width=300,   top=0,   left=0,   toolbar=no,   menubar=no,   scrollbars=yes,   resizable=yes,location=no,   status=no')  
+	//window.open('edit_NewsList.jsp','_blank','width=700,height=500,menubar=no,resizable=no,status=no,scrollbars=no,left=25,top=25');
+	//window.opener=null;window.close();
+
+
+     }
+
+    </SCRIPT>
+   
+	<div id="easy-tabs" class="easy-tabs">
+    	<ul class="easy-tabs-header">
+			#foreach($typeOne in $!typeOneVarList)
+        	<li><label>$!typeOne.varTypeName</label></li>
+			#end
+        </ul>
+        <div class="easy-tabs-pages">
+			#foreach($typeOne in $!typeOneVarList)
+        	<div class="easy-tabs-page">
+            	<table class="fieldtbl">
+                	<tbody>
+						#foreach($typeTwo in $!typeTwoVarList)
+							#if($!typeTwo.varTypeId.equals($!typeOne.varTypeId))
+                        	<tr>
+                            	<td class="field" width="7%">
+                                	<label>$!typeTwo.subName：</label>
+                                </td>
+                            	<td>
+    							#foreach($typeVar in $!templateVarList)
+									#if($!typeVar.subId.equals($!typeTwo.subId))
+                                	<a href="#" #if($!typeVar.varTypeId.equals(3)) title="$!typeVar.remark" #end onclick="InsertLabel('$!typeVar.varTag')">$!typeVar.varName</a>
+									#end
+    							#end
+                                </td>
+                            </tr>
+    						#end
+                    	#end
+                    </tbody>
+                </table>
+            </div>
+			#end
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+﻿#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta   http-equiv="Pragma"   content="no-cache"> 
+    <title>组织机构</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+   <style type="text/css">
+    	.Agency-left { float: left; width: 220px; }
+		.Agency-left h4 { height: 30px; border: 1px solid #ccc; padding: 0px 5px; line-height: 30px; font-size: 12px; font-family: Microsoft Yahei; }
+		.Agency-left h4 label { float: left;}
+		.Agency-left h4 p { float: right; }
+		.Agency-left h4 p a { float: left; width: 20px; overflow: hidden; text-indent: -1000px; }
+		.Agency-left h4 p a.edi-add { background: url(${ctx}/images/template/edi-add.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-up { background: url(${ctx}/images/template/edi-up.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-down { background: url(${ctx}/images/template/edi-down.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-del { background: url(${ctx}/images/template/edi-del.gif) no-repeat center center transparent; }
+		.Agency-left h4 p a.edi-edi { background: url(${ctx}/images/template/edi-edi.gif) no-repeat center center transparent; }
+		.Agency-left .Agency-tree {width:99%; display: block; height: 500px; border: 1px solid #ccc; margin-top: 2px; overflow: auto; }
+		
+		.Agency-right { min-height: 534px; height: auto !important; height: 534px; margin-left: 230px; }
+    </style>
+
+	#scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.exedit-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+		var oldPostJson={};
+		var postJson={};
+		
+		
+		
+		//延迟器
+		var timer = null;
+		
+ 		
+		
+		//清空
+		function qingkong(){
+			var length = document.forms[0].length
+			for(i=0;i<length;i++)
+			{
+				 var type = document.forms[0].elements[i].type;
+				 if(type!="button"){
+					 document.forms[0].elements[i].value = "";
+				 }
+			}
+			 if(document.getElementById("deptCheckbox").checked && document.getElementById("deptCheckbox").disabled==false){ 
+			   document.getElementById("deptCheckbox").checked = false;
+			 }
+		}
+		
+ 		
+		//组装数据
+		function getQueryJson(){
+    		postJson['deptUserBean.account']=jQuery.trim($('#account').val());
+			postJson['deptUserBean.userName']=jQuery.trim($('#userName').val());
+			postJson['deptUserBean.isActived']=jQuery.trim($('#isActived').val());
+    		oldPostJson = postJson;
+    		return postJson;
+    	}
+		
+		//刷新
+		function refreshForm(){
+			filterPageForm_submit();
+		}
+		//模糊查询搜索用户
+		function postUserQuery(){
+				postJson={};
+				postJson['userName']=$("#userName").val();
+				postJson['deptName']=$("#deptName").val();
+				postJson['teamUserIds']=$("#cuserIds").val();
+				oldPostJson = postJson;
+    			jQuery.ajax({
+    			    type:"post", 
+    			    url:"getUserPageList.html", 
+    			    data:postJson,
+    			    success:function(html){
+    			    	$("#deptGrid").html(html).find('table').table();
+    			    	$("#total").text($("#totalAmount").val());
+    			    }
+    			});
+			
+		}
+		
+		//根据ID删除用户
+		function addUsers(flag,teamId){
+            	
+			if(flag=='insert'){
+    		var userId=$("#cuserIds").val();
+			$("input[name='userIds']:checkbox:checked").each(function(){
+					if(userId!=null&&userId!=""){
+						userId = userId+","+this.value;
+					}else{
+					userId=this.value;
+					}
+            	});
+			tab.close(GetId(),false);
+			tab.add({userIds:userId.substring(1), pid: GetId(), title: "新建团队", url: "../team/saveSysTeam.html?userIds="+userId+"&sysTeam.teamName="+$("#teamName").val(), lock: false});
+    		}
+			if(flag=='update'){
+			var userId="";
+			$("input[name='userIds']:checkbox:checked").each(function(){
+            		userId = userId+","+this.value;
+            	});
+			tab.close(GetId(),false);
+				tab.add({id: "systeam_update"+teamId, pid: GetId(), title: "编辑团队-", url: "../team/updateSysTeam.html?flag=1&sysTeamUser.teamUserId="+teamId+"&sysTeam.teamName="+22+"&userIds="+userId.substring(1)+"&random="+Math.random(), lock: false});
+			}
+		}
+		//复选框选中和取消
+		function selectAll(obj){   
+          var mm=document.getElementsByName("userIds");
+		  	for(var i=0;i<mm.length;i++){
+    			if(obj.checked==true){
+					mm[i].checked=true;
+    			}else{
+					mm[i].checked=false;
+				}
+				if(mm[i].disabled==true){
+					mm[i].checked=false;
+				}
+    		}
+        }   
+
+		$("input:checkbox").click(function(){
+        	var userIds="";
+        	$("input:checkbox:checked").each(function(){
+        		userIds = userIds+","+this.value;
+        	});
+		});
+		
+	
+		
+		
+		
+
+	</script>
+</head>
+ 
+<body>
+	
+	#* <div class="Agency-left">
+    	<h4>
+        	<label>组织机构</label>
+            <p>
+				<input id="deptId" type="hidden" name="deptId" />
+                <a href="javascript:void(0);" class="edi-add" id="add" onclick="changeActive(2)">add</a>
+                <a href="javascript:void(0);" class="edi-up" id="up" onclick="changeActive(3)">up</a>
+                <a href="javascript:void(0);" class="edi-down" id="down" onclick="changeActive(4)">down</a>
+                <a href="javascript:void(0);" class="edi-del" id="del" onclick="changeActive(5)">del</a>
+                <a href="javascript:void(0);" class="edi-edi" id="edi" onclick="changeActive(6)">edi</a>
+            </p>
+        </h4>
+        <div class="Agency-tree">
+        	<ul id="deptTree" class="ztree"></ul>
+        </div>
+    </div>*#
+    <div >
+		<form name="deptList" id="deptList" style="width: 50%;">
+			<table class="htmltbl" cellpadding="0" cellspacing="0" width="100%">
+            	<tbody>
+                	<tr>
+                       #* <td width="6%" class="field" style="text-align: left;">
+                        	<label>用户名:</label>
+                        </td>
+                        <td width="20%">
+							<div class="dtxt1">
+								<input type="text" id="account" name="deptUserBean.account" class="dtxt1-txt" maxLength="20" />
+							</div>
+                        </td>*#
+                        <td width="2%" class="field" style="text-align: left;">
+                        	<label>姓名:</label>
+                        </td>
+                        <td width="5%" >
+								<input type="text" id="userName" name="deptUserBean.userName" class="dtxt1-txt" maxLength="20" />
+                        </td>
+						<td width="2%" class="field" style="text-align: left;">
+                        	<label>所属机构:</label>
+                        </td>
+                        <td width="5%" >
+								<input type="text" id="deptName" name="deptUserBean.deptName" class="dtxt1-txt" maxLength="30" />
+                        </td>
+						
+                    </tr>
+                </tbody>
+            </table>
+	     </form>
+    		 <p  class="sz" style="clear: none;">
+            	<span class="fl bold">
+				</span>
+                <input type="button" value="清 空" onclick="qingkong()" class="btn1" />
+                <input type="button" value="搜 索" onclick="postUserQuery()" class="btn1" />
+    		</p>
+		
+            <div class="actrow" style="margin-top: 20px;" >
+    	    	<a href="javascript:void(0);" class="btn2 fr" onclick="refreshForm()">
+    	            <label class="btn2-txt">刷 新</label>
+    	        </a>
+    	    </div>
+			
+    	   <div id="deptGrid">
+			#parse("/velocity/team/deptUserList.vm")
+           </div>
+    </div>
+	<div style="margin-top: 20px; text-align: center;">
+		
+		#if($!sysTeamUser.teamUserId)
+			  <input type="button" value="保 存 " onclick="addUsers('update','$!sysTeamUser.teamUserId')" class="btn5 btn5bg1"/>
+		#else
+		<input type="button" value="保 存 " onclick="addUsers('insert')" class="btn5 btn5bg1"/>
+		#end
+    <input type="button" value="取 消" onclick="tab.close(GetId(),false);" class="btn5 btn5bg3"/>
+	</div>
+</body>
+</html>

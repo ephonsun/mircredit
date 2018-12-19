@@ -1,0 +1,107 @@
+<thead>
+<tr>
+    <th><label title="日程">日程</label></th>
+    <th><label title="沟通进度">沟通进度</label></th>
+    <th><label title="日程备注">日程备注</label></th>
+    <th><label title="完成情况">完成情况</label></th>
+    #if($hasPermission)
+        <th><label title="操作">操作</label></th>
+    #end
+</tr>
+</thead>
+<tbody>
+#foreach($schedule in $scheduleList)
+<tr #if($!schedule.status == 0 && ($!schedule.isOutDate == 1)) class="orange" #end>
+    <td><label title="#if($schedule.contactType==1)电话联系#elseif($schedule.contactType==2)上门拜访#else #end $!date.format('yyyy-MM-dd',$!schedule.contactDate ) $!date.format('HH:mm',$!schedule.contactDate )" style="height: 50">
+
+        #if($schedule.contactType==1)
+            电话联系
+        #elseif($schedule.contactType==2)
+            上门拜访
+        #else
+        #end
+        <br/>
+        $!date.format('yyyy-MM-dd',$!schedule.contactDate )
+        $!date.format('HH:mm',$!schedule.contactDate )
+    </label></td>
+    <td #if($!schedule.status == 1 || $!schedule.status == 2) style="overflow:hidden;" #else style="overflow:visible;" #end class="autoSelected black">
+        #if($!schedule.status == 1 || $!schedule.status == 2 || $!schedule.pdtProductCustomerBean.belongUserId != $!loginUserId)
+            #foreach($cp in $commProgressList)
+                #if($cp.COMM_PROGRESS_ID == $!schedule.commProgressId)
+                    <label title="$!cp.COMM_PROGRESS_NAME">
+                        <span>$!cp.COMM_PROGRESS_NAME</span>
+                        <span></span>
+                    </label>
+                #end
+            #end
+        #else
+            <input type="hidden"  value="$!schedule.commProgressId" />
+            <select name="commProgress" onchange="commProgressEdit($!schedule.scheduleId,$(this));">
+                <!--
+                <option value="">&nbsp;</option>
+                -->
+                #foreach($cp in $commProgressList)
+                    <option value="$cp.COMM_PROGRESS_ID" style="color: black;">&nbsp;$cp.COMM_PROGRESS_NAME</option>
+                #end
+            </select>
+        #end
+    </td>
+
+    <td><label title="$!subString.replaceRemark($!schedule.remark)">
+        <span>$!schedule.remark</span>
+        <span></span>
+    </label></td>
+    <td style="overflow:visible;" class="autoSelected black">
+        #if($!schedule.status == 1)
+            <label title="已完成">
+                <span>已完成</span>
+                <span></span>
+            </label>
+        #elseif($!schedule.status == 2)
+            <label title="已作废">
+                <span>已作废</span>
+                <span></span>
+            </label>
+        #else
+            #if($!schedule.pdtProductCustomerBean.belongUserId != $!loginUserId)
+                <label title="已完成">
+                    <span>未完成</span>
+                    <span></span>
+                </label>
+            #else
+                <input type="hidden" value="$!schedule.status"  />
+                <select onchange="statusEdit($!schedule.scheduleId,$(this));" id="statusSelect">
+                    <!--
+                    <option value="" >&nbsp;</option>
+                    -->
+                    <option value="0" >&nbsp;未完成</option>
+                    <option value="1" >&nbsp;已完成</option>
+                    <!--
+                    <option value="2" >&nbsp;已过期</option>
+                    -->
+                    <option value="2" >&nbsp;已作废</option>
+                </select>
+            #end
+        #end
+    </td>
+    #if($hasPermission)
+        <td>
+            #if($!schedule.status == 0 && $schedule.pdtProductCustomerBean && $!schedule.pdtProductCustomerBean.belongUserId == $!loginUserId)
+                <span class="slink" onclick="openScheduleAlterWindow('$!schedule.scheduleId')" >编辑日程</span>
+            #else
+                <span disabled="true" style="cursor: default;">编辑日程</span>
+            #end
+        </td>
+    #end
+</tr>
+#end
+</tbody>
+<tfoot>
+<tr>
+    <td #if($hasPermission) colspan="5" #else colspan="4" #end>
+        #pageSize($page,"Schedule")
+    </td>
+</tr>
+</tfoot>
+<input type="hidden" id="scheduleRecordCount" value="$!scheduleCount" />
+<input type="hidden" id="hasPermission" value="$!hasPermission" />

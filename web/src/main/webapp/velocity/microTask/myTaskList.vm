@@ -1,0 +1,440 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>我执行的任务</title>
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <link rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" type="text/css">
+    <style type="text/css">
+    	span.ml { margin-left: -1px; }
+    </style>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.table-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.common.js"></script>
+    <script type="text/javascript" src="${ctx}/js/banger/banger.input.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.excheck-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+    
+    <script type="text/javascript">
+    	var oldPostJson = {};
+    	
+    	function getQueryJson(){
+	    	var postJson = {};
+			postJson['taskTitle']=jQuery.trim($('#taskTitle').val());
+			postJson['taskType'] = jQuery.trim($('#taskType').val());
+			postJson['startDate'] = jQuery.trim($('#startDate').val());
+			postJson['endDate']=jQuery.trim($('#endDate').val());
+			postJson['taskStatus'] = jQuery.trim($('#taskStatus').val());
+			postJson['isOutDate'] = jQuery.trim($('#isOutDate').val());
+			postJson['assignUserType'] = jQuery.trim($('#assignUserType').val());
+			postJson['assignUserIds']=$('#userIds').val();
+			
+			oldPostJson = postJson;
+			
+			return postJson;
+	    }
+	    
+	    //分页跳转
+		function gotoPage(page){
+			if(oldPostJson){
+				goto(
+					page,
+					"../tskMicroTask/myTaskListQuery.html?RandNum="+ Math.random(),
+					oldPostJson,
+					function(html){
+						queryBack(html, 'dataList');
+					});
+			}
+		}
+		
+		function queryBack(html, gridId){
+			$("#"+gridId).html(html);
+			$('table.datatbl').table();
+			
+			var total = $('#total').val();
+			if(total!=null){
+				$("#recordCount").text(total);
+			}else {
+				$("#recordCount").text(0);
+			}
+		}
+		
+		function delTask(taskId) {
+			var cusName = $('#taskTitle_' + taskId).html();
+			if(confirm("您确定要删除任务“"+cusName+"”吗？")){
+    			var postJson = {};
+				postJson['taskId']=taskId;
+				var urlStr = "../tskMicroTask/delTask.html?RandNum="+ Math.random();
+				jQuery.ajax({
+				  type: 'POST',
+				  url: urlStr,
+				  data: postJson,
+				  success:function(){
+				  		$("#refresh").click();
+				  	}
+				});	
+			}
+		}
+		
+		function stopTask(taskId) {
+			var cusName = $('#taskTitle_' + taskId).html();
+			if(confirm("您确定要中止任务“"+cusName+"”吗？")){
+    			var postJson = {};
+				postJson['taskId']=taskId;
+				var urlStr = "../tskMicroTask/stopTask.html?RandNum="+ Math.random();
+				jQuery.ajax({
+				  type: 'POST',
+				  url: urlStr,
+				  data: postJson,
+				  success:function(){
+				  		$("#refresh").click();
+				  	}
+				});	
+			}
+		}
+		//点击User
+		function onCheckUser(treeId){
+			var postJson = {};
+			postJson = getCheckJson(treeId, 'U');
+			$('#userIds').val(postJson.ids);
+			$('#userText').val(postJson.names);
+		}
+		function getCheckJson(treeId, flag){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getCheckedNodes(true);
+			var len = nodes.length;
+			var uIds = "";
+			var uName = "";
+			for(var i=0; i<len; i++){
+				if(flag=='U'){
+					if(nodes[i].flag==flag){
+						if(uIds==""){
+							uIds = nodes[i].id;
+							uName = nodes[i].name;
+						}else{
+							uIds = uIds + "," + nodes[i].id;
+							uName = uName+ "," +nodes[i].name;
+						}
+					}
+				}else{
+					if(uIds==""){
+						uIds = nodes[i].id;
+						uName = nodes[i].name;
+					}else{
+						uIds = uIds + "," + nodes[i].id;
+						uName = uName+ "," +nodes[i].name;
+					}	
+				}
+			}
+			var postJson = {};
+			postJson['ids'] = uIds;
+			postJson['names'] = uName;
+			return postJson;
+		}
+		var isInChargeOf='$!isInChargeOf';
+		
+		$(function(){
+			$('select').select();
+			
+			$('table.datatbl').table();
+			jQuery("#taskForm").validator();
+			
+			getQueryJson();
+			//加载下属树
+			$('#userList').subtree({
+				tid: 'subtree',
+				showIcon: true,
+				url: function(){ return "../customer/getCusBelongToJson.html?BelongToType=brUser&random=" + Math.random(); },
+				buttons: [
+					{ text: '确定', callback: onCheckUser },
+					{ text: '取消' }
+				]
+			});
+			$("#query").click(function(){
+				var bool = jQuery.validator({ form: 'taskForm'});
+				if(bool){
+					var postJson = getQueryJson();
+					var urlStr = "../tskMicroTask/myTaskListQuery.html?RandNum="+ Math.random();
+					jQuery.ajax({
+					  type: 'POST',
+					  url: urlStr,
+					  data: postJson,
+					  success:function(html){
+					  	queryBack(html, 'dataList');
+					  	oldPostJson = getQueryJson();
+					  }
+					});	
+				}
+			});
+			
+			$("#clear").click(function(){
+				$('.text').val('');
+		    	$("select").each(function(){
+		    		this.selectedIndex = 0;
+		    		$(this).select();
+		    	});
+		        assignUserTypeChange("brAll");
+			});
+			
+			$("#refresh").click(function(){
+				if(oldPostJson){
+					goto( 
+						null,
+						"../tskMicroTask/myTaskListQuery.html?RandNum="+ Math.random(),
+						oldPostJson,
+						function(html){
+							queryBack(html, 'dataList');
+					});
+		    	}
+			});
+			
+			$("#assignUserType").change(function(){
+				assignUserTypeChange($(this).val());
+			});
+			assignUserTypeChange($("#assignUserType").val());	
+		});
+		
+		/**
+		 * 编辑者是分配者
+		 */
+		function editTaskByAssign(taskId){
+			var title = $('#taskTitle_' + taskId).html();
+			var options = {id: "editTaskByAssign-"+taskId, pid: GetId(), title: "编辑贷款任务-"+title, url: "${ctx}/tskMicroTask/toEditTskMicroTaskByAssignPage.html?tskMicroTask.taskId="+taskId, lock: false,confirm: true};
+			tab.add(options);
+		}
+		
+		/**
+		 * 编辑者是执行者
+		 */
+		function editTaskByExecutor(taskId){
+			var title = $('#taskTitle_' + taskId).html();
+			var options = {id: "editTaskByExecutor-"+taskId, pid: GetId(), title: "编辑贷款任务-"+title, url: "${ctx}/tskMicroTask/toEditTskMicroTaskByExecutorPage.html?isImport=1&tskMicroTask.taskId="+taskId, lock: false};
+			tab.add(options);
+		}
+		
+		/**
+		 * 查看贷款任务
+		 */
+		function viewTask(taskId){
+			var title = $('#taskTitle_' + taskId).html();
+			var options = {id: "viewTask-"+taskId, pid: GetId(), title: "查看贷款任务-"+title, url: "${ctx}/tskMicroTask/toViewTskMicroTaskPage.html?tskMicroTask.taskId="+taskId, lock: false};
+			tab.add(options);
+		}
+		
+		
+		/**
+		 * 编辑营销任务者是分配者
+		 */
+		function editTaskMarketingByAssign(taskId){
+			var title = $('#taskTitle_' + taskId).html();
+			var options = {id: "editTaskByAssign-"+taskId, pid: GetId(), title: "编辑营销任务-"+title, url: "${ctx}/tskMicroTask/toEditTskMicroTaskMarketingByAssignPage.html?tskMicroTask.taskId="+taskId, lock: false,confirm: true};
+			tab.add(options);
+		}
+		
+		/**
+		 * 编辑营销任务者是执行者
+		 */
+		function editTaskMarketingByExecutor(taskId){
+			var title = $('#taskTitle_' + taskId).html();
+			var options = {id: "editTaskByExecutor-"+taskId, pid: GetId(), title: "编辑营销任务-"+title, url: "${ctx}/tskMicroTask/toEditTskMicroTaskMarketingByExecutorPage.html?isImport=1&tskMicroTask.taskId="+taskId, lock: false};
+			tab.add(options);
+		}
+		
+		/**
+		 * 查看营销任务
+		 */
+		function viewTaskMarketing(taskId,taskType){
+			var title = $('#taskTitle_' + taskId).html();
+			var actionName = "";
+			if(taskType == 3){
+				actionName = "toViewTskMicroTaskMarketingPage";
+			}else{
+				actionName = "toViewPhoneTskMicroTaskMarketingPage";
+			}
+			var options = {id: "viewTask-"+taskId, pid: GetId(), title: "查看营销任务-"+title, url: "${ctx}/tskMicroTask/"+actionName+".html?tskMicroTask.taskId="+taskId, lock: false};
+			tab.add(options);
+		}
+		
+		function execTask(taskId){
+			var title = $('#taskTitle_' + taskId).html();
+			var options = {id: "execTask-"+taskId, pid: GetId(), title: "执行营销任务-"+title, url: "${ctx}/tskMicroTaskTarget/phoneTaskExeList.html?taskId="+taskId, lock: false};
+			tab.add(options);
+		}
+		
+       	function assignUserTypeChange(v){
+			$('#userIds').val("");
+			$('#userText').val("");
+			switch(v){
+				case "brAll":
+					$("#myShowText, #userList").hide();	
+					break;
+				case "my":
+					$('#showText').text(window.top.getUn());
+					$("#myShowText").show();
+					$("#userList").hide();
+					break;
+				case "brUser":
+					$("#userList").show();
+					$("#myShowText").hide();
+					break;
+				default: break;
+			}
+		};
+		
+		function searchStartDateFun(obj){
+			var startDate=$("#startDate").val();
+			var endDate=$("#endDate").val();
+			if(endDate.length>0&&startDate.length>0){
+				if(endDate<startDate){
+    				$(obj).attr('tips', '开始日期必须小于结束日期'); return false;
+    			}else{
+					$('#endDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+		function searchEndDateFun(obj){
+			var startDate=$("#startDate").val();
+			var endDate=$("#endDate").val();
+			if(endDate.length>0&&startDate.length>0){
+				if(startDate>endDate){
+    				$(obj).attr('tips', '结束日期不能小于开始日期'); return false;
+    			}else{
+					$('#startDiv').removeClass('v-fails');
+					return true;
+				}
+			}else return true;
+		}
+    </script>
+</head>
+<body>
+<form id="taskForm" name="taskForm" action="" method="post">
+	<table class="htmltbl">
+    	<tbody>
+    		<tr>
+            	<td class="field" width="8%">
+                	<label>任务名称：</label>
+                </td>
+                <td width="17%">
+                	<div class="ui-div-text">
+                		<input id="taskTitle" type="text" class="text" />
+                	</div>
+                </td>
+            	<td class="field" width="8%">
+                	<label>任务类型：</label>
+                </td>
+                <td width="17%">
+                	<select id="taskType">
+                    	<option value="">&nbsp;</option>
+                    	<option value="1">&nbsp;贷款任务</option>
+                    	<option value="2">&nbsp;营销任务-电话营销</option>
+                    	<option value="3">&nbsp;营销任务-实地营销</option>
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>执行日期：</label>
+                </td>
+                <td colspan="2">
+                	<table class="celltbl">
+                		<tbody>
+                			<tr>
+                				<td width="120">
+                					<div class="ui-div-text" id="startDiv">
+				                		<input type="text" fun="searchStartDateFun" id="startDate" readonly="readonly" class="text datepicker" />
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                				<td width="20"><label>-</label></td>
+                				<td width="120">
+                					<div class="ui-div-text" id="endDiv">
+				                		<input type="text" fun="searchEndDateFun" id="endDate" readonly="readonly" type="text" class="text datepicker" />
+				                		<i class="date"></i>
+				                	</div>
+                				</td>
+                			</tr>
+                		</tbody>
+                	</table>
+                </td>
+				<td width="17%"></td>
+            </tr>
+            <tr>
+            	<td class="field" width="8%">
+                	<label>任务状态：</label>
+                </td>
+                <td width="17%">
+                	<select id="taskStatus">
+						<option value="-1">&nbsp;</option>
+						<option value="1">&nbsp;已完成</option>
+						<option value="0">&nbsp;未完成</option>
+					</select>
+				</td>
+            	<td class="field" width="8%">
+                	<label>是否过期：</label>
+                </td>
+                <td width="17%">
+                	<select id="isOutDate">
+                    	<option value="">&nbsp;</option>
+                    	<option value="1">&nbsp;已过期</option>
+                    	<option value="0">&nbsp;未过期</option>
+                    </select>
+                </td>
+            	<td class="field" width="8%">
+                	<label>创建者：</label>
+                </td>
+                <td>
+                	<select id="assignUserType">
+                    	#if($!isInChargeOf=="1")
+                            <option value="brAll">&nbsp;</option>
+                            <option value="my">&nbsp;我的</option>
+                            <option value="brUser">下属的</option>
+                    	#else
+                            <option value="brAll">&nbsp;</option>
+                            <option value="my">&nbsp;我的</option>
+                    	#end
+                    </select>
+                </td>
+				<td colspan="2">
+					<span class="ui-span-btn fl" style="display:none;" id="myShowText">
+                        <label id="showText">
+                        	
+                        </label>
+                    </span>
+                    <div id="userList" class="dtxt2 fl" style="display: none; width: 200px;">
+                        <input type="text" class="dtxt2-txt" readonly="readonly" id="userText"/>
+                        <input id="userIds" name="userIds" type="hidden" />
+                        <span class="dtxt2-ddl" id="ddlchange">ddl</span>
+                    </div>
+				</td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+    <div class="search-bar">
+        <span class="fl">
+            我执行的任务(<label id="recordCount" class="green">$!recordCount</label>)
+        </span>
+        <input id="clear" type="button" class="ui-input-btn" value="清空" />
+        <input id="query" type="button" class="ui-input-btn" value="搜索" />
+    </div>
+    
+	<div class="action-bar">
+        <span id="refresh" class="ui-span-btn fr">
+        	<label>刷新</label>
+        </span>
+    </div>
+    <table id="dataList" class="datatbl">
+        #parse("/velocity/microTask/myTaskListTable.vm")
+    </table>
+</body>
+</html>

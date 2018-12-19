@@ -1,0 +1,945 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>设置定时发送</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    <style type="text/css">
+    	.htmltbl td { line-height:2; }
+		.htmltbl .trweek ul, .htmltbl .trmonth ul { height: auto; overflow: auto; zoom: 1; }
+		.htmltbl .trweek ul li, .htmltbl .trmonth ul li { float: left; }
+		.htmltbl .trweek ul li .chk, .htmltbl .trmonth ul li .chk { -margin: 4px 0px; }
+		.htmltbl .trweek ul li { width: 70px; }
+		.htmltbl .trmonth ul li { width: 60px; }
+		.w { width: 150px; }
+		.mr { margin-right: 5px; }
+		.hide { display: none; }
+		
+		.width { width:200px; }
+    </style>
+
+    #scriptLink("core")
+    #scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.timer-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+		$(function(){
+			/* 加载下拉选择框 */
+			$('select').select();
+			
+			/*加载时间选择控件 */
+			$('table.timer').timer({
+				hour: { show: true, id: 'txtHour', name: '', value: '00' },
+				mins: { show: true, id: 'txtMins', name: '', value: '00' }
+			});
+			
+			/* 天输入：只能输入数字 */
+			numInput('#txtDay');
+			
+			bindData();
+			
+			$('#adActived').click(function(){
+				if($(this).attr("checked")!=null){
+					$('#activedSync').removeClass('hide');
+					$("#adActived").val("1");
+				}else{
+					$('#activedSync').addClass('hide');
+					$('.sync').addClass('hide');
+					$("#adActived").val("0");
+				}
+			});
+			$('#hand').click(function(){
+				$('#handPage').show();
+				$('#timingPage').hide();
+			});
+			$('#timing').click(function(){
+				$('#handPage').hide();
+				$('#timingPage').show();
+			});
+			$('#connect').click(function(){
+				connectAdService();
+			});
+			$('#btnOk').click(function(){
+				saveAdSyncConfig();
+			});
+			$('#syncIng').click(function(){
+				handSyncAdService();
+			});
+			$('#day,#week,#month,#year').click(function(){		
+				clearFailsStyle();		
+				changeSyncRatePage($(this).val());
+			});
+			
+			$(".chk").click(function(){
+				if(jQuery("#day")[0].checked){
+					dayFun();
+				}
+				
+				if(jQuery("#week")[0].checked){
+					weekFun();
+				}
+				
+				if(jQuery("#month")[0].checked){
+					monthFun();
+				}
+			});
+			jQuery("#activedSync").validator();
+			jQuery("#deptSync").validator();
+		});
+		
+		function changeSyncRatePage(type){
+			switch(type){
+				case "":
+				case "day":
+					$('.trday').show();
+					$('.trweek, .trmonth, .tryear').hide();
+					$('.trweek :checkbox').removeAttr('checked');
+					$('.trmonth :checkbox').removeAttr('checked');
+					$('.tryear select').each(function(){
+						this.selectedIndex = 0;
+						$(':text:first', $(this).prev()).val(1);
+					});
+					break;
+				case "week":
+					$('.trweek').show();
+					$('.trday, .trmonth, .tryear').hide();
+					$('.trmonth :checkbox').removeAttr('checked');
+					$('.tryear select').each(function(){
+						this.selectedIndex = 0;
+						$(':text:first', $(this).prev()).val(1);
+					});
+					break;
+				case "month":
+					$('.trmonth').show();
+					$('.trday, .trweek, .tryear').hide();
+					$('.trweek :checkbox').removeAttr('checked');
+					$('.tryear select').each(function(){
+						this.selectedIndex = 0;
+						$(':text:first', $(this).prev()).val(1);
+					});
+					break;
+				case "year":
+					$('.tryear').show();
+					$('.trday, .trweek, .trmonth').hide();
+					$('.trweek :checkbox').removeAttr('checked');
+					$('.trmonth :checkbox').removeAttr('checked');
+					break;
+				default: break;
+			};
+		};
+		
+		function changeSyncRate(type){
+			$('#day').attr("checked",false);
+			$('#week').attr("checked",false);
+			$('#month').attr("checked",false);
+			$('#year').attr("checked",false);
+			
+			var setings = '$!syncAdPcUsersSetting.adSyncRateSetting';
+			switch(type){
+				case "":
+				case "day":
+					$('#day').attr("checked",true);
+					$('#txtDay').val(setings);
+					break;
+				case "week":
+					$('#week').attr("checked",true);
+					var setArray = setings.split("|");
+					for (var i =0; i< setArray.length;i++){
+						$("input[name='weeks']").each(function(){
+        					if ($(this).val() == setArray[i]){
+								$(this).attr("checked", true);
+							}
+        				});
+					}
+					break;
+				case "month":
+					$('#month').attr("checked",true);
+					var setArray = setings.split("|");
+					for (var i =0; i< setArray.length;i++){
+						$("input[name='days']").each(function(){
+        					if ($(this).val() == setArray[i]){
+								$(this).attr("checked", true);
+							}
+        				});
+					}
+					break;
+				case "year":
+					$('#year').attr("checked",true);
+					var setArray = setings.split("-");
+					$('#selMonth').val(setArray[0]).select();
+					$('#selDay').val(setArray[1]).select();
+					break;
+				default: break;
+			};
+			changeSyncRatePage(type);
+		};
+		
+		function bindData(){
+			if('$!syncAdPcUsersSetting.adActived'){
+				$('#activedSync').removeClass('hide');
+			};
+			if('$!treeJsonArray'){
+				//自动连接    绑定数据
+				$('.sync').removeClass('hide');
+				initTree();
+			};
+			if('$!syncAdPcUsersSetting.adSyncMode'=='time'){
+				$('#handPage').hide();
+				$('#timingPage').show();
+			};
+			changeSyncRate('$!syncAdPcUsersSetting.adSyncRate');
+			if('$!syncAdPcUsersSetting.adSyncTime'){
+				var syncDate = '$!date.format('yyyy-MM-dd',$!syncAdPcUsersSetting.adSyncTime)';
+				var time = '$!date.format('HH:mm',$!syncAdPcUsersSetting.adSyncTime)';
+				var hours = time.substring(0,2);
+				var minutes = time.substring(3,5);
+				$('#txtSyncDate').val(syncDate);
+				$('#txtHour').val(hours);
+				$('#txtMins').val(minutes);
+			};
+		};
+		
+		function initTree(){
+			var json = jQuery.parseJSON('$!treeJsonArray');
+			var deptJson = jQuery.parseJSON('$!deptJson');
+			initSourceTree(json);
+			initTargetTree(deptJson);
+		};
+		
+		function initSourceTree(json){
+			$("#sourceList").atree({
+				setting: {
+					check: {enable: true,chkboxType: { "Y": "s", "N": "s" }},
+					view: {showIcon: false,dblClickExpand: false},
+					data: {simpleData: {enable: true}},
+					callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: null,
+						onCheck: null
+					}
+				},
+				nodes: json,
+				okHandler: btOkSource
+			});
+		};
+		
+		function initTargetTree(deptJson){
+			$("#targetList").atree({
+				setting: {
+					check: {enable: true,chkboxType: { "Y": "s", "N": "s" }},
+					view: {showIcon: false,dblClickExpand: false},
+					data: {simpleData: {enable: true}},
+					callback: {
+						beforeClick: null,
+						onClick: null,
+						beforeCheck: null,
+						onCheck: null
+					}
+				},
+				nodes: deptJson,
+				okHandler: btOkTarget
+			});
+		};
+		function btOkSource(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#adSyncDeptNode').val(nodes[0].id);
+			$('#sourceTree').val(nodes[0].name);
+			if($('#sourceTree').val()){
+				$('#sourceList').removeClass('v-fails');
+			}
+		};
+		
+		function btOkTarget(treeId){
+			var treeObj = jQuery.fn.zTree.getZTreeObj(treeId);
+			var nodes = treeObj.getSelectedNodes();
+			if(!nodes[0]){
+				return;
+			}
+			$('#adSyncDeptId').val(nodes[0].id);
+			$('#targetTree').val(nodes[0].name);
+			if($('#targetTree').val()){
+				$('#targetList').removeClass('v-fails');
+			}
+		};
+		
+		function connectAdService(){
+			var postJson = getSyncConfigJson();
+			var urlStr = "../adsync/connectAdService.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(result){
+			  	var json = jQuery.parseJSON(result);
+			  	if(json){
+			  		$('.sync').removeClass('hide');
+			  		$('.atree').remove();
+			  		$('#sourceTree').val("");
+			  		$('#targetTree').val("");
+			  		initSourceTree(json[0]);
+					initTargetTree(json[1]);
+					//赋值后自动验证
+					$('#sourceTree,#targetTree').focus().blur();
+			  	}else{
+			  		$('.sync').addClass('hide');
+			  	}
+			  }
+			});	
+		};
+		
+		function handSyncAdService(){
+			var bool = jQuery.validator({ form: 'activedSync', extend: true, extendhandler: extendvalidator });
+			var bool1 = jQuery.validator({ form: 'deptSync', extend: true, extendhandler: extendvalidator });
+			if($('#deptSync').is(':hidden')){
+				if(!bool){
+					return false;
+				}
+			}else{
+				if(!bool||!bool1){
+					return false;
+				}
+			}
+			var postJson = getSyncConfigJson();
+			var urlStr = "${ctx}/adsync/handSyncAdService.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(result){
+			  	if(result == "SUCCESS"){
+			  		banger.page.showMessageBox({"type":"success","content":"手工同步成功！"});	
+			  	}else{
+			  		banger.page.showMessageBox(result);
+			  	}
+			  }
+			});	
+		};
+		
+		function getSyncConfigJson(){
+			var postJson = getPostJson();
+			
+			if(!$('#deptSync').is(':hidden')){
+				var txtSyncDate = $('#txtSyncDate').val() + " " + jQuery("#txtHour").val() + ":"+ jQuery("#txtMins").val() + ":00";
+				postJson['syncTime'] = txtSyncDate;
+				
+				var type = "";
+				$("input[name='syncAdPcUsersSetting.adSyncRate']").each(function(){
+					if(this.checked){
+						type = $(this).val();
+					};
+				});
+				
+				switch(type){
+					case "":
+						banger.page.showMessageBox("同步频率不能为空！");	
+						break;
+					case "day":
+						postJson['syncAdPcUsersSetting.adSyncRateSetting'] = jQuery.trim($("#txtDay").val());
+						break;
+					case "week":
+						var sendRateSetting = "";
+						$("input[name='weeks']").each(function (){
+							if(this.checked){
+								if(sendRateSetting){
+									sendRateSetting += "|" + jQuery.trim($(this).val());
+								}else{
+									sendRateSetting = jQuery.trim($(this).val());
+								};
+							};
+						});
+						postJson['syncAdPcUsersSetting.adSyncRateSetting'] = sendRateSetting;
+						break;
+					case "month":
+						var sendRateSetting = "";
+						$("input[name='days']").each(function (){
+							if(this.checked){
+								if(sendRateSetting){
+									sendRateSetting += "|" + jQuery.trim($(this).val());
+								}else{
+									sendRateSetting = jQuery.trim($(this).val());
+								};
+							};
+						});
+						postJson['syncAdPcUsersSetting.adSyncRateSetting'] = sendRateSetting;
+						break;
+					case "year":
+						postJson['syncAdPcUsersSetting.adSyncRateSetting'] = $("#selMonth").val()+"-"+$("#selDay").val();
+						break;
+					default: break;
+				};
+			};
+			return postJson;
+		};
+		
+		function saveAdSyncConfig(){
+			var bool = jQuery.validator({ form: 'activedSync', extend: true, extendhandler: function(){return true;} });
+			var bool1 = jQuery.validator({ form: 'deptSync', extend: true, extendhandler: extendvalidator });
+			
+			if($('#deptSync').is(':hidden')){
+				if(!bool){
+					return false;
+				}
+			}else{
+				if(!bool||!bool1){
+					return false;
+				}
+			}
+			var postJson = getSyncConfigJson();
+			var urlStr = "${ctx}/adsync/saveAdSyncConfig.html?RandNum="+ Math.random();
+			jQuery.ajax({
+			  type: 'POST',
+			  url: urlStr,
+			  data: postJson,
+			  success:function(result){
+			  	if(result!=null&&parseInt(result)>0){
+			  		$('#adId').val(result);
+			  		banger.page.showMessageBox({"type":"success","content":"保存成功！"});	
+			  	}
+			  }
+			});	
+		};
+		
+		function clearFailsStyle(){
+			jQuery("#txtDay").parent().removeClass('v-fails');
+			
+			jQuery("input[name='days']").each(function (){
+				jQuery(this).removeClass('v-fails');
+			});
+			jQuery("input[name='weeks']").each(function (){
+				jQuery(this).removeClass('v-fails');
+			});
+		};
+		
+		function syncDateFun(){
+			if(jQuery("#timing")[0].checked){
+				var bool = true;
+				if(!jQuery.trim(jQuery("#txtSyncDate").val())){
+					jQuery("#txtSyncDate").parent().addClass('v-fails');
+					bool = false;
+				}else{
+					jQuery("#txtSyncDate").parent().removeClass('v-fails');
+				};
+				return bool;
+			}else{
+				jQuery("#txtSyncDate").parent().removeClass('v-fails');
+				return true;
+			};
+		};
+		
+		function dayFun(){
+			if(jQuery("#day")[0].checked && jQuery("#timing")[0].checked){
+				var bool = true;
+				if(!jQuery.trim(jQuery("#txtDay").val())){
+					jQuery("#txtDay").parent().addClass('v-fails');
+					bool = false;
+				}else{
+					jQuery("#txtDay").parent().removeClass('v-fails');
+				};
+				return bool;
+			}else{
+				jQuery("#txtDay").parent().removeClass('v-fails');
+				return true;
+			};
+		};
+		
+		function weekFun(){
+			if(jQuery("#week")[0].checked && jQuery("#timing")[0].checked){
+				var bool = true;
+				if(jQuery("input[name='weeks']:checked").length==0){
+					jQuery("input[name='weeks']").each(function (){
+						jQuery(this).addClass('v-fails');
+					});
+					bool = false;
+				}else{
+					jQuery("input[name='weeks']").each(function (){
+						jQuery(this).removeClass('v-fails');
+					});
+				};
+				return bool;
+			}else{
+				jQuery("input[name='weeks']").each(function (){
+					jQuery(this).removeClass('v-fails');
+				});
+				return true;
+			};
+		};
+		
+		function monthFun(){
+			if(jQuery("#month")[0].checked && jQuery("#timing")[0].checked){
+				var bool = true;
+				if(jQuery("input[name='days']:checked").length == 0){
+					jQuery("input[name='days']").each(function (){
+						jQuery(this).addClass('v-fails');
+					});
+					bool = false;
+				}else{
+					jQuery("input[name='days']").each(function (){
+						jQuery(this).removeClass('v-fails');
+					});
+				};
+				return bool;
+			}else{
+				jQuery("input[name='days']").each(function (){
+					jQuery(this).removeClass('v-fails');
+				});
+				return true;
+			};
+		};
+			
+		function extendvalidator(){
+			var bool = true;
+			if($("#timing")[0].checked){
+				var type = "";
+				$("input[name='syncAdPcUsersSetting.adSyncRate']").each(function(){
+					if(this.checked){
+						type = $(this).val();
+					};
+				});
+					
+				switch(type){
+					case "day":
+						bool = dayFun();
+						break;
+					case "week":
+						bool = weekFun();
+						break;
+					case "month":
+						bool = monthFun();
+						break;
+					default: break;
+				};
+			};
+			return bool;
+		};
+    </script>
+</head>
+
+<body style="padding-bottom:0;">
+	<div style="margin-bottom:10px;">
+    	<input type="checkbox" name="syncAdPcUsersSetting.adActived" id="adActived" class="chk" #if($!syncAdPcUsersSetting.adActived==1) checked="true" value="1" #else value="0" #end />
+        <label for="adActived">启用AD域帐号同步</label>
+    </div>
+	
+	<!-- Hidden Panel -->
+	<input type="hidden" name="syncAdPcUsersSetting.adId" value="$!syncAdPcUsersSetting.adId" id="adId"/>
+	<input type="hidden" name="syncAdPcUsersSetting.adSyncDeptNode" value="$!syncAdPcUsersSetting.adSyncDeptNode" id="adSyncDeptNode"/>
+	<input type="hidden" name="syncAdPcUsersSetting.adSyncDeptId" value="$!syncAdPcUsersSetting.adSyncDeptId" id="adSyncDeptId"/>
+	
+	<table id="activedSync" class="htmltbl hide">
+        <tbody>
+            <tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>AD域名：</label>
+                </td>
+                <td>
+					<div class="dtxt2 width">
+						<input type="text" name="syncAdPcUsersSetting.adName" id="adName" class="dtxt2-txt" value="$!syncAdPcUsersSetting.adName" maxlength="30"  rule="\S" tips='“AD域名”必须填写' />
+					</div>
+				</td>
+            </tr>
+            <tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>AD域地址：</label>
+                </td>
+                <td>
+					<div class="dtxt2 width">
+						<input type="text" name="syncAdPcUsersSetting.adLdapUrl" id="adLdapUrl" class="dtxt2-txt" value="$!syncAdPcUsersSetting.adLdapUrl" maxlength="50" rule="\S" tips='“AD域地址”必须填写' />
+					</div>
+				</td>
+            </tr>
+            <tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>AD域管理帐号：</label>
+                </td>
+                <td>
+					<div class="dtxt2 width">
+						<input type="text" name="syncAdPcUsersSetting.adAdminName" id="adAdminName" class="dtxt2-txt" value="$!syncAdPcUsersSetting.adAdminName" maxlength="50" rule="\S" tips='“AD域管理帐号”必须填写' />
+					</div>
+				</td>
+            </tr>
+            <tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>AD域管理密码：</label>
+                </td>
+                <td>
+					<div class="dtxt2 width">
+						<input type="password" name="syncAdPcUsersSetting.adAdminPassword" id="adAdminPassword" class="dtxt2-txt" value="$!syncAdPcUsersSetting.adAdminPassword" onpaste="return false" oncopy="return false" maxlength="50" rule="\S" tips='“AD域管理密码”必须填写' />
+					</div>
+				</td>
+            </tr>
+            <tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>密码加密方式：</label>
+                </td>
+                <td>
+					<input type="radio" name="syncAdPcUsersSetting.adAdminPwEnctypt" id="pswMode" class="rdo" #if($!syncAdPcUsersSetting.adAdminPwEnctypt=='AES'||!$!syncAdPcUsersSetting.adAdminPwEnctypt) checked="true" #end value="AES" />
+                	<label for="pswMode">AES</label>
+                	<input type="radio" name="syncAdPcUsersSetting.adAdminPwEnctypt" id="pswMode1" class="rdo" #if($!syncAdPcUsersSetting.adAdminPwEnctypt=='DES') checked="true" #end value="DES" />
+                	<label for="pswMode1">DES</label>
+				</td>
+            </tr>
+            <tr>
+            	<td colspan="3">
+                	<input type="button" id="connect" class="btn2" value="连接" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+        
+	<hr class="hide sync" />
+	
+	<table id="deptSync" class="htmltbl hide sync">
+        <tbody>
+        	<tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>AD域机构：</label>
+                </td>
+                <td>
+                	<div id="sourceList" class="dtxt2 width">
+                        <input type="text" id="sourceTree" class="dtxt2-txt" readonly="readonly" rule="\S" tips='“AD域机构”必须填写' />
+                        <i class="dtxt2-ddl">&nbsp;</i>
+                    </div>
+                </td>
+        	</tr>
+        	<tr>
+                <td width="120" class="field">
+                	<label class="red">*</label>
+                    <label>目标机构：</label>
+                </td>
+                <td>
+                    <div id="targetList" class="dtxt2 width">
+                        <input type="text" id="targetTree" class="dtxt2-txt" readonly="readonly" rule="\S" tips='“目标机构”必须填写' />
+                        <span class="dtxt2-ddl">&nbsp;</span>
+                    </div>
+                </td>
+        	</tr>
+            <tr>
+                <td width="120" class="field">
+                    <label>同步方式：</label>
+                </td>
+                <td>
+                	<input type="radio" name="syncAdPcUsersSetting.adSyncMode" class="rdo" id="hand" #if($!syncAdPcUsersSetting.adSyncMode=='manual'||!$!syncAdPcUsersSetting.adSyncMode) checked=true #end value="manual" />
+                	<label for="hand">手工同步</label>
+                	<input type="radio" name="syncAdPcUsersSetting.adSyncMode" class="rdo" id="timing" #if($!syncAdPcUsersSetting.adSyncMode=='time') checked=true #end value="time" />
+                	<label for="timing">定时同步</label>
+                </td>
+            </tr>
+		</tbody>
+        <tbody id="timingPage" class="hide">
+            <tr class="trfq">
+                <td width="120" class="field">
+                    <label>同步频率：</label>
+                </td>
+                <td>
+                	<input type="radio" name="syncAdPcUsersSetting.adSyncRate" class="rdo" id="day" value="day" checked=true/>
+                	<label for="day">每天</label>
+                	<input type="radio" name="syncAdPcUsersSetting.adSyncRate" class="rdo" id="week" value="week" />
+                	<label for="week">每周</label>
+                	<input type="radio" name="syncAdPcUsersSetting.adSyncRate" class="rdo" id="month" value="month"/>
+                	<label for="month">每月</label>
+                	<input type="radio" name="syncAdPcUsersSetting.adSyncRate" class="rdo" id="year" value="year"/>
+                	<label for="year">每年</label>
+                </td>
+            </tr>
+            <tr class="trday">
+                <td width="120" class="field">
+                    <label></label>
+                </td>
+                <td>
+                	<label class="fl" style="line-height: 24px;">每隔</label>
+                    <div class="dtxt2 fl" style="width: 40px; margin: 0 5px;">
+						<input type="text" class="dtxt2-txt" id="txtDay" value="" maxlength="2" fun="dayFun" tips='"每隔天数"必须填写'/>
+					</div>
+                    <label class="fl" style="line-height: 24px;">天</label>
+                </td>
+            </tr>
+            <tr class="trweek hide">
+                <td width="120" class="field">
+                    <label>&nbsp;</label>
+                </td>
+                <td>
+                	<ul>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="mon" value="1" tips="至少选择一项作为具体发送频率" />
+                            <label for="mon">星期一</label>
+                        </li>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="tues" value="2" tips="至少选择一项作为具体发送频率" />
+                            <label for="tues">星期二</label>
+                        </li>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="wed" value="3" tips="至少选择一项作为具体发送频率" />
+                            <label for="wed">星期三</label>
+                        </li>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="thur" value="4" tips="至少选择一项作为具体发送频率" />
+                            <label for="thur">星期四</label>
+                        </li>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="fri" value="5" tips="至少选择一项作为具体发送频率" />
+                            <label for="fri">星期五</label>
+                        </li>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="sat" value="6" tips="至少选择一项作为具体发送频率" />
+                            <label for="sat">星期六</label>
+                        </li>
+                    	<li>
+                            <input type="checkbox" class="chk" name="weeks" id="sun" value="7" tips="至少选择一项作为具体发送频率" />
+                            <label for="sun">星期日</label>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr class="trmonth hide">
+                <td width="120" class="field">
+                    <label>&nbsp;</label>
+                </td>
+                <td>
+                	<ul>
+                    	<li>
+                        	<input type="checkbox" class="chk" name="days" value="1" tips="至少选择一项作为具体发送频率"/>
+                			<label>1</label>
+                        </li>
+                    	<li>
+                        	<input type="checkbox" class="chk" name="days" value="2" tips="至少选择一项作为具体发送频率"/>
+                			<label>2</label>
+                        </li>
+                    	<li>
+                        	<input type="checkbox" class="chk" name="days" value="3" tips="至少选择一项作为具体发送频率"/>
+                			<label>3</label>
+                        </li>
+                    	<li>
+                        	<input type="checkbox" class="chk" name="days" value="4" tips="至少选择一项作为具体发送频率"/>
+                			<label>4</label>
+                        </li>
+                    	<li>
+                        	<input type="checkbox" class="chk" name="days" value="5" tips="至少选择一项作为具体发送频率"/>
+                			<label>5</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="6" tips="至少选择一项作为具体发送频率"/>
+                			<label>6</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="7" tips="至少选择一项作为具体发送频率"/>
+                			<label>7</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="8" tips="至少选择一项作为具体发送频率"/>
+                			<label>8</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="9" tips="至少选择一项作为具体发送频率"/>
+                			<label>9</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="10" tips="至少选择一项作为具体发送频率"/>
+                			<label>10</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="11" tips="至少选择一项作为具体发送频率"/>
+                			<label>11</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="12" tips="至少选择一项作为具体发送频率"/>
+                			<label>12</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="13" tips="至少选择一项作为具体发送频率"/>
+                			<label>13</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="14" tips="至少选择一项作为具体发送频率"/>
+                			<label>14</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="15" tips="至少选择一项作为具体发送频率"/>
+                			<label>15</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="16" tips="至少选择一项作为具体发送频率"/>
+                			<label>16</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="17" tips="至少选择一项作为具体发送频率"/>
+                			<label>17</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="18" tips="至少选择一项作为具体发送频率"/>
+                			<label>18</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="19" tips="至少选择一项作为具体发送频率"/>
+                			<label>19</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="20" tips="至少选择一项作为具体发送频率"/>
+                			<label>20</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="21" tips="至少选择一项作为具体发送频率"/>
+                			<label>21</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="22" tips="至少选择一项作为具体发送频率"/>
+                			<label>22</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="23" tips="至少选择一项作为具体发送频率"/>
+                			<label>23</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="24" tips="至少选择一项作为具体发送频率"/>
+                			<label>24</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="25" tips="至少选择一项作为具体发送频率"/>
+                			<label>25</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="26" tips="至少选择一项作为具体发送频率"/>
+                			<label>26</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="27" tips="至少选择一项作为具体发送频率"/>
+                			<label>27</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="28" tips="至少选择一项作为具体发送频率"/>
+                			<label>28</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="29" tips="至少选择一项作为具体发送频率"/>
+                			<label>29</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="30" tips="至少选择一项作为具体发送频率"/>
+                			<label>30</label>
+                        </li>
+                        <li>
+                        	<input type="checkbox" class="chk" name="days" value="31" tips="至少选择一项作为具体发送频率"/>
+                			<label>31</label>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr class="tryear hide">
+                <td width="120" class="field">
+                    <label>&nbsp;</label>
+                </td>
+                <td>
+                	<table class="celltbl">
+                        <tr>
+                            <td width="50">
+                                <select id="selMonth">
+                                	<option value="1">1</option>
+                                	<option value="2">2</option>
+                                	<option value="3">3</option>
+                                	<option value="4">4</option>
+                                	<option value="5">5</option>
+                                	<option value="6">6</option>
+                                	<option value="7">7</option>
+                                	<option value="8">8</option>
+                                	<option value="9">9</option>
+                                	<option value="10">10</option>
+                                	<option value="11">11</option>
+                                	<option value="12">12</option>
+                                </select>
+                            </td>
+                            <td width="40"><label>月</label></td>
+                            <td width="50">
+                                <select id="selDay">
+                                	<option value="1">1</option>
+                                	<option value="2">2</option>
+                                	<option value="3">3</option>
+                                	<option value="4">4</option>
+                                	<option value="5">5</option>
+                                	<option value="6">6</option>
+                                	<option value="7">7</option>
+                                	<option value="8">8</option>
+                                	<option value="9">9</option>
+                                	<option value="10">10</option>
+                                	<option value="11">11</option>
+                                	<option value="12">12</option>
+                                	<option value="13">13</option>
+                                	<option value="14">14</option>
+                                	<option value="15">15</option>
+                                	<option value="16">16</option>
+                                	<option value="17">17</option>
+                                	<option value="18">18</option>
+                                	<option value="19">19</option>
+                                	<option value="20">20</option>
+                                	<option value="21">21</option>
+                                	<option value="22">22</option>
+                                	<option value="23">23</option>
+                                	<option value="24">24</option>
+                                	<option value="25">25</option>
+                                	<option value="26">26</option>
+                                	<option value="27">27</option>
+                                	<option value="28">28</option>
+                                	<option value="29">29</option>
+                                	<option value="30">30</option>
+                                	<option value="31">31</option>
+                                </select>
+                            </td>
+                            <td width="40"><label>日</label></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr class="trtime">
+                <td width="120" class="field">
+                    <label>同步时间：</label>
+                </td>
+                <td>
+                	<div class="dtxt2 fl width mr">
+                    	<input type="text" class="dtxt2-txt" id="txtSyncDate" render="date" readonly="true" fun="syncDateFun" tips='“同步时间”必须填写' />
+                        <span class="dtxt2-date"></span>
+                    </div>
+                    <table class="timer"></table>
+                </td>
+            </tr>
+        </tbody>
+        <tbody id="handPage">
+            <tr class="trtime">
+                <td width="120" class="field">
+                    <label>&nbsp;</label>
+                </td>
+                <td>
+                	<input type="button" class="btn2" value="同步" id="syncIng" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="确定" id="btnOk"/>
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:tab.close(GetId(), false)"/>
+    </div>
+</body>
+</html>

@@ -1,0 +1,416 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title id="title">归档记录</title>
+    #styleLink("base")
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+    #scriptLink("page")
+	<script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="${ctx}/js/jquery/jquery.ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.drag.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.video.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.contactIcon.js"></script>
+    <script type="text/javascript">
+	$(document).ready(function(){
+		$("#customer").tips({ msg: "姓名、电话" });
+		jQuery("#select").change(function(){
+			changeSpan(1);
+		});
+	});
+	
+	function queryRecord(recordId){
+		location.href="queryArchiveRecordById.html?recordId="+recordId;
+	} 
+	
+	function sub(){
+		if($('#customer').val()=="姓名、电话"){
+			$('#customer').val("");
+		}
+		$('#recForm').attr("action","showArchiveRecordInfoListPage.html");
+		$('#recForm').submit();
+	}
+    function clean(){
+    	var length = document.forms[0].length
+    	for(i=0;i<length;i++)
+    	{
+    		 var type = document.forms[0].elements[i].type;
+    		 if(type!="button"){
+    			 document.forms[0].elements[i].value = "";
+    		 }
+			  $("#customer").tips({ msg: "姓名、电话" });
+    	}
+		changeSpan();
+    }
+	
+	function play(obj,id,name,path,fileSize){
+		if(fileSize==0||fileSize==""){
+			banger.page.showMessageBox("对不起,录音在上传时损坏,无法播放！");
+			return;
+    	}
+		jQuery.post("playVideo.html", {"recordInfo.fileName":name,"recordInfo.filePath":path}, function(result){
+			new window.video.create(id, 310, 60,"../Records/"+result, obj);
+		});
+	}
+	
+	function downExcel(){
+		location.href="downExcel.html?type=$!type&recordInfo.recordNo="+$('#No').val()+"&recordInfo.customerName="+$('#customerName').val()+"&recordInfo.idCard="+$('#idCard').val()
+		+"&recordInfo.remark="+$('#remark').val()+"&recordInfo.bizTypeName="+$('#bizTypeName').val()+"&recordInfo.isCanceled="+$('#isCanceled').val()+"&recordInfo.startDate="+$('#startDate').val()+"&recordInfo.endDate="+$('#endDate').val()
+		+"&recordInfo.userName="+$('#userName').val()+"&recordInfo.isKnowCustomer="+$('#isKnowCustomer').val()+"&recordInfo.callType="+$('#callType').val();
+		}
+	
+	function exportRecs(){
+		var obj = jQuery(".dataTable").find("input[type=checkbox][name=chkone]:checked");
+		if(obj.size() == 0){
+			banger.page.showMessageBox("请选择您要导出的录音！");
+			return false;
+		}
+		var str = "";
+		obj.each(function(){
+			if(jQuery(this).attr("checked")){
+				str += jQuery(this).val() + ",";
+			}
+		});
+	 	if(confirm("你确认要导出选择的录音吗？")){
+			location.href="exportRecs.html?recordIds="+str;
+		}
+	}
+	
+	function refresh(){
+		location.href="showArchiveRecordInfoListPage.html?type=$!type&recordInfo.recordNo="+$('#No').val()+"&recordInfo.customerName="+$('#customerName').val()+"&recordInfo.idCard="+$('#idCard').val()
+		+"&recordInfo.remark="+$('#remark').val()+"&recordInfo.bizTypeName="+$('#bizTypeName').val()+"&recordInfo.isCanceled="+$('#isCanceled').val()+"&recordInfo.startDate="+$('#startDate').val()+"&recordInfo.endDate="+$('#endDate').val()
+		+"&recordInfo.userName="+$('#userName').val()+"&recordInfo.isKnowCustomer="+$('#isKnowCustomer').val()+"&recordInfo.callType="+$('#callType').val();
+		//jQuery.post("showArchiveRecordInfoListPage.html", {"type":$!type,"recordInfo.recordNo":$('#No').val(),"recordInfo.customerName":$('#customerName').val(),"recordInfo.idCard":$('#idCard').val(),"recordInfo.remark":$('#remark').val(),"recordInfo.bizTypeName":$('#bizTypeName').val(),"recordInfo.isCanceled":$('#isCanceled').val(),"recordInfo.startDate":$('#startDate').val(),"recordInfo.endDate":$('#endDate').val(),"recordInfo.userName":$('#userName').val(),"recordInfo.isKnowCustomer":$('#isKnowCustomer').val(),"recordInfo.callType":$('#callType').val()}, function(result){});
+	}
+	
+	function changeSpan(state){
+			var flag=$('#select').val();
+			
+			if(flag==1){
+				$('#showText').text(window.top.getUn());
+				$('#userId').val("");
+				$('#userNameRec').val("");
+				$('#Subordinate').show();
+				$('#ddlchange').hide();
+				$('#Subordinate').unbind("click");
+			}else if(flag==2){
+				if(state==1){
+					jQuery.getJSON("../task/initCurrentAgentUser.html?random="+Math.random(),{},function(data){
+						if($('#userId').val()==''){
+							changeText(data[0].userId,data[0].userName);
+						}
+						$(".box-content").find("tbody").text("");
+						var txt=$("#showText").text();
+    					jQuery.each(data,function(index, value){
+    						var account=value.account;
+    						var userName=value.userName;
+    						var deptName=value.deptName;
+							var cssTxt="";
+							if(txt.length>0){
+								if(userName==txt){
+									cssTxt='class=selected';
+								}
+							}
+    						$(".box-content").find("tbody").append("<tr "+cssTxt+" tid="+ value.userId +"><td>"+account+"</td><td><label>"+userName+"</label></td><td>"+deptName+"</td></tr>").find("tr").live("click", function(){
+								$('#showText').text($(this).find("label").text());
+								$('#userId').val($(this).attr("tid"));
+								$('#userNameRec').val($(this).find("label").text());
+								$(this).addClass("selected").siblings().removeClass("selected");
+							});
+						});
+    				});
+				}
+				$('#Subordinate').show();
+				$('#ddlchange').show();
+				$("#Subordinate").click(function(){
+					showbox($(this)[0], '#box')
+				});
+			}else{
+				$('#showText').text("");
+				$('#userId').val("");
+				$('#userNameRec').val("");
+				$('#Subordinate').hide();
+				$('#ddlchange').hide();
+			}
+		}
+		function changeText(userId,userName){
+			$('#showText').text(userName);
+			$('#userId').val(userId);
+			$('#userNameRec').val(userName);
+		}
+		function showbox(obj, box) {
+			var obj = $(obj);
+			if(!$(box).is(":hidden")){
+				return false;
+			}
+			var offset = $(obj).offset();
+			
+			if(offset.left + $(box).width() > $(window).width()){
+				var l = offset.left + $(obj).width() - $(box).width() + 20;
+				
+				$(box).css({display:"block", left:l + "px", top:offset.top + obj.outerHeight() - 1 + "px"}).slideDown("fast");
+			}
+			else{
+				$(box).css({display:"block", left:offset.left + "px", top:offset.top + obj.outerHeight() - 1 + "px"}).slideDown("fast");
+			}
+			
+			$("body").bind("mousedown", onBodyDown);
+			changeSpan(1);
+		}
+		function hidebox() {
+			$("#box").fadeOut("fast");
+			$("body").unbind("mousedown", onBodyDown);
+		}
+		function onBodyDown(event) {
+			if (!(event.target.id=="Subordinate" || event.target.id=="box" || $(event.target).parents("#box").length>0)) {
+				hidebox();
+			}
+		}
+	</script>
+	
+</head>
+<body>
+<form name="recForm"  id = "recForm" action="" method="post">
+	<table class="htmlTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<tbody>
+        	<tr>
+                <td width="10%" align="right" nowrap="nowrap">流水号：
+					<label id="hid">
+						<input type="hidden"  id="type" name="type" value="$!type"/> <input type="hidden" id="No" value="$!recordInfo.recordNo"/>
+						<input type="hidden" id="customerName" value="$!recordInfo.customerName"/><input type="hidden" id="idCard" value="$!recordInfo.idCard"/>
+						<input type="hidden" id="remark" value="$!recordInfo.remark"/><input type="hidden" id="bizTypeName" value="$!recordInfo.bizTypeName"/>
+						<input type="hidden" id="isCanceled" value="$!recordInfo.isCanceled"/><input type="hidden" id="startDate" value="$!recordInfo.startDate"/>
+						<input type="hidden" id="endDate" value="$!recordInfo.endDate"/><input type="hidden" id="userName" value="$!recordInfo.userName"/>
+						<input type="hidden" id="isKnowCustomer" value="$!recordInfo.isKnowCustomer"/><input type="hidden" id="callType" value="$!recordInfo.callType"/>
+					</label>
+				</td>
+                <td width="15%">
+					<div class="dtxt1">
+                        <input type="text" name="recordInfo.recordNo" value="$!recordInfo.recordNo" class="dtxt1-txt" />
+                    </div>
+                </td>
+                <td width="10%" align="right" nowrap="nowrap">客户：</td>
+            	<td width="15%">
+					<div class="dtxt1">
+                        <input type="text" id="customer" name="recordInfo.customerName" value="$!recordInfo.customerName" class="dtxt1-txt" />
+                    </div>
+                </td>
+                <td width="10%" align="right" nowrap="nowrap">身份证：</td>
+            	<td width="15%">
+					<div class="dtxt1">
+                        <input type="text" name="recordInfo.idCard" value="$!recordInfo.idCard" class="dtxt1-txt" />
+                    </div>
+                </td>
+                <td width="10%" align="right" nowrap="nowrap">备注：</td>
+            	<td width="15%">
+					<div class="dtxt1">
+                        <input type="text" name="recordInfo.remark" value="$!recordInfo.remark" class="dtxt1-txt" />
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+                <td width="10%" align="right" nowrap="nowrap" >业务类型：</td>
+                <td width="15%">
+                	<div class="dselect">
+						<div>
+                            <select name="recordInfo.bizType" id="recBizType">
+                                <option></option>
+        						#foreach($recbizType in $!recbizTypeList)
+        						<option value="$!recbizType.bizTypeCode"  #if($!recbizType.bizTypeCode==$!recordInfo.bizType) selected=true #end>$!recbizType.bizTypeName</option>
+        						#end
+                            </select>
+						</div>
+                    </div>
+                </td>
+                <td width="10%" align="right" nowrap="nowrap">状态：</td>
+            	<td width="15%">
+                	<div class="dselect">
+						<div>
+                            <select name="recordInfo.isCanceled">
+                                <option></option>
+        						<option value="0" #if($!recordInfo.isCanceled==0) selected=true #end>有效</option>
+    							<option value="1" #if($!recordInfo.isCanceled==1) selected=true #end>作废</option>
+                            </select>
+						</div>
+                    </div>
+                </td>
+                <td width="10%" align="right" nowrap="nowrap">开始时间：</td>
+            	<td colspan="3">
+                	<div class="dtxt2 floatL" style="width: 100px;">
+                    	<input type="text" name="recordInfo.startDate" value="#if($!recordInfo.startDate)$date.format("yyyy-MM-dd",$!recordInfo.startDate)#end"  id="datepicker1" class="dtxt2-txt" />
+                        <span class="dtxt2-date">date</span>
+                    </div>
+                    <label class="dash">—</label>
+                	<div class="dtxt2 floatL" style="width: 100px;">
+                    	<input type="text" name="recordInfo.endDate" value="#if($!recordInfo.endDate)$date.format("yyyy-MM-dd",$!recordInfo.endDate)#end" id="datepicker2" class="dtxt2-txt" />
+                        <span class="dtxt2-date">date</span>
+                    </div>
+                </td>
+            </tr>
+        	<tr>
+				<!--#if($!isManage=='1')
+                <td width="10%" height="40" align="right">客户经理：</td>
+                <td width="15%">
+					<div class="dtxt1">
+                        <input type="text" name="recordInfo.userName" value="$!recordInfo.userName" class="dtxt1-txt" />
+                    </div>
+                </td>
+				#end-->
+                <td width="10%" align="right" nowrap="nowrap">未知客户：</td>
+            	<td width="15%">
+                	<div class="dselect">
+						<div>
+                            <select name="recordInfo.isKnowCustomer" value="$!recordInfo.isKnowCustomer">
+                                <option></option>
+        						<option value="1"  #if($!recordInfo.isKnowCustomer==1) selected=true #end>是</option>
+        						<option value="2"  #if($!recordInfo.isKnowCustomer==2) selected=true #end>否</option>
+                            </select>
+						</div>
+                    </div>
+                </td>
+                <td width="10%" align="right" nowrap="nowrap" id="queryType">联系类型：</td>
+            	<td >
+					<div class="dselect" style="width: 100px;">
+						<div>
+                        	<select id="queryTypeSelect" name="recordInfo.callType">
+                            	<option></option>
+        						<option value="0" #if($!recordInfo.callType=='0') selected=true #end>通话记录</option>
+        						<option value="4" #if($!recordInfo.callType=='4') selected=true #end>现场录音</option>
+        						<option value="5" #if($!recordInfo.callType=='5') selected=true #end>拜访记录</option>
+                            </select>
+						</div>
+                    </div>
+                </td>
+				<td width="10%" align="right" nowrap="nowrap">客户经理：</td>
+				<td width="15%" colspan="3">
+					<div class="dselect floatL" style="width: 107px;">
+	                    <div>
+                            <select name="recordInfo.userName" id="select">
+                                <option value=""></option>
+								<option value="1" #if($!recordInfo.userName==1) selected=true #end>我的</option>
+								<option value="2" #if($!recordInfo.userName==2) selected=true #end>下属的</option>
+                            </select>
+                        </div>
+                    </div>
+					<a href="javascript:void(0);" id="Subordinate" class="btn2 abtnnonebg floatL" style="margin-left: 5px;">
+                    	<label id="showText" class="btn2-txt">$!userName</label>
+                        <span id="ddlchange" class="btn2-ddl">ddl</span>
+                    </a>
+					<input type="hidden" name="userId" value="$!userId" id="userId"/>
+					<input type="hidden" name="userName" value="$!userName" id="userNameRec"/>
+					<div id="box" class="box-content">
+						<table class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+                        	<thead>
+                            	<tr>
+                                	<th>用户名</th>
+                                	<th>客户经理</th>
+                                	<th>机构</th>
+                                </tr>
+                            </thead>
+                        	<tbody>
+                            </tbody>
+						</table>
+					</div>
+                </td>
+				<script>
+    				changeSpan(0);
+                </script>
+            </tr>
+        </tbody>
+    </table>
+	<p class="dataSearch">
+    	<label class="floatL bold dataSearch-count">归档记录(<span class="dgreen">$!count</span>)</label>
+        <input type="button" value="清 空" class="btn1" onclick="clean();" />
+        <input type="button" value="搜 索" class="btn1" onclick="sub();"/>
+    </p>
+	</form>
+	
+    <div class="actrow">
+    	<a id="exportNotes" href="#2" class="btn2 floatL" onclick="downExcel()">
+            <label class="btn2-txt">导出记录</label>
+        </a>
+    	<a id="exportRecs" href="#2" class="btn2 floatL" style="margin-left: 5px;" onclick="exportRecs()">
+            <label class="btn2-txt">导出录音</label>
+        </a>
+    	<a href="#2" class="btn2 floatL" style=" margin-left: 5px;" onclick="refresh()">
+            <label class="btn2-txt">刷 新</label>
+        </a>
+    </div>
+    <table class="dataTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th width="20"><input type="checkbox" nm="chkall"/></th>
+            	<th width="10%" title="流水号">流水号</th>
+            	<th width="180" title="客户姓名（电话）">客户姓名（电话）</th>
+            	<th width="6%" title="联系类型">联系类型</th>
+            	<th width="13%" title="开始时间">开始时间</th>
+            	<th width="7%" title="时长">时长</th>
+            	<th width="6%" title="客户经理">客户经理</th>
+            	<th width="15%" title="业务类型">业务类型</th>
+            	<th width="7%" title="记录来源">记录来源</th>
+            	<th width="5%" title="状态">状态</th>
+            	<th width="60" title="操作">操作</th>
+            </tr>
+        </thead>
+		
+    	<tbody>
+			#foreach($recordInfo in $!recordInfoList.items)
+              <tr align="center">
+				<td><input type="checkbox" name="chkone" nm="chkone" value="$!recordInfo.recordInfoId"/></td>
+                <td><div align="center" title="$!recordInfo.recordNo">$!recordInfo.recordNo </div></td>
+                <td><div align="center" id="customer$!recordInfo.recordInfoId" title="#if(!$!recordInfo.customerId||$!recordInfo.customerId!='0') $!recordInfo.customerName #if($!recordInfo.remotePhone!='') #if($!recordInfo.customerName!=''||!$!recordInfo.customerName) ($!recordInfo.remotePhone)#else $!recordInfo.remotePhone #end#end#elseif($!recordInfo.remotePhone!='')未知($!recordInfo.remotePhone)#else 未知#end">
+							#if(!$!recordInfo.customerId||$!recordInfo.customerId!='0') 
+								$!recordInfo.customerName
+								#if($!recordInfo.remotePhone!='') 
+									#if($!recordInfo.customerName!=''||!$!recordInfo.customerName)
+										($!recordInfo.remotePhone)
+									#else
+									$!recordInfo.remotePhone 
+									#end
+								#end
+							#elseif($!recordInfo.remotePhone!='')
+								未知($!recordInfo.remotePhone)
+							#else
+								未知
+							#end
+            	</div></td>
+                <td><label title="$!recordInfo.callTypeName">$!recordInfo.callTypeName</label></td>
+                <td><label title="#if($!recordInfo.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!recordInfo.startDate)#end">#if($!recordInfo.startDate)$date.format("yyyy-MM-dd HH:mm:ss",$!recordInfo.startDate)#end</label></td>
+                <td><label title="$!recordInfo.callTime">$!recordInfo.callTime</label></td>
+            	<td><label title="$!recordInfo.userName">$!recordInfo.userName</label></td>
+            	<td><label title="$!recordInfo.bizType">$!recordInfo.bizType</label></td>
+            	<td><label title="$!recordInfo.recordSource">$!recordInfo.recordSource</label></td>
+                <td>
+					<label title="#if($!recordInfo.state=='作废') 作废 #else $!recordInfo.state #end">
+						#if($!recordInfo.state=='作废')<label class="red bold">作废</label>#else<label>$!recordInfo.state</label>#end
+					</label>
+                </td>
+                <td style="font-weight: normal;">
+					#if($urlPermitUtil.hasPermission('recordPlayVideo'))
+            			#if($!recordInfo.fileName==''||$!recordInfo.filePath==''||!$!recordInfo.fileName||!$!recordInfo.filePath)<a href="#2" style="color:gray;cursor: default;; text-decoration:none;" disable="true">播放</a> 
+        				#else<a class="slink" href="#2" onclick='play(this,$!recordInfo.recordInfoId,"$!recordInfo.fileName","$!recordInfo.filePath","$!recordInfo.fileSize")'>播放</a>
+						#end
+					#end
+					#if($urlPermitUtil.hasPermission('recordQueryRecord'))
+						<a href="#2" onclick="queryRecord($!recordInfo.recordInfoId)">查看</a>
+					#end
+            	</td>
+              </tr>
+            #end
+        </tbody>
+		<tfoot>
+        	<tr>
+            	<td colspan="11">
+                	<div class="floatR">#parse("/velocity/page.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+	 
+</body>
+</html>

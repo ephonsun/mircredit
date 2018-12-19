@@ -1,0 +1,28 @@
+<table class="datatbl">
+    <thead>
+        <tr>
+            <th><label title="彩信类型">彩信类型</label></th>
+            <th><label title="彩信内容">彩信内容</label></th>
+            <th><label title="发送时间">发送时间</label></th>
+            <th width="100"><label title="操作">操作</label></th>
+        </tr>
+        </tr>
+    </thead>
+    <tbody>
+         #foreach($mms in $!mmsDataList.items)
+        	<tr>
+            	<td><label title="#if($!mms.mmsType == '1')即时彩信 #elseif($!mms.mmsType == '2')定时彩信#end">#if($!mms.mmsType == '1')即时彩信 #elseif($!mms.mmsType == '2')定时彩信#end</label></td>
+				<td><label title="$!mms.mmsContent">$!mms.mmsContent</label></td>
+				<td><label title="#if($!mms.sendDate)$date.format("yyyy-MM-dd HH:mm:ss",$!mms.sendDate)#end">#if($!mms.sendDate)$date.format("yyyy-MM-dd HH:mm:ss",$!mms.sendDate)#end</label></td>
+				<td><label><a class="slink" href="#2" onclick="javascript:showMmsDiv('$!mms.mmsType','#if($!mms.sendDate)$date.format('yyyy-MM-dd HH:mm:ss',$!mms.sendDate)#end','$!mms.mmsTitle','$!mms.mmsContent')">查看</a></label></td>
+            </tr>
+		#end
+    </tbody>
+    <tfoot>
+         <tr>
+        	<td colspan="4">
+            	<div class="fr">#parse("/velocity/ajaxPage.vm")</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

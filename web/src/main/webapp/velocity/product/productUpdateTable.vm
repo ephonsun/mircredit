@@ -1,0 +1,68 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+<thead>
+	<tr>
+    	<th><label title="客户编号">客户编号</label></th>
+    	<th width="240"><label title="客户(电话)">客户(电话)</label></th>
+    	<th><label title="销售额($!productObj.moneyUnitName)">销售额($!productObj.moneyUnitName)</label></th>
+    	<th><label title="身份证">身份证</label></th>
+    	<th><label title="账号">账号</label></th>
+    	<th><label title="购买日期">购买日期</label></th>
+    	<th><label title="营销人员机构">营销人员机构</label></th>
+    	<th><label title="营销人员">营销人员</label></th>
+		<th width="80"><label title="操作">操作</label></th>
+    </tr>
+</thead>
+<tbody>
+	#foreach($buyCustomer in $!buyCustomerList.items)
+	<tr id="$!buyCustomer.productCustomerId">
+    	<td><label title="$!buyCustomer.customerNo">$!buyCustomer.customerNo</label></td>
+		<td>
+        	<div class="datacus">
+				<label title="$!buyCustomer.customerName（$!buyCustomer.phone）">
+					<a href="#2" class="nm" onclick="openCustomer('$!buyCustomer.customerId')">$!buyCustomer.customerName（$!buyCustomer.phone）</a>
+                </label>
+                <div class="icon">
+					#if($!buyCustomer.phone!="")
+                        <i class="i phone" onclick="dial('$!buyCustomer.phone','$!buyCustomer.customerId')" title="拨号">phone</i>
+						<i class="i dsc" onclick="tape('$!buyCustomer.customerId')" title="座谈" >dsc</i>
+						#if($!buyCustomer.phone.length()==11&&$!buyCustomer.phone.substring(0, 1)=="1")
+							#if($urlPermitUtil.hasPermission('toAddSms'))
+                            <i class="i sms" onclick="sendSms('$!buyCustomer.phone','$!buyCustomer.customerId')" title="短信">sms</i>
+							#end
+            				#if($urlPermitUtil.hasPermission('toAddMms'))
+            				<i class="i mms" onclick="sendMms('$!buyCustomer.phone','$!buyCustomer.customerId')" title="彩信">mms</i>
+							#end
+						#end
+					#end
+                </div>
+                <div class="other">
+                	<label class="item">
+                    	$!buyCustomer.customerTitle
+                    </label>
+                    <label class="item">
+                    	$!buyCustomer.sex
+                    </label>
+                    <label class="item">
+                    	#if($!buyCustomer.age)$!buyCustomer.age岁#else #end
+                    </label>
+                </div>
+            </div>
+        </td>
+    	<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!buyCustomer.buyMoney))">$moneyUtil.decimeMoney($typeUtil.changeType($!buyCustomer.buyMoney))</label></td>
+		<td><label title="$!buyCustomer.idCard">$!buyCustomer.idCard</label></td>
+    	<td><label title="$!buyCustomer.bankAccount">$!buyCustomer.bankAccount</label></td>
+    	<td><label title="#if($!buyCustomer.buyDate)$date.format("yyyy-MM-dd",$!buyCustomer.buyDate)#end">#if($!buyCustomer.buyDate)$date.format("yyyy-MM-dd",$!buyCustomer.buyDate)#end</label></td>
+		<td><label title="$!buyCustomer.deptName">$!buyCustomer.deptName</label></td>
+		<td><label title="$!buyCustomer.account">$!buyCustomer.account</label></td>
+		<td><label><a href="#2" onclick="deleteBuyCustomer($!buyCustomer.productCustomerId,'$!buyCustomer.userId');">删除</a></label></td>
+    </tr>
+	#end
+</tbody>
+<tfoot>
+	<tr>
+    	<td colspan="9">
+        	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+        </td>
+    </tr>
+</tfoot>
+</table>

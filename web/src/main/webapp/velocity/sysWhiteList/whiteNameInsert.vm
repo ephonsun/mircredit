@@ -1,0 +1,177 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<base target="_self"> 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>添加通话白名单</title>
+    
+    #styleLink("base")
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/tree/zTreeStyle.css" />
+    <style type="text/css">
+    	.w { width: 150px; }
+    </style>
+    
+	<style type="text/css">
+		.v-fails { border: 1px solid red; background-color: #fff7f7; }
+		.v-fails input { color: red; }
+		.v-tips { position: absolute; border: 1px solid #a6c9e2; background-color: white; padding: 4px 7px; line-height: 20px; }
+		.v-tips img { position: absolute; top: -10px; border: 0; }
+    </style>
+    #scriptLink("core")
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.ztree.core-3.2.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+	<script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/system/b.dialog.js"></script>
+    <script type="text/javascript" src="${ctx}/js/system/b.abnormal.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+    		$('#tabs').easytabs();
+			jQuery("#insertList").validator();
+			$('[name=\'check\'], [name=\'radio\']').click(function(){
+				extendvalidator();
+			});
+			numInput('#phoneNo');
+    	});
+    	function extendvalidator(){
+			var bool = true;
+			return bool;
+		}
+    	//保存
+    	function submitdata(){
+    		var bool = jQuery.validator({ form: 'insertList', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			//判断联系电话是否存在
+			jQuery.ajax({
+				type:"post",
+				url:"isExitByphone.html", 
+				data:{"phone":$('#phoneNo').val()},
+				cache: false,
+				async: false,
+				success:function(data){
+					if(data=='1'){
+						if(confirm("白名单已存在"+$('#phoneNo').val()+"联系号码,您确定要替换姓名？")){
+    						jQuery.post('insertSysWhiteList.html',{'sysWhiteList.whiteListName':$('#whiteListName').val().replace(/(^\s*)|(\s*$)/g,""),
+            					'sysWhiteList.phoneNo':$('#phoneNo').val().replace(/(^\s*)|(\s*$)/g,"")
+            				},function(){
+            					window.returnValue=1;
+            					window.close();
+            					}
+            				);	
+    					}else{
+    						return;
+    					}
+					}else{
+						jQuery.post('insertSysWhiteList.html',
+        				{'sysWhiteList.whiteListName':$('#whiteListName').val().replace(/(^\s*)|(\s*$)/g,""),
+        				 'sysWhiteList.phoneNo':$('#phoneNo').val().replace(/(^\s*)|(\s*$)/g,"")
+        				},
+        				function(){
+        					window.returnValue=1;
+        					window.close();
+        					}
+        				);	
+					}
+				}
+			});
+			
+			
+	  	}
+	  	//保存并新建
+	  	function submitdataAndAdd(){
+	  		var bool = jQuery.validator({ form: 'insertList', extend: true, extendhandler: extendvalidator });
+			if(!bool){
+				return false;
+			}
+			//判断联系电话是否存在
+			jQuery.ajax({
+				type:"post",
+				url:"isExitByphone.html", 
+				data:{"phone":$('#phoneNo').val()},
+				cache: false,
+				async: false,
+				success:function(data){
+					if(data=='1'){
+						if(confirm("白名单已存在"+$('#phoneNo').val()+"联系号码,您确定要替换姓名？")){
+    						jQuery.post('insertSysWhiteList.html',{'sysWhiteList.whiteListName':$('#whiteListName').val().replace(/(^\s*)|(\s*$)/g,""),
+            					'sysWhiteList.phoneNo':$('#phoneNo').val().replace(/(^\s*)|(\s*$)/g,"")
+            				},function(){
+            					refrashh();
+            					}
+            				);	
+    					}else{
+    						return;
+    					}
+					}else{
+						jQuery.post('insertSysWhiteList.html',
+        				{'sysWhiteList.whiteListName':$('#whiteListName').val().replace(/(^\s*)|(\s*$)/g,""),
+        				 'sysWhiteList.phoneNo':$('#phoneNo').val().replace(/(^\s*)|(\s*$)/g,"")
+        				},
+        					function(){
+        						refrashh();
+        					}
+        				);	
+					}
+				}
+			});
+	  	}
+	  	function refrashh(){
+	  		this.target="_self"; 
+			var reload=document.getElementById('reload'); 
+			reload.href = window.location.href + "&random="+Math.random(); 
+			reload.click(); 
+			window.returnValue=1;
+	  	}
+	  	function checkStr(obj){
+	  		var reg;
+	  		var str=obj.value;
+	  		reg=/^\d+$/;
+	  		if(str.length==0||str==""){
+	  			$(obj).attr('tips', "”联系电话“必须填写"); return false;
+	  		}
+	  		if(!reg.test(str)){
+	  			$(obj).attr('tips', '“联系电话”只能是数字'); return false;
+	  		}
+	  	}
+    </script>
+</head>
+
+<body>
+	<a id="reload" href="showInsertPage.html?random=+Math.random()*1000" style="display:none"></a>
+	<form id="insertList" name="insertList" action="insertSysWhiteList.html"  method="post">
+	<table class="htmltbl" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>
+                <td width="80" class="field">
+                    <label>姓    名：</label>
+                </td>
+                <td>
+                    <input type="text" class="txt w" name="sysWhiteList.whiteListName" id="whiteListName" maxLength="20"/>
+                </td>
+            </tr>
+            <tr>
+                <td width="80" class="field">
+                	<label class="red">*</label>
+                    <label>联系电话：</label>
+                </td>
+                <td>
+                	<div class="dtxt2" style="width: 155px;">
+                    <input type="text" class="dtxt2-txt"  name="sysWhiteList.phoneNo" id="phoneNo" maxLength="20"  rule="\S" tips="“联系电话”必须填写"/>
+                	</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <hr />
+    
+    <div class="halign">
+    	<input type="button" class="btn6 btn6bg1" value="保存" onclick='submitdata()'/>
+    	<input type="button" class="btn6 btn6bg2" value="保存并新建" onclick='submitdataAndAdd()' />
+    	<input type="button" class="btn6 btn6bg3" value="取消" onclick="javascript:window.close();" />
+    </div>
+</body>
+</html>

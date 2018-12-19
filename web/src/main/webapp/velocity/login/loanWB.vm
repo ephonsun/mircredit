@@ -1,0 +1,72 @@
+#parse("/velocity/taglibs.vm")
+<script type="text/javascript" src="${ctx}/js/banger/banger.loan.js"></script>
+<script type="text/javascript">
+function changeloan(type){
+    $("span[name=link]").removeClass().addClass("link");
+    $("#link"+type).addClass("orange-bg");
+	jQuery.post("../loan/getLoanToWPbyType.html?type="+type+"&random="+Math.random()*1000000,
+		function(html){
+			$('#type').val(type);
+			$('#grid').html(html);
+			$('#linkCount'+type).html($('#count').val());
+		});
+}
+function queryLoanById(loanId){
+	var options = {id: "viewLoan-"+loanId, pid: GetId(), title: "查看贷款", url: "${ctx}/loan/vLoan.html?isLoan=true&RandNum="+ Math.random()+"&loanId="+loanId, lock: false};
+	tab.add(options);
+}
+
+function queryMoveLoan(){
+	var type = $('#type').val();
+	var url;
+	var title;
+	switch (type) {
+    	case '1':
+			tab.add({id: "181", pid: "", title: "所有贷款", url: "${ctx}/loan/allLoanList.html?type="+type+"&RandNum="+ Math.random(), lock: false});
+    		break;
+    	case '2':
+			tab.add({id: "182", pid: "", title: "贷款申请", url: "${ctx}/loan/needSubmitLoanList.html?type="+type+"RandNum="+ Math.random(), lock: false});
+			break;
+		case '3':
+			tab.add({id: "183", pid: "", title: "贷款分配", url: "${ctx}/loan/allotingLoanList.html?type="+type+"RandNum="+ Math.random(), lock: false});
+			break;
+		case '4':
+			tab.add({id: "184", pid: "", title: "贷款调查", url: "${ctx}/loan/unExamLoanList.html?type="+type+"RandNum="+ Math.random(), lock: false});
+			break;
+		case '5':
+			tab.add({id: "185", pid: "", title: "所有贷款", url: "${ctx}/loan/allLoanList.html?type="+type+"isWBApproveLoan=true&RandNum="+ Math.random(), lock: false});
+			break;
+		case '6':
+			tab.add({id: "186", pid: "", title: "贷款放贷", url: "${ctx}/loan/notMakeLoanList.html?type="+type+"RandNum="+ Math.random(), lock: false});
+			break;
+		case '7':
+			tab.add({id: "188", pid: "", title: "贷款催收", url: "${ctx}/loan/dunLoanList.html?type="+type+"RandNum="+ Math.random(), lock: false});
+			break;
+    	default:
+    		break;
+	}
+}
+</script>
+<style type="text/css">
+	.right { text-align: right; }
+	.ml { margin-left: -10px; }
+	.bb { border-color: #e6e6e6 !important; }
+	.loan-remind-head{ width:100%; border: 1px solid #b1b1b1; margin-bottom: 10px; padding:15px 0; font-size:13px;}
+	.loan-remind-head span{ margin-left:20px; }
+	.orange-bg{ background-color:#FC6; padding-top:8px; padding-bottom:11px; padding-left:10px; padding-right:10px; -padding-top:11px; -padding-bottom:8px;  }
+	.loan-remind-head .link { cursor: pointer; }					
+</style>   
+	
+<div class="loan-remind-head fl">       
+	<span class="orange-bg link" name="link" id="link1" onclick="changeloan(1);">全部状态</span>
+	<span class="link" name="link" id="link2" onclick="changeloan(2);">申请(<label id="linkCount2" >#if(!$!needSubmitCount)0#else$!needSubmitCount#end</label>)</span>
+    #if($!ismanage == 1)<span class="link" name="link" id="link3" onclick="changeloan(3);">分配(<label id="linkCount3" >#if(!$!needAssignCount)0#else$!needAssignCount#end</label>)</span>#end
+    <span class="link" name="link" id="link4" onclick="changeloan(4);">调查(<label id="linkCount4" >#if(!$!unExamCount)0#else$!unExamCount#end</label>)</span>
+    <span class="link" name="link" id="link5" onclick="changeloan(5);">审批(<label id="linkCount5" >#if(!$!unApproveCount)0#else$!unApproveCount#end</label>)</span>
+    <span class="link" name="link" id="link6" onclick="changeloan(6);">放贷(<label id="linkCount6" >#if(!$!unMakeCount)0#else$!unMakeCount#end</label>)</span>
+    <span class="link" name="link" id="link7" onclick="changeloan(7);">催收(<label id="linkCount7" >#if(!$!repaymentCount)0#else$!repaymentCount#end</label>)</span>    
+</div>
+<div id="grid">
+	 #parse("/velocity/login/loanWBList.vm")
+</div>
+<input type="hidden" id="type" value="1"/>

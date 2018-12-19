@@ -1,0 +1,103 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>发帖</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+    <style type="text/css">
+		span.ml { margin-left: -1px; }
+		div.mt { margin-top: 0 !important; }
+		.inp{ width: 30px; border: 1px solid #ccc; }
+    </style>
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/system/b.base.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.etabs-v1.0.js"></script>
+    <script type="text/javascript" src="${ctx}/js/controls/jquery.select-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.tabs-v1.interface.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.bgiframe-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/controls/jquery.validator-v1.0.js"></script>
+
+    <script type="text/javascript">
+    	$(function(){
+			jQuery("#themeForm").validator();
+			$("#sendTheme").click(function(){
+				var bool = jQuery.validator({ form: 'themeForm', extend: true,extendhandler:initContent});
+				if(bool){
+					var partitionId='$!partitionId';
+					var templateId='$!templateId';
+					jQuery.post('insertTheme.html',{
+						'theme.themeTitle':jQuery.trim($("#themeTitle").val()),
+						'theme.themeContent':$("#content").text(),
+						'theme.partitionId':partitionId,
+        				'theme.templateId':templateId,
+        				'theme.themeType':1
+					},function(date){
+						if(date>0){
+							tab.close(GetId(), true);
+						}else{
+							banger.page.showMessageBox("发布帖子失败!");
+						}
+					});
+				}
+			});
+		});
+		function initContent(){
+			var value= jQuery.trim(window.content_html.getHTML());
+			//var reg=new RegExp("&nbsp;","g");
+			//var p1=new RegExp("<P>","g");
+			//var p2=new RegExp("</P>","g");
+			//value=value.replace(p1,"").replace(p2,"").replace(reg,"").replace(/^\s+|\s+$/g,"");
+			if(value.length==0){
+				banger.page.showMessageBox("帖子内容不能为空!");return false;
+			}else if(value.length<2){
+				banger.page.showMessageBox("帖子内容字数不能够小于2个字!");return false;
+			}else{$("#content").text(value);return true;} 
+		}
+		function writeText(value){
+			var le=jQuery.trim(value).length;
+			$("#sz").text(80-parseInt(le));
+		}
+    </script>
+</head>
+
+<body>
+	<div class="ui-exchangearea-banner">
+		<p>
+			<label class="fl">$!partition.partitionName >></label><label class="fl">$!temp.templateName >></label><label class="fl bold">发表新主题</label>
+        </p>
+	</div>
+	<form id="themeForm" name="themeForm" action="" method="post">
+	<table class="htmltble" style="table-layout: auto;">
+        <tbody>
+            <tr>
+                <td>
+                    <div class="ui-div-text">
+                        <input type="text" class="text" onkeyup="writeText(this.value)" name="theme.themeTitle" id="themeTitle" rule="\S" tips='“标题”必须填写' maxlength="80"/>
+						<input style="display:none">
+					</div>
+                </td>
+				<td width="8%" class="notwrap">
+					(<label>还可以输入<span id="sz">80</span>个字符</label>)
+				</td>
+            </tr>
+			<tr>
+				<td colspan="2">
+				  	<div class="ui-div-textarea">
+						<textarea style="display:none" class="textarea" name="theme.themeContent" id="content"></textarea>
+						<IFRAME ID="eWebEditor1" name="content_html" src="$request.contextPath/eWebEditor/eWebEditor.jsp?id=content&style=standard" frameborder="0" scrolling="no" width="100%" height="400"></IFRAME> 
+					</div>
+				</td>
+			</tr>
+        </tbody>
+    </table>
+    <hr />
+    <div>
+        <input type="button" class="ui-footer-btn1 ui-footer-btn1-save" id="sendTheme" value="发表帖子" />
+    </div>
+	</form>
+</body>
+</html>

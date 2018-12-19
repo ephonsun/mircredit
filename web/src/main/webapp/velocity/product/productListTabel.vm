@@ -1,0 +1,47 @@
+<table class="datatbl" cellpadding="0" cellspacing="0">
+    	<thead>
+        	<tr>
+            	<th><label title="产品编号">产品编号</label></th>
+            	<th><label title="产品名称">产品名称</label></th>
+            	<th><label title="预期收益率">预期收益率</label></th>
+            	<th><label title="理财时长(天)">理财时长(天)</label></th>
+            	<th><label title="到期日">到期日</label></th>
+            	<th><label title="未处理客户数">未处理客户数</label></th>
+            	<th><label title="总销售额(单位)">总销售额(单位)</label></th>
+				<th><label title="销售客户数">销售客户数</label></th>
+            	<th><label title="销售额">销售额</label></th>
+            	<th width="160"><label title="操作">操作</label></th>
+            </tr>
+        </thead>
+    	<tbody>
+			#foreach($product in $!productList.items)
+        	<tr #if($!product.expireDays<=0)style="color:#f60"#end>
+            	<input type="hidden" id="productId" value="$!product.productId"/>
+            	<td><label title="$!product.productCode">$!product.productCode</label></td>
+                <td><label title="$!product.productName"><a href="#2" onclick="queryProductById($!product.productId);">$!product.productName</a></label></td>
+            	<td><label title="$!product.profitRateMin#if($!product.profitRateMin)%-#end$!product.profitRateMax#if($!product.profitRateMin)%#end">$!product.profitRateMin#if($!product.profitRateMin)%-#end$!product.profitRateMax#if($!product.profitRateMin)%#end</label></td>
+				<td><label title="$!product.duration">$!product.duration</label></td>
+            	<td><label title="#if($!product.expireDate)$date.format("yyyy-MM-dd",$!product.expireDate)#end">#if($!product.expireDate)$date.format("yyyy-MM-dd",$!product.expireDate)#end</label></td>
+            	<td><label title="$!product.isDealCount">#if($!product.isDealCount>0)<a href="#2" onclick="isDealCustomer('$!product.productId');">$!product.isDealCount</a>#else $!product.isDealCount#end</label></td>
+				<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoneyTotal))$!product.moneyUnitName">$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoneyTotal))$!product.moneyUnitName</label></td>
+            	<td><label title="$!product.buyCustomerCount">$!product.buyCustomerCount</label></td>
+            	<td><label title="$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoney))">$moneyUtil.decimeMoney($typeUtil.changeType($!product.buyMoney))</label></td>
+            	<td>
+					#if($urlPermitUtil.hasPermission('openUpdateProduct'))
+						<a href="#2" onclick="productUpdate($!product.productId);">编辑</a>
+					#end
+					#if($urlPermitUtil.hasPermission('deleteProduct'))
+						<a href="#2" onclick="deleteProduct($!product.productId,'$!product.productName');">删除</a>
+					#end
+                </td>
+            </tr>
+			#end
+        </tbody>
+        <tfoot>
+        	<tr>
+            	<td colspan="10">
+                	<div class="floatR">#parse("/velocity/ajaxPage.vm")</div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>

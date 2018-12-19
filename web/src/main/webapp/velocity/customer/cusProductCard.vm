@@ -1,0 +1,60 @@
+<script type="text/javascript">
+
+var autoLogin = "$!autoLogin";
+
+//根据id查看详情
+function queryProductById(id){
+	var options = {id: "product_queryProductById"+id, pid: GetId()+id, title: "查看产品详情", url: "../pdtProduct/editProduct.html?"+autoLogin+"pdtProduct.productId="+id+"&actionType=detail&random="+Math.random(), lock: false};
+	tab.add(options);
+}
+
+//分页跳转
+function gotoPageProduct(page)
+{
+	var cid=$!customerId;
+	var needLine=$!needLine;
+	gotoProduct(page,"../pdtProduct/getCustomerBuyProduct.html?"+autoLogin+"random="+Math.random(),{
+		"customerId":cid,
+		"page.currentPage":page,
+		"needLine":needLine
+	},function(html){
+		refreshGridProduct('productMsg',html);
+	});
+}
+
+//刷新taskMsg
+function refreshGridProduct(gridId,html)
+{
+	var elem = $(html);
+	var grid = $("#"+gridId);
+	grid[0].innerHTML="";
+	grid.append(elem);
+}
+
+</script>
+<table class="datatbl" cellpadding="0" cellspacing="0">
+	<thead>
+    	<tr>
+        	<th><label title="产品编号">产品类型</label></th>
+        	<th><label title="产品名称">产品编号</label></th>
+			<th><label title="产品类型">产品名称</label></th>
+        </tr>
+    </thead>
+	<tbody>
+		#foreach($product in $!productList.items)
+    	<tr>
+			<td><label title="$!product.templateName">$!product.templateName</label></td>
+        	<td><label title="$!product.productCode">$!product.productCode</label></td>
+            <td><label title="$!product.productName">#if($!needLine==0)$!product.productName#else<a class="slink" href="#2" onclick="queryProductById($!product.productId);">$!product.productName</a>#end</label></td>
+        </tr>
+		#end
+    </tbody>
+    <tfoot>
+    	<tr>
+        	<td colspan="3">
+            	<div class="floatR">#pageSize($page,'Product')</div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+

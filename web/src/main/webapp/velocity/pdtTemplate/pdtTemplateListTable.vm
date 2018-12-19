@@ -1,0 +1,43 @@
+<table class="datatbl">
+	<thead>
+		<tr>
+			<th><label title="产品类型">产品类型</label></th>
+			<th><label title="最低日均销售比">最低日均销售比</label></th>
+			<th><label title="操作">操作</label></th>
+		</tr>
+	</thead>
+	<tbody>
+		#set($pageIndex = ($page.currentPage - 1) * $page.pageSize)
+		#if($pageIndex>$page.totalRowsAmount)
+			#set($pageIndex=0)
+		#end
+		#foreach($template in $!templatePageList.items)
+			#set($pageIndex = $pageIndex+1)			
+    		<tr>
+    			<td><label title="$!template.templateName">$!template.templateName</label></td>
+    			<td><label title="$!template.templateRate%">$!template.templateRate%</label></td>
+    			<td>
+    				<span class="link" onclick="addTab('update',$!template.templateId,'$!jsUtil.escapeJs($!template.templateName)');">编辑</span>
+    				#if($pageIndex>1)
+						<span class="link" onclick="moveData('$!template.templateId','up')">上移</span>
+					#else
+						<span disabled="true">上移</span>
+					#end
+					#if($pageIndex<$page.totalRowsAmount)
+						<span class="link" onclick="moveData('$!template.templateId','down')">下移</span>
+					#else
+						<span disabled="true">下移</span>
+					#end
+    				<span class="link" onclick="addTab('feild',$!template.templateId,'$!jsUtil.escapeJs($!template.templateName)');">模板字段</span>
+    				<span class="link" onclick="activeTemp($!template.templateId,$!template.templateState);">#if($!template.templateState==0)启用 #else 停用 #end</span>
+    				<span class="link" onclick="delTemp($!template.templateId,'$!jsUtil.escapeJs($!template.templateName)');">删除</span>
+    			</td>
+    		</tr>
+		#end
+	</tbody>
+	<tfoot>
+        <tr>
+            <td colspan="3">#parse("/velocity/ajaxPage.vm")</td>
+        </tr>
+    </tfoot>
+</table>

@@ -1,0 +1,50 @@
+<h3 class="recenter-ttl" style="text-align: center;">
+	#if($!startDate!=""&&$!endDate!="")
+		$!startDate至$!endDate
+	#elseif($!startDate!=""&&$!endDate=="")
+		$!startDate之后
+	#elseif($!startDate==""&&$!endDate!="")
+		截止至$!endDate
+	#end
+	财经要点阅读情况统计表
+</h3>
+<table class="recenter-tbl">
+    <thead>
+		<tr>
+			<th><label title="客户经理">客户经理</label></th>
+			<th><label title="名称">名称</label></th>
+			<th><label title="总条(必读)">总条(必读)</label></th>
+			<th><label title="已读(必读)">已读(必读)</label></th>
+			<th><label title="未读(必读)">未读(必读)</label></th>
+			<th><label title="阅读率(必读率)">阅读率(必读率)</label></th>
+		</tr>
+	</thead>
+	<tbody>
+		#set($count=$!colsCount+1)
+		#foreach($user in $!userList)
+    		<tr>
+    			<td rowspan="$!count"><label>$!user.userName</label></td>
+    		</tr>
+			#foreach($fin in $!financeReportList)
+				#if($!user.userId==$!fin.userId)
+        		<tr>
+        			<td><label>$!fin.columnName</label></td>
+                    <td><label>$!fin.articleCount（$!fin.mastReadArticleCount）</span></label></td>
+        			<td><label>$!fin.readCount（$!fin.mastReadCount）</label></td>
+        			<td>
+						<label>
+							#if($!fin.unReadCount!=0)<a class="slink" href="#2" onclick="detailFinance($!fin.userId,$!fin.columnId,0)">$!fin.unReadCount</a>#else$!fin.unReadCount#end（#if($!fin.mastUnReadCount!=0)<a class="slink" href="#2" onclick="detailFinance($!fin.userId,$!fin.columnId,1)">$!fin.mastUnReadCount</a>#else$!fin.mastUnReadCount#end）
+						</label>
+					</td>
+        			<td><label>$!fin.readRate（$!fin.mastReadRate）</label></td>
+        		</tr>
+				#end
+			#end
+		#end
+	</tbody>
+</table>
+<p class="recenter-footnote" style="text-align: right;">
+    制表人：$!userName
+    &nbsp; &nbsp; 
+    制表时间：$!reportTime
+</p>

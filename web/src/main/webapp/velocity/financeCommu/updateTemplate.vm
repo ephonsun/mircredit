@@ -1,0 +1,142 @@
+#parse("/velocity/taglibs.vm")
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>编辑版块</title>
+    
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/basic.css" />
+    <link type="text/css" rel="stylesheet" href="${ctx}/css/public.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/common.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/css/jquery.ui/base/jquery.ui.base.css" />
+    #scriptLink("core")
+	#scriptLink("page")
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.plugins.js"></script>
+    <script type="text/javascript" src="${ctx}/js/plugins/jquery.validator-v1.0.js"></script>
+	<script type="text/javascript" src="${ctx}/js/banger/banger.validate.common.js"></script>
+
+	<script type="text/javascript" src="${ctx}/js/system/b.date.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+			$('select').select();
+			jQuery("#htmltbl").validator();
+			$('#ok').click(function(){
+    			fn.sure()
+    		});
+		
+    		$('#cancel').click(function(){
+    			fn.cancel();
+    		});
+			$('#okAndNew').click(function(){
+    			fn.okAndNew();
+    		});
+			
+		});
+		
+		var fn = {};
+    	fn.sure = function(){
+    		submit('0');
+    	};
+    	fn.cancel = function(){
+    		window.returnValue = "";
+    		window.close();
+    	};
+		fn.okAndNew = function(){
+			submit('1');
+		}
+		
+		function submit(isNew){
+			var bool = jQuery.validator({ form: 'htmltbl', extend: false});
+    		if(!bool){
+    			return false;
+    		}		
+			var postJson = {};
+			postJson['commTemplate.templateId'] = jQuery.trim($('#templateId').val());
+			postJson['commTemplate.partitionId'] = jQuery.trim($('#partitionId').val());
+			postJson['commTemplate.templateName'] = jQuery.trim($('#templateName').val());
+			postJson['commTemplate.templateState'] =  $("input[name='radio']:checked").val();
+			postJson['commTemplate.templateDescription'] = jQuery.trim($('#desc').val());
+    		jQuery.post("updateTemplate.html?random="+Math.random()*1000000,postJson,
+    		function(msg){
+    			if(msg=='0'){
+					if(isNew == '0'){
+    					window.returnValue = "1";
+        				window.close();
+					}else{
+						$('#templateName').val('');
+						$('#desc').val('');
+					}
+					
+    			}else if(msg == '-2'){
+    				banger.page.showMessageBox('已存在相同的版块名，请重新输入!');
+    			}else{
+    				banger.page.showMessageBox('新建版块失败!');
+    			}
+    			
+    		});
+		}
+    </script>
+</head>
+<body>
+    <table class="htmltbl" id="htmltbl">
+        <tbody>
+            <tr>
+                <td class="field" width="100">
+                    <label class="red">*</label>
+                    <label>分区名称：</label>
+					
+                </td>
+                <td>
+                   <select style="width: 150px;" id="partitionId">
+					#foreach($!partition in $!list)
+						<option value="$!partition.partitionId" #if($!commTemplate.partitionId == $!partition.partitionId) selected #end>$!partition.partitionName</option>
+					#end
+					</select>
+                </td>
+            </tr>
+			 <tr>
+				<input type="hidden" id="templateId" value="$!commTemplate.templateId">
+                <td class="field" width="100">
+                    <label class="red">*</label>
+                    <label>版块名称：</label>
+                </td>
+                <td>
+				 	<div class="ui-div-text" style="width:150px;">
+                    	<input type="text" class="text"  rule="\S" tips="“版块名称”必须填写" maxlength="10" 
+							id="templateName" value="$!commTemplate.templateName" #if($!commTemplate.isBuiltin ==1) Readonly="true" #end/>
+                    </div>
+                </td>
+            </tr>
+			 <tr>
+                <td class="field" width="100">
+                    <label class="red">*</label>
+                    <label>启用状态：</label>
+                </td>
+                <td>
+				 	<input type="radio" class="radio" name="radio" id="startuse" value="0" #if($!commTemplate.templateState ==0) checked="checked" #end/>
+					<label for="startuse">启用</label>
+                	<input type="radio" class="radio" name="radio" id="stopuse" value="1" #if($!commTemplate.templateState ==1) checked="checked" #end/>
+					<label for="stopuse">停用</label>
+                </td>
+            </tr>
+            <tr>
+                <td class="field" width="100">
+                    <label>描述：</label>
+                </td>
+                <td>
+                    <div class="ui-div-textarea" style="height: 100px;">
+                        <textarea class="textarea" style="height: 100px;" onkeyup="this.value=this.value.slice(0, 500)" id="desc">$!commTemplate.templateDescription</textarea>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <hr />
+    
+    <div class="center">
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-save" value="保存" id="ok"/>
+		<input type="button" class="ui-footer-btn1 ui-footer-btn1-cancel" value="取消" id="cancel"/>
+    </div>
+</body>
+</html>
+
