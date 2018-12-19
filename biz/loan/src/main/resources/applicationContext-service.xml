@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+       default-lazy-init="true" default-autowire="byName">
+
+    <!--事务配置-->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!--service 配置-->
+    <bean id="lnLoanService" class="com.banger.mobile.facade.impl.LnLoanServiceImpl">
+    </bean>
+
+    <bean id="lnLoanDetailService" class="com.banger.mobile.facade.impl.LnLoanDetailServiceImpl">
+    </bean>
+
+    <bean id="lnLoanTypeService" class="com.banger.mobile.facade.impl.LnLoanTypeServiceImpl">
+    </bean>
+   	<bean id="lnLoanMonitorService" class="com.banger.mobile.facade.impl.LnLoanMonitorServiceImpl">
+    </bean>
+	<!-- 贷款子类型 -->
+	<bean id="lnLoanSubTypeService" class="com.banger.mobile.facade.impl.LnLoanSubTypeServiceImpl"
+		>
+	</bean>
+
+    <bean id="lnExceptionRepaymentPlanService"
+          class="com.banger.mobile.facade.impl.LnExceptionRepaymentPlanServiceImpl"
+          >
+    </bean>
+
+    <bean id="lnExceptionDunLogService"
+          class="com.banger.mobile.facade.impl.LnExceptionDunLogServiceImpl"
+          >
+    </bean>
+
+    <bean id="lnDunLogService"
+          class="com.banger.mobile.facade.impl.LnDunLogServiceImpl"
+          >
+    </bean>
+
+    <bean id="lnCancelReasonService"
+          class="com.banger.mobile.facade.impl.LnCancelReasonServiceImpl"
+         >
+    </bean>
+
+    <bean id="lnOpHistoryService"
+          class="com.banger.mobile.facade.impl.LnOpHistoryServiceImpl"
+          >
+    </bean>
+
+	<bean id="lnCreditHistoryService"
+          class="com.banger.mobile.facade.impl.LnCreditHistoryServiceImpl"
+          >
+    </bean>
+    <bean id="inBusinessReachesService"
+          class="com.banger.mobile.facade.impl.InBusinessReachesServiceImpl"
+          >
+    </bean>
+
+    <bean id="lnDeviationAnalsysisService"
+          class="com.banger.mobile.facade.impl.LnDeviationAnalsysisServiceImpl"
+          >
+    </bean>
+    <bean id="lnLoanCoBorrowerService"
+          class="com.banger.mobile.facade.impl.LnLoanCoBorrowerServiceImpl"
+          >
+    </bean>
+
+    <bean id="lnLoanGuarantorService"
+          class="com.banger.mobile.facade.impl.LnLoanGuarantorServiceImpl"
+          >
+    </bean>
+	<bean id="lnLoanPledgeService"
+          class="com.banger.mobile.facade.impl.LnLoanPledgeServiceImpl"
+          >
+    </bean>
+	
+    
+    <bean id="lnLoanStatusService"
+          class="com.banger.mobile.facade.impl.LnLoanStatusServiceImpl"
+         >
+    </bean>
+
+    <bean id="lnRepaymentPlanService"
+          class="com.banger.mobile.facade.impl.LnRepaymentPlanServiceImpl"
+          >
+    </bean>
+
+    <bean id="lnLoanSyncService"
+          class="com.banger.mobile.facade.impl.LnLoanSyncServiceImpl"
+          >
+    </bean>
+
+    <!--用户审批额度设置表service-->
+    <bean id="lnApproveLimitUserService"
+          class="com.banger.mobile.facade.impl.LnApproveLimitUserServiceImpl"
+          >
+    </bean>
+
+    <!-- 贷款信息service -->
+    <bean id="lnLoanInfoService"
+          class="com.banger.mobile.facade.impl.LnLoanInfoServiceImpl"
+          >
+    </bean>
+
+    <!--角色审批额度设置表service-->
+    <bean id="lnApproveLimitRoleService"
+          class="com.banger.mobile.facade.impl.LnApproveLimitRoleServiceImpl">
+    </bean>
+
+    <!--分配异常催收贷款service-->
+    <bean id="lnExceptionDunAssignService"
+          class="com.banger.mobile.facade.impl.LnExceptionDunAssignServiceImpl"></bean>
+
+    <!--审计历史操作service-->
+    <bean id="lnVerifyHistoryService"
+          class="com.banger.mobile.facade.impl.LnVerifyHistoryServiceImpl"
+          ></bean>
+
+    <!--贷款信息字典service-->
+    <bean id="lnLoanInfoDictionaryService"
+          class="com.banger.mobile.facade.impl.LnLoanInfoDictionaryServiceImpl"
+          ></bean>
+    <!--拒绝客户登记service-->
+    <bean id="lnRejectCustomerService"
+          class="com.banger.mobile.facade.impl.LnRejectCustomerServiceImpl"></bean>
+
+    <bean id="sDicService" class="com.banger.mobile.facade.impl.SDicServiceImpl">
+        <property name="sDicDao"><ref bean="sDicDao" /></property>
+    </bean>
+    <bean id="crRequestService" class="com.banger.mobile.facade.impl.crRequest.CrRequestServiceImpl">
+      </bean>
+
+    	 <!-- 经营贷经营模式 -->                      
+    <bean id="lnBusinessmodelService" class="com.banger.mobile.facade.impl.LnBusinessModelServiceImpl"></bean>
+     <!-- 消费贷访谈记录 -->                      
+    <bean id="lnRecordInterviewService" class="com.banger.mobile.facade.impl.LnRecordInterviewServiceImpl"></bean>
+     <!-- 消费贷发展历史 -->                      
+    <bean id="lnLoanHistoryService" class="com.banger.mobile.facade.impl.LnLoanHistoryServiceImpl"></bean>
+     <!-- 资产负债表 -->                      
+    <bean id="lnLoanBalanceService" class="com.banger.mobile.facade.impl.LnLoanBalanceServiceImpl"></bean>
+       
+    <!-- 资产负债表  资产 -->                      
+    <bean id="lnLoanBalanceAssetService" class="com.banger.mobile.facade.impl.LnLoanBalanceAssetServiceImpl"></bean>
+            
+    <!-- 资产负债表  负债 -->                      
+    <bean id="lnLoanBalanceDebtService" class="com.banger.mobile.facade.impl.LnLoanBalanceDebtServiceImpl"></bean>
+    
+    <!-- 资产负债表  房产-->                      
+    <bean id="lnLoanBalanceHousingService" class="com.banger.mobile.facade.impl.LnLoanBalanceHousingServiceImpl"></bean>
+     <!-- 资产负债表  其他交叉检查-->                      
+    <bean id="lnLoanBalanceOtherService" class="com.banger.mobile.facade.impl.LnLoanBalanceOtherServiceImpl"></bean>
+     <!-- 资产负债表  应收账-->                      
+    <bean id="lnLoanBalanceReceivableService" class="com.banger.mobile.facade.impl.LnLoanBalanceReceivableServiceImpl"></bean>
+     <!-- 资产负债表  机动车-->                      
+    <bean id="lnLoanBalanceVehicleService" class="com.banger.mobile.facade.impl.LnLoanBalancceVehicleServiceImpl"></bean>
+    
+     <!-- 损益表  主表-->                      
+    <bean id="lnLoanProfitandlossService" class="com.banger.mobile.facade.impl.LnLoanProfitandlossServiceImpl"></bean>
+     <!-- 损益表  消费贷详情-->                      
+    <bean id="lnLoanProfitandlossXfDetailService" class="com.banger.mobile.facade.impl.LnLoanProfitandlossXfDetailServiceImpl"></bean>
+     <!-- 损益表  经营贷详情-->                      
+    <bean id="lnLoanProfitandlossJyDetailService" class="com.banger.mobile.facade.impl.LnLoanProfitandlossJyDetailServiceImpl"></bean>
+
+    <bean id="lnLoanContractService" class="com.banger.mobile.facade.impl.LnLoanContractServiceImpl"></bean>
+
+	<bean id="lnProfitLossProdService" class="com.banger.mobile.facade.impl.LnProfitLossProdServiceImpl"></bean>
+    <bean id="lnProfitLossBaseService" class="com.banger.mobile.facade.impl.LnProfitLossBaseServiceImpl"></bean>
+
+
+    <!--资产负债,交叉检验-->
+    <bean id="lnBalanceService" class="com.banger.mobile.facade.impl.LnBalanceServiceImpl"></bean>
+
+
+
+</beans>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+	
+	 <!-- 知识库分类 -->
+	<bean id="feKnowledgeTypeService"
+		class="com.banger.mobile.facade.impl.finance.FeKnowledgeTypeServiceImpl">
+		<property name="feKnowledgebaseTypeDao">
+			<ref bean="feKnowledgebaseTypeDao" />
+		</property>
+	</bean>
+	 <!-- 文章管理service -->
+	<bean id="feArticleService"
+		class="com.banger.mobile.facade.impl.finance.FeArticleServiceImpl">
+		<property name="feArticleDao">
+			<ref bean="feArticleDao" />
+		</property>
+	</bean> 
+	<!-- 栏目 -->
+	<bean id="feColumnService" class="com.banger.mobile.facade.impl.finance.FeColumnServiceImpl">
+		<property name="feAllColumnDao">
+			<ref bean="feAllColumnDao"/>
+		</property>
+	</bean>
+	
+	<!-- 文章附件管理service -->
+	<bean id="feArticleAttachmentService"
+		class="com.banger.mobile.facade.impl.finance.FeArticleAttachmentServiceImpl">
+		<property name="feArticeleAttachmentDao">
+			<ref bean="feArticeleAttachmentDao" />
+		</property>
+	</bean> 
+
+	<!-- 收藏数据Service-->
+	<bean id="feKnowLedgeContentService"
+		class="com.banger.mobile.facade.impl.finance.FeKnowLedgeContentServiceImpl">
+		<property name="feKnowLedgeContentDao">
+			<ref bean="feKnowLedgeContentDao" />
+		</property>
+	</bean>
+	
+	<!-- 财经要点，用户操作service -->
+	<bean id="feUserRelationService"
+		class="com.banger.mobile.facade.impl.finance.FeUserRelationServiceImpl">
+		<property name="feUserRelationDao">
+			<ref bean="feUserRelationDao"/>
+		</property>
+	</bean>
+	<!-- 文章评论service -->
+	<bean id="feArticleDiscessService"
+		class="com.banger.mobile.facade.impl.finance.FeArticleDiscessServiceImpl">
+		<property name="feArticleDiscessDao">
+			<ref bean="feArticleDiscessDao"/>
+		</property>
+	</bean>
+	
+	<!-- 评论回复service -->
+	<bean id="feArticleReplyService"
+		class="com.banger.mobile.facade.impl.finance.FeArticleReplyServiceImpl">
+		<property name="feArticleReplyDao">
+			<ref bean="feArticleReplyDao"/>
+		</property>
+	</bean>
+	<!-- 财经要点报表统计service -->
+	<bean id="financeReportService"
+		class="com.banger.mobile.facade.impl.finance.FinanceReportServiceImpl">
+		<property name="financeReportDao">
+			<ref bean="financeReportDao"/>
+		</property>
+	</bean>
+
+</beans>

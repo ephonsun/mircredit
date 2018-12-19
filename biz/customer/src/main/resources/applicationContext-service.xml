@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="crmCustomerService"
+		class="com.banger.mobile.facade.impl.customer.CrmCustomerServiceImpl">
+		<property name="crmCustomerDao">
+			<ref bean="crmCustomerDao" />
+		</property>
+		<property name="customizedFieldDao">
+			<ref bean="customizedFieldDao" />
+		</property>
+		<property name="familyNameDao">
+			<ref bean="familyNameDao" />
+		</property>
+		<property name="deptFacadeService">
+			<ref bean="deptFacadeService" />
+		</property>
+		<property name="crmCustomerShareService">
+			<ref bean="crmCustomerShareService" />
+		</property>
+		<property name="crmCustomerRelativesService">
+			<ref bean="crmCustomerRelativesService" />
+		</property>
+		<property name="temp">
+			<ref bean="crmTemplateService" />
+		</property>
+		<property name="sysUserService">
+			<ref bean="sysUserService" />
+		</property>
+	</bean>
+	
+	<bean id="crmCustomerShareService"
+		class="com.banger.mobile.facade.impl.customer.CrmCustomerShareServiceImpl">
+		<property name="crmCustomerShareDao">
+			<ref bean="crmCustomerShareDao" />
+		</property>
+	</bean>
+	
+	<bean id="crmCustomerRelativesService"
+		class="com.banger.mobile.facade.impl.customer.CrmCustomerRelativesServiceImpl">
+		<property name="crmCustomerRelativesDao">
+			<ref bean="crmCustomerRelativesDao" />
+		</property>
+		<property name="deptFacadeService">
+			<ref bean="deptFacadeService" />
+		</property>
+	</bean>
+	
+	<bean id="mayDiffCustomerService"
+		class="com.banger.mobile.facade.impl.customer.MayDiffCustomerServiceImpl">
+		<property name="crmCustomerDao">
+			<ref bean="crmCustomerDao" />
+		</property>
+		<property name="mayDiffCustomerDao">
+			<ref bean="mayDiffCustomerDao" />
+		</property>
+	</bean>
+	
+	<!-- 高级搜索客户service注入 -->
+	<bean id="advancedCustomerService"
+		class="com.banger.mobile.facade.impl.customer.AdvancedCustomerServiceImpl">
+		<property name="advancedCustomerDao">
+			<ref bean="advancedCustomerDao" />
+		</property>
+		<property name="crmTemplateFieldDao">
+			<ref bean="crmTemplateFieldDao" />
+		</property>
+		<property name="deptService">
+			<ref bean="deptFacadeService" />
+		</property>
+	</bean>
+	
+	<!-- 电话通话service注入 -->
+	<bean id="telephoneTalkService" class="com.banger.mobile.facade.impl.customer.TelephoneTalkServiceImpl">
+		<property name="crmCustomerDao" ref="crmCustomerDao" />
+		<property name="userDao" ref="sysUserDao" />
+		<property name="userService" ref="sysUserService" />
+		<property name="deptService" ref="deptFacadeService" />
+		<property name="custService" ref="crmCustomerService" />
+	</bean>
+
+	
+	<!-- 新增客户统计报表service注入 -->
+	<bean id="addCustReportService" class="com.banger.mobile.facade.impl.customer.AddCustomerReportServiceImpl">
+		<property name="cusRepDao" ref="customerReportDao" />
+		<property name="deptFacadeService">
+			<ref bean="deptFacadeService" />
+		</property>
+	</bean>
+	
+	<!-- 客户跟进统计报表service注入 -->
+	<bean id="contactCustReportService" class="com.banger.mobile.facade.impl.customer.ContactCustomerReportServiceImpl">
+		<property name="cusRepDao" ref="customerReportDao" />
+		<property name="deptFacadeService">
+			<ref bean="deptFacadeService" />
+		</property>
+		<property name="cd">
+			<ref bean="codetableService" />
+		</property>
+	</bean>
+	
+	<!-- 短信查询发送客户 -->
+	<bean id="smsQueryCustomerService" class="com.banger.mobile.facade.impl.customer.SmsCustomerServiceImpl">
+		<property name="advancedCustomerDao">
+			<ref bean="advancedCustomerDao" />
+		</property>
+		<property name="deptService">
+			<ref bean="deptFacadeService" />
+		</property>
+	</bean>
+	<!-- 客户导出 -->
+	<bean id="customerExportService" class="com.banger.mobile.facade.impl.customer.CustomerExportServiceImpl">
+		<property name="sysUserDao" ref="sysUserDao" />
+		<property name="crmTemplateService" ref="crmTemplateService" />
+		<property name="codetableService" ref="codetableService" />
+	</bean>
+	
+	<bean id="crmModuleExportService" class="com.banger.mobile.facade.impl.customer.CrmModuleExportServiceImpl"> 
+		<property name="crmModuleExportDao" ref="crmModuleExportDao" />
+	</bean>
+
+</beans>

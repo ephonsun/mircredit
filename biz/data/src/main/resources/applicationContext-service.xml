@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="customerDataService"
+		class="com.banger.mobile.facade.impl.data.CustomerDataServiceImpl" />
+	
+	<bean id="photoDataXmlParserService"
+		class="com.banger.mobile.facade.impl.data.PhotoDataXmlParserServiceImpl" />
+	
+	<bean id="audioDataXmlParserService"
+		class="com.banger.mobile.facade.impl.data.AudioDataXmlParserServiceImpl" />
+		
+	<bean id="videoDataXmlParserService"
+		class="com.banger.mobile.facade.impl.data.VideoDataXmlParserServiceImpl" />
+	
+	<bean id="zxDataXmlParserService"
+		class="com.banger.mobile.facade.impl.data.ZxDataXmlParserServiceImpl" />
+	
+	<bean id="dhDataXmlParserService"
+		class="com.banger.mobile.facade.impl.data.DhDataXmlParserServiceImpl" />
+	
+	<!-- 资料 Super  -->	
+	<bean id="dataSuperService" class="com.banger.mobile.facade.impl.data.DataSuperServiceImpl" />
+	
+	<!-- 视频  -->	
+	<bean id="dataVideoService" class="com.banger.mobile.facade.impl.data.DataVideoServiceImpl" parent="dataSuperService" />
+	
+	<!-- 录音  -->	
+	<bean id="dataAudioService" class="com.banger.mobile.facade.impl.data.DataAudioServiceImpl" parent="dataSuperService" />
+	
+	<!-- 照片  -->	
+	<bean id="dataPhotoService" class="com.banger.mobile.facade.impl.data.DataPhotoServiceImpl" parent="dataSuperService" />
+	
+	<!-- 资料表  -->	
+	<bean id="dataFormService" class="com.banger.mobile.facade.impl.data.DataFormServiceImpl" parent="dataSuperService" />
+	
+	<!-- 短信  -->	
+	<bean id="dataSmsService" class="com.banger.mobile.facade.impl.data.DataSmsServiceImpl" parent="dataSuperService" />
+	
+	<!-- 彩信  -->	
+	<bean id="dataMmsService" class="com.banger.mobile.facade.impl.data.DataMmsServiceImpl" parent="dataSuperService" />
+	
+	<!-- cms接口案卷接口 -->
+    <bean id="caseHelperService"
+          class="com.banger.mobile.facade.impl.data.CaseHelperServiceImpl">
+        <property name="interfaceUrl" value="${cms.interface.url}" />
+        <property name="fileServerHost" value="${cms.fileServer.host}" />
+        <property name="fileServerPort" value="${cms.fileServer.port}" />
+        <property name="storageType" value="${uploadFile.storageType}" />
+        <property name="appInterfaceUrl" value="${cms.app.interface.url}" />
+        <property name="localHostIp" value="${cms.fileServer.localHostIp}" />
+        <property name="interfaceUserId" value="${cms.fileServer.interfaceUserId}" />
+        <property name="deptId" value="${cms.fileServer.deptId}" />
+        <property name="audioType" value="${cms.docType.audio.code}" />
+        <property name="audioTypeName" value="${cms.docType.audio.name}" />
+        <property name="audioFileType" value="${cms.docType.audio.fileType}" />
+        <property name="videoType" value="${cms.docType.video.code}" />
+        <property name="videoTypeName" value="${cms.docType.video.name}" />
+        <property name="videoFileType" value="${cms.docType.video.fileType}" />
+        <property name="nodeName" value="${cms.nodeName}"/>
+        <property name="support" value="${cms.support.custom.user}"/>
+        <property name="loginToken" value="${cms.fileServer.loginToken}"/>
+        <property name="roleId" value="${cms.fileServer.roleId}"/>
+        <property name="bizStep" value="${cms.fileServer.bizStep}"/>
+        <property name="dataType" value="${cms.fileServer.dataType}"/>
+        <property name="busiType" value="${cms.fileServer.busiType}"/>
+        <property name="supportHostIp" value="${cms.support.custom.localHostIp}"/>
+        <property name="appId" value="${cms.fileServer.appid}"/>
+        <property name="setting" value="${system.isDevelop.setting}"/>
+    </bean>
+</beans>

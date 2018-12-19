@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+    <!-- 录音业务service -->
+	<bean id="recordInfoService"
+		class="com.banger.mobile.facade.impl.record.RecordInfoServiceImpl">
+		<property name="sysUserDao" ref="sysUserDao" />
+		<property name="recordInfoDao">
+			<ref bean="recordInfoDao" />
+		</property>
+	</bean>
+	<!-- 拜访记录service -->
+	<bean id="visitRecordService"
+		class="com.banger.mobile.facade.impl.visitRecord.VisitRecordServiceImpl">
+		<property name="visitRecordDao">
+			<ref bean="visitRecordDao" />
+		</property>
+	</bean>
+	
+	<!-- 通话统计报表service注入 -->
+	<bean id="recordReportService" class="com.banger.mobile.facade.impl.record.RecordReportServiceImpl">
+		<property name="reportDao" ref="recordReportDao" />
+		<property name="deptFacadeService">
+			<ref bean="deptFacadeService" />
+		</property>
+	</bean>
+		<!-- 联系记录导出 -->
+	<bean id="recordExportService" class="com.banger.mobile.facade.impl.record.RecordExportServiceImpl">
+		<property name="sysUserDao" ref="sysUserDao" />
+		<property name="crmTemplateService" ref="crmTemplateService" />
+		<property name="codetableService" ref="codetableService" />
+	</bean>
+</beans>

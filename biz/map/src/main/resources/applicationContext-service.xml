@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+	<description>map service</description>
+    <!-- Transaction manager for a single JDBC DataSource -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!-- 使用annotation定义事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <!-- 用户地理位置service -->
+    <bean id="mapUserGpsService"
+          class="com.banger.mobile.facade.impl.map.MapUserGpsServiceImpl">
+    </bean>
+
+    <!-- 高德 。客户地理位置service 
+    <bean id="mapCustomerGpsService"
+          class="com.banger.mobile.facade.impl.map.MapCustomerGpsServiceImpl">
+        <property name="cityCoding" value="${map.cityCoding}" />
+        <property name="cityLngLat" value="${map.cityLngLat}" />
+        <property name="proxyIp" value="${map.proxyIp}" />
+        <property name="proxyFlag" value="${map.proxyFlag}" />
+        <property name="mapIp" value="${map.mapIp}" />
+        <property name="mapKey" value="${map.mapKey}" />
+        <property name="mapVersion" value="${map.mapVersion}" />
+    </bean>
+    -->
+	<!-- 瑞图。 客户地理位置service -->
+    <bean id="mapCustomerGpsService"
+          class="com.banger.mobile.facade.impl.map.MapCustomerGpsServiceImpl">
+        <property name="proxyFlag" value="${map.proxyFlag}" />
+        <property name="cityLngLat" value="${map.cityLngLat}" />
+        <property name="mapIp" value="${map.mapIp}" />
+        
+        <property name="reportUrl154" value="${report.product.154}" />
+        <property name="reportUrl155" value="${report.product.155}" />
+        <property name="reportUrlTest" value="${report.dev.test}" />
+    </bean>
+    
+    
+    <!-- 客户录音地理位置service -->
+    <bean id="mapRecordGpsService"
+          class="com.banger.mobile.facade.impl.map.MapRecordGpsServiceImpl">
+    </bean>
+
+    <!-- 用户GPS信息日志service -->
+    <bean id="mapUserGpsLogService"
+          class="com.banger.mobile.facade.impl.map.MapUserGpsLogServiceImpl">
+    </bean>
+
+</beans>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<!-- 证件类型service注入 -->
+	<bean id="cardTypeService" class="com.banger.mobile.facade.impl.plan.CardTypeServiceImpl">
+		<property name="cardTypeDao" ref="cardTypeDao" />
+	</bean>
+  <!-- 理财规划模板业务service -->
+	<bean id="plnReportTemplateService" class="com.banger.mobile.facade.impl.plnReportTemplate.PlnReportTemplateServiceImpl">
+		<property name="plnReportTemplateDao" ref="plnReportTemplateDao"></property>
+		<property name="plnPlanTypeDao" ref="plnPlanTypeDao"></property>
+		<property name="plnTemplateVarDao" ref="plnTemplateVarDao"></property>
+		<property name="crmCustomerDao" ref="crmCustomerDao"></property>
+	</bean>
+	<!-- 快速规划service -->
+	<bean id="plnFastPlanService" class="com.banger.mobile.facade.impl.plnFastPlan.PlnFastPlanServiceImpl">
+		<property name="plnFastPlanDao" ref="plnFastPlanDao"></property>
+	</bean>
+	<!-- 理财规划报告service -->
+	<bean id="plnReportService" class="com.banger.mobile.facade.impl.plnReport.PlnReportServiceImpl">
+		<property name="plnReportDao" ref="plnReportDao"></property>
+	</bean>
+
+</beans>

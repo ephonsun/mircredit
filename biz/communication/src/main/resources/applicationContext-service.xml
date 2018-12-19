@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+	
+	<!-- 分区service -->
+	<bean id="partitionService"
+		class="com.banger.mobile.facade.impl.communication.PartitionServiceImpl">
+		<property name="partitionDao">
+			<ref bean="partitionDao"/>
+		</property>
+	</bean>
+	
+	<!-- 版块service -->
+	<bean id="commonTemplateService"
+		class="com.banger.mobile.facade.impl.communication.CommonTemplateServiceImpl">
+		<property name="commonTemplateDao">
+			<ref bean="commonTemplateDao"/>
+		</property>
+	</bean>
+	<!-- 交流主题 -->
+	<bean id="commThemeService" 
+		class="com.banger.mobile.facade.impl.communication.CommThemeServiceImpl">
+		<property name="commThemeDao">
+			<ref bean="commThemeDao" />
+		</property>
+	</bean>
+	<!-- 主题 回复-->
+	<bean id="commThemeReplyService" 
+		class="com.banger.mobile.facade.impl.communication.CommThemeReplyServiceImpl">
+		<property name="commThemeReplyDao">
+			<ref bean="commThemeReplyDao" />
+		</property>
+	</bean>
+	<!-- 用户/交流关系-->
+	<bean id="commUserRelationService" 
+		class="com.banger.mobile.facade.impl.communication.CommUserRelationServiceImpl">
+		<property name="commUserRelationDao">
+			<ref bean="commUserRelationDao" />
+		</property>
+	</bean>
+	
+	<!-- 主题投票-->
+	<bean id="commThemeOptionService" 
+		class="com.banger.mobile.facade.impl.communication.CommThemeOptionServiceImpl">
+		<property name="commThemeOptionDao">
+			<ref bean="commThemeOptionDao" />
+		</property>
+	</bean>
+</beans>

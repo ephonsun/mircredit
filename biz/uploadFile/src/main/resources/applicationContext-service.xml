@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+    <!-- Transaction manager for a single JDBC DataSource -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!-- 使用annotation定义事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <bean id="sysUploadFileService" class="com.banger.mobile.facade.impl.uploadFile.SysUploadFileServiceImpl">
+    	<property name="storageType" value="${uploadFile.storageType}" />
+    	<property name="host" value="${cms.fileServer.host}" />
+    	<property name="port" value="${cms.fileServer.port}" />
+    	<property name="packageSize" value="${cms.fileServer.packageSize}" />
+    	<property name="appid" value="${cms.fileServer.appid}" />
+    	<property name="support" value="${cms.support.custom.user}" />
+    	<property name="interfaceUserId" value="${cms.fileServer.interfaceUserId}" />
+    </bean>
+
+    <bean id="uploadFileToCMS" class="com.banger.mobile.facade.impl.uploadFile.UploadFileToCMSImpl">
+        <property name="docType1" value="${docType1}" />
+        <property name="docType2" value="${docType2}" />
+        <property name="docType3" value="${docType3}" />
+        <property name="docType4" value="${docType4}" />
+        <property name="docType5" value="${docType5}" />
+        <property name="docType6" value="${docType6}" />
+        <property name="docType7" value="${docType7}" />
+        <property name="docType8" value="${docType8}" />
+        <property name="docType9" value="${docType9}" />
+        <property name="docType10" value="${docType10}" />
+        <property name="docType11" value="${docType11}" />
+        <property name="docType12" value="${docType12}" />
+        <property name="docType13" value="${docType13}" />
+        <property name="docType14" value="${docType14}" />
+        <property name="docType15" value="${docType15}" />
+        <property name="docType16" value="${docType16}" />
+        <property name="docType20" value="${docType20}" />
+        <property name="docType21" value="${docType21}" />
+        <property name="docType22" value="${docType22}" />
+        <property name="docType23" value="${docType23}" />
+        <property name="docTypeIdcard" value="${docTypeIdcard}" />
+        <property name="docTypeAuth" value="${docTypeAuth}" />
+    </bean>
+</beans>

@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 安全日志service -->
+	<bean id="loginLogService" class="com.banger.mobile.facade.impl.log.LoginLogServiceImpl">
+		<property name="loginLogDao">
+			<ref bean="loginLogDao" />
+		</property>
+	</bean>
+
+
+	<!-- 操作日志service -->
+	<bean id="opeventLogService" class="com.banger.mobile.facade.impl.log.OpeventLogServiceImpl">
+		<property name="opeventLogDao">
+			<ref bean="opeventLogDao" />
+		</property>
+	</bean>
+	<!-- 业务模板service -->
+	<bean id="crmTemplateService"
+		class="com.banger.mobile.facade.impl.system.template.CrmTemplateServiceImpl">
+		<property name="crmTemplateDao" ref="crmTemplateDao"></property>
+		<property name="crmFieldCodeDataDao" ref="crmFieldCodeDataDao"></property>
+		<property name="crmTemplateFieldDao" ref="crmTemplateFieldDao"></property>
+	</bean>
+
+	<!-- 客户类型service -->
+	<bean id="crmCustomerTypeService"
+		class="com.banger.mobile.facade.impl.system.basicsdata.CrmCustomerTypeServiceImpl">
+		<property name="crmCustomerTypeDao">
+			<ref bean="crmCustomerTypeDao" />
+		</property>
+	</bean>
+
+	<!-- 机构业务service -->
+	<bean id="deptService"
+		class="com.banger.mobile.facade.impl.system.dept.DeptServiceImpl">
+		<property name="deptDao" ref="deptDao"></property>
+		<property name="crmCustomerService" ref="crmCustomerService"></property>
+		<property name="sysWebFlowControlService" ref="sysWebFlowControlService" />
+	</bean>
+	<!-- 机构业务互调service -->
+	<bean id="deptFacadeService"
+		class="com.banger.mobile.facade.impl.system.dept.DeptFacadeServiceImpl">
+		<property name="dataAuthDao" ref="dataAuthDao"></property>
+		<property name="deptDao" ref="deptDao"></property>
+		<property name="userDao" ref="sysUserDao"></property>
+		<property name="sysRoleMemberDao" ref="sysRoleMemberDao"></property>
+		<property name="sysDeptAuthDao" ref="sysDeptAuthDao" />
+	</bean>
+
+	<!-- 数据访问权限 service -->
+	<bean id="dataAuthService"
+		class="com.banger.mobile.facade.impl.system.dataAuth.DataAuthServiceImpl">
+		<property name="dataAuthDao" ref="dataAuthDao"></property>
+	</bean>
+	<!-- 功能权限 -->
+	<bean id="funcAuthService"
+		class="com.banger.mobile.facade.impl.system.funcAuth.FuncAuthServiceImpl">
+		<property name="funcAuthDao" ref="funcAuthDao"></property>
+	</bean>
+	<!-- 业务类型service -->
+	<bean id="recbizTypeService"
+		class="com.banger.mobile.facade.impl.system.recbiztype.RecbizTypeServiceImpl">
+		<property name="recbizTypeDao" ref="recbizTypeDao"></property>
+	</bean>
+	<!-- 用户管理业务service -->
+	<bean id="sysUserService"
+		class="com.banger.mobile.facade.impl.system.user.SysUserServiceImpl">
+		<property name="sysUserDao" ref="sysUserDao"></property>
+		<property name="sysRoleMemberDao" ref="sysRoleMemberDao"></property>
+		<property name="sysRoleDao" ref="sysRoleDao"></property>
+		<property name="sysParamService" ref="sysParamService"></property>
+	</bean>
+
+	<!-- 基础数据-沟通进度 -->
+	<bean id="commProgressService"
+		class="com.banger.mobile.facade.impl.system.basicsdata.CommProgressServiceImpl">
+		<property name="commProgressDao">
+			<ref bean="commProgressDao" />
+		</property>
+	</bean>
+
+	<!-- 角色service -->
+	<bean id="sysRoleService"
+		class="com.banger.mobile.facade.impl.system.role.SysRoleServiceImpl">
+		<property name="sysRoleDao" ref="sysRoleDao"></property>
+	</bean>
+	<!-- 团队service -->
+	<bean id="sysTeamService"
+		class="com.banger.mobile.facade.impl.system.team.SysTeamServiceImpl">
+		<property name="sysTeamDao" ref="sysTeamDao"></property>
+		<property name="deptDao" ref="deptDao"></property>
+	</bean>
+	<!-- 团队成员service -->
+	<bean id="sysTeamUserService"
+		class="com.banger.mobile.facade.impl.system.team.SysTeamUserServiceImpl">
+		<property name="sysTeamUserDao" ref="sysTeamUserDao"></property>
+	</bean>
+	<!-- 全局参数service -->
+	<bean id="sysParamService"
+		class="com.banger.mobile.facade.impl.system.param.SysParamServiceImpl">
+		<property name="sysParamDao">
+			<ref bean="sysParamDao" />
+		</property>
+	</bean>
+
+	<!-- 用户角色service -->
+	<bean id="sysRoleMemberService"
+		class="com.banger.mobile.facade.impl.system.rolemember.SysRoleMemberServiceImpl">
+		<property name="sysRoleMemberDao" ref="sysRoleMemberDao"></property>
+		<property name="sysRoleDao" ref="sysRoleDao"></property>
+	</bean>
+	<!-- 行业类型service -->
+	<bean id="crmCustomerIndustryService"
+		class="com.banger.mobile.facade.impl.system.basicsdata.CrmCustomerIndustryServiceImpl">
+		<property name="crmCustomerIndustryDao">
+			<ref bean="crmCustomerIndustryDao" />
+		</property>
+	</bean>
+	<!-- 模版字段类型service -->
+	<bean id="crmFieldTypeService"
+		class="com.banger.mobile.facade.impl.system.fieldType.CrmFieldTypeServiceImpl">
+		<property name="crmFieldTypeDao">
+			<ref bean="crmFieldTypeDao" />
+		</property>
+	</bean>
+
+	<!-- 系统代码表 service -->
+	<bean id="codetableService"
+		class="com.banger.mobile.facade.impl.system.codetable.CdSystemServiceImpl">
+		<property name="cityDao" ref="cityDao"></property>
+		<property name="provDao" ref="provinceDao"></property>
+		<property name="sexDao" ref="sexDao"></property>
+		<property name="industDao" ref="crmCustomerIndustryDao"></property>
+		<property name="cusTypeDao" ref="crmCustomerTypeDao"></property>
+		<property name="cdOnlineStatusDao" ref="cdOnlineStatusDao"></property>
+		<property name="crmCredentialTypeDao" ref="crmCredentialTypeDao"></property>
+		<property name="crmLivingConditionDao" ref="crmLivingConditionDao"></property>
+		<property name="crmEducationalHistoryDao" ref="crmEducationalHistoryDao"></property>
+		<property name="crmMaritalStatusDao" ref="crmMaritalStatusDao"></property>
+		<property name="crmLegalFormDao" ref="crmLegalFormDao"></property>
+		<property name="crmOrgTypeDao" ref="crmOrgTypeDao"></property>
+	</bean>
+
+	<!-- 模版字段列表service -->
+	<bean id="crmTemplateFieldService"
+		class="com.banger.mobile.facade.impl.system.templateField.CrmTemplateFieldServiceImpl">
+		<property name="crmTemplateFieldDao">
+			<ref bean="crmTemplateFieldDao" />
+		</property>
+	</bean>
+	<!-- 通话配置service -->
+	<bean id="phoneConfigService"
+		class="com.banger.mobile.facade.impl.system.phoneConfig.PhoneConfigServiceImpl">
+		<property name="phoneConfigDao">
+			<ref bean="phoneConfigDao" />
+		</property>
+	</bean>
+	<!-- 模版字段代码列表service -->
+	<bean id="crmFieldCodeDataService"
+		class="com.banger.mobile.facade.impl.system.fieldCodeData.CrmFieldCodeDataServiceImpl">
+		<property name="crmFieldCodeDataDao">
+			<ref bean="crmFieldCodeDataDao" />
+		</property>
+	</bean>
+	<!-- 消息提醒配置service -->
+	<bean id="remindConfigService"
+		class="com.banger.mobile.facade.impl.system.remindConfig.RemindConfigServiceImpl">
+		<property name="remindConfigDao">
+			<ref bean="remindConfigDao" />
+		</property>
+	</bean>
+	<!-- 客户资料同步设置service注入 -->
+	<bean id="syncSettingService"
+		class="com.banger.mobile.facade.impl.system.syncSetting.SyncSettingServiceImpl">
+		<property name="syncSettingDao">
+			<ref bean="syncSettingDao" />
+		</property>
+	</bean>
+	<!-- 答录配置service -->
+	<bean id="answerConfigService"
+		class="com.banger.mobile.facade.impl.system.answerConfig.AnswerConfigServiceImpl">
+		<property name="answerConfigDao">
+			<ref bean="answerConfigDao" />
+		</property>
+	</bean>
+
+	<!-- 在线用户service -->
+	<bean id="sysUserOnlineService"
+		class="com.banger.mobile.facade.impl.system.user.SysUserOnlineServiceImpl">
+		<property name="sysUserOnlineDao">
+			<ref bean="sysUserOnlineDao" />
+		</property>
+	</bean>
+	<!-- 可管理角色service -->
+	<bean id="sysRoleAuthService"
+		class="com.banger.mobile.facade.impl.system.user.SysRoleAuthServiceImpl">
+		<property name="sysRoleAuthDao">
+			<ref bean="sysRoleAuthDao" />
+		</property>
+	</bean>
+	<!-- 可管理部门service -->
+	<bean id="sysDeptAuthService"
+		class="com.banger.mobile.facade.impl.system.user.SysDeptAuthServiceImpl">
+		<property name="sysDeptAuthDao">
+			<ref bean="sysDeptAuthDao" />
+		</property>
+	</bean>
+
+	<!-- 工作转交service -->
+	<bean id="sysWorkTransferService"
+		class="com.banger.mobile.facade.impl.system.user.SysWorkTransferServiceImpl">
+		<property name="sysWorkTransferDao">
+			<ref bean="sysWorkTransferDao" />
+		</property>
+	</bean>
+	<!-- 工作托管service -->
+	<bean id="sysWorkDelegateService"
+		class="com.banger.mobile.facade.impl.system.user.SysWorkDelegateServiceImpl">
+		<property name="sysWorkDelegateDao">
+			<ref bean="sysWorkDelegateDao" />
+		</property>
+	</bean>
+
+	<!-- 日志service -->
+	<bean id="opeventLoginLogService"
+		class="com.banger.mobile.facade.impl.log.OpeventLoginLogServiceImpl">
+		<property name="opeventLoginLogDao">
+			<ref bean="opeventLoginLogDao" />
+		</property>
+	</bean>
+
+	<!-- 菜单权限service -->
+	<bean id="menuAuthService"
+		class="com.banger.mobile.facade.impl.system.menuAuth.MenuAuthServiceImpl">
+		<property name="menuAuthDao">
+			<ref bean="menuAuthDao" />
+		</property>
+		<property name="advanceDao">
+			<ref bean="advancedCustomerDao" />
+		</property>
+		<property name="funcAuthService" ref="funcAuthService" />
+
+		<property name="feColumnService">
+			<ref bean="feColumnService" />
+		</property>
+		<property name="partitionService">
+			<ref bean="partitionService" />
+		</property>
+	</bean>
+	<!-- web端流量控制service -->
+	<bean id="sysWebFlowControlService"
+		class="com.banger.mobile.facade.impl.system.sysWebFlowControl.SysWebFlowControlServiceImpl">
+		<property name="sysWebFlowControlDao">
+			<ref bean="sysWebFlowControlDao" />
+		</property>
+	</bean>
+	<!-- 导入记录service -->
+	<bean id="sysImportService"
+		class="com.banger.mobile.facade.impl.system.sysImport.SysImportServiceImpl">
+		<property name="sysImportDao">
+			<ref bean="sysImportDao" />
+		</property>
+	</bean>
+	<!-- 铃声设置service -->
+	<bean id="crmRingSettingService"
+		class="com.banger.mobile.facade.impl.system.crmRingSetting.CrmRingSettingServiceImpl">
+		<property name="crmRingSettingDao">
+			<ref bean="crmRingSettingDao" />
+		</property>
+	</bean>
+	<!-- 录音提示音service -->
+	<bean id="crmRecordRemindService"
+		class="com.banger.mobile.facade.impl.system.crmRecordRemind.CrmRecordRemindServiceImpl">
+		<property name="crmRecordRemindDao">
+			<ref bean="crmRecordRemindDao" />
+		</property>
+	</bean>
+
+	<!-- 用户登入状态service -->
+	<bean id="sysUserStatusService"
+		class="com.banger.mobile.facade.impl.system.user.SysUserStatusServiceImpl">
+		<property name="userService">
+			<ref bean="sysUserService" />
+		</property>
+	</bean>
+	<!-- 录音设置service -->
+	<bean id="crmRecordSettingService"
+		class="com.banger.mobile.facade.impl.system.crmRecordSetting.CrmRecordSettingServiceImpl">
+		<property name="crmRecordSettingDao">
+			<ref bean="crmRecordSettingDao" />
+		</property>
+	</bean>
+	<!-- 柜台人员service -->
+	<bean id="crmCounterUserService"
+		class="com.banger.mobile.facade.impl.system.crmCounterUser.CrmCounterUserServiceImpl">
+		<property name="crmCounterUserDao">
+			<ref bean="crmCounterUserDao" />
+		</property>
+		<property name="deptFacadeService" ref="deptFacadeService" />
+	</bean>
+	<!-- 录音设置service -->
+	<bean id="sysUserOnlineMaxService"
+		class="com.banger.mobile.facade.impl.system.user.SysUserOnlineMaxServiceImpl">
+		<property name="sysUserOnlineMaxDao">
+			<ref bean="sysUserOnlineMaxDao" />
+		</property>
+	</bean>
+	<!-- 运行天数 -->
+	<bean id="sysRunDaysService"
+		class="com.banger.mobile.facade.impl.system.sysRunDays.SysRunDaysServiceImpl">
+		<property name="sysRunDaysDao" ref="sysRunDaysDao" />
+	</bean>
+	<!-- 个人配置所有信息 -->
+	<bean id="personalConfigService"
+		class="com.banger.mobile.facade.impl.system.personalConfig.PersonalConfigServiceImpl">
+		<property name="answerConfigDao" ref="answerConfigDao" />
+		<property name="crmRingSettingDao" ref="crmRingSettingDao" />
+		<property name="crmRecordRemindDao" ref="crmRecordRemindDao" />
+		<property name="crmRecordSettingDao" ref="crmRecordSettingDao" />
+		<property name="funcAuthService" ref="funcAuthService" />
+	</bean>
+
+
+	<!-- 集群配置服务 -->
+	<bean id="clustersConfigService"
+		class="com.banger.mobile.facade.impl.system.clusters.ClustersConfigServiceImpl">
+		<property name="enable" value="${clusters.serverConfig.enable}" />
+		<property name="index" value="${clusters.serverConfig.index}" />
+		<property name="servers" value="${clusters.serverConfig.servers}" />
+		<property name="list" value="${clusters.serverConfig.list}" />
+	</bean>
+
+	<!-- AD域帐号同步 -->
+	<bean id="adUserSyncService"
+		class="com.banger.mobile.facade.impl.system.adsync.AdUserSyncServiceImpl">
+		<property name="dept" ref="deptService" />
+		<property name="user" ref="sysUserService" />
+		<property name="enable" value="${task.adsync.enable}" />
+	</bean>
+	<!-- AD域配置 -->
+	<bean id="adSyncConfigService"
+		class="com.banger.mobile.facade.impl.system.adsync.AdSyncConfigServiceImpl">
+		<property name="adSyncConfigDao" ref="adSyncConfigDao" />
+	</bean>
+
+	<!-- 有效通话配置量service -->
+	<bean id="sysTalkLimitConfigService"
+		class="com.banger.mobile.facade.impl.system.TalkLimitConfig.SysTalkLimitConfigServiceImpl">
+		<property name="sysTalkLimitConfigDao">
+			<ref bean="sysTalkLimitConfigDao" />
+		</property>
+	</bean>
+
+	<!-- 联系目的service -->
+	<bean id="tskTaskPurposeService"
+		class="com.banger.mobile.facade.impl.system.basicsdata.TskTaskPurposeServiceImpl">
+		<property name="tskTaskPurposeDao">
+			<ref bean="tskTaskPurposeDao" />
+		</property>
+	</bean>
+
+	<!-- 任务等级service -->
+	<bean id="taskGradeService"
+		class="com.banger.mobile.facade.impl.system.basicsdata.TaskGradeServiceImpl">
+		<property name="taskGradeDao">
+			<ref bean="taskGradeDao" />
+		</property>
+	</bean>
+
+	<!-- 催收设置 -->
+	<bean id="lnDunSetingService"
+		class="com.banger.mobile.facade.impl.system.lnDunSeting.LnDunSetingServiceImpl">
+		<property name="lnDunSetingDao" ref="lnDunSetingDao" />
+	</bean>
+    
+    <!-- PAD管理service-->
+    <bean id="padInfoService" class="com.banger.mobile.facade.impl.system.padManagement.PadInfoServiceImpl">
+        <property name="padInfoDao" ref="padInfoDao" />
+    </bean>
+    <bean id="padTypeService" class="com.banger.mobile.facade.impl.system.padManagement.PadTypeServiceImpl">
+        <property name="padTypeDao" ref="padTypeDao" />
+    </bean>
+    <bean id="sysPadLogService" class="com.banger.mobile.facade.impl.system.padManagement.SysPadLogServiceImpl">
+        <property name="sysPadLogDao" ref="sysPadLogDao" />
+    </bean>
+    <!-- 特殊数据权限 -->
+    <bean id="specialDataAuthService"
+          class="com.banger.mobile.facade.impl.system.specialDataAuth.SpecialDataAuthServiceImpl">
+        <property name="specialDataAuthDao" ref="specialDataAuthDao"/>
+    </bean>
+
+</beans>
