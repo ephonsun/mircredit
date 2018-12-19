@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FinanceReportBeanSQL">
+	<typeAlias alias="FinanceReportBean"
+		type="com.banger.mobile.domain.model.report.FinanceReportBean" />
+		
+	<typeAlias alias="UserRelationReportBean"
+		type="com.banger.mobile.domain.model.report.UserRelationReportBean" />
+
+	<!-- 财经要点报表统计Bean -->
+	<resultMap class="FinanceReportBean" id="FinanceReportBeanResult">
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="COLUMN_ID" property="columnId"/>
+		<result column="COLUMN_NAME" property="columnName"/>
+		<result column="ARTICLE_COUNT" property="articleCount" />
+		<result column="MASTREAD_ARTICLE_COUNT" property="mastReadArticleCount" />
+		<result column="READ_COUNT" property="readCount" />
+		<result column="MASTREAD_COUNT" property="mastReadCount" />
+		<result column="UNREAD_COUNT" property="unReadCount" />
+		<result column="MASTUNREAD_COUNT" property="mastUnReadCount"/>
+		<result column="READ_RATE" property="readRate"/>
+		<result column="MASTREAD_RATE" property="mastReadRate"/>
+	</resultMap>
+	
+	<!-- 财经要点用户/财经报表统计 -->
+	<resultMap class="UserRelationReportBean" id="UserRelationReportBeanResult">
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="COLUMN_ID" property="columnId"/>
+		<result column="IS_READ" property="isRead" />
+		<result column="MAST_READ" property="mastRead" />
+	</resultMap>
+	
+	<!-- 财经要点报表统计列表 -->
+	<select id="GetFinanceReportList" resultMap="FinanceReportBeanResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT 0 AS USER_ID,'' AS USER_NAME,C.COLUMN_ID,C.COLUMN_NAME,
+			(CASE WHEN C2.ARTICLE_COUNT IS NULL THEN 0 ELSE C2.ARTICLE_COUNT END) AS ARTICLE_COUNT,
+			(CASE WHEN C2.MASTREAD_ARTICLE_COUNT IS NULL THEN 0 ELSE C2.MASTREAD_ARTICLE_COUNT END) AS MASTREAD_ARTICLE_COUNT,
+			0 AS READ_COUNT,0 AS MASTREAD_COUNT,0 AS UNREAD_COUNT,0 AS MASTUNREAD_COUNT, 0||'%' AS READ_RATE,0||'%' AS MASTREAD_RATE 
+			FROM FE_COLUMN AS C 
+			LEFT JOIN (
+			    SELECT 
+			    ARTICLE.ARTICLE_COLUMN_ID AS COLUMN_ID,
+			    SUM(CASE WHEN COL.COLUMN_NAME IS NULL THEN 0 ELSE 1 END) AS ARTICLE_COUNT,
+			    SUM(CASE WHEN ARTICLE.IS_MASTREAD=1 THEN 1 ELSE 0 END) AS MASTREAD_ARTICLE_COUNT 
+			    FROM FE_ARTICLE AS ARTICLE 
+			    LEFT JOIN FE_COLUMN AS COL ON COL.COLUMN_ID=ARTICLE.ARTICLE_COLUMN_ID AND COL.IS_DEL=0 
+			    WHERE ARTICLE.IS_DEL=0 AND ARTICLE.IS_PUBLISH=1 
+		]]>
+		<isNotEmpty property="searchDate">
+			<![CDATA[ $searchDate$ ]]>
+		</isNotEmpty>
+		<![CDATA[
+			    GROUP BY COL.COLUMN_NAME,ARTICLE.ARTICLE_COLUMN_ID
+			) AS C2 ON C2.COLUMN_ID=C.COLUMN_ID 
+			WHERE C.COLUMN_ID IN($columnIds$) 
+		]]>
+	</select>
+	
+	<!-- 财经要点用户/财经报表统计List -->
+	<select id="GetUserRelationReportList" resultMap="UserRelationReportBeanResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT USERS.USER_ID,USERS.USER_NAME,ARTICLE.ARTICLE_COLUMN_ID AS COLUMN_ID,
+			SUM(CASE WHEN U_REL.IS_READ=1 THEN 1 ELSE 0 END) AS IS_READ,
+			SUM(CASE WHEN ARTICLE.IS_MASTREAD=1 AND U_REL.IS_READ=1 THEN 1 ELSE 0 END) AS MAST_READ 
+			FROM FE_USER_RELATION AS U_REL 
+			LEFT JOIN SYS_USER AS USERS ON USERS.USER_ID=U_REL.USER_ID 
+			LEFT JOIN FE_ARTICLE AS ARTICLE ON ARTICLE.ARTICLE_ID=U_REL.FE_ID   
+			LEFT JOIN FE_COLUMN COL ON COL.COLUMN_ID=ARTICLE.ARTICLE_COLUMN_ID 
+			WHERE U_REL.RELATION_TYPE=0 
+			AND ARTICLE.IS_DEL=0 AND ARTICLE.IS_PUBLISH=1 AND ARTICLE.ARTICLE_COLUMN_ID IN($columnIds$) AND USERS.USER_ID IN($userIds$) 
+		]]>
+		<isNotEmpty property="searchDate">
+			<![CDATA[ $searchDate$ ]]>
+		</isNotEmpty>
+		<![CDATA[
+			GROUP BY USERS.USER_ID,USERS.USER_NAME,ARTICLE.ARTICLE_COLUMN_ID
+		]]>
+	</select>
+</sqlMap>

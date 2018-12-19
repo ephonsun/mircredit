@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysPadLogSQL"> 
+	<typeAlias alias="SysPadLog" type="com.banger.mobile.domain.model.padManagement.SysPadLog" />
+	<typeAlias alias="PadUseLogBean" type="com.banger.mobile.domain.model.padManagement.PadUseLogBean" />
+	
+	<!-- PAD使用记录表 -->
+	<resultMap class="SysPadLog" id="SysPadLogResult" >
+		<result column="PAD_LOG_ID" property="padLogId" />
+		<result column="PAD_INFO_ID" property="padInfoId" />
+		<result column="USER_ID" property="userId" />
+		<result column="LOG_TYPE" property="loginType" />
+		<result column="LOGIN_DATE" property="loginDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="PadUseLogBean" id="PadUseLogBeanResult" >
+		<result column="PAD_INFO_ID" property="padInfoId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="LOGIN_DATE" property="loginDate" />
+		<result column="LOG_TYPE" property="logType" />
+		<result column="COUNT_UPLOAD" property="countUpload" />
+		<result column="COUNT_DOWNLOAD" property="countDownLoad" />
+	</resultMap>
+
+	<!-- 根据时间分组查询pad使用记录 -->
+	<select id="GetByPadDateLogGroup" parameterClass="java.util.Map" resultMap="PadUseLogBeanResult">
+		<![CDATA[
+			SELECT L.PAD_INFO_ID,''AS USER_NAME,L.LOGIN_DATE,0 AS LOG_TYPE,
+			(SELECT SUM(COUNT_UPLOAD) AS COUNT_UPLOAD FROM SYS_PAD_UPLOAD_LOG WHERE PAD_INFO_ID=$padInfoId$ AND TO_CHAR(COUNT_DATE,'yyyy-MM-dd')=L.LOGIN_DATE), 
+			(SELECT SUM(COUNT_DOWNLOAD) AS COUNT_DOWNLOAD FROM SYS_PAD_UPLOAD_LOG WHERE PAD_INFO_ID=$padInfoId$ AND TO_CHAR(COUNT_DATE,'yyyy-MM-dd')=L.LOGIN_DATE)
+			FROM(
+			    SELECT PAD_INFO_ID,TO_CHAR(LOGIN_DATE,'yyyy-MM-dd') AS LOGIN_DATE FROM SYS_PAD_LOG WHERE PAD_INFO_ID=$padInfoId$ 
+			) AS L WHERE 1=1 
+		]]>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND L.LOGIN_DATE>=#startDate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND L.LOGIN_DATE<=#endDate# ]]>
+		</isNotEmpty>
+		<![CDATA[	
+			GROUP BY L.LOGIN_DATE,L.PAD_INFO_ID ORDER BY L.LOGIN_DATE DESC
+		]]>
+	</select>
+	
+	<select id="GetPadLogGroup" parameterClass="java.util.Map" resultMap="PadUseLogBeanResult">
+		<![CDATA[
+			SELECT P.PAD_INFO_ID,U.USER_NAME,P.LOGIN_DATE,P.LOG_TYPE,0 AS COUNT_UPLOAD,0 AS COUNT_DOWNLOAD 
+			FROM SYS_PAD_LOG AS P 
+			LEFT JOIN SYS_USER AS U ON U.USER_ID=P.USER_ID AND U.IS_DEL=0 
+			WHERE P.PAD_INFO_ID=$padInfoId$ 
+		]]>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND TO_CHAR(P.LOGIN_DATE,'yyyy-MM-dd')>='$startDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND TO_CHAR(P.LOGIN_DATE,'yyyy-MM-dd')<='$endDate$' ]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY P.LOGIN_DATE DESC 
+		]]>
+	</select>
+	
+	<!-- 插入Pad使用记录 -->
+	<insert id="AddPadLog" parameterClass="SysPadLog">
+		<![CDATA[
+			INSERT INTO SYS_PAD_LOG
+			(
+				PAD_LOG_ID,
+				PAD_INFO_ID,
+				USER_ID,
+				LOG_TYPE,
+				LOGIN_DATE,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#padLogId#,
+				#padInfoId#,
+				#userId#,
+				#loginType#,
+				current timestamp,
+				current timestamp,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="padLogId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_PAD_LOG
+		</selectKey>
+	</insert>
+	
+	<!-- 查询pad使用记录数 -->
+	<select id="GetPadLogCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT COUNT(1) FROM SYS_PAD_LOG WHERE PAD_INFO_ID=#padInfoId#
+		]]>
+	</select>
+</sqlMap>
+
+
+
+

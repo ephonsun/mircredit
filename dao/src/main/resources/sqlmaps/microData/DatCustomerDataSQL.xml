@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DatCustomerDataSQL">
+	<typeAlias alias="CustomerData" type="com.banger.mobile.domain.model.data.CustomerData" />
+	<typeAlias alias="Event" type="com.banger.mobile.domain.model.data.Event" />
+    <typeAlias alias="LoanData" type="com.banger.mobile.domain.model.data.LoanData" />
+	<typeAlias alias="PadLoanData" type="com.banger.mobile.domain.model.pad.PadLoanData"/>
+    <typeAlias alias="LoanExportData" type="com.banger.mobile.domain.model.data.LoanExportData"/>
+
+	<!-- 信息全字段  -->
+	<resultMap class="CustomerData" id="CustomerDataResult">
+		<result column="CUSTOMER_DATA_ID" property="customerDataId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="EVENT_ID" property="eventId" />
+		<result column="UPLOAD_USER_ID" property="uploadUserId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="ADDRESS" property="address" />
+		<result column="EVENT_NAME" property="eventName" />
+		<result column="USER_NAME" property="userName" />
+		<result column="UPLOAD_USER_NAME" property="uploadUserName" />
+	</resultMap>
+	
+	<resultMap class="Event" id="EventResult">
+		<result column="EVENT_ID" property="eventId" />
+		<result column="EVENT_NAME" property="eventName" />
+		<result column="SORTNO" property="sortno" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+    <!-- 贷款资料  -->
+    <resultMap class="LoanData" id="LoanDataResult">
+        <result column="DATA_TYPE" property="dataType" />
+        <result column="PHOTO_TYPE_ID" property="photoTypeId" />
+        <result column="DATA_NAME" property="dataName" />
+        <result column="UPLOAD_DATE" property="uploadDate" />
+        <result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="UPLOAD_USER_NAME" property="uploadUserName" />
+        <result column="UPLOAD_USER_ACCOUNT" property="uploadUserAccount" />
+        <result column="FILE_NAME" property="fileName" />
+        <result column="FILE_PATH" property="filePath" />
+        <result column="LOAN_ID" property="loanId" />
+        <result column="CUSTOMER_ID" property="customerId" />
+        <result column="CUSTOMER_NAME" property="customerName" />
+        <result column="EVENT_ID" property="eventId" />
+
+        <result column="DAT_UUID" property="datUuid"/>
+        <result column="IS_DEL" property="isDel"/>
+        <result column="DATA_ID" property="dataId"/>
+        <result column="REMARK" property="remark"/>
+        <result column="RECORD_LENGTH" property="recordLength"/>
+
+        <result column="FILE_ID" property="fileId"/>
+        <result column="RECORD_DATE" property="recordDate" />
+    </resultMap>
+	
+	 <!--催收资料-->
+    <resultMap id="PadLoanDataResult" class="PadLoanData">
+        <result property="customerDataId" column="CUSTOMER_DATA_ID"/>
+        <result property="dataType" column="DATA_TYPE"/>
+        <result property="dataName" column="DATA_NAME"/>
+        <result property="submitDate" column="SUBMIT_DATE"/>
+        <result property="createDate" column="RECORD_DATE"/>
+
+        <result property="userName" column="USER_NAME"/>
+        <result property="account" column="USER_ACCOUNT"/>
+        <result property="fileId" column="FILE_ID"/>
+        <result property="filePath" column="FILE_PATH"/>
+        <result property="fileName" column="FILE_NAME"/>
+        <result property="content" column="CONTENT"/>
+        <result property="eventId" column="EVENT_ID"/>
+        <result property="loanId" column="LOAN_ID"/>
+        <result property="recordLength" column="RECORD_LENGTH"/>
+
+        <!--新增几个字段-->
+        <result property="msgType" column="MSG_TYPE"/>
+        <result property="mmsTitle" column="MMS_TITLE"/>
+
+        <result column="DAT_UUID" property="uuid"/>
+        <result column="REMARK" property="remark"/>
+    </resultMap>
+
+	<!-- 新资料管理列表 -->
+	<resultMap class="CustomerData" id="NewCustomerDataResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE" property="phone" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="ADDRESS" property="address" />
+		<result column="BELONG_USER_NAME" property="belongUserName" />
+		<result column="BELONG_DEPT_NAME" property="belongDeptName" />
+		<result column="AUDIO_COUNT" property="audioCount" />
+		<result column="PHOTO_COUNT" property="photoCount" />
+		<result column="VIDEO_COUNT" property="videoCount" />
+		<result column="FORM_COUNT" property="formCount"/>
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="IS_NOGOOD" property="isNoGood"/>
+	</resultMap>
+	
+	<!-- 客户管理查看资料列表 -->
+	<resultMap class="CustomerData" id="QueryDataByCusIdResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="EVENT_ID" property="eventId" />
+		<result column="AUDIO_COUNT" property="audioCount" />
+		<result column="PHOTO_COUNT" property="photoCount" />
+		<result column="VIDEO_COUNT" property="videoCount" />
+		<result column="SMS_COUNT" property="smsCount" />
+		<result column="MMS_COUNT" property="mmsCount" />
+		<result column="FORM_COUNT" property="formCount" />
+		<result column="EVENT_NAME" property="eventName" />
+		
+	</resultMap>
+
+    <resultMap id="LoanExportDataResult" class="LoanExportData">
+        <result property="loanId" column="LOAN_ID"/>
+        <result property="eventId" column="EVENT_ID"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="fileId" column="FILE_ID"/>
+    </resultMap>
+	
+	<!-- 插入 -->
+  	<insert id="addNewCustomerData" parameterClass="CustomerData">
+		<![CDATA[
+	 	INSERT INTO DAT_CUSTOMER_DATA
+		    (
+		        CUSTOMER_DATA_ID,
+				LOAN_ID,
+				CUSTOMER_ID,
+				EVENT_ID,
+				UPLOAD_USER_ID,
+				CREATE_DATE,
+				UPDATE_DATE,
+				CREATE_USER,
+				UPDATE_USER
+		    )
+			VALUES
+		    (	
+		       	#customerDataId:INTEGER#,
+				#loanId:INTEGER#,
+				#customerId:INTEGER#,
+				#eventId:INTEGER#,
+				#uploadUserId:INTEGER#,
+				current timestamp,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#
+		    )
+      ]]>
+		<selectKey keyProperty="customerDataId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_DAT_CUSTOMER_DATA
+		</selectKey>
+	</insert>
+	
+	<!-- 事件对象类型 -->
+    <select id="getEventTypeList" resultMap="EventResult">
+		<![CDATA[
+			select * from DAT_EVENT ORDER BY SORTNO
+		]]>
+    </select>
+	
+	<select id="getEventTypeListById" resultMap="EventResult" parameterClass="Integer">
+		<![CDATA[
+			select * from DAT_EVENT ORDER where EVENT_ID = #id#
+		]]>
+    </select>
+    
+	<select id="getCustomerData" resultMap="CustomerDataResult" parameterClass="java.util.Map">
+			select a.*,b.CUSTOMER_NAME,b.ID_CARD,b.ADDRESS,c.EVENT_NAME,d.USER_NAME,
+			dd.USER_NAME as UPLOAD_USER_NAME,
+            0 as AUDIO_COUNT,0 as VIDEO_COUNT, 0 as PHOTO_COUNT, 0 as FORM_COUNT
+			from DAT_CUSTOMER_DATA a 
+			inner join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+			left join SYS_USER d on b.BELONG_USER_ID=d.USER_ID 
+			left join SYS_USER dd on a.UPLOAD_USER_ID=dd.USER_ID 
+			inner join DAT_EVENT c on c.EVENT_ID = a.EVENT_ID
+			where 1=1
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[A.CUSTOMER_ID=#customerId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="eventId">
+				<![CDATA[A.EVENT_ID = #eventId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="loanId">
+				<![CDATA[A.LOAN_ID = #loanId#]]>
+			</isNotEmpty>
+	</select>
+	
+	<!-- 增加-->
+	<insert id="insertCustomerData" parameterClass="CustomerData">
+        <![CDATA[
+	 	INSERT INTO DAT_CUSTOMER_DATA 
+		    (
+		        CUSTOMER_DATA_ID,
+				LOAN_ID,
+				CUSTOMER_ID,
+				EVENT_ID,
+				UPLOAD_USER_ID,
+				CREATE_DATE,
+				UPDATE_DATE,
+				CREATE_USER,
+				UPDATE_USER
+		    )
+			VALUES
+		    (
+		       	#customerDataId:INTEGER#,
+				#loanId:INTEGER#,
+				#customerId:INTEGER#,
+				#eventId:INTEGER#,
+				#uploadUserId:INTEGER#,
+				current timestamp,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#
+		    )
+        ]]>
+        <selectKey keyProperty="customerDataId" resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_DAT_CUSTOMER_DATA
+        </selectKey>
+	</insert>
+
+	
+	<!-- 修改-->
+	<update id="updateCustomerData" parameterClass="CustomerData">
+	 <![CDATA[
+             update DAT_CUSTOMER_DATA  set
+		 ]]>	
+		 <isNotEmpty property="loanId">
+				LOAN_ID=#loanId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="customerId">
+				CUSTOMER_ID=#customerId#,
+		 </isNotEmpty>
+		 <![CDATA[
+			UPDATE_DATE=current timestamp
+			where CUSTOMER_DATA_ID=#customerDataId#
+         ]]>
+	</update>
+
+    <update id="updateDatCustomerData" parameterClass="java.util.Map">
+        update  DAT_CUSTOMER_DATA set LOAN_ID=LOAN_ID,UPDATE_DATE=current timestamp
+        <isNotEmpty property="customerId" prepend=",">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="uploadUserId" prepend=",">
+            UPLOAD_USER_ID=#uploadUserId#
+        </isNotEmpty>
+        where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="oldCustomerId" prepend="and">
+            CUSTOMER_ID=#oldCustomerId#
+        </isNotEmpty>
+        <!--
+        <isNotEmpty property="customerId" prepend="and">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        -->
+        <isNotEmpty property="eventId" prepend="and">
+            EVENT_ID=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="customerDataIdList" prepend="and">
+            CUSTOMER_DATA_ID IN
+            <iterate property="customerDataIdList" open="(" conjunction="," close=")">
+                #customerDataIdList[]#
+            </iterate>
+        </isNotEmpty>
+    </update>
+
+    <!-- -->
+    <update id="relationRecord" parameterClass="java.util.Map">
+        <![CDATA[
+             update DAT_CUSTOMER_DATA  set CUSTOMER_ID = #customerIdNew# where CUSTOMER_ID = #customerId#
+		 ]]>
+    </update>
+
+	<!-- 资料（分页查询） -->
+	<select id="getCustomerDataListPage" resultMap="CustomerDataResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+			select a.*,b.CUSTOMER_NAME,b.ID_CARD,b.ADDRESS,c.EVENT_NAME,d.USER_NAME,
+			dd.USER_NAME as UPLOAD_USER_NAME,
+            0 as AUDIO_COUNT,0 as VIDEO_COUNT, 0 as PHOTO_COUNT, 0 as FORM_COUNT
+			from DAT_CUSTOMER_DATA a 
+			inner join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+			left join SYS_USER d on b.BELONG_USER_ID=d.USER_ID 
+			left join SYS_USER dd on a.UPLOAD_USER_ID=dd.USER_ID 
+			inner join DAT_EVENT c on c.EVENT_ID = a.EVENT_ID
+			where 1=1
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[b.CUSTOMER_NAME like '%$customerName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="eventId">
+				<![CDATA[a.EVENT_ID = #eventId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[b.BELONG_USER_ID in ($userIds$)]]>
+			</isNotEmpty>
+			ORDER BY b.CUSTOMER_NAME_PINYIN
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 资料（分页求和） -->
+	<select id="getCustomerDataListPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		select count(1)
+		from DAT_CUSTOMER_DATA a 
+		inner join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+		left join SYS_USER d on b.BELONG_USER_ID=d.USER_ID 
+		left join SYS_USER dd on a.UPLOAD_USER_ID=dd.USER_ID 
+		inner join DAT_EVENT c on c.EVENT_ID = a.EVENT_ID
+		where 1=1
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[b.CUSTOMER_NAME like '%$customerName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="eventId">
+			<![CDATA[a.EVENT_ID = #eventId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userIds">
+			<![CDATA[b.BELONG_USER_ID in ($userIds$)]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 资料（查找） -->
+	<select id="getCustomerDataByParameterMap" resultMap="CustomerDataResult" parameterClass="java.util.Map">
+		select a.*,b.CUSTOMER_NAME,b.ID_CARD,b.ADDRESS,c.EVENT_NAME,d.USER_NAME,
+		dd.USER_NAME as UPLOAD_USER_NAME 
+		from DAT_CUSTOMER_DATA a
+        left join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+        left join SYS_USER d on b.BELONG_USER_ID=d.USER_ID
+        left join SYS_USER dd on a.UPLOAD_USER_ID=dd.USER_ID
+        left join DAT_EVENT c on c.EVENT_ID = a.EVENT_ID
+		where 1=1
+		<isNotEmpty prepend="and" property="loanId">
+			<![CDATA[a.LOAN_ID = #loanId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerId">
+			<![CDATA[a.CUSTOMER_ID = #customerId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="eventId">
+			<![CDATA[a.EVENT_ID = #eventId#]]>
+		</isNotEmpty>	
+	</select>
+
+    <select id="getAllLoanDataById" resultMap="LoanDataResult" parameterClass="java.util.Map">
+        select 1 as DATA_TYPE,photo.PHOTO_TYPE_ID,photo.PHOTO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,photo.DAT_UUID,photo.IS_DEL,
+        photo.PHOTO_ID as DATA_ID,photo.REMARK,0 as RECORD_LENGTH,suf.FILE_ID,photo.RECORD_DATE
+        from dat_photo photo
+        inner join dat_customer_data d on photo.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = photo.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        where d.loan_id = #loanId#
+        <isNotEmpty property="customerId" prepend="and">
+            d.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            d.event_id=#eventId#
+        </isNotEmpty>
+      
+        <isNotEmpty property="statistics" prepend="and">
+            (photo.IS_DEL IS NULL OR photo.IS_DEL = 0)
+        </isNotEmpty>
+        <isNotEmpty property="storageType" prepend="and">
+            suf.storage_type=#storageType#
+        </isNotEmpty>
+
+        union all
+
+        select 2 as DATA_TYPE,-1 as PHOTO_TYPE_ID,aud.AUDIO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,aud.DAT_UUID,0 as IS_DEL,
+        aud.AUDIO_ID as DATA_ID,aud.REMARK,aud.RECORD_LENGTH,suf.FILE_ID,aud.RECORD_DATE
+        from dat_audio aud
+        inner join dat_customer_data d on aud.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = aud.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        where d.loan_id = #loanId#
+        <isNotEmpty property="customerId" prepend="and">
+            d.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            d.event_id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="storageType" prepend="and">
+            suf.storage_type=#storageType#
+        </isNotEmpty>
+
+        union all
+
+        select 3 as DATA_TYPE,-1 as PHOTO_TYPE_ID,vde.VIDEO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,vde.DAT_UUID,0 as IS_DEL,
+        vde.VIDEO_ID as DATA_ID,vde.REMARK,vde.RECORD_LENGTH,suf.FILE_ID,vde.RECORD_DATE
+        from dat_video vde
+        inner join dat_customer_data d on vde.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = vde.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        where d.loan_id = #loanId#
+        <isNotEmpty property="customerId" prepend="and">
+            d.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            d.event_id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="storageType" prepend="and">
+            suf.storage_type=#storageType#
+        </isNotEmpty>
+
+        union all
+
+        select 4 as DATA_TYPE,-1 as PHOTO_TYPE_ID,suf.UPLOAD_FILE_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,'' as DAT_UUID,0 as IS_DEL,
+        form.FORM_ID as DATA_ID,form.REMARK,0 as RECORD_LENGTH,suf.FILE_ID,form.CREATE_DATE as RECORD_DATE
+        from dat_form form
+        inner join dat_customer_data d on form.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = form.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        where d.loan_id = #loanId#
+        <isNotEmpty property="customerId" prepend="and">
+            d.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            d.event_id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="storageType" prepend="and">
+            suf.storage_type=#storageType#
+        </isNotEmpty>
+
+        order by photo_type_id asc,DATA_TYPE
+    </select>
+	
+     <select id="getAllLoanDataByIdCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        SELECT COUNT(*) from (
+        select 1 as DATA_TYPE,photo.PHOTO_TYPE_ID,photo.PHOTO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,photo.DAT_UUID,photo.IS_DEL,
+        photo.PHOTO_ID as DATA_ID,photo.REMARK,0 as RECORD_LENGTH,suf.FILE_ID,photo.RECORD_DATE
+        from dat_photo photo
+        inner join dat_customer_data d on photo.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = photo.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        where d.loan_id = #loanId#
+        <isNotEmpty property="customerId" prepend="and">
+            d.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            d.event_id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="photoTypeId" prepend="and">
+             photo.photo_type_id &lt;=#photoTypeId#
+        </isNotEmpty>
+     
+        <isNotEmpty property="statistics" prepend="and">
+            (photo.IS_DEL IS NULL OR photo.IS_DEL = 0)
+        </isNotEmpty>
+        <isNotEmpty property="storageType" prepend="and">
+            suf.storage_type=#storageType#
+        </isNotEmpty>
+
+        )
+    </select>
+	 <select id="getDunDataById" parameterClass="java.util.Map" resultMap="PadLoanDataResult">
+        select photo.CUSTOMER_DATA_ID,1 as DATA_TYPE,photo.PHOTO_NAME as DATA_NAME,suf.UPLOAD_DATE as submit_date,
+        u.USER_NAME as USER_NAME,u.ACCOUNT as USER_ACCOUNT,suf.FILE_ID,suf.FILE_PATH,suf.FILE_NAME,'' as content,0 as MSG_TYPE,'' as MMS_TITLE
+        ,d.LOAN_ID,d.EVENT_ID,0 as RECORD_LENGTH,photo.DAT_UUID,photo.REMARK,photo.RECORD_DATE
+        from (select * from dat_photo
+             where IS_DEL = 0
+             <isNotEmpty property="customerDataIds" prepend="and">
+                 customer_data_id in
+                 <iterate property="customerDataIds" open="(" close=")" conjunction=",">
+                     #customerDataIds[]#
+                 </iterate>
+             </isNotEmpty>
+         ) photo
+        inner join dat_customer_data d on photo.customer_data_id = d.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = photo.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+
+        union all
+
+        select aud.CUSTOMER_DATA_ID,2 as DATA_TYPE,aud.AUDIO_NAME as DATA_NAME,suf.UPLOAD_DATE as submit_date,
+        u.USER_NAME as USER_NAME,u.ACCOUNT as USER_ACCOUNT,suf.FILE_ID,suf.FILE_PATH,suf.FILE_NAME,'' as content,0 as MSG_TYPE,'' as MMS_TITLE
+         ,d.LOAN_ID,d.EVENT_ID,aud.RECORD_LENGTH,aud.DAT_UUID,aud.REMARK,aud.RECORD_DATE
+        from (select * from dat_audio
+             where 1=1
+             <isNotEmpty property="customerDataIds" prepend="and">
+                 customer_data_id in
+                 <iterate property="customerDataIds" open="(" close=")" conjunction=",">
+                     #customerDataIds[]#
+                 </iterate>
+             </isNotEmpty>
+         ) aud
+        inner join dat_customer_data d on aud.customer_data_id = d.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = aud.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+
+        union all
+
+        select vde.CUSTOMER_DATA_ID,3 as DATA_TYPE,vde.VIDEO_NAME as DATA_NAME,suf.UPLOAD_DATE as submit_date,
+        u.USER_NAME as USER_NAME,u.ACCOUNT as USER_ACCOUNT,suf.FILE_ID,suf.FILE_PATH,suf.FILE_NAME,'' as content,0 as MSG_TYPE,'' as MMS_TITLE
+         ,d.LOAN_ID,d.EVENT_ID,vde.RECORD_LENGTH,vde.DAT_UUID,vde.REMARK,vde.RECORD_DATE
+        from (select * from dat_video
+             where 1=1
+             <isNotEmpty property="customerDataIds" prepend="and">
+                 customer_data_id in
+                 <iterate property="customerDataIds" open="(" close=")" conjunction=",">
+                     #customerDataIds[]#
+                 </iterate>
+             </isNotEmpty>
+         ) vde
+        inner join dat_customer_data d on vde.customer_data_id = d.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = vde.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+
+        union all
+
+        select ds.CUSTOMER_DATA_ID,5 as DATA_TYPE,ds.remark as data_name,ds.send_date as submit_date,
+        su.user_name as user_name,su.ACCOUNT as USER_ACCOUNT,0 as FILE_ID,'' as FILE_PATH,'' as FILE_NAME,ds.SMS_CONTENT as content,ds.SMS_TYPE as MSG_TYPE,'' as MMS_TITLE
+         ,d.LOAN_ID,d.EVENT_ID,0 as RECORD_LENGTH,'' as DAT_UUID,ds.REMARK,ds.CREATE_DATE AS RECORD_DATE
+         from (select * from DAT_SMS
+             where 1=1
+             <isNotEmpty property="customerDataIds" prepend="and">
+                 customer_data_id in
+                 <iterate property="customerDataIds" open="(" close=")" conjunction=",">
+                     #customerDataIds[]#
+                 </iterate>
+             </isNotEmpty>
+         ) ds
+         inner join dat_customer_data d on ds.customer_data_id = d.customer_data_id
+        inner join sys_user su on ds.SEND_USER_ID=su.user_id
+
+        union all
+
+        select dm.CUSTOMER_DATA_ID,6 as data_type,dm.remark as data_name,dm.send_date as submit_date,
+        su.user_name as user_name,su.ACCOUNT as USER_ACCOUNT,0 as FILE_ID,'' as FILE_PATH,'' as FILE_NAME,dm.mms_content as content,dm.MMS_TYPE as MSG_TYPE,dm.MMS_TITLE as MMS_TITLE
+         ,d.LOAN_ID,d.EVENT_ID,0 as RECORD_LENGTH,'' as DAT_UUID,dm.REMARK,dm.CREATE_DATE AS RECORD_DATE
+         from (select * from DAT_MMS
+             where 1=1
+             <isNotEmpty property="customerDataIds" prepend="and">
+                 customer_data_id in
+                 <iterate property="customerDataIds" open="(" close=")" conjunction=",">
+                     #customerDataIds[]#
+                 </iterate>
+             </isNotEmpty>
+         ) dm
+         inner join dat_customer_data d on dm.customer_data_id = d.customer_data_id
+        inner join sys_user su on dm.SEND_USER_ID=su.user_id
+
+        order by DATA_TYPE,SUBMIT_DATE
+    </select>
+
+
+	<!-- 以下为新资料管理 (huangk)-->
+	
+	<!-- 所有客户资料总条数（分页） -->
+	<select id="getAllCustomerDataCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[		
+			SELECT
+			    COUNT(1)
+			FROM
+			    (
+			        SELECT
+			            CUSTOMER_ID,CUSTOMER_NAME,CUSTOMER_NAME_PINYIN,PHONE,CUSTOMER_TITLE,SEX,AGE,ADDRESS,IS_NOGOOD,
+			            SUM(AUDIO_COUNT),SUM(PHOTO_COUNT),SUM(VIDEO_COUNT),SUM(FORM_COUNT)
+			        FROM
+			            (
+			                SELECT
+			                    a.CUSTOMER_ID,a.CUSTOMER_NAME,a.CUSTOMER_NAME_PINYIN,
+			                    (CASE a.DEFAULT_PHONE_TYPE WHEN 1 THEN a.MOBILE_PHONE1 WHEN 2 THEN a.MOBILE_PHONE2 WHEN 3 THEN a.PHONE WHEN 4 THEN a.FAX END) AS PHONE,
+			                    a.CUSTOMER_TITLE,a.SEX,a.AGE,a.ADDRESS,a.IS_NOGOOD,
+			                    (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_AUDIO da WHERE da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID) AS AUDIO_COUNT,
+			                    (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_PHOTO da WHERE da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID AND da.IS_DEL = 0 ) AS PHOTO_COUNT,
+			                    (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_VIDEO da WHERE da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID ) AS VIDEO_COUNT,
+			                    (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_FORM da WHERE da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID ) AS FORM_COUNT
+			                FROM
+			                    DAT_CUSTOMER_DATA b 
+			                INNER JOIN  CRM_CUSTOMER a ON a.CUSTOMER_ID = b.CUSTOMER_ID
+			]]>
+			                <isNotEmpty property="customerName" prepend="AND">
+								<![CDATA[ a.CUSTOMER_NAME LIKE '%$customerName$%' ]]>
+							</isNotEmpty>
+							<isNotEmpty property="phone" prepend="AND">
+								<![CDATA[(a.MEMO LIKE '%$phone$%' OR a.MEMO LIKE '%$phone$%' OR a.MEMO LIKE '%$phone$%' OR a.MEMO LIKE '%$phone$%') ]]>
+							</isNotEmpty>
+			LEFT JOIN SYS_USER c ON a.BELONG_USER_ID = c.USER_ID
+			LEFT JOIN SYS_DEPT d ON a.BELONG_DEPT_ID = d.DEPT_ID
+			WHERE 1 = 1 
+			<isNotEmpty property="userIds" prepend="AND">
+				c.USER_ID IN ($userIds$)
+			</isNotEmpty>
+			<isNotEmpty property="deptIds" prepend="OR">
+				d.DEPT_ID IN ($deptIds$)
+			</isNotEmpty>
+			) where AUDIO_COUNT > 0 or PHOTO_COUNT > 0 or VIDEO_COUNT > 0 or FORM_COUNT > 0
+			GROUP BY CUSTOMER_ID,CUSTOMER_NAME,CUSTOMER_NAME_PINYIN,PHONE,
+			            CUSTOMER_TITLE,SEX,AGE,ADDRESS,IS_NOGOOD
+			)
+	</select>
+	
+	<!-- 所有客户资料列表分页数据（分页） -->
+	<select id="getAllCustomerDataPage" resultMap="NewCustomerDataResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+				SELECT CUSTOMER_ID,CUSTOMER_NAME,CUSTOMER_NAME_PINYIN,PHONE,            
+					CUSTOMER_TITLE,SEX,AGE,ADDRESS,BELONG_USER_NAME,BELONG_DEPT_NAME,IS_NOGOOD,            
+					sum(AUDIO_COUNT) as AUDIO_COUNT,sum(PHOTO_COUNT) as PHOTO_COUNT,sum(VIDEO_COUNT) as VIDEO_COUNT,sum(FORM_COUNT) as FORM_COUNT     
+				FROM (        
+					SELECT             
+						a.CUSTOMER_ID,a.CUSTOMER_NAME,a.CUSTOMER_NAME_PINYIN,(CASE a.DEFAULT_PHONE_TYPE WHEN 1 THEN a.MOBILE_PHONE1                 
+						WHEN 2 THEN a.MOBILE_PHONE2 WHEN 3 THEN a.PHONE WHEN 4 THEN a.FAX END) AS PHONE,                
+						a.CUSTOMER_TITLE,a.SEX,a.AGE,a.ADDRESS,c.USER_NAME AS BELONG_USER_NAME,d.DEPT_NAME AS BELONG_DEPT_NAME,a.IS_NOGOOD,            
+						(SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_AUDIO da where  da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID ) as AUDIO_COUNT,                    
+						(SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_PHOTO da where  da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID and da.IS_DEL = 0) as PHOTO_COUNT,                    
+						(SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_VIDEO da where  da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID ) as VIDEO_COUNT,            
+						(SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_FORM da where  da.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID ) as FORM_COUNT        
+					FROM DAT_CUSTOMER_DATA b 
+					INNER JOIN  CRM_CUSTOMER a ON a.CUSTOMER_ID = b.CUSTOMER_ID
+				]]>
+					<isNotEmpty property="customerName" prepend="AND">
+						<![CDATA[ a.CUSTOMER_NAME LIKE '%$customerName$%' ]]>
+					</isNotEmpty>
+					<isNotEmpty property="phone" prepend="AND">
+						<![CDATA[(a.MEMO LIKE '%$phone$%' OR a.MEMO LIKE '%$phone$%' OR a.MEMO LIKE '%$phone$%' OR a.MEMO LIKE '%$phone$%') ]]>
+					</isNotEmpty>
+			
+			LEFT JOIN SYS_USER c ON a.BELONG_USER_ID = c.USER_ID
+			LEFT JOIN SYS_DEPT d ON a.BELONG_DEPT_ID = d.DEPT_ID
+			WHERE 1 = 1 
+			<isNotEmpty property="userIds" prepend="AND">
+				c.USER_ID IN ($userIds$)
+			</isNotEmpty>
+			<isNotEmpty property="deptIds" prepend="OR">
+				d.DEPT_ID IN ($deptIds$)
+			</isNotEmpty>
+			) where AUDIO_COUNT > 0 or PHOTO_COUNT > 0 or VIDEO_COUNT > 0 or FORM_COUNT > 0
+			GROUP BY CUSTOMER_ID,CUSTOMER_NAME,CUSTOMER_NAME_PINYIN,PHONE,CUSTOMER_TITLE,SEX,AGE,ADDRESS,BELONG_USER_NAME,BELONG_DEPT_NAME,IS_NOGOOD
+			ORDER BY CUSTOMER_NAME_PINYIN
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 客户管理查看小页卡资料 统计-->
+	<select id="queryDataByCusId" resultMap="QueryDataByCusIdResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		SELECT EVENT_NAME,CUSTOMER_ID,EVENT_ID,SUM(AUDIO_COUNT) as AUDIO_COUNT,SUM(PHOTO_COUNT) as PHOTO_COUNT,SUM(VIDEO_COUNT) as VIDEO_COUNT,SUM(SMS_COUNT) as SMS_COUNT,SUM(MMS_COUNT) as MMS_COUNT,SUM(FORM_COUNT) as FORM_COUNT
+		FROM (
+	        SELECT b.EVENT_NAME,a.CUSTOMER_ID,a.EVENT_ID,b.SORTNO,
+	        (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_AUDIO da where  da.CUSTOMER_DATA_ID = a.CUSTOMER_DATA_ID ) as AUDIO_COUNT,        
+	        (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_PHOTO da where  da.CUSTOMER_DATA_ID = a.CUSTOMER_DATA_ID AND da.IS_DEL = 0 ) as PHOTO_COUNT,        
+	        (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_VIDEO da where  da.CUSTOMER_DATA_ID = a.CUSTOMER_DATA_ID ) as VIDEO_COUNT,        
+	        (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_SMS da where  da.CUSTOMER_DATA_ID = a.CUSTOMER_DATA_ID ) as SMS_COUNT,        
+	        (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_MMS da where  da.CUSTOMER_DATA_ID = a.CUSTOMER_DATA_ID ) as MMS_COUNT,        
+	        (SELECT COUNT(da.CUSTOMER_DATA_ID) FROM DAT_FORM da where  da.CUSTOMER_DATA_ID = a.CUSTOMER_DATA_ID ) as FORM_COUNT 
+	        FROM DAT_EVENT b
+	        RIGHT JOIN DAT_CUSTOMER_DATA a ON a.EVENT_ID = b.EVENT_ID
+	        WHERE a.CUSTOMER_ID = #customerId#
+	    ) GROUP BY EVENT_NAME,CUSTOMER_ID,EVENT_ID,SORTNO
+	    ORDER BY SORTNO
+	    ]]>
+    </select>
+
+    <!--需求变更-->
+    <select id="getCustomerDataCount" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+        select 1 as data_type,count(photo_id) as data_count,dcd.event_id from dat_photo dp
+        left join dat_customer_data dcd on dp.customer_data_id=dcd.customer_data_id WHERE dp.IS_DEL = 0 AND
+        dcd.loan_id=#loanId# and dcd.customer_id=#customerId#
+        group by dcd.event_id
+        union all
+        select 2 as data_type,count(audio_id) as data_count,dcd.event_id from DAT_AUDIO da
+        left join dat_customer_data dcd on da.customer_data_id=dcd.customer_data_id
+        where dcd.loan_id=#loanId# and dcd.customer_id=#customerId#
+        group by dcd.event_id
+        union all
+        select 3 as data_type,count(video_id) as data_count,dcd.event_id from DAT_VIDEO dv
+        left join dat_customer_data dcd on dv.customer_data_id=dcd.customer_data_id
+        where dcd.loan_id=#loanId# and dcd.customer_id=#customerId#
+        group by dcd.event_id
+        union all
+        select 4 as data_type,count(form_id) as data_count,dcd.event_id from DAT_FORM df
+        left join dat_customer_data dcd on df.customer_data_id=dcd.customer_data_id
+        where dcd.loan_id=#loanId# and dcd.customer_id=#customerId#
+        group by dcd.event_id
+    </select>
+
+    <select id="getCustomerDataIdList" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select customer_data_id from DAT_CUSTOMER_DATA where loan_id=#loanId# and customer_id=#customerId#
+    </select>
+
+    <delete id="delCustomerData" parameterClass="java.util.Map">
+        delete from DAT_CUSTOMER_DATA where loan_id=#loanId# 
+		<isNotEmpty property="customerId" prepend="and">
+ 			customer_id=#customerId#
+ 		</isNotEmpty>
+    </delete>
+
+    <select id="getCustomerDataId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select customer_data_id from DAT_CUSTOMER_DATA where loan_id=#loanId# and customer_id=#customerId# and event_id=#eventId#
+    </select>
+
+    <!--优化后的代码-->
+    <select id="getAllLoanDataByIdOptimize" resultMap="LoanDataResult" parameterClass="java.util.Map">
+        select 1 as DATA_TYPE,photo.PHOTO_TYPE_ID,photo.PHOTO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,photo.DAT_UUID,photo.IS_DEL,
+        photo.PHOTO_ID as DATA_ID,photo.REMARK,0 as RECORD_LENGTH,suf.FILE_ID,photo.RECORD_DATE
+        from (select * from dat_customer_data where loan_id = #loanId#
+            <isNotEmpty property="customerId" prepend="and">
+                customer_id=#customerId#
+            </isNotEmpty>
+            <isNotEmpty property="eventId" prepend="and">
+                event_id=#eventId#
+            </isNotEmpty>
+        ) d
+        inner join dat_photo photo on photo.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = photo.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        where 1=1
+        <isNotEmpty property="statistics" prepend="and">
+            (photo.IS_DEL IS NULL OR photo.IS_DEL = 0)
+        </isNotEmpty>
+
+        union all
+
+        select 2 as DATA_TYPE,-1 as PHOTO_TYPE_ID,aud.AUDIO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,aud.DAT_UUID,0 as IS_DEL,
+        aud.AUDIO_ID as DATA_ID,aud.REMARK,aud.RECORD_LENGTH,suf.FILE_ID,aud.RECORD_DATE
+        from (select * from dat_customer_data where loan_id = #loanId#) d
+        inner join dat_audio aud on aud.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = aud.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+
+        union all
+
+        select 3 as DATA_TYPE,-1 as PHOTO_TYPE_ID,vde.VIDEO_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,vde.DAT_UUID,0 as IS_DEL,
+        vde.VIDEO_ID as DATA_ID,vde.REMARK,vde.RECORD_LENGTH,suf.FILE_ID,vde.RECORD_DATE
+        from (select * from dat_customer_data where loan_id = #loanId#) d
+        inner join dat_video vde on vde.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = vde.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+        union all
+
+        select 4 as DATA_TYPE,-1 as PHOTO_TYPE_ID,suf.UPLOAD_FILE_NAME as DATA_NAME,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,
+        u.USER_NAME as UPLOAD_USER_NAME,u.ACCOUNT as UPLOAD_USER_ACCOUNT,suf.FILE_NAME,suf.FILE_PATH,
+        d.LOAN_ID,d.CUSTOMER_ID, cus.CUSTOMER_NAME,d.EVENT_ID,'' as DAT_UUID,0 as IS_DEL,
+        form.FORM_ID as DATA_ID,form.REMARK,0 as RECORD_LENGTH,suf.FILE_ID,form.CREATE_DATE AS RECORD_DATE
+        from (select * from dat_customer_data where loan_id=#loanId#) d
+        inner join dat_form form on form.customer_data_id = d.customer_data_id
+        inner join crm_customer cus on cus.customer_id = d.customer_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = form.FILE_ID
+        inner join sys_user u on suf.upload_user_id = u.user_id
+
+        order by DATA_TYPE,UPLOAD_DATE
+    </select>
+
+    <select id="getFileIdCountByLoan" resultClass="Integer" parameterClass="java.util.Map">
+        select count(1) from (
+            select dp.file_id from dat_customer_data dcd
+            inner join dat_photo dp on dcd.customer_data_id=dp.customer_data_id
+            where dcd.loan_id=#loanId# and (dp.is_del is null or dp.is_del=0)
+
+            union all
+
+            select da.file_id from dat_customer_data dcd
+            inner join dat_audio da on dcd.customer_data_id=da.customer_data_id
+            where dcd.loan_id=#loanId#
+
+            union all
+
+            select dv.file_id from dat_customer_data dcd
+            inner join dat_video dv on dcd.customer_data_id=dv.customer_data_id
+            where dcd.loan_id=#loanId#
+
+            union all
+
+            select df.file_id from dat_customer_data dcd
+            inner join dat_form df on dcd.customer_data_id=df.customer_data_id
+            where dcd.loan_id=#loanId#
+        )
+    </select>
+
+    <select id="getFileIdListByLoan" resultMap="LoanExportDataResult" parameterClass="java.util.Map">
+        select dcd.loan_id,dcd.event_id,cc.customer_name,dp.file_id from dat_customer_data dcd
+        inner join crm_customer cc on dcd.customer_id=cc.customer_id
+        inner join dat_photo dp on dcd.customer_data_id=dp.customer_data_id
+        where dcd.loan_id=#loanId# and (dp.is_del is null or dp.is_del=0)
+
+        union all
+
+        select dcd.loan_id,dcd.event_id,cc.customer_name,da.file_id from dat_customer_data dcd
+        inner join crm_customer cc on dcd.customer_id=cc.customer_id
+        inner join dat_audio da on dcd.customer_data_id=da.customer_data_id
+        where dcd.loan_id=#loanId#
+
+        union all
+
+        select dcd.loan_id,dcd.event_id,cc.customer_name,dv.file_id from dat_customer_data dcd
+        inner join crm_customer cc on dcd.customer_id=cc.customer_id
+        inner join dat_video dv on dcd.customer_data_id=dv.customer_data_id
+        where dcd.loan_id=#loanId#
+
+        union all
+
+        select dcd.loan_id,dcd.event_id,cc.customer_name,df.file_id from dat_customer_data dcd
+        inner join crm_customer cc on dcd.customer_id=cc.customer_id
+        inner join dat_form df on dcd.customer_data_id=df.customer_data_id
+        where dcd.loan_id=#loanId#
+    </select>
+	<select id="getFileByDatType" parameterClass="java.util.Map" resultClass="java.lang.String">
+		select file_path||'/'||file_name from sys_upload_file where file_id in (
+		<isEqual property="dataType" compareValue="photo">
+			select file_id from dat_photo
+		</isEqual>
+		<isEqual property="dataType" compareValue="video">
+			select file_id from dat_video
+		</isEqual>
+		<isEqual property="dataType" compareValue="audio">
+			select file_id from dat_audio
+		</isEqual>
+		<isEqual property="dataType" compareValue="form">
+			select file_id from dat_form
+		</isEqual>
+		where customer_data_id in (select customer_data_id from dat_customer_data where loan_id=#loanId#)
+		<isEqual property="dataType" compareValue="photo" prepend="and">
+			(is_del is null or is_del=0)
+		</isEqual>
+		)
+	</select>
+    
+</sqlMap>
+
+
+
+

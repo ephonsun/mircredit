@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrdDbdktzSQL">
+    <typeAlias alias="CrdDbdktz" type="com.banger.mobile.domain.model.loan.CrdDbdktz"/>
+    <typeAlias alias="BaseCrdTzHkjh" type="com.banger.mobile.domain.model.base.loan.BaseCrdTzHkjh"/>
+    <typeAlias alias="BaseCunkuanfhAjdk" type="com.banger.mobile.domain.model.base.loan.BaseCunkuanfhAjdk"/>
+    <typeAlias alias="LnLoanInfo" type="com.banger.mobile.domain.model.loan.LnLoanInfo" />
+
+    <resultMap id="LnLoanInfoResult" class="LnLoanInfo">
+        <result column="LOAN_INFO_ID"	property="loanInfoId"/>
+		<result column="LOAN_ID"	property="loanId"/>
+		<result column="CUSTOMER_ID"	property="customerId"/>
+		<result column="REFUSE_LOAN_STATE_ID"	property="refuseLoanStateId"/>
+		<result column="REFUSE_REASON_TYPE_ID"	property="refuseReasonTypeId"/>
+		<result column="REFUSE_REASON_SUB_TYPE_ID"	property="refuseReasonSubTypeId"/>
+		<result column="REFUSE_CONTENT"	property="refuseContent"/>
+		<result column="REGISTER_MICRO_BIZ_CENTER"	property="registerMicroBizCenter"/>
+		<result column="REGISTER_RECOMMEND_BANK"	property="registerRecommendBank"/>
+		<result column="REGISTER_APPLY_DATE"	property="registerApplyDate"/>
+		<result column="REGISTER_LOAN_DATE"	property="registerLoanDate"/>
+		<result column="REGISTER_INFO_SOURCE_IDS"	property="registerInfoSourceIds"/>
+		<result column="REGISTER_DIRECT_MARKET"	property="registerDirectMarket"/>
+		<result column="REGISTER_EXIST_CUS_INTRODUCT"	property="registerExistCusIntroduct"/>
+		<result column="REGISTER_INFO_SOURCE_OTHER"	property="registerInfoSourceOther"/>
+		<result column="APP_LOAN_TYPE_ID"	property="appLoanTypeId"/>
+		<result column="APP_MONEY"	property="appMoney"/>
+		<result column="APP_LIMIT_YEAR"	property="appLimitYear"/>
+		<result column="APP_REPAYMENT_MONTH"	property="appRepaymentMonth"/>
+		<result column="APP_LOAN_PURPOSE"	property="appLoanPurpose"/>
+		<result column="APP_GUARANTOR_WAY_ID"	property="appGuarantorWayId"/>
+		<result column="APP_MORTGAGE_ID"	property="appMortgageId"/>
+		<result column="APP_PLEDGE_ID"	property="appPledgeId"/>
+		<result column="APP_MAX_INSTALLMENT_MONEY"	property="appMaxInstallmentMoney"/>
+		<result column="APP_TOTAL_PROJECT_COST"	property="appTotalProjectCost"/>
+		<result column="APP_USER_DETAIL"	property="appUserDetail"/>
+		<result column="CUS_NAME"	property="cusName"/>
+		<result column="CUS_BIRTHDAY"	property="cusBirthday"/>
+		<result column="CUS_SEX"	property="cusSex"/>
+		<result column="CUS_IDTYPE_ID"	property="cusIdtypeId"/>
+		<result column="CUS_IDCARD"	property="cusIdcard"/>
+		<result column="CUS_MOBILE_PHONE"	property="cusMobilePhone"/>
+		<result column="CUS_PHONE"	property="cusPhone"/>
+		<result column="CUS_EDUCATION_ID"	property="cusEducationId"/>
+		<result column="CUS_LIVING_STATUS_ID"	property="cusLivingStatusId"/>
+		<result column="CUS_ADDRESS"	property="cusAddress"/>
+		<result column="CUS_MARRIAGE"	property="cusMarriage"/>
+		<result column="CUS_REGISTERED_RESIDENCE"	property="cusRegisteredResidence"/>
+		<result column="CUS_LIVING_TYPE_ID"	property="cusLivingTypeId"/>
+		<result column="CUS_LIVING_START_DATE"	property="cusLivingStartDate"/>
+		<result column="CUS_HOUSE_PATTERN"	property="cusHousePattern"/>
+		<result column="CUS_HOUSE_AREA"	property="cusHouseArea"/>
+		<result column="CUS_HOUSE_DECORATE_ID"	property="cusHouseDecorateId"/>
+		<result column="CUS_ECONOMIC_STATE"	property="cusEconomicState"/>
+		<result column="CUS_NOTE"	property="cusNote"/>
+		<result column="CUS_NET_AGE"	property="cusNetAge"/>
+		<result column="CUS_COMMON_OPERATER_NAME"	property="cusCommonOperaterName"/>
+		<result column="CUS_COMMON_OPERATER_IDCARD"	property="cusCommonOperaterIdcard"/>
+		<result column="CUS_COMMON_OPERATER_MOBILE_PHONE"	property="cusCommonOperaterMobilePhone"/>
+		<result column="CUS_FIRST_IMPRESS"	property="cusFirstImpress"/>
+		<result column="CUS_MATE_NAME"	property="cusMateName"/>
+		<result column="CUS_MATE_IDCARD"	property="cusMateIdcard"/>
+		<result column="CUS_COMPANY_NAME"	property="cusCompanyName"/>
+		<result column="CUS_MATE_MOBILE_PHONE"	property="cusMateMobilePhone"/>
+		<result column="CUS_MATE_PHONE"	property="cusMatePhone"/>
+		<result column="CUS_MATE_COMPANY_PHONE"	property="cusMateCompanyPhone"/>
+		<result column="CUS_COMPANY_NATURE"	property="cusCompanyNature"/>
+		<result column="CUS_MATE_JOB"	property="cusMateJob"/>
+		<result column="CUS_MATE_WORK_YEAR"	property="cusMateWorkYear"/>
+		<result column="CUS_MATE_ADDRESS"	property="cusMateAddress"/>
+		<result column="CUS_MATE_MONTHLY_INCOMING_ID"	property="cusMateMonthlyIncomingId"/>
+		<result column="CUS_CHD_INFO"	property="cusChdInfo"/>
+		<result column="CUS_FAMILY_NUM"	property="cusFamilyNum"/>
+		<result column="CUS_PARENT_INFO"	property="cusParentInfo"/>
+		<result column="CUS_LOCAL_YEAR"	property="cusLocalYear"/>
+		<result column="COMPANY_NAME"	property="companyName"/>
+		<result column="COMPANY_NATURE"	property="companyNature"/>
+		<result column="COMPANY_JOB"	property="companyJob"/>
+		<result column="COMPANY_WORK_YEAR"	property="companyWorkYear"/>
+		<result column="COMPANY_MONTHLY_INCOMING"	property="companyMonthlyIncoming"/>
+		<result column="COMPANY_ADDRESS"	property="companyAddress"/>
+		<result column="BIZ_COMPANY"	property="bizCompany"/>
+		<result column="BIZ_SCOPE"	property="bizScope"/>
+		<result column="BIZ_ORG_ID"	property="bizOrgId"/>
+		<result column="BIZ_ORG_CODE"	property="bizOrgCode"/>
+		<result column="BIZ_LICENSE_NUM"	property="bizLicenseNum"/>
+		<result column="BIZ_SOCIAL_CREDIT_NUM"	property="bizSocialCreditNum"/>
+		<result column="BIZ_ACTUAL_OPERATOR"	property="bizActualOperator"/>
+		<result column="BIZ_ADDRESS"	property="bizAddress"/>
+		<result column="BIZ_SHAREHOLDER_PROPORTION"	property="bizShareholderProportion"/>
+		<result column="BIZ_PLACE_ID"	property="bizPlaceId"/>
+		<result column="BIZ_AREA"	property="bizArea"/>
+		<result column="BIZ_LAW_FORM_ID"	property="bizLawFormId"/>
+		<result column="BIZ_LEAGL"	property="bizLeagl"/>
+		<result column="BIZ_LEAGL_MOBILE_PHONE"	property="bizLeaglMobilePhone"/>
+		<result column="BIZ_EMPLOYEE_NUM"	property="bizEmployeeNum"/>
+		<result column="BIZ_OPEN_DATE"	property="bizOpenDate"/>
+		<result column="BIZ_IS_BELONG_MYBANK"	property="bizIsBelongMybank"/>
+		<result column="BIZ_NOTE"	property="bizNote"/>
+		<result column="CAF_MONTHLY_SALES"	property="cafMonthlySales"/>
+		<result column="CAF_BUSY_SEASON"	property="cafBusySeason"/>
+		<result column="CAF_LOW_SEASON"	property="cafLowSeason"/>
+		<result column="CAF_RECEIVABLE_MONEY"	property="cafReceivableMoney"/>
+		<result column="CAF_GROSS_MARGIN"	property="cafGrossMargin"/>
+		<result column="CAF_INVENTORY"	property="cafInventory"/>
+		<result column="CAF_DEBT"	property="cafDebt"/>
+		<result column="CAF_TOTAL_MONEY"	property="cafTotalMoney"/>
+		<result column="CAF_OTHER"	property="cafOther"/>
+		<result column="CAF_TOTAL_CREDIT_CARD"	property="cafTotalCreditCard"/>
+		<result column="CAF_TOTAL_CREDIT_MONEY"	property="cafTotalCreditMoney"/>
+		<result column="CAF_TOTAL_OVERDRAFT_MONEY"	property="cafTotalOverdraftMoney"/>
+		<result column="CAF_OVERDUE_SITUATION"	property="cafOverdueSituation"/>
+		<result column="CAF_LOAN_CARD"	property="cafLoanCard"/>
+		<result column="CAF_BORROWER_CREIDT_DESC"	property="cafBorrowerCreidtDesc"/>
+		<result column="CAF_GUARANTOR_CREIDT_DESC"	property="cafGuarantorCreidtDesc"/>
+		<result column="ADVICE_MONEY"	property="adviceMoney"/>
+		<result column="ADVICE_LIMIT_YEAR"	property="adviceLimitYear"/>
+		<result column="ADVICE_RATE"	property="adviceRate"/>
+		<result column="ADVICE_REPAY_DATE"	property="adviceRepayDate"/>
+		<result column="ADVICE_LEND_WAY_ID"	property="adviceLendWayId"/>
+		<result column="ADVICE_REPAY_WAY_ID"	property="adviceRepayWayId"/>
+		<result column="ADVICE_OTHER"	property="adviceOther"/>
+		<result column="ADVICE_NOTE"	property="adviceNote"/>
+		<result column="RESULT_MONEY"	property="resultMoney"/>
+		<result column="RESULT_LIMIT_YEAR"	property="resultLimitYear"/>
+		<result column="RESULT_RATE"	property="resultRate"/>
+		<result column="RESULT_REPAY_DATE"	property="resultRepayDate"/>
+		<result column="RESULT_INSTAL_REPAY_MONEY"	property="resultInstalRepayMoney"/>
+		<result column="RESULT_RISK_WARM"	property="resultRiskWarm"/>
+		<result column="RESULT_SURVEY_EXIS_PROBLEMS"	property="resultSurveyExisProblems"/>
+		<result column="RESULT_NOTE"	property="resultNote"/>
+		<result column="LEND_CONTRACT_NUM "	property="lendContractNum"/>
+		<result column="LEND_CONFRIM_CONTRACT_NUM"	property="lendConfrimContractNum"/>
+		<result column="LEND_NOTE"	property="lendNote"/>
+		<result column="CREATE_DATE"	property="createDate"/>
+		<result column="UPDATE_DATE"	property="updateDate"/>
+    </resultMap>
+
+    <resultMap id="BaseCrdTzHkjhResult" class="BaseCrdTzHkjh">
+        <result property="pk1" column="PK1"/>
+        <result property="jjbh" column="JJBH"/>
+        <result property="htbh" column="HTBH"/>
+        <result property="zh" column="ZH"/>
+        <result property="hkqs" column="HKQS"/>
+        <result property="hkrq" column="HKRQ"/>
+        <result property="sjhkrq" column="SJHKRQ"/>
+        <result property="ll" column="LL"/>
+        <result property="jhje" column="JHJE"/>
+        <result property="jhlx" column="JHLX"/>
+        <result property="sjje" column="SJJE"/>
+        <result property="sjlx" column="SJLX"/>
+        <result property="qbx" column="QBX"/>
+        <result property="dkye" column="DKYE"/>
+        <result property="jgm" column="JGM"/>
+
+        <result property="loanId" column="LOAN_ID"/>
+    </resultMap>
+
+    <resultMap id="BaseCunkuanfhAjdkResult" class="BaseCunkuanfhAjdk">
+        <result property="jgm" column="jgm"/>
+        <result property="khm" column="khm"/>
+        <result property="khmc" column="khmc"/>
+        <result property="dkzh" column="dkzh"/>
+        <result property="dkye" column="dkye"/>
+        <result property="js" column="js"/>
+        <result property="zt" column="zt"/>
+        <result property="dqrq" column="dqrq"/>
+        <result property="kmh" column="kmh"/>
+        <result property="zh" column="zh"/>
+        <result property="zhye" column="zhye"/>
+        <result property="khrq" column="khrq"/>
+        <result property="jjbh" column="jjbh"/>
+        <result property="zrr" column="zrr"/>
+        <result property="htbh" column="htbh"/>
+        <result property="yll" column="yll"/>
+        <result property="bz" column="bz"/>
+        <result property="jtbz" column="jtbz"/>
+    </resultMap>
+
+    <resultMap id="CrdDbdktzResult" class="CrdDbdktz">
+        <result property="djserno" column="DJSERNO"/>
+        <result property="pk1" column="PK1"/>
+        <result property="jjbh" column="JJBH"/>
+        <result property="dkzh" column="DKZH"/>
+        <result property="rq" column="RQ"/>
+        <result property="jgm" column="JGM"/>
+        <result property="khm" column="KHM"/>
+        <result property="khmc" column="KHMC"/>
+        <result property="htbh" column="HTBH"/>
+        <result property="zwhtbh" column="ZWHTBH"/>
+        <result property="qdrq" column="QDRQ"/>
+        <result property="zdrq" column="ZDRQ"/>
+        <result property="dkje" column="DKJE"/>
+        <result property="dkye" column="DKYE"/>
+        <result property="jszh" column="JSZH"/>
+        <result property="zt" column="ZT"/>
+        <result property="zrr" column="ZRR"/>
+        
+        <result property="nf" column="NF"/>
+        <result property="yf" column="YF"/>
+        <result property="jbjgm" column="JBJGM"/>
+        <result property="yzdrq" column="YZDRQ"/>
+        <result property="kmh" column="KMH"/>
+        <result property="bz" column="BZ"/>
+        <result property="sjfl" column="SJFL"/>
+        <result property="zcdkye" column="ZCDKYE"/>
+        <result property="yqdkye" column="YQDKYE"/>
+        <result property="dzdkye" column="DZDKYE"/>
+        <result property="dzhangdkye" column="DZHANGDKYE"/>
+        <result property="wjfl" column="WJFL"/>
+        <result property="qfrq" column="QFRQ"/>
+        <result property="yslxlj" column="YSLXLJ"/>
+        <result property="sslxlj" column="SSLXLJ"/>
+        <result property="qxlj" column="QXLJ"/>
+        <result property="bnqx" column="BNQX"/>
+        <result property="bwqx" column="BWQX"/>
+        <result property="zjhkrq" column="ZJHKRQ"/>
+        <result property="scfkrq" column="SCFKRQ"/>
+        <result property="bjyqqsrq" column="BJYQQSRQ"/>
+        <result property="lxyqqsrq" column="LXYQQSRQ"/>
+        <result property="dkyqyy" column="DKYQYY"/>
+        <result property="jxfs" column="JXFS"/>
+        <result property="hkfs" column="HKFS"/>
+        <result property="hkzq" column="HKZQ"/>
+        <result property="jqrq" column="JQRQ"/>
+        <result property="xhrq" column="XHRQ"/>
+        <result property="zyzc" column="ZYZC"/>
+        <result property="zylx" column="ZYLX"/>
+        <result property="zblbz" column="ZBLBZ"/>
+        <result property="sfbldk" column="SFBLDK"/>
+        <result property="yqqs" column="YQQS"/>
+        <result property="lxyqqs" column="LXYQQS"/>
+        <result property="djr" column="DJR"/>
+        <result property="zrr2" column="ZRR2"/>
+        <result property="xgrq" column="XGRQ"/>
+        <result property="zqcs" column="ZQCS"/>
+        <result property="jzll" column="JZLL"/>
+        <result property="fdll" column="FDLL"/>
+        <result property="ll" column="LL"/>
+        <result property="yqll" column="YQLL"/>
+        <result property="wyll" column="WYLL"/>
+        <result property="shjfl" column="SHJFL"/>
+    </resultMap>
+
+    <resultMap id="CrdDbdktzAllResult" class="CrdDbdktz" extends="CrdDbdktzResult">
+        <result property="baseCunkuanfhAjdk" resultMap="CrdDbdktzSQL.BaseCunkuanfhAjdkResult" nullValue="null"/>
+    </resultMap>
+
+    <resultMap id="CrdDbdktzLoanResult" class="CrdDbdktz" extends="CrdDbdktzResult">
+        <result property="baseCunkuanfhAjdk" resultMap="CrdDbdktzSQL.BaseCunkuanfhAjdkResult" nullValue="null"/>
+        <result property="lnLoanInfo" resultMap="CrdDbdktzSQL.LnLoanInfoResult" nullValue="null"/>
+        <result property="loanSortNo" column="LOAN_SORTNO"/>
+    </resultMap>
+
+    <!--根据贷款账号得到台账信息-->
+    <select id="getDbdktzList" parameterClass="java.util.Map" resultMap="CrdDbdktzAllResult">
+        select cd.*,ca.* from DATA.crd_dbdktz cd
+        left join DATA.cunkuanfh_ajdk ca on cd.dkzh=ca.dkzh
+        where 1=1
+        <isNotEmpty property="dkzhs" prepend="and">
+            cd.DKZH in ($dkzhs$)
+        </isNotEmpty>
+    </select>
+
+    <!--根据贷款账号得到贷款还款计划-->
+    <select id="getHkjhList" parameterClass="java.util.Map" resultMap="BaseCrdTzHkjhResult">
+      select cth.*,lli.LOAN_ID
+      from DATA.crd_tz_hkjh cth
+      inner join DATA.crd_dbdktz cd on cth.zh=cd.dkzh
+      inner join ln_loan_info lli on cd.DJSERNO=lli.SERIAL_NUMBER
+      where 1=1
+      <isNotEmpty property="dkzhs" prepend="and">
+          cth.ZH in ($dkzhs$)
+      </isNotEmpty>
+    </select>
+
+    <!--获得需要同步的贷款数量-->
+    <select id="getCountSyncRepayment" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(1) from DATA.crd_dbdktz cd
+        left join DATA.cunkuanfh_ajdk ca on ca.zh=cd.dkzh
+        inner join ln_loan_info lli on lli.SERIAL_NUMBER=cd.DJSERNO
+        inner join ln_loan ll on lli.loan_id=ll.loan_id
+        where cd.zt in ($zts$)
+        <isNotEmpty property="loanStatusIds" prepend="and">
+            ll.loan_status_id in ($loanStatusIds$)
+        </isNotEmpty>
+    </select>
+
+    <!--分页获得需要同步的贷款-->
+    <select id="getSyncRepaymentList" parameterClass="java.util.Map" resultMap="CrdDbdktzLoanResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+            select cd.*,ca.*,lli.*,ll.sortno as loan_sortno
+            from DATA.crd_dbdktz cd
+            left join DATA.cunkuanfh_ajdk ca on ca.dkzh=cd.dkzh
+            inner join ln_loan_info lli on lli.SERIAL_NUMBER=cd.DJSERNO
+            inner join ln_loan ll on lli.loan_id=ll.loan_id
+            where cd.zt in ($zts$)
+            <isNotEmpty property="loanStatusIds" prepend="and">
+                ll.loan_status_id in ($loanStatusIds$)
+            </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <delete id="delCrdDbdktzBatch">
+        delete from (SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+        select * from DATA.crd_dbdktz
+        ) g ) tmp where tmp.NUMROW &lt;= 30000 and tmp.NUMROW &gt;= 1)
+    </delete>
+    
+    <delete id="delCrdTzHkjhBatch">
+        delete from (SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+        select * from DATA.crd_tz_hkjh
+        ) g ) tmp where tmp.NUMROW &lt;= 30000 and tmp.NUMROW &gt;= 1)
+    </delete>
+    
+    <delete id="delCunkuanfhAjdk">
+        delete from (SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+        select * from DATA.cunkuanfh_ajdk
+        ) g ) tmp where tmp.NUMROW &lt;= 30000 and tmp.NUMROW &gt;= 1)
+    </delete>
+</sqlMap>

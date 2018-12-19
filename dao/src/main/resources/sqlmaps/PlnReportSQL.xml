@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PlnFastPlanSQL">
+	<typeAlias alias="PlnReport" type="com.banger.mobile.domain.model.plnReport.PlnReport" />
+	<typeAlias alias="PlnReportInfo" type="com.banger.mobile.domain.model.plnReport.PlnReportInfo" />
+
+	<!--理财规划报告-->
+	<resultMap class="PlnReport" id="PlnReportResult">
+		<result column="REPORT_ID" property="reportId" />
+		<result column="PLAN_ID" property="planId" />
+		<result column="TARGET_DATE" property="targetDate" />
+		<result column="PLAN_TYPE_ID" property="planTypeId" />
+		<result column="CONTENT" property="content" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+	</resultMap>
+	
+    
+	<!--理财规划info-->
+	<resultMap class="PlnReportInfo" id="PlnReportInfoResult">
+		<result column="REPORT_ID" property="reportId" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="PHONE" property="phone" />
+		<result column="PLAN_NAME" property="planName" />
+		<result column="USER_NAME" property="userName" />
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="PLAN_TYPE_NAME" property="planTypeName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CONTENT" property="content" />
+	</resultMap>
+	
+	
+	
+	  <!-- 添加理财规划报告-->
+  	<insert id="insertPlnReport" parameterClass="PlnReport">
+ 	<![CDATA[
+ 		insert into PLN_REPORT
+ 		(
+ 			REPORT_ID,
+			PLAN_ID,
+			TARGET_DATE,
+			PLAN_TYPE_ID,
+			CONTENT,
+			CREATE_DATE,
+			IS_DEL
+ 		)
+ 		values
+ 		(
+ 			#reportId#,
+			#planId#,
+			#targetDate:TIMESTAMP#,
+			#planTypeId#,
+			#content#,
+			current timestamp,
+			0
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="reportId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_PLN_REPORT
+ 	</selectKey>
+  </insert>
+  
+  <!-- 理财规划报告列表 -->
+	<select id="getAllPlnReport" resultMap="PlnReportInfoResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		select 
+			a.REPORT_ID,
+			a.PLAN_ID,
+			a.PLAN_TYPE_ID,
+			a.CONTENT,
+			a.IS_DEL,
+			a.CREATE_DATE,
+			b.PLAN_DATE,
+			b.CUSTOMER_NO,
+			b.CUSTOMER_NAME,
+			b.CUSTOMER_ID,
+			b.PHONE,
+			b.PLAN_NAME,
+			c.USER_NAME,
+			d.PLAN_TYPE_NAME
+		 from  
+		 	PLN_REPORT a
+		 left join	PLN_FAST_PLAN b on a.PLAN_ID = b.FAST_PLAN_ID
+		 left join	SYS_USER c on b.USER_ID = c.USER_ID
+		 left join	PLN_PLAN_TYPE d on a.PLAN_TYPE_ID =d.PLAN_TYPE_ID
+		 left join  CRM_CUSTOMER e on b.CUSTOMER_ID=e.CUSTOMER_ID	
+		 where
+		 	a.IS_DEL=0 
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.CREATE_DATE>='$startDate$ 00:00:00' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.CREATE_DATE<='$endDate$ 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+				<![CDATA[b.CUSTOMER_NO like '%$customerNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[(e.CUSTOMER_NAME_PINYIN like '$customerName$%' or e.CUSTOMER_NAME like '%$customerName$%'  or b.CUSTOMER_NAME LIKE '%$customerName$%' )]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planName">
+				<![CDATA[b.PLAN_NAME like '%$planName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planTypeId">
+				<![CDATA[a.PLAN_TYPE_ID = '$planType$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[c.USER_ID IN ($userId$)]]>
+			</isNotEmpty>
+		 </dynamic>		
+			order by a.CREATE_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getAllPlnReportCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+		select 
+			count(*)
+		 from  
+		 	PLN_REPORT a
+		 left join	PLN_FAST_PLAN b on a.PLAN_ID = b.FAST_PLAN_ID
+		 left join	SYS_USER c on b.USER_ID = c.USER_ID
+		 left join	PLN_PLAN_TYPE d on a.PLAN_TYPE_ID =d.PLAN_TYPE_ID
+		 left join  CRM_CUSTOMER e on b.CUSTOMER_ID=e.CUSTOMER_ID	
+		 where
+		 	a.IS_DEL=0 
+		]]>
+		 <dynamic>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.CREATE_DATE>='$startDate$ 00:00:00' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.CREATE_DATE<='$endDate$ 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+				<![CDATA[b.CUSTOMER_NO like '%$customerNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[(e.CUSTOMER_NAME_PINYIN like '$customerName$%' or e.CUSTOMER_NAME like '%$customerName$%'   or b.CUSTOMER_NAME LIKE '%$customerName$%' )]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planName">
+				<![CDATA[b.PLAN_NAME like '%$planName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planTypeId">
+				<![CDATA[a.PLAN_TYPE_ID = '$planType$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[c.USER_ID IN ($userId$)]]>
+			</isNotEmpty>
+		 </dynamic>		
+	</select>
+	
+	<!-- 根据ID删除报告 -->
+	<update id="deletePlnReport" parameterClass="java.lang.String">
+		UPDATE 
+			PLN_REPORT 
+		SET 
+			IS_DEL = 1
+		where
+		 	REPORT_ID in ($value$)
+	</update>
+	
+	<!--根据id查询理财报告  -->
+	<select id="getPlnReportByPlanId" resultClass="java.lang.Integer"  parameterClass="java.lang.Integer">
+	<![CDATA[
+		select count(*) from PLN_REPORT where PLAN_ID = #planId# and IS_DEL=0
+	]]>
+  	</select>
+  	
+	<!--根据规划模板ID查询规划报告成生数量  -->
+	<select id="getReportById" resultMap="PlnReportResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from PLN_REPORT a where a.REPORT_ID = #Id# and a.IS_DEL=0
+	]]>
+  	</select>
+	
+	<!--根据报告ID查询规划报告  -->
+	<select id="GetPlnReportInfoById" resultMap="PlnReportInfoResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select 
+			a.REPORT_ID,
+			a.PLAN_ID,
+			a.PLAN_TYPE_ID,
+			a.CONTENT,
+			a.IS_DEL,
+			a.CREATE_DATE,
+			b.PLAN_DATE,
+			b.CUSTOMER_NO,
+			b.CUSTOMER_NAME,
+			b.PHONE,
+			b.CUSTOMER_ID,
+			b.PLAN_NAME,
+			c.USER_NAME,
+			d.PLAN_TYPE_NAME
+		 from  
+		 	PLN_REPORT a
+		 left join	PLN_FAST_PLAN b on a.PLAN_ID = b.FAST_PLAN_ID
+		 left join	SYS_USER c on b.USER_ID = c.USER_ID
+		 left join	PLN_PLAN_TYPE d on a.PLAN_TYPE_ID =d.PLAN_TYPE_ID
+		 where
+		 	a.IS_DEL=0 and a.REPORT_ID = #reportId#
+	]]>
+  	</select>
+	
+</sqlMap>
+
+
+
+

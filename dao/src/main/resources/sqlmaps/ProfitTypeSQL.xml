@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="ProfitTypeSQL">
+	<typeAlias alias="PDTProfitType"
+		type="com.banger.mobile.domain.model.system.ProfitType" />
+
+	<!-- 收益类型-->
+	<!-- 信息全字段 -->
+	<resultMap class="PDTProfitType" id="ProfitTypeResult">
+		<result column="PROFIT_TYPE_ID" property="profitTypeId" />
+		<result column="PROFIT_TYPE_NAME" property="profitTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+	</resultMap>
+
+	<!-- 增加收益类型-->
+	<insert id="insertProfitType" parameterClass="PDTProfitType">
+		<![CDATA[
+		INSERT INTO PDT_PROFIT_TYPE
+    	(
+        PROFIT_TYPE_ID,
+        PROFIT_TYPE_NAME,
+        IS_DEL,
+        SORTNO
+    	)
+    	VALUES
+    	(
+        #profitTypeId#,
+        #profitTypeName#,
+	    #isDel#,
+        #sortNo#
+    	)
+      ]]>
+		<selectKey keyProperty="profitTypeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_PROFIT_TYPE
+		</selectKey>
+	</insert>
+
+
+	<!-- 修改收益类型-->
+	<update id="updProfitType" parameterClass="PDTProfitType">
+		UPDATE 
+			PDT_PROFIT_TYPE
+		SET 
+			IS_DEL = #isDel#,
+			PROFIT_TYPE_NAME = #profitTypeName#, 
+			SORTNO = #sortNo#
+		where
+			PROFIT_TYPE_ID= #profitTypeId#
+	</update>
+
+	<!-- 根据ID删除收益类型 -->
+	<update id="deleteProfitType" parameterClass="java.lang.Integer">
+		UPDATE 
+			PDT_PROFIT_TYPE 
+		SET 
+			IS_DEL = 1
+		where
+		 	PROFIT_TYPE_ID= #profitTypeId#
+	</update>
+	
+	<!-- 根据id得到收益类型对象 -->
+	<select id="getProfitTypeById"	resultMap="ProfitTypeResult" 
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from PDT_PROFIT_TYPE where PROFIT_TYPE_ID=#Id#
+	]]>
+	</select>
+	
+
+	<!-- 获取收益类型列表 -->
+	<select id="getAllProfitType" resultMap="ProfitTypeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            PDT_PROFIT_TYPE 
+        WHERE 
+        	IS_DEL = 0
+        Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 获取按排序SORTNO最大的对象 -->
+	<select id="getMaxNoProfitType" resultMap="ProfitTypeResult">
+		<![CDATA[
+		select *  from 
+			PDT_PROFIT_TYPE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取按排序SORTNO最小的对象 -->
+	<select id="getMinNoProfitType" resultMap="ProfitTypeResult">
+		<![CDATA[
+		select *  from 
+			PDT_PROFIT_TYPE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取要移动的收益类型对象 -->
+	<select id="getNeedMoveProfitType"	resultMap="ProfitTypeResult" 
+		parameterClass="java.util.Map">
+		select *  from PDT_PROFIT_TYPE WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询相同名称的对象 -->
+	<select id="getProfitTypeBySameName" resultMap="ProfitTypeResult"
+		parameterClass="PDTProfitType">
+		<![CDATA[
+		select * from PDT_PROFIT_TYPE where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="profitTypeId">
+     		<isNotEqual prepend="and" property="profitTypeId" compareValue="0">
+			<![CDATA[PROFIT_TYPE_ID != #profitTypeId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="profitTypeName">
+			<![CDATA[PROFIT_TYPE_NAME = #profitTypeName#]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

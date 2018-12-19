@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnExceptionDunAssignSQL">
+    <typeAlias alias="LnExceptionDunAssign" type="com.banger.mobile.domain.model.loan.LnExceptionDunAssign"/>
+    <typeAlias alias="LnLoan" type="com.banger.mobile.domain.model.loan.LnLoan"/>
+    <typeAlias alias="CrmCustomer" type="com.banger.mobile.domain.model.customer.CrmCustomer"/>
+
+    <!--LnExceptionDunAssignResult全字段-->
+    <resultMap id="LnExceptionDunAssignResult" class="LnExceptionDunAssign">
+        <result column="EXP_DUN_ASSIGN_ID" property="expDunAssignId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="DUN_USER_ID" property="dunUserId"/>
+        <result column="ASSIGN_USER_ID" property="assignUserId"/>
+        <result column="ASSIGN_DATE" property="assignDate"/>
+        <result column="EXCEPTION_ASSIGN_USER_NAMES" property="exceptionAssignUserNames"/>
+    </resultMap>
+
+
+    <!-- CrmCustomer部分字段 -->
+    <resultMap class="CrmCustomer" id="partCrmCustomerResult">
+        <!-- 基本字段 -->
+        <result column="CUSTOMER_ID" property="customerId"/>
+        <!--
+        <result column="USER_ID" property="userId" />
+        -->
+        <!-- 扩展字段 -->
+        <result column="CUSTOMER_NO" property="customerNo" />
+        <result column="CUSTOMER_NAME" property="customerName" />
+        <result column="CUSTOMER_TITLE" property="customerTitle"/>
+        <result column="CUSTOMER_TYPE_ID" property="customerTypeId"/>
+        <result column="SEX" property="sex" />
+        <result column="BIRTHDAY" property="birthday"/>
+        <result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+        <result column="MOBILE_PHONE1" property="mobilePhone1" />
+        <result column="MOBILE_PHONE2" property="mobilePhone2" />
+        <result column="PHONE" property="phone" />
+        <result column="FAX" property="fax" />
+        <result column="ID_CARD" property="idCard" />
+        <result column="AGE" property="age" />
+        <result column="IS_NOGOOD_CUS" property="isNoGood" />
+    </resultMap>
+
+    <!--LnLoan部分字段-->
+    <resultMap class="LnLoan" id="LnLoanResult">
+        <result column="LOAN_ID" property="loanId"/>
+        <!-- <result column="CUSTOMER_ID" property="customerId"/>
+        <result column="LOAN_TYPE_ID" property="loanTypeId"/>
+        <result column="IS_NOGOOD" property="isNogood"/>
+        <result column="LOAN_STATUS_ID" property="loanStatusId"/>
+
+        <result column="ACCOUNT_REMAINING" property="accountRemaining"/>
+        <result column="LOAN_REMAINING" property="loanRemaining"/>
+        <result column="REPAYMENT_STATUS" property="repaymentStatus"/>
+        <result column="CURRENT_NEED_REPAY" property="currentNeedRepay"/>
+        <result column="REPAYMENT_DATE" property="repaymentDate"/>
+        <result column="OVERDUE_PRINCIPAL" property="overduePrincipal"/>
+        <result column="OVERDUE_INTEREST" property="overdueInterest"/>
+        <result column="OWED_PRINCIPAL" property="owedPrincipal"/>
+        <result column="OWED_INTEREST" property="owedInterest"/>
+        <result column="PAID_PRINCIPAL" property="paidPrincipal"/>
+        <result column="PAID_INTEREST" property="paidInterest"/> -->
+    </resultMap>
+
+
+
+    <!--我的异常贷款列表 结果集-->
+    <resultMap id="LnExceptionDunAssignListResult" class="LnExceptionDunAssign" extends="LnExceptionDunAssignResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnExceptionDunAssignSQL.partCrmCustomerResult" nullValue="null"/>
+        <result property="lnLoan" resultMap="LnExceptionDunAssignSQL.LnLoanResult" nullValue="null" />
+    </resultMap>
+
+
+    <!-- 增加一种类型-->
+    <insert id="insertExpDunAssign" parameterClass="LnExceptionDunAssign">
+        <![CDATA[
+		INSERT INTO LN_EXCEPTION_DUN_ASSIGN
+    	(
+        EXP_DUN_ASSIGN_ID,
+        LOAN_ID,
+        DUN_USER_ID,
+        ASSIGN_USER_ID,
+        ASSIGN_DATE
+    	)
+    	VALUES
+    	(
+        #expDunAssignId:INTEGER#,
+        #loanId:INTEGER#,
+        #dunUserId:INTEGER#,
+        #assignUserId:INTEGER#,
+        #assignDate:TIMESTAMP#
+    	)
+      ]]>
+        <selectKey keyProperty="expDunAssignId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_LN_EXCEPTION_DUN_ASSIGN
+        </selectKey>
+    </insert>
+
+    <select id="selectAssignLoanCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+         select count(1) from LN_EXCEPTION_DUN_ASSIGN leda
+        left join ln_loan ll on leda.loan_id = ll.loan_id
+        left join crm_customer c on ll.customer_id=c.customer_id
+         where 1=1
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or  c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+         <isNotEmpty property="loanIds" prepend="and">
+             loan_id in
+             <iterate property="loanIds" open="(" close=")" conjunction=",">
+                 #loanIds[]#
+             </iterate>
+         </isNotEmpty>
+        <isNotEmpty property="dunUserId"  prepend="and">
+            leda.DUN_USER_ID =#dunUserId#
+        </isNotEmpty>
+        <isNotEmpty property="loanId" prepend="and">
+           leda.LOAN_ID = #loanId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID=#loanStatusId#
+        </isNotEmpty>
+        <!--搜索我的的贷款催收(精确查询)  欧阳珞-->
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+               ll.REPAYMENT_DATE >= #repaymentStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+              ll.REPAYMENT_DATE <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStatus">
+            ll.REPAYMENT_STATUS=#repaymentStatus#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="isNogood">
+            ll.IS_NOGOOD =#isNogood#
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            ll.LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <!--搜索贷款催收(精确查询)-->
+    </select>
+
+    <!--删除异常催收贷款-->
+    <delete id="deleteAssignLoanByLoanId" parameterClass="java.util.Map">
+        delete from LN_EXCEPTION_DUN_ASSIGN
+        where 1=1
+        <isNotEmpty property="loanIds" prepend="and">
+            loan_id in
+            <iterate property="loanIds" open="(" close=")" conjunction=",">
+                #loanIds[]#
+            </iterate>
+        </isNotEmpty>
+    </delete>
+
+    <!--查询指定贷款的异常催收贷款记录数-->
+    <select id="selectAssignedCountByLoanId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(*) from ln_exception_dun_assign
+        where 1=1
+        <isNotEmpty property="loanIds" prepend="and">
+            loan_id in
+            <iterate property="loanIds" open="(" close=")" conjunction=",">
+                #loanIds[]#
+            </iterate>
+        </isNotEmpty>
+    </select>
+
+    <!--查询所有贷款  -->
+    <select id="selectMyExceptionDunLoanList" resultMap="LnExceptionDunAssignListResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select leda.*,ll.LOAN_ID,ll.CUSTOMER_ID,ll.LOAN_TYPE_ID,ll.IS_NOGOOD,ll.LOAN_STATUS_ID,ll.ACCOUNT_REMAINING,
+        ll.LOAN_REMAINING,ll.REPAYMENT_STATUS,ll.CURRENT_NEED_REPAY,ll.REPAYMENT_DATE,ll.OVERDUE_PRINCIPAL,ll.OVERDUE_INTEREST,
+        ll.OWED_PRINCIPAL,ll.OWED_INTEREST,ll.PAID_PRINCIPAL,ll.PAID_INTEREST,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,
+        c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,c.MOBILE_PHONE1,c.MOBILE_PHONE2,
+        c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as IS_NOGOOD_CUS,
+        GET_LN_USER_NAMES_BY_LOAN_ID(ll.loan_id) as EXCEPTION_ASSIGN_USER_NAMES
+        from ln_exception_dun_assign leda
+        left join ln_loan ll on leda.loan_id = ll.loan_id
+        left join crm_customer c on ll.customer_id=c.customer_id
+        WHERE 1=1
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or  c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        <isNotEmpty property="dunUserId"  prepend="and">
+            leda.DUN_USER_ID =#dunUserId#
+        </isNotEmpty>
+      <isNotEmpty property="loanId" prepend="and">
+          leda.LOAN_ID = #loanId#
+      </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID=#loanStatusId#
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            ll.LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <!--搜索贷款催收(精确查询)  欧阳珞-->
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+               ll.REPAYMENT_DATE >= #repaymentStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+              ll.REPAYMENT_DATE <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStatus">
+            ll.REPAYMENT_STATUS=#repaymentStatus#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="isNogood">
+            ll.IS_NOGOOD =#isNogood#
+        </isNotEmpty>
+        order by case when ll.repayment_status =0 then 3 ELSE ll.repayment_status end,ll.repayment_date
+        <!--搜索贷款催收(精确查询)-->
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+
+</sqlMap>

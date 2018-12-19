@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeKnowledgebaseContentSQL">
+	<typeAlias alias="FeKnowledgebaseContent" type="com.banger.mobile.domain.model.finance.FeKnowledgebaseContent" />	
+	
+	<resultMap class="FeKnowledgebaseContent" id="FeKnowledgebaseContentResult">
+		<result column="KNOWLEDGEBASE_CONTENT_ID" property="knowledgebaseContentId" />
+		<result column="KNOWLEDGEBASE_TYPE_ID" property="knowledgebaseTypeId" />
+		<result column="ARTICLE_ID" property="articleId" />
+		<result column="KNOWLEDGEBASE_TITLE" property="knowledgebaseTitle" />
+		<result column="KNOWLEDGEBASE_NOTE" property="knowledgebaseNote" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<result column="KNOW_TYPE_NAME" property="knowTypeName" />		
+	</resultMap>
+	
+	<!-- 新增收藏内容 -->
+	<insert id="addKnowledgeContent" parameterClass="FeKnowledgebaseContent">
+		<![CDATA[	
+			INSERT INTO
+			    FE_KNOWLEDGEBASE_CONTENT
+			    (
+			        KNOWLEDGEBASE_CONTENT_ID,
+			        KNOWLEDGEBASE_TYPE_ID,
+			        ARTICLE_ID,
+			        KNOWLEDGEBASE_TITLE,
+			        KNOWLEDGEBASE_NOTE,
+			        USER_ID,
+			        IS_DEL,
+			        CREATE_DATE,
+			        CREATE_USER
+			    )
+			    VALUES
+			    (
+			        #knowledgebaseContentId#,
+			        #knowledgebaseTypeId#,
+			        #articleId#,
+			        #knowledgebaseTitle#,
+			        #knowledgebaseNote#,
+			        #userId#,
+			        0,
+			        #createDate#,
+			        #createUser#
+			        )
+		]]>	
+		<selectKey keyProperty="knowledgebaseContentId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_FE_KNOWLEDGEBASE_CONTENT
+		</selectKey>	
+	</insert>
+	<!-- 搜索所有收藏内容分页 -->
+	<select id="getKnowledgeContent" parameterClass="java.util.Map" resultMap="FeKnowledgebaseContentResult" >
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[SELECT 
+			    a.KNOWLEDGEBASE_CONTENT_ID,a.KNOWLEDGEBASE_TYPE_ID,a.ARTICLE_ID, a.USER_ID,a.IS_DEL, a.CREATE_DATE, a. UPDATE_DATE, a.CREATE_USER,a.UPDATE_USER,
+			   	a.KNOWLEDGEBASE_TITLE, a.KNOWLEDGEBASE_NOTE, '' as KNOW_TYPE_NAME
+			    FROM FE_KNOWLEDGEBASE_CONTENT AS a WHERE IS_DEL=0]]>
+		<dynamic>
+			<isNotEmpty prepend="AND" property="typeId">
+				<![CDATA[ KNOWLEDGEBASE_TYPE_ID = $typeId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="userId">
+				<![CDATA[ USER_ID = $userId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="startDate">
+				<![CDATA[ CREATE_DATE >= '$startDate$']]>			
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endDate">
+				<![CDATA[ CREATE_DATE <= '$endDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="title">
+				<![CDATA[ KNOWLEDGEBASE_TITLE LIKE '%$title$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="note">
+				<![CDATA[ KNOWLEDGEBASE_NOTE LIKE '%$note$%']]>
+			</isNotEmpty>
+		</dynamic>
+		<![CDATA[ ORDER BY CREATE_DATE DESC ]]>	
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!--搜索所有收藏内容分页count-->
+	<select id="getKnowledgeContentCount" parameterClass="java.util.Map" resultClass="java.lang.Integer" >
+		<![CDATA[SELECT COUNT(*) FROM FE_KNOWLEDGEBASE_CONTENT WHERE IS_DEL=0 ]]>
+		<dynamic>
+			<isNotEmpty prepend="AND" property="typeId">
+				<![CDATA[ KNOWLEDGEBASE_TYPE_ID = $typeId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="userId">
+				<![CDATA[ USER_ID = $userId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="startDate">
+				<![CDATA[ CREATE_DATE >= '$startDate$']]>			
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endDate">
+				<![CDATA[ CREATE_DATE <= '$endDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="title">
+				<![CDATA[ KNOWLEDGEBASE_TITLE LIKE '%$title$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="note">
+				<![CDATA[ KNOWLEDGEBASE_NOTE LIKE '%$note$%']]>
+			</isNotEmpty>
+		</dynamic>		
+	</select>
+	<!-- 删除收藏内容 -->
+	<update id="deleteKnowLedgContent"  parameterClass="FeKnowledgebaseContent" >	
+	<![CDATA[ UPDATE FE_KNOWLEDGEBASE_CONTENT SET IS_DEL = 1, UPDATE_DATE = #updateDate#, UPDATE_USER = #updateUser#
+			WHERE KNOWLEDGEBASE_CONTENT_ID = #knowledgebaseContentId# ]]>	
+	</update>
+	<!-- 编辑收藏内容 -->
+	<update id="updateKnowLedgContent"  parameterClass="FeKnowledgebaseContent" >	
+	<![CDATA[ 
+		UPDATE
+		    FE_KNOWLEDGEBASE_CONTENT
+		SET
+		    KNOWLEDGEBASE_TYPE_ID = #knowledgebaseTypeId#,
+		    KNOWLEDGEBASE_TITLE = #knowledgebaseTitle#,
+		    KNOWLEDGEBASE_NOTE = #knowledgebaseNote#,
+		    UPDATE_DATE = #updateDate#,
+		    UPDATE_USER = #updateUser#
+        WHERE KNOWLEDGEBASE_CONTENT_ID = #knowledgebaseContentId# ]]>	
+	</update>
+	
+	<select id="getContentById" parameterClass="java.lang.Integer" resultMap="FeKnowledgebaseContentResult">
+	<![CDATA[ 	
+		SELECT c.*,t.KNOWLEDGEBASE_TYPE_NAME as KNOW_TYPE_NAME 
+		FROM FE_KNOWLEDGEBASE_CONTENT AS c
+		LEFT JOIN FE_KNOWLEDGEBASE_TYPE AS t ON c.KNOWLEDGEBASE_TYPE_ID = t.KNOWLEDGEBASE_TYPE_ID
+		WHERE c.IS_DEL = 0 AND c.KNOWLEDGEBASE_CONTENT_ID = #value#
+	]]>	
+	</select>
+	
+</sqlMap>
+
+
+
+

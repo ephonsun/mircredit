@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysRoleMemberSQL">
+	<typeAlias alias="SysRoleMember" type="com.banger.mobile.domain.model.user.SysRoleMember" />
+
+	<!-- 用户信息表-->
+	<!-- SysUserSQL信息全字段 -->
+	<resultMap class="SysRoleMember" id="SysRoleMemberResult">
+		<result column="ROLE_MEMBER_ID" property="roleMemberId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="USER_ID" property="userId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<cacheModel id="UserRole-Cache" type="OSCACHE" serialize="true" readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="addSysRoleMember" />
+		<flushOnExecute statement="updateSysRoleMember" />
+		<flushOnExecute statement="deleteSysRoleMember" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+		<!-- 增加一条录音记录信息-->
+	<insert id="addSysRoleMember" parameterClass="SysRoleMember">
+     <![CDATA[
+		insert into SYS_ROLE_MEMBER
+		(
+		 ROLE_MEMBER_ID,
+		 ROLE_ID,
+		 USER_ID,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#roleMemberId#,
+		#roleId#,
+	    #userId#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="roleMemberId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_ROLE_MEMBER 
+		</selectKey>
+	</insert>
+	
+	<!-- 用户记录修改-->
+	<update id="updateSysRoleMember" parameterClass="SysRoleMember">
+	 <![CDATA[
+             update SYS_ROLE_MEMBER  set 
+		 ]]>	
+		 <isNotEmpty property="roleId">
+				ROLE_ID=#roleId#,
+		 </isNotEmpty>
+		 <isNotEmpty prepend="and"  property="userId">
+				USER_ID=#userId#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where ROLE_MEMBER_ID=#roleMemberId#
+         ]]> 
+	</update>
+	<!-- 人员角色 -->
+  <select id="GetRoleMember" resultMap="SysRoleMemberResult" parameterClass="java.util.Map" cacheModel="UserRole-Cache" >
+  	<![CDATA[
+		select * from SYS_ROLE_MEMBER 
+	]]>
+	<dynamic prepend="where" >
+	    <isNotEmpty  property="USER_ID">
+			<![CDATA[USER_ID = '$USER_ID$']]>
+		</isNotEmpty>
+	</dynamic>
+	order by ROLE_ID 
+  </select>
+  
+  
+  	  <!-- 获取机构管理员，admin角色编号集合 -->
+  <select id="getAdminAndDepartmentList" resultMap="SysRoleMemberResult"  >
+  	<![CDATA[
+		select * from SYS_ROLE_MEMBER where ROLE_ID IN(1,2) AND USER_ID NOT IN(
+		select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID where b.ROLE_ID not in (1,2,3,4)
+		) OR USER_ID=1
+	]]>
+  </select>
+  
+  	  <!-- 传入用户ID得到角色集合 -->
+  <select id="GetRoleMemberByUserIds" resultMap="SysRoleMemberResult" parameterClass="java.util.Map" cacheModel="UserRole-Cache" >
+  	<![CDATA[
+		select * from SYS_ROLE_MEMBER  where USER_ID=#userId# 
+	]]>
+  </select>
+  
+  	<!-- 根据ID删除记录 -->
+   <delete id="deleteSysRoleMember" parameterClass="java.lang.Integer">
+	<![CDATA[
+		delete from SYS_ROLE_MEMBER where   ROLE_MEMBER_ID= #roleMemberId# 
+	]]>
+   </delete>
+   
+   <!-- 根据用户ID删除记录 -->
+   <delete id="delSysRoleMember" parameterClass="java.lang.Integer">
+	<![CDATA[
+		delete from SYS_ROLE_MEMBER where  USER_ID= #userId# 
+	]]>
+   </delete>
+   
+   <select id="getRoleIdByUserIds" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		select role_id from sys_role_member where user_id in ($userIds$)
+   </select>
+
+	<select id="getRoleIdByUserId" resultClass="java.lang.Integer"
+			parameterClass="java.lang.Integer">
+		select role_id from sys_role_member where user_id =#userId#
+	</select>
+
+
+   <select id="getUserIdByRole" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		select sm.user_id from sys_role_member sm, sys_user su 
+		where sm.user_id = su.user_id and sm.role_id = #roleId#  and su.is_del = 0 and su.is_actived = 1 and (su.LEAVE_TAG=0 or su.LEAVE_TAG is null)
+		<isNotEmpty  property="approvalValue">
+			and (su.APPROVAL_VALUE>=#approvalValue#  or su.APPROVAL_VALUE is null or  su.APPROVAL_VALUE =0)
+		</isNotEmpty>
+   </select>
+   
+   
+   
+</sqlMap>

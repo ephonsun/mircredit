@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeAllColumnSQL">
+	<typeAlias alias="FeColumn"
+		type="com.banger.mobile.domain.model.finance.FeColumn" />
+
+	<!-- 任务表-->
+	<!-- FeAllColumnSQL信息全字段 -->
+	<resultMap class="FeColumn" id="FeColumnResult">
+		<result column="COLUMN_ID" property="columnId"/>
+		<result column="COLUMN_NAME" property="columnName"/>
+		<result column="COLUMN_DESCRIPTION" property="columnDescription"/>
+		<result column="COLUMN_ORDER" property="columnOrder"/>
+		<result column="IS_START" property="isStart"/>
+		<result column="IS_DEL" property="isDel"/>
+		<result column="CREATE_DATE" property="createDate"/>
+		<result column="UPDATE_DATE" property="updateDate"/>
+		<result column="CREATE_USER" property="createUser"/>
+		<result column="UPDATE_USER" property="updateUser"/>
+	</resultMap>
+	
+	<!-- 返回所有栏目(根据名字搜索) -->
+	<select id="getAllColumn" resultMap="FeColumnResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT 
+				*
+			FROM FE_COLUMN 
+			WHERE IS_DEL=0  
+		]]>
+		<isNotEmpty property="columnName">
+			<![CDATA[
+			   AND COLUMN_NAME like '%$columnName$%'
+	    	]]>
+		</isNotEmpty>
+		<isNotEmpty property="columnId">
+			<![CDATA[
+			   AND COLUMN_ID=#columnId#
+	    	]]>
+		</isNotEmpty>
+		<isNotEmpty property="isStart">
+			<![CDATA[
+			   AND IS_START=#isStart#
+	    	]]>
+		</isNotEmpty>
+		ORDER BY COLUMN_ORDER
+	</select>
+	
+	<!-- 添加一个栏目 -->
+	<insert id="insertColumn" parameterClass="FeColumn">
+ 	<![CDATA[
+ 		insert into FE_COLUMN
+ 		(
+ 			COLUMN_ID,
+			COLUMN_NAME,
+			COLUMN_DESCRIPTION,
+			COLUMN_ORDER,
+			IS_START,
+			IS_DEL,
+			CREATE_DATE,
+			UPDATE_DATE,
+			CREATE_USER,
+			UPDATE_USER
+ 		)
+ 		values
+ 		(
+ 			#columnId#,
+			#columnName#,
+			#columnDescription#,
+			#columnId#,
+			#isStart#,
+			#isDel#,
+			#createDate#,
+			#updateDate#,
+			#createUser#,
+			#updateUser#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="columnId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_FE_COLUMN
+ 	</selectKey>
+  </insert>
+  
+  	<!-- 删除栏目 -->
+  	<update id="delColumn" parameterClass="java.lang.Integer">
+		UPDATE FE_COLUMN
+	      SET
+	      IS_DEL=1
+	      WHERE
+	      COLUMN_ID = #columnId#
+	</update>
+	
+	<!-- 编辑栏目 -->
+	<update id="editColumn" parameterClass="FeColumn">
+		UPDATE FE_COLUMN
+			SET
+			COLUMN_NAME=#columnName#,
+			COLUMN_DESCRIPTION=#columnDescription#
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<!-- 停用栏目 -->
+	<update id="stopColumn" parameterClass="java.lang.Integer">
+		UPDATE FE_COLUMN
+			SET
+			IS_START=0
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<!-- 启用栏目 -->
+	<update id="startColumn" parameterClass="java.lang.Integer">
+		UPDATE FE_COLUMN
+			SET
+			IS_START=1
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<!-- 上移栏目 -->
+	<select id="nowFeColumn" resultMap="FeColumnResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		SELECT 
+		* FROM 
+		FE_COLUMN
+		WHERE
+		IS_DEL = 0 AND COLUMN_ID=#columnId#
+	]]>
+	</select>
+	
+	<select id="upFeColumn" resultMap="FeColumnResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		SELECT 
+		* FROM 
+		FE_COLUMN
+		WHERE
+		IS_DEL = 0 AND COLUMN_ORDER<#nowOrder#
+		ORDER BY COLUMN_ORDER DESC FETCH FIRST 1 ROW ONLY
+	]]>
+	</select>
+	
+	<update id="upColumn1" parameterClass="FeColumn">
+		UPDATE FE_COLUMN
+			SET
+			COLUMN_ORDER=#columnOrder#
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<update id="upColumn2" parameterClass="FeColumn">
+		UPDATE FE_COLUMN
+			SET
+			COLUMN_ORDER=#columnOrder#
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<!-- 下移栏目 -->
+	<select id="nowFeColumnDown" resultMap="FeColumnResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		SELECT 
+		* FROM 
+		FE_COLUMN
+		WHERE
+		IS_DEL = 0 AND COLUMN_ID=#columnId#
+	]]>
+	</select>
+	
+	<select id="nextFeColumnDown" resultMap="FeColumnResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		SELECT 
+		* FROM 
+		FE_COLUMN
+		WHERE
+		IS_DEL = 0 AND COLUMN_ORDER>#nowOrderDown#
+		ORDER BY COLUMN_ORDER ASC FETCH FIRST 1 ROW ONLY
+	]]>
+	</select>
+	
+	<update id="downColumn1" parameterClass="FeColumn">
+		UPDATE FE_COLUMN
+			SET
+			COLUMN_ORDER=#columnOrder#
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<update id="downColumn2" parameterClass="FeColumn">
+		UPDATE FE_COLUMN
+			SET
+			COLUMN_ORDER=#columnOrder#
+			WHERE
+			COLUMN_ID=#columnId#
+	</update>
+	
+	<!-- 获取具体栏目信息 -->
+	<select id="getColumn" parameterClass="FeColumn" resultMap="FeColumnResult">
+		<![CDATA[
+		SELECT * 
+			FROM FE_COLUMN 
+		WHERE IS_DEL=0 AND COLUMN_NAME=#columnName#
+ 		]]>
+ 		<isNotEmpty property="columnId">
+			<![CDATA[
+			   AND COLUMN_ID <> #columnId#
+	    	]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 测试isNull和isEmpty的区别 -->
+	<select id="getTest" parameterClass="java.util.Map" resultMap="FeColumnResult">
+		<![CDATA[SELECT * FROM FE_COLUMN WHERE 1=1]]>
+		<isNull property="columnId" prepend="and">
+			COLUMN_ID=#columnId#
+		</isNull>
+		<isEmpty property="columnNmae" prepend="and">
+			COLUMN_NAME=#columnNmae#
+		</isEmpty>
+	</select>
+	
+</sqlMap>

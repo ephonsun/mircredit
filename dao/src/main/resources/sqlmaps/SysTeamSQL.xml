@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysTeamSQL">
+    
+    <typeAlias alias="baseSysTeam" 	type="com.banger.mobile.domain.model.base.system.BaseSysTeam"/>
+    <typeAlias alias="sysTeam" 	type="com.banger.mobile.domain.model.system.SysTeam"/>
+    <typeAlias alias="sysTeamInfo" type="com.banger.mobile.domain.model.system.SysTeamInfo"/>
+    
+    <resultMap class="baseSysTeam" id="BaseSysTeamResult">
+        <result column="TEAM_ID" property="teamId" />
+        <result column="TEAM_NAME" property="teamName" />
+        <result column="IS_DEL" property="isDel" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="UPDATE_DATE" property="updateDate" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="UPDATE_USER" property="updateUser" />
+    </resultMap>
+    
+    <resultMap class="sysTeam" id="SysTeamResult" extends="BaseSysTeamResult">
+        <result column="TEAMLEADER_USERNAME" property="teamLeaderUserName" />
+        <result column="BACKGROUND_USERNAMES" property="backgroundUserNames" />
+        <result column="CLIENTMANAGE_USERNAMES" property="clientManageUserNames" />
+    </resultMap>
+    <resultMap class="sysTeamInfo" id="SysTeamInfoResult" >
+    	<result column="TEAM_ID" property="teamId" />
+        <result column="TEAM_NAME" property="teamName" />
+        <result column="USER_NAME" property="userName" />
+        <result column="ROLE_NAME" property="roleName" />
+        <result column="ROLE_ID" property="roleId" />
+    </resultMap>
+    
+    <insert id="addSysTeam" parameterClass="baseSysTeam">
+        <![CDATA[
+        	insert into SYS_TEAM
+        	(
+        		TEAM_ID
+				,TEAM_NAME
+				,IS_DEL
+				,CREATE_DATE
+				,UPDATE_DATE
+				,CREATE_USER
+				,UPDATE_USER
+        	)values
+        	(        		
+				#teamId:INTEGER#
+				,#teamName:VARCHAR:NULL#
+			    ,#isDel:INTEGER#
+			    ,current timestamp
+			    ,current timestamp
+			    ,#createUser:INTEGER#
+			    ,#updateUser:INTEGER#
+        	)
+        ]]>
+        
+        <selectKey keyProperty="teamId" resultClass="java.lang.Integer"
+            type="pre">
+            values NEXTVAL for SEQ_SYS_TEAM
+        </selectKey>
+    </insert>
+    	
+	<update id="updateSysTeam" parameterClass="baseSysTeam">
+	   
+	    		UPDATE SYS_TEAM 
+	    		SET 
+	    			IS_DEL = #isDel:INTEGER#
+	    			<isNotEmpty property="createDate">
+					,CREATE_DATE = #createDate#
+					</isNotEmpty>
+					,UPDATE_DATE = <![CDATA[current timestamp]]>
+					<isNotEmpty property="createUser">
+					,CREATE_USER = #createUser#
+					</isNotEmpty>
+					,UPDATE_USER = #updateUser# 
+					<isNotEmpty property="teamName">
+	    			,TEAM_NAME = #teamName:VARCHAR:NULL#
+	    			</isNotEmpty>
+				where
+				TEAM_ID= #teamId#
+	   
+	</update>
+
+	<update id="deleteSysTeamById" 	parameterClass="java.lang.Integer">
+		UPDATE SYS_TEAM SET IS_DEL = 1, UPDATE_DATE =<![CDATA[current timestamp]]>
+		where TEAM_ID= #Id#
+	</update>
+	
+	
+	<!-- 分页获取数据Count -->
+	<select id="getSysTeamCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		select count(0) from SYS_TEAM a where a.IS_DEL = 0		
+	</select>
+	
+	<!-- 分页获取数据 -->
+	<select id="getSysTeamParameterPageMap" resultMap="BaseSysTeamResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   ( ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+			
+			Select * from SYS_TEAM where IS_DEL=0 
+			<isNotEmpty prepend="and" property="teamName">
+				<![CDATA[ Team_NAME like '%$teamName$%' ]]>
+			</isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 估计teamid获取成员数据 -->
+	<select id="getTeamInfoList" resultMap="SysTeamInfoResult" parameterClass="java.lang.Integer">
+	select st.team_name ,st.team_id ,su.user_name,sr.role_name,sr.role_id
+ 	from sys_role sr,sys_role_member srm ,sys_team st,sys_team_user stu ,sys_user su
+	where sr.role_id = srm.role_id and srm.user_id=su.user_id and stu.user_id =su.user_id 
+	and stu.team_id = st.team_id and st.team_id =#teamId#
+    </select>
+    <!-- 根据teamname获取成员数据 -->
+	<select id="getSysTeamByName" resultMap="BaseSysTeamResult" parameterClass="java.lang.String">
+	Select * from SYS_TEAM where team_name = #teamName#
+    </select>
+       <!-- 根据userId获取成员数据 -->
+	<select id="getSysTeamByUserId" resultMap="BaseSysTeamResult" parameterClass="java.lang.Integer">
+	select st.* from sys_team st
+	left join sys_team_user stu on stu.team_id = st.team_id
+	where stu.user_id = #userId#
+    </select>
+	<select id="getSysTeamList" resultMap="BaseSysTeamResult">
+	    select * from sys_team
+	</select>
+</sqlMap>

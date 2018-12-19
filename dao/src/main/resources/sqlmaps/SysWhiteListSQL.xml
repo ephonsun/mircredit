@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysWhiteListSQL">
+	<typeAlias alias="SysWhiteList" type="com.banger.mobile.domain.model.sysWhiteList.SysWhiteList" />
+
+
+	<!-- 信息全字段 -->
+	<resultMap class="SysWhiteList" id="SysWhiteListResult">
+		<result column="WHITE_LIST_ID" property="whiteListId" />
+		<result column="WHITE_LIST_NAME" property="whiteListName" />
+		<result column="PHONE_NUMBER" property="phoneNo" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updDate" />
+	</resultMap>
+	
+	
+	<!-- OpeventLoginLogInfo信息全字段 -->
+	<resultMap class="OpeventLoginLogInfo" id="OpeventLoginLogInfoResult">
+		<result column="OPEVENT_DATE" property="opeventDate"/>
+		<result column="OPEVENT_OBJECT_NAME" property="opeventObj" />
+		<result column="OPEVENT_ACTION" property="opeventAction" />
+		<result column="USER_NAME" property="userName" />
+		<result column="CLIENT_TYPE_NAME" property="clientTypeName" />
+		<result column="OPEVENT_IP" property="opeventIp" />
+	</resultMap>
+	
+	<cacheModel id="sysWhiteCache" type="OSCACHE" serialize="true"
+		readOnly="true" >
+		<flushInterval hours="24" />
+		<flushOnExecute statement="insertSysWhiteList" />
+		<flushOnExecute statement="deleteSysWhiteList" />
+		<flushOnExecute statement="updateByImport" />
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	<!-- 增加一条白名单-->
+	<insert id="insertSysWhiteList" parameterClass="SysWhiteList">
+     <![CDATA[
+		insert into SYS_WHITE_LIST
+		(
+		 WHITE_LIST_ID,
+		 WHITE_LIST_NAME,
+		 PHONE_NUMBER,
+		 IS_DEL,
+		 CREATE_DATE,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#whiteListId#,
+		#whiteListName#,
+	    #phoneNo#,
+	    #isDel:INTEGER#,
+	    current timestamp,
+	    current timestamp
+		)
+      ]]>
+		<selectKey keyProperty="whiteListId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_WHITE_LIST 
+		</selectKey>
+	</insert>
+	
+  	<!-- 分页count -->
+  <select id="getWhiteListPageCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   SYS_WHITE_LIST
+             WHERE 
+        		   IS_DEL=0      
+     ]]>
+     <dynamic>
+     	<isNotEmpty prepend="and" property="whiteListName">
+			<![CDATA[WHITE_LIST_NAME like '%$whiteListName$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="phoneNo">
+			<![CDATA[PHONE_NUMBER like '%$phoneNo$%']]>
+		</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  	<!-- 分页 -->
+  <select id="getWhiteListPage" resultMap="SysWhiteListResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+			  WHITE_LIST_ID,
+		      WHITE_LIST_NAME,
+              PHONE_NUMBER,
+              IS_DEL,
+              CREATE_DATE,
+              UPDATE_DATE
+        from 
+            SYS_WHITE_LIST 
+        WHERE 
+        	IS_DEL=0    
+	]]>
+	<dynamic>
+     	<isNotEmpty prepend="and" property="whiteListName">
+			<![CDATA[WHITE_LIST_NAME like '%$whiteListName$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="phoneNo">
+			<![CDATA[PHONE_NUMBER like '%$phoneNo$%']]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  <!-- 删除 -->
+  <update id="deleteSysWhiteList" parameterClass="java.util.Map">
+		UPDATE 
+			SYS_WHITE_LIST 
+		SET 
+			IS_DEL = 1
+		where
+		<isNotEmpty property="id">
+		 	WHITE_LIST_ID =#id#
+		</isNotEmpty>
+		<isNotEmpty property="phoneNo">
+		 	PHONE_NUMBER =#phoneNo#
+		</isNotEmpty>
+	</update>
+	<!-- 更新 -->
+	<update id="updateSysWhiteList" parameterClass="SysWhiteList">
+		UPDATE 
+			SYS_WHITE_LIST 
+		SET 
+			WHITE_LIST_NAME=#whiteListName#,
+            PHONE_NUMBER=#phoneNo#,
+            UPDATE_DATE=#updDate#
+		where
+		 	WHITE_LIST_ID =#whiteListId#
+	</update>
+	<!--根据id查询  -->
+	<select id="getWhiteListById" resultMap="SysWhiteListResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from SYS_WHITE_LIST  where WHITE_LIST_ID = #whiteListId# and IS_DEL=0
+	]]>
+  	</select>
+  	<!--根据电话号码查询  -->
+  	<select id="queryByPhoneNo" resultMap="SysWhiteListResult" parameterClass="java.lang.String" cacheModel="sysWhiteCache" >
+	<![CDATA[
+		select * from SYS_WHITE_LIST  where PHONE_NUMBER in ('$phoneNo$') and IS_DEL=0
+	]]>
+  	</select>
+  	
+  	<!--得到所有白名单数据  -->
+  	<select id="queryByPhoneNoAll" resultMap="SysWhiteListResult" cacheModel="sysWhiteCache" >
+		<![CDATA[
+			select * from SYS_WHITE_LIST  where IS_DEL=0
+		]]>
+  	</select>
+  	
+  	<!-- 导入查询是否已存在 -->
+  	<select id="getWhiteListByObj" resultMap="SysWhiteListResult" parameterClass="java.util.Map">
+		<![CDATA[
+			select * from SYS_WHITE_LIST  where PHONE_NUMBER=#phoneNo# and IS_DEL=0
+		]]>
+		<isNotNull property="whiteListId" prepend="and">
+		 	WHITE_LIST_ID &lt;> #whiteListId#
+		</isNotNull>
+  	</select>
+	<update id="updateByImport" parameterClass="SysWhiteList">
+		UPDATE 
+			SYS_WHITE_LIST 
+		SET 
+			WHITE_LIST_NAME=#whiteListName#,
+			PHONE_NUMBER =#phoneNo#,
+            UPDATE_DATE=current timestamp
+		where
+		 	PHONE_NUMBER =#phoneNo# or PHONE_NUMBER =#isDel# <!-- 借助isdel属性存放另一个号码 -->
+	</update>
+</sqlMap>
+
+
+
+

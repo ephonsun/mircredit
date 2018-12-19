@@ -1,0 +1,1111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DeptSQL">
+	<typeAlias alias="SysDept" type="com.banger.mobile.domain.model.dept.SysDept" />
+	<typeAlias alias="DeptUserBean" type="com.banger.mobile.domain.model.dept.DeptUserBean" />
+	<typeAlias alias="cusBelongToBean" type="com.banger.mobile.domain.model.dept.CusBelongToBean" />
+	<typeAlias alias="UserOnlineBean" type="com.banger.mobile.domain.model.dept.UserOnlineBean" />
+	<typeAlias alias="UserSubordinateBean" type="com.banger.mobile.domain.model.dept.UserSubordinateBean" />
+	
+	<!-- 部门表-->
+	<!-- DeptSQL信息全字段 -->
+	<resultMap class="SysDept" id="SysDeptResult">
+		<result column="DEPT_ID" property="deptId" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="DEPT_PARENT_ID" property="deptParentId" />
+		<result column="DEPT_CODE" property="deptCode" />
+		<result column="DEPT_SEARCH_CODE" property="deptSearchCode" />
+		<result column="SORTNO" property="sortno" />
+		<result column="IS_LEAF" property="isLeaf" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- DeptUserBeanSQL信息部分字段 -->
+	<resultMap class="DeptUserBean" id="DeptUserListResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="USER_ID" property="userId" />
+		<result column="ROLE_NAME" property="roleNames" />
+		<result column="DEPT_NAME" property="deptName" />
+		
+	</resultMap>
+	<!-- DeptUserBeanSQL信息全字段 -->
+	<resultMap class="DeptUserBean" id="DeptUserBeanResult">
+		<result column="ACCOUNT" property="account" />
+		<result column="USER_NAME" property="userName" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_CODE" property="userCode" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="LAST_LOGIN_DATE" property="lastLoginDate"/>
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="STATE" property="state" />
+		<result column="FEISTATE" property="feiState"/>
+	</resultMap>
+	<!--  在线用户-->
+	<resultMap class="UserOnlineBean" id="UserOnlineBeanResult" extends="DeptUserBeanResult">
+		<result column="LOGINSTATE" property="loginState"/>
+	</resultMap>
+	<!--  下属用户-->
+	<resultMap class="UserSubordinateBean" id="UserSubordinateBeanResult" extends="DeptUserBeanResult">
+		<result column="ISCANCEL" property="isCancel"/>
+        <result column="ISOK" property="isOK"></result>
+	</resultMap>
+	
+	<!-- 组织机构及用户树 -->
+	<resultMap class="cusBelongToBean" id="cusBelongToBeanResult">
+		<result column="ID" property="id" />
+		<result column="PARENT_ID" property="parentId"/>
+		<result column="TEXT_NAME" property="textName"/>
+		<result column="TYPE" property="type" />
+		<result column="DEPT_NAME" property="deptName" />
+	</resultMap>
+	
+	<cacheModel type="OSCACHE" id="DeptSQL-Cache" serialize="true" readOnly="true">
+		<flushInterval hours="24"/>
+		<flushOnExecute statement="insertDept"/>
+		<flushOnExecute statement="updateDept"/>
+		<flushOnExecute statement="deleteDeptById"/>
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+	<select id="getAllDeptForCache" resultMap="SysDeptResult" cacheModel="DeptSQL-Cache">
+	  <![CDATA[
+	  	select * from SYS_DEPT 
+	  		where IS_DEL = 0 
+	  		order by DEPT_PARENT_ID,SORTNO
+	  ]]>
+	</select>
+	
+  	<!-- 显示用户分页 -->
+  <select id="getDeptUserList" resultMap="DeptUserBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+              u.USER_CODE,
+			  d.DEPT_NAME,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+          ]]>
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+            <isPropertyAvailable  property="roleMemberId">
+             left join SYS_WORK_DELEGATE e on e.DELEGATE_USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+        where u.IS_DEL = 0 and u.USER_ID != 1
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[u.USER_ID not in ($userId$)]]>
+		</isNotEmpty>
+         order by u.ACCOUNT 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  
+  
+  
+  
+  	<!-- 显示用户分页count -->
+  <select id="getDeptUserCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+        select 
+               count(*)
+        from 
+               SYS_USER u 
+               left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+        ]]>  
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+       	 where u.IS_DEL = 0 and u.USER_ID != 1
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[u.USER_ID not in ($userId$)]]>
+		</isNotEmpty>
+  </select>
+  
+   <!-- 查询包含下属部门的用户信息 -->
+  <select id="getDeptSubsUserList" resultMap="DeptUserBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+			  d.DEPT_NAME,
+			  u.USER_CODE,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+      ]]>  
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT 
+                 where IS_DEL = 0   
+        ]]>      
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptName">
+			<![CDATA[d.DEPT_NAME like '%$deptName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+         order by u.ACCOUNT 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  <select id="getDeptSubsUserCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+       select 
+             count(*)
+       from
+       SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+         ]]>  
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT 
+                 where IS_DEL = 0   
+        ]]>      
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptName">
+			<![CDATA[d.DEPT_NAME like '%$deptName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+  </select>
+  
+  
+  
+  	<!-- 显示下属用户分页 -->
+  <select id="getDeptSubordinateList" resultMap="UserSubordinateBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+              u.USER_CODE,
+			  d.DEPT_NAME,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE,
+             (case
+                when tl.update_date>(current date) then
+                1
+                else
+                0
+                end
+               ) as ISOK,
+              e.IS_CANCEL as ISCANCEL
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join TEAM_LOG tl on u.user_id=tl.user_id
+                ]]>
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+          <![CDATA[
+             left join (select * from SYS_WORK_DELEGATE where IS_CANCEL=1) e on e.DELEGATE_USER_ID=u.USER_ID
+        where u.IS_DEL = 0 and u.USER_ID != 1  
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+         order by u.ACCOUNT 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  
+  
+  
+  
+  	<!-- 显示下属用户分页count -->
+  <select id="getDeptSubordinateCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+        select 
+               count(*)
+        from 
+               SYS_USER u 
+               left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+                     ]]>  
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+               left join (select * from SYS_WORK_DELEGATE where IS_CANCEL=1) e on e.DELEGATE_USER_ID=u.USER_ID
+       	 where u.IS_DEL = 0 and u.USER_ID != 1
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+  </select>
+  
+   <!-- 查询包含下属部门的下属用户信息 -->
+  <select id="getDeptSubordinateUserList" resultMap="UserSubordinateBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+			  d.DEPT_NAME,
+			  u.USER_CODE,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+			  e.IS_CANCEL as ISCANCEL,
+			  (case
+                when tl.update_date>(current date) then
+                1
+                else
+                0
+                end
+               ) as ISOK,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join TEAM_LOG tl on u.user_id=tl.user_id
+                   ]]>  
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+             left join (select * from SYS_WORK_DELEGATE where IS_CANCEL=1) e on e.DELEGATE_USER_ID=u.USER_ID
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT 
+                 where IS_DEL = 0   
+        ]]>      
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+         order by u.ACCOUNT 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  <select id="getDeptSubordinateUserCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+       select 
+             count(*)
+       from
+       SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+      		 left join (select * from SYS_WORK_DELEGATE where IS_CANCEL=1) e on e.DELEGATE_USER_ID=u.USER_ID
+                  ]]>  
+           <isPropertyAvailable  property="roleId">
+             left join SYS_ROLE_MEMBER c on c.USER_ID=u.USER_ID
+           </isPropertyAvailable>
+    <![CDATA[
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT 
+                 where IS_DEL = 0   
+        ]]>      
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[c.ROLE_ID = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleMemberId">
+			<![CDATA[u.USER_ID not in (select USER_ID from SYS_ROLE_MEMBER where ROLE_ID=2)]]>
+		</isNotEmpty>
+  </select>
+  
+  <!-- 在线用户分页 -->
+  <select id="getUserOnlineList" resultMap="UserOnlineBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+              u.USER_CODE,
+			  d.DEPT_NAME,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE,
+             (CASE WHEN f.ONLINE_STATUS_ID=1 THEN '在线'  WHEN  f.ONLINE_STATUS_ID=2 THEN '离开' ELSE  '离线' END) as LOGINSTATE 
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join SYS_USER_ONLINE f on f.USER_ID=u.USER_ID
+        	 where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1  and u.IS_ACTIVED=1
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[f.ONLINE_STATUS_ID = #onlineStatusId#]]>
+		</isNotEmpty>
+         order by f.ONLINE_STATUS_ID, u.USER_NAME 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  
+  <!-- 查询包含下属部门的在线用户信息 -->
+  <select id="getSubsUserOnlineList" resultMap="UserOnlineBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+
+			select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+              u.USER_CODE,
+			  d.DEPT_NAME,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE,
+             (CASE WHEN f.ONLINE_STATUS_ID=1 THEN '在线'  WHEN  f.ONLINE_STATUS_ID=2 THEN '离开' ELSE  '离线' END) as LOGINSTATE 
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join SYS_USER_ONLINE f on f.USER_ID=u.USER_ID
+
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.IS_ACTIVED=1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT 
+        where IS_DEL = 0   
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[f.ONLINE_STATUS_ID = #onlineStatusId#]]>
+		</isNotEmpty>
+         order by f.ONLINE_STATUS_ID 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <select id="getSubsUserOnlineCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+        select 
+             count(*)
+        from
+	         SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join SYS_USER_ONLINE f on f.USER_ID=u.USER_ID
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.IS_ACTIVED=1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT  where IS_DEL = 0   
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[f.ONLINE_STATUS_ID = #onlineStatusId#]]>
+		</isNotEmpty>
+  </select>
+  
+  <!--取出包含下属部门的在线用户查询时，在线，离线，离开的用户数 -->
+  <select id="getSubsUserOnlineOffline" resultMap="UserOnlineBeanResult"
+		parameterClass="java.util.Map">
+        select 
+             u.ACCOUNT,
+              u.USER_NAME,
+              u.USER_CODE,
+			  d.DEPT_NAME,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE,
+             (CASE WHEN f.ONLINE_STATUS_ID=1 THEN '在线'  WHEN  f.ONLINE_STATUS_ID=2 THEN '离开' ELSE  '离线' END) as LOGINSTATE 
+        from
+	         SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join SYS_USER_ONLINE f on f.USER_ID=u.USER_ID
+        where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.IS_ACTIVED=1 and u.DEPT_ID in (select DEPT_ID from SYS_DEPT  where IS_DEL = 0   
+           <isPropertyAvailable prepend="and" property="searchMany">
+           		$searchMany$
+           </isPropertyAvailable>
+           <isNotPropertyAvailable prepend="and" property="searchMany">
+           		DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+           </isNotPropertyAvailable>
+        )
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isActived">
+			<![CDATA[u.IS_ACTIVED = #isActived#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[f.ONLINE_STATUS_ID = #onlineStatusId#]]>
+		</isNotEmpty>
+  </select>
+   <!-- 在线查询时，在线，离线，离开的用户数 -->
+  <select id="getUserOnlineOffline" resultMap="UserOnlineBeanResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select 
+		      u.ACCOUNT,
+              u.USER_NAME,
+              u.USER_CODE,
+			  d.DEPT_NAME,
+			  u.USER_ID,
+			  u.IS_ACTIVED,
+			  u.LAST_LOGIN_DATE,
+             (CASE u.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE,
+             (CASE u.IS_ACTIVED WHEN 0 THEN '启用' ELSE '停用' END) as FEISTATE,
+             (CASE WHEN f.ONLINE_STATUS_ID=1 THEN '在线'  WHEN  f.ONLINE_STATUS_ID=2 THEN '离开' ELSE  '离线' END) as LOGINSTATE 
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join SYS_USER_ONLINE f on f.USER_ID=u.USER_ID
+        	 where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1  and u.IS_ACTIVED=1
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[f.ONLINE_STATUS_ID = #onlineStatusId#]]>
+		</isNotEmpty>
+         order by f.ONLINE_STATUS_ID 
+  </select>
+  
+  
+  
+  	<!-- 在线用户显示用户分页count -->
+  <select id="getUserOnlineCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+        select 
+               count(*)
+        from 
+             SYS_USER u 
+             left join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+             left join SYS_USER_ONLINE f on f.USER_ID=u.USER_ID
+        	 where u.IS_DEL = 0 and u.IS_ACTIVED =1 and u.USER_ID != 1 and u.IS_ACTIVED=1
+	]]>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[u.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="account">
+			<![CDATA[u.ACCOUNT like '%$account$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[u.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[f.ONLINE_STATUS_ID = #onlineStatusId#]]>
+		</isNotEmpty>
+  </select>
+ 
+  
+  
+    <!-- 查询本部门及下属部门用户ID-->
+    <select id="getUserDel" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+    <![CDATA[
+    	select USER_ID from SYS_USER 
+    	  where DEPT_ID in  (
+    	  	select DEPT_ID from SYS_DEPT where DEPT_SEARCH_CODE like '$deptSearchCode$%' and IS_DEL = 0
+    	  ) and IS_DEL = 0
+    ]]>	
+    </select>
+    
+    
+    
+    <!-- 以下是SYS_DEPT sql语句 -->
+    
+	<!-- 查找本部门及下属部门 -->
+	<select id="getDeptAndSubs" parameterClass="java.lang.String" resultMap="SysDeptResult">
+	 <![CDATA[
+    	  select * from SYS_DEPT 
+    	    where DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+    	      and IS_DEL = 0
+    ]]>	
+	</select>
+  <!-- 查找下属部门不包括自己 -->
+  <select id="getSubDepts" parameterClass="java.util.Map" resultMap="SysDeptResult">
+   <![CDATA[
+    	  select * from SYS_DEPT 
+    	    where DEPT_SEARCH_CODE like '$deptSearchCode$%' 
+    	      and DEPT_ID != #deptId#
+    	       and IS_DEL = 0
+    ]]>	
+  </select>
+  
+   <!-- 新增一个部门 -->
+  <insert id="insertDept" parameterClass="SysDept">
+ 	<![CDATA[
+ 		insert into SYS_DEPT
+ 		(
+ 			DEPT_ID,
+			DEPT_NAME,
+			DEPT_PARENT_ID,
+			DEPT_CODE,
+			DEPT_SEARCH_CODE,
+			SORTNO,
+			IS_LEAF,
+			REMARK,
+			CREATE_DATE,
+			CREATE_USER,
+			IS_DEL
+ 		)
+ 		values
+ 		(
+ 			#deptId#,
+			#deptName#,
+			#deptParentId#,
+			#deptCode#,
+			#deptSearchCode#,
+			#sortno#,
+			#isLeaf#,
+			#remark#,
+			current timestamp,
+			#createUser#,
+			#isDel#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="deptId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_SYS_USER
+ 	</selectKey>
+  </insert>
+  <!-- 修改机构信息 -->
+  <update id="updateDept" parameterClass="SysDept">
+  <![CDATA[
+  	update SYS_DEPT d
+  		set 
+  			d.DEPT_NAME = #deptName#,
+  			d.DEPT_PARENT_ID = #deptParentId#,
+  			d.DEPT_CODE = #deptCode#,
+  			d.DEPT_SEARCH_CODE = #deptSearchCode#,
+  			d.SORTNO = #sortno#,
+  			d.IS_LEAF = #isLeaf#,
+  			d.REMARK = #remark#,
+  			d.UPDATE_DATE = current timestamp,
+  			d.UPDATE_USER = #updateUser#,
+  			d.IS_DEL = #isDel#
+  		where 
+  			d.DEPT_ID = #deptId#
+  	]]>
+  </update>
+  <!-- 根据id查询机构信息 -->
+  <select id="getDeptById" parameterClass="java.lang.Integer"  resultMap="SysDeptResult">
+  	<![CDATA[
+  		select * from SYS_DEPT where DEPT_ID = #deptId#
+  	]]>
+  </select>
+  <!-- 根据id删除机构 -->
+  <delete id="deleteDeptById" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_DEPT where DEPT_ID = #deptId#
+  	]]>
+  </delete>
+  <!-- 查询所有机构 -->
+  <select id="getAllDepts" resultMap="SysDeptResult">
+  	<![CDATA[
+  		select * from SYS_DEPT 
+  		where IS_DEL = 0 
+  		order by DEPT_PARENT_ID,SORTNO
+  	]]>
+  </select>
+  <!-- 查找一级子部门集合 -->
+  <select id="getChildDept" parameterClass="java.lang.Integer"  resultMap="SysDeptResult">
+  	<![CDATA[
+  		 select * from SYS_DEPT  
+  		    where DEPT_PARENT_ID = #deptParentId# 
+  		       and IS_DEL =0 
+  		           order by DEPT_SEARCH_CODE desc
+  	]]>
+ 
+  </select>
+    <!-- 查找一级子部门集合sortno -->
+  <select id="getChildDeptSortno" parameterClass="java.lang.Integer"  resultMap="SysDeptResult">
+  	<![CDATA[
+  		 select * from SYS_DEPT  
+  		    where DEPT_PARENT_ID = #deptParentId# 
+  		       and IS_DEL =0 
+  		           order by SORTNO
+  	]]>
+ 
+  </select>
+  <!-- 根据deptName查询部门 -->
+  <select id="getDeptByName" parameterClass="java.lang.String"  resultMap="SysDeptResult">
+  <![CDATA[
+  		 select * from SYS_DEPT  
+  		    where DEPT_NAME = #deptName#  and IS_DEL =0 
+  	]]>
+  </select>
+   <!-- 归属本部门及下属部门 -->
+  <select id="getSubListDept" resultMap="SysDeptResult" parameterClass="java.util.Map"> 
+  	<![CDATA[
+  		 select * from SYS_DEPT 
+  		 	where DEPT_SEARCH_CODE like '$deptSearchCode$%'
+	     	and DEPT_ID = #deptParentId#
+	 	 	and IS_DEL = 0
+  	]]>
+  </select>
+  
+  <!-- 查找兄弟部门除自己 -->
+  <select id="getBrotherDept" resultMap="SysDeptResult" parameterClass="java.util.Map">
+  <![CDATA[
+  	select * from SYS_DEPT 
+  		 where DEPT_PARENT_ID = #deptParentId#
+	     and DEPT_ID != #deptId#
+	 	 and IS_DEL = 0 
+	]]>	
+  </select>
+ <!-- 部门名称唯一性验证 -->
+ <select id="deptNameIsExist" resultMap="SysDeptResult" parameterClass="java.util.Map">
+ <![CDATA[
+ 	select * from SYS_DEPT 
+ 		where IS_DEL = 0 and DEPT_NAME = #deptName# and DEPT_PARENT_ID = #deptParentId#
+  ]]>
+ 	<isNotEmpty prepend="and" property="deptId">
+		<![CDATA[DEPT_ID != #deptId#]]>
+	</isNotEmpty>
+ </select>
+ <!-- 部门编码唯一性验证 -->
+ <select id="deptCodeIsExist" resultMap="SysDeptResult" parameterClass="java.util.Map">
+ <![CDATA[
+ 	select * from SYS_DEPT 
+ 		where IS_DEL = 0 and DEPT_CODE = #deptCode# 
+  ]]>
+ 	<isNotEmpty prepend="and" property="deptId">
+		<![CDATA[DEPT_ID != #deptId#]]>
+	</isNotEmpty>
+ </select>
+
+  <!-- 查询所管理的机构树 -->
+  <select id="getInCharegeDeptTree" resultMap="SysDeptResult" parameterClass="java.lang.String">
+  <![CDATA[
+  	select * from SYS_DEPT 
+  		where IS_DEL = 0 and  $value$
+  		order by DEPT_PARENT_ID,SORTNO
+  ]]>
+  </select>
+  <!-- 查询所管理的机构树（不包含没有人员的机构） -->
+  <select id="getInCharegeDeptListFilter" resultMap="SysDeptResult" parameterClass="java.lang.String">
+  <![CDATA[
+  	select * from SYS_DEPT 
+  		where IS_DEL = 0 and  $value$
+  		and DEPT_ID in(select distinct DEPT_ID from SYS_USER where IS_DEL = 0 and  IS_ACTIVED=1)
+  		order by DEPT_PARENT_ID,SORTNO
+  ]]>
+  </select>
+  
+ <!-- 查询管理的根机构serachKey -->
+	<!-- 		where DEPT_ID in (select DEPT_ID from SYS_DEPT_AUTH where USER_ID = #userId# and ROLE_ID=#roleId#)-->
+	<select id="getInCharegeSearchKey" resultClass="java.lang.String" parameterClass="java.util.Map">
+   <![CDATA[
+  	select DEPT_SEARCH_CODE from SYS_DEPT 
+  		where DEPT_ID in (select DEPT_ID from SYS_USER where USER_ID = #userId# )
+  		and IS_DEL = 0
+   ]]>
+  </select>
+
+  
+ <!-- 查询负责的所在机构及下属机构          人员和机构          集合 -->  
+  <select id="getInChargeUserAndDept" resultMap="cusBelongToBeanResult" parameterClass="java.util.Map">
+  
+			with deptUsertree (ID,PARENT_ID,TEXT_NAME,TYPE, DEPT_NAME) as 
+			(
+			    select ID,PARENT_ID,TEXT_NAME,TYPE, DEPT_NAME from 
+                            (
+                                SELECT A.USER_ID AS ID,A.DEPT_ID AS PARENT_ID,A.USER_NAME AS TEXT_NAME,'U' AS TYPE, B.DEPT_NAME FROM SYS_USER A 
+                                left join SYS_DEPT B on A.DEPT_ID = B.DEPT_ID
+                                where A.USER_ID !=1 AND A.IS_DEL=0 AND A.IS_ACTIVED=1 and
+                                    A.USER_ID  in( select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+                                                     where b.ROLE_ID in (3,4))           
+                                UNION ALL    
+                                SELECT DEPT_ID,DEPT_PARENT_ID,DEPT_NAME,'D' AS TYPE, DEPT_NAME FROM SYS_DEPT 
+                                where IS_DEL=0                         
+                                
+                           <isPropertyAvailable prepend="and" property="searchKey">
+           						 DEPT_ID IN(select distinct DEPT_ID from SYS_USER where DEPT_ID IN (select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$) and s2.IS_DEL=0) 
+											and IS_DEL = 0 and IS_ACTIVED=1
+											union
+											select distinct DEPT_PARENT_ID from SYS_DEPT where  DEPT_ID IN (
+ 												select distinct DEPT_ID from SYS_USER where DEPT_ID IN (select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$) and s2.IS_DEL=0) 
+												and IS_DEL = 0 and IS_ACTIVED=1)
+											) 
+           					</isPropertyAvailable>     
+                                
+                                order by ID asc
+                             ) 
+                            as DD  
+			    where DD.ID in ($deptId$)
+			    union all 
+			    select  child.ID,child.PARENT_ID,child.TEXT_NAME,child.TYPE, child.DEPT_NAME from deptUsertree parent,
+			     (
+                                SELECT A.USER_ID AS ID,A.DEPT_ID AS PARENT_ID,A.USER_NAME AS TEXT_NAME,'U' AS TYPE, B.DEPT_NAME FROM SYS_USER A 
+                                left join SYS_DEPT B on A.DEPT_ID = B.DEPT_ID
+                                where A.USER_ID !=1 AND A.IS_DEL=0 AND A.IS_ACTIVED=1  and
+                                    A.USER_ID  in( select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+                                                     where b.ROLE_ID in (3,4))          
+                                UNION ALL    
+                                SELECT DEPT_ID,DEPT_PARENT_ID,DEPT_NAME,'D' AS TYPE, DEPT_NAME FROM SYS_DEPT 
+                                where IS_DEL=0  
+	                        <isPropertyAvailable prepend="and" property="searchKey">
+	           						 DEPT_ID IN(select distinct DEPT_ID from SYS_USER where DEPT_ID IN (select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$) and s2.IS_DEL=0) 
+												and IS_DEL = 0 and IS_ACTIVED=1
+												union
+												select distinct DEPT_PARENT_ID from SYS_DEPT where  DEPT_ID IN (
+	 												select distinct DEPT_ID from SYS_USER where DEPT_ID IN (select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$) and s2.IS_DEL=0) 
+													and IS_DEL = 0 and IS_ACTIVED=1)
+												) 
+	           				</isPropertyAvailable>     
+                                order by ID asc
+                            ) 
+                            as child 
+                            where parent.ID=child.PARENT_ID
+			)
+			select distinct* from deptUsertree order by TYPE asc
+		
+  </select>
+  
+  <!-- 查询同级机构及上级机构集合(业务主管)短信彩信审核人 -->
+  <select id="getExamineDeptList" resultMap="SysDeptResult" parameterClass="java.lang.Integer">
+  	 <![CDATA[
+  	 	select * from SYS_DEPT d where IS_DEL=0 and(DEPT_PARENT_ID =#deptParentId# or DEPT_ID = #deptParentId#)
+  	 	       and DEPT_ID in (select distinct DEPT_ID from SYS_DEPT_AUTH where ROLE_ID = 3)
+  	 	       and 
+				(select count(1) from SYS_USER u left join SYS_ROLE_MEMBER r on r.USER_ID = u.USER_ID
+				 	where u.IS_DEL=0 and u.IS_ACTIVED=1 and u.DEPT_ID =d.DEPT_ID and r.ROLE_ID = 3)>0
+  	 	 order by DEPT_PARENT_ID,SORTNO
+  	 ]]>
+  </select>
+   <!-- 查询同级机构及上级机构集合(客户经理) 短信彩信审核人 -->
+  <select id="getExamineCommonList" resultMap="SysDeptResult" parameterClass="java.lang.String">
+   <![CDATA[
+   		select * from SYS_DEPT d where DEPT_SEARCH_CODE = $deptSearchCode$ and IS_DEL = 0
+   			and DEPT_ID in (select distinct DEPT_ID from SYS_DEPT_AUTH where ROLE_ID = 3)
+   			and 
+				(select count(1) from SYS_USER u left join SYS_ROLE_MEMBER r on r.USER_ID = u.USER_ID
+					where u.IS_DEL=0 and u.IS_ACTIVED=1 and u.DEPT_ID =d.DEPT_ID and r.ROLE_ID = 3)>0
+   ]]>
+  </select>
+  
+   <!-- 根据deptIds查询机构serachKey -->
+  <select id="getDeptSearchKeyByIds" resultClass="java.lang.String" parameterClass="java.lang.String">
+   <![CDATA[
+  	select DEPT_SEARCH_CODE from SYS_DEPT where IS_DEL = 0 and DEPT_ID in ($value$)
+   ]]>
+  </select>
+  
+  <!-- 查询归属机构的客户 -->
+  <select id="getBelongCustomerCount" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+   <![CDATA[
+   		select count(*) from CRM_CUSTOMER where  BELONG_USER_ID = 0 and BELONG_DEPT_ID in ($value$) 
+   ]]>
+  </select>
+  <!-- 根据deptSearchCode查询机构名称 -->
+  <select id="getDeptNameByDeptSearchCode" resultClass="java.lang.String" parameterClass="java.lang.String">
+   <![CDATA[
+   		select DEPT_NAME from SYS_DEPT where DEPT_SEARCH_CODE in ($deptSearchCode$) and IS_DEL = 0
+   ]]>
+  </select>
+  
+  <!-- 根据deptIds查询实体集合 -->
+  <select id="getDeptsByDeptIds" resultMap="SysDeptResult" parameterClass="java.lang.String">
+  <![CDATA[
+   		select * from SYS_DEPT where DEPT_ID in ($deptIds$) and IS_DEL = 0
+   ]]>
+  </select>
+
+ 	<!-- 查询营销人员机构树 -->
+ 	<select id="getCounterUserDeptList" resultMap="SysDeptResult">
+		 <![CDATA[
+		 	select * from SYS_DEPT   where IS_DEL = 0 and DEPT_ID in (
+			    select distinct DEPT_ID from SYS_USER where IS_DEL = 0 and  IS_ACTIVED=1
+			    union
+			    select distinct DEPT_ID from CRM_COUNTER_USER 
+			) order by DEPT_PARENT_ID,SORTNO
+		 ]]>
+	</select>
+
+	<!-- 客户经理所管理的柜台人员 -->
+	<select id="getCounterUserBelongCommon" resultClass="java.lang.Integer" parameterClass="java.lang.Integer">
+		 <![CDATA[
+		 	select c.COUNTER_USER_ID from CRM_COUNTER_USER c where c.USER_ID=#userId#
+		 ]]>
+	</select>
+	<!-- 业务经理所管理的柜台人员 -->
+	<select id="getCounterUserBelongManager" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+		 <![CDATA[
+		 	select c.COUNTER_USER_ID from CRM_COUNTER_USER c where  c.DEPT_ID in ($value$)
+		 ]]>
+	</select>
+	<!-- 查询所管理的用户id (包含删除和停用)-->
+	<select id="getUserIdsBelongToManager" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+		<![CDATA[
+			select USER_ID from SYS_USER where DEPT_ID in($value$)
+		]]>
+	</select>
+	
+	  <!-- 查询用户部门角色信息 -->
+  <select id="getUserDept" resultMap="DeptUserListResult" parameterClass="java.lang.String">
+  <![CDATA[
+  	select su.user_id,su.user_name,sd.dept_name,sr.role_name 
+  	from sys_user su , sys_dept sd ,sys_role sr , sys_role_member srm 
+	where su.dept_id = sd.dept_id and su.user_id = srm.user_id 
+	and srm.role_id = sr.role_id and su.user_id in($value$)
+  ]]>
+  </select>
+</sqlMap>

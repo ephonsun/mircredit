@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DataPhotoSQL">
+	<typeAlias alias="BaseDatPhoto" type="com.banger.mobile.domain.model.base.data.BaseDatPhoto" />
+	<typeAlias alias="Photo" type="com.banger.mobile.domain.model.data.Photo" />
+
+    <resultMap class="Photo" id="PhotoResultBase">
+		<result column="PHOTO_ID" property="photoId" />
+		<result column="CUSTOMER_DATA_ID" property="customerDataId" />
+		<result column="PHOTO_NAME" property="photoName" />
+        <result column="PHOTO_TYPE_ID" property="photoTypeId" />
+        <result column="RECORD_DATE" property="recordDate" />
+		<result column="REMARK" property="remark" />
+		<result column="FILE_ID" property="fileId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="DAT_UUID" property="datUuid" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+        <result column="GPS_LNG" property="gpsLng" />
+        <result column="GPS_LAT" property="gpsLat"/>
+	</resultMap>
+	
+	<resultMap class="Photo" id="PhotoResult" extends="PhotoResultBase">
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="UPLOAD_USER_ID" property="uploadUserId" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="UPLOAD_USER_NAME" property="uploadUserName" />
+		<result column="NUMROW" property="numRow" />
+		<result column="EVENT_NAME" property="eventName" />
+	</resultMap>
+	<resultMap class="Photo" id="PhotoResult1" extends="PhotoResult">
+		<result column="photo_Type_Name" property="photoTypeName" />
+	</resultMap>
+	
+	<resultMap class="Photo" id="PhotoListResult">
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="file_id" property="fileId" />
+		<result column="photo_name" property="fileName" />
+		<result column="UPLOAD_USER_NAME" property="uploadUserName" />
+		<result column="REMARK" property="remark" />
+		<result column="photo_id" property="photoId" />
+		<result column="PHOTO_TYPE_ID" property="photoTypeId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+	</resultMap>
+	  <resultMap class="Photo" id="PhotoTypeResult">
+		<result column="PHOTO_TYPE_ID" property="photoTypeId" />
+		<result column="PHOTO_TYPE_NAME" property="photoTypeName" />
+		<result column="PHOTO_COUNT" property="photoCount" />
+	</resultMap>
+	<!-- 插入 -->
+	<insert id="addNewPhoto" parameterClass="Photo">
+		<![CDATA[
+	 	INSERT INTO DAT_PHOTO
+		    (
+		        PHOTO_ID,
+				CUSTOMER_DATA_ID,
+				PHOTO_NAME,
+				PHOTO_TYPE_ID,
+				RECORD_DATE,
+				REMARK,
+		        FILE_ID,
+		        DAT_UUID,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER,
+		        GPS_LNG,
+		        GPS_LAT
+		    )
+			VALUES
+		    (	
+		        #photoId#,
+				#customerDataId:INTEGER#,
+				#photoName:VARCHAR:NULL#,
+				#photoTypeId:INTEGER#,
+				#recordDate:TIMESTAMP#,
+				#remark:VARCHAR:NULL#,
+				#fileId:INTEGER#,
+				#datUuid:VARCHAR:NULL#,
+				0,
+				#createDate:TIMESTAMP#,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#,
+				#gpsLng:varchar:NULL#,
+				#gpsLat:varchar:NULL#
+		    )
+      ]]>
+		<selectKey keyProperty="photoId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_DAT_PHOTO
+		</selectKey>
+	</insert>
+	<!--根据贷款id查找图片类型数量  -->
+	  <select id="getPhotoTypeMenu" resultMap="PhotoTypeResult" parameterClass="java.util.HashMap" >
+	  	select dpt.PHOTO_TYPE_ID,dpt.PHOTO_TYPE_NAME,
+		(select count(dp.PHOTO_ID) from dat_photo dp ,dat_customer_data dcd where dp.PHOTO_TYPE_ID = dpt.PHOTO_TYPE_ID and dcd.CUSTOMER_DATA_ID = dp.CUSTOMER_DATA_ID and dcd.event_id =#eventId# and dcd.loan_id=#loanId# and dp.IS_DEL = 0) PHOTO_COUNT
+		from  dat_photo_type dpt
+	  </select> 
+	  <!--根据贷款id查找图片  -->
+	  <select id="getPhotoListInfo" resultMap="PhotoListResult" parameterClass="java.util.HashMap" >
+	  	<![CDATA[
+	  	select dcd.CUSTOMER_ID,dp.photo_id,dp.PHOTO_TYPE_ID,suf.file_id, dp.photo_name,su.user_name UPLOAD_USER_NAME,suf.UPLOAD_DATE,dp.REMARK from sys_upload_file suf 
+		left join dat_photo dp on dp.FILE_ID =suf.FILE_ID 
+		left join dat_customer_data dcd on dcd.CUSTOMER_DATA_ID = dp.CUSTOMER_DATA_ID
+		left join sys_user su on su.USER_ID = suf.UPLOAD_USER_ID
+		where dcd.loan_id=#loanId# and dcd.event_id =#eventId# and PHOTO_TYPE_ID=#photoTypeId# and dp.IS_DEL = 0
+		ORDER BY dp.CREATE_DATE DESC
+		
+	  	]]>
+	  </select> 
+	  <!--批量图片归类-->
+	    <update id="updatePhotoType" parameterClass="java.util.Map">
+	        update dat_photo set photo_type_id=#photoTypeId#
+	        where photo_id IN ($photoIds$)
+	    </update>
+  <!--根据id查找照片信息  -->
+  <select id="getPhotoById" resultMap="PhotoResult" parameterClass="java.lang.Integer" >
+  	<![CDATA[
+  		select d.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,s.USER_NAME as UPLOAD_USER_NAME,1 as NUMROW,'' as EVENT_NAME from DAT_PHOTO d 
+		LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+		left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID
+  		where d.IS_DEL = 0 AND d.PHOTO_ID = #photoId#
+  	]]>
+  </select>
+	<select id="getPhotoByTypeId" resultMap="PhotoResultBase" parameterClass="java.util.Map" >
+  		select * from dat_photo where CUSTOMER_DATA_ID=#customerId#
+		<isNotEmpty property="typeId" prepend="AND">
+			PHOTO_TYPE_ID = #typeId#
+		</isNotEmpty>
+	</select>
+	<select id="getPhotoByPhotoId" resultMap="PhotoResultBase" parameterClass="java.lang.Integer">
+		select * from dat_photo where PHOTO_ID=#photoId#
+	</select>
+
+
+
+	<!-- 根据 搜索条件 查找照片资料  -->
+  <select id="queryPhotoData" resultMap="PhotoResult" parameterClass="java.util.HashMap">
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+	         </isNotEmpty>
+	</isNotEmpty>
+  		<![CDATA[
+  		select d.* ,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,s.USER_NAME as UPLOAD_USER_NAME,'' as EVENT_NAME from DAT_PHOTO d
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+  		left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID 
+  		where d.IS_DEL = 0
+  		]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId" >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	<!--TODO customerDataId和 （loanId 或eventId）都为空时  -->
+  	<isNotEmpty property="photoName" prepend="and">
+  		<![CDATA[d.PHOTO_NAME like '%$photoName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.RECORD_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.RECORD_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="photoUploadDateFrom" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE >= #photoUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="photoUploadDateTo" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE <= #photoUploadDateTo#]]>
+  	</isNotEmpty>
+  	
+  	
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+	        </isNotEmpty>
+	</isNotEmpty>
+  </select>
+  
+  <!-- 根据 搜索条件 查找照片资料   求和-->
+  <select id="queryPhotoDataCount" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+  	
+  	<![CDATA[
+  		select count(*)  from DAT_PHOTO d
+			LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+			left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID 
+			where d.IS_DEL = 0
+  	]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[d.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId"  >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					d.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	
+  	<isNotEmpty property="photoName" prepend="and">
+  		<![CDATA[d.PHOTO_NAME like '%$photoName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.RECORD_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.RECORD_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="photoUploadDateFrom" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE >= #photoUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="photoUploadDateTo" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE <= #photoUploadDateTo#]]>
+  	</isNotEmpty>
+  </select >
+ 
+  
+  <!-- 根据录音id查找旧的备注 -->
+  <select id="getPhotoRemark" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+  		<![CDATA[
+  			select REMARK 
+  			from DAT_PHOTO d
+  			where d.PHOTO_ID = #photoId# 
+  		]]>
+  </select>
+  
+  
+  
+  <!-- 修改照片备注信息 -->
+  <update id="updatePhotoRemark" parameterClass="Photo" >
+      update DAT_PHOTO d
+      set PHOTO_ID=PHOTO_ID
+      <isNotNull property="remark" prepend=",">
+          REMARK = #remark#
+      </isNotNull>
+      <isNotNull property="photoTypeId" prepend=",">
+          PHOTO_TYPE_ID = #photoTypeId#
+      </isNotNull>
+      <isNotNull property="photoName" prepend=",">
+          PHOTO_NAME = #photoName#
+      </isNotNull>
+      where 1=1
+      <isNotEmpty property="photoId" prepend="and">
+        PHOTO_ID = #photoId#
+      </isNotEmpty>
+      <isNotEmpty property="datUuid" prepend="and">
+        DAT_UUID = #datUuid#
+      </isNotEmpty>
+  </update>
+
+    <!-- 修改照片全字段 -->
+    <update id="updatePhoto" parameterClass="Photo" >
+  		<![CDATA[
+  			update SYS_UPLOAD_FILE
+			set UPLOAD_USER_ID = #uploadUserId:INTEGER#,
+  			UPLOAD_DATE = #uploadDate:TIMESTAMP#,
+  			FILE_NAME = #fileName:VARCHAR:NULL#,
+  			FILE_PATH = #filePath:VARCHAR:NULL#
+			where FILE_ID = (SELECT FILE_ID FROM DAT_PHOTO WHERE PHOTO_ID = #photoId#)
+  		]]>
+  </update>
+  
+  <!-- 以下为新资料管理功能 -->
+  
+	<!--查看客户照片列表分页数据（总数） -->
+	<select id="getCustomerPhotoDataCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[		
+			SELECT COUNT(1)
+			    FROM DAT_PHOTO a 
+			    LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+			    LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			    LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+			    LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+			    WHERE a.IS_DEL = 0
+		]]>
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.PHOTO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+			
+            <!-- add by yuan -->
+            <isNotEmpty property="customerDataId" prepend="AND">
+                <![CDATA[ a.CUSTOMER_DATA_ID = #customerDataId#]]>
+            </isNotEmpty>
+            <isNotEmpty property="photoTypeId" prepend="AND">
+                <![CDATA[ a.PHOTO_TYPE_ID = #photoTypeId#]]>
+            </isNotEmpty>
+	</select>
+
+	<!--查看客户照片列表分页数据（分页） -->
+	<select id="getCustomerPhotoDataPage" resultMap="PhotoResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,c.USER_NAME as UPLOAD_USER_NAME,0 as NUMROW1,d.EVENT_NAME
+			FROM DAT_PHOTO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+			WHERE a.IS_DEL = 0
+		]]>
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.PHOTO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+
+            <!-- add by yuan -->
+            <isNotEmpty property="customerDataId" prepend="AND">
+                <![CDATA[ a.CUSTOMER_DATA_ID = #customerDataId#]]>
+            </isNotEmpty>
+            <isNotEmpty property="photoTypeId" prepend="AND">
+                <![CDATA[ a.PHOTO_TYPE_ID = #photoTypeId#]]>
+            </isNotEmpty>
+		ORDER BY suf.UPLOAD_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据numrow 及条件查询照片信息 -->
+	<select id="getPhotoByNumRow" resultMap="PhotoResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM (SELECT rownumber() over() AS NUMROW1, g.* from   (
+		<![CDATA[
+			SELECT a.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,c.USER_NAME as UPLOAD_USER_NAME,0 as NUMROW,'' as EVENT_NAME
+			FROM DAT_PHOTO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+			WHERE a.IS_DEL = 0
+		]]>
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.PHOTO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		ORDER BY suf.UPLOAD_DATE DESC
+		 ) g ) tmp 
+		<isNotEmpty property="numRow">
+			<![CDATA[ where tmp.NUMROW1 = #numRow#
+        	]]>
+		</isNotEmpty>
+	</select>
+
+    <select id="getPhotoDataByUUID" resultMap="PhotoResultBase" parameterClass="Photo">
+         select * from DAT_PHOTO
+         where IS_DEL = 0 AND CUSTOMER_DATA_ID in
+         (select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where LOAN_ID in
+            (select LOAN_ID from DAT_CUSTOMER_DATA where CUSTOMER_DATA_ID = #customerDataId#)
+         )
+         and DAT_UUID = #datUuid#
+    </select>
+
+    <select id="getPhotoByUUID" resultMap="PhotoResultBase" parameterClass="Photo">
+         select * from DAT_PHOTO
+         where DAT_UUID = #datUuid# fetch first 1 row only
+    </select>
+
+    <!--查看客户照片列表数据（非分页） -->
+    <select id="getCustomerPhotoData" resultMap="PhotoResult"
+            parameterClass="java.util.Map">
+        <![CDATA[
+			SELECT a.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,c.USER_NAME as UPLOAD_USER_NAME,0 as NUMROW,'' as EVENT_NAME
+			FROM DAT_PHOTO a
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+			WHERE a.IS_DEL = 0
+		]]>
+            <isNotEmpty property="customerId" prepend="AND">
+                <![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+            </isNotEmpty>
+            <isNotEmpty property="eventId" prepend="AND">
+                <![CDATA[ b.EVENT_ID = $eventId$]]>
+            </isNotEmpty>
+            <isNotEmpty property="dataName" prepend="AND">
+                <![CDATA[ a.PHOTO_NAME Like '%$dataName$%']]>
+            </isNotEmpty>
+            <isNotEmpty property="createStartDate" prepend="AND">
+                <![CDATA[ a.CREATE_DATE >='$createStartDate$']]>
+            </isNotEmpty>
+            <isNotEmpty property="createEndDate" prepend="AND">
+                <![CDATA[ a.CREATE_DATE <='$createEndDate$']]>
+            </isNotEmpty>
+            <isNotEmpty property="uploadStartDate" prepend="AND">
+                <![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+            </isNotEmpty>
+            <isNotEmpty property="uploadEndDate" prepend="AND">
+                <![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+            </isNotEmpty>
+            <isNotEmpty property="userIds" prepend="AND">
+                <![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+            </isNotEmpty>
+
+            <!-- add by yuan -->
+            <isNotEmpty property="customerDataId" prepend="AND">
+                <![CDATA[ a.CUSTOMER_DATA_ID = #customerDataId#]]>
+            </isNotEmpty>
+            <isNotEmpty property="photoTypeId" prepend="AND">
+                <![CDATA[ a.PHOTO_TYPE_ID = #photoTypeId#]]>
+            </isNotEmpty>
+        ORDER BY suf.UPLOAD_DATE DESC
+    </select>
+
+    <!-- 删除图片 -->
+    <delete id="deletePhoto" parameterClass="String">
+         DELETE FROM DAT_PHOTO WHERE DAT_UUID = #uuid#
+    </delete>
+
+    <delete id="delPhotoById" parameterClass="java.util.Map">
+        DELETE FROM DAT_PHOTO WHERE 1=1
+        <isNotEmpty property="photoId" prepend="and">
+            PHOTO_ID=#photoId#
+        </isNotEmpty>
+        <isNotEmpty property="customerDataIdList" prepend="and">
+            customer_data_id in
+            <iterate property="customerDataIdList" open="(" conjunction="," close=")">
+                #customerDataIdList[]#
+            </iterate>
+        </isNotEmpty>
+    </delete>
+
+    <!--伪删除图片-->
+    <update id="updatePhotoById" parameterClass="java.util.Map">
+        update dat_photo set 
+            is_del=1
+        where 1=1
+        <isNotEmpty property="photoId" prepend="and">
+            photo_id in($photoId$)
+        </isNotEmpty>
+    </update>
+    
+	<select id="selectPhotoListByLoanId" resultMap="PhotoResult1"  parameterClass="java.lang.Integer">
+	    SELECT a.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,c.USER_NAME as UPLOAD_USER_NAME,0 as NUMROW,'' as EVENT_NAME,d.photo_Type_Name
+			FROM DAT_PHOTO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+                        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+                        left join DAT_PHOTO_TYPE d on a.photo_Type_id = d.PHOTO_TYPE_ID
+			WHERE a.IS_DEL = 0
+  			and  a.CUSTOMER_DATA_ID in (Select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where Loan_id =#loanId# )
+    </select>
+    
+</sqlMap>

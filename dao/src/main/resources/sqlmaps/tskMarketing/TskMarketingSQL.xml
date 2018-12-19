@@ -1,0 +1,978 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMarketingSQL">
+	<typeAlias alias="TskMarketing"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketing" />
+	<typeAlias alias="TskMarketingBean"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingBean" />
+	<typeAlias alias="TskMarketingReportBean"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingReportBean" />
+	<!-- 营销任务主表-->
+	<!-- TskMarketingSQL信息全字段 -->
+	<resultMap class="TskMarketing" id="TskMarketingResult">
+		<result column="MARKETING_ID" property="marketingId"/>
+		<result column="GRADE_ID" property="gradeId" />
+		<result column="MARKETING_TITLE" property="marketingTitle"/>
+		<result column="START_DATE" property="startDate"/>
+		<result column="END_DATE" property="endDate"/>
+		<result column="REMARK" property="remark" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="SUB_TEMPLATE_NAME" property="subTemplateName" />
+		<result column="PRODUCT_ID" property="productId"/>
+		<result column="ASSIGN_USER_ID" property="assignUserId" />
+		<result column="IS_SUSPEND" property="isSuspend" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<resultMap class="TskMarketingBean" id="TskMarketingBeanResult" extends="TskMarketingResult">
+		<result column="PRODUCT_TARGET" property="productTarget" />
+		<result column="TASK_TARGET" property="taskTarget" />
+		<result column="BUY_MONEYS" property="buyMoneys" />
+		<result column="COM_PERCENT" property="comPercent" />
+		<result column="MARKETING_GRADE_NAME" property="marketingGradeName" />
+		<result column="USER_NAME" property="assignUserName" />
+	</resultMap>
+	
+	<resultMap class="TskMarketingReportBean" id="TskMarketingReportBeanResult">
+		<result column="EXCUTE_ID" property="excuteId" />
+		<result column="EXCUTE_NAME" property="excuteName" />
+		<result column="TASK_COUNT" property="taskCount" />
+		<result column="UNASSIGN_RATE" property="unAssignRate" />
+		<result column="UNFINSH_COUNT" property="unFinish" />
+		<result column="UNFINISH_RATE" property="unFinishRate" />
+		<result column="FINISH_COUNT" property="finish" />
+		<result column="FINISH_RATE" property="finishRate" />
+	</resultMap>
+	
+	<!-- 添加营销任务 -->
+	<insert id="addTskMarketing" parameterClass="TskMarketing">
+		<![CDATA[
+			INSERT INTO TSK_MARKETING
+			(
+				MARKETING_ID,
+				GRADE_ID,
+				MARKETING_TITLE,
+				START_DATE,
+				END_DATE,
+				REMARK,
+				TEMPLATE_ID,
+				SUB_TEMPLATE_NAME,
+				PRODUCT_ID,
+				ASSIGN_USER_ID,
+				IS_SUSPEND,
+				IS_DEL,
+				CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+			)
+			VALUES
+			(
+				#marketingId#,
+				#gradeId#,
+				#marketingTitle#,
+				#startDate#,
+				#endDate#,
+				#remark#,
+				#templateId#,
+				#subTemplateName#,
+				#productId#,
+				#assignUserId#,
+				0,
+				#isDel#,
+				current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="marketingId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_MARKETING
+		</selectKey>
+	</insert>
+	
+	<!-- 修改营销任务 -->
+	<update id="editTskMarketing" parameterClass="TskMarketing">
+		<![CDATA[	
+		UPDATE
+		   TSK_MARKETING
+		SET 
+		    GRADE_ID = #gradeId#,
+	        MARKETING_TITLE = #marketingTitle#,
+	        START_DATE = #startDate#,
+	        END_DATE = #endDate#,
+	        REMARK = #remark#,
+	        TEMPLATE_ID = #templateId#,
+	        SUB_TEMPLATE_NAME = #subTemplateName#,
+	        PRODUCT_ID = #productId#,
+	        ASSIGN_USER_ID = #assignUserId#,
+	        IS_SUSPEND = #isSuspend#,
+	        IS_DEL = #isDel#,
+		    UPDATE_DATE =  current timestamp,
+		    UPDATE_USER = #updateUser#  
+		WHERE 
+		  MARKETING_ID = #marketingId#
+		  ]]>
+	</update>
+	
+	<!-- 根据ID伪删除 -->
+	<update id="delTskMarketingById" parameterClass="java.util.Map">
+		<![CDATA[
+		UPDATE TSK_MARKETING SET IS_DEL=$isDel$ WHERE MARKETING_ID = #marketingId#
+	]]>
+	</update>
+	
+	<!-- 根据ID中止 -->
+	<update id="stopTskMarketingById" parameterClass="java.lang.Integer">
+		<![CDATA[
+		UPDATE TSK_MARKETING SET IS_SUSPEND=1 WHERE MARKETING_ID = #marketingId#
+	]]>
+	</update>
+	
+	<!-- 根据ID重启 -->
+	<update id="reStartTskMarketingById" parameterClass="java.lang.Integer">
+		<![CDATA[
+		UPDATE TSK_MARKETING SET IS_SUSPEND=0 WHERE MARKETING_ID = #marketingId#
+	]]>
+	</update>
+	
+	<!-- 查询单个营销任务数据 -->
+	<select id="getTskMarketingById" resultMap="TskMarketingResult" parameterClass="int">
+		SELECT * FROM TSK_MARKETING WHERE MARKETING_ID = #marketingId#
+	</select>
+	
+	<!-- 查询所有营销任务数据 -->
+	<select id="getAllTskMarketingByConds" resultMap="TskMarketingResult" parameterClass="java.util.Map">
+		SELECT * FROM TSK_MARKETING WHERE IS_DEL = 0
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[MARKETING_ID = #marketingId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="unMarketingId">
+			<![CDATA[MARKETING_ID != #unMarketingId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="marketingTitle">
+			<![CDATA[MARKETING_TITLE = #marketingTitle#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTargetType">
+			<isEqual prepend="" property="productTargetType" compareValue="templateId">
+				<![CDATA[TEMPLATE_ID = #productTargetVal# AND (SUB_TEMPLATE_NAME='' OR SUB_TEMPLATE_NAME IS NULL) ]]>
+			</isEqual>
+			<isEqual prepend="" property="productTargetType" compareValue="subTemplateName">
+				<![CDATA[SUB_TEMPLATE_NAME = #productTargetVal#]]>
+			</isEqual>
+			<isEqual prepend="" property="productTargetType" compareValue="productId">
+				<![CDATA[PRODUCT_ID = #productTargetVal#]]>
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productId">
+			<![CDATA[PRODUCT_ID = #productId#]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[((START_DATE <= #startDate# AND END_DATE <= #endDate# AND END_DATE >= #startDate#) OR (START_DATE >= #startDate# AND END_DATE <= #endDate#) OR (START_DATE >= #startDate# AND END_DATE >= #endDate# AND START_DATE <= #endDate#) OR (START_DATE <= #startDate# AND END_DATE >= #endDate#))]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="and" property="executeUserId">
+			<![CDATA[
+			MARKETING_ID in (select MARKETING_ID from TSK_MARKETING_EXECUTE where USER_ID = $executeUserId$ AND MARKETING_TARGET>0)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="Expired">
+			<![CDATA[ AND TO_CHAR(START_DATE,'yyyy-MM-dd')<=TO_CHAR(current timestamp,'yyyy-MM-dd') AND TO_CHAR(END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd') ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询营销任务(扩展)数据 -->
+	<select id="getTskMarketingBeanById" resultMap="TskMarketingBeanResult" parameterClass="java.util.Map">
+		SELECT R.*,CASE WHEN TASK_TARGET > 0 THEN (BUY_MONEYS/TASK_TARGET) ELSE 0 END AS COM_PERCENT,'' AS MARKETING_GRADE_NAME,U.USER_NAME      
+		FROM(    
+		<isEqual property="isCommon" compareValue="1">
+			<![CDATA[ 
+				SELECT A.*,GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        (SELECT SUM(MARKETING_TARGET) AS TASK_TARGET FROM TSK_MARKETING_EXECUTE WHERE USER_ID = $userIdEdit$ AND MARKETING_ID=A.MARKETING_ID),               
+		        GET_BUY_MONEYS('$inChargeUserIdsMarkEdit$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS           
+		        FROM TSK_MARKETING AS A WHERE A.MARKETING_ID IN (SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE USER_ID in ($userIdEdit$))     
+			]]>
+		</isEqual>
+		<isEqual property="isCommon" compareValue="0">
+			<![CDATA[ 
+			    SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        (CASE WHEN GET_TASK_TARGET($userIdEdit$,A.MARKETING_ID)=0 THEN GET_TASK_TARGET(A.ASSIGN_USER_ID,A.MARKETING_ID) ELSE GET_TASK_TARGET($userIdEdit$,A.MARKETING_ID) END) AS TASK_TARGET,
+		        GET_BUY_MONEYS('$inChargeUserIdsMarkEdit$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.ASSIGN_USER_ID IN($inChargeUserIdsEdit$)
+		        UNION ALL
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        GET_TASK_TARGET($userIdEdit$,A.MARKETING_ID) AS TASK_TARGET,
+		        GET_BUY_MONEYS('$inChargeUserIdsMarkEdit$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIdsEdit$) 
+		        AND EXISTS (SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE DEPT_ID IN ($inChargeDeptsEdit$) FETCH FIRST 1 ROWS ONLY)
+	    	]]>
+		</isEqual>
+		) AS R 
+		LEFT JOIN SYS_USER AS U ON U.USER_ID=R.ASSIGN_USER_ID
+		WHERE R.MARKETING_ID=$marketingId$
+	</select>
+	
+	<!-- 查询所有营销任务分页 -->
+	<select id="getAllTskMarketingPageByConds"
+		resultMap="TskMarketingBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT tmp.*,S.USER_NAME FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		SELECT T.*,G.MARKETING_GRADE_NAME FROM (
+		    SELECT R.*,CASE WHEN TASK_TARGET > 0 THEN (BUY_MONEYS/TASK_TARGET) ELSE 0 END AS COM_PERCENT
+		    FROM (
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        (CASE WHEN GET_TASK_TARGET($userId$,A.MARKETING_ID)=0 THEN GET_TASK_TARGET(A.ASSIGN_USER_ID,A.MARKETING_ID) ELSE GET_TASK_TARGET($userId$,A.MARKETING_ID) END) AS TASK_TARGET,
+		        GET_BUY_MONEYS('$inChargeUserIdsMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.ASSIGN_USER_ID IN($inChargeUserIds$)
+		        UNION ALL
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        GET_TASK_TARGET($userId$,A.MARKETING_ID) AS TASK_TARGET,
+		        GET_BUY_MONEYS('$inChargeUserIdsMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIds$) 
+		        AND EXISTS (SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE DEPT_ID IN ($inChargeDepts$) FETCH FIRST 1 ROWS ONLY)
+		    ) AS R
+		) AS T
+		INNER JOIN TSK_MARKETING_GRADE AS G ON G.MARKETING_GRADE_ID = T.GRADE_ID
+		WHERE T.IS_DEL = 0
+		<isNotEmpty prepend="and" property="marketingTitle">
+			<![CDATA[
+			T.MARKETING_TITLE LIKE '%$marketingTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="gradeId">
+			<![CDATA[
+			T.GRADE_ID = #gradeId#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTarget">
+			<![CDATA[
+			T.PRODUCT_TARGET LIKE '%$productTarget$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID = #assignUserId#
+			]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="AND" property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="and" property="marketingIds">
+			<![CDATA[T.MARKETING_ID in ($marketingIds$)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="notAssign">
+			<![CDATA[
+			T.MARKETING_ID IN (
+				SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE DEPT_UNASSIGN > 0
+				AND DEPT_ID IN($inChargeDepts$)
+			)
+			]]>
+		</isNotEmpty>
+		
+		<!-- 完成情况 -->
+		<isNotEmpty property="unStartTsk">
+			<![CDATA[ 
+				AND ((TO_CHAR(T.START_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0 
+				OR (TO_CHAR(T.START_DATE,'yyyy-MM-dd') <= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND (TO_CHAR(T.END_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="completion">
+			<isEqual prepend="and" property="completion" compareValue="unStart">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') > TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="execing">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') <= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND (TO_CHAR(T.END_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[ T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="end">
+				<![CDATA[ (TO_CHAR(T.END_DATE,'yyyy-MM-dd') < TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="suspend">
+				<![CDATA[ IS_SUSPEND = 1  ]]>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[ AND T.MARKETING_ID IN(SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 WHERE E.USER_ID IN($inChargeUserIds$) AND E.MARKETING_TARGET>0 OR E.DEPT_ID IN($inChargeDepts$))  ]]> 
+		ORDER BY G.SORTNO ASC,T.END_DATE ASC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  
+			INNER JOIN SYS_USER AS S ON tmp.ASSIGN_USER_ID = S.USER_ID
+			where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询所有营销任务分页求和 -->
+	<select id="getAllTskMarketingPageCountByConds"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		SELECT COUNT(0) FROM (
+		    SELECT R.*,CASE WHEN TASK_TARGET > 0 THEN (BUY_MONEYS/TASK_TARGET) ELSE 0 END AS COM_PERCENT
+		    FROM (
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        GET_TASK_TARGET($userId$,A.MARKETING_ID) AS TASK_TARGET,
+		        GET_BUY_MONEYS('$inChargeUserIdsMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.ASSIGN_USER_ID IN($inChargeUserIds$)
+		        UNION ALL
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		        GET_TASK_TARGET($userId$,A.MARKETING_ID) AS TASK_TARGET,
+		        GET_BUY_MONEYS('$inChargeUserIdsMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIds$) 
+		        AND EXISTS (SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE DEPT_ID IN ($inChargeDepts$) FETCH FIRST 1 ROWS ONLY)
+		    ) AS R
+		) AS T
+		INNER JOIN TSK_MARKETING_GRADE AS G ON G.MARKETING_GRADE_ID = T.GRADE_ID
+		WHERE T.IS_DEL = 0
+		<isNotEmpty prepend="and" property="marketingTitle">
+			<![CDATA[
+			T.MARKETING_TITLE LIKE '%$marketingTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="gradeId">
+			<![CDATA[
+			T.GRADE_ID = #gradeId#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTarget">
+			<![CDATA[
+			T.PRODUCT_TARGET LIKE '%$productTarget$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID = #assignUserId#
+			]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="AND" property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="and" property="marketingIds">
+			<![CDATA[T.MARKETING_ID in ($marketingIds$)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="notAssign">
+			<![CDATA[
+			T.MARKETING_ID IN (
+				SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE DEPT_UNASSIGN > 0
+				AND DEPT_ID IN($inChargeDepts$)
+			)
+			]]>
+		</isNotEmpty>
+		
+		<!-- 完成情况 -->
+		<isNotEmpty property="unStartTsk">
+			<![CDATA[ 
+				AND ((TO_CHAR(T.START_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0 
+				OR (TO_CHAR(T.START_DATE,'yyyy-MM-dd') <= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND (TO_CHAR(T.END_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="completion">
+			<isEqual prepend="and" property="completion" compareValue="unStart">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') > TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="execing">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') <= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND (TO_CHAR(T.END_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[ T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="end">
+				<![CDATA[ (TO_CHAR(T.END_DATE,'yyyy-MM-dd') < TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="suspend">
+				<![CDATA[ IS_SUSPEND = 1  ]]>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[ AND T.MARKETING_ID IN(SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 WHERE E.USER_ID IN($inChargeUserIds$) AND E.MARKETING_TARGET>0 OR E.DEPT_ID IN($inChargeDepts$))  ]]> 
+	</select>
+
+<!-- 查询所有我执行的营销任务分页 -->
+	<select id="getAllTskMarketingPageByCondsMyExecute"
+		resultMap="TskMarketingBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT tmp.*,S.USER_NAME FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		SELECT T.*,G.MARKETING_GRADE_NAME FROM (
+		    SELECT R.*,CASE WHEN TASK_TARGET > 0 THEN (BUY_MONEYS/TASK_TARGET) ELSE 0 END AS COM_PERCENT
+		    FROM (
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		<isEqual property="isCommon" compareValue="0">
+			<![CDATA[ GET_TASK_TARGET($userId$,A.MARKETING_ID) AS TASK_TARGET, ]]>
+		</isEqual>
+		<isEqual property="isCommon" compareValue="1">
+			<![CDATA[ (SELECT SUM(MARKETING_TARGET) AS TASK_TARGET FROM TSK_MARKETING_EXECUTE WHERE USER_ID = $userId$ AND MARKETING_ID=A.MARKETING_ID), ]]>
+		</isEqual>
+		        GET_BUY_MONEYS('$userIdMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.MARKETING_ID IN (SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE USER_ID in ($userId$))
+		    ) AS R
+		) AS T
+		INNER JOIN TSK_MARKETING_GRADE AS G ON G.MARKETING_GRADE_ID = T.GRADE_ID
+		WHERE T.IS_DEL = 0
+		<isNotEmpty prepend="and" property="marketingTitle">
+			<![CDATA[
+			T.MARKETING_TITLE LIKE '%$marketingTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="gradeId">
+			<![CDATA[
+			T.GRADE_ID = #gradeId#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTarget">
+			<![CDATA[
+			T.PRODUCT_TARGET LIKE '%$productTarget$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID = #assignUserId#
+			]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="AND" property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="and" property="marketingIds">
+			<![CDATA[T.MARKETING_ID in ($marketingIds$)]]>
+		</isNotEmpty>
+		
+		<!-- 完成情况 -->
+		<isNotEmpty property="completion">
+			<isEqual prepend="and" property="completion" compareValue="unStart">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') > TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="execing">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') <= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND (TO_CHAR(T.END_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[ T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="end">
+				<![CDATA[ (TO_CHAR(T.END_DATE,'yyyy-MM-dd') < TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="suspend">
+				<![CDATA[ IS_SUSPEND = 1  ]]>
+			</isEqual>
+		</isNotEmpty>
+		AND T.MARKETING_ID IN(SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 WHERE E.USER_ID=$userId$ AND E.MARKETING_TARGET>0) 
+		ORDER BY G.SORTNO ASC,T.END_DATE ASC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  
+			INNER JOIN SYS_USER AS S ON tmp.ASSIGN_USER_ID = S.USER_ID
+			where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询所有我执行的营销任务分页求和 -->
+	<select id="getAllTskMarketingPageCountByCondsMyExecute"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		SELECT COUNT(0) FROM (
+		    SELECT R.*,CASE WHEN TASK_TARGET > 0 THEN (BUY_MONEYS/TASK_TARGET) ELSE 0 END AS COM_PERCENT
+		    FROM (
+		        SELECT A.*,
+		        GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS PRODUCT_TARGET,
+		<isEqual property="isCommon" compareValue="0">
+			<![CDATA[ GET_TASK_TARGET($userId$,A.MARKETING_ID) AS TASK_TARGET, ]]>
+		</isEqual>
+		<isEqual property="isCommon" compareValue="1">
+			<![CDATA[ (SELECT SUM(MARKETING_TARGET) AS TASK_TARGET FROM TSK_MARKETING_EXECUTE WHERE USER_ID = $userId$ AND MARKETING_ID=A.MARKETING_ID), ]]>
+		</isEqual>
+		        GET_BUY_MONEYS('$userIdMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		        FROM TSK_MARKETING AS A WHERE A.MARKETING_ID IN (SELECT MARKETING_ID FROM TSK_MARKETING_EXECUTE WHERE USER_ID in ($userId$))
+		    ) AS R
+		) AS T
+		INNER JOIN TSK_MARKETING_GRADE AS G ON G.MARKETING_GRADE_ID = T.GRADE_ID
+		WHERE T.IS_DEL = 0
+		<isNotEmpty prepend="and" property="marketingTitle">
+			<![CDATA[
+			T.MARKETING_TITLE LIKE '%$marketingTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="gradeId">
+			<![CDATA[
+			T.GRADE_ID = #gradeId#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTarget">
+			<![CDATA[
+			T.PRODUCT_TARGET LIKE '%$productTarget$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID = #assignUserId#
+			]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="AND" property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="and" property="marketingIds">
+			<![CDATA[T.MARKETING_ID in ($marketingIds$)]]>
+		</isNotEmpty>
+		
+		<!-- 完成情况 -->
+		<isNotEmpty property="completion">
+			<isEqual prepend="and" property="completion" compareValue="unStart">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') > TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="execing">
+				<![CDATA[ (TO_CHAR(T.START_DATE,'yyyy-MM-dd') <= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND (TO_CHAR(T.END_DATE,'yyyy-MM-dd') >= TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[ T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="end">
+				<![CDATA[ (TO_CHAR(T.END_DATE,'yyyy-MM-dd') < TO_CHAR(current timestamp,'yyyy-MM-dd')) AND IS_SUSPEND = 0]]>
+				<isNotEmpty prepend="and" property="complete">
+					<![CDATA[T.COM_PERCENT >= 1]]>
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="and" property="completion" compareValue="suspend">
+				<![CDATA[ IS_SUSPEND = 1  ]]>
+			</isEqual>
+		</isNotEmpty>
+		AND T.MARKETING_ID IN(SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 WHERE E.USER_ID=$userId$ AND E.MARKETING_TARGET>0) 
+	</select>
+	
+	<!-- 查询查询营销情况完成统计表  用户-->
+	<select id="getTskMarketingFinishReportByUser" resultMap="TskMarketingReportBeanResult" parameterClass="java.util.Map">
+		SELECT S.USER_ID AS EXCUTE_ID,S.USER_NAME AS EXCUTE_NAME
+		,CASE WHEN tmp.TASK_COUNT IS NULL THEN 0 ELSE tmp.TASK_COUNT END AS TASK_COUNT
+		,CASE WHEN tmp.UNASSIGN_RATE IS NULL THEN 0 ELSE tmp.UNASSIGN_RATE END AS UNASSIGN_RATE
+		,CASE WHEN tmp.UNFINSH_COUNT IS NULL THEN 0 ELSE tmp.UNFINSH_COUNT END AS UNFINSH_COUNT
+		,CASE WHEN tmp.UNFINISH_RATE IS NULL  THEN 0 ELSE tmp.UNFINISH_RATE END AS UNFINISH_RATE
+		,CASE WHEN tmp.FINISH_COUNT IS NULL THEN 0 ELSE tmp.FINISH_COUNT END AS FINISH_COUNT
+		,CASE WHEN tmp.FINISH_RATE IS NULL  THEN 0 ELSE tmp.FINISH_RATE END AS FINISH_RATE
+		FROM SYS_USER AS S
+		LEFT JOIN (
+		SELECT tmp.*
+		,CASE WHEN TASK_COUNT=0 THEN 0 ELSE cast(FINISH_COUNT*1.0/TASK_COUNT*100 as decimal(18,1))END AS FINISH_RATE
+		,CASE WHEN TASK_COUNT=0 THEN 0 ELSE cast(UNASSIGN_COUNT*1.0/TASK_COUNT*100 as decimal(18,1))END AS UNASSIGN_RATE
+		,CASE WHEN TASK_COUNT=0 THEN 0 ELSE cast((TASK_COUNT-UNASSIGN_COUNT-FINISH_COUNT)*1.0/TASK_COUNT*100 as decimal(18,1))END AS UNFINISH_RATE
+		,(TASK_COUNT-UNASSIGN_COUNT-FINISH_COUNT) AS UNFINSH_COUNT FROM (
+		SELECT B.USER_ID,COUNT(B.MARKETING_ID) AS TASK_COUNT ,SUM(B.DONE_COUNT) AS FINISH_COUNT
+    	,SUM(CASE WHEN B.UNASSIGN_COUNT > 0 THEN 1 ELSE 0 END) AS UNASSIGN_COUNT FROM (
+			SELECT C.* ,CASE WHEN BUY_MONEYS >= TASK_TARGET THEN 1 ELSE 0 END AS DONE_COUNT
+                               ,CASE WHEN C.DEPT_UNASSIGN > 0 THEN 1 ELSE 0 END AS UNASSIGN_COUNT  FROM(
+			SELECT  A.MARKETING_ID,tme.MARKETING_TARGET AS TASK_TARGET,tme.USER_ID,tme.DEPT_UNASSIGN
+		,GET_BUY_MONEYS('['||tme.USER_ID||']',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+		FROM TSK_MARKETING A 
+		INNER JOIN TSK_MARKETING_EXECUTE tme ON tme.MARKETING_ID=A.MARKETING_ID WHERE A.IS_SUSPEND=0 AND A.IS_DEL=0
+	<isNotEmpty prepend="and"  property="taskLevelId">
+		A.GRADE_ID=#taskLevelId#
+	</isNotEmpty>
+	<isNotEmpty property="executeDateSearch">
+	 	<![CDATA[
+	 		$executeDateSearch$
+	 	]]>
+	</isNotEmpty>
+		) C  WHERE C.TASK_TARGET>0) B
+		 GROUP BY B.USER_ID) tmp)  as tmp ON tmp.USER_ID=S.USER_ID WHERE 1=1
+	<isNotEmpty prepend="and"  property="userIds">
+		S.USER_ID IN ($userIds$)
+	</isNotEmpty>
+		ORDER BY  FINISH_COUNT DESC
+	</select>
+	<!-- 查询查询营销情况完成统计表  部门-->
+	<select id="getTskMarketingFinishReportByDept" resultMap="TskMarketingReportBeanResult" parameterClass="java.util.Map">
+			SELECT
+			    S.DEPT_ID AS EXCUTE_ID,
+			    S.DEPT_NAME AS EXCUTE_NAME,
+			    CASE
+			        WHEN tmp.TASK_COUNT IS NULL
+			        THEN 0
+			        ELSE tmp.TASK_COUNT
+			    END AS TASK_COUNT ,
+			    CASE
+			        WHEN tmp.UNASSIGN_RATE IS NULL
+			        THEN 0
+			        ELSE tmp.UNASSIGN_RATE
+			    END AS UNASSIGN_RATE ,
+			    CASE
+			        WHEN tmp.UNFINSH_COUNT IS NULL
+			        THEN 0
+			        ELSE tmp.UNFINSH_COUNT
+			    END AS UNFINSH_COUNT ,
+			    CASE
+			        WHEN tmp.UNFINISH_RATE IS NULL
+			         THEN 0
+			        ELSE tmp.UNFINISH_RATE
+			    END AS UNFINISH_RATE ,
+			    CASE
+			        WHEN tmp.FINISH_COUNT IS NULL
+			        THEN 0
+			        ELSE tmp.FINISH_COUNT
+			    END AS FINISH_COUNT ,
+			    CASE
+			        WHEN tmp.FINISH_RATE IS NULL
+			        THEN 0
+			        ELSE tmp.FINISH_RATE
+			    END AS FINISH_RATE
+			FROM
+			    SYS_DEPT       AS S
+			LEFT JOIN
+			    (
+			        SELECT
+			            tmp.* ,
+			            CASE
+			                WHEN TASK_COUNT=0
+			                THEN 0
+			                ELSE CAST(FINISH_COUNT*1.0/TASK_COUNT*100 AS DECIMAL(18,1))
+			            END AS FINISH_RATE ,
+			            CASE
+			                WHEN TASK_COUNT=0
+			                THEN 0
+			                ELSE CAST(UNASSIGN_COUNT*1.0/TASK_COUNT*100 AS DECIMAL(18,1))
+			            END AS UNASSIGN_RATE ,
+			            CASE
+			                WHEN TASK_COUNT=0
+			                THEN 0
+			                ELSE CAST((TASK_COUNT-UNASSIGN_COUNT-FINISH_COUNT)*1.0/TASK_COUNT*100 AS DECIMAL(18
+			                    ,1))
+			            END                                      AS UNFINISH_RATE ,
+			            (TASK_COUNT-UNASSIGN_COUNT-FINISH_COUNT) AS UNFINSH_COUNT
+			        FROM
+			            (
+			                SELECT
+			                    B.DEPT_ID,
+			                    COUNT(B.MARKETING_ID) AS TASK_COUNT ,
+			                    SUM(B.DONE_COUNT)     AS FINISH_COUNT ,
+			                    SUM(
+			                        CASE
+			                            WHEN B.UNASSIGN_COUNT > 0
+			                            THEN 1
+			                            ELSE 0
+			                        END) AS UNASSIGN_COUNT
+			                FROM
+			                    (
+			                        SELECT
+			                            C.* ,
+			                            CASE
+			                                WHEN BUY_MONEYS >= TASK_TARGET
+			                                THEN 1
+			                                ELSE 0
+			                            END AS DONE_COUNT ,
+			                            CASE
+			                                WHEN C.DEPT_UNASSIGN > 0
+			                                THEN 1
+			                                ELSE 0
+			                            END AS UNASSIGN_COUNT
+			                        FROM
+			                            (
+			                                SELECT
+			                                    A.MARKETING_ID,
+			                                    tme.MARKETING_TARGET AS TASK_TARGET,
+			                                    tme.DEPT_ID,
+			                                    tme.DEPT_UNASSIGN ,                               
+			                                    GET_BUY_MONEYS(
+			                                 (select USER_ID FROM TABLE(GETUSER_REPORT(tme.DEPT_ID)))
+			                                    ,A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,
+			                                    A.START_DATE,A.END_DATE) AS BUY_MONEYS
+			                                FROM
+			                                    TSK_MARKETING A
+			                                INNER JOIN TSK_MARKETING_EXECUTE tme
+			                                ON
+			                                    tme.MARKETING_ID=A.MARKETING_ID
+			                                WHERE
+			                                    A.IS_SUSPEND=0
+			                                AND A.IS_DEL=0  AND tme.USER_ID=0
+				<isNotEmpty prepend="and"  property="taskLevelId">
+					A.GRADE_ID=#taskLevelId#
+				</isNotEmpty>
+				<isNotEmpty property="executeDateSearch">
+				 	<![CDATA[
+				 		$executeDateSearch$
+				 	]]>
+				</isNotEmpty>
+			                            )
+			                            C
+			                    )
+			                    B
+			                GROUP BY
+			                    B.DEPT_ID
+			            )
+			            tmp
+			    ) AS tmp
+			ON tmp.DEPT_ID=S.DEPT_ID WHERE 1=1
+			<isNotEmpty prepend="and"  property="deptIds">
+					S.DEPT_ID IN ($deptIds$)
+			</isNotEmpty>
+			ORDER BY  FINISH_COUNT DESC
+	</select>
+	<!-- 营销任务报表明细 分页总数 -->
+	<select id="getTskMarketingFinishReportDetailCount"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		SELECT
+				    COUNT(*)
+				FROM
+				    (
+				        SELECT
+				            R.* ,
+				            CASE
+				                WHEN TASK_TARGET > 0
+				                THEN CAST(BUY_MONEYS*1.0/TASK_TARGET*100 AS DECIMAL(18,1))
+				                ELSE 1
+				            END AS COM_PERCENT
+				        FROM
+				            (
+				                SELECT
+				                    A.*,
+				                    GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS
+				                    PRODUCT_TARGET,
+				                    tme.MARKETING_TARGET AS TASK_TARGET,
+				                    tme.USER_ID,
+				                    tme.DEPT_ID,
+				                    tme.DEPT_UNASSIGN ,
+				                    GET_BUY_MONEYS('['||tme.USER_ID||']',A.MARKETING_ID,A.TEMPLATE_ID,
+				                    A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+				                FROM
+				                    TSK_MARKETING A
+				                INNER JOIN TSK_MARKETING_EXECUTE tme
+				                ON
+				                    tme.MARKETING_ID=A.MARKETING_ID
+				                WHERE
+				                    A.IS_SUSPEND=0
+				                	AND A.IS_DEL=0
+				            )
+				            R
+				    )
+				    T
+				INNER JOIN TSK_MARKETING_GRADE AS G
+				ON
+				    G.MARKETING_GRADE_ID = T.GRADE_ID WHERE 1=1
+		<isNotEmpty prepend="and" property="userId">
+				<![CDATA[T.USER_ID = #userId#
+					AND T.MARKETING_ID IN(
+				        SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E
+				        INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 
+				        WHERE E.USER_ID=$userId$ AND E.MARKETING_TARGET>0
+				    )   				
+				]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+				<![CDATA[T.DEPT_ID = #deptId# AND T.USER_ID=0
+					AND T.MARKETING_ID IN(
+				        SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E
+				        INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 
+				        WHERE E.DEPT_ID=$deptId$ AND E.MARKETING_TARGET>0
+				    )  
+				]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeDateSearch">
+			<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and"  property="taskLevelId">
+			<![CDATA[ T.GRADE_ID=#taskLevelId# ]]>
+		</isNotEmpty>
+	</select>
+	<!-- 营销任务报表明细 分页 -->
+	<select id="getTskMarketingFinishReportDetail" resultMap="TskMarketingBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT tmp.*,S.USER_NAME FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		SELECT
+				    T.*,
+				    G.MARKETING_GRADE_NAME
+				FROM
+				    (
+				        SELECT
+				            R.* ,
+				            CASE
+				                WHEN TASK_TARGET > 0
+				                THEN CAST(BUY_MONEYS*1.0/TASK_TARGET*100 AS DECIMAL(18,1))
+				                ELSE 1
+				            END AS COM_PERCENT
+				        FROM
+				            (
+				                SELECT
+				                    A.*,
+				                    GET_PRODUCT_TARGET(A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID) AS
+				                    PRODUCT_TARGET,
+				                    tme.MARKETING_TARGET AS TASK_TARGET,
+				                    tme.USER_ID,
+				                    tme.DEPT_ID,
+				                    tme.DEPT_UNASSIGN ,
+				                    <isNotEmpty  property="userId">
+										GET_BUY_MONEYS('['||tme.USER_ID||']',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+									</isNotEmpty>
+				                    <isNotEmpty  property="deptId">
+										GET_BUY_MONEYS((select USER_ID FROM TABLE(GETUSER_REPORT(tme.DEPT_ID)))
+										,A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE) AS BUY_MONEYS
+									</isNotEmpty>
+				                    
+				                FROM
+				                    TSK_MARKETING A
+				                INNER JOIN TSK_MARKETING_EXECUTE tme
+				                ON
+				                    tme.MARKETING_ID=A.MARKETING_ID
+				                WHERE
+				                    A.IS_SUSPEND=0
+				                	AND A.IS_DEL=0
+				            )
+				            R
+				    )
+				    T
+				INNER JOIN TSK_MARKETING_GRADE AS G
+				ON
+				    G.MARKETING_GRADE_ID = T.GRADE_ID WHERE 1=1
+		<isNotEmpty prepend="and" property="userId">
+				<![CDATA[T.USER_ID = #userId#
+					AND T.MARKETING_ID IN(
+				        SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E
+				        INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 
+				        WHERE E.USER_ID=$userId$ AND E.MARKETING_TARGET>0
+				    )   				
+				]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+				<![CDATA[T.DEPT_ID = #deptId# AND T.USER_ID=0
+					AND T.MARKETING_ID IN(
+				        SELECT DISTINCT E.MARKETING_ID FROM TSK_MARKETING_EXECUTE AS E
+				        INNER JOIN TSK_MARKETING AS T ON T.MARKETING_ID=E.MARKETING_ID AND T.IS_DEL=0 
+				        WHERE E.DEPT_ID=$deptId$ AND E.MARKETING_TARGET>0
+				    )  
+				]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeDateSearch">
+			<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and"  property="taskLevelId">
+			T.GRADE_ID=#taskLevelId# 
+		</isNotEmpty>
+		ORDER BY T.END_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  
+			INNER JOIN SYS_USER AS S ON tmp.ASSIGN_USER_ID = S.USER_ID
+			where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 已完成销售额 -->
+	<select id="getSaleMoneyByConds" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT distinct 
+				GET_BUY_MONEYS_UPDATE_VIEW('$inChargeUserIdsMark$',A.MARKETING_ID,A.TEMPLATE_ID,A.SUB_TEMPLATE_NAME,A.PRODUCT_ID,A.START_DATE,A.END_DATE,'$inCounterUserIds$') AS BUY_MONEYS
+			FROM TSK_MARKETING AS A
+			INNER JOIN TSK_MARKETING_EXECUTE AS B ON A.MARKETING_ID = B.MARKETING_ID
+			WHERE 1=1 
+		]]>
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[B.MARKETING_ID = $marketingId$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[B.USER_ID = $userId$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[B.DEPT_ID = $deptId$ ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 放弃新增任务，删除指定任务  -->
+	<update id="DeleteTskMarketById" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM TSK_MARKETING WHERE MARKETING_ID=$markettingId$
+		]]>
+	</update>
+	
+	<!-- 根据营销任务ID查询任务的销售额 -->
+	<select id="GetMarketingSaleMoney" parameterClass="java.lang.Integer" resultClass="java.math.BigDecimal">
+		<![CDATA[
+			SELECT (CASE WHEN BUY_MONEY IS NULL THEN 0 ELSE BUY_MONEY END) AS BUY_MONEY FROM (
+			SELECT 
+			(
+			    CASE WHEN TSK.PRODUCT_ID>0 THEN 
+			    (
+			        SELECT SUM(BUY_MONEY) FROM PDT_PRODUCT_CUSTOMER WHERE IS_DEL=0 AND PRODUCT_ID=TSK.PRODUCT_ID
+			        AND (TO_CHAR(TSK.START_DATE,'yyyy-MM-dd') <= TO_CHAR(BUY_DATE,'yyyy-MM-dd')) 
+			        AND (TO_CHAR(TSK.END_DATE,'yyyy-MM-dd') >= TO_CHAR(BUY_DATE,'yyyy-MM-dd'))
+			    )
+			    ELSE (
+			        CASE WHEN SUB_TEMPLATE_NAME = '' THEN
+			        (
+			            SELECT SUM(PC.BUY_MONEY) FROM PDT_PRODUCT_CUSTOMER AS PC
+			            INNER JOIN PDT_PRODUCT AS P ON P.PRODUCT_ID=PC.PRODUCT_ID
+			            WHERE P.TEMPLATE_ID=TSK.TEMPLATE_ID AND P.IS_DEL=0 AND PC.IS_DEL=0 
+			            AND (TO_CHAR(TSK.START_DATE,'yyyy-MM-dd') <= TO_CHAR(PC.BUY_DATE,'yyyy-MM-dd')) 
+			            AND (TO_CHAR(TSK.END_DATE,'yyyy-MM-dd') >= TO_CHAR(PC.BUY_DATE,'yyyy-MM-dd'))
+			        ) 
+			        WHEN SUB_TEMPLATE_NAME != '' THEN
+			        (
+			            SELECT SUM(PC.BUY_MONEY) FROM PDT_PRODUCT_CUSTOMER AS PC
+			            WHERE PC.IS_DEL=0 AND PC.PRODUCT_ID IN(
+			                SELECT PF.PRODUCT_ID FROM PDT_PRODUCT_FIELD AS PF 
+			                WHERE PF.TEMPLATE_ID=TSK.TEMPLATE_ID AND PF.FIELD_VALUE_STRING=TSK.SUB_TEMPLATE_NAME
+			            )
+			            AND (TO_CHAR(TSK.START_DATE,'yyyy-MM-dd') <= TO_CHAR(PC.BUY_DATE,'yyyy-MM-dd')) 
+			            AND (TO_CHAR(TSK.END_DATE,'yyyy-MM-dd') >= TO_CHAR(PC.BUY_DATE,'yyyy-MM-dd'))
+			        )
+			        ELSE 0 END
+			    ) END
+			) AS BUY_MONEY
+			FROM TSK_MARKETING AS TSK
+			WHERE TSK.MARKETING_ID=$markettingId$)
+		]]>
+	</select>
+</sqlMap>
+
+
+
+
+
+
+
+
+
+
+
+

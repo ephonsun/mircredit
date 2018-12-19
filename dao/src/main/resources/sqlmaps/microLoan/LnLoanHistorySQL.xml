@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanHistorySQL">
+    <typeAlias alias="LnLoanHistory" type="com.banger.mobile.domain.model.loan.LnLoanHistory"/>
+
+    <resultMap id="LnLoanHistoryResult" class="LnLoanHistory">
+    	<result column="HISTORY_ID" property="historyId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="WORK_HISTORY" property="workHistory"/>
+        <result column="SPECIAL_EXPLANATION" property="specialExplanation"/>
+        <result column="OTHER_CONDITIONS" property="otherConditions"/>
+        <result column="FAMILY_INFO" property="familyInfo"/>
+        <result column="GUARANTEE_INFO" property="guaranteeInfo"/>
+        <result column="EXPLANATION_AMOUNT" property="explanationAmount" />
+        <result column="FLOW_PRINCIPLE" property="flowPrinciple" />
+        <result column="CREATE_DATE" property="createDate" />
+       	<result column="UPDATE_DATE" property="updateDate" />          
+    </resultMap>
+    
+    <insert id="insertLnLoanHistory" parameterClass="LnLoanHistory">
+        INSERT INTO LN_LOAN_HISTORY
+    	(
+		    HISTORY_ID
+		    <isNotEmpty property="loanId" prepend=",">
+				LOAN_ID
+			</isNotEmpty>
+			<isNotEmpty property="workHistory" prepend=",">
+				WORK_HISTORY
+			</isNotEmpty>
+			<isNotEmpty property="specialExplanation" prepend=",">
+				SPECIAL_EXPLANATION
+			</isNotEmpty>
+			<isNotEmpty property="otherConditions" prepend=",">
+				OTHER_CONDITIONS
+			</isNotEmpty>
+			<isNotEmpty property="familyInfo" prepend=",">
+				FAMILY_INFO
+			</isNotEmpty>
+			<isNotEmpty property="guaranteeInfo" prepend=",">
+				GUARANTEE_INFO
+			</isNotEmpty>
+			<isNotEmpty property="explanationAmount" prepend=",">
+				EXPLANATION_AMOUNT
+			</isNotEmpty>
+			<isNotEmpty property="flowPrinciple" prepend=",">
+				FLOW_PRINCIPLE
+			</isNotEmpty>
+			,CREATE_DATE
+			,UPDATE_DATE	
+			)VALUES
+	    (
+	       	#historyId:INTEGER#
+	       	<isNotEmpty property="loanId" prepend=",">
+				#loanId:INTEGER#
+			</isNotEmpty>
+			<isNotEmpty property="workHistory" prepend=",">
+				#workHistory:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="specialExplanation" prepend=",">
+				#specialExplanation:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="otherConditions" prepend=",">
+				#otherConditions:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="familyInfo" prepend=",">
+				#familyInfo:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="guaranteeInfo" prepend=",">
+				#guaranteeInfo:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="explanationAmount" prepend=",">
+				#explanationAmount:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="flowPrinciple" prepend=",">
+				#flowPrinciple:VARCHAR#
+			</isNotEmpty>
+			,current timestamp
+			,current timestamp
+        )
+        <selectKey keyProperty="historyId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_LOAN_HISTORY
+		</selectKey>
+    </insert>
+    
+     <select id="selectByLnLoanHistoryPrimary" parameterClass="java.util.Map" resultMap="LnLoanHistoryResult">
+        SELECT * FROM LN_LOAN_HISTORY WHERE 1=1
+        <isNotEmpty property="historyId" prepend="AND">
+		   		   		HISTORY_ID = #historyId#
+		</isNotEmpty>
+        <isNotEmpty property="loanId" prepend="AND">
+		   		   		LOAN_ID = #loanId#
+		</isNotEmpty>
+         order by HISTORY_ID desc   fetch first 1 rows only
+     </select>
+    
+   
+     <update id="updateLnLoanHistory" parameterClass="LnLoanHistory">
+        
+      UPDATE LN_LOAN_HISTORY SET
+  		 WORK_HISTORY=#workHistory:VARCHAR:NULL#,
+		SPECIAL_EXPLANATION=#specialExplanation:VARCHAR:NULL#,
+		OTHER_CONDITIONS=#otherConditions:VARCHAR:NULL#,
+		FAMILY_INFO=#familyInfo:VARCHAR:NULL#,
+		GUARANTEE_INFO=#guaranteeInfo:VARCHAR:NULL#,
+		EXPLANATION_AMOUNT=#explanationAmount:VARCHAR:NULL#,
+		FLOW_PRINCIPLE=#flowPrinciple:VARCHAR:NULL#,
+		UPDATE_DATE = current timestamp
+		WHERE HISTORY_ID=#historyId# 
+    </update>
+    
+</sqlMap>

@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtLibrarySQL">
+	<typeAlias alias="PdtLibrary"
+		type="com.banger.mobile.domain.model.microProduct.PdtLibrary" />
+		
+	<typeAlias alias="PdtLibraryBean"
+		type="com.banger.mobile.domain.model.microProduct.PdtLibraryBean" />
+
+	<!-- 产品知识库SQL-->
+	<resultMap class="PdtLibrary" id="PdtLibraryResult">
+		<result column="LIBRARY_ID" property="libraryId" />
+		<result column="PARENT_ID" property="parentId" />
+		<result column="IS_LEAF" property="isLeaf" />
+		<result column="LIB_TITLE" property="libTitle" />
+		<result column="LIB_NO" property="libNo" />
+		<result column="LIB_CONTENT" property="libContent" />
+		<result column="REMARK" property="remark" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+        <result column="LIB_TITLE_PINYIN" property="libTitlePinyin" />
+	</resultMap>
+
+	<resultMap class="PdtLibraryBean" id="PdtLibraryBeanResult" extends="PdtLibraryResult">
+		<result column="LIB_NAME" property="libName" />
+	</resultMap>
+	<!-- 增加 -->
+	<insert id="addPdtLibrary" parameterClass="PdtLibrary">
+		<![CDATA[
+	 	INSERT INTO PDT_MICRO_LIBRARY
+		    (
+		        LIBRARY_ID,
+		        PARENT_ID,
+		        IS_LEAF,
+		        LIB_TITLE,
+		        LIB_NO,
+		        LIB_CONTENT,
+		        REMARK,
+		        SORTNO,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER,
+		        LIB_TITLE_PINYIN
+		    )
+			VALUES
+		    (
+		        #libraryId#,
+		        #parentId#,
+				#isLeaf#,
+		        #libTitle#,
+		        #libNo#,
+		        #libContent#,
+		        #remark#,
+		        #libraryId#,
+				0,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#,
+		        #libTitlePinyin#
+		    )
+      ]]>
+		<selectKey keyProperty="libraryId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_MICRO_LIBRARY
+		</selectKey>
+	</insert>
+	
+	<!-- 增加 -->
+	<insert id="addPdtLibraryWithKey" parameterClass="PdtLibrary">
+		<![CDATA[
+	 	INSERT INTO PDT_MICRO_LIBRARY
+		    (
+		        LIBRARY_ID,
+		        PARENT_ID,
+		        IS_LEAF,
+		        LIB_TITLE,
+		        LIB_NO,
+		        LIB_CONTENT,
+		        REMARK,
+		        SORTNO,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER,
+		        LIB_TITLE_PINYIN
+		    )
+			VALUES
+		    (
+		        #libraryId#,
+		        #parentId#,
+				#isLeaf#,
+		        #libTitle#,
+		        #libNo#,
+		        #libContent#,
+		        #remark#,
+		        #libraryId#,
+				#libraryId#,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#,
+		        #libTitlePinyin#
+		    )
+      ]]>
+	</insert>
+
+	<!-- 修改-->
+	<update id="editPdtLibrary" parameterClass="PdtLibrary">
+		<![CDATA[	
+		UPDATE
+		   PDT_MICRO_LIBRARY
+		SET 
+		    PARENT_ID = #parentId#,
+	        IS_LEAF = #isLeaf#,
+	        LIB_TITLE = #libTitle#,
+	        LIB_NO = #libNo#,
+	        LIB_CONTENT = #libContent#,
+	        REMARK = #remark#,
+	        SORTNO = #sortNo#,
+	        IS_DEL = #isDel#,
+		    UPDATE_DATE =  current timestamp, 
+		    UPDATE_USER = #updateUser#,
+		    LIB_TITLE_PINYIN = #libTitlePinyin#
+		WHERE 
+		  LIBRARY_ID = #libraryId#
+		  ]]>
+	</update>
+	
+	<!-- 根据ID伪删除 -->
+	<update id="delPdtLibraryById" parameterClass="int">
+		<![CDATA[
+		UPDATE PDT_MICRO_LIBRARY SET IS_DEL=1 WHERE LIBRARY_ID = #libraryId#
+	]]>
+	</update>
+	
+	<!-- 根据IDS批量伪删除 -->
+	<update id="delPdtLibraryByIds" parameterClass="String">
+		<![CDATA[
+		UPDATE PDT_MICRO_LIBRARY SET IS_DEL=1 WHERE LIBRARY_ID in ($libraryIds$)
+	]]>
+	</update>
+
+	<!-- 查询单个产品知识库分类数据 -->
+	<select id="getPdtLibraryById" resultMap="PdtLibraryResult" parameterClass="int">
+		SELECT * FROM PDT_MICRO_LIBRARY WHERE LIBRARY_ID = #libraryId#
+	</select>
+	
+	<!-- 查询所有产品知识库数据 -->
+	<select id="getAllPdtLibraryByConds" resultMap="PdtLibraryResult" parameterClass="java.util.Map">
+		SELECT * FROM PDT_MICRO_LIBRARY WHERE IS_DEL = 0
+		<isNotEmpty prepend="and" property="isLeaf">
+			<![CDATA[IS_LEAF = #isLeaf#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="parentId">
+			<![CDATA[PARENT_ID = #parentId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="parentIds">
+			<![CDATA[PARENT_ID in ($parentIds$)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="libTitle">
+			<![CDATA[LIB_TITLE = #libTitle#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="libNo">
+			<![CDATA[LIB_NO = #libNo#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="unLibraryId">
+			<![CDATA[LIBRARY_ID != #unLibraryId#]]>
+		</isNotEmpty>
+		ORDER BY SORTNO ASC
+	</select>
+	
+	<!-- 查询产品知识库分类（分页查询） -->
+	<select id="getPdtLibraryPageByConds" resultMap="PdtLibraryBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+			SELECT a.*,b.LIB_TITLE AS LIB_NAME FROM PDT_MICRO_LIBRARY a INNER JOIN PDT_MICRO_LIBRARY b ON a.PARENT_ID = b.LIBRARY_ID
+				 WHERE a.IS_DEL = 0 AND a.IS_LEAF = 1 AND b.IS_DEL = 0
+			<isNotEmpty property="parentId">
+				<isNotEqual prepend="and" property="parentId" compareValue="1">
+					<![CDATA[a.PARENT_ID = #parentId#]]>
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libTitle">
+				<![CDATA[a.LIB_TITLE LIKE '%$libTitle$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libNo">
+				<![CDATA[a.LIB_NO LIKE '%$libNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libContent">
+				<![CDATA[a.LIB_CONTENT LIKE '%$libContent$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createStartDate">
+					<![CDATA[a.CREATE_DATE >= #createStartDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createEndDate">
+					<![CDATA[a.CREATE_DATE <= #createEndDate# ]]>
+			</isNotEmpty>
+            <isNotEmpty prepend="and" property="parentIds">
+                a.PARENT_ID in
+                <iterate property="parentIds" open="(" close=")" conjunction=",">
+                    #parentIds[]#
+                </iterate>
+            </isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="padInput">
+				<![CDATA[
+				((((a.LIB_TITLE like '%$padInput$%') or (a.LIB_CONTENT like '%$padInput$%'))
+				or a.LIB_NO like '%$padInput$%') 
+				OR a.PARENT_ID IN(SELECT LIBRARY_ID FROM PDT_MICRO_LIBRARY WHERE IS_DEL=0 AND IS_LEAF=0 AND LIB_TITLE like '%$padInput$%')) 
+				]]>
+			</isNotEmpty>
+			 ORDER BY a.CREATE_DATE DESC 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询产品知识库分类（分页求和） -->
+	<select id="getPdtLibraryPageCountByConds" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+			SELECT COUNT(0) FROM PDT_MICRO_LIBRARY a INNER JOIN PDT_MICRO_LIBRARY b ON a.PARENT_ID = b.LIBRARY_ID
+				 WHERE a.IS_DEL = 0 AND a.IS_LEAF = 1 AND b.IS_DEL = 0
+			<isNotEmpty property="parentId">       
+				<isNotEqual prepend="and" property="parentId" compareValue="1">
+					<![CDATA[a.PARENT_ID = #parentId#]]>
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libTitle">
+				<![CDATA[a.LIB_TITLE LIKE '%$libTitle$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libNo">
+				<![CDATA[a.LIB_NO LIKE '%$libNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libContent">
+				<![CDATA[a.LIB_CONTENT LIKE '%$libContent$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createStartDate">
+					<![CDATA[a.CREATE_DATE >= #createStartDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createEndDate">
+					<![CDATA[a.CREATE_DATE <= #createEndDate# ]]>
+			</isNotEmpty>
+            <isNotEmpty prepend="and" property="parentIds">
+                a.PARENT_ID in
+                <iterate property="parentIds" open="(" close=")" conjunction=",">
+                    #parentIds[]#
+                </iterate>
+            </isNotEmpty>
+
+			<isNotEmpty prepend="and" property="padInput">
+				<![CDATA[
+				((((a.LIB_TITLE like '%$padInput$%') or (a.LIB_CONTENT like '%$padInput$%'))
+				or a.LIB_NO like '%$padInput$%') 
+				OR a.PARENT_ID IN(SELECT LIBRARY_ID FROM PDT_MICRO_LIBRARY WHERE IS_DEL=0 AND IS_LEAF=0 AND LIB_TITLE like '%$padInput$%')) 
+				]]>
+			</isNotEmpty>
+	</select>
+
+    <select id="getPdtLibraryPageByCondsForPad" resultMap="PdtLibraryBeanResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        SELECT a.*,'' as LIB_NAME FROM PDT_MICRO_LIBRARY a
+        WHERE a.IS_DEL = 0
+        <isNotEmpty property="parentId">
+            <isEqual prepend="and" property="allSearch" compareValue="0">
+                <![CDATA[a.PARENT_ID = #parentId#]]>
+            </isEqual>
+        </isNotEmpty>
+        <isEqual prepend="and" property="allSearch" compareValue="1">
+            <![CDATA[a.IS_LEAF = 1#]]>
+        </isEqual>
+        <isNotEmpty prepend="and" property="padInput">
+            <![CDATA[
+				((a.LIB_TITLE like '%$padInput$%') or (a.LIB_CONTENT like '%$padInput$%'))
+				]]>
+        </isNotEmpty>
+        ORDER BY a.IS_LEAF ASC,a.CREATE_DATE DESC
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <select id="getPdtLibraryPageCountByCondsForPad" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        SELECT count(1) FROM PDT_MICRO_LIBRARY a
+        WHERE a.IS_DEL = 0
+        <isNotEmpty property="parentId">
+            <isEqual prepend="and" property="allSearch" compareValue="0">
+                <![CDATA[a.PARENT_ID = #parentId#]]>
+            </isEqual>
+        </isNotEmpty>
+        <isEqual prepend="and" property="allSearch" compareValue="1">
+            <![CDATA[a.IS_LEAF = 1#]]>
+        </isEqual>
+        <isNotEmpty prepend="and" property="padInput">
+            <![CDATA[
+				((a.LIB_TITLE like '%$padInput$%') or (a.LIB_CONTENT like '%$padInput$%'))
+				]]>
+        </isNotEmpty>
+    </select>
+
+	<!-- 查询知识库数据 PAD -->
+	<select id="queryAllLibraryForPad" resultMap="PdtLibraryResult" parameterClass="String">
+		SELECT * FROM PDT_MICRO_LIBRARY WHERE IS_DEL = 0 and IS_LEAF = 1
+		and ((LIB_TITLE like '%$input$%') or (LIB_CONTENT like '%$input$%'))
+		or PARENT_ID in (
+			select LIBRARY_ID from PDT_MICRO_LIBRARY where IS_DEL = 0 and IS_LEAF = 0
+			and LIB_TITLE like '%$input$%'
+		)
+		ORDER BY SORTNO ASC
+	</select>
+	
+	<!-- 得到知识库 NEXT SEQ 值 -->
+   	<select id="getNextLibraryId" resultClass="java.lang.Integer" >
+	   	SELECT NEXTVAL FOR SEQ_PDT_MICRO_LIBRARY FROM SYSIBM.SYSDUMMY1
+   	</select>
+</sqlMap>

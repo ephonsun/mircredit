@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnApproveLimitUserSQL">
+    <typeAlias alias="LnApproveLimitUser" type="com.banger.mobile.domain.model.loan.LnApproveLimitUser"/>
+
+    <!--LnApproveLimitUser全字段-->
+    <resultMap id="LnApproveLimitUserResult" class="LnApproveLimitUser">
+        <result column="LIMIT_USER_ID" property="limitUserId"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="LIMIT_MONEY" property="limitMoney"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+        <result column="ACCOUNT" property="account"/>
+        <result column="USER_NAME" property="userName"/>
+    </resultMap>
+
+    <!--根据userId查询出记录数-->
+    <select id="selectCountByUserId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+         SELECT COUNT(*) FROM LN_APPROVE_LIMIT_USER
+         WHERE 1=1
+         <isNotEmpty property="userId" prepend="and">
+             USER_ID=#userId#
+         </isNotEmpty>
+    </select>
+
+    <!--根据userId查询出该用户能审批的最大贷款金额额度-->
+    <select id="getLimitUserByUserId" resultMap="LnApproveLimitUserResult" parameterClass="java.util.Map">
+		SELECT a.*,'' AS ACCOUNT,'' AS USER_NAME FROM LN_APPROVE_LIMIT_USER a
+        WHERE 1=1
+        <isNotEmpty property="userId" prepend="and">
+            USER_ID=#userId#
+        </isNotEmpty>
+    </select>
+    
+    <!-- 根据部门Id查询部门下人员的额度(总数) -->
+    <select id="getLimitUserCountByDeptId" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+    	SELECT COUNT(1) FROM SYS_USER a 
+			LEFT JOIN LN_APPROVE_LIMIT_USER b ON a.USER_ID = b.USER_ID  
+			WHERE  a.IS_DEL = 0 AND a.ACCOUNT &lt;&gt; 'admin'
+        <isNotEmpty property="deptId" prepend="and">
+        	a.DEPT_ID = #deptId#
+        </isNotEmpty>
+        <isNotEmpty property="account" prepend="and">
+        	(a.ACCOUNT LIKE '%$account$%' OR a.USER_NAME LIKE '%$account$%')
+        </isNotEmpty>
+        
+    </select>
+    
+    <!-- 根据部门Id查询部门下人员的额度(分页) -->
+    <select id="getLimitUserByDeptId" resultMap="LnApproveLimitUserResult" parameterClass="java.util.Map">
+    	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+	    	SELECT b.LIMIT_USER_ID,a.USER_ID,b.LIMIT_MONEY,b.CREATE_DATE,b.UPDATE_DATE,b.CREATE_USER,b.UPDATE_USER,a.ACCOUNT,a.USER_NAME FROM SYS_USER a 
+			LEFT JOIN LN_APPROVE_LIMIT_USER b ON a.USER_ID = b.USER_ID  
+			WHERE  a.IS_DEL = 0 AND a.ACCOUNT <> 'admin'
+        ]]>
+        <isNotEmpty property="deptId" prepend="and">
+        	a.DEPT_ID = #deptId#
+        </isNotEmpty>
+        <isNotEmpty property="account" prepend="and">
+        	(a.ACCOUNT LIKE '%$account$%' OR a.USER_NAME LIKE '%$account$%')
+        </isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+    </select>
+    
+   	<!-- 根据ID修改审批额度 -->
+	<update id="updateLimitUserById" parameterClass="java.util.Map">
+		<![CDATA[
+		UPDATE LN_APPROVE_LIMIT_USER SET LIMIT_MONEY = $value$ WHERE LIMIT_USER_ID = #id#
+		]]>
+	</update>
+	
+	<!-- 新建用户审批额度 -->
+	<insert id="saveLimitUser" parameterClass="LnApproveLimitUser">
+		<![CDATA[
+			insert into LN_APPROVE_LIMIT_USER
+		(
+		 	LIMIT_USER_ID,
+			USER_ID,
+			LIMIT_MONEY,
+			CREATE_DATE,
+			UPDATE_DATE,
+			CREATE_USER,
+			UPDATE_USER
+		 )
+		values
+		(
+		#limitUserId#,
+		#userId#,
+		#limitMoney#,
+	    current timestamp,
+	    current timestamp,
+		#createUser#,
+		#updateUser#
+		)
+		]]>
+		<selectKey keyProperty="limitUserId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_APPROVE_LIMIT_USER
+		</selectKey>
+	</insert>
+	
+	<!-- 根据用户id查询金额设置表里是否包含 -->
+	<select id="getUserSetCountByUserId" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+             SELECT COUNT(1) FROM LN_APPROVE_LIMIT_USER WHERE USER_ID = #userId#
+        ]]>
+	</select>
+</sqlMap>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCounterUserSQL">
+	<typeAlias alias="CrmCounterUser"
+		type="com.banger.mobile.domain.model.crmCounterUser.CrmCounterUser" />
+
+
+	<!-- 柜台人员表-->
+	<!-- CrmCounterUserSQL信息全字段 -->
+	<resultMap class="CrmCounterUser" id="CrmCounterUserResult">
+		<result column="COUNTER_USER_ID" property="counterUserId" />
+		<result column="COUNTER_USER_ACCOUNT"
+			property="counterUserAccount" />
+		<result column="COUNTER_USER_NAME" property="counterUserName" />
+		<result column="USER_ID" property="userId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="IS_DEL" property="isDel" />
+	</resultMap>
+
+	<!-- 更新 -->
+	<update id="updateCounterUser" parameterClass="CrmCounterUser">
+		<![CDATA[
+  	update CRM_COUNTER_USER a
+  		set 
+  			a.COUNTER_USER_ACCOUNT = #counterUserAccount#,
+  			a.COUNTER_USER_NAME = #counterUserName#,
+  			a.DEPT_ID = #deptId#,
+  			a.UPDATE_DATE=current timestamp
+  		where 
+  			a.COUNTER_USER_ID = #counterUserId#
+  	]]>
+	</update>
+
+	<!-- 查询 -->
+	<select id="queryById" resultMap="CrmCounterUserResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		select * from CRM_COUNTER_USER a  where a.COUNTER_USER_ID=#counterUserId#
+  	]]>
+	</select>
+	<!-- 增加-->
+	<insert id="insertCounterUser" parameterClass="CrmCounterUser">
+		<![CDATA[
+		insert into CRM_COUNTER_USER
+		(
+		 COUNTER_USER_ID,
+		 COUNTER_USER_ACCOUNT,
+		 COUNTER_USER_NAME,
+		 USER_ID,
+		 DEPT_ID,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 IS_DEL
+		 )
+		values
+		(
+		#counterUserId#,
+		#counterUserAccount#,
+	    #counterUserName#,
+	    #userId#,
+	    #deptId#,
+	    current timestamp,
+	    current timestamp,
+	    0
+		)
+      ]]>
+		<selectKey keyProperty="counterUserId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_SYS_USER
+		</selectKey>
+	</insert>
+
+	<!-- 删除 -->
+	<update id="deleteCounterUser" parameterClass="java.lang.Integer">
+		<![CDATA[
+  			UPDATE CRM_COUNTER_USER SET IS_DEL = 1 WHERE COUNTER_USER_ID = #counterUserId#
+  		]]>
+	</update>
+
+
+
+	<!-- 分页查询 -->
+	<select id="getAllCrmCounterUser" resultMap="CrmCounterUserResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		select 
+		      a.*
+        from 
+             CRM_COUNTER_USER a
+             left join SYS_DEPT b on a.DEPT_ID = b.DEPT_ID 
+             where a.IS_DEL = 0
+                   ]]>
+		<isPropertyAvailable prepend="and"
+			property="searchMany">
+			$searchMany$
+		</isPropertyAvailable>
+		<isNotPropertyAvailable prepend="and"
+			property="searchMany">
+			b.DEPT_SEARCH_CODE like '$deptSearchCode$%'
+		</isNotPropertyAvailable>
+		<!--  
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[a.USER_ID =#userId#]]>
+		</isNotEmpty>
+		-->
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[b.DEPT_ID =#deptId#]]>
+		</isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<select id="getAllCrmCounterUserCount"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+		select 
+		      COUNT(*)
+        from 
+             CRM_COUNTER_USER a
+             left join SYS_DEPT b on a.DEPT_ID = b.DEPT_ID 
+             where a.IS_DEL = 0
+                   ]]>
+		<isPropertyAvailable prepend="and"
+			property="searchMany">
+			$searchMany$
+		</isPropertyAvailable>
+		<isNotPropertyAvailable prepend="and"
+			property="searchMany">
+			b.DEPT_SEARCH_CODE like '$deptSearchCode$%'
+		</isNotPropertyAvailable>
+		<!--  
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[a.USER_ID =#userId#]]>
+		</isNotEmpty>
+		-->
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[b.DEPT_ID =#deptId#]]>
+		</isNotEmpty>
+	</select>
+	<!-- 添加验证 -->
+	<select id="validateCrmCounterUser"
+		resultMap="CrmCounterUserResult" parameterClass="CrmCounterUser">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_COUNTER_USER a
+             where a.COUNTER_USER_ACCOUNT=#counterUserAccount# AND a.IS_DEL = 0
+        ]]>
+        	<isNotEmpty prepend="and" property="counterUserId">
+				<![CDATA[a.COUNTER_USER_ID !=#counterUserId#]]>
+			</isNotEmpty>
+	</select>
+	
+	
+	<select id="getAllCrmCounterUserForList" resultMap="CrmCounterUserResult"
+		parameterClass="java.lang.String">
+		<![CDATA[
+		select 
+		      a.*
+        from 
+             CRM_COUNTER_USER a where a.DEPT_ID in ($ids$) AND a.IS_DEL = 0
+         ]]>  
+	</select>
+	
+	<select id="getAllCounterUser" resultMap="CrmCounterUserResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select * from CRM_COUNTER_USER where 1=1
+         ]]>  
+         <isEmpty prepend="and" property="value">
+			<![CDATA[IS_DEL = 0]]>
+		</isEmpty>
+		<isNotEmpty prepend="and" property="value">
+			<![CDATA[DEPT_ID in ($value$)]]>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getCounterUserByUserId" resultMap="CrmCounterUserResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select * from CRM_COUNTER_USER where 1=1
+         ]]>  
+         <isNotEmpty prepend="and" property="isDel">
+			<![CDATA[IS_DEL = $isDel$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[USER_ID in ($userId$)]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>
+
+
+
+

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysWorkTransferSQL">
+	<typeAlias alias="SysWorkTransfer" type="com.banger.mobile.domain.model.user.SysWorkTransfer" />
+	
+	<!-- 工作转交表-->
+	<!-- SysWorkTransferSQL信息全字段  -->
+	<resultMap class="SysWorkTransfer" id="SysWorkTransferResult">
+		<result column="WORK_TRANSFER_ID" property="workTransferId" />
+		<result column="USER_ID" property="userId" />
+		<result column="TRANSFER_USER_ID" property="transferUserId" />
+		<result column="MANAGER_USER_ID" property="managerUserId" />
+		<result column="IS_TRANSFER_OVER" property="isTransferOver" />
+		<result column="TRANSFER_DATE" property="transferDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条工作转交-->
+	<insert id="addSysWorkTransfer" parameterClass="SysWorkTransfer">
+     <![CDATA[
+		insert into SYS_WORK_TRANSFER
+		(
+		 WORK_TRANSFER_ID,
+		 USER_ID,
+		 TRANSFER_USER_ID,
+		 MANAGER_USER_ID,
+		 IS_TRANSFER_OVER,
+		 TRANSFER_DATE,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#workTransferId#,
+		#userId#,
+	    #transferUserId#,
+	    #managerUserId#,
+	    #isTransferOver#,
+	    #transferDate#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="workTransferId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_WORK_TRANSFER 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 工作转交修改-->
+	<update id="updateSysWorkTransfer" parameterClass="SysWorkTransfer">
+	 <![CDATA[
+             update SYS_WORK_TRANSFER  set 
+		 ]]>	
+		<isNotEmpty property="userId">
+				USER_ID=#userId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="transferUserId">
+				TRANSFER_USER_ID=#transferUserId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="managerUserId">
+				MANAGER_USER_ID=#managerUserId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isTransferOver">
+				isTransferOver=#isTransferOver#,
+		 </isNotEmpty>
+		  <isNotEmpty property="transferDate">
+				TRANSFER_DATE=#transferDate#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where WORK_TRANSFER_ID=#workTransferId#
+         ]]> 
+	</update>
+	
+  
+  <!-- 根据id得到工作转交-->	
+  <select id="getSysWorkTransferById"  resultMap="SysWorkTransferResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_WORK_TRANSFER where WORK_TRANSFER_ID=#workTransferId#
+	]]>
+  </select>
+
+  <select id="getSysWorkTransferList" resultMap="SysWorkTransferResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_WORK_TRANSFER where 1=1 
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ USER_ID=#userId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="transferUserId">
+			<![CDATA[ TRANSFER_USER_ID=#transferUserId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="managerUserId">
+			<![CDATA[ MANAGER_USER_ID=#managerUserId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isTransferOver">
+			<![CDATA[ isTransferOver=#isTransferOver#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="transferDate">
+			<![CDATA[ TRANSFER_DATE=#transferDate#]]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+  </select>
+</sqlMap>
+
+
+
+

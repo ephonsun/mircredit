@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="LnProfitLossDetailSQL" >
+  <resultMap id="lnProfitLossDetailResult" class="com.banger.mobile.domain.model.loan.LnProfitLossDetail" >
+    <result column="ID" property="detailId" jdbcType="INTEGER" />
+    <result column="ITEM_ID" property="itemId" jdbcType="INTEGER" />
+    <result column="LOAN_ID" property="loanId" jdbcType="INTEGER" />
+    <result column="MONTH" property="month" jdbcType="VARCHAR" />
+    <result column="AMOUNT" property="amount" jdbcType="DECIMAL" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="SORT_NO" property="sortNo" jdbcType="INTEGER"/>
+    <result column="CREATE_USER" property="createUser" jdbcType="INTEGER" />
+    <result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="UPDATE_USER" property="updateUser" jdbcType="INTEGER" />
+    <result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+    <!--<parameterMap id="lossItemMap" class="java.util.HashMap">-->
+        <!--<parameter property="loanId"/>-->
+        <!--<parameter property="type"/>-->
+    <!--</parameterMap>-->
+
+    <!--<select id="selectItemListByType" resultMap="lnProfitLossItemResult" parameterMap="java.lang.Integer" >-->
+    <!---->
+        <!--select * from LN_PROFIT_LOSS_ITEM WHERE ITEM_ID = #itemId:INTEGER# ;-->
+
+    <!--</select>-->
+    <select id="selectDetailsByItemId" resultMap="lnProfitLossDetailResult" parameterClass="java.lang.Integer" >
+
+        select * from LN_PROFIT_LOSS_DETAIL WHERE ITEM_ID = #itemId:INTEGER# ORDER BY SORT_NO
+
+    </select>
+  <delete id="deleteDetailsByItemId" parameterClass="java.lang.Integer" >
+    delete from LN_PROFIT_LOSS_DETAIL
+    where ITEM_ID = #itemId:INTEGER#
+  </delete>
+    <delete id="deleteDetailsByLoanId" parameterClass="java.lang.Integer" >
+        delete from LN_PROFIT_LOSS_DETAIL
+        where LOAN_ID = #loanId:INTEGER#
+    </delete>
+  <update id="updateDetails" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossDetail" >
+    update LN_PROFIT_LOSS_DETAIL
+    set
+    AMOUNT = #amount:DECIMAL#,
+    REMARK = #remark:VARCHAR#,
+    UPDATE_USER = #updateUser:INTEGER#,
+    UPDATE_DATE = #updateDate:TIMESTAMP#
+    where ID = #detailId:INTEGER#
+  </update>
+
+
+  <insert id="insertDetails" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossDetail">
+    INSERT INTO LN_PROFIT_LOSS_DETAIL
+      (
+        ID,
+        ITEM_ID,
+        LOAN_ID,
+        MONTH,
+        SORT_NO,
+        CREATE_USER,
+        CREATE_DATE
+      )VALUES
+      (
+      #detailId:INTEGER#,
+      #itemId:INTEGER#,
+      #loanId:INTEGER#,
+      #month:VARCHAR#,
+      #sortNo:INTEGER#,
+      #createUser:INTEGER#,
+      #createDate:TIMESTAMP#
+      )
+
+    <selectKey keyProperty="detailId" resultClass="java.lang.Integer" type="pre">
+      VALUES NEXTVAL FOR SEQ_LN_PROFIT_LOSS_DETAIL
+    </selectKey>
+  </insert>
+</sqlMap>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmMaritalStatusSQL">
+	<typeAlias alias="CrmMaritalStatus" type="com.banger.mobile.domain.model.maritalStatus.MaritalStatus" />
+
+	<!-- CrmMaritalStatusSQL信息全字段 -->
+	<resultMap class="CrmMaritalStatus" id="CrmMaritalStatusResult">
+		<result column="MARITAL_STATUS_ID" property="maritalStatusId" />
+		<result column="MARITAL_STATUS_NAME" property="maritalStatusName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种婚姻状况-->
+	<insert id="addCrmMaritalStatus" parameterClass="CrmMaritalStatus">
+		<![CDATA[
+		INSERT INTO CRM_MARITAL_STATUS
+    	(
+        MARITAL_STATUS_ID,
+        IS_DEL,
+        MARITAL_STATUS_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #maritalStatusId#,
+        #isDel#,
+        #maritalStatusName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="maritalStatusId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_MARITAL_STATUS
+		</selectKey>
+	</insert>
+
+
+	<!-- 婚姻状况修改-->
+	<update id="updateCrmMaritalStatus" parameterClass="CrmMaritalStatus">
+		UPDATE CRM_MARITAL_STATUS SET 
+			IS_DEL = #isDel#,
+			MARITAL_STATUS_NAME = #maritalStatusName#, 
+			SORTNO = #sortNo#,
+			IS_ACTIVED = #isActived#, 
+			CREATE_DATE = #createDate#,
+			UPDATE_DATE =<![CDATA[current timestamp]]>, 
+			CREATE_USER = #createUser#, 
+			UPDATE_USER = #updateUser# 
+		where
+			MARITAL_STATUS_ID= #maritalStatusId#
+	</update>
+
+	<!-- 根据ID删除婚姻状况 -->
+	<update id="deleteCrmMaritalStatusById" parameterClass="java.lang.Integer">
+		UPDATE CRM_MARITAL_STATUS SET 
+			IS_DEL = 1, 
+			UPDATE_DATE =<![CDATA[current timestamp]]>
+		where 
+			MARITAL_STATUS_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到婚姻状况 -->
+	<select id="getCrmMaritalStatusById" resultMap="CrmMaritalStatusResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_MARITAL_STATUS where MARITAL_STATUS_ID=#Id#
+	]]>
+	</select>
+	
+	<!-- 根据婚姻状况名称获取相同婚姻状况名称的数据 -->
+	<select id="getSameCrmMaritalStatusByName" resultMap="CrmMaritalStatusResult" parameterClass="CrmMaritalStatus">
+		<![CDATA[select * from CRM_MARITAL_STATUS where  IS_DEL = 0]]>
+     	<isNotEmpty prepend="" property="maritalStatusId">
+     		<isNotEqual prepend="and" property="maritalStatusId" compareValue="0">
+			<![CDATA[MARITAL_STATUS_ID != #maritalStatusId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="maritalStatusName">
+			<![CDATA[MARITAL_STATUS_NAME = #maritalStatusName#]]>
+		</isNotEmpty>	
+	</select>
+
+	<!-- 获取婚姻状况列表 -->
+	<select id="getAllCrmMaritalStatus" resultMap="CrmMaritalStatusResult">
+	    <![CDATA[
+		select * from CRM_MARITAL_STATUS
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC
+        ]]>
+	</select>
+
+	<!-- 获取现有婚姻状况数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmMaritalStatus" resultMap="CrmMaritalStatusResult">
+		<![CDATA[
+		select *  from CRM_MARITAL_STATUS 
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取现有婚姻状况数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmMaritalStatus" resultMap="CrmMaritalStatusResult">
+		<![CDATA[
+		select *  from CRM_MARITAL_STATUS 
+		WHERE IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取要移动的婚姻状况对象 -->
+	<select id="getNeedMoveCrmMaritalStatus" resultMap="CrmMaritalStatusResult" parameterClass="java.util.Map">
+		select *  from CRM_MARITAL_STATUS WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

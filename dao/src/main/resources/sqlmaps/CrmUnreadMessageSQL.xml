@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmUnreadMessageSQL">
+	<typeAlias alias="CrmUnreadMessage" type="com.banger.mobile.domain.model.unreadMessage.CrmUnreadMessage" />
+
+
+	<!-- 消息提醒表-->
+	<!-- CrmUnreadMessageSQL信息全字段 -->
+	<resultMap class="CrmUnreadMessage" id="CrmUnreadMessageResult">
+		<result column="UNREAD_MESSAGE_ID" property="unreadMessageId" />
+		<result column="USER_ID" property="userId" />
+		<result column="UNREAD_MESSAGE" property="unreadMessage" />
+		<result column="MISSING_CALL" property="missingCall" />
+	</resultMap>
+  
+   <!-- 查询 -->
+  <select id="queryCrmUnreadMessage"   resultMap="CrmUnreadMessageResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from CRM_UNREAD_MESSAGE where USER_ID=#userId# 
+  	]]>
+  </select>
+	
+</sqlMap>
+
+
+
+

@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="transactionTemplate"
+		class="org.springframework.transaction.support.TransactionTemplate" />
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" />
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation">
+			<value>classpath:/sql-map-config.xml
+			</value>
+		</property>
+		<property name="dataSource" ref="dataSource" />
+		<property name="useTransactionAwareDataSource">
+			<value>false</value>
+		</property>
+	</bean>
+
+	<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="dataSource" ref="dataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+
+	<!-- end add by zhangxiang for dao依赖类 ，自动注入-->
+	<bean id="recordInfoDao" class="com.banger.mobile.dao.record.ibatis.RecordInfoDaoiBatis"></bean>
+	
+	<!-- 客户dao --> 
+	<bean id="crmCustomerDao" class="com.banger.mobile.dao.customer.ibatis.CrmCustomerDaoiBatis"></bean>
+	<!-- 可能重复客户dao --> 
+	<bean id="mayDiffCustomerDao" class="com.banger.mobile.dao.customer.ibatis.MayDiffCustomerDaoiBatis"></bean>
+	<!-- 客户自定义dao --> 
+	<bean id="customizedFieldDao" class="com.banger.mobile.dao.customer.ibatis.CustomizedFieldDaoiBatis"></bean>
+	<!-- 客户称谓dao --> 
+	<bean id="familyNameDao" class="com.banger.mobile.dao.customer.ibatis.FamilyNameDaoiBatis"></bean>
+	<!-- 客户共享Dao -->
+	<bean id="crmCustomerShareDao" class="com.banger.mobile.dao.customer.ibatis.CrmCustomerShareDaoiBatis"></bean>
+	<!-- 亲友客户Dao -->
+	<bean id="crmCustomerRelativesDao" class="com.banger.mobile.dao.customer.ibatis.CrmCustomerRelativesiBatis"></bean>
+	
+	<bean id="crmTemplateDao" class="com.banger.mobile.dao.template.ibatis.CrmTemplateDaoiBatis"></bean>
+
+	<!-- 客户类型end add by QianJie for dao依赖类 ，自动注入-->
+	<bean id="crmCustomerTypeDao" class="com.banger.mobile.dao.system.ibatis.CrmCustomerTypeDaoiBatis"></bean>
+	<!--end add by wumh for commProgressDao 依赖类，自动注入-->
+	<bean id="commProgressDao" class="com.banger.mobile.dao.system.ibatis.CommProgressDaoiBatis"></bean>
+	<!-- 部门dao --> 
+	<bean id="deptDao" class="com.banger.mobile.dao.dept.ibatis.DeptDaoiBatis"></bean>
+ 	<!-- 数据访问权限dao -->
+ 	<bean id="dataAuthDao" class="com.banger.mobile.dao.dataAuth.ibatis.DataAuthDaoiBatis"></bean>
+ 	<!-- 功能权限树dao -->
+ 	<bean id="funcAuthDao" class="com.banger.mobile.dao.funcAuth.ibatis.FuncAuthDaoiBatis"></bean>
+		<!-- end add by yangy for dao用户管理依赖类 ，自动注入-->
+	<bean id="sysUserDao" class="com.banger.mobile.dao.user.ibatis.SysUserDaoiBatis"></bean>
+
+	<!-- end add by yangy for dao用户角色管理依赖类 ，自动注入-->
+	<bean id="sysRoleMemberDao" class="com.banger.mobile.dao.user.ibatis.SysRoleMemberDaoiBatis"></bean>
+
+	<!-- 业务类型Dao注入 -->
+	<bean id="recbizTypeDao" class="com.banger.mobile.dao.recbiztype.ibatis.RecbizTypeDaoiBatis"></bean>
+	<!-- 角色Dao注入 -->
+	<bean id="sysRoleDao" class="com.banger.mobile.dao.role.ibatis.SysRoleDaoiBatis"></bean>
+	<!-- 安全日志dao注入 -->
+	<bean id="loginLogDao" class="com.banger.mobile.dao.loginLog.ibatis.LoginLogDaoiBatis"></bean>
+	<!-- 操作日志dao注入 -->
+	<bean id="opeventLogDao" class="com.banger.mobile.dao.opeventLog.ibatis.OpeventLogDaoiBatis"></bean>
+	<!-- 全局参数dao注入 -->
+	<bean id="sysParamDao" class="com.banger.mobile.dao.param.ibatis.SysParamDaoiBatis"></bean>
+	<!-- 行业类型 end add by QianJie for dao依赖类 ，自动注入-->
+	<bean id="crmCustomerIndustryDao" class="com.banger.mobile.dao.system.ibatis.CrmCustomerIndustryDaoiBatis"></bean>
+	<!-- 高级搜索客户Dao注入 -->
+	<bean id="advancedCustomerDao" class="com.banger.mobile.dao.customer.ibatis.AdvancedCustomerDaoiBatis"></bean>
+	<!-- 模版字段类型Dao注入 -->
+	<bean id="crmFieldTypeDao" class="com.banger.mobile.dao.fieldType.ibatis.CrmFieldTypeiBatis"></bean>
+	<!-- 拜访记录dao注入 -->
+	<bean id="visitRecordDao" class="com.banger.mobile.dao.visitRecord.ibatis.VisitRecordDaoiBatis"></bean>
+	<!-- 代码表 性别 -->
+	<bean id="sexDao" class="com.banger.mobile.dao.system.ibatis.CdSexDaoiBatis"></bean>
+	<!-- 代码表 省份 -->
+	<bean id="provinceDao" class="com.banger.mobile.dao.system.ibatis.CdProvinceDaoiBatis"></bean>
+	<!-- 代码表 城市 -->
+	<bean id="cityDao" class="com.banger.mobile.dao.system.ibatis.CdCityDaoiBatis"></bean>
+	<!-- 模版字段列表Dao注入 -->
+	<bean id="crmTemplateFieldDao" class="com.banger.mobile.dao.templateField.ibatis.CrmTemplateFieldDaoiBatis"></bean>
+	<!-- 通话基础设置Dao注入 -->
+	<bean id="phoneConfigDao" class="com.banger.mobile.dao.phoneConfig.ibatis.PhoneConfigDaoiBatis"></bean>
+	<!-- 模版字段代码表Dao注入 -->
+	<bean id="crmFieldCodeDataDao" class="com.banger.mobile.dao.fieldCodeData.ibatis.CrmFieldCodeDataDaoiBatis"></bean>
+	<!-- 消息提醒Dao注入 -->
+	<bean id="remindConfigDao" class="com.banger.mobile.dao.remindConfig.ibatis.RemindConfigDaoiBatis"></bean>
+	<!-- 客户资料同步设置Dao注入 -->
+	<bean id="syncSettingDao" class="com.banger.mobile.dao.syncSetting.ibatis.SyncSettingDaoiBatis"></bean>
+	<!-- 答录配置Dao注入 -->
+	<bean id="answerConfigDao" class="com.banger.mobile.dao.answerConfig.ibatis.AnswerConfigDaoiBatis"></bean>
+	<!-- 未接信息Dao注入 -->
+	<bean id="crmUnreadMessageDao" class="com.banger.mobile.dao.unreadMessage.ibatis.CrmUnreadMessageDaoiBatis"></bean>
+	<!-- 手机号码区域表Dao注入 -->
+	<bean id="mobileAreaDao" class="com.banger.mobile.dao.talk.ibatis.TlkMobileAttibutionDaoiBatis"></bean>
+	<!-- 区号名称Dao注入 -->
+	<bean id="telephoneAreaDao" class="com.banger.mobile.dao.talk.ibatis.TlkTelephoneCodeDaoiBatis"></bean>
+
+	<!-- 理财规划报告模板dao --> 
+	<bean id="plnReportTemplateDao" class="com.banger.mobile.dao.PlnReportTemplate.ibatis.PlnReportTemplateDaoiBatis"></bean>
+	<!-- 理财规划报告模板类型dao --> 
+	<bean id="plnPlanTypeDao" class="com.banger.mobile.dao.plnPlanType.ibatis.PlnPlanTypeDaoiBatis"></bean>
+
+	<!-- 证件类型Dao注入 -->
+	<bean id="cardTypeDao" class="com.banger.mobile.dao.CardType.ibatis.CardTypeDaoiBatis"></bean>
+
+	<!-- 快速规划Dao注入 -->
+	<bean id="plnFastPlanDao" class="com.banger.mobile.dao.plnFastPlan.ibatis.PlnFastPlanDaoiBatis"></bean>
+	<!-- 客户统计报表Dao注入 -->
+	<bean id="customerReportDao" class="com.banger.mobile.dao.report.ibatis.CustomerReportDaoiBatis"></bean>
+	<!-- 通话统计报表Dao注入 -->
+	<bean id="recordReportDao" class="com.banger.mobile.dao.report.ibatis.RecordReportDaoiBatis"></bean>
+	<!-- 理财规划模板变量dao -->
+	<bean id="plnTemplateVarDao" class="com.banger.mobile.dao.plnTemplateVar.ibatis.PlnTemplateVarDaoiBatis" />
+	<!-- 理财规划报告dao -->
+	<bean id="plnReportDao" class="com.banger.mobile.dao.plnReport.ibatis.PlnReportDaoiBatis" />
+	<!-- 日志dao -->
+	<bean id="opeventLoginLogDao" class="com.banger.mobile.dao.log.ibatis.OpeventLoginLogDaoiBatis" />
+	<!-- 定时任务Dao -->
+	<bean id="taskCurrentDao" class="com.banger.mobile.dao.quartz.ibatis.TaskCurrentDaoiBatis" />
+	<bean id="taskInsDao" class="com.banger.mobile.dao.quartz.ibatis.TaskInsDaoiBatis" />
+	<!-- 菜单权限dao -->
+	<bean id="menuAuthDao" class="com.banger.mobile.dao.menuAuth.ibatis.MenuAuthDaoiBatis" />
+	<!-- 登陆状态代码dao -->
+	<bean id="cdOnlineStatusDao" class="com.banger.mobile.dao.user.ibatis.CdOnlineStatusDaoiBatis" />
+	<!-- 可管理部门dao -->
+	<bean id="sysDeptAuthDao" class="com.banger.mobile.dao.user.ibatis.SysDeptAuthiBatis" />
+	<!-- 可管理角色dao -->
+	<bean id="sysRoleAuthDao" class="com.banger.mobile.dao.user.ibatis.SysRoleAuthiBatis" />
+	<!-- 在线用户dao -->
+	<bean id="sysUserOnlineDao" class="com.banger.mobile.dao.user.ibatis.SysUserOnlineiBatis" />
+	<!-- 峰会在线用户dao -->
+	<bean id="sysUserOnlineMaxDao" class="com.banger.mobile.dao.user.ibatis.SysUserOnlineMaxiBatis" />
+	<!-- 工作托管dao -->
+	<bean id="sysWorkDelegateDao" class="com.banger.mobile.dao.user.ibatis.SysWorkDelegateiBatis" />
+	<!-- 工作转交dao -->
+	<bean id="sysWorkTransferDao" class="com.banger.mobile.dao.user.ibatis.SysWorkTransferiBatis" />
+	<!-- 通话白名单dao -->
+	<bean id="sysWhiteListDao" class="com.banger.mobile.dao.sysWhiteList.iBatis.SysWhiteListDaoiBatis" />
+	<!-- web端限流dao -->
+	<bean id="sysWebFlowControlDao" class="com.banger.mobile.dao.sysWebFlowControl.iBatis.SysWebFlowControlDaoiBatis" />
+	
+	<!-- 导入记录dao -->
+	<bean id="sysImportDao" class="com.banger.mobile.dao.sysImport.ibatis.SysImportDaoiBatis" />
+	<!-- 铃声设置dao -->
+	<bean id="crmRingSettingDao" class="com.banger.mobile.dao.crmRingSetting.iBatis.CrmRingSettingDaoiBatis" />
+	<!-- 录音提示音dao -->
+	<bean id="crmRecordRemindDao" class="com.banger.mobile.dao.crmRecordRemind.iBatis.CrmRecordRemindDaoiBatis" />
+	<!-- 录音设置dao -->
+	<bean id="crmRecordSettingDao" class="com.banger.mobile.dao.crmRecordSetting.iBatis.CrmRecordSettingDaoiBatis" />
+	<!-- 柜台人员dao -->
+	<bean id="crmCounterUserDao" class="com.banger.mobile.dao.crmCounterUser.iBatis.CrmCounterUserDaoiBatis" />
+	<bean id="sysRunDaysDao" class="com.banger.mobile.dao.sysRunDays.ibatis.SysRunDaysDaoiBatis" />
+	<!-- 导出字段 dao -->
+	<bean id="crmModuleExportDao" class="com.banger.mobile.dao.crmModuleExport.iBatis.CrmModuleExportDaoiBatis" />
+	<!-- AD域配置Dao -->
+	<bean id="adSyncConfigDao" class="com.banger.mobile.dao.adsync.ibatis.AdSyncConfigDaoiBatis" />
+	
+	<!-- 有效通话量设置dao -->
+	<bean id="sysTalkLimitConfigDao" class="com.banger.mobile.dao.system.ibatis.SysTalkLimitConfigDaoiBatis" />
+	
+	<!-- 知识库dao -->
+	<bean id="feKnowledgebaseTypeDao" class="com.banger.mobile.dao.finance.ibatis.FeKnowledgebaseTypeibatis"/>
+	<!-- 财经文章dao -->
+	<bean id="feArticleDao" class="com.banger.mobile.dao.finance.ibatis.FeArticleDaoiBatis" />
+	<!-- 财经文章附件dao -->
+	<bean id="feArticeleAttachmentDao" class="com.banger.mobile.dao.finance.ibatis.FeArticeleAttachmentDaoiBatis" />
+	<!-- 收藏数据DAO -->
+	<bean id="feKnowLedgeContentDao" class="com.banger.mobile.dao.finance.ibatis.FeKnowLedgeContentiBatis"/>
+	<!-- 所有栏目dao -->
+	<bean id="feAllColumnDao" class="com.banger.mobile.dao.finance.ibatis.FeAllColumniBatis"/>
+	<!-- 财经要点，用户关联表Dao -->
+	<bean id="feUserRelationDao" class="com.banger.mobile.dao.finance.ibatis.FeUserRelationiBatis"/>
+	<!-- 文章评论dao -->
+	<bean id="feArticleDiscessDao" class="com.banger.mobile.dao.finance.ibatis.FeArticleDiscessiBatis"/>
+	<!-- 评论回复dao -->
+	<bean id="feArticleReplyDao" class="com.banger.mobile.dao.finance.ibatis.FeArticleReplyiBatis"/>
+	<!-- 财经要点报表Dao -->
+	<bean id="financeReportDao" class="com.banger.mobile.dao.report.ibatis.FinanceReportDaoiBatis"/>
+	<!-- 交流区分区Dao -->
+	<bean id="partitionDao" class="com.banger.mobile.dao.communication.iBatis.PartitionDaoiBatis"/>
+	<!-- 交流区版块Dao -->
+	<bean id="commonTemplateDao" class="com.banger.mobile.dao.communication.iBatis.CommonTemplateDaoiBatis"/>
+	<!-- 交流主题Dao -->
+	<bean id="commThemeDao" class="com.banger.mobile.dao.communication.iBatis.CommThemeDaoiBatis"/>
+	<!-- 主题回复Dao -->
+	<bean id="commThemeReplyDao" class="com.banger.mobile.dao.communication.iBatis.CommThemeReplyDaoiBatis"/>
+	<!-- 用户/交流关系Dao -->
+	<bean id="commUserRelationDao" class="com.banger.mobile.dao.communication.iBatis.CommUserRelationDaoiBatis"/>
+	<!-- 主题投票Dao -->
+	<bean id="commThemeOptionDao" class="com.banger.mobile.dao.communication.iBatis.CommThemeOptionDaoiBatis"/>
+	
+	<!-- 联系目的dao -->
+	<bean id="tskTaskPurposeDao" class="com.banger.mobile.dao.tskTaskPurpose.ibatis.TskTaskPurposeDaoiBatis" />
+	<!-- 联系计划dao重构 -->
+	<bean id="tskPlanDao" class="com.banger.mobile.dao.tskContact.iBatis.TskPlanDaoiBatis" />
+	<!-- 联系计划目标客户dao重构 -->
+	<bean id="tskPlanTargetDao" class="com.banger.mobile.dao.tskContact.iBatis.TskPlanTargetDaoiBatis" />
+	<!-- 联系任务主体Dao(重构) -->
+	<bean id="tskContactDao" class="com.banger.mobile.dao.tskContact.iBatis.TskContactiBatis"/>
+	<!-- 联系任务附件Dao(重构) -->
+	<bean id="tskContactAttachmentDao" class="com.banger.mobile.dao.tskContact.iBatis.TskContactAttachmentiBatis"/>
+	<!-- 联系任务执行者Dao(重构) -->
+	<bean id="tskContactExecuteDao" class="com.banger.mobile.dao.tskContact.iBatis.TskContactExecuteiBatis"/>
+ 	<!-- 联系任务执行者Dao(重构) -->
+	<bean id="tskContactTargetDao" class="com.banger.mobile.dao.tskContact.iBatis.TskContactTargetiBatis"/>
+	
+	<!-- 营销计划Dao -->
+	<bean id="tskMarketingPlanDao" class="com.banger.mobile.dao.tskMarketing.iBatis.TskMarketingPlanDaoiBatis"/>
+	<bean id="tskMarketingPlanDetailDao" class="com.banger.mobile.dao.tskMarketing.iBatis.TskMarketingPlanDetailDaoiBatis"/>
+	<!-- 营销任务附件表Dao -->
+	<bean id="tskMarketingAttachmentDao" class="com.banger.mobile.dao.tskMarketing.iBatis.TskMarketingAttachmentDaoiBatis"/>
+	<!-- 营销任务主表Dao -->
+	<bean id="tskMarketingDao" class="com.banger.mobile.dao.tskMarketing.iBatis.TskMarketingDaoiBatis"/>
+	<!-- 营销任务明细表Dao -->
+	<bean id="tskMarketingExecuteDao" class="com.banger.mobile.dao.tskMarketing.iBatis.TskMarketingExecuteDaoiBatis"/>
+	
+	<!-- 产品报表Dao -->
+	<bean id="pdtProductReportDao" class="com.banger.mobile.dao.report.ibatis.PdtProductReportDaoiBatis"/>
+	<!-- 任务等级Dao -->
+	<bean id="taskGradeDao" class="com.banger.mobile.dao.system.ibatis.TaskGradeDaoiBatis"/>
+
+	<!-- 特殊号码 -->
+	<bean id="specialNumberDao" class="com.banger.mobile.dao.talk.ibatis.TlkSpecialNumberDaoiBatis"/>
+
+	<!-- 产品 dao -->
+	<bean id="pdtProductDao" class="com.banger.mobile.dao.microProduct.ibatis.PdtProductDaoiBatis" />
+	<!-- 产品知识库 dao -->
+	<bean id="pdtLibraryDao" class="com.banger.mobile.dao.microProduct.ibatis.PdtLibraryDaoiBatis" />
+	<!-- 产品知识附件 dao -->
+	<bean id="pdtLibraryAttachmentDao" class="com.banger.mobile.dao.microProduct.ibatis.PdtLibraryAttachmentDaoiBatis" />
+	<!-- 产品意向客户 dao -->
+	<bean id="pdtProductCustomerDao" class="com.banger.mobile.dao.microProduct.ibatis.PdtProductCustomerDaoiBtatis" />
+	<!-- 产品通知 dao -->
+	<bean id="pdtNoticeDao" class="com.banger.mobile.dao.microProduct.ibatis.PdtNoticeDaoiBatis" />
+	<!-- 产品通知用户 dao -->
+	<bean id="pdtNoticeUserDao" class="com.banger.mobile.dao.microProduct.ibatis.PdtNoticeUserDaoiBatis" />
+	
+	<!-- 任务日程Dao -->
+	<bean id="tskScheduleDao" class="com.banger.mobile.dao.microTask.ibatis.TskScheduleDaoiBatis" />
+	<!-- 任务Dao -->
+	<bean id="tskMicroTaskDao" class="com.banger.mobile.dao.microTask.ibatis.TskMicroTaskDaoiBatis" />
+	<!-- 任务附件Dao -->
+	<bean id="tskMicroTaskAttachmentDao" class="com.banger.mobile.dao.microTask.ibatis.TskMicroTaskAttachmentDaoiBatis" />
+	<!-- 任务执行者Dao -->
+	<bean id="tskMicroTaskExecuteDao" class="com.banger.mobile.dao.microTask.ibatis.TskMicroTaskExecuteDaoiBatis" />
+	<!-- 任务目标客户Dao -->
+	<bean id="tskMicroTaskTargetDao" class="com.banger.mobile.dao.microTask.ibatis.TskMicroTaskTargetDaoiBatis" />
+	
+	<!-- 资料 dao -->
+	<bean id="customerDataDao" class="com.banger.mobile.dao.data.ibatis.CustomerDataDaoiBatis" />
+	<!-- 资料 Super dao -->
+	<bean id="dataSuperDao" class="com.banger.mobile.dao.data.ibatis.DataSuperDaoiBatis" />
+	<!-- 资料 视频 dao -->
+	<bean id="dataVideoDao" class="com.banger.mobile.dao.data.ibatis.DataVideoDaoiBatis" parent="dataSuperDao" />
+	<!-- 资料 录音 dao -->
+	<bean id="dataAudioDao" class="com.banger.mobile.dao.data.ibatis.DataAudioDaoiBatis" parent="dataSuperDao" />
+	<!-- 资料 照片 dao -->
+	<bean id="dataPhotoDao" class="com.banger.mobile.dao.data.ibatis.DataPhotoDaoiBatis" parent="dataSuperDao" />
+	<!-- 资料 资料表dao -->
+	<bean id="dataFormDao" class="com.banger.mobile.dao.data.ibatis.DataFormDaoiBatis" parent="dataSuperDao" />
+	<!-- 资料 短信dao-->
+	<bean id="dataSmsDao" class="com.banger.mobile.dao.data.ibatis.DataSmsDaoiBatis" parent="dataSuperDao" />
+	<!-- 资料 彩信dao -->
+	<bean id="dataMmsDao" class="com.banger.mobile.dao.data.ibatis.DataMmsDaoiBatis" parent="dataSuperDao" />
+	
+	<!-- 贷款  -->
+    <bean id="lnLoanDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanDaoiBatis"/>
+    <!-- 贷款类型  -->
+    <bean id="lnLoanTypeDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanTypeDaoiBatis"/>
+     <!-- 贷款类型  -->
+    <bean id="lnLoanMonitorDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanMonitorDaoiBatis"/>
+    <!-- 贷款子类型  -->
+    <bean id="lnLoanSubTypeDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanSubTypeDaoiBatis"/>
+    <!-- 贷款撤销原因  -->
+    <bean id="lnCancelReasonDao" class="com.banger.mobile.dao.loan.ibatis.LnCancelReasonDaoiBatis"/>
+    <!-- 信贷历史记录  -->
+    <bean id="lnCreditHistoryDao" class="com.banger.mobile.dao.loan.ibatis.LnCreditHistoryDaoiBatis"/>
+  	 <!-- 抵质押物记录  -->
+    <bean id="lnLoanPledgeDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanPledgeDaoiBatis"/>
+    
+    <!-- 贷款催收记录  -->
+    <bean id="lnDunLogDao" class="com.banger.mobile.dao.loan.ibatis.LnDunLogDaoiBatis"/>
+    <!-- 异常贷款催收记录  -->
+    <bean id="lnExceptionDunLogDao" class="com.banger.mobile.dao.loan.ibatis.LnExceptionDunLogDaoiBatis"/>
+    <!-- 异常还款计划  -->
+    <bean id="lnExceptionRepaymentPlanDao" class="com.banger.mobile.dao.loan.ibatis.LnExceptionRepaymentPlanDaoiBatis"/>
+    <!-- 共同借贷人  -->
+    <bean id="lnLoanCoBorrowerDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanCoBorrowerDaoiBatis"/>
+    <!-- 担保人  -->
+    <bean id="lnLoanGuarantorDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanGuarantorDaoiBatis"/>
+
+	<!-- 上下游  -->
+	<bean id="inBusinessReachesDao" class="com.banger.mobile.dao.loan.ibatis.InBusinessReachesDaoiBatis"/>
+
+
+	<!--偏差分析-->
+	<bean id="lnDeviationAnalsysisDao" class="com.banger.mobile.dao.loan.ibatis.LnDeviationAnalsysisDaoBatis"/>
+
+
+
+    <!-- 贷款状态  -->
+    <bean id="lnLoanStatusDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanStatusDaoiBatis"/>
+    <!-- 贷款操作历史记录  -->
+    <bean id="lnOpHistoryDao" class="com.banger.mobile.dao.loan.ibatis.LnOpHistoryDaoiBatis"/>
+    <!-- 还款计划  -->
+    <bean id="lnRepaymentPlanDao" class="com.banger.mobile.dao.loan.ibatis.LnRepaymentPlanDaoiBatis"/>
+    <!--用户审批额度设置表-->
+    <bean id="lnApproveLimitUserDao" class="com.banger.mobile.dao.loan.ibatis.LnApproveLimitUserDaoiBatis"/>
+    <!--角色审批额度设置表-->
+    <bean id="lnApproveLimitRoleDao" class="com.banger.mobile.dao.loan.ibatis.LnApproveLimitRoleDaoiBatis"/>
+	<!-- 催收设置 -->
+	<bean id="lnDunSetingDao" class="com.banger.mobile.dao.loan.ibatis.LnDunSetingDaoiBatis"/>
+    <!--异常催收贷款分配-->
+    <bean id="lnExceptionDunAssignDao" class="com.banger.mobile.dao.loan.ibatis.LnExceptionDunAssignDaoiBatis"/>
+    <!--审计历史操作-->
+    <bean id="lnVerifyHistoryDao" class="com.banger.mobile.dao.loan.ibatis.LnVerifyHistoryDaoiBatis"/>
+    <!--用户地理位置-->
+    <bean id="mapUserGpsDao" class="com.banger.mobile.dao.map.ibatis.MapUserGpsDaoiBatis"/>
+    <!--客户地理位置-->
+    <bean id="mapCustomerGpsDao" class="com.banger.mobile.dao.map.ibatis.MapCustomerGpsDaoiBatis"/>
+    <!--录音地理位置-->
+    <bean id="mapRecordGpsDao" class="com.banger.mobile.dao.map.ibatis.MapRecordGpsDaoiBatis"/>
+    <!--文件上传 -->
+    <bean id="sysUploadFileDao" class="com.banger.mobile.dao.uploadFile.ibatis.SysUploadFileDaoiBatis"/>
+    
+    <!-- PAD管理 -->
+    <bean id="padInfoDao" class="com.banger.mobile.dao.padManagement.ibatis.PadInfoDaoiBatis"/>
+    <bean id="padTypeDao" class="com.banger.mobile.dao.padManagement.ibatis.PadTypeDaoiBatis"/>
+    <bean id="sysPadUploadLogDao" class="com.banger.mobile.dao.padManagement.ibatis.SysPadUploadLogDaoiBatis"/>
+    <bean id="sysPadLogDao" class="com.banger.mobile.dao.padManagement.ibatis.SysPadLogDaoiBatis"/>
+
+    <!--特殊数据权限 -->
+    <bean id="specialDataAuthDao" class="com.banger.mobile.dao.specialDataAuth.ibatis.SpecialDataAuthDaoiBatis"/>
+    <!--贷款信息 -->
+    <bean id="lnLoanInfoDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanInfoDaoiBatis"/>
+    <!--贷款信息字典-->
+    <bean id="lnLoanInfoDictionaryDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanInfoDictionaryDaoiBatis"/>
+    <!--用户GPS地址日志表-->
+    <bean id="mapUserGpsLogDao" class="com.banger.mobile.dao.map.ibatis.MapUserGpsLogDaoiBatis"/>
+
+    <!--积分商城客户-->
+    <bean id="jfMyCustomerDao" class="com.banger.mobile.dao.points.ibatis.JfMyCustomerDaoiBatis"/>
+    <bean id="jfOrderPhotoDao" class="com.banger.mobile.dao.points.ibatis.JfOrderPhotoDaoiBatis"/>
+
+    <!--拒绝客户登记-->
+    <bean id="lnRejectCustomerDao" class="com.banger.mobile.dao.loan.ibatis.LnRejectCustomerDaoiBatis"/>
+    <!--征信调查-->
+    <bean id="crRequestDao" class="com.banger.mobile.dao.crRequest.ibatis.CrRequestDaoiBatis"/>
+    <!-- 在线反馈 -->
+    <bean id="feedBackDao"  class="com.banger.mobile.dao.feedBack.ibatis.FeedBackDaoiBatis"/>
+    <!-- 团队日志 -->
+    <bean id="teamLogDao" class="com.banger.mobile.dao.microTask.ibatis.TeamLogDaoiBatis"/>
+    <!-- 通告 -->
+    <bean id="informDao" class="com.banger.mobile.dao.inform.ibatis.InformDaoIBatis"/>
+    
+    <!-- -->
+    <bean id="crmCredentialTypeDao" class="com.banger.mobile.dao.system.ibatis.CrmCredentialTypeDaoiBatis"/>
+    <bean id="crmLivingConditionDao" class="com.banger.mobile.dao.system.ibatis.CrmLivingConditionDaoiBatis"/>
+    <bean id="crmEducationalHistoryDao" class="com.banger.mobile.dao.system.ibatis.CrmEducationalHistoryDaoiBatis"/>
+    <bean id="crmMaritalStatusDao" class="com.banger.mobile.dao.system.ibatis.CrmMaritalStatusDaoiBatis"/>
+    <bean id="crmLegalFormDao" class="com.banger.mobile.dao.system.ibatis.CrmLegalFormDaoiBatis"/>
+    <bean id="crmOrgTypeDao" class="com.banger.mobile.dao.system.ibatis.CrmOrgTypeDaoiBatis"/>
+    <!-- 团队 -->
+    <bean id="sysTeamDao" class="com.banger.mobile.dao.system.ibatis.SysTeamDaoiBatis"/>
+    <bean id="sysTeamUserDao" class="com.banger.mobile.dao.system.ibatis.SysTeamUserDaoiBatis"/>
+    
+    <!-- 贷款数据字典 -->
+    <bean id="sDicDao" class="com.banger.mobile.dao.loan.ibatis.SDicDaoiBatis"/>
+    
+    <bean id="padLnLoanInfoDao" class="com.banger.mobile.dao.webservice.ibatis.PadLnLoanInfoDaoIbatis"/>
+
+	 <!-- 经营贷经营模式 -->
+    <bean id="lnBusinessModelDao" class="com.banger.mobile.dao.loan.ibatis.LnBusinessModelDaoiBatis"/>
+    <!-- 消费贷访谈记录-->
+    <bean id="lnRecordInterviewDao" class="com.banger.mobile.dao.loan.ibatis.LnRecordInterviewDaoiBatis"/>
+    <!-- 消费贷发展历史-->
+    <bean id="lnLoanHistoryDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanHistoryDaoiBatis"/>
+     <!-- 资产负债表-->
+    <bean id="lnLoanBalanceDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceDaoiBatis"/>
+    <!-- 资产负债表 资产-->
+    <bean id="lnLoanBalanceAssetDAO" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceAssetDaoiBatis"/>
+    <!-- 资产负债表  负债-->
+    <bean id="lnLoanBalanceDebtDAO" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceDebtDaoiBatis"/>
+  
+    <!-- 资产负债表  其他交叉检查-->
+    <bean id="lnLoanBalanceOtherDAO" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceOtherDAOImpl"/>
+    <!-- 资产负债表  应收账-->
+    <bean id="lnLoanBalanceReceivableDAO" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceReceivableImplDaoiBatis"/>
+  	<!-- 资产负债表  房产-->
+    <bean id="lnLoanBalanceHousingDAO" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceHousingDaoiBatis"/>
+  	  <!-- 资产负债表  机动车-->
+    <bean id="lnLoanBalanceVehicleDAO" class="com.banger.mobile.dao.loan.ibatis.LnLoanBalanceVehicleDaoiBatis"/>
+ 	  <!-- 损益表 消费贷主表  -->
+    <bean id="lnLoanProfitandlossDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanProfitandlossDaoiBatis"/>
+ 	  <!-- 损益表  消费贷详情-->
+    <bean id="lnLoanProfitandlossXfDetailDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanProfitandlossXfDetailDaoiBatis"/>
+ 	  <!-- 损益表  经营贷详情-->
+    <bean id="lnLoanProfitandlossJyDetailDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanProfitandlossJyDetailDaoiBatis"/>
+
+	<!-- 损益表  经营贷详情-->
+	<bean id="lnLoanContractDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanContractDaoiBatis"/>
+	
+    <bean id="lnProfitLossProdDAO" class="com.banger.mobile.dao.loan.ibatis.LnProfitLossProdDAOImpl"/>
+
+	<bean id="lnProfitLossBaseDAO" class="com.banger.mobile.dao.loan.ibatis.LnProfitLossBaseDAOImpl"/>
+	<bean id="lnProfitLossDetailDAO" class="com.banger.mobile.dao.loan.ibatis.LnProfitLossDetailDAOImpl"/>
+	<bean id="lnProfitLossItemDAO" class="com.banger.mobile.dao.loan.ibatis.LnProfitLossItemDAOImpl"/>
+
+
+	<!--资产负债-->
+	<bean id="lnBalanceAccountDao" class="com.banger.mobile.dao.loan.ibatis.LnBalanceAccountDaoiBatis"/>
+	<bean id="lnBalanceCashDao" class="com.banger.mobile.dao.loan.ibatis.LnBalanceCashDaoiBatis"/>
+	<bean id="lnBalanceDebtDao" class="com.banger.mobile.dao.loan.ibatis.LnBalanceDebtDaoiBatis"/>
+	<bean id="lnBalanceFixedDao" class="com.banger.mobile.dao.loan.ibatis.LnBalanceFixedDaoiBatis"/>
+	<bean id="lnBalanceOffDao" class="com.banger.mobile.dao.loan.ibatis.LnBalanceOffDaoiBatis"/>
+
+	<!-- 交叉检验-->
+	<bean id="lnValidationRightsDao" class="com.banger.mobile.dao.loan.ibatis.LnValidationRightsDaoiBatis"/>
+	<bean id="lnValidationItemDao" class="com.banger.mobile.dao.loan.ibatis.LnValidationItemDaoiBatis"/>
+
+	<!--ods接口数据-->
+	<bean id="lnLoanTmpDao" class="com.banger.mobile.dao.loan.ibatis.LnLoanTmpDaoiBatis"/>
+
+
+</beans>

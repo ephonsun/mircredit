@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="AnaCoBorrowerAndGuarantorSQL">
+    <typeAlias alias="BaseAnaCoBorrower" type="com.banger.mobile.domain.model.base.loan.BaseAnaCoBorrower"/>
+    <typeAlias alias="BaseAnaGuarantor" type="com.banger.mobile.domain.model.base.loan.BaseAnaGuarantor"/>
+    <!--上会分析表——共同借贷人信息-->
+    <resultMap id="BaseAnaCoBorrowerResult" class="BaseAnaCoBorrower">
+        <result property="coBorrowerId" column="CO_BORROWER_ID"/>
+        <result property="loanId" column="LOAN_ID"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="idCard" column="ID_CARD"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="company" column="COMPANY"/>
+        <result property="companyJob" column="COMPANY_JOB"/>
+        <result property="companyPhone" column="COMPANY_PHONE"/>
+        <result property="annualIncoming" column="ANNUAL_INCOMING"/>
+        <result property="relation" column="RELATION"/>
+        <result property="relationOther" column="RELATION_OTHER"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+    </resultMap>
+    <!--上会分析表——担保人信息-->
+    <resultMap id="BaseAnaGuarantorResult" class="BaseAnaGuarantor">
+        <result property="guarantorId" column="GUARANTOR_ID"/>
+        <result property="loanId" column="LOAN_ID"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="idCard" column="ID_CARD"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="company" column="COMPANY"/>
+        <result property="companyJob" column="COMPANY_JOB"/>
+        <result property="companyPhone" column="COMPANY_PHONE"/>
+        <result property="annualIncoming" column="ANNUAL_INCOMING"/>
+        <result property="mainProperty" column="MAIN_PROPERTY"/>
+        <result property="hasDebt" column="HAS_DEBT"/>
+        <result property="debt" column="DEBT"/>
+        <result property="ensure" column="ENSURE"/>
+        <result property="relation" column="RELATION"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+    </resultMap>
+
+    <!--得到贷款所有共同借贷人信息（属：上会分析表）-->
+    <select id="getAllCoBorrowerListByLoan" parameterClass="java.util.Map" resultMap="BaseAnaCoBorrowerResult">
+        select * from ANA_CO_BORROWER
+        where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            loan_id=#loanId#
+        </isNotEmpty>
+    </select>
+    <!--得到贷款所有担保人信息（属：上会分析表）-->
+    <select id="getAllGuarantorListByLoan" parameterClass="java.util.Map" resultMap="BaseAnaGuarantorResult">
+        select * from ANA_GUARANTOR
+        where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            loan_id=#loanId#
+        </isNotEmpty>
+    </select>
+    <!--删除贷款共同借贷人（属：上会分析表）-->
+    <delete id="delAllCoBorrowerByLoan" parameterClass="Integer">
+        DELETE FROM ANA_CO_BORROWER WHERE LOAN_ID=#loanId#
+    </delete>
+    <!--删除贷款担保人（属：上会分析表）-->
+    <delete id="delAllGuarantorByLoan" parameterClass="Integer">
+        DELETE FROM ANA_GUARANTOR WHERE LOAN_ID=#loanId#
+    </delete>
+    <!--添加贷款共同借贷人（属：上会分析表）-->
+    <insert id="insertCoBorrowerOfLoan" parameterClass="BaseAnaCoBorrower">
+        INSERT INTO ANA_CO_BORROWER
+        (
+           CO_BORROWER_ID,
+           LOAN_ID,
+           CUSTOMER_NAME,
+           ID_CARD,
+           MOBILE_PHONE,
+           COMPANY,
+           COMPANY_JOB,
+           COMPANY_PHONE,
+           ANNUAL_INCOMING,
+           RELATION,
+           RELATION_OTHER,
+           UPDATE_DATE
+        )
+        VALUES
+        (
+           #coBorrowerId:INTEGER#,
+           #loanId:INTEGER#,
+           #customerName:VARCHAR:NULL#,
+           #idCard:VARCHAR:NULL#,
+           #mobilePhone:VARCHAR:NULL#,
+           #company:VARCHAR:NULL#,
+           #companyJob:VARCHAR:NULL#,
+           #companyPhone:VARCHAR:NULL #,
+           #annualIncoming:DECIMAL#,
+           #relation:VARCHAR:NULL #,
+           #relationOther:VARCHAR:NULL#,
+           current timestamp
+        )
+    </insert>
+    <!--添加贷款担保人（属：上会分析表）-->
+    <insert id="insertGuarantorOfLoan" parameterClass="BaseAnaGuarantor">
+        INSERT INTO ANA_GUARANTOR
+        (
+             GUARANTOR_ID,
+             LOAN_ID,
+             CUSTOMER_NAME,
+             ID_CARD,
+             MOBILE_PHONE,
+             COMPANY,
+             COMPANY_JOB,
+             COMPANY_PHONE,
+             ANNUAL_INCOMING,
+             MAIN_PROPERTY,
+             HAS_DEBT,
+             DEBT,
+             ENSURE,
+             RELATION,
+             UPDATE_DATE
+        )
+        VALUES
+        (
+            #guarantorId:INTEGER#,
+            #loanId:INTEGER#,
+            #customerName:VARCHAR:NULL#,
+            #idCard:VARCHAR:NULL#,
+            #mobilePhone:VARCHAR:NULL#,
+            #company:VARCHAR:NULL#,
+            #companyJob:VARCHAR:NULL#,
+            #companyPhone:VARCHAR:NULL#,
+            #annualIncoming:DECIMAL#,
+            #mainProperty:VARCHAR:NULL#,
+            #hasDebt:VARCHAR:NULL#,
+            #debt:DECIMAL#,
+            #ensure:VARCHAR:NULL#,
+            #relation:VARCHAR:NULL#,
+            current timestamp
+        )
+    </insert>
+</sqlMap>

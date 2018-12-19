@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnBalanceOffSQL">
+
+    <typeAlias alias="LnBalanceOff" type="com.banger.mobile.domain.model.loan.LnBalanceOff"/>
+
+    <resultMap class="LnBalanceOff" id="LnBalanceOffResult">
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+       	<result column="REMARK" property="remark"/>
+
+       	<result column="BALANCE_AMOUNT" property="balanceAmount"/>
+       	<result column="DEBT_AMOUNT" property="debtAmount"/>
+       	<result column="BALANCE_ADVICE_TIME" property="balanceAdviceTime"/>
+       	<result column="FINANCIAL_ANALYSIS" property="financialAnalysis"/>
+
+    </resultMap>
+
+    <delete id="deleteBalanceOff" parameterClass="Integer">
+         DELETE FROM LN_BALANCE_OFF WHERE LOAN_ID = #loanId#
+    </delete>
+
+    <insert id="insertBalanceOff" parameterClass="LnBalanceOff">
+        INSERT INTO LN_BALANCE_OFF
+         (
+         	LOAN_ID,
+			BALANCE_AMOUNT,
+			DEBT_AMOUNT,
+			BALANCE_ADVICE_TIME,
+			REMARK,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE
+         )
+         VALUES
+         (
+			#loanId:INTEGER#,
+			#balanceAmount:DECIMAL#,
+			#debtAmount:DECIMAL#,
+			#balanceAdviceTime:TIMESTAMP#,
+			#remark:VARCHAR#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#
+         )
+    </insert>
+
+
+
+    <update id="updateBalanceOff" parameterClass="LnBalanceOff">
+        update LN_BALANCE_OFF SET LOAN_ID=LOAN_ID
+        <isNotEmpty property="balanceAmount" prepend=",">
+			BALANCE_AMOUNT = #balanceAmount#
+		</isNotEmpty>
+		<isNotEmpty property="debtAmount" prepend=",">
+			DEBT_AMOUNT = #debtAmount#
+		</isNotEmpty>
+		<isNotEmpty property="balanceAdviceTime" prepend=",">
+			BALANCE_ADVICE_TIME = #balanceAdviceTime#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			REMARK = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+        where LOAN_ID=#loanId#
+    </update>
+
+
+
+    <select id="getLnBalanceOffById" resultMap="LnBalanceOffResult" parameterClass="java.lang.Integer">
+		select * from LN_BALANCE_OFF where loan_id=#loanId#
+    </select>
+
+</sqlMap>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrRequest">
+
+    <typeAlias alias="BaseCrRequest" type="com.banger.mobile.domain.model.base.crRequest.BaseCrRequest"/>
+    <typeAlias alias="CrRequest" type="com.banger.mobile.domain.model.crRequest.CrRequest"/>    
+    <typeAlias alias="BaseSysUploadFile" type="com.banger.mobile.domain.model.base.uploadFile.BaseSysUploadFile" />
+    <typeAlias alias="SysUploadFile" type="com.banger.mobile.domain.model.uploadFile.SysUploadFile" />
+    
+    <resultMap id="BaseSysUploadFileResult" class="BaseSysUploadFile">
+        <result property="fileId" column="FILE_ID" />
+        <result property="storageType" column="STORAGE_TYPE" />
+        <result property="fileName" column="FILE_NAME" />
+        <result property="filePath" column="FILE_PATH" />
+        <result property="uploadFileName" column="UPLOAD_FILE_NAME" />
+        <result property="uploadDate" column="UPLOAD_DATE" />
+        <result property="uploadUserId" column="UPLOAD_USER_ID" />
+        <result property="fileSize" column="FILE_SIZE" />
+        <result property="fileMd5" column="FILE_MD5" />
+        <result property="caseNo" column="CASE_NO" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="createUser" column="CREATE_USER" />
+        <result property="updateUser" column="UPDATE_USER" />
+        
+    </resultMap>
+   <resultMap id="SysUploadFileResult" class="SysUploadFile" extends="BaseSysUploadFileResult">
+        
+    </resultMap>
+	<resultMap id ="BaseCrRequestResult" class="BaseCrRequest">
+		<result property="requestId" column="REQUEST_ID"/>
+		<result property="loanId" column="LOAN_ID"/>
+		<result property="serno" column="SERNO"/>
+		<result property="customerId" column="CUSTOMER_ID"/>
+		<result property="customerType" column="CUSTOMER_TYPE"/>
+		<result property="requestUser" column="REQUEST_USER"/>
+		<result property="requestDate" column="REQUEST_DATE"/>
+		<result property="requestReason" column="REQUEST_REASON"/>
+		<result property="idauthFlag" column="IDAUTHFLAG"/>
+		<result property="requestStatus" column="REQUEST_STATUS"/>
+	    <result property="requestResult" column="REQUEST_RESULT" />
+		<result property="upFileId" column="UP_FILE_ID"/>
+		<result property="downFileId" column="DOWN_FILE_ID"/>
+		<result property="authFileId" column="AUTH_FILE_ID"/>
+		<result property="remark" column="REMARK"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="updateUser" column="UPDATE_USER"/>
+        <result property="conductor" column="CONDUCTOR"/>
+        <result property="conductorDate" column="CONDUCTOR_DATE"/>
+	</resultMap>
+	
+	
+    <resultMap id="CrRequestResult" class="CrRequest" extends="BaseCrRequestResult">
+        <result property="requestStatusValue" column="REQUEST_STATUS_VALUE"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="idCard" column="ID_CARD"/>
+        <result property="conductorName" column="CONDUCTOR_NAME"/>
+         <result property="requestName" column="REQUEST_NAME"/>
+      
+
+    </resultMap>
+
+	
+  
+    <insert id="insertCrRequest" parameterClass="CrRequest">
+        <![CDATA[
+    	insert into CR_REQUEST(
+        REQUEST_ID,
+        SERNO,
+        LOAN_ID,
+        CUSTOMER_ID,
+        CUSTOMER_TYPE,
+        REQUEST_USER,
+        REQUEST_DATE,
+        REQUEST_REASON,
+        IDAUTHFLAG,
+        REQUEST_STATUS,
+        REQUEST_RESULT,
+        UP_FILE_ID,
+        DOWN_FILE_ID,
+        AUTH_FILE_ID,
+        REMARK,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER,
+        CONDUCTOR,
+        CONDUCTOR_DATE
+        
+   	 )values (
+      #requestId:INTEGER#,
+      #serno:VARCHAR#,
+      #loanId:INTEGER#,
+      #customerId:INTEGER#,
+      #customerType:INTEGER#,
+      #requestUser:INTEGER#,
+      #requestDate:TIMESTAMP#,
+      #requestReason:VARCHAR#,
+      #idauthFlag:INTEGER#,
+      #requestStatus:INTEGER#,
+      #requestResult:VARCHAR#,
+      #upFileId:INTEGER#,
+      #downFileId:INTEGER#,
+      #authFileId:INTEGER#,
+      #remark:VARCHAR#,
+      #createDate:TIMESTAMP#,
+      #updateDate:TIMESTAMP#,
+      #createUser:INTEGER#,
+      #updateUser:INTEGER#,
+      #conductor:INTEGER#,
+      #conductorDate:TIMESTAMP#      
+    )
+    ]]>
+    <selectKey keyProperty="requestId" resultClass="java.lang.Integer" type="pre">
+        VALUES NEXTVAL FOR SEQ_CR_REQUEST
+    </selectKey>
+</insert>
+
+
+    
+    <update id="updateCrRequest" parameterClass="CrRequest">
+        <![CDATA[
+        update Cr_Request set REQUEST_ID=#requestId#
+        ]]>
+        <isNotEmpty property="loanId" prepend=",">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="serno" prepend=",">
+            SERNO=#serno#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend=",">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="customerType" prepend=",">
+            CUSTOMER_TYPE=#customerType#
+        </isNotEmpty>
+        <isNotEmpty property="requestUser" prepend=",">
+            REQUEST_USER=#requestUser#
+        </isNotEmpty>
+        <isNotEmpty property="requestDate" prepend=",">
+            REQUEST_DATE=#requestDate#
+        </isNotEmpty>
+        <isNotEmpty property="requestReason" prepend=",">
+            REQUEST_REASON=#requestReason#
+        </isNotEmpty>
+        <isNotEmpty property="idauthFlag" prepend=",">
+            IDAUTHFLAG=#idauthFlag#
+        </isNotEmpty>
+        <isNotEmpty property="requestStatus" prepend=",">
+            REQUEST_STATUS=#requestStatus#
+        </isNotEmpty>
+        <isNotEmpty property="requestResult" prepend=",">
+            REQUEST_RESULT=#requestResult#
+        </isNotEmpty>
+        <isNotEmpty property="upFileId" prepend=",">
+            UP_FILE_ID=#upFileId#
+        </isNotEmpty>
+        <isNotEmpty property="downFileId" prepend=",">
+            DOWN_FILE_ID=#downFileId#
+        </isNotEmpty>
+        <isNotEmpty property="authFileId" prepend=",">
+            AUTH_FILE_ID=#authFileId#
+        </isNotEmpty>
+        <isNotEmpty property="remark" prepend=",">
+            REMARK=#remark#
+        </isNotEmpty>
+        <isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE=#createDate#
+        </isNotEmpty>
+        <isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE=#updateDate#
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend=",">
+            CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER=#updateUser#
+        </isNotEmpty>
+    	<isNotEmpty property="conductor" prepend=",">
+            CONDUCTOR=#conductor#
+        </isNotEmpty>
+        <isNotEmpty property="conductorDate" prepend=",">
+            CONDUCTOR_DATE=#conductorDate#
+        </isNotEmpty>
+        
+        where REQUEST_ID=#requestId#
+    </update>
+    <update id="updateRequestResult" parameterClass="java.util.Map">
+        update CR_REQUEST set REQUEST_RESULT=#requestResult# where REQUEST_ID=#requestId#
+    </update>
+
+    <select id="queryCrRequest" resultMap="CrRequestResult" parameterClass="java.util.Map">
+        select * from CR_REQUEST
+        where 1=1
+        <isNotEmpty prepend="and" property="requestId">
+            REQUEST_ID = #requestId#
+        </isNotEmpty>
+        <isNotEmpty property="customerType" prepend="and">
+            CUSTOMER_TYPE=#customerType#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanId">
+            LOAN_ID = #loanId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="serno" >
+            SERNO=#serno#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customerId">
+            CUSTOMER_ID = #customerId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="requestUser">
+            REQUEST_USER = #requestUser#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="requestStatus">
+            REQUEST_STATUS = #requestStatus#
+        </isNotEmpty>
+        
+    </select>
+
+    
+   
+    <!--征信总数-->
+    <select id="getCrRequestCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+    	select count(1) from CR_REQUEST s	
+        left join  CRM_CUSTOMER c on s.CUSTOMER_ID =c.CUSTOMER_ID 		
+		left join LN_LOAN_INFO_DICTIONARY l on l.DICTIONARY_NAME='ZXZT'and s.REQUEST_STATUS=l.DICTIONARY_KEY
+		left join SYS_USER u on u.USER_ID=s.REQUEST_USER
+		left join SYS_USER uc on uc.user_id = s.conductor
+        where 1=1
+          <isNotEmpty prepend="and" property="requestName">
+        s.REQUEST_USER in (Select user_id from Sys_user where user_name=#requestName#)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanTypeId">
+            l.DICTIONARY_KEY=#loanTypeId#
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="requestId">
+            s.REQUEST_ID=#requestId#
+         </isNotEmpty>
+         <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="belongUserIds">
+            s.REQUEST_USER in ($belongUserIds$)
+        </isNotEmpty>
+    </select>
+
+    
+    
+    <!--征信调查列表-->
+    <select id="getCrRequestList" parameterClass="java.util.Map" resultMap="CrRequestResult">
+
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+          select s.*,c.customer_name,c.id_card ,L.DICTIONARY_VALUE  REQUEST_STATUS_VALUE,u.user_Name REQUEST_NAME,uc.user_name  CONDUCTOR_NAME from CR_REQUEST s
+        left join  CRM_CUSTOMER c on s.CUSTOMER_ID =c.CUSTOMER_ID 		
+		left join LN_LOAN_INFO_DICTIONARY l on l.DICTIONARY_NAME='ZXZT'and s.REQUEST_STATUS=l.DICTIONARY_KEY
+		left join SYS_USER u on u.USER_ID=s.REQUEST_USER
+		left join SYS_USER uc on uc.user_id = s.conductor
+        where 1=1
+          <isNotEmpty prepend="and" property="requestName">
+        s.REQUEST_USER in (Select user_id from Sys_user where user_name=#requestName#)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanTypeId">
+            l.DICTIONARY_KEY=#loanTypeId#
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="requestId">
+            s.REQUEST_ID=#requestId#
+         </isNotEmpty>
+         <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="belongUserIds">
+            s.REQUEST_USER in ($belongUserIds$)
+         </isNotEmpty>
+         
+        order by s.request_date ASC
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty> 
+    </select>
+
+    
+	<select id="getCrRequestByLoanIdAndCustomerId" parameterClass="java.util.Map" resultMap="CrRequestResult">
+        select s.*,c.customer_name,c.id_card ,L.DICTIONARY_VALUE  REQUEST_STATUS_VALUE,u.user_Name REQUEST_NAME,uc.user_name  CONDUCTOR_NAME from CR_REQUEST s
+        left join  CRM_CUSTOMER c on s.CUSTOMER_ID =c.CUSTOMER_ID 		
+		left join LN_LOAN_INFO_DICTIONARY l on l.DICTIONARY_NAME='ZXZT'and s.REQUEST_STATUS=l.DICTIONARY_KEY
+		left join SYS_USER u on u.USER_ID=s.REQUEST_USER
+		left join SYS_USER uc on uc.user_id = s.conductor
+        where 1=1
+        <isNotEmpty prepend="and" property="loanId">
+            s.LOAN_ID=#loanId#
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="customerId">
+            s.CUSTOMER_ID=#customerId#
+         </isNotEmpty>
+    </select>
+  
+    
+ 	<select id="getCrRequestById" parameterClass="Integer" resultMap="CrRequestResult">
+        select s.*,c.customer_name,c.id_card ,L.DICTIONARY_VALUE  REQUEST_STATUS_VALUE,u.user_Name REQUEST_NAME,uc.user_name  CONDUCTOR_NAME from CR_REQUEST s
+        left join  CRM_CUSTOMER c on s.CUSTOMER_ID =c.CUSTOMER_ID 		
+		left join LN_LOAN_INFO_DICTIONARY l on l.DICTIONARY_NAME='ZXZT'and s.REQUEST_STATUS=l.DICTIONARY_KEY
+		left join SYS_USER u on u.USER_ID=s.REQUEST_USER
+		left join SYS_USER uc on uc.user_id = s.conductor
+        where 1=1 and s.REQUEST_ID = #requestId#
+    </select>
+
+</sqlMap>

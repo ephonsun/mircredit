@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="VisitRecordSQL">
+	<typeAlias alias="VisitRecord" type="com.banger.mobile.domain.model.visitRecord.VisitRecord" />
+	<typeAlias alias="VisitRecordInfo" type="com.banger.mobile.domain.model.visitRecord.VisitRecordInfo" />
+
+
+	<!-- VisitRecordSQL信息全字段 -->
+	<resultMap class="VisitRecord" id="VisitRecordResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="USER_ID" property="userId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="START_DATE" property="startDate" />
+		<result column="BIZ_TYPE" property="bizType" />
+		<result column="COMM_PROGRESS_ID" property="commProgress" />
+		<result column="REMARK" property="remark" />
+		<result column="CALL_TYPE" property="callType" />
+		<result column="RECORD_NO" property="recordNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="IS_CANCELED" property="isCancled" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ARCHIVED" property="isArchived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="IS_READ" property="isRead" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="CREATE_USER" property="creatUser" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="SPLIT_COUNT" property="splitCount" />
+		<result column="RECORD_SOURCE" property="recordSource" />
+		<result column="CUSTOMER_STR" property="customerStr"/>
+		
+		
+	</resultMap>
+	
+	<resultMap class="VisitRecordInfo" id="VisitRecordInfoResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="USER_ID" property="userId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="START_DATE" property="startDate" />
+		<result column="BIZ_TYPE_NAME" property="bizTypeName" />
+		<result column="COMM_PROGRESS_NAME" property="commProgressName" />
+		<result column="REMARK" property="remark" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+	</resultMap>
+
+
+	<!-- 添加拜访记录 -->
+	<insert id="addVisitRecord" parameterClass="VisitRecord">
+		<![CDATA[ 
+				insert into REC_RECORD_INFO
+		(
+		 RECORD_INFO_ID,
+		 USER_ID,
+		 CUSTOMER_ID,
+		 START_DATE,
+		 BIZ_TYPE,
+		 COMM_PROGRESS_ID,
+		 REMARK,
+		 CALL_TYPE,
+		 RECORD_NO,
+		 CUSTOMER_NAME,
+		 IS_CANCELED,
+		 IS_DEL,
+		 IS_ARCHIVED,
+		 CREATE_DATE,
+		 IS_READ,
+		 REMOTE_PHONE,
+		 CREATE_USER,
+		 CALL_TIME,
+		 SPLIT_COUNT,
+		 RECORD_SOURCE,
+		 CUSTOMER_STR
+		 )
+		values
+		(
+		#recordInfoId#,
+		#userId#,
+	    #customerId#,
+	    #startDate#,
+	    #bizType:INTEGER#,
+	    #commProgress#,
+	    #remark#,
+	    5,
+	    #recordNo#,
+	    #customerName#,
+	    0,
+	    0,
+	    0,
+	    current timestamp,
+	    1,
+	    #remotePhone:VARCHAR:NULL#,
+	    #creatUser#,
+	    0,
+	    0,
+	    1,
+	    #customerStr:VARCHAR:NULL#
+		) 
+		]]>
+		<selectKey keyProperty="recordInfoId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_REC_RECORD_INFO 
+		</selectKey>
+	</insert>
+	
+	 <!-- 编辑拜访信息 -->
+  <update id="updateVisitRecord" parameterClass="VisitRecord">
+  <![CDATA[
+  	update REC_RECORD_INFO
+  		set 
+  			START_DATE = #startDate#,
+  			COMM_PROGRESS_ID = #commProgress#,
+  			REMARK = #remark#,
+  			CREATE_USER=#creatUser#
+  	]]>
+	<isNotEmpty prepend="," property="bizType">
+		<![CDATA[ BIZ_TYPE=#bizType# ]]>
+	</isNotEmpty>
+  		where 
+  			RECORD_INFO_ID = #recordInfoId#
+  </update>
+  
+  <!-- 根据id查询 -->
+  <select id="getVisitRecord" parameterClass="java.lang.Integer"  resultMap="VisitRecordInfoResult">
+  	<![CDATA[
+  		select 
+			a.RECORD_INFO_ID,
+			a.USER_ID,
+			a.CUSTOMER_ID,
+			a.START_DATE,
+			a.REMARK,
+			(CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL  THEN a.CUSTOMER_NAME else d.CUSTOMER_NAME end) AS CUSTOMER_NAME,
+			b.BIZ_TYPE_NAME,
+			c.COMM_PROGRESS_NAME
+		from
+			REC_RECORD_INFO a
+			left join REC_BIZ_TYPE b on a.BIZ_TYPE=b.BIZ_TYPE_ID
+			left join CRM_COMM_PROGRESS c on a.COMM_PROGRESS_ID=c.COMM_PROGRESS_ID
+  			left join CRM_CUSTOMER d on a.CUSTOMER_ID=d.CUSTOMER_ID
+  		where a.RECORD_INFO_ID = #recordInfoId#
+  	]]>
+  </select>
+	
+</sqlMap>
+
+
+
+

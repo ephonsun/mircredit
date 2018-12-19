@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysImportSQL">
+	<typeAlias alias="SysImport" type="com.banger.mobile.domain.model.sysImport.SysImport" />
+	
+	<!-- 导入记录表-->
+	<!-- SysImportSQL信息全字段  -->
+	<resultMap class="SysImport" id="SysImportResult">
+		<result column="IMPORT_ID" property="importId" />
+		<result column="IMPORT_NO" property="importNo" />
+		<result column="IMPORT_DATE" property="importDate" />
+		<result column="TOTAL_NUM" property="totalNum" />
+		<result column="SUCCESS_NUM" property="successNum" />
+		<result column="FAIL_NUM" property="failNum" />
+		<result column="FAIL_FILE_PATH" property="failFilePath"/>
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条导入记录-->
+	<insert id="addSysImport" parameterClass="SysImport">
+     <![CDATA[
+		insert into SYS_IMPORT
+		(
+		 IMPORT_ID,
+		 IMPORT_NO,
+		 IMPORT_DATE,
+		 TOTAL_NUM,
+		 SUCCESS_NUM,
+		 FAIL_NUM,
+		 FAIL_FILE_PATH,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#importId#,
+		#importNo#,
+	    #importDate#,
+	    #totalNum#,
+	    #successNum#,
+	    #failNum#,
+	    #failFilePath#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="importId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_IMPORT 
+		</selectKey>
+	</insert>
+	
+	
+  
+  <!-- 根据id得到导入记录-->	
+  <select id="getSysImportById"  resultMap="SysImportResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_IMPORT 	where IMPORT_ID=#importId#
+	]]>
+  </select>
+
+  <select id="getSysImportList" resultMap="SysImportResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_IMPORT where 1=1 
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="importId">
+			<![CDATA[ IMPORT_ID=#importId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="importNo">
+			<![CDATA[ IMPORT_NO =#importNo#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="importDate">
+			<![CDATA[ IMPORT_DATE=#importDate#]]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+  </select>
+</sqlMap>
+
+
+
+

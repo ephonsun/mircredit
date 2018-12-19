@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="ReportSQL">
+	<typeAlias alias="CustomerBean"
+		type="com.banger.mobile.domain.model.customer.CustomerBean" />
+		
+	<!-- 新增客户统计 -->
+	<resultMap id="customerCount" class="java.util.HashMap">
+		<result property="date" column="D" />
+		<result property="count" column="C" />
+		<result property="name" column="N" />
+		<result property="user" column="U" />
+		<result property="deptName" column="DN" />
+	</resultMap>
+	
+	<!-- 客户联系跟进统计 -->
+	<resultMap id="contactCount" class="java.util.HashMap">
+		<result property="type" column="T" />
+		<result property="count" column="C" />
+		<result property="name" column="N" />
+		<result property="user" column="U" />
+		<result property="deptName" column="DN" />
+		<result property="typeName" column="TN" />
+	</resultMap>
+	
+	<!-- 客户明细 -->
+	<resultMap class="CustomerBean" id="CustomerBeanResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="COMPANY" property="company" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="USER_NAME" property="userName" />
+	</resultMap>
+
+	<select id="getAddCustomerReportByUser" resultMap="customerCount">
+		select count(*) as c,n,d,u,DN from (
+			select u.user_name as n,u.user_id as u,TO_CHAR(c.create_date,'yyyyMM') as d, d.DEPT_NAME as DN 
+			 from crm_customer c 
+			 inner join sys_user u on c.create_user = u.user_id
+			 inner join sys_dept d on u.dept_id = d.dept_id
+			 where c.is_del=0 and c.IS_TRASH=0
+			 <isNotEmpty prepend="and" property="dateBegin" >
+				<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') >= '$dateBegin$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="dateEnd" >
+				<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') <= '$dateEnd$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userIds" >
+				<![CDATA[ u.user_id in ($userIds$) ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptIds" >
+				<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+			 </isNotEmpty>
+		) a group by n,d,u,DN 
+	</select>
+	
+	<select id="getAddCustomerReportByDept" resultMap="customerCount">
+		select count(*) as c,n,d,u,DN from (
+	        select d.dept_name as n,d.dept_id as u,TO_CHAR(c.create_date,'yyyyMM') as d, d.DEPT_NAME as DN  
+	        from crm_customer c 
+	        inner join sys_user u on c.create_user = u.user_id
+	        inner join sys_dept d on u.dept_id = d.dept_id
+	        where c.is_del=0 and c.IS_TRASH=0
+			 <isNotEmpty prepend="and" property="dateBegin" >
+				<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') >= '$dateBegin$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="dateEnd" >
+				<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') <= '$dateEnd$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userIds" >
+			    <![CDATA[ u.user_id in ($userIds$) ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptIds" >
+				<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+			 </isNotEmpty>
+		) a group by n,d,u,DN 
+	</select>
+	
+	<select id="getContactCustomerReportByDept" resultMap="contactCount">
+		select count(*) as c,u,n,t,DN,TN from (
+		    select d,u,n,'Y' as t,DN,TN from (
+			    select c.customer_id as d,count(i.record_info_id) as c,d.dept_id as u,d.dept_name as n,
+			    d.dept_name as DN,e.CUSTOMER_TYPE_NAME as TN
+			    from crm_customer c
+			    inner join sys_dept d on c.BELONG_DEPT_ID = d.dept_id
+			    left join rec_record_info i on c.customer_id = i.customer_id
+			    <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ i.create_date>='$dateBegin$' ]]>
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend="and" property="dateEnd" >
+			 		<![CDATA[ i.create_date<='$dateEnd$' ]]>
+			 	</isNotEmpty>
+			    left join CRM_CUSTOMER_TYPE e on c.CUSTOMER_TYPE_ID = e.CUSTOMER_TYPE_ID
+			    where c.is_del=0 and c.IS_TRASH=0 and i.is_del=0
+			    <isNotEmpty prepend="" property="typeEmpty" >
+			        <isEqual property="typeEmpty" compareValue="1">
+			            <isNotEmpty prepend="and" property="customerType" >
+							(<![CDATA[ c.customer_type_id in ($customerType$) or c.customer_type_id is null ]]>)
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					</isEqual>
+					<isEqual property="typeEmpty" compareValue="0">
+			            <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id in ($customerType$) ]]>
+						</isNotEmpty>
+					</isEqual>
+			 	</isNotEmpty>
+				<isNotEmpty prepend="and" property="deptIds" >
+					<![CDATA[ c.BELONG_DEPT_ID in ($deptIds$) ]]>
+				</isNotEmpty>
+			    group by c.customer_id,d.dept_id,d.dept_name,e.CUSTOMER_TYPE_NAME
+		    ) where <![CDATA[ c>=$contactCount$ ]]>
+		    union
+		    select d,u,n,'N' as t,DN,TN from (
+			    select c.customer_id as d,count(i.record_info_id) as c,d.dept_id as u,d.dept_name as n,
+			    d.dept_name as DN,e.CUSTOMER_TYPE_NAME as TN
+			    from crm_customer c
+			    inner join sys_dept d on c.BELONG_DEPT_ID = d.dept_id
+			    left join rec_record_info i on c.customer_id = i.customer_id and i.is_del=0
+			    <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ i.create_date>='$dateBegin$' ]]>
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend="and" property="dateEnd" >
+			 		<![CDATA[ i.create_date<='$dateEnd$' ]]>
+			 	</isNotEmpty>
+			    left join CRM_CUSTOMER_TYPE e on c.CUSTOMER_TYPE_ID = e.CUSTOMER_TYPE_ID
+			    where c.is_del=0 and c.IS_TRASH=0
+				 <isNotEmpty prepend="" property="typeEmpty" >
+			        <isEqual property="typeEmpty" compareValue="1">
+			            <isNotEmpty prepend="and" property="customerType" >
+							(<![CDATA[ c.customer_type_id in ($customerType$) or c.customer_type_id is null ]]>)
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					</isEqual>
+					<isEqual property="typeEmpty" compareValue="0">
+			            <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id in ($customerType$) ]]>
+						</isNotEmpty>
+					</isEqual>
+			 	</isNotEmpty>
+				<isNotEmpty prepend="and" property="deptIds" >
+					<![CDATA[ c.BELONG_DEPT_ID in ($deptIds$) ]]>
+				</isNotEmpty>
+			 	group by c.customer_id,d.dept_id,d.dept_name,e.CUSTOMER_TYPE_NAME
+		    ) where <![CDATA[ c<$contactCount$ ]]>
+		) group by u,n,t,DN,TN
+	</select>
+	<select id="getContactCustomerReportByUser" resultMap="contactCount">
+		select count(*) as c,u,n,t,DN,TN from (
+		    select d,u,n,'Y' as t,DN,TN from (
+			    select c.customer_id as d,count(i.record_info_id) as c,u.user_id as u,u.user_name as n,
+			    d.dept_name as DN,e.CUSTOMER_TYPE_NAME as TN
+			    from crm_customer c
+			    inner join sys_user u on c.BELONG_USER_ID = u.user_id
+			    inner join sys_dept d on u.dept_id = d.dept_id
+			    left join rec_record_info i on c.customer_id = i.customer_id
+			    <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ i.create_date>='$dateBegin$' ]]>
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend="and" property="dateEnd" >
+			 		<![CDATA[ i.create_date<='$dateEnd$' ]]>
+			 	</isNotEmpty>
+			    left join CRM_CUSTOMER_TYPE e on c.CUSTOMER_TYPE_ID = e.CUSTOMER_TYPE_ID
+			    where c.is_del=0 and c.IS_TRASH=0 and i.is_del=0
+			    <isNotEmpty prepend="" property="typeEmpty" >
+			        <isEqual property="typeEmpty" compareValue="1">
+			            <isNotEmpty prepend="and" property="customerType" >
+							(<![CDATA[ c.customer_type_id in ($customerType$) or c.customer_type_id is null ]]>)
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					</isEqual>
+					<isEqual property="typeEmpty" compareValue="0">
+			            <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id in ($customerType$) ]]>
+						</isNotEmpty>
+					</isEqual>
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend="and" property="userIds" >
+			    	<![CDATA[ u.user_id in ($userIds$) ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="deptIds" >
+					<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+				</isNotEmpty>
+				group by c.customer_id,u.user_id,u.user_name,d.dept_name,e.CUSTOMER_TYPE_NAME
+		    ) where <![CDATA[ c>=$contactCount$ ]]>
+		    union
+		    select d,u,n,'N' as t,DN,TN from (
+			    select c.customer_id as d,count(i.record_info_id) as c,u.user_id as u,u.user_name as n,
+			    d.dept_name as DN,e.CUSTOMER_TYPE_NAME as TN
+			    from crm_customer c
+			    inner join sys_user u on c.BELONG_USER_ID = u.user_id
+			    inner join sys_dept d on u.dept_id = d.dept_id
+			    left join rec_record_info i on c.customer_id = i.customer_id and i.is_del=0
+			    <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ i.create_date>='$dateBegin$' ]]>
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend="and" property="dateEnd" >
+			 		<![CDATA[ i.create_date<='$dateEnd$' ]]>
+			 	</isNotEmpty>
+			    left join CRM_CUSTOMER_TYPE e on c.CUSTOMER_TYPE_ID = e.CUSTOMER_TYPE_ID
+			    where c.is_del=0 and c.IS_TRASH=0
+			     <isNotEmpty prepend="" property="typeEmpty" >
+			        <isEqual property="typeEmpty" compareValue="1">
+			            <isNotEmpty prepend="and" property="customerType" >
+							(<![CDATA[ c.customer_type_id in ($customerType$) or c.customer_type_id is null ]]>)
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					</isEqual>
+					<isEqual property="typeEmpty" compareValue="0">
+			            <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id in ($customerType$) ]]>
+						</isNotEmpty>
+					</isEqual>
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend="and" property="userIds" >
+			    	<![CDATA[ u.user_id in ($userIds$) ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="and" property="deptIds" >
+					<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+				</isNotEmpty>
+				group by c.customer_id,u.user_id,u.user_name,d.dept_name,e.CUSTOMER_TYPE_NAME
+		    ) where <![CDATA[ c<$contactCount$ ]]>
+		) group by u,n,t,DN,TN 
+	</select>
+	
+	<select id="getCustomerReportDetailCount" resultClass="java.lang.Integer" >
+	    select count(*) from 
+		CRM_CUSTOMER as c 
+		left join CRM_CUSTOMER_TYPE as type on c.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+		left join SYS_DEPT AS dept ON c.BELONG_DEPT_ID=dept.DEPT_ID
+		left join SYS_USER as users ON c.BELONG_USER_ID=users.USER_ID
+		inner join sys_user u on c.create_user = u.user_id
+		where c.is_del=0 and c.IS_TRASH=0
+		<isNotEmpty prepend="and" property="deptId">
+			u.dept_id in ($deptId$)
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			u.user_id = $userId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="dateBegin" >
+			<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') >= '$dateBegin$' ]]>
+	 	</isNotEmpty>
+	 	<isNotEmpty prepend="and" property="dateEnd" >
+			<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') <= '$dateEnd$' ]]>
+	 	</isNotEmpty>
+	</select>
+	
+	<select id="getCustomerReportDetail" resultMap="CustomerBeanResult" >
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    select 
+			c.CUSTOMER_ID,
+			c.CUSTOMER_NO,
+			c.CUSTOMER_NAME,
+			c.MOBILE_PHONE1, 
+			c.MOBILE_PHONE2,
+			c.PHONE,
+			c.FAX,
+			c.DEFAULT_PHONE_TYPE,
+			type.CUSTOMER_TYPE_NAME,
+			c.SEX,
+			c.AGE,
+			c.BIRTHDAY,
+			c.COMPANY,
+			c.CUSTOMER_TITLE,
+			c.CUSTOMER_NAME_PINYIN,
+			dept.DEPT_NAME,
+			users.USER_NAME
+		from 
+		CRM_CUSTOMER as c 
+		left join CRM_CUSTOMER_TYPE as type on c.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+		left join SYS_DEPT AS dept ON c.BELONG_DEPT_ID=dept.DEPT_ID
+		left join SYS_USER as users ON c.BELONG_USER_ID=users.USER_ID
+		inner join sys_user u on c.create_user = u.user_id
+		where c.is_del=0 and c.IS_TRASH=0
+		<isNotEmpty prepend="and" property="deptId">
+		    u.dept_id in ($deptId$)
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			u.user_id = $userId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="dateBegin" >
+			<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') >= '$dateBegin$' ]]>
+	 	</isNotEmpty>
+	 	<isNotEmpty prepend="and" property="dateEnd" >
+			<![CDATA[ TO_CHAR(c.create_date,'yyyyMM') <= '$dateEnd$' ]]>
+	 	</isNotEmpty>
+	 	order by c.CUSTOMER_NAME_PINYIN
+	 	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getContactCustomerReportDetailCount" resultClass="java.lang.Integer" >
+	    select count(*)
+		from 
+		CRM_CUSTOMER as c 
+		left join CRM_CUSTOMER_TYPE as type on c.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+		left join SYS_DEPT AS dept ON c.BELONG_DEPT_ID=dept.DEPT_ID
+		left join SYS_USER as users ON c.BELONG_USER_ID=users.USER_ID
+		where c.is_del=0 and c.IS_TRASH=0
+		<isNotEmpty prepend="" property="contactFlag" >
+		    <isEqual prepend="and" property="contactFlag" compareValue="1">
+		       c.customer_id in(
+					select customer_id from( 
+				        select c.customer_id, count(i.record_info_id) as cc 
+				        from crm_customer c
+				        <isNotEmpty prepend="" property="deptId">
+						    inner join sys_dept d on c.BELONG_DEPT_ID = d.dept_id
+						</isNotEmpty>
+						<isNotEmpty prepend="" property="userId">
+							inner join sys_user u on c.BELONG_USER_ID = u.user_id
+						</isNotEmpty>
+				        left join rec_record_info i on c.customer_id = i.customer_id
+				        <isNotEmpty prepend="and" property="dateBegin" >
+							<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') >= '$dateBegin$']]>
+					 	</isNotEmpty>
+					 	<isNotEmpty prepend="and" property="dateEnd" >
+					 		<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') <= '$dateEnd$' ]]>
+					 	</isNotEmpty>
+				        where c.is_del=0 and i.is_del=0 
+				        <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id = $customerType$ ]]>
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					 	<isNotEmpty prepend="and" property="deptId">
+						    d.dept_id in ($deptId$)
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="userId">
+							u.user_id = $userId$
+						</isNotEmpty>
+				        group by c.customer_id
+					) 
+					where <![CDATA[ cc>=$contactCount$ ]]>
+				)
+		    </isEqual>
+		    <isEqual prepend="and" property="contactFlag" compareValue="0">
+		       c.customer_id in(
+					select customer_id from( 
+				        select c.customer_id, count(i.record_info_id) as cc 
+				        from crm_customer c
+				        <isNotEmpty prepend="" property="deptId">
+						    inner join sys_dept d on c.BELONG_DEPT_ID = d.dept_id
+						</isNotEmpty>
+						<isNotEmpty prepend="" property="userId">
+							inner join sys_user u on c.BELONG_USER_ID = u.user_id
+						</isNotEmpty>
+				        left join rec_record_info i on c.customer_id = i.customer_id 
+				        and i.is_del=0 
+				        <isNotEmpty prepend="and" property="dateBegin" >
+							<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') >= '$dateBegin$' ]]>
+					 	</isNotEmpty>
+					 	<isNotEmpty prepend="and" property="dateEnd" >
+					 		<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') <= '$dateEnd$' ]]>
+					 	</isNotEmpty>
+				        where c.is_del=0 
+				        <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id = $customerType$ ]]>
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+						<isNotEmpty prepend="and" property="deptId">
+						    d.dept_id in ($deptId$)
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="userId">
+							u.user_id = $userId$
+						</isNotEmpty>
+				        group by c.customer_id
+					) 
+					where <![CDATA[ cc<$contactCount$ ]]>
+				)
+			</isEqual>
+	 	</isNotEmpty>
+	</select>
+	
+	<select id="getContactCustomerReportDetail" resultMap="CustomerBeanResult" >
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    select 
+			c.CUSTOMER_ID,
+			c.CUSTOMER_NO,
+			c.CUSTOMER_NAME,
+			c.MOBILE_PHONE1, 
+			c.MOBILE_PHONE2,
+			c.PHONE,
+			c.FAX,
+			c.DEFAULT_PHONE_TYPE,
+			type.CUSTOMER_TYPE_NAME,
+			c.SEX,
+			c.AGE,
+			c.BIRTHDAY,
+			c.COMPANY,
+			c.CUSTOMER_TITLE,
+			c.CUSTOMER_NAME_PINYIN,
+			dept.DEPT_NAME,
+			users.USER_NAME
+		from 
+		CRM_CUSTOMER as c 
+		left join CRM_CUSTOMER_TYPE as type on c.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+		left join SYS_DEPT AS dept ON c.BELONG_DEPT_ID=dept.DEPT_ID
+		left join SYS_USER as users ON c.BELONG_USER_ID=users.USER_ID
+		where c.is_del=0 and c.IS_TRASH=0
+		<isNotEmpty prepend="" property="contactFlag" >
+		    <isEqual prepend="and" property="contactFlag" compareValue="1">
+		       c.customer_id in(
+					select customer_id from( 
+				        select c.customer_id, count(i.record_info_id) as cc 
+				        from crm_customer c
+				        <isNotEmpty prepend="" property="deptId">
+						    inner join sys_dept d on c.BELONG_DEPT_ID = d.dept_id
+						</isNotEmpty>
+						<isNotEmpty prepend="" property="userId">
+							inner join sys_user u on c.BELONG_USER_ID = u.user_id
+						</isNotEmpty>
+				        left join rec_record_info i on c.customer_id = i.customer_id 
+				        <isNotEmpty prepend="and" property="dateBegin" >
+							<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') >= '$dateBegin$']]>
+					 	</isNotEmpty>
+					 	<isNotEmpty prepend="and" property="dateEnd" >
+					 		<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') <= '$dateEnd$' ]]>
+					 	</isNotEmpty>
+				        where c.is_del=0 and i.is_del=0 
+				        <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id = $customerType$ ]]>
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					 	<isNotEmpty prepend="and" property="deptId">
+						    d.dept_id in ($deptId$)
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="userId">
+							u.user_id = $userId$
+						</isNotEmpty>
+				        group by c.customer_id
+					) 
+					where <![CDATA[ cc>=$contactCount$ ]]>
+				)
+		    </isEqual>
+		    <isEqual prepend="and" property="contactFlag" compareValue="0">
+		       c.customer_id in(
+					select customer_id from( 
+				        select c.customer_id, count(i.record_info_id) as cc 
+				        from crm_customer c
+				        <isNotEmpty prepend="" property="deptId">
+						    inner join sys_dept d on c.BELONG_DEPT_ID = d.dept_id
+						</isNotEmpty>
+						<isNotEmpty prepend="" property="userId">
+							inner join sys_user u on c.BELONG_USER_ID = u.user_id
+						</isNotEmpty>
+				        left join rec_record_info i on c.customer_id = i.customer_id 
+				        and i.is_del=0 
+				        <isNotEmpty prepend="and" property="dateBegin" >
+							<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') >= '$dateBegin$' ]]>
+					 	</isNotEmpty>
+					 	<isNotEmpty prepend="and" property="dateEnd" >
+					 		<![CDATA[ TO_CHAR (i.create_date,'yyyy-MM-dd') <= '$dateEnd$' ]]>
+					 	</isNotEmpty>
+				        where c.is_del=0 
+				        <isNotEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id = $customerType$ ]]>
+						</isNotEmpty>
+						<isEmpty prepend="and" property="customerType" >
+							<![CDATA[ c.customer_type_id is null ]]>
+					 	</isEmpty>
+					 	<isNotEmpty prepend="and" property="deptId">
+						    d.dept_id in ($deptId$)
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="userId">
+							u.user_id = $userId$
+						</isNotEmpty>
+				        group by c.customer_id
+					) 
+					where <![CDATA[ cc<$contactCount$ ]]>
+				)
+			</isEqual>
+	 	</isNotEmpty>
+	 	order by c.CUSTOMER_NAME_PINYIN
+	 	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+</sqlMap>

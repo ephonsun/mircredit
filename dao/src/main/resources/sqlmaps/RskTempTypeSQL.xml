@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskTempTypeSQL">
+	<typeAlias alias="RskTempType" type="com.banger.mobile.domain.model.rskTempType.RskTempType" />
+
+
+	<!-- 风险测评模板类型-->
+	<!-- RskTempTypeSQL信息全字段 -->
+	<resultMap class="RskTempType" id="RskTempTypeResult">
+		<result column="TEMPLATE_TYPE_ID" property="tempTypeId" />
+		<result column="TEMPLATE_TYPE_NAME" property="tempTypeName" />
+		<result column="SORTNO" property="sortNo" />
+	</resultMap>
+	
+	   <!-- 更新 -->
+	<update id="updateRskTempType" parameterClass="RskTempType">
+  <![CDATA[
+  	update RSK_TEMPLATE_TYPE a
+  		set 
+  			a.TEMPLATE_TYPE_NAME = #tempTypeName#,
+  			a.SORTNO = #sortNo#
+  		where 
+  			a.TEMPLATE_TYPE_ID = #tempTypeId#
+  	]]>
+  </update>
+  
+   <!-- 查询 -->
+  <select id="queryRskTempType"   resultMap="RskTempTypeResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from RSK_TEMPLATE_TYPE a where a.TEMPLATE_TYPE_ID =#tempTypeId# 
+  	]]>
+  </select>
+  
+  <select id="queryAllType"  resultMap="RskTempTypeResult">
+  	<![CDATA[
+  		select * from RSK_TEMPLATE_TYPE 
+  	]]>
+  </select>
+	<!-- 增加-->
+	<insert id="addRskTempType" parameterClass="RskTempType">
+     <![CDATA[
+		insert into RSK_TEMPLATE_TYPE
+		(
+		 TEMPLATE_TYPE_ID,
+		 TEMPLATE_TYPE_NAME,
+		 SORTNO
+		 )
+		values
+		(
+		#tempTypeId#,
+		#tempTypeName#,
+	    #sortNo#
+		)
+      ]]>
+		<selectKey keyProperty="tempTypeId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_RSK_TEMPLATE_TYPE 
+		</selectKey>
+	</insert>	
+	<!-- 删除 -->
+	<delete id="deleteRskTempType" parameterClass="java.lang.Integer">
+  		<![CDATA[
+  		delete from RSK_TEMPLATE_TYPE a where a.TEMPLATE_TYPE_ID = #tempTypeId#
+  		]]>
+  	</delete>
+</sqlMap>
+
+
+
+

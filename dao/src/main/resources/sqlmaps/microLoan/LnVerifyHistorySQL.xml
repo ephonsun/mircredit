@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnVerifyHistorySQL">
+    <typeAlias alias="LnVerifyHistory" type="com.banger.mobile.domain.model.loan.LnVerifyHistory" />
+
+    <!-- 贷款操作历史记录表 全字段  -->
+    <resultMap class="LnVerifyHistory" id="LnVerifyHistoryResult">
+        <result column="VERIFY_HISTORY_ID" property="verifyHistoryId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="VERIFY_HISTORY_ID_DATE" property="verifyHistoryIdDate"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="CONTENT" property="content"/>
+        <result column="REMARK" property="remark"/>
+
+        <!--扩展字段-->
+        <result column="USER_NAME" property="userName" />
+        <result column="ACCOUNT" property="account" />
+    </resultMap>
+
+
+    <insert id="insertLnVerifyHistory"  parameterClass="LnVerifyHistory">
+        INSERT INTO LN_VERIFY_HISTORY
+        (
+          VERIFY_HISTORY_ID,
+          LOAN_ID,
+          VERIFY_HISTORY_ID_DATE,
+          USER_ID,
+          CONTENT
+        <isPropertyAvailable property="remark">
+            <isNotEmpty property="remark" prepend=",">
+                REMARK
+            </isNotEmpty>
+        </isPropertyAvailable>
+        )
+        VALUES
+        (
+        #verifyHistoryId:Integer#,
+        #loanId:Integer#,
+        #verifyHistoryIdDate:TIMESTAMP#,
+        #userId:Integer#,
+        #content:VARCHAR:NULL#
+        <isPropertyAvailable property="remark">
+            <isNotEmpty property="remark" prepend=",">
+                #remark:VARCHAR:NULL#
+            </isNotEmpty>
+        </isPropertyAvailable>
+        )
+        <selectKey keyProperty="verifyHistoryId" resultClass="java.lang.Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_LN_VERIFY_HISTORY
+        </selectKey>
+    </insert>
+
+    <select id="getLnVerifyHistoryByLoanId"  resultMap="LnVerifyHistoryResult" resultClass="Integer">
+        SELECT A.*,B.USER_NAME,B.ACCOUNT
+        FROM (select * from LN_VERIFY_HISTORY where loan_id=#loanId#) A
+        LEFT JOIN SYS_USER B ON B.USER_ID = A.USER_ID
+        ORDER BY A.VERIFY_HISTORY_ID_DATE DESC
+    </select>
+    <select id="getFirstVerifyHistoryByLoanId" parameterClass="java.util.Map" resultClass="LnVerifyHistory">
+        SELECT * FROM LN_VERIFY_HISTORY
+        WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="isVerifyPass" prepend="and">
+            <isEqual property="isVerifyPass" compareValue="3">
+                <!--审计不通过-->
+                CONTENT='审计不通过'
+            </isEqual>
+        </isNotEmpty>
+        ORDER BY VERIFY_HISTORY_ID_DATE DESC FETCH FIRST 1 ROW ONLY
+    </select>
+</sqlMap>

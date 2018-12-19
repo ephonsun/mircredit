@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnBalanceDebtSQL">
+
+    <typeAlias alias="LnBalanceDebt" type="com.banger.mobile.domain.model.loan.LnBalanceDebt"/>
+
+    <resultMap class="LnBalanceDebt" id="LnBalanceDebtResult">
+       	<result column="ID" property="id"/>
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+       	<result column="REMARK" property="remark"/>
+       	<result column="TYPE" property="type"/>
+       	<result column="AMOUNT" property="amount"/>
+
+       	<result column="DEBT_SOURCE" property="debtSource"/>
+       	<result column="LIMIT_YEAR" property="limitYear"/>
+       	<result column="LOAN_PURPOSE" property="loanPurpose"/>
+       	<result column="BEGIN_DATE" property="beginDate"/>
+       	<result column="LOAN_BALANCE" property="loanBalance"/>
+       	<result column="GUARANTY_TYPE" property="guarantyType"/>
+
+
+    </resultMap>
+
+    <delete id="deleteBalanceDebt" parameterClass="Integer">
+         DELETE FROM LN_BALANCE_DEBT WHERE ID = #ID#
+    </delete>
+
+    <insert id="insertBalanceDebt" parameterClass="LnBalanceDebt">
+        INSERT INTO LN_BALANCE_DEBT
+         (
+         	ID,
+         	LOAN_ID,
+			AMOUNT,
+			REMARK,
+			TYPE,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE,
+			DEBT_SOURCE,
+			LIMIT_YEAR,
+			LOAN_PURPOSE,
+			BEGIN_DATE,
+			LOAN_BALANCE,
+			GUARANTY_TYPE
+         )
+         VALUES
+         (
+			#id:INTEGER#,
+			#loanId:INTEGER#,
+			#amount:DECIMAL#,
+			#remark:VARCHAR#,
+			#type:VARCHAR#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#,
+
+			#debtSource:VARCHAR#,
+			#limitYear:VARCHAR#,
+			#loanPurpose:VARCHAR#,
+			#beginDate:TIMESTAMP#,
+			#loanBalance:DECIMAL#,
+			#guarantyType:VARCHAR#
+         )
+		<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_BALANCE_DEBT
+		</selectKey>
+    </insert>
+
+
+    <update id="updateBalanceDebt" parameterClass="LnBalanceDebt">
+        update LN_BALANCE_DEBT SET ID=ID
+        <isNotEmpty property="loanId" prepend=",">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+		<isNotEmpty property="amount" prepend=",">
+			AMOUNT = #amount#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			REMARK = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="type" prepend=",">
+			TYPE = #type#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+
+		<isNotEmpty property="debtSource" prepend=",">
+			DEBT_SOURCE = #debtSource#
+		</isNotEmpty>
+		<isNotEmpty property="limitYear" prepend=",">
+			LIMIT_YEAR = #limitYear#
+		</isNotEmpty>
+		<isNotEmpty property="loanPurpose" prepend=",">
+			LOAN_PURPOSE = #loanPurpose#
+		</isNotEmpty>
+		<isNotEmpty property="beginDate" prepend=",">
+			BEGIN_DATE = #beginDate#
+		</isNotEmpty>
+		<isNotEmpty property="loanBalance" prepend=",">
+			LOAN_BALANCE = #loanBalance#
+		</isNotEmpty>
+		<isNotEmpty property="guarantyType" prepend=",">
+			GUARANTY_TYPE = #guarantyType#
+		</isNotEmpty>
+        where ID=#id#
+    </update>
+
+
+    <select id="getLnBalanceDebtById" resultMap="LnBalanceDebtResult" parameterClass="java.lang.Integer">
+		select * from LN_BALANCE_DEBT where ID=#id#
+    </select>
+
+	<select id="getLnBalanceDebtByLoanId" resultMap="LnBalanceDebtResult" parameterClass="java.util.Map">
+		select * from LN_BALANCE_DEBT where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+	<select id="sumDebtByType" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		select sum(AMOUNT) from LN_BALANCE_DEBT where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+</sqlMap>

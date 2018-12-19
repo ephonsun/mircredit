@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpeventLogSQL">
+	<typeAlias alias="OpeventLoginLog" type="com.banger.mobile.domain.model.log.OpeventLoginLog" />
+	<typeAlias alias="OpeventLoginLogInfo" type="com.banger.mobile.domain.model.log.OpeventLoginLogInfo" />
+
+
+	<!-- OpeventLoginLog信息全字段 -->
+	<resultMap class="OpeventLoginLog" id="OpeventLoginLogResult">
+		<result column="OPEVENT_ID" property="opeventId" />
+		<result column="USER_ID" property="userId" />
+		<result column="OPEVENT_OBJECT_ID" property="opeventObjectId" />
+		<result column="OPEVENT_ACTION" property="opeventAction" />
+		<result column="OPEVENT_DATE" property="opeventDate" />
+		<result column="OPEVENT_IP" property="opeventIp" />
+		<result column="CLIENT_TYPE_ID" property="clientTypeId" />
+		<result column="STATE" property="state" />
+		<result column="REMARK" property="remark" />
+	</resultMap>
+	
+	
+	<!-- OpeventLoginLogInfo信息全字段 -->
+	<resultMap class="OpeventLoginLogInfo" id="OpeventLoginLogInfoResult">
+		<result column="OPEVENT_DATE" property="opeventDate"/>
+		<result column="OPEVENT_OBJECT_NAME" property="opeventObj" />
+		<result column="OPEVENT_ACTION" property="opeventAction" />
+		<result column="USER_NAME" property="userName" />
+		<result column="CLIENT_TYPE_NAME" property="clientTypeName" />
+		<result column="OPEVENT_IP" property="opeventIp" />
+	</resultMap>
+
+		<!-- 增加一条操作日志-->
+	<insert id="insertLog" parameterClass="OpeventLoginLog">
+     <![CDATA[
+		insert into SYS_OPEVENT_LOG
+		(
+		 OPEVENT_ID,
+		 USER_ID,
+		 OPEVENT_OBJECT_ID,
+		 OPEVENT_ACTION,
+		 OPEVENT_DATE,
+		 OPEVENT_IP,
+		 CLIENT_TYPE_ID,
+		 STATE,
+		 REMARK
+		 )
+		values
+		(
+		#opeventId#,
+		#userId#,
+	    #opeventObjectId#,
+	    #opeventAction#,
+	    #opeventDate#,
+	    #opeventIp#,
+	    #clientTypeId#,
+	    #state#,
+	    #remark#
+		)
+      ]]>
+		<selectKey keyProperty="opeventId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_OPEVENT_LOG 
+		</selectKey>
+	</insert>
+	
+	
+	
+  
+  	<!-- 操作日志分页count -->
+  <select id="forLogCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   SYS_OPEVENT_LOG a
+                   left join SYS_USER b on a.USER_ID=b.USER_ID 
+                   left join CD_OPEVENT_OBJECT c on a.OPEVENT_OBJECT_ID=c.OPEVENT_OBJECT_ID 
+                   left join CD_CLIENT_TYPE d on a.CLIENT_TYPE_ID=d.CLIENT_TYPE_ID 
+     ]]>
+     <dynamic prepend="where" >
+     	<isNotEmpty prepend="and" property="startLogDate">
+			<![CDATA[a.OPEVENT_DATE>='$startLogDate$ 00:00:00' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="endLogDate">
+			<![CDATA[a.OPEVENT_DATE<='$endLogDate$ 23:59:59']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="opeventObj">
+			<![CDATA[c.OPEVENT_OBJECT_NAME like '%$opeventObj$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[b.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  	<!-- 安全日志记录 -->
+  <select id="forLogPage" resultMap="OpeventLoginLogInfoResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+			  a.OPEVENT_DATE,
+		      a.OPEVENT_ACTION,
+              a.OPEVENT_IP,
+              b.USER_NAME,
+              c.OPEVENT_OBJECT_NAME,
+              d.CLIENT_TYPE_NAME
+        from 
+            SYS_OPEVENT_LOG a
+                   left join SYS_USER b on a.USER_ID=b.USER_ID 
+                   left join CD_OPEVENT_OBJECT c on a.OPEVENT_OBJECT_ID=c.OPEVENT_OBJECT_ID 
+                   left join CD_CLIENT_TYPE d on a.CLIENT_TYPE_ID=d.CLIENT_TYPE_ID 
+	]]>
+	<dynamic prepend="where" >
+     	<isNotEmpty prepend="and" property="startLogDate">
+			<![CDATA[a.OPEVENT_DATE>='$startLogDate$ 00:00:00' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="endLogDate">
+			<![CDATA[a.OPEVENT_DATE<='$endLogDate$ 23:59:59']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="opeventObj">
+			<![CDATA[c.OPEVENT_OBJECT_NAME like '%$opeventObj$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[b.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+	</dynamic>
+	order by a.OPEVENT_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <delete id="dropLog">
+		delete from SYS_OPEVENT_LOG
+  </delete>
+
+
+</sqlMap>
+
+
+
+

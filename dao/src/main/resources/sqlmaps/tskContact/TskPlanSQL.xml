@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskPlanSQL">
+	<typeAlias alias="TskPlan"
+		type="com.banger.mobile.domain.model.tskContact.TskPlan" />
+	<typeAlias alias="TskPlanSelectBean"
+		type="com.banger.mobile.domain.model.tskContact.TskPlanSelectBean" />
+	<typeAlias alias="TskPlanCustListBean"
+		type="com.banger.mobile.domain.model.tskContact.TskPlanCustListBean" />
+	<typeAlias alias="TskPlanListBean"
+		type="com.banger.mobile.domain.model.tskContact.TskPlanListBean" />		
+		
+		
+	<!--联系计划表 全字段  -->
+	<resultMap class="TskPlan" id="TskPlanResult">
+		<result column="PLAN_ID" property="planId" />
+		<result column="TABLIE_NAME" property="tableName" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="TASK_PLAN_DATE" property="taskPlanDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- 联系计划 选择客户列表bean -->
+	<resultMap class="TskPlanSelectBean" id="TskPlanSelectBeanResult">
+		<result column="TARGETIDS" property="targetIds" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="BELONG_USER_NAME" property="belongUserName" />
+		<result column="RELATIVE_TSKS" property="relativeTsks" />
+		<result column="REMARK" property="remark" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinYin" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="COMPANY" property="company" />
+		<result column="PHONE_NO" property="phoneNo" />
+		<result column="TASK_CUSTOMER_NAME" property="taskCustomerName" />
+		
+		<result column="TASK_PLAN_DATE" property="planDate" />
+	</resultMap>
+	<!-- 制定计划 客户列表bean -->
+	<resultMap class="TskPlanCustListBean" id="TskPlanCustListBeanResult"
+		extends="TskPlanSelectBeanResult">
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="IS_SHARE" property="isShare" />
+		<result column="IS_DEL" property="isDel"/>
+		<result column="FINISH_LEVEL" property="finishLevel" />
+	</resultMap>
+	<!-- 所有联系计划 列表 bean -->
+	<resultMap class="TskPlanListBean"
+		id="TskPlanListBeanResult">
+		<result column="PLAN_ID" property="planId" />
+		<result column="TABLIE_NAME" property="tableName" />
+		<result column="USER_NAME" property="executeUser" />
+		<result column="EXECUTE_USER_ID" property="execUserId" />
+		<result column="PLAN_COUNT" property="totalConnect" />
+		<result column="PLAN_FINISH_COUNT" property="finishConnect" />
+		<result column="TASK_PLAN_DATE" property="taskPlanDate" />
+	</resultMap>
+	
+	
+<!-- 所有联系计划分页count -->
+	<select id="getAllTaskPlanCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		   	SELECT COUNT(*) FROM (
+        		SELECT USER_NAME, TABLIE_NAME, EXECUTE_USER_ID, TASK_PLAN_DATE,
+				    SUM(PLAN_COUNT) 	   AS PLAN_COUNT,
+				    SUM(PLAN_FINISH_COUNT) AS PLAN_FINISH_COUNT,
+				    SUM(TASK_PLAN_ID)      AS PLAN_ID
+				FROM(   
+			    	SELECT 
+			        (SELECT
+			            COUNT(1) AS PLAN_COUNT
+			            FROM 
+			            TSK_PLAN_TARGET
+			            WHERE
+			            PLAN_ID=plan.PLAN_ID) AS PLAN_COUNT,
+			        (SELECT
+			            COUNT(1) AS PLAN_FINISH_COUNT
+			            FROM
+			            TSK_PLAN_TARGET
+			            WHERE
+			            PLAN_ID=plan.PLAN_ID
+			            AND FINISH_LEVEL IN(1,2)),
+			        users.USER_NAME,
+			        plan.PLAN_ID AS TASK_PLAN_ID,
+			        plan.TABLIE_NAME,
+			        plan.EXECUTE_USER_ID,
+			        plan.TASK_PLAN_DATE
+			    FROM
+		        TSK_PLAN  AS plan
+			    LEFT JOIN SYS_USER AS users ON users.USER_ID=plan.EXECUTE_USER_ID
+			    AND users.IS_DEL=0
+			    AND users.IS_ACTIVED=1
+        WHERE
+        ]]>
+        	<isNotEmpty prepend="" property="execUserIds">
+				<![CDATA[plan.EXECUTE_USER_ID in ($execUserIds$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[plan.TASK_PLAN_DATE >= '$startDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[plan.TASK_PLAN_DATE <= '$endDate$' ]]>
+			</isNotEmpty>
+       		<isPropertyAvailable property="IsProducure">
+		        UNION ALL
+		        SELECT
+		            temp.PLAN_COUNT,
+		            temp.PLAN_FINISH_COUNT,
+		            temp.USER_NAME,
+		            temp.TASK_PLAN_ID,
+		            temp.TABLIE_NAME,
+		            temp.EXECUTE_USER_ID,
+		            temp.TASK_PLAN_DATE
+		        FROM
+		            session.TEMP_TASK_PLAN AS temp
+            </isPropertyAvailable>
+   	   <![CDATA[	
+    		) AS aa
+		GROUP BY
+    		USER_NAME,
+    		TABLIE_NAME,
+    		EXECUTE_USER_ID,
+    		TASK_PLAN_DATE
+		ORDER BY
+			TASK_PLAN_DATE ASC,
+    		USER_NAME
+		]]>
+		)
+	</select>
+	<!-- 联系计划列表存储过程 -->
+	<procedure id="callProducure" resultMap="TskPlanListBeanResult"
+		parameterClass="java.util.Map">
+		<![CDATA[{call TASK_PLAN_LIST_PROCEDURE('$ids$','$startDate$','$endDate$')} ]]>
+	</procedure>
+
+	<!-- 所有联系计划分页 -->
+	<select id="getAllTaskPlan" resultMap="TskPlanListBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+	    	SELECT USER_NAME, TABLIE_NAME, EXECUTE_USER_ID, TASK_PLAN_DATE,
+			    SUM(PLAN_COUNT) 	   AS PLAN_COUNT,
+			    SUM(PLAN_FINISH_COUNT) AS PLAN_FINISH_COUNT,
+			    SUM(TASK_PLAN_ID)      AS PLAN_ID
+			FROM(   
+			    SELECT 
+			        (SELECT
+			            COUNT(1) AS PLAN_COUNT
+			            FROM 
+			            TSK_PLAN_TARGET
+			            WHERE
+			            PLAN_ID=plan.PLAN_ID) AS PLAN_COUNT,
+			        (SELECT
+			            COUNT(1) AS PLAN_FINISH_COUNT
+			            FROM
+			            TSK_PLAN_TARGET
+			            WHERE
+			            PLAN_ID=plan.PLAN_ID
+			            AND FINISH_LEVEL IN(1,2)),
+			        users.USER_NAME,
+			        plan.PLAN_ID AS TASK_PLAN_ID,
+			        plan.TABLIE_NAME,
+			        plan.EXECUTE_USER_ID,
+			        plan.TASK_PLAN_DATE
+			    FROM
+		        TSK_PLAN  AS plan
+			    LEFT JOIN SYS_USER AS users ON users.USER_ID=plan.EXECUTE_USER_ID
+			    AND users.IS_DEL=0
+			    AND users.IS_ACTIVED=1
+		    WHERE
+        ]]>
+        	<isNotEmpty prepend="" property="execUserIds">
+				<![CDATA[plan.EXECUTE_USER_ID in ($execUserIds$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[plan.TASK_PLAN_DATE >= '$startDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[plan.TASK_PLAN_DATE <= '$endDate$' ]]>
+			</isNotEmpty>
+			<isPropertyAvailable property="IsProducure">
+		        UNION ALL
+		        SELECT
+		            temp.PLAN_COUNT,
+		            temp.PLAN_FINISH_COUNT,
+		            temp.USER_NAME,
+		            temp.TASK_PLAN_ID,
+		            temp.TABLIE_NAME,
+		            temp.EXECUTE_USER_ID,
+		            temp.TASK_PLAN_DATE
+		        FROM
+		            session.TEMP_TASK_PLAN AS temp
+		    </isPropertyAvailable>
+	    <![CDATA[
+    		) AS aa
+		GROUP BY
+    		USER_NAME,
+    		TABLIE_NAME,
+    		EXECUTE_USER_ID,
+    		TASK_PLAN_DATE
+		ORDER BY
+			TASK_PLAN_DATE ASC,
+			PLAN_COUNT DESC,
+			PLAN_FINISH_COUNT DESC
+    		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据计划名查询计划 -->
+	<select id="getPlanByTskPlan" resultMap="TskPlanResult" parameterClass="TskPlan">
+		select * from TSK_PLAN p
+		left join SYS_USER u on u.USER_ID=p.EXECUTE_USER_ID
+		where u.IS_DEL=0
+		<isNotEmpty prepend="and" property="tableName">
+			p.TABLIE_NAME = #tableName#
+		</isNotEmpty>
+		<isNotNull prepend="and" property="planId">
+			p.PLAN_ID = #planId#
+		</isNotNull>
+	</select>
+	
+	<!-- 新增联系计划 -->
+	<insert id="insertTskPlan" parameterClass="TskPlan">
+		<![CDATA[
+	 		insert into TSK_PLAN
+	 		(
+	 			PLAN_ID,
+				TABLIE_NAME,
+				EXECUTE_USER_ID,
+				TASK_PLAN_DATE,
+				CREATE_DATE,
+				CREATE_USER
+	 		)
+	 		values
+	 		(
+	 			#planId#,
+	 			#tableName#,
+	 			#executeUserId#,
+	 			#taskPlanDate#,
+				current timestamp,
+				#createUser#
+	 		)
+	 	]]>
+		<selectKey keyProperty="planId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_TSK_PLAN
+		</selectKey>
+	</insert>
+	
+	<!-- 选择联系客户列表-->
+	<select id="getTskPlanSelectCustList" resultMap="TskPlanSelectBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select 
+				CASE WHEN B.CUSTOMER_ID=0 
+					or (
+							select num from (
+							    select customer_id,user_id,count(1) as num from (
+							        select * from (select t.customer_id,c.contact_id,
+							                         case when e.user_id is null then 0 else e.user_id end as user_id
+							                         from tsk_contact_target as t
+							                         left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+							                                    and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+							                                    and c.is_next_contact =0 and c.is_del=0 and c.IS_SUSPEND=0
+							         left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+							         where contact_id is not null
+							    ) group by customer_id,user_id
+							) where customer_id=B.CUSTOMER_ID and user_id=$userId$
+						) is null
+				THEN 0 ELSE  
+			    (
+					select num from (
+					    select customer_id,user_id,count(1) as num from (
+					        select * from (select t.customer_id,c.contact_id,
+					                         case when e.user_id is null then 0 else e.user_id end as user_id
+					                         from tsk_contact_target as t
+					                         left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+					                                    and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+					                                    and c.is_next_contact =0 and c.is_del=0 and c.IS_SUSPEND=0
+					         left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+					         where contact_id is not null
+					    ) group by customer_id,user_id
+					) where customer_id=B.CUSTOMER_ID and user_id=$userId$
+			     ) END AS RELATIVE_TSKS, 
+			    B.*,'' as REMARK,
+			    case when B.CUSTOMER_ID =0 then #deptName# else d.USER_NAME end as BELONG_USER_NAME,
+			    c.CUSTOMER_NAME,c.DEFAULT_PHONE_TYPE,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.PHONE,c.FAX,c.CUSTOMER_NAME_PINYIN,
+			    c.CUSTOMER_NO,c.ID_CARD,c.COMPANY
+			from
+			    (
+			      select task.TARGETIDS,task.CUSTOMER_ID,task.PHONE_NO,task.CUSTOMER_NAME as TASK_CUSTOMER_NAME,p.TASK_PLAN_DATE 
+				  from
+					    (
+					        select 
+					        	CUSTOMER_ID,PHONE_NO,CUSTOMER_NAME,replace(replace(xml2clob(xmlagg(xmlelement(NAME a, CONTACT_TARGET_ID||','))),'<A>',''),'</A>','') AS TARGETIDS
+					        from 
+					              TSK_CONTACT_TARGET  as contact
+					        left join TSK_CONTACT_EXECUTE e on contact.EXECUTE_ID=e.EXECUTE_ID    
+					        where contact.IS_FINISH=0 and contact.CONTACT_ID in($tskIds$) and e.USER_ID=$userId$
+					        GROUP BY CUSTOMER_ID,PHONE_NO,CUSTOMER_NAME
+					    ) as task
+				  left join  
+				        (
+			           		select 
+			           			case when target.CUSTOMER_ID=0 then target.PHONE_NO else target.CUSTOMER_ID end AS id,
+			           			plan.TASK_PLAN_DATE 
+			                from TSK_PLAN_TARGET target
+			                left join TSK_PLAN plan on target.PLAN_ID = plan.PLAN_ID 
+			                where plan.EXECUTE_USER_ID=$userId$ and plan.TASK_PLAN_DATE>=current date and target.FINISH_LEVEL=0
+				        ) as p on (task.CUSTOMER_ID=p.id or task.PHONE_NO=p.id)
+			    ) as B
+			left join CRM_CUSTOMER c on c.CUSTOMER_ID = B.CUSTOMER_ID
+			left join SYS_USER d on c.BELONG_USER_ID = d.USER_ID
+			where 1=1
+		]]>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[(
+				(c.CUSTOMER_NAME like '%$customerName$%')
+				or (c.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+				or (c.CUSTOMER_NO = '$customerName$')
+				or (c.ID_CARD like '%$customerName$%')
+				or (c.COMPANY like '%$customerName$%')
+				or (c.MOBILE_PHONE1 like '%$customerName$%')
+				or (c.MOBILE_PHONE2 like '%$customerName$%')
+				or (c.PHONE like '%$customerName$%')
+				or (c.FAX like '%$customerName$%')
+				or (TASK_CUSTOMER_NAME like '%$customerName$%')
+				or (PHONE_NO like '%$customerName$%')
+				)]]>
+			</isNotEmpty>
+			<isNotEmpty property="isPlan">
+				<isEqual prepend="and" property="isPlan" compareValue="0">
+					TASK_PLAN_DATE is null
+				</isEqual>
+				<isEqual prepend="and" property="isPlan" compareValue="1">
+					 TASK_PLAN_DATE is not null
+					<isNotEmpty prepend="and" property="startDate">
+						<![CDATA[ to_char(TASK_PLAN_DATE,'yyyy-MM-dd') >= '$startDate$' ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="endDate">
+						<![CDATA[ to_char(TASK_PLAN_DATE,'yyyy-MM-dd') <= '$endDate$' ]]>
+					</isNotEmpty>
+				</isEqual>
+			</isNotEmpty>
+		<![CDATA[	
+			order by TASK_PLAN_DATE desc,RELATIVE_TSKS desc
+	    ]]>
+		
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!--选择联系客户列表count -->
+	<select id="getTskPlanSelectCustCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select 
+			   COUNT(0)
+			from
+			    (
+			      select task.TARGETIDS,task.CUSTOMER_ID,task.PHONE_NO,task.CUSTOMER_NAME as TASK_CUSTOMER_NAME,p.TASK_PLAN_DATE 
+				  from
+					    (
+					        select 
+					        	CUSTOMER_ID,PHONE_NO,CUSTOMER_NAME,replace(replace(xml2clob(xmlagg(xmlelement(NAME a, CONTACT_TARGET_ID||','))),'<A>',''),'</A>','') AS TARGETIDS
+					        from 
+					              TSK_CONTACT_TARGET  as contact
+					        left join TSK_CONTACT_EXECUTE e on contact.EXECUTE_ID=e.EXECUTE_ID    
+					        where contact.IS_FINISH=0 and contact.CONTACT_ID in($tskIds$) and e.USER_ID=$userId$
+					        GROUP BY CUSTOMER_ID,PHONE_NO,CUSTOMER_NAME
+					    ) as task
+				  left join  
+				        (
+				            select 
+			           			case when target.CUSTOMER_ID=0 then target.PHONE_NO else target.CUSTOMER_ID end AS id,
+			           			plan.TASK_PLAN_DATE 
+			                from TSK_PLAN_TARGET target
+			                left join TSK_PLAN plan on target.PLAN_ID = plan.PLAN_ID 
+			                where plan.EXECUTE_USER_ID=$userId$ and plan.TASK_PLAN_DATE>=current date and target.FINISH_LEVEL=0
+				        ) as p on (task.CUSTOMER_ID=p.id or task.PHONE_NO=p.id)
+			    ) as B
+			left join CRM_CUSTOMER c on c.CUSTOMER_ID = B.CUSTOMER_ID
+			left join SYS_USER d on c.BELONG_USER_ID = d.USER_ID
+			where 1=1
+		]]>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[(
+				(c.CUSTOMER_NAME like '%$customerName$%')
+				or (c.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+				or (c.CUSTOMER_NO = '$customerName$')
+				or (c.ID_CARD like '%$customerName$%')
+				or (c.COMPANY like '%$customerName$%')
+				or (c.MOBILE_PHONE1 like '%$customerName$%')
+				or (c.MOBILE_PHONE2 like '%$customerName$%')
+				or (c.PHONE like '%$customerName$%')
+				or (c.FAX like '%$customerName$%')
+				or (TASK_CUSTOMER_NAME like '%$customerName$%')
+				or (PHONE_NO like '%$customerName$%')
+				)]]>
+			</isNotEmpty>
+			<isNotEmpty property="isPlan">
+				<isEqual prepend="and" property="isPlan" compareValue="0">
+					TASK_PLAN_DATE is null
+				</isEqual>
+				<isEqual prepend="and" property="isPlan" compareValue="1">
+					 TASK_PLAN_DATE is not null
+					<isNotEmpty prepend="and" property="startDate">
+						<![CDATA[ to_char(TASK_PLAN_DATE,'yyyy-MM-dd') >= '$startDate$' ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="endDate">
+						<![CDATA[ to_char(TASK_PLAN_DATE,'yyyy-MM-dd') <= '$endDate$' ]]>
+					</isNotEmpty>
+				</isEqual>
+			</isNotEmpty>
+		
+	</select>
+	
+	<!-- 查询有联系计划的客户列表-->
+	<select id="getPlanCustBeanList" resultMap="TskPlanCustListBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select 
+				CASE WHEN B.FINISH_LEVEL<>0 or B.CUSTOMER_ID =0
+					or (
+							select num from (
+							    select customer_id,user_id,count(1) as num from (
+							        select * from (select t.customer_id,c.contact_id,
+							                         case when e.user_id is null then 0 else e.user_id end as user_id
+							                         from tsk_contact_target as t
+							                         left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+							                                    and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+							                                    and c.is_next_contact =0 and c.is_del=0 and c.IS_SUSPEND=0
+							         left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+							         where contact_id is not null
+							    ) group by customer_id,user_id
+							) where customer_id=B.CUSTOMER_ID and user_id=$userId$
+						) is null
+				THEN 0 ELSE  
+				(
+					select num from (
+					    select customer_id,user_id,count(1) as num from (
+					        select * from (select t.customer_id,c.contact_id,
+					                         case when e.user_id is null then 0 else e.user_id end as user_id
+					                         from tsk_contact_target as t
+					                         left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+					                                    and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+					                                    and c.is_next_contact =0 and c.is_del=0 and c.IS_SUSPEND=0
+					         left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+					         where contact_id is not null
+					    ) group by customer_id,user_id
+					) where customer_id=B.CUSTOMER_ID and user_id=$userId$
+				)
+				END AS RELATIVE_TSKS,  
+			    B.TARGET_ID as TARGETIDS,B.CUSTOMER_ID,B.REMARK,B.PHONE_NO,B.CUSTOMER_NAME as TASK_CUSTOMER_NAME,B.FINISH_LEVEL,
+			    case when B.CUSTOMER_ID =0 then #deptName# else d.USER_NAME end as BELONG_USER_NAME,
+			    (case  when c.CUSTOMER_ID in (
+			                                        SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+			                                        left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+			                                        WHERE 
+			                                        SHARE_USER_ID in ($userId$) 
+			                                        AND g.BELONG_USER_ID != $userId$ 
+			                                     ) 
+			      then 1  else 0 end
+			    ) as IS_SHARE,
+			    c.CUSTOMER_NAME,c.DEFAULT_PHONE_TYPE,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.PHONE,c.FAX,c.CUSTOMER_NAME_PINYIN,
+			    c.CUSTOMER_NO,c.ID_CARD,c.COMPANY,c.CUSTOMER_TITLE,c.SEX,c.AGE,c.BIRTHDAY,c.IS_TRASH as IS_DEL,
+			    current timestamp as TASK_PLAN_DATE
+			from
+			   TSK_PLAN_TARGET as B
+			left join CRM_CUSTOMER c on c.CUSTOMER_ID = B.CUSTOMER_ID
+			left join SYS_USER d on c.BELONG_USER_ID = d.USER_ID
+			where B.PLAN_ID=$planId$
+			order by FINISH_LEVEL,RELATIVE_TSKS desc
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!--查询有联系计划的客户列表count -->
+	<select id="getPlanCustBeanCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select 
+				count(0)
+			from
+			    TSK_PLAN_TARGET as B
+			left join CRM_CUSTOMER c on c.CUSTOMER_ID = B.CUSTOMER_ID
+			left join SYS_USER d on c.BELONG_USER_ID = d.USER_ID
+			where B.PLAN_ID=$planId$
+		]]>
+	</select>
+	
+	<!-- 计划列表有效联系量 -->
+	<select id="getActivedContactCount" resultClass="java.lang.Integer" parameterClass="java.lang.Integer">
+		SELECT COUNT(0) FROM TSK_PLAN_TARGET WHERE  PLAN_ID=#planId# AND FINISH_LEVEL IN (1,2)
+	</select>
+	
+	<!-- 任务的联系量 -->
+	<select id="getTaskContactCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			select 
+			   count(0) 
+			from 
+			    TSK_CONTACT_TARGET t
+			left join  TSK_CONTACT_EXECUTE u on u.EXECUTE_ID = t.EXECUTE_ID
+			where 
+			   t.CONTACT_ID=#taskIds#
+			   and u.USER_ID=#userId#
+		]]>
+		<isPropertyAvailable prepend="and" property="isFinish">
+			<![CDATA[ IS_FINISH=0 ]]>
+		</isPropertyAvailable>
+	</select>
+	
+	<!--选择全部联系客户targetIds -->
+	<select id="getTskPlanSelectCustIds" resultClass="java.lang.String" parameterClass="java.util.Map">
+		<![CDATA[
+			select 
+			   B.TARGETIDS
+			from
+			    (
+			      select task.TARGETIDS,task.CUSTOMER_ID,task.PHONE_NO,task.CUSTOMER_NAME as TASK_CUSTOMER_NAME,p.TASK_PLAN_DATE 
+				  from
+					    (
+					        select 
+					        	CUSTOMER_ID,PHONE_NO,CUSTOMER_NAME,replace(replace(xml2clob(xmlagg(xmlelement(NAME a, CONTACT_TARGET_ID||','))),'<A>',''),'</A>','') AS TARGETIDS
+					        from 
+					              TSK_CONTACT_TARGET  as contact
+					        left join TSK_CONTACT_EXECUTE e on contact.EXECUTE_ID=e.EXECUTE_ID    
+					        where contact.IS_FINISH=0 and contact.CONTACT_ID in($tskIds$) and e.USER_ID=$userId$
+					        GROUP BY CUSTOMER_ID,PHONE_NO,CUSTOMER_NAME
+					    ) as task
+				  left join  
+				        (
+				            select 
+			           			case when target.CUSTOMER_ID=0 then target.PHONE_NO else target.CUSTOMER_ID end AS id,
+			           			plan.TASK_PLAN_DATE 
+			                from TSK_PLAN_TARGET target
+			                left join TSK_PLAN plan on target.PLAN_ID = plan.PLAN_ID 
+			                where plan.EXECUTE_USER_ID=$userId$ and plan.TASK_PLAN_DATE>=current date and target.FINISH_LEVEL=0
+				        ) as p on (task.CUSTOMER_ID=p.id or task.PHONE_NO=p.id)
+			    ) as B
+			left join CRM_CUSTOMER c on c.CUSTOMER_ID = B.CUSTOMER_ID
+			left join SYS_USER d on c.BELONG_USER_ID = d.USER_ID
+			where 1=1
+		]]>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[(
+				(c.CUSTOMER_NAME like '%$customerName$%')
+				or (c.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+				or (c.CUSTOMER_NO = '$customerName$')
+				or (c.ID_CARD like '%$customerName$%')
+				or (c.COMPANY like '%$customerName$%')
+				or (c.MOBILE_PHONE1 like '%$customerName$%')
+				or (c.MOBILE_PHONE2 like '%$customerName$%')
+				or (c.PHONE like '%$customerName$%')
+				or (c.FAX like '%$customerName$%')
+				or (TASK_CUSTOMER_NAME like '%$customerName$%')
+				or (PHONE_NO like '%$customerName$%')
+				)]]>
+			</isNotEmpty>
+			<isNotEmpty property="isPlan">
+				<isEqual prepend="and" property="isPlan" compareValue="0">
+					TASK_PLAN_DATE is null
+				</isEqual>
+				<isEqual prepend="and" property="isPlan" compareValue="1">
+					 TASK_PLAN_DATE is not null
+					<isNotEmpty prepend="and" property="startDate">
+						<![CDATA[ to_char(TASK_PLAN_DATE,'yyyy-MM-dd') >= '$startDate$' ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="endDate">
+						<![CDATA[ to_char(TASK_PLAN_DATE,'yyyy-MM-dd') <= '$endDate$' ]]>
+					</isNotEmpty>
+				</isEqual>
+			</isNotEmpty>
+	</select>
+	
+</sqlMap>

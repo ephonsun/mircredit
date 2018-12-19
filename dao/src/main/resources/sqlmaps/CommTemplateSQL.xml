@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommTemplateSQL">
+	<typeAlias alias="BaseCommTemplate" type="com.banger.mobile.domain.model.base.communication.BaseCommTemplate" />	
+	<typeAlias alias="CommTemplate" type="com.banger.mobile.domain.model.communication.CommTemplate" />	
+	
+	<resultMap class="BaseCommTemplate" id="BaseCommTemplateResult">
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="PARTITION_ID" property="partitionId" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="TEMPLATE_DESCRIPTION" property="templateDescription" />
+		<result column="TEMPLATE_STATE" property="templateState" />
+		<result column="TEMPLATE_ORDER" property="templateOrder" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="IS_BUILTIN" property="isBuiltin" />		
+	</resultMap>
+	<resultMap class="CommTemplate" extends="BaseCommTemplateResult" id="CommTemplateResult">
+		
+	</resultMap>
+	
+	<!-- 新增版块 -->
+	<insert id="addCommTemplate" parameterClass="CommTemplate">
+		<![CDATA[	
+			INSERT INTO
+			    COMM_TEMPLATE
+			    (
+			        TEMPLATE_ID,
+			        PARTITION_ID,
+					TEMPLATE_NAME,
+					TEMPLATE_DESCRIPTION,
+					TEMPLATE_STATE,
+					TEMPLATE_ORDER,
+					IS_DEL,
+					CREATE_DATE,
+					CREATE_USER,
+					IS_BUILTIN
+			    )
+			    SELECT 
+			       	#templateId#,
+					#partitionId#,
+					#templateName#,
+					#templateDescription#,
+					#templateState#,
+					case when max(TEMPLATE_ORDER) is null then 1 else max(TEMPLATE_ORDER)+1 end,
+					0,
+					#createDate#,
+					#createUser#,
+					#isBuiltin#
+			        FROM COMM_TEMPLATE
+		]]>	
+		<selectKey keyProperty="templateId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_COMM_TEMPLATE
+		</selectKey>	
+	</insert>
+	
+	<!-- 删除版块-->
+	<update id="deleteCommTemplate"  parameterClass="CommTemplate" >	
+		<![CDATA[ UPDATE COMM_TEMPLATE SET IS_DEL = 1, UPDATE_DATE = #updateDate#, UPDATE_USER = #updateUser#
+			WHERE TEMPLATE_ID = #templateId# ]]>	
+	</update>
+	
+	<!-- 编辑版块内容 -->
+	<update id="updateCommTemplate"  parameterClass="CommTemplate" >	
+		<![CDATA[ 
+			UPDATE
+			    COMM_TEMPLATE
+			SET
+			    TEMPLATE_STATE = #templateState#,
+		]]>
+		<isNotEmpty property="partitionId">
+			<![CDATA[
+				PARTITION_ID = #partitionId#,
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="templateName">
+			<![CDATA[
+				TEMPLATE_NAME = #templateName#,
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="templateDescription">
+			<![CDATA[
+				TEMPLATE_DESCRIPTION = #templateDescription#,
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="templateOrder">
+			<![CDATA[
+				TEMPLATE_ORDER = #templateOrder#,
+		    ]]>
+		</isNotEmpty>	 
+		<isNotEmpty property="updateUser">
+			<![CDATA[
+				UPDATE_USER = #updateUser#,
+		    ]]>
+		</isNotEmpty>	
+		<![CDATA[ 
+        	 UPDATE_DATE = #updateDate#	WHERE TEMPLATE_ID = #templateId# 
+        ]]>
+	</update>
+	
+	<!-- 通过ID获取版块 -->
+	<select id="getCommTemplateById" parameterClass="java.lang.Integer" resultMap="CommTemplateResult">
+	<![CDATA[ 	
+		SELECT * FROM COMM_TEMPLATE WHERE TEMPLATE_ID = #templateId#
+	]]>	
+	</select>
+	
+	
+	<!-- 获取所有版块分页总数 -->
+	<select id="getCommTemplateListCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+	<![CDATA[ 	
+		SELECT COUNT(*) FROM COMM_TEMPLATE WHERE IS_DEL = 0
+	]]>	
+		<dynamic prepend="">
+				<isNotEmpty prepend="AND" property="partitionId">
+					<![CDATA[ PARTITION_ID = #partitionId# ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="templateName">
+					<![CDATA[ TEMPLATE_NAME LIKE '%$templateName$%' ]]>
+				</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 获取所有版块分页 -->
+	<select id="getCommTemplateList" parameterClass="java.util.Map" resultMap="CommTemplateResult">
+		<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+				<![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+		         ]]>
+				</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[ 	
+			SELECT * FROM COMM_TEMPLATE  WHERE IS_DEL = 0
+		]]>	
+		<dynamic>
+				<isNotEmpty prepend="AND" property="partitionId">
+					<![CDATA[ PARTITION_ID = #partitionId# ]]>
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="templateName">
+					<![CDATA[ TEMPLATE_NAME LIKE '%$templateName$%' ]]>
+				</isNotEmpty>
+		</dynamic>
+		ORDER BY TEMPLATE_ORDER
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 上移下移查询分区 -->
+	<select id="getDesCommTemplate" parameterClass="java.util.Map" resultMap="CommTemplateResult">
+	<![CDATA[
+		SELECT t.* FROM COMM_TEMPLATE t WHERE IS_DEL = 0  AND TEMPLATE_ORDER	
+	]]>	
+	<dynamic prepend="">
+		<isEqual prepend="" property="type" compareValue="up">
+			<![CDATA[ < #orderId# ]]> ORDER BY TEMPLATE_ORDER DESC
+		</isEqual>
+		<isEqual prepend="" property="type" compareValue="down">
+			<![CDATA[ > #orderId# ]]> ORDER BY TEMPLATE_ORDER ASC
+		</isEqual>
+	</dynamic>	
+	<![CDATA[ FETCH FIRST 1 ROW ONLY ]]>		
+	</select>
+	
+	<!-- 通过标题获取版块 -->
+	<select id="getCommTemplateByTitle" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+	<![CDATA[ 	
+		SELECT COUNT(*) FROM COMM_TEMPLATE a  WHERE IS_DEL = 0 AND a.TEMPLATE_NAME= '$templateName$'
+	]]>	
+		<isNotEmpty property="templateId">
+			<![CDATA[
+				AND a.TEMPLATE_ID != #templateId#
+		    ]]>
+		</isNotEmpty>
+		
+		<isNotEmpty property="partitionId">
+			<![CDATA[
+				AND a.PARTITION_ID = #partitionId#
+		    ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 通过分区ID获取版块 -->
+	<select id="getCommTemplateListByPid" parameterClass="java.util.Map" resultMap="CommTemplateResult">
+	<![CDATA[ 	
+		SELECT * FROM COMM_TEMPLATE a  WHERE a.IS_DEL=0  AND a.PARTITION_ID = #partitionId# 
+	]]>	
+		<isNotEmpty property="templateState">
+			<![CDATA[
+				AND a.TEMPLATE_STATE = 0
+		    ]]>
+		</isNotEmpty>
+		ORDER BY a.TEMPLATE_ORDER
+	</select>
+	
+</sqlMap>
+
+
+
+

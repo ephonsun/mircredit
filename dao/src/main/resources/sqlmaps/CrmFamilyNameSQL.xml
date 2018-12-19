@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmFamilyNameSQL">
+	<typeAlias alias="BaseFamilyName" type="com.banger.mobile.domain.model.base.customer.BaseFamilyName" />
+
+	<resultMap class="BaseFamilyName" id="BaseFamilyNameResult">
+		<result column="FAMILY_NAME_ID" property="familyNameId" />
+		<result column="FAMILY_NAME" property="familyName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<cacheModel id="FamilyNameModel" type="OSCACHE" serialize="true"
+		readOnly="true" >
+		<flushInterval hours="24" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+   <!-- 查询所有百家姓集合  -->
+   <select id="getNickName" resultMap="BaseFamilyNameResult" cacheModel="FamilyNameModel">
+	<![CDATA[
+		select * from CRM_FAMILY_NAME
+	]]>
+   </select>
+</sqlMap>

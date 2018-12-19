@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="InformSQL">
+    <typeAlias alias="Inform" type="com.banger.mobile.domain.model.inform.Inform"/>
+
+    <resultMap id="informResult" class="Inform">
+        <result property="informId" column="INFORM_ID"/>
+        <result property="isOpen" column="IS_OPEN"/>
+        <result property="text" column="TEXT"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+        <result property="updateUser" column="UPDATE_USER"/>
+    </resultMap>
+
+    <insert id="insertInform" parameterClass="Inform">
+        insert into INFORM(
+        INFORM_ID,
+        IS_OPEN,
+        TEXT,
+        CREATE_USER,
+        CREATE_DATE
+        )values (
+        #informId:INTEGER#,
+        #isOpen:INTEGER#,
+        #text:VARCHAR#,
+        #createUser:INTEGER#,
+        #createDate:TIMESTAMP#
+        )
+        <selectKey keyProperty="informId" resultClass="java.lang.Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_INFORM
+        </selectKey>
+    </insert>
+
+    <update id="updateInform" parameterClass="Inform">
+        update INFORM set INFORM_ID=#informId#
+        <isNotEmpty property="isOpen" prepend=",">
+            IS_OPEN=#isOpen#
+        </isNotEmpty>
+        <isNotEmpty property="text" prepend=",">
+            TEXT=#text#
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend=",">
+            CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE=#createDate#
+        </isNotEmpty>
+        <isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE=#updateDate#
+        </isNotEmpty>
+        <isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER=#updateUser#
+        </isNotEmpty>
+        where INFORM_ID=#informId#
+    </update>
+
+
+    <select id="queryInform" parameterClass="java.lang.Integer" resultMap="informResult">
+        select * from inform where inform_id=#id#
+    </select>
+
+</sqlMap>

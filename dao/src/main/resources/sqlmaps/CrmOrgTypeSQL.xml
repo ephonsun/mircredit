@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmOrgTypeSQL">
+	<typeAlias alias="CrmOrgType" type="com.banger.mobile.domain.model.orgType.OrgType" />
+
+	<!-- CrmMaritalStatusSQL信息全字段 -->
+	<resultMap class="CrmOrgType" id="CrmOrgTypeResult">
+		<result column="ORG_TYPE_ID" property="orgTypeId" />
+		<result column="ORG_TYPE_NAME" property="orgTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种组织形式-->
+	<insert id="addCrmOrgType" parameterClass="CrmOrgType">
+		<![CDATA[
+		INSERT INTO CRM_ORG_TYPE
+    	(
+        ORG_TYPE_ID,
+        IS_DEL,
+        ORG_TYPE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #orgTypeId#,
+        #isDel#,
+        #orgTypeName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="orgTypeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_ORG_TYPE
+		</selectKey>
+	</insert>
+
+
+	<!-- 组织形式修改-->
+	<update id="updateCrmOrgType" parameterClass="CrmOrgType">
+		UPDATE CRM_ORG_TYPE SET 
+			IS_DEL = #isDel#,
+			ORG_TYPE_NAME = #orgTypeName#, 
+			SORTNO = #sortNo#,
+			IS_ACTIVED = #isActived#, 
+			CREATE_DATE = #createDate#,
+			UPDATE_DATE =<![CDATA[current timestamp]]>, 
+			CREATE_USER = #createUser#, 
+			UPDATE_USER = #updateUser# 
+		where
+			ORG_TYPE_ID= #orgTypeId#
+	</update>
+
+	<!-- 根据ID删除组织形式 -->
+	<update id="deleteCrmOrgTypeById" parameterClass="java.lang.Integer">
+		UPDATE CRM_ORG_TYPE SET 
+			IS_DEL = 1, 
+			UPDATE_DATE =<![CDATA[current timestamp]]>
+		where 
+			ORG_TYPE_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到组织形式 -->
+	<select id="getCrmOrgTypeById" resultMap="CrmOrgTypeResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_ORG_TYPE where ORG_TYPE_ID=#Id#
+	]]>
+	</select>
+	
+	<!-- 根据组织形式名称获取相同组织形式名称的数据 -->
+	<select id="getSameCrmOrgTypeByName" resultMap="CrmOrgTypeResult" parameterClass="CrmOrgType">
+		<![CDATA[select * from CRM_ORG_TYPE where  IS_DEL = 0]]>
+     	<isNotEmpty prepend="" property="orgTypeId">
+     		<isNotEqual prepend="and" property="orgTypeId" compareValue="0">
+			<![CDATA[ORG_TYPE_ID != #orgTypeId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="orgTypeName">
+			<![CDATA[ORG_TYPE_NAME = #orgTypeName#]]>
+		</isNotEmpty>	
+	</select>
+
+	<!-- 获取组织形式列表 -->
+	<select id="getAllCrmOrgType" resultMap="CrmOrgTypeResult">
+	    <![CDATA[
+		select * from CRM_ORG_TYPE
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC
+        ]]>
+	</select>
+
+	<!-- 获取现有组织形式数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmOrgType" resultMap="CrmOrgTypeResult">
+		<![CDATA[
+		select *  from CRM_ORG_TYPE 
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取现有组织形式数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmOrgType" resultMap="CrmOrgTypeResult">
+		<![CDATA[
+		select *  from CRM_ORG_TYPE 
+		WHERE IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取要移动的组织形式对象 -->
+	<select id="getNeedMoveCrmOrgType" resultMap="CrmOrgTypeResult" parameterClass="java.util.Map">
+		select *  from CRM_ORG_TYPE WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

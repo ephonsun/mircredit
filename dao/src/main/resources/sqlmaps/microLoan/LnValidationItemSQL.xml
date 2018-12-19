@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnValidationItemSQL">
+
+    <typeAlias alias="LnValidationItem" type="com.banger.mobile.domain.model.loan.LnValidationItem"/>
+
+    <resultMap class="LnValidationItem" id="LnValidationItemResult">
+
+       	<result column="ID" property="id"/>
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+		<result column="TYPE" property="type"/>
+		<result column="ITEM_NAME" property="itemName"/>
+
+		<result column="ITEM_REMARK" property="itemRemark"/>
+       	<result column="ITEM_RATE" property="itemRate"/>
+
+    </resultMap>
+
+    <delete id="deleteValidationItem" parameterClass="Integer">
+         DELETE FROM LN_VALIDATION_ITEM WHERE ID = #ID#
+    </delete>
+
+    <insert id="insertValidationItem" parameterClass="LnValidationItem">
+        INSERT INTO LN_VALIDATION_ITEM
+         (
+         	ID,
+         	LOAN_ID,
+			ITEM_NAME,
+			ITEM_REMARK,
+			ITEM_RATE,
+			TYPE,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE
+         )
+         VALUES
+         (
+			#id:INTEGER#,
+			#loanId:INTEGER#,
+			#itemName:VARCHAR#,
+			#itemRemark:VARCHAR#,
+			#itemRate:DOUBLE#,
+			#type:VARCHAR#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#
+         )
+		<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_VALIDATION_ITEM
+		</selectKey>
+    </insert>
+
+
+
+    <update id="updateValidationItem" parameterClass="LnValidationItem">
+        update LN_VALIDATION_ITEM SET ID=ID
+        <isNotEmpty property="loanId" prepend=",">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+		<isNotEmpty property="itemName" prepend=",">
+			ITEM_NAME = #itemName#
+		</isNotEmpty>
+		<isNotEmpty property="itemRemark" prepend=",">
+			ITEM_REMARK = #itemRemark#
+		</isNotEmpty>
+		<isNotEmpty property="itemRate" prepend=",">
+			ITEM_RATE = #itemRate#
+		</isNotEmpty>
+		<isNotEmpty property="type" prepend=",">
+			TYPE = #type#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+        where ID=#id#
+    </update>
+
+
+
+    <select id="getLnValidationItemById" resultMap="LnValidationItemResult" parameterClass="java.lang.Integer">
+		select * from LN_VALIDATION_ITEM where ID=#id#
+    </select>
+
+	<select id="getLnValidationItemByLoanId" resultMap="LnValidationItemResult" parameterClass="java.util.Map">
+		select * from LN_VALIDATION_ITEM where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+</sqlMap>

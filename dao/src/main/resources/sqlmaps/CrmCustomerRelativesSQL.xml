@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerRelativesSQL">
+	<typeAlias alias="BaseCrmCustomerRelatives" type="com.banger.mobile.domain.model.base.customer.BaseCrmCustomerRelatives" />
+	<typeAlias alias="CrmCustomerRelatives" type="com.banger.mobile.domain.model.customer.CrmCustomerRelatives" />
+
+	<resultMap class="BaseCrmCustomerRelatives" id="BaseCrmCustomerRelativesResult">
+		<result column="CUSTOMER_RELATIVES_ID" property="customerRelativesId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="RELATIVES_ID" property="relativesId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="CrmCustomerRelatives" id="CrmCustomerRelativesResult" extends="BaseCrmCustomerRelativesResult">
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="COMPANY" property="company" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="IS_SHARE" property="isShare" />
+	</resultMap>
+
+	<!-- 新增关联客户  -->
+	<insert id="insertCustomerRelatives" parameterClass="BaseCrmCustomerRelatives">
+     <![CDATA[
+		insert into CRM_CUSTOMER_RELATIVES
+		(
+		 CUSTOMER_RELATIVES_ID,
+		 CUSTOMER_ID,
+		 RELATIVES_ID,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER 
+		 )
+		values
+		(
+		#customerRelativesId#,
+		#customerId:INTEGER#,
+	    #relativesId:INTEGER#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="customerRelativesId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_CUSTOMER_RELATIVES 
+		</selectKey>
+	</insert>
+	
+	<!-- 查询亲友客户 count -->
+	<select id="selectCustomerRelativesCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+	<![CDATA[
+		select count(0) from (
+		select 
+              distinct b.*
+              FROM CRM_CUSTOMER_RELATIVES  b
+		        left join CRM_CUSTOMER a on (b.RELATIVES_ID = a.CUSTOMER_ID)
+                where
+		        ( a.IS_DEL = 0  )
+		        and
+		        (b.CUSTOMER_ID = #customerId#)
+		        and 
+		        (
+		        	((select BELONG_USER_ID from CRM_CUSTOMER where CUSTOMER_ID = b.RELATIVES_ID)in ($userIds$))
+		        	or
+		        	((select BELONG_DEPT_ID from CRM_CUSTOMER where CUSTOMER_ID = b.RELATIVES_ID)in ($InChargeOfDeptIds$))
+			        or (b.RELATIVES_ID in (SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID WHERE 
+							SHARE_USER_ID in ($userIds$) AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))
+						)
+				)
+		)
+     ]]>
+  </select>
+  
+	<!-- 查询亲友客户  -->
+   <select id="selectCustomerRelatives" resultMap="CrmCustomerRelativesResult"
+		parameterClass="java.util.Map">
+	<isNotEmpty property="startRow">
+		<isNotEmpty property="endRow">
+		<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   ( ]]>
+		</isNotEmpty>
+	</isNotEmpty>
+	<![CDATA[
+		select 
+              distinct b.*,
+              a.CUSTOMER_NO,
+              a.CUSTOMER_NAME,
+              e.CUSTOMER_TYPE_NAME,
+              a.DEFAULT_PHONE_TYPE,
+              a.MOBILE_PHONE1,
+              a.MOBILE_PHONE2,
+              a.PHONE,
+              a.FAX,	
+              a.CUSTOMER_TITLE,
+              a.SEX,
+              a.AGE,
+              a.COMPANY,
+              a.BELONG_DEPT_ID,
+              a.BELONG_USER_ID,
+              c.USER_NAME,
+              d.DEPT_NAME,
+              a.CUSTOMER_NAME_PINYIN,
+              case
+		              when a.BELONG_DEPT_ID in ($InChargeOfDeptIds$) or  a.BELONG_USER_ID = #UserId#
+		              then 0
+		              else 1
+		              end
+		              as IS_SHARE
+              FROM CRM_CUSTOMER_RELATIVES  b
+		        left join CRM_CUSTOMER a on (b.RELATIVES_ID = a.CUSTOMER_ID)
+		        left join SYS_USER c on a.BELONG_USER_ID=c.USER_ID 
+                left join SYS_DEPT d on a.BELONG_DEPT_ID=d.DEPT_ID
+                left join CRM_CUSTOMER_TYPE e on a.CUSTOMER_TYPE_ID = e.CUSTOMER_TYPE_ID
+                where
+		        ( a.IS_DEL = 0  )
+		        and
+		        (b.CUSTOMER_ID = #customerId#)
+		        and 
+		        (
+		        	((select BELONG_USER_ID from CRM_CUSTOMER where CUSTOMER_ID = b.RELATIVES_ID)in ($userIds$))
+		        	or
+		        	((select BELONG_DEPT_ID from CRM_CUSTOMER where CUSTOMER_ID = b.RELATIVES_ID)in ($InChargeOfDeptIds$))
+			        or (b.RELATIVES_ID in (SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID WHERE 
+							SHARE_USER_ID in ($userIds$) AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))
+						)
+				)
+     ]]>
+         order by a.CUSTOMER_NAME_PINYIN
+      <isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <select id="getCustomerIdList" resultClass="java.lang.Integer"
+		parameterClass="java.lang.String">
+	<![CDATA[
+		select RELATIVES_ID from CRM_CUSTOMER_RELATIVES where 
+		(CUSTOMER_ID=#value#)
+     ]]>
+  </select>
+  
+  <!-- 删除亲友客户  -->
+  <delete id='delRelatives' parameterClass="java.lang.String">
+      delete from CRM_CUSTOMER_RELATIVES a
+      where a.CUSTOMER_RELATIVES_ID = #value#
+    </delete>
+   
+  <select id="getCusIdsByPermission" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	 select A.CUSTOMER_ID from CRM_CUSTOMER A
+     where (IS_TRASH = 1)
+     and A.BELONG_USER_ID in ($InChargeOfUserIds$)
+     <isPropertyAvailable property="InChargeOfDeptIds">
+       <isNotEmpty prepend="or" property="InChargeOfDeptIds">
+         <![CDATA[A.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+       </isNotEmpty>
+     </isPropertyAvailable>
+  </select>
+  
+  <!--批量彻底删除客户，删除关联信息-->
+	<delete id="delRelativesInDustbin" parameterClass='java.lang.String'>
+	  delete from CRM_CUSTOMER_RELATIVES A
+	  where
+	  A.CUSTOMER_ID in ($value$)
+	  or A.RELATIVES_ID in ($value$)
+	</delete>
+	
+	<!--清空垃圾箱，删除关联信息-->
+	<delete id="clearRelativesInDustbin" parameterClass='java.util.Map'>
+	  delete from CRM_CUSTOMER_RELATIVES A
+	  where
+	  A.CUSTOMER_ID in 
+	  (
+	  	select A.CUSTOMER_ID from CRM_CUSTOMER A
+     	where (IS_TRASH = 1)
+     	and A.BELONG_USER_ID in ($InChargeOfUserIds$)
+     	<isPropertyAvailable property="InChargeOfDeptIds">
+       		<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+         	<![CDATA[A.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+       		</isNotEmpty>
+     	</isPropertyAvailable>
+	  )
+	  or A.RELATIVES_ID in 
+	  (
+		select A.CUSTOMER_ID from CRM_CUSTOMER A
+     	where (IS_TRASH = 1)
+     	and A.BELONG_USER_ID in ($InChargeOfUserIds$)
+     	<isPropertyAvailable property="InChargeOfDeptIds">
+       		<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+         	<![CDATA[A.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+       		</isNotEmpty>
+     	</isPropertyAvailable>
+	  )
+	</delete>
+
+    <!-- 查询客户关联亲友数 -->
+    <select id="selectRelativesByCustomerId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+        select count(*) from crm_customer_relatives  where customer_id =#customerId#
+    </select>
+</sqlMap>

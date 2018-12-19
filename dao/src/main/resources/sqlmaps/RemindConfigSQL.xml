@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RemindConfigSQL">
+	<typeAlias alias="RemindConfig" type="com.banger.mobile.domain.model.remindConfig.RemindConfig" />
+
+	<cacheModel id="RemindConfig-Cache" type="OSCACHE" serialize="true" readOnly="true" >
+		<flushInterval hours="24" />
+		<flushOnExecute statement="updateRemindConfig" />
+		<flushOnExecute statement="addRemindConfig" />
+		<flushOnExecute statement="deleteRemingConfig" />
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	<!-- 消息提醒表-->
+	<!-- RemindConfigSQL信息全字段 -->
+	<resultMap class="RemindConfig" id="RemindConfigResult">
+		<result column="REMIND_CONFIG_ID" property="remindConfigId" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_CALL_REMIND" property="isCallRemind" />
+		<result column="IS_MESSAGE_REMIND" property="isMessageRemind" />
+		<result column="IS_OVERDUE_TASK" property="isOverDueTask" />
+		<result column="IS_ASSIGN_TASK" property="isAssignTask" />
+		<result column="IS_SMS_REMIND" property="isSmsRemind" />
+		<result column="IS_SEND_SMS" property="isSendSms" />
+		<result column="IS_SEND_MMS" property="isSendMms" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updDate" />
+		
+		
+		<result column="IS_VISIT_REMIND" property="isVisitRemind" />
+		<result column="IS_VERIFY_SMS" property="isVerifySms" />
+		<result column="IS_SEND_BACK_SMS" property="isSendBackSms" />
+		<result column="IS_VERIFY_MMS" property="isVerifyMms" />
+		<result column="IS_SEND_BACK_MMS" property="isSendBackMms" />
+	</resultMap>
+	
+	   <!-- 更新 -->
+	<update id="updateRemindConfig" parameterClass="RemindConfig">
+  <![CDATA[
+  	update CRM_REMIND_CONFIG a
+  		set 
+  			a.IS_CALL_REMIND = #isCallRemind#,
+  			a.IS_MESSAGE_REMIND = #isMessageRemind#,
+  			a.IS_OVERDUE_TASK=#isOverDueTask#,
+  			a.IS_ASSIGN_TASK=#isAssignTask#,
+  			a.IS_SMS_REMIND=#isSmsRemind#,
+  			a.IS_SEND_SMS=#isSendSms#,
+  			a.IS_SEND_MMS=#isSendMms#,
+  			a.IS_VISIT_REMIND=#isVisitRemind#,
+  			a.IS_VERIFY_SMS=#isVerifySms#,
+  			a.IS_SEND_BACK_SMS=#isSendBackSms#,
+  			a.IS_VERIFY_MMS=#isVerifyMms#,
+  			a.IS_SEND_BACK_MMS=#isSendBackMms#,
+  			a.UPDATE_DATE= current timestamp
+  		where 
+  			a.USER_ID = #userId#
+  	]]>
+  </update>
+  
+   <!-- 查询 -->
+  <select id="queryRemindConfig"   resultMap="RemindConfigResult" parameterClass="java.lang.Integer" cacheModel="RemindConfig-Cache">
+  	<![CDATA[
+  		select * from CRM_REMIND_CONFIG a where a.USER_ID =#userId# 
+  	]]>
+  </select>
+	<!-- 增加一条消息提醒配置-->
+	<insert id="addRemindConfig" parameterClass="RemindConfig">
+     <![CDATA[
+		insert into CRM_REMIND_CONFIG
+		(
+		 REMIND_CONFIG_ID,
+		 USER_ID,
+		 IS_CALL_REMIND,
+		 IS_MESSAGE_REMIND,
+		 IS_OVERDUE_TASK,
+		 IS_ASSIGN_TASK,
+		 IS_SMS_REMIND,
+		 IS_SEND_SMS,
+		 IS_SEND_MMS,
+		 CREATE_DATE,
+		 
+		 IS_VISIT_REMIND,
+		 IS_VERIFY_SMS,
+		 IS_SEND_BACK_SMS,
+		 IS_VERIFY_MMS,
+		 IS_SEND_BACK_MMS,
+		 
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#remindConfigId#,
+		#userId#,
+	    #isCallRemind#,
+	    #isMessageRemind#,
+		#isOverDueTask#,
+		#isAssignTask#,
+		#isSmsRemind#,
+		#isSendSms#,
+		#isSendMms#,
+		current timestamp,
+		
+		#isVisitRemind#,
+		#isVerifySms#,
+		#isSendBackSms#,
+		#isVerifyMms#,
+		#isSendBackMms#,
+		
+		current timestamp
+		)
+      ]]>
+		<selectKey keyProperty="remindConfigId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_REMIND_CONFIG 
+		</selectKey>
+	</insert>	
+	<delete id="deleteRemingConfig" parameterClass="java.lang.Integer">
+		<![CDATA[
+  		delete from REMIND_CONFIG_ID where USER_ID = #userId#
+  		]]>	
+	</delete>
+
+</sqlMap>
+
+
+
+

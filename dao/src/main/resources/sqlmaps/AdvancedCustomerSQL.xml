@@ -1,0 +1,934 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerSQL">
+	<typeAlias alias="CustomerBean"
+		type="com.banger.mobile.domain.model.customer.CustomerBean" />
+
+	<typeAlias alias="CrmUserQueryBean" type="com.banger.mobile.domain.model.customer.CrmUserQueryBean" />
+
+	<!-- 高级搜索客户  -->
+	<!-- CustomerBeanSQL信息全字段 -->
+	<resultMap class="CustomerBean" id="CustomerBeanResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="SEX" property="sex" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="IS_RECEIVE_SMS" property="isReceiveSms" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="USER_NAME" property="userName" />
+		<result column="IS_SHARE" property="isShare" />
+		<result column="IS_NOGOOD" property="isNoGood" />
+		<result column="COMPANY" property="company" />
+	</resultMap>
+	
+	<resultMap class="CrmUserQueryBean" id="CrmUserQueryResult">
+		<result column="USER_QUERY_ID" property="userQueryId" />
+		<result column="USER_ID" property="userId" />
+		<result column="QUERY_NAME" property="queryName" />
+		<result column="SORTNO" property="sortno" />
+		<result column="QUERY_DETAIL" property="queryDetail" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="QUERY_TYPE" property="queryType" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 高级搜索客户分页列表 -->
+	<select id="getExportAdvancedCustomers" resultMap="CrmExportBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (     
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+		    select 
+				cus.*,
+				ex.*,
+				dept.DEPT_CODE,
+				users.ACCOUNT,
+				type.CUSTOMER_TYPE_NAME,
+				dept.DEPT_NAME,
+				users.USER_NAME,
+				d.CUSTOMER_TYPE_NAME,
+				e.CUSTOMER_INDUSTRY_NAME,
+				case when cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID = $loginId$
+	             then 0 else 1 end as IS_SHARE
+			from 
+			CRM_CUSTOMER as cus 
+			left join CRM_CUSTOMER_TYPE as type on cus.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+			LEFT JOIN SYS_DEPT AS dept ON cus.BELONG_DEPT_ID=dept.DEPT_ID
+			left join SYS_USER as users ON cus.BELONG_USER_ID=users.USER_ID
+			left join CRM_CUSTOMER_TYPE d on cus.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+            left join CRM_CUSTOMER_INDUSTRY e on cus.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+			inner join CRM_CUSTOMER_EXT_FIELD as ex on cus.CUSTOMER_ID=ex.CUSTOMER_ID
+			where cus.IS_TRASH=0 and cus.IS_DEL=0
+	    ]]>
+	    <isNotEmpty prepend="and" property="customerTypeId">
+			cus.CUSTOMER_TYPE_ID = $customerTypeId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerIndustryId">
+			cus.CUSTOMER_INDUSTRY_ID = $customerIndustryId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="sex">
+			cus.SEX = '$sex$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="province">
+			cus.PROVINCE = '$province$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="city">
+			cus.CITY = '$city$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerName">
+			cus.CUSTOMER_NAME like '%$customerName$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerTitle">
+			cus.CUSTOMER_TITLE like '%$customerTitle$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerNo">
+			cus.CUSTOMER_NO like '%$customerNo$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="idCard">
+			cus.ID_CARD like '%$idCard$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="company">
+			cus.COMPANY like '%$company$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="remark">
+			cus.REMARK like '%$remark$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="tel">
+			( cus.MOBILE_PHONE1 like '%$tel$%' or cus.MOBILE_PHONE2 like '%$tel$%' or cus.PHONE like '%$tel$%' or cus.FAX like '%$tel$%' )
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="email">
+			cus.EMAIL like '%$email$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="address">
+			cus.ADDRESS like '%$address$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTime">
+			<![CDATA[ cus.LAST_CONTACT_DATE>=TO_DATE ('$lastTime$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTimeEnd">
+			<![CDATA[ cus.LAST_CONTACT_DATE<=TO_DATE ('$lastTimeEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createUser">
+			<![CDATA[ cus.CREATE_USER= $createUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateUser">
+			<![CDATA[ cus.UPDATE_USER= $updateUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDate">
+			<![CDATA[ cus.CREATE_DATE>=TO_DATE ('$updateDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDateEnd">
+			<![CDATA[ cus.CREATE_DATE<=TO_DATE ('$updateDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDate">
+			<![CDATA[ cus.UPDATE_DATE>=TO_DATE ('$createDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDateEnd">
+			<![CDATA[ cus.UPDATE_DATE<=TO_DATE ('$createDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageBegin" >
+			<![CDATA[ cus.BIRTHDAY <= date(year(current date - $ageBegin$ year) || '-12-31') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageEnd" >
+			<![CDATA[ cus.BIRTHDAY >= date(year(current date - $ageEnd$ year) || '-01-01') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isReceiveSms" >
+			<![CDATA[ cus.IS_RECEIVE_SMS = $isReceiveSms$ ]]>
+		</isNotEmpty>
+		<isEqual property="birthQueryType" compareValue="1" >
+			<isNotEmpty prepend="and" property="birthdayBegin" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayBegin$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="birthdayEnd" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayEnd$' ]]>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="birthQueryType" compareValue="2" >
+			<![CDATA[ AND (TO_CHAR(cus.BIRTHDAY,'MMdd') >= '0101' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayBegin$') or (TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayEnd$' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '1231') ]]>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="unShare">
+			<isNotEmpty prepend="and" property="belongTo">
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[( cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$) )]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="share">
+			<isNotEqual property="belongTo" compareValue="un">
+				and EXISTS (
+								SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+								inner join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+								WHERE f.CUSTOMER_ID = cus.CUSTOMER_ID
+								AND SHARE_USER_ID in ($userIds$) 
+								AND g.BELONG_USER_ID != $loginId$ 
+								AND g.BELONG_DEPT_ID not in ($deptIds$))
+			</isNotEqual>
+			<isEqual property="belongTo" compareValue="un">
+				and 1=0
+			</isEqual>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="all">
+			<isNotEmpty prepend="and" property="belongTo">
+				(
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$)]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+				<isNotEqual property="belongTo" compareValue="un">
+					or EXISTS (
+						SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+						inner join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+						WHERE f.CUSTOMER_ID = cus.CUSTOMER_ID
+						AND SHARE_USER_ID in ($userIds$) 
+						AND g.BELONG_USER_ID != $loginId$
+						AND g.BELONG_DEPT_ID not in ($deptIds$)
+					)
+				</isNotEqual>
+				)
+			</isNotEmpty>
+		</isEqual>
+		<isNotEmpty property="exCondition" >
+			$exCondition$
+		</isNotEmpty>
+		<isNotEmpty property="rules" >
+			$rules$
+		</isNotEmpty>
+		 order by cus.CUSTOMER_NAME_PINYIN
+	    <isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 高级搜索客户分页count -->
+	<select id="getAdvancedCustomerIds" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map" >
+        	select cus.CUSTOMER_ID as id from 
+			CRM_CUSTOMER as cus 
+			left join CRM_CUSTOMER_TYPE as type on cus.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID 
+			left join SYS_DEPT AS dept on cus.BELONG_DEPT_ID=dept.DEPT_ID 
+			left join SYS_USER as users on cus.BELONG_USER_ID=users.USER_ID 
+			<isNotEmpty property="exCondition" >
+				inner join CRM_CUSTOMER_EXT_FIELD as ex on cus.CUSTOMER_ID=ex.CUSTOMER_ID
+			</isNotEmpty>
+			where cus.IS_TRASH=0 and cus.IS_DEL=0
+
+        <isNotEmpty prepend="and" property="customerTypeId">
+			cus.CUSTOMER_TYPE_ID = $customerTypeId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerIndustryId">
+			cus.CUSTOMER_INDUSTRY_ID = $customerIndustryId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="sex">
+			cus.SEX = '$sex$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="province">
+			cus.PROVINCE = '$province$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="city">
+			cus.CITY = '$city$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerName">
+			cus.CUSTOMER_NAME like '%$customerName$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerTitle">
+			cus.CUSTOMER_TITLE like '%$customerTitle$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerNo">
+			cus.CUSTOMER_NO like '%$customerNo$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="idCard">
+			cus.ID_CARD like '%$idCard$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="company">
+			cus.COMPANY like '%$company$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="remark">
+			cus.REMARK like '%$remark$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="tel">
+			( cus.MOBILE_PHONE1 like '%$tel$%' or cus.MOBILE_PHONE2 like '%$tel$%' or cus.PHONE like '%$tel$%' or cus.FAX like '%$tel$%' )
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="email">
+			cus.EMAIL like '%$email$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="address">
+			cus.ADDRESS like '%$address$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createUser">
+			<![CDATA[ cus.CREATE_USER= $createUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateUser">
+			<![CDATA[ cus.UPDATE_USER= $updateUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDate">
+			<![CDATA[ cus.CREATE_DATE>=TO_DATE ('$updateDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDateEnd">
+			<![CDATA[ cus.CREATE_DATE<=TO_DATE ('$updateDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDate">
+			<![CDATA[ cus.UPDATE_DATE>=TO_DATE ('$createDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDateEnd">
+			<![CDATA[ cus.UPDATE_DATE<=TO_DATE ('$createDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTime">
+			<![CDATA[ cus.LAST_CONTACT_DATE>=TO_DATE ('$lastTime$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTimeEnd">
+			<![CDATA[ cus.LAST_CONTACT_DATE<=TO_DATE ('$lastTimeEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageBegin" >
+			<![CDATA[ cus.BIRTHDAY <= date(year(current date - $ageBegin$ year) || '-12-31') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageEnd" >
+			<![CDATA[ cus.BIRTHDAY >= date(year(current date - $ageEnd$ year) || '-01-01') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isReceiveSms" >
+			<![CDATA[ cus.IS_RECEIVE_SMS = $isReceiveSms$ ]]>
+		</isNotEmpty>
+		<isEqual property="birthQueryType" compareValue="1" >
+			<isNotEmpty prepend="and" property="birthdayBegin" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayBegin$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="birthdayEnd" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayEnd$' ]]>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="birthQueryType" compareValue="2" >
+			<![CDATA[ AND ((TO_CHAR(cus.BIRTHDAY,'MMdd') >= '0101' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayBegin$') or (TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayEnd$' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '1231')) ]]>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="unShare">
+			<isNotEmpty prepend="and" property="belongTo">
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[( cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$) )]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="share">
+			 and 1=0 
+		</isEqual>
+		<isEqual property="shareTo" compareValue="all">
+			<isNotEmpty prepend="and" property="belongTo">
+				(
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$)]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+				)
+			</isNotEmpty>
+		</isEqual>
+		<isNotEmpty property="exCondition" >
+			$exCondition$
+		</isNotEmpty>
+		<isNotEmpty property="rules" >
+			$rules$
+		</isNotEmpty>
+	</select>
+	
+	<!-- 高级搜索客户分页count -->
+	<select id="getAdvancedCustomerCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map" >
+		<isEqual property="result" compareValue="count" >
+            select count(*) from 
+        </isEqual>
+        <isEqual property="result" compareValue="id" >
+        	select cus.CUSTOMER_ID from 
+        </isEqual>
+			CRM_CUSTOMER as cus 
+			left join CRM_CUSTOMER_TYPE as type on cus.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID 
+			left join SYS_DEPT AS dept on cus.BELONG_DEPT_ID=dept.DEPT_ID 
+			left join SYS_USER as users on cus.BELONG_USER_ID=users.USER_ID 
+			<isNotEmpty property="exCondition" >
+				inner join CRM_CUSTOMER_EXT_FIELD as ex on cus.CUSTOMER_ID=ex.CUSTOMER_ID
+			</isNotEmpty>
+			where cus.IS_TRASH=0 and cus.IS_DEL=0
+
+        <isNotEmpty prepend="and" property="customerTypeId">
+			cus.CUSTOMER_TYPE_ID = $customerTypeId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerIndustryId">
+			cus.CUSTOMER_INDUSTRY_ID = $customerIndustryId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="sex">
+			cus.SEX = '$sex$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="province">
+			cus.PROVINCE = '$province$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="city">
+			cus.CITY = '$city$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerName">
+			cus.CUSTOMER_NAME like '%$customerName$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerTitle">
+			cus.CUSTOMER_TITLE like '%$customerTitle$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerNo">
+			cus.CUSTOMER_NO like '%$customerNo$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="idCard">
+			cus.ID_CARD like '%$idCard$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="company">
+			cus.COMPANY like '%$company$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="remark">
+			cus.REMARK like '%$remark$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="tel">
+			( cus.MOBILE_PHONE1 like '%$tel$%' or cus.MOBILE_PHONE2 like '%$tel$%' or cus.PHONE like '%$tel$%' or cus.FAX like '%$tel$%' )
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="email">
+			cus.EMAIL like '%$email$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="address">
+			cus.ADDRESS like '%$address$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createUser">
+			<![CDATA[ cus.CREATE_USER= $createUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateUser">
+			<![CDATA[ cus.UPDATE_USER= $updateUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDate">
+			<![CDATA[ cus.UPDATE_DATE>=TO_DATE ('$updateDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDateEnd">
+			<![CDATA[ cus.UPDATE_DATE<=TO_DATE ('$updateDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDate">
+			<![CDATA[ cus.CREATE_DATE>=TO_DATE ('$createDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDateEnd">
+			<![CDATA[ cus.CREATE_DATE<=TO_DATE ('$createDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTime">
+			<![CDATA[ cus.LAST_CONTACT_DATE>=TO_DATE ('$lastTime$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTimeEnd">
+			<![CDATA[ cus.LAST_CONTACT_DATE<=TO_DATE ('$lastTimeEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageBegin" >
+			<![CDATA[ cus.BIRTHDAY <= date(year(current date - $ageBegin$ year) || '-12-31') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageEnd" >
+			<![CDATA[ cus.BIRTHDAY >= date(year(current date - $ageEnd$ year) || '-01-01') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isReceiveSms" >
+			<![CDATA[ cus.IS_RECEIVE_SMS = $isReceiveSms$ ]]>
+		</isNotEmpty>
+		<isEqual property="birthQueryType" compareValue="1" >
+			<isNotEmpty prepend="and" property="birthdayBegin" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayBegin$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="birthdayEnd" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayEnd$' ]]>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="birthQueryType" compareValue="2" >
+			<![CDATA[ AND ((TO_CHAR(cus.BIRTHDAY,'MMdd') >= '0101' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayBegin$') or (TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayEnd$' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '1231')) ]]>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="unShare">
+			<isNotEmpty prepend="and" property="belongTo">
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[( cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$) )]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="share">
+			<isNotEqual property="belongTo" compareValue="un">
+				and cus.CUSTOMER_ID in (
+								SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+								inner join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+								WHERE 
+								SHARE_USER_ID in ($userIds$) 
+								AND g.BELONG_USER_ID != $loginId$ 
+								AND g.BELONG_DEPT_ID not in ($deptIds$))
+			</isNotEqual>
+			<isEqual property="belongTo" compareValue="un">
+				and 1=0
+			</isEqual>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="all">
+			<isNotEmpty prepend="and" property="belongTo">
+				(
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$)]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+				<isNotEqual property="belongTo" compareValue="un">
+					or EXISTS (
+						SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+						inner join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+						WHERE f.CUSTOMER_ID = cus.CUSTOMER_ID
+						AND SHARE_USER_ID in ($userIds$) 
+						AND g.BELONG_USER_ID != $loginId$
+						AND g.BELONG_DEPT_ID not in ($deptIds$)
+					)
+				</isNotEqual>
+				)
+			</isNotEmpty>
+		</isEqual>
+		<isNotEmpty property="exCondition" >
+			$exCondition$
+		</isNotEmpty>
+		<isNotEmpty property="rules" >
+			$rules$
+		</isNotEmpty>
+	</select>
+	
+	<!-- 高级搜索客户分页列表 -->
+	<select id="getAdvancedCustomerPageMap" resultMap="CustomerBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (     
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		    select 
+				cus.CUSTOMER_ID,
+				cus.CUSTOMER_NO,
+				cus.CUSTOMER_NAME,
+				cus.MOBILE_PHONE1,
+				cus.MOBILE_PHONE2,
+				cus.PHONE,
+				cus.FAX,
+				cus.DEFAULT_PHONE_TYPE,
+				type.CUSTOMER_TYPE_NAME,
+				cus.SEX,
+				cus.BIRTHDAY,
+				cus.CUSTOMER_TITLE,
+				cus.CUSTOMER_NAME_PINYIN,
+				cus.IS_RECEIVE_SMS,
+				dept.DEPT_NAME,
+				users.USER_NAME,
+				cus.IS_NOGOOD,
+				cus.COMPANY,
+				<isEqual property="shareTo" compareValue="all">
+			    case when cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID = $loginId$
+	             then 0 else 1 end as IS_SHARE
+	            </isEqual>
+	            <isEqual property="shareTo" compareValue="share">
+	            1 as IS_SHARE
+	            </isEqual>
+	            <isEqual property="shareTo" compareValue="unShare">
+	            0 as IS_SHARE
+	            </isEqual>
+			from 
+			CRM_CUSTOMER as cus 
+			left join CRM_CUSTOMER_TYPE as type on cus.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+			LEFT JOIN SYS_DEPT AS dept ON cus.BELONG_DEPT_ID=dept.DEPT_ID
+			left join SYS_USER as users ON cus.BELONG_USER_ID=users.USER_ID
+			<isNotEmpty property="exCondition" >
+				inner join CRM_CUSTOMER_EXT_FIELD as ex on cus.CUSTOMER_ID=ex.CUSTOMER_ID
+			</isNotEmpty>
+			where cus.IS_TRASH=0 and cus.IS_DEL=0
+	    
+	    <isNotEmpty prepend="and" property="customerTypeId">
+			cus.CUSTOMER_TYPE_ID = $customerTypeId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerIndustryId">
+			cus.CUSTOMER_INDUSTRY_ID = $customerIndustryId$
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="sex">
+			cus.SEX = '$sex$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="province">
+			cus.PROVINCE = '$province$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="city">
+			cus.CITY = '$city$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerName">
+			cus.CUSTOMER_NAME like '%$customerName$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerTitle">
+			cus.CUSTOMER_TITLE like '%$customerTitle$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerNo">
+			cus.CUSTOMER_NO like '%$customerNo$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="idCard">
+			cus.ID_CARD like '%$idCard$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="company">
+			cus.COMPANY like '%$company$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="remark">
+			cus.REMARK like '%$remark$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="tel">
+			( cus.MOBILE_PHONE1 like '%$tel$%' or cus.MOBILE_PHONE2 like '%$tel$%' or cus.PHONE like '%$tel$%' or cus.FAX like '%$tel$%' )
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="email">
+			cus.EMAIL like '%$email$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="address">
+			cus.ADDRESS like '%$address$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTime">
+			<![CDATA[ cus.LAST_CONTACT_DATE>=TO_DATE ('$lastTime$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="lastTimeEnd">
+			<![CDATA[ cus.LAST_CONTACT_DATE<=TO_DATE ('$lastTimeEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createUser">
+			<![CDATA[ cus.CREATE_USER= $createUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateUser">
+			<![CDATA[ cus.UPDATE_USER= $updateUser$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDate">
+			<![CDATA[ cus.UPDATE_DATE>=TO_DATE ('$updateDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="updateDateEnd">
+			<![CDATA[ cus.UPDATE_DATE<=TO_DATE ('$updateDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDate">
+			<![CDATA[ cus.CREATE_DATE>=TO_DATE ('$createDate$','yyyy-MM-dd') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="createDateEnd">
+			<![CDATA[ cus.CREATE_DATE<=TO_DATE ('$createDateEnd$ 23:59:59','yyyy-MM-dd hh24:mi:ss') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageBegin" >
+			<![CDATA[ cus.BIRTHDAY <= date(year(current date - $ageBegin$ year) || '-12-31') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ageEnd" >
+			<![CDATA[ cus.BIRTHDAY >= date(year(current date - $ageEnd$ year) || '-01-01') ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isReceiveSms" >
+			<![CDATA[ cus.IS_RECEIVE_SMS = $isReceiveSms$ ]]>
+		</isNotEmpty>
+		<isEqual property="birthQueryType" compareValue="1" >
+			<isNotEmpty prepend="and" property="birthdayBegin" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayBegin$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="birthdayEnd" >
+				<![CDATA[ TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayEnd$' ]]>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="birthQueryType" compareValue="2" >
+			<![CDATA[ AND ((TO_CHAR(cus.BIRTHDAY,'MMdd') >= '0101' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '$birthdayBegin$') or (TO_CHAR(cus.BIRTHDAY,'MMdd') >= '$birthdayEnd$' AND TO_CHAR(cus.BIRTHDAY,'MMdd') <= '1231')) ]]>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="unShare">
+			<isNotEmpty prepend="and" property="belongTo">
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[( cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$) )]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="share">
+			<isNotEqual property="belongTo" compareValue="un">
+				and EXISTS (
+								SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+								inner join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+								WHERE f.CUSTOMER_ID = cus.CUSTOMER_ID
+								AND SHARE_USER_ID in ($userIds$) 
+								AND g.BELONG_USER_ID != $loginId$ 
+								AND g.BELONG_DEPT_ID not in ($deptIds$))
+			</isNotEqual>
+			<isEqual property="belongTo" compareValue="un">
+				and 1=0
+			</isEqual>
+		</isEqual>
+		<isEqual property="shareTo" compareValue="all">
+			<isNotEmpty prepend="and" property="belongTo">
+				(
+				<isEqual property="belongTo" compareValue="all">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$) or cus.BELONG_USER_ID in ($userIds$)]]>		
+				</isEqual>
+				<isEqual property="belongTo" compareValue="my">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="sub">
+					<![CDATA[cus.BELONG_USER_ID in ($userIds$)]]>
+				</isEqual>
+				<isEqual property="belongTo" compareValue="dept">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+				</isEqual>
+				<isEqual property="belongTo" compareValue="un">
+					<![CDATA[cus.BELONG_DEPT_ID in ($deptIds$)]]>	
+					and cus.BELONG_USER_ID = 0
+				</isEqual>
+				<isNotEqual property="belongTo" compareValue="un">
+					or EXISTS (
+						SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+						inner join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+						WHERE f.CUSTOMER_ID = cus.CUSTOMER_ID
+						AND SHARE_USER_ID in ($userIds$) 
+						AND g.BELONG_USER_ID != $loginId$
+						AND g.BELONG_DEPT_ID not in ($deptIds$)
+					)
+				</isNotEqual>
+				)
+			</isNotEmpty>
+		</isEqual>
+		<isNotEmpty property="exCondition" >
+			$exCondition$
+		</isNotEmpty>
+		<isNotEmpty property="rules" >
+			$rules$
+		</isNotEmpty>
+		order by cus.CUSTOMER_NAME_PINYIN
+	    <isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getUserQueryCountByName" parameterClass="CrmUserQueryBean" resultClass="java.lang.Integer" >
+		select count(*) from CRM_USER_QUERY WHERE IS_DEL=0 and QUERY_TYPE=1
+		<isNotEmpty prepend="and" property="userId" >
+			USER_ID = #userId#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="queryName" >
+			QUERY_NAME = #queryName#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userQueryId" >
+			<![CDATA[ USER_QUERY_ID <> #userQueryId# ]]>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getUserQueryList" parameterClass="java.util.Map" resultMap="CrmUserQueryResult" >
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		select * from CRM_USER_QUERY where USER_ID=#userId# and IS_DEL=0 and QUERY_TYPE=1 order by SORTNO desc 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getUserQueryListCount" parameterClass="java.util.Map" resultClass="java.lang.Integer" >
+		select count(*) from CRM_USER_QUERY where USER_ID=#userId# and IS_DEL=0 and QUERY_TYPE=1
+	</select>
+	
+	<select id="getUserQueryMenuList" parameterClass="java.lang.Integer" resultMap="CrmUserQueryResult" >
+		select * from CRM_USER_QUERY where USER_ID=#val# and IS_DEL=0 and QUERY_TYPE=1 order by SORTNO desc fetch first 20 rows only
+	</select>
+	
+	<select id="getUserQueryListTop100" parameterClass="java.lang.Integer" resultMap="CrmUserQueryResult" >
+		select * from CRM_USER_QUERY where USER_ID=#val# and IS_DEL=0 and QUERY_TYPE=1 order by SORTNO desc fetch first 100 rows only
+	</select>
+	
+	<select id="getUserQueryConditionTopSortNo" parameterClass="java.lang.Integer" resultClass="java.lang.Integer" >
+		select SORTNO from CRM_USER_QUERY where USER_ID = #val# and IS_DEL=0 and QUERY_TYPE=1 order by SORTNO desc fetch first 1  rows only
+	</select>
+	
+	<delete id="delUserQueryById" parameterClass="java.lang.Integer" >
+		delete from CRM_USER_QUERY where USER_QUERY_ID = #val#
+	</delete>
+	
+	<update id="editUserQueryConditionName" parameterClass="CrmUserQueryBean" >
+		UPDATE CRM_USER_QUERY SET
+	    QUERY_NAME = #queryName:VARCHAR:NULL#
+	    ,QUERY_DETAIL = #queryDetail:VARCHAR:NULL#
+	    ,UPDATE_DATE = #updateDate#
+	    ,UPDATE_USER = #updateUser#
+	    WHERE USER_QUERY_ID = #userQueryId#
+	</update>
+	
+	<update id="editUserQueryConditionSortNo" parameterClass="CrmUserQueryBean" >
+		UPDATE CRM_USER_QUERY SET
+		SORTNO = #sortno:INTEGER#
+		WHERE USER_QUERY_ID = #userQueryId#
+	</update>
+	
+	<select id="getUserQueryConditionById" parameterClass="java.lang.Integer" resultMap="CrmUserQueryResult" >
+		select * from CRM_USER_QUERY where USER_QUERY_ID=#val#
+	</select>
+	
+	<!-- 保存自定义查询  -->
+	<insert id="addUserQueryCondition" parameterClass="CrmUserQueryBean" >
+     <![CDATA[
+		insert into CRM_USER_QUERY
+		(
+			USER_QUERY_ID,
+		    USER_ID,
+		    QUERY_NAME,
+		    SORTNO,
+		    QUERY_DETAIL,
+		    IS_DEL,
+		    QUERY_TYPE,
+		    CREATE_DATE,
+		    UPDATE_DATE,
+		    CREATE_USER,
+		    UPDATE_USER
+		)
+		values
+		(
+			#userQueryId#,
+		    #userId#,
+		    #queryName:VARCHAR:NULL#,
+		    #sortno#,
+		    #queryDetail:VARCHAR:NULL#,
+		    #isDel#,
+		    #queryType#,
+		    #createDate#,
+		    #updateDate#,
+		    #createUser#,
+		    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="userQueryId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_USER_QUERY 
+		</selectKey>
+	</insert>
+	
+    <!-- 查询选择客户  -->
+	<select id="selectSmsCustomerByIds" resultMap="CustomerBeanResult"
+			parameterClass="java.lang.String">
+		<![CDATA[
+			select 
+				cus.CUSTOMER_ID,
+				cus.CUSTOMER_NO,
+				cus.CUSTOMER_NAME,
+				cus.MOBILE_PHONE1,
+				cus.MOBILE_PHONE2,
+				cus.PHONE,
+				cus.FAX,
+				cus.BIRTHDAY,
+				cus.DEFAULT_PHONE_TYPE,
+				type.CUSTOMER_TYPE_NAME,
+				cus.SEX,
+				cus.CUSTOMER_TITLE,
+				cus.CUSTOMER_NAME_PINYIN,
+				cus.IS_RECEIVE_SMS,
+				dept.DEPT_NAME,
+				users.USER_NAME,
+				0 as IS_SHARE,
+				cus.IS_NOGOOD
+			from 
+			CRM_CUSTOMER as cus 
+			left join CRM_CUSTOMER_TYPE as type on cus.CUSTOMER_TYPE_ID=type.CUSTOMER_TYPE_ID
+			LEFT JOIN SYS_DEPT AS dept ON cus.BELONG_DEPT_ID=dept.DEPT_ID
+			left join SYS_USER as users ON cus.BELONG_USER_ID=users.USER_ID
+			where cus.IS_TRASH=0 and cus.IS_TRASH = 0 and cus.CUSTOMER_ID in ($val$)
+			order by cus.CUSTOMER_NAME_PINYIN
+	     ]]>
+	</select>
+	
+	<select id="getCustomResultLength" parameterClass="CrmUserQueryBean" resultClass="java.lang.Integer" >
+		select count(*) from CRM_USER_QUERY where USER_ID=#userId# and IS_DEL=0 and QUERY_TYPE=1
+	</select>
+</sqlMap>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanCoBorrowerSQL">
+	<typeAlias alias="LnLoanCoBorrower" type="com.banger.mobile.domain.model.loan.LnLoanCoBorrower" />
+	<typeAlias alias="LnLoanCoBorrowerBean" type="com.banger.mobile.domain.model.loan.LnLoanCoBorrowerBean" />
+
+	<!-- 共同借贷人表 全字段  -->
+	
+	<resultMap class="LnLoanCoBorrower" id="LnLoanCoBorrowerResult" >
+		<result column="LOAN_CO_BORROWER_ID" property="loanCoBorrowerId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="COMPANY_ADDRESS" property="companyAddress" />
+		<result column="PETITIONER_RELATE" property="petitionerRelate" />
+		<result column="IS_KOWN_LOAN" property="isKownLoan" />
+		<result column="IS_EXCEPTION" property="isException" />
+		<result column="CHECK_MESSAGE" property="checkMessage" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!--申请贷款 客户字段-->
+    <resultMap class="LnLoanCoBorrowerBean" id="LnLoanCoBorrowerBeanResult" extends="LnLoanCoBorrowerResult">
+        <result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="COMPANY" property="company" />
+		<result column="FAX" property="fax" />
+		<result column="ID_CARD" property="idCard" />
+	</resultMap>
+
+    <!-- 删除 -->
+    <delete id="deleteLnLoanCoBorrower" parameterClass="Integer">
+        DELETE FROM LN_LOAN_CO_BORROWER WHERE LOAN_CO_BORROWER_ID = #coId#
+    </delete>
+
+	<!-- 增加 -->
+	<insert id="addLnLoanCoBorrower" parameterClass="LnLoanCoBorrower">
+		<![CDATA[
+	 	INSERT INTO LN_LOAN_CO_BORROWER
+		    (
+		        LOAN_CO_BORROWER_ID,
+		        LOAN_ID,
+		        CUSTOMER_ID,
+		        COMPANY_ADDRESS,
+		        PETITIONER_RELATE,
+		        IS_KOWN_LOAN,
+		        IS_EXCEPTION,
+		        CHECK_MESSAGE,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #loanCoBorrowerId#,
+		        #loanId:INTEGER#,
+				#customerId:INTEGER#,
+				#companyAddress:VARCHAR:NULL#,
+				#petitionerRelate:VARCHAR:NULL#,
+				#isKownLoan:INTEGER#,
+				#isException:INTEGER#,
+				#checkMessage:VARCHAR:NULL#,
+		        current timestamp,
+			    current timestamp,
+		        #createUser:INTEGER#,
+		        #updateUser:INTEGER#
+		    )
+      ]]>
+		<selectKey keyProperty="loanCoBorrowerId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_LOAN_CO_BORROWER
+		</selectKey>
+	</insert>
+	
+	<!-- 查询所有共同借贷人数据 -->
+	<select id="getAllLnLoanCoBorrowerBeanByConds" resultMap="LnLoanCoBorrowerBeanResult" parameterClass="java.util.Map">
+		SELECT A.*,B.CUSTOMER_ID,B.COMPANY,B.CUSTOMER_NAME,B.DEFAULT_PHONE_TYPE,B.MOBILE_PHONE1,B.MOBILE_PHONE2,B.PHONE,B.FAX,B.ID_CARD
+        FROM LN_LOAN_CO_BORROWER AS A
+		INNER JOIN CRM_CUSTOMER AS B ON A.CUSTOMER_ID = B.CUSTOMER_ID
+		WHERE 1=1
+		<isNotEmpty prepend="and" property="loanId">
+			<![CDATA[A.LOAN_ID = #loanId#]]>
+		</isNotEmpty>
+	</select>
+
+    <!--更新共同借贷人 先删除原先的共同借贷人信息，然后再插入新的共同借贷人信息-->
+    <delete id="deleteCoBorrowerById" parameterClass="Integer">
+        delete LN_LOAN_CO_BORROWER where loan_id=#loanId#
+    </delete>
+
+    <update id="updateCoBorrowerById" parameterClass="com.banger.mobile.domain.model.loan.LnLoanCoBorrower">
+        UPDATE LN_LOAN_CO_BORROWER SET LOAN_ID=#loanId#
+        <isNotEmpty property="customerId" prepend=",">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="companyAddress" prepend=",">
+            COMPANY_ADDRESS=#companyAddress#
+        </isNotEmpty>
+        <isNotEmpty property="petitionerRelate" prepend=",">
+            PETITIONER_RELATE=#petitionerRelate#
+        </isNotEmpty>
+        <isNotEmpty property="isKownLoan" prepend=",">
+            IS_KOWN_LOAN=#isKownLoan#
+        </isNotEmpty>
+        
+        <isNotEmpty property="isException" prepend=",">
+            IS_EXCEPTION=#isException#
+        </isNotEmpty>
+        
+        <isNotEmpty property="checkMessage" prepend=",">
+            CHECK_MESSAGE=#checkMessage#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+    </update>
+
+    <select id="getCoBorrowerCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+         SELECT COUNT(1) FROM LN_LOAN_CO_BORROWER WHERE 1=1
+         <isNotEmpty property="loanId" prepend="and">
+             LOAN_ID=#loanId#
+         </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+    </select>
+
+    <update id="updateCoBorrower" parameterClass="java.util.Map">
+        UPDATE LN_LOAN_CO_BORROWER SET LOAN_ID=LOAN_ID
+        <isNotEmpty property="customerId" prepend=",">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="companyAddress" prepend=",">
+            COMPANY_ADDRESS=#companyAddress#
+        </isNotEmpty>
+        <isNotEmpty property="petitionerRelate" prepend=",">
+            PETITIONER_RELATE=#petitionerRelate#
+        </isNotEmpty>
+        
+        <isNotEmpty property="isKownLoan" prepend=",">
+            IS_KOWN_LOAN=#isKownLoan#
+        </isNotEmpty>
+        
+        <isNotEmpty property="isException" prepend=",">
+            IS_EXCEPTION=#isException#
+        </isNotEmpty>
+        
+        <isNotEmpty property="checkMessage" prepend=",">
+            CHECK_MESSAGE=#checkMessage#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="oldCustomerId" prepend="and">
+            CUSTOMER_ID=#oldCustomerId#
+        </isNotEmpty>
+    </update>
+
+    <select id="seleteCoBorrower" parameterClass="java.util.Map" resultMap="LnLoanCoBorrowerResult">
+        select * from LN_LOAN_CO_BORROWER where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+           LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+          CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        fetch first 1 row only
+    </select>
+</sqlMap>
+
+
+
+

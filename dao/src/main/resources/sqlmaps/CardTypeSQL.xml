@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CardTypeSQL">
+	<typeAlias alias="CardType" type="com.banger.mobile.domain.model.cardType.CardType" />
+
+
+	<!-- 证件类型-->
+	<resultMap class="CardType" id="CardTypeResult">
+		<result column="ID_TYPE_ID" property="idTypeId" />
+		<result column="ID_TYPE_NAME" property="idTypeName" />
+	</resultMap>
+	
+	<!-- 获取所有证件类型 -->
+	<select id="getAllCardTypes" resultMap="CardTypeResult">
+		<![CDATA[
+		select * from PLN_ID_TYPE
+		]]>
+	</select>
+</sqlMap>
+
+
+
+

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DataVideoSQL">
+	<typeAlias alias="BaseDatVideo" type="com.banger.mobile.domain.model.base.data.BaseDatVideo" />
+	<typeAlias alias="Video" type="com.banger.mobile.domain.model.data.Video" />
+
+	<!-- 数据权限表 -->
+    <resultMap class="BaseDatVideo" id="BaseDatVideoResult">
+        <result column="VIDEO_ID" property="videoId" />
+        <result column="CUSTOMER_DATA_ID" property="customerDataId" />
+        <result column="VIDEO_NAME" property="videoName" />
+        <result column="RECORD_DATE" property="recordDate" />
+        <result column="RECORD_LENGTH" property="recordLength" />
+        <result column="REMARK" property="remark" />
+        <result column="FILE_ID" property="fileId"/>
+        <result column="DAT_UUID" property="datUuid"/>
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="UPDATE_DATE" property="updateDate" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="UPDATE_USER" property="updateUser" />
+    </resultMap>
+
+    <resultMap class="Video" id="VideoResult" extends="BaseDatVideoResult">
+        <result column="UPLOAD_DATE" property="uploadDate" />
+        <result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="FILE_NAME" property="fileName" />
+        <result column="FILE_PATH" property="filePath" />
+        <result column="UPLOAD_USER" property="uploadUser" />
+        <result column="EVENT_NAME" property="eventName" />
+    </resultMap>
+    
+
+  <!-- 插入 -->
+  <insert id="addNewVideo" parameterClass="Video">
+		<![CDATA[
+	 	INSERT INTO DAT_VIDEO
+		    (
+		        VIDEO_ID,
+				CUSTOMER_DATA_ID,
+				VIDEO_NAME,
+				RECORD_LENGTH,
+				RECORD_DATE,
+				REMARK,
+		        FILE_ID,
+		        DAT_UUID,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (	
+		        #videoId#,
+				#customerDataId:INTEGER#,
+				#videoName:VARCHAR:NULL#,
+				#recordLength:INTEGER#,
+				#recordDate:TIMESTAMP#,
+				#remark:VARCHAR:NULL#,
+				#fileId:INTEGER#,
+				#datUuid:VARCHAR:NULL#,
+				current timestamp,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#
+		    )
+      ]]>
+		<selectKey keyProperty="videoId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_DAT_VIDEO
+		</selectKey>
+	</insert>
+	
+ 
+  <!-- 根据 搜索条件 查找视频资料  -->
+  <select id="queryVideoData" resultMap="VideoResult" parameterClass="java.util.HashMap">
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+	         </isNotEmpty>
+	</isNotEmpty>
+  		<![CDATA[
+  		select d.* ,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,s.USER_NAME as UPLOAD_USER,0 as NUMROW,'' as EVENT_NAME
+        from DAT_VIDEO d
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+        left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID 
+        where 1=1
+  		]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[d.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId" >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					d.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	<!--TODO customerDataId和 （loanId 或eventId）都为空时  -->
+  	<isNotEmpty property="videoName" prepend="and">
+  		<![CDATA[d.VIDEO_NAME like '%$videoName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.RECORD_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.RECORD_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="videoUploadDateFrom" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE >= #videoUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="videoUploadDateTo" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE <= #videoUploadDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+	        </isNotEmpty>
+	</isNotEmpty>
+  </select>
+  
+  <!-- 根据 搜索条件 查找视频资料   求和-->
+  <select id="queryVideoDataCount" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+  	
+  	<![CDATA[
+  		select count(*)  from DAT_VIDEO d
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+  		left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID 
+  		where 1=1
+  	]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[d.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId"  >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					d.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	
+  	<isNotEmpty property="videoName" prepend="and">
+  		<![CDATA[d.VIDEO_NAME like '%$videoName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.RECORD_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.RECORD_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="videoUploadDateFrom" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE >= #videoUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="videoUploadDateTo" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE <= #videoUploadDateTo#]]>
+  	</isNotEmpty>
+ 
+  </select >
+  <!-- 根据顾客数据id查询姓名 -->
+  <select id="getCustomerNameByDataId" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+  		<![CDATA[select CUSTOMER_NAME from CRM_CUSTOMER 
+  		where CUSTOMER_ID = 
+  		(select CUSTOMER_ID from DAT_CUSTOMER_DATA where CUSTOMER_DATA_ID = #customerDataId#) ]]>
+  </select>
+  
+  <!-- 根据录音id查找旧的备注 -->
+  <select id="getVideoRemark" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+  		<![CDATA[
+  			select REMARK 
+  			from DAT_VIDEO d
+  			where d.VIDEO_ID = #videoId# 
+  		]]>
+  </select>
+  
+  <!-- 修改视频备注信息 -->
+  <update id="updateVideoRemark" parameterClass="Video" >
+  		<![CDATA[
+  			update DAT_VIDEO d 
+  			set REMARK = #remark#
+  			where VIDEO_ID = #videoId#
+  		]]>
+  </update>
+  
+  
+  <!-- 以下为新资料管理功能 -->
+  
+	<!--查看客户视频列表分页数据（总数） -->
+	<select id="getCustomerVideoDataCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[		
+			SELECT COUNT(1)
+			FROM DAT_VIDEO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.VIDEO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--查看客户视频列表分页数据（分页） -->
+	<select id="getCustomerVideoDataPage" resultMap="VideoResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,c.USER_NAME as UPLOAD_USER,d.EVENT_NAME
+			FROM DAT_VIDEO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.VIDEO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY suf.UPLOAD_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+    <select id="getVideoDataByUUID" resultMap="BaseDatVideoResult" parameterClass="Video">
+         select * from DAT_VIDEO
+         where CUSTOMER_DATA_ID in
+         (select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where LOAN_ID in
+            (select LOAN_ID from DAT_CUSTOMER_DATA where CUSTOMER_DATA_ID = #customerDataId#)
+         )
+         and DAT_UUID = #datUuid#
+    </select>
+
+    <!--获得贷款中各贷款流程的视频资料信息-->
+    <select id="getVideoOnLoanFlow" parameterClass="java.util.Map" resultMap="VideoResult">
+       select dv.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,su.USER_NAME as UPLOAD_USER,0 as NUMROW,'' as EVENT_NAME
+        from dat_video dv
+        left join dat_customer_data dcd on dv.customer_data_id=dcd.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = dv.FILE_ID
+        left join sys_user su on suf.upload_user_id=su.user_id
+        where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            dcd.loan_id=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            dcd.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            dcd.event_id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="customerDataId" prepend="and">
+            dv.customer_data_id=#customerDataId#
+        </isNotEmpty>
+        order by suf.upload_date
+    </select>
+
+    <delete id="delVideoById" parameterClass="java.util.Map">
+        delete from dat_video where customer_data_id in
+        <iterate property="customerDataIdList" open="(" conjunction="," close=")">
+            #customerDataIdList[]#
+        </iterate>
+    </delete>
+    
+    <select id="selectVideoListByLoanId" resultMap="VideoResult" parameterClass="java.lang.Integer">
+        select dv.*,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_PATH,suf.FILE_NAME,su.USER_NAME as UPLOAD_USER,0 as NUMROW,'' as EVENT_NAME
+        from dat_video dv
+        left join dat_customer_data dcd on dv.customer_data_id=dcd.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = dv.FILE_ID
+        left join sys_user su on suf.upload_user_id=su.user_id
+  		where  dv.CUSTOMER_DATA_ID in (Select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where Loan_id =#loanId# )
+    </select>
+    
+    
+</sqlMap>

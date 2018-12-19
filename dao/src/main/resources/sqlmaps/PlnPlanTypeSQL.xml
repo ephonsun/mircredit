@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PlnPlanTypeSQL">
+	<typeAlias alias="PlnPlanType"
+		type="com.banger.mobile.domain.model.PlnReportTemplate.PlnPlanType" />
+
+	<!-- 理财规划报告模板表-->
+	<!-- PlnReportTemplate信息全字段 -->
+	<resultMap class="PlnPlanType" id="PlnPlanTypeResult">
+		<result column="PLAN_TYPE_ID" property="planTypeId" />
+		<result column="PLAN_TYPE_NAME" property="planTypeName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 理财规划报告模板类型 -->
+	<select id="getAllPlnPlanType" resultMap="PlnPlanTypeResult">
+	    <![CDATA[
+            select * from PLN_PLAN_TYPE 
+        ]]>
+	</select>
+	<!-- 根据Id查询模板类型 -->
+	<select id="getPlanTypeById" resultMap="PlnPlanTypeResult" parameterClass="java.lang.Integer">
+		 <![CDATA[
+            select * from PLN_PLAN_TYPE where PLAN_TYPE_ID = #planTypeId#
+        ]]>
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FuncAuthSQL">
+	<typeAlias alias="FuncAuthBean" type="com.banger.mobile.domain.model.funcAuth.FuncAuthBean" />
+	<typeAlias alias="SysFuncAuth" type="com.banger.mobile.domain.model.funcAuth.SysFuncAuth" />
+	<typeAlias alias="SysMenuAuth" type="com.banger.mobile.domain.model.menuAuth.SysMenuAuth" />
+
+	<!-- 功能权限树 -->
+    <resultMap class="FuncAuthBean" id="FuncAuthBeanResult">
+		<result column="FUNC_ID" property="funcId" />
+		<result column="FUNC_PARENT_ID" property="funcParentId" />
+		<result column="FUNC_NAME" property="funcName" />
+		<result column="TYPE" property="type" />
+		<result column="URL" property="url" />
+	</resultMap>
+	
+	<!-- 功能权限角色表 -->
+	  <resultMap class="SysFuncAuth" id="SysFuncAuthResult">
+		<result column="FUNC_AUTH_ID" property="funcAuthId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="FUNC_ID" property="funcId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- 菜单权限角色表 -->
+	<resultMap class="SysMenuAuth" id="SysMenuAuthResult">
+		<result column="MENU_AUTH_ID" property="menuAuthId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="MENU_ID" property="menuId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<cacheModel type="OSCACHE" id="FuncAuthSQL-Cache" serialize="true" readOnly="true">
+		<flushInterval hours="24"/>
+		<flushOnExecute statement="insertFuncAuth"/>
+		<flushOnExecute statement="deleteFuncAuth"/>
+		<flushOnExecute statement="insertMenuAuth"/>
+		<flushOnExecute statement="deleteMenuAuth"/>
+	</cacheModel>
+	
+  <!-- 查询功能权限树 -->
+  <select id="getFuncAuthTree" resultMap="FuncAuthBeanResult">
+  	<![CDATA[
+  		select FUNC_ID,FUNC_PARENT_ID,FUNC_NAME,'FUNC' as TYPE,FUNC_URL as URL from SYS_FUNC  where IS_DEL<>1
+  	]]>
+  </select>
+  <!-- 查看角色对应的功能权限 -->
+  <select id="getDetailFuncByRoleId" resultMap="FuncAuthBeanResult" parameterClass="java.lang.Integer">
+  <![CDATA[
+  select FUNC.FUNC_ID,FUNC.FUNC_PARENT_ID,FUNC.FUNC_NAME,'FUNC' as TYPE,FUNC.FUNC_URL as URL
+  	  from SYS_FUNC as FUNC,SYS_FUNC_AUTH as FAUTH where FUNC.FUNC_ID=FAUTH.FUNC_ID and FAUTH.ROLE_ID=#roleId# 
+  	]]>
+  </select>
+  
+   <!-- 新增角色功能权限 -->
+  <insert id="insertFuncAuth" parameterClass="SysFuncAuth">
+ 	<![CDATA[
+ 		insert into SYS_FUNC_AUTH
+ 		(
+ 			FUNC_AUTH_ID,
+			ROLE_ID,
+			FUNC_ID,
+			CREATE_DATE,
+			CREATE_USER
+ 		)
+ 		values
+ 		(
+ 			#funcAuthId#,
+			#roleId#,
+			#funcId#,
+			current timestamp,
+			#createUser#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="funcAuthId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_SYS_FUNC_AUTH
+ 	</selectKey>
+  </insert>
+   <!--删除角色功能权限  -->
+  <delete id="deleteFuncAuth" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_FUNC_AUTH where ROLE_ID = #roleId#
+  	]]>
+  </delete>
+   <!--根据funcId删除角色功能权限  -->
+  <delete id="deleteFuncAuthByFuncId" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_FUNC_AUTH where FUNC_AUTH_ID = #funcAuthId#
+  	]]>
+  </delete>
+  <!-- 根据角色id查询功能权限 -->
+  <select id="getFuncAuthByRoleId" resultMap="SysFuncAuthResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from SYS_FUNC_AUTH where ROLE_ID = #roleId#
+  	]]>
+  </select>
+  
+  <!-- 根据角色id集合查询功能id -->
+  <select id="getFuncIdListByRoleId" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+  	select distinct FUNC_ID from SYS_FUNC_AUTH where ROLE_ID in ($value$)
+  </select>
+  
+   <!-- 新增角色菜单权限 -->
+  <insert id="insertMenuAuth" parameterClass="SysMenuAuth">
+ 	<![CDATA[
+ 		insert into SYS_MENU_AUTH
+ 		(
+ 			MENU_AUTH_ID,
+			ROLE_ID,
+			MENU_ID,
+			CREATE_DATE,
+			CREATE_USER
+ 		)
+ 		values
+ 		(
+ 			#menuAuthId#,
+			#roleId#,
+			#menuId#,
+			current timestamp,
+			#createUser#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="menuAuthId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_SYS_MENU_AUTH
+ 	</selectKey>
+  </insert>
+     <!--删除角色菜单权限  -->
+  <delete id="deleteMenuAuth" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_MENU_AUTH where ROLE_ID = #roleId#
+  	]]>
+  </delete>
+  
+  
+</sqlMap>

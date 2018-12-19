@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskContactTargetSQL">
+	<typeAlias alias="BaseTskContactTarget"
+		type="com.banger.mobile.domain.model.base.tskContact.BaseTskContactTarget" />
+	<typeAlias alias="TskContactTarget"
+		type="com.banger.mobile.domain.model.tskContact.TskContactTarget" />
+	<typeAlias alias="TskImportBean"
+		type="com.banger.mobile.domain.model.tskContact.TskImportBean" />
+
+	<!-- BaseTskContactTarget信息全字段 -->
+	<resultMap class="BaseTskContactTarget" id="BaseTskContactTargetResult">
+		<result column="CONTACT_TARGET_ID" property="contactTargetId" />
+		<result column="EXECUTE_ID" property="executeId" />
+		<result column="CONTACT_ID" property="contactId"/>
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE_NO" property="phoneNo" />
+		<result column="IS_FINISH" property="isFinish" />		
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 联系任务联系客户表-->
+	<!-- TskContactTarget信息全字段 -->
+	<resultMap class="TskContactTarget" id="TskContactTargetResult">
+		<result column="CONTACT_TARGET_ID" property="contactTargetId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName"/>
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType"/>
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />		
+		<result column="FAX" property="fax" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="USER_NAME" property="userName" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="EXECUTE_NAME" property="executeName" />
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="RELATED_TASK_COUNT" property="relatedTaskCount" />
+		<result column="REMARK" property="remark" />
+		<result column="PHONE_NO" property="phoneNo" />
+		<result column="IS_DEL" property="isDel"/>
+	</resultMap>
+	<!-- 客户导入信息全字段 -->
+	<resultMap class="TskImportBean" id="TskImportBeanResult" >
+		<result column="CONTACT_TARGET_ID" property="contactTargetId" />
+		<result column="EXECUTE_ID" property="executeId"/>
+		<result column="CONTACT_ID" property="contactId"/>
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="PHONE_NO" property="phoneNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+	</resultMap>
+	<!-- 添加导入客户 -->
+	<insert id="insertCustomerForImport" parameterClass="TskImportBean">
+		<![CDATA[
+			INSERT INTO
+		    	TSK_CONTACT_TARGET
+		    (
+		        CONTACT_TARGET_ID,
+		        EXECUTE_ID,
+		        CONTACT_ID,
+		        CUSTOMER_ID,
+		        CUSTOMER_NAME,
+		        PHONE_NO,
+		        IS_FINISH,
+		        REMARK,
+		        CREATE_DATE,
+		        CREATE_USER
+		    )
+		    VALUES
+		    (
+		        #contactTargetId#,
+		        #executeId#,
+		        #contactId#,
+		        #customerId#,
+		        #customerName:VARCHAR:NULL#,
+		        #phoneNo:VARCHAR:NULL#,
+		        0,
+		       	'',
+		        #createDate#,
+				#createUser#
+		    )
+		]]>
+		<selectKey keyProperty="contactTargetId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_CONTACT_TARGET
+		</selectKey>
+	</insert>
+	<!-- 新增联系任务联系客户 -->
+	<insert id="insertContactTarget" parameterClass="BaseTskContactTarget">
+		<![CDATA[
+			INSERT INTO
+		    	TSK_CONTACT_TARGET
+		    (
+		        CONTACT_TARGET_ID,
+		        EXECUTE_ID,
+		        CONTACT_ID,
+		        CUSTOMER_ID,
+		        CUSTOMER_NAME,
+		        PHONE_NO,
+		        IS_FINISH,
+		        REMARK,
+		        CREATE_DATE,
+		        CREATE_USER
+		    )
+		    VALUES
+		    (
+		        #contactTargetId#,
+		        #executeId#,
+		        #contactId#,
+		        #customerId#,
+		        #customerName:VARCHAR:NULL#,
+		        #phoneNo:VARCHAR:NULL#,
+		        0,
+		       	'',
+		        #createDate#,
+				#createUser#
+		    )
+	    ]]>
+	   	<selectKey keyProperty="contactTargetId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_CONTACT_TARGET
+		</selectKey>
+	</insert>	
+	<!-- 删除联系客户 -->
+	<delete id="deleteTskTarget" parameterClass="java.lang.String">
+		<![CDATA[
+			DELETE FROM TSK_CONTACT_TARGET WHERE CONTACT_TARGET_ID IN ($value$)
+		]]>
+	</delete>
+	
+	<!-- 删除联系客户(根据任务ID) -->
+	<delete id="deleteTargetByContactId" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM TSK_CONTACT_TARGET WHERE CONTACT_ID = #value#
+		]]>
+	</delete>
+	<!-- 删除未分配的联系客户 -->
+	<delete id="deleteUnAssignTarget" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM TSK_CONTACT_TARGET WHERE CONTACT_ID = #value# AND EXECUTE_ID = 0
+		]]>
+	</delete>
+	
+	<!-- 联系客户修改执行者 -->
+	<update id="updateTargetExecuter" parameterClass="java.util.Map">
+		UPDATE TSK_CONTACT_TARGET 
+		SET 
+			<isNotNull property="executeId">
+				EXECUTE_ID = #executeId#, 
+			</isNotNull>
+			<isNotNull property="isFinish">
+				IS_FINISH=#isFinish#,
+			</isNotNull>
+			UPDATE_USER=#updateUser#,
+			UPDATE_DATE=#updateDate# 
+		WHERE CONTACT_TARGET_ID IN ($targetIds$)			
+	</update>
+	
+	
+	<update id="updateTargetRemark" parameterClass="BaseTskContactTarget">
+		UPDATE TSK_CONTACT_TARGET 
+			SET REMARK = #remark#, 
+				UPDATE_USER=#updateUser#,
+				UPDATE_DATE=#updateDate# 
+		WHERE CONTACT_TARGET_ID =#contactTargetId#
+	</update>
+	
+	<!-- 根据主键ids查询实体集合 -->
+	<select id="getCustListByTargetIds" parameterClass="java.lang.String" resultMap="BaseTskContactTargetResult">
+		<![CDATA[
+			select * from TSK_CONTACT_TARGET where CONTACT_TARGET_ID IN ($value$)
+		]]>			
+	</select>
+	
+	<!-- 根据任务ID查询所有的客户ID -->
+	<select id="getAllCustomerIdByContactId" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		<![CDATA[select customer_id from TSK_CONTACT_TARGET where CONTACT_ID = #value#	]]>		
+	</select>	
+	<!-- 根据contactId查询任务下客户ids -->
+	<select id="getCustIdsByContactId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[
+			select CUSTOMER_ID from TSK_CONTACT_TARGET where CONTACT_ID=#contactId# and CUSTOMER_ID<>0
+		]]>
+	</select>
+	
+
+	<!-- 联系客户分页list -->
+	<select id="getContactCustomerList" parameterClass="java.util.Map" resultMap="TskContactTargetResult">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[ 
+			select a.*,case when plan_date2 is null then plan_date1 else plan_date2 end as plan_date  from (
+				select t.contact_target_id,t.customer_id,t.phone_no,t.remark,t.is_finish,c.sex,c.age,c.customer_title,
+			            c.DEFAULT_PHONE_TYPE,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.PHONE,c.fax,c.IS_TRASH as IS_DEL,
+			            case when u1.user_name is null  then '' else  u1.user_name end as execute_name,
+			            u2.user_name,d.dept_name,
+			            case when t.customer_id = 0 then t.customer_name  else c.customer_name end as customer_name,
+			            (select task_plan_date from 
+			            	(
+                        	   select id,EXECUTE_USER_ID,max(TASK_PLAN_DATE) as task_plan_date  from (
+						            select case when t.customer_id is null or t.customer_id=0 then t.phone_no else t.customer_id end as id ,p.EXECUTE_USER_ID,
+						                p.TASK_PLAN_DATE from TSK_PLAN_TARGET as t left join tsk_plan as p on t.plan_id=p.plan_id where finish_level=0 
+						        )
+						        where task_plan_date>= #satrtDate# and task_plan_date <= #endDate#  
+						        group by id, EXECUTE_USER_ID
+	                        ) as plan 
+                        	where (plan.id=t.customer_Id or plan.id=t.phone_no) and plan.EXECUTE_USER_ID=e.user_id
+                    	) as PLAN_DATE1,
+		               (select task_plan_date from 
+		               		( 
+				                 select id,EXECUTE_USER_ID,min(TASK_PLAN_DATE) as task_plan_date from (
+				                    select case when t.customer_id is null or t.customer_id=0 then t.phone_no else t.customer_id end as id ,p.EXECUTE_USER_ID,
+				                    	   p.TASK_PLAN_DATE from TSK_PLAN_TARGET as t left join tsk_plan as p on t.plan_id=p.plan_id where finish_level in(1,2) 
+				                 )  
+				                 where task_plan_date>= #satrtDate# and task_plan_date <= #endDate#
+				                 group by id,EXECUTE_USER_ID
+		                 	) as plan 
+		                 	where (plan.id=t.customer_Id or plan.id=t.phone_no) and plan.EXECUTE_USER_ID=e.user_id
+		                ) as PLAN_DATE2,
+			            case when cus.num is null or cus.customer_id=0 or t.is_finish=1 then 0 else cus.num end AS RELATED_TASK_COUNT,
+			           	case when e.user_id is null then 0 else e.user_id end as EXECUTE_USER_ID
+			    from TSK_CONTACT_TARGET as t
+		     	left join TSK_CONTACT task on t.contact_id = task.contact_id
+			    left join TSK_CONTACT_EXECUTE e on e.EXECUTE_ID = t.EXECUTE_ID
+			    left join SYS_USER as u1 on e.user_id = u1.user_id
+			    left join CRM_CUSTOMER as c on c.customer_id = t.customer_id
+			    left join SYS_DEPT as d on d.dept_id = c.belong_dept_id
+			    left join SYS_USER as u2 on c.belong_user_id = u2.user_id
+			    left join 
+			    	(select customer_id,user_id,count(1) as num from (
+			    		select * from (select t.customer_id,c.contact_id,
+							case when e.user_id is null then 0 else e.user_id end as user_id
+							 from tsk_contact_target as t
+							left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+							            and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+							            and c.is_next_contact =0 and c.is_del=0 and c.is_suspend=0
+							left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+						where contact_id is not null
+					) group by customer_id,user_id) as cus on cus.customer_id = t.customer_id and e.user_id = cus.user_id
+			    where t.contact_id =$contactId$) as a
+			where a.EXECUTE_USER_ID in ($userIds$)
+		]]> 
+		<![CDATA[ ORDER BY IS_FINISH, RELATED_TASK_COUNT DESC ]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 联系客户分页count -->
+	<select id="getContactCustomerListCount"  parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 
+		select count(1) from (
+			SELECT t.contact_target_id,
+			   case when e.user_id is null then 0 else e.user_id end as user_id
+			FROM tsk_contact_target AS t
+			LEFT JOIN tsk_contact_execute AS e ON t.execute_id = e.execute_id
+			WHERE t.contact_id = #contactId#) 
+		where user_id IN ($userIds$)
+		]]>
+	</select>
+	<!--查询已分配的联系客户个数  -->
+	<select id="getTskContactTargetCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 	
+		select count(1) from (
+			SELECT t.contact_target_id,
+			   case when e.user_id is null then 0 else e.user_id end as user_id
+			FROM tsk_contact_target AS t
+			LEFT JOIN tsk_contact_execute AS e ON t.execute_id = e.execute_id
+			WHERE t.contact_id = #contactId#) 
+		where user_id IN ($userIds$)
+		]]>
+	</select>	
+	
+	<!--查询未分配的联系客户个数  -->
+	<select id="getTskTargetUnAssignedCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+	<![CDATA[ select count(*) from tsk_contact_target where execute_id=0 and contact_id=#value#]]>
+	</select>	
+	<!-- 根据任务ID查询外部客户联系方式 -->
+	<select id="getPhoneListByContactId" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		<![CDATA[
+			SELECT PHONE_NO FROM TSK_CONTACT_TARGET WHERE CONTACT_ID=#contactId# and CUSTOMER_ID=0
+		]]>
+	</select>
+	<!-- 查询需要自动完成的任务客户 -->
+	<select id="getTargetIdsForAutoFinish" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select a.CONTACT_TARGET_ID 
+			from TSK_CONTACT_TARGET a
+			left join TSK_CONTACT t on a.CONTACT_ID=t.CONTACT_ID
+			left join TSK_CONTACT_EXECUTE e on e.EXECUTE_ID=a.EXECUTE_ID
+			where 
+			    a.EXECUTE_ID>0 and a.IS_FINISH=0
+			    and t.IS_DEL=0 and t.IS_SUSPEND=0
+			    and e.USER_ID=$userId$
+	    ]]>
+	    <isPropertyAvailable property="currDate">
+	   		<![CDATA[
+	    		and to_char(t.START_DATE,'yyyy-MM-dd') <= '$currDate$' and to_char(t.END_DATE,'yyyy-MM-dd') >= '$currDate$'
+	    	]]>
+	    </isPropertyAvailable>
+	    <isNotPropertyAvailable property="currDate">
+	    	<![CDATA[
+	    		and to_char(t.START_DATE,'yyyy-MM-dd') <= current date and to_char(t.END_DATE,'yyyy-MM-dd') >= current date
+	    	]]>
+	    </isNotPropertyAvailable>
+		
+		<isNotNull prepend="and" property="customerId">
+			a.CUSTOMER_ID=$customerId$
+		</isNotNull>
+		<isNotEmpty prepend="and" property="phoneNo">
+			a.PHONE_NO=#phoneNo#	
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据任务id查询下次联系的客户姓名 -->
+	<select id="getTargetCustomerByTaskId" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		<![CDATA[
+			select c.CUSTOMER_NAME from  TSK_CONTACT_TARGET t
+			left join CRM_CUSTOMER c on c.CUSTOMER_ID=t.CUSTOMER_ID
+			where CONTACT_ID=$contactId$
+		]]>
+	</select>
+	
+	<!-- 根据任务id及执行者查询已分配的客户 -->
+	<select id="getcontactTargetIdsByMap" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			select c.CONTACT_TARGET_ID from TSK_CONTACT_TARGET c
+			left join TSK_CONTACT_EXECUTE e on e.EXECUTE_ID = c.EXECUTE_ID
+			where e.CONTACT_ID=$contactId$ and e.USER_ID in ($userIds$)
+		]]>
+	</select>
+	
+</sqlMap>

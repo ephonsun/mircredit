@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnApproveLimitRoleSQL">
+    <typeAlias alias="LnApproveLimitRole" type="com.banger.mobile.domain.model.loan.LnApproveLimitRole"/>
+
+    <!--LnApproveLimitRole全字段-->
+    <resultMap id="LnApproveLimitRoleResult" class="LnApproveLimitRole">
+        <result column="LIMIT_ROLE_ID" property="limitRoleId"/>
+        <result column="ROLE_ID" property="roleId"/>
+        <result column="LIMIT_MONEY" property="limitMoney"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+        <result column="ROLE_NAME" property="roleName"/>
+    </resultMap>
+
+    <!--根据roleId查询出记录数量-->
+    <select id="selectCountByRoleId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+         SELECT COUNT(*) FROM LN_APPROVE_LIMIT_ROLE
+         WHERE 1=1
+         <isNotEmpty property="roleId" prepend="and">
+             ROLE_ID=#roleId#
+         </isNotEmpty>
+    </select>
+
+    <!--根据roleId查询出该角色所能审批的最大贷款额度-->
+    <select id="getLimitRoleByRoleId" parameterClass="java.util.Map" resultMap="LnApproveLimitRoleResult">
+		SELECT a.*,'' AS ROLE_NAME FROM LN_APPROVE_LIMIT_ROLE a
+        WHERE 1=1
+        <isNotEmpty property="roleIds" prepend="and">
+            ROLE_ID IN
+            <iterate property="roleIds" open="(" close=")" conjunction=",">
+                #roleIds[]#
+            </iterate>
+        </isNotEmpty>
+        ORDER BY LIMIT_MONEY DESC
+    </select>
+    
+    <!-- 角色分页count -->
+	<select id="getRoleSetCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+             SELECT COUNT(1) FROM SYS_ROLE a LEFT JOIN LN_APPROVE_LIMIT_ROLE b ON a.ROLE_ID = b.ROLE_ID WHERE a.IS_DEL = 0
+        ]]>
+	</select>
+
+	<!-- 角色分页列表 -->
+	<select id="getRoleSetPage" resultMap="LnApproveLimitRoleResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+		    SELECT b.LIMIT_ROLE_ID,a.ROLE_ID,b.LIMIT_MONEY,b.CREATE_DATE,b.UPDATE_DATE,b.CREATE_USER,b.UPDATE_USER,a.ROLE_NAME FROM SYS_ROLE a LEFT JOIN LN_APPROVE_LIMIT_ROLE b ON a.ROLE_ID = b.ROLE_ID WHERE a.IS_DEL = 0
+	    ]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据ID修改审批额度 -->
+	<update id="updateLimitRoleById" parameterClass="java.util.Map">
+		<![CDATA[
+		UPDATE LN_APPROVE_LIMIT_ROLE SET LIMIT_MONEY = $value$ WHERE LIMIT_ROLE_ID = #id#
+		]]>
+	</update>
+	
+	<!-- 新建角色审批额度 -->
+	<insert id="saveLimitRole" parameterClass="LnApproveLimitRole">
+		<![CDATA[
+			insert into LN_APPROVE_LIMIT_ROLE
+		(
+		 	LIMIT_ROLE_ID,
+			ROLE_ID,
+			LIMIT_MONEY,
+			CREATE_DATE,
+			UPDATE_DATE,
+			CREATE_USER,
+			UPDATE_USER
+		 )
+		values
+		(
+		#limitRoleId#,
+		#roleId#,
+		#limitMoney#,
+	    current timestamp,
+	    current timestamp,
+		#createUser#,
+		#updateUser#
+		)
+		]]>
+		<selectKey keyProperty="limitRoleId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_APPROVE_LIMIT_ROLE
+		</selectKey>
+	</insert>
+	
+	<!-- 根据角色id查询金额设置表里是否包含 -->
+	<select id="getRoleSetCountByRoleId" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+             SELECT COUNT(1) FROM LN_APPROVE_LIMIT_ROLE WHERE ROLE_ID = #roleId#
+        ]]>
+	</select>
+</sqlMap>

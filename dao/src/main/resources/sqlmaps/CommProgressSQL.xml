@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommProgressSQL">
+	<typeAlias alias="CommProgress"
+		type="com.banger.mobile.domain.model.system.CommProgress" />
+
+	<!-- 录音记录表-->
+	<!-- RecordInfoSQL信息全字段 -->
+	<resultMap class="CommProgress" id="CommProgressResult">
+		<result column="COMM_PROGRESS_ID" property="commProgressId" />
+		<result column="COMM_PROGRESS_NAME" property="commProgressName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一条沟通进度-->	
+	<insert id="addCommProgress" parameterClass="CommProgress">
+		<![CDATA[
+		insert into CRM_COMM_PROGRESS
+		(
+		 COMM_PROGRESS_ID,
+		 COMM_PROGRESS_NAME,
+		 SORTNO,
+		 IS_DEL,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		select 
+		#commProgressId#,
+		#commProgressName#,
+	    case when max(SORTNO) is null then 1 else max(SORTNO)+1 end, 
+	    #isDel#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+	    from CRM_COMM_PROGRESS
+      ]]>
+		<selectKey keyProperty="commProgressId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_COMM_PROGRESS
+		</selectKey>
+	</insert> 
+
+	<!-- 沟通进度修改-->
+	<update id="updateCommProgress" parameterClass="CommProgress">
+		<![CDATA[	UPDATE CRM_COMM_PROGRESS 
+		SET 
+		  COMM_PROGRESS_NAME = #commProgressName#, 
+		  UPDATE_DATE = current timestamp, 
+		  UPDATE_USER = #updateUser# 
+		WHERE 
+		  COMM_PROGRESS_ID = #commProgressId#
+		  ]]>
+	</update>
+
+	<!-- 删除沟通记录 (伪删除)-->
+	<delete id="deleteCommProgress"
+		parameterClass="CommProgress">
+		<![CDATA[
+		UPDATE CRM_COMM_PROGRESS SET
+		 IS_DEL = 1, UPDATE_DATE = current timestamp, UPDATE_USER = #updateUser#
+		WHERE COMM_PROGRESS_ID = #commProgressId#	
+		]]>
+	</delete>
+	
+	<!-- 根据ID获得沟通记录 -->
+	<select id="getCommProgressById" resultMap="CommProgressResult"
+		parameterClass="java.lang.Integer">
+		select * from CRM_COMM_PROGRESS where COMM_PROGRESS_ID = #Id#
+	</select>
+
+	<!-- 获取列表  不需要分页 -->
+	<select id="getCommProgressList" resultMap="CommProgressResult">
+		select * from CRM_COMM_PROGRESS where IS_DEL = 0 order by SORTNO
+	</select>
+
+	<select id="getMaxOrMinSortNo" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		select
+		<dynamic prepend="">
+			<isEqual prepend="" property="Type" compareValue="max">
+				<![CDATA[ max(SORTNO) as SORTNO]]>
+			</isEqual>
+			<isEqual prepend="" property="Type" compareValue="min">
+				<![CDATA[ min(SORTNO) as SORTNO]]>
+			</isEqual>
+		</dynamic>
+		from CRM_COMM_PROGRESS where IS_DEL = 0
+	</select>
+	
+	<select id="getDesCommProgress" resultMap="CommProgressResult"
+		parameterClass="java.util.Map">
+		select  * from CRM_COMM_PROGRESS where IS_DEL = 0 and SORTNO		
+		<dynamic prepend="">
+			<isEqual prepend="" property="Type" compareValue="up">
+				<![CDATA[ < #SortNo# ]]> order by SORTNO desc
+			</isEqual>
+			<isEqual prepend="" property="Type" compareValue="down">
+				<![CDATA[ > #SortNo# ]]> order by SORTNO asc
+			</isEqual>
+		</dynamic>
+		fetch first 1 row only
+	</select>
+	
+	<update id="updateCommProSort" parameterClass="CommProgress">
+		<![CDATA[	update CRM_COMM_PROGRESS 
+		set 
+		  SORTNO = #sortNo#,
+		  UPDATE_DATE = current timestamp
+		where 
+		  COMM_PROGRESS_ID = #commProgressId#
+		  ]]>			
+	</update>
+	
+	<select id="getCommProByName" resultMap="CommProgressResult"
+		parameterClass="java.lang.String">
+		<![CDATA[	
+			select * from CRM_COMM_PROGRESS where IS_DEl = 0 and COMM_PROGRESS_NAME = #name#
+		]]>	
+	</select>
+	
+
+</sqlMap>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="AnswerConfigSQL">
+	<typeAlias alias="AnswerConfig" type="com.banger.mobile.domain.model.answerConfig.AnswerConfig" />
+
+
+	<!-- 答录配置表-->
+	<!-- AnswerConfigSQL信息全字段 -->
+	<resultMap class="AnswerConfig" id="AnswerConfigResult">
+		<result column="ANSWER_CONFIG_ID" property="answerConfigId" />
+		<result column="USER_ID" property="userId" />
+		<result column="VOICE_FILE_PATH" property="voiceFilePath" />
+		<result column="RING_COUNT" property="ringCount" />
+		<result column="IS_MUTE" property="isMute" />
+		<result column="CONFIG_TYPE" property="configType" />
+		<result column="FILE_MD5" property="fileMd5" />
+		<result column="FILE_NAME" property="fileName" />
+	</resultMap>
+
+	 <!-- 更新 -->
+	<update id="updateAnswerConfig" parameterClass="AnswerConfig">
+  <![CDATA[
+  	update CRM_ANSWER_CONFIG a
+  		set 
+  			a.RING_COUNT = #ringCount#
+  ]]>	
+  			<isNotEmpty prepend="," property="isMute">
+  				a.IS_MUTE = #isMute#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="voiceFilePath">
+  				a.VOICE_FILE_PATH = #voiceFilePath#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="fileMd5">
+				a.FILE_MD5=#fileMd5#
+			</isNotEmpty>
+  			<isNotEmpty prepend="," property="fileName">
+				a.FILE_NAME=#fileName#
+			</isNotEmpty>
+  		where 
+  			a.USER_ID = #userId#  and a.CONFIG_TYPE=#configType#
+  	
+  </update>
+  
+   <!-- 查询 -->
+  <select id="queryAnswerConfig"   resultMap="AnswerConfigResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select * from CRM_ANSWER_CONFIG a  where a.USER_ID=#userId# and a.CONFIG_TYPE=#configType#
+  	]]>
+  </select>
+  
+  <select id="queryAnswerConfigById"  resultMap="AnswerConfigResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from CRM_ANSWER_CONFIG a  where a.ANSWER_CONFIG_ID = #id#
+  	]]>
+  </select>
+  
+  <!-- 增加一条配置-->
+	<insert id="addAnswerConfig" parameterClass="AnswerConfig">
+     <![CDATA[
+		insert into CRM_ANSWER_CONFIG
+		(
+		 ANSWER_CONFIG_ID,
+		 USER_ID,
+		 VOICE_FILE_PATH,
+		 RING_COUNT,
+		 IS_MUTE,
+		 CONFIG_TYPE
+		 )
+		values
+		(
+		#answerConfigId#,
+		#userId#,
+	    #voiceFilePath#,
+	    #ringCount#,
+	    #isMute#,
+	    #configType#
+		)
+      ]]>
+		<selectKey keyProperty="answerConfigId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_ANSWER_CONFIG 
+		</selectKey>
+	</insert>
+	<delete id="deleteAnswerConfig" parameterClass="java.lang.Integer">
+		<![CDATA[
+  		delete from CRM_ANSWER_CONFIG where USER_ID = #userId#
+  		]]>	
+	</delete>
+  
+</sqlMap>
+
+
+
+

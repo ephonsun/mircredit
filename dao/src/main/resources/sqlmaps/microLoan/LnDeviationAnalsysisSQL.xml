@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnDeviationAnalsysisSQL">
+    <typeAlias alias="LnDeviationAnalsysis" type="com.banger.mobile.domain.model.loan.LnDeviationAnalsysis"/>
+
+    
+    <resultMap id="LnDeviationAnalsysisResult" class="LnDeviationAnalsysis">
+
+    	<result column="ID" property="id"/>
+    	<result column="LOAN_ID" property="loanId"/>
+    	<result column="LOAN_MARITAL_STATUS" property="loanMaritalStatus"/>
+    	<result column="LOAN_AGE" property="loanAge"/>
+    	<result column="LOAN_WORK_STATUS" property="loanWorkStatus"/>
+    	<result column="LOAN_BIZ_YEAR" property="loanBizYear"/>
+    	<result column="LOAN_LOCAL_YEAR" property="loanLocalYear"/>
+    	<result column="LOAN_FINANCE_STATUS" property="loanFinanceStatus"/>
+    	<result column="LOAN_CREDIT_STATUS" property="loanCreditStatus"/>
+    	<result column="LOAN_CHILD_STATUS" property="loanChildStatus"/>
+    	<result column="LOAN_SPOUSE_STATUS" property="loanSpouseStatus"/>
+    	<result column="GU_MARITAL_STATUS" property="guMaritalStatus"/>
+    	<result column="GU_AGE" property="guAge"/>
+    	<result column="GU_WORK_STATUS" property="guWorkStatus"/>
+    	<result column="GU_BIZ_YEAR" property="guBizYear"/>
+    	<result column="GU_FINANCE_STATUS" property="guFinanceStatus"/>
+    	<result column="GU_CREDIT_STATUS" property="guCreditStatus"/>
+    	<result column="REMARK" property="remark"/>
+    	<result column="CREATE_USER" property="createUser"/>
+    	<result column="CREATE_DATE" property="createDate"/>
+    	<result column="UPDATE_USER" property="updateUser"/>
+    	<result column="UPDATE_DATE" property="updateDate"/>
+
+
+    </resultMap>
+    
+    <insert id="addLnDeviationAnalsysis" parameterClass="java.util.Map">
+        INSERT INTO LN_DEVIATION_ANALYSIS
+		(
+		   		ID,
+				LOAN_ID,
+				LOAN_MARITAL_STATUS,
+				LOAN_AGE,
+				LOAN_WORK_STATUS ,
+				LOAN_BIZ_YEAR ,
+				LOAN_LOCAL_YEAR ,
+				LOAN_FINANCE_STATUS ,
+				LOAN_CREDIT_STATUS ,
+				LOAN_CHILD_STATUS ,
+				LOAN_SPOUSE_STATUS,
+				GU_MARITAL_STATUS ,
+				GU_AGE,
+				GU_WORK_STATUS ,
+				GU_BIZ_YEAR ,
+				GU_FINANCE_STATUS ,
+				GU_CREDIT_STATUS,
+				REMARK,
+				CREATE_USER ,
+				CREATE_DATE
+
+			)VALUES (
+				#id:INTEGER#,
+				#loanId:INTEGER#,
+				#loanMaritalStatus:INTEGER#,
+				#loanAge:INTEGER#,
+				#loanWorkStatus:INTEGER#,
+				#loanBizYear:INTEGER#,
+				#loanLocalYear:INTEGER#,
+				#loanFinanceStatus:INTEGER#,
+				#loanCreditStatus:INTEGER#,
+				#loanChildStatus:INTEGER#,
+				#loanSpouseStatus:INTEGER#,
+				#guMaritalStatus:INTEGER#,
+				#guAge:INTEGER#,
+				#guWorkStatus:INTEGER#,
+				#guBizYear:INTEGER#,
+				#guFinanceStatus:INTEGER#,
+				#guCreditStatus:INTEGER#,
+				#remark:VARCHAR:NULL#,
+				#createUser:INTEGER#,
+				#createDate:TIMESTAMP#
+
+        )
+		<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_DEVIATION_ANALYSIS
+	</selectKey>
+
+    </insert>
+
+	<select id="selectLnDeviationAnalsysisByLoanId" parameterClass="java.lang.Integer" resultMap="LnDeviationAnalsysisResult">
+
+
+		select
+		*
+		from
+		LN_DEVIATION_ANALYSIS
+		where
+		LOAN_ID = #loanId#
+
+	</select>
+
+	<update id="UpdateLnDeviationAnalsysis" parameterClass="java.util.Map">
+		UPDATE LN_DEVIATION_ANALYSIS SET  LOAN_ID=LOAN_ID
+
+		<isNotEmpty property="loanMaritalStatus" prepend=",">
+			LOAN_MARITAL_STATUS =#loanMaritalStatus#
+		</isNotEmpty>
+		<isNotEmpty property="loanAge" prepend=",">
+			LOAN_AGE =#loanAge#
+		</isNotEmpty>
+		<isNotEmpty property="loanWorkStatus" prepend=",">
+			LOAN_WORK_STATUS =#loanWorkStatus#
+		</isNotEmpty>
+		<isNotEmpty property="loanBizYear" prepend=",">
+			LOAN_BIZ_YEAR =#loanBizYear#
+		</isNotEmpty>
+		<isNotEmpty property="loanLocalYear" prepend=",">
+			LOAN_LOCAL_YEAR =	#loanLocalYear#
+		</isNotEmpty>
+		<isNotEmpty property="loanFinanceStatus" prepend=",">
+			LOAN_FINANCE_STATUS =	#loanFinanceStatus#
+		</isNotEmpty>
+		<isNotEmpty property="loanCreditStatus" prepend=",">
+			LOAN_CREDIT_STATUS =#loanCreditStatus#
+		</isNotEmpty>
+		<isNotEmpty property="loanChildStatus" prepend=",">
+			LOAN_CHILD_STATUS =#loanChildStatus#
+		</isNotEmpty>
+		<isNotEmpty property="loanSpouseStatus" prepend=",">
+			LOAN_SPOUSE_STATUS=#loanSpouseStatus#
+		</isNotEmpty>
+		<isNotEmpty property="guMaritalStatus" prepend=",">
+			GU_MARITAL_STATUS =#guMaritalStatus#
+		</isNotEmpty>
+		<isNotEmpty property="guAge" prepend=",">
+			GU_AGE =#guAge#
+		</isNotEmpty>
+		<isNotEmpty property="guWorkStatus" prepend=",">
+			GU_WORK_STATUS =#guWorkStatus#
+		</isNotEmpty>
+		<isNotEmpty property="guBizYear" prepend=",">
+			GU_BIZ_YEAR =#guBizYear#
+		</isNotEmpty>
+		<isNotEmpty property="guFinanceStatus" prepend=",">
+			GU_FINANCE_STATUS =#guFinanceStatus#
+		</isNotEmpty>
+		<isNotEmpty property="guCreditStatus" prepend=",">
+			GU_CREDIT_STATUS=#guCreditStatus#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			REMARK=#remark#
+		</isNotEmpty>
+		 , UPDATE_USER=#updateUser#,
+		  UPDATE_DATE=#updateDate#
+		WHERE LOAN_ID=#loanId#
+
+	</update>
+
+    
+    <!-- <select id="selectByReachesType" parameterClass="java.util.Map" resultMap="LnDeviationAnalsysisResult">
+        SELECT * FROM (SELECT * FROM LN_DEVIATION_ANALYSIS WHERE LOAN_ID = #loanId#) WHERE REACHES_TYPE= #reachesType#
+     </select>
+-->
+
+</sqlMap>

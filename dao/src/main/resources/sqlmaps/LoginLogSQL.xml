@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LoginLogSQL">
+	<typeAlias alias="LoginLog" type="com.banger.mobile.domain.model.log.LoginLog" />
+	<typeAlias alias="LoginLogInfo" type="com.banger.mobile.domain.model.log.LoginLogInfo" />
+
+
+	<!-- 安全日志表-->
+	<!-- LoginLogSQL信息全字段 -->
+	<resultMap class="LoginLog" id="LoginLogResult">
+		<result column="LOGIN_LOG_ID" property="loginLogID" />
+		<result column="USER_ID" property="userId" />
+		<result column="LOG_TYPE" property="logType" />
+		<result column="LOG_DATE" property="logDate" />
+		<result column="LOG_IP" property="logIp" />
+		<result column="LOG_DEVICE" property="loginDevice" />
+	</resultMap>
+	
+	
+	<!-- LoginLogInfoSQL信息全字段 -->
+	<resultMap class="LoginLogInfo" id="LoginLogInfoResult">
+		<result column="ACCOUNT" property="account"/>
+		<result column="LOG_TYPE_NAME" property="logTypeName" />
+		<result column="LOG_DATE" property="logDate" />
+		<result column="LOG_DEVICE" property="logDevice" />
+		<result column="LOG_IP" property="logIp" />
+	</resultMap>
+
+		<!-- 增加一条安全日志-->
+	<insert id="addLoginLog" parameterClass="LoginLog">
+     <![CDATA[
+		insert into SYS_LOGIN_LOG
+		(
+		 LOGIN_LOG_ID,
+		 USER_ID,
+		 LOG_TYPE,
+		 LOG_DATE,
+		 LOG_IP,
+		 LOG_DEVICE
+		 )
+		values
+		(
+		#loginLogID#,
+		#userId#,
+	    #logType#,
+	    current timestamp,
+	    #logIp#,
+	    #loginDevice#
+		)
+      ]]>
+		<selectKey keyProperty="loginLogID" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_LOGIN_LOG 
+		</selectKey>
+	</insert>
+	
+	
+	
+  
+  	<!-- 安全日志分页count -->
+  <select id="getLoginLogCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   SYS_LOGIN_LOG a
+                   left join SYS_USER b on a.USER_ID=b.USER_ID 
+                   left join CD_LOG_TYPE c on a.LOG_TYPE=c.LOG_TYPE_CODE
+     ]]>
+     <dynamic prepend="where" >
+     	<isNotEmpty prepend="and" property="startLogDate">
+			<![CDATA[a.LOG_DATE>='$startLogDate$ 00:00:00' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="endLogDate">
+			<![CDATA[a.LOG_DATE<='$endLogDate$ 23:59:59']]>
+		</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  	<!-- 安全日志记录 -->
+  <select id="getLoginLogPageMap" resultMap="LoginLogInfoResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+			  a.LOG_DATE,
+		      a.LOG_DEVICE,
+              a.LOG_IP,
+              b.ACCOUNT,
+              c.LOG_TYPE_NAME
+        from 
+             SYS_LOGIN_LOG a 
+             left join SYS_USER b on a.USER_ID=b.USER_ID 
+             left join CD_LOG_TYPE c on a.LOG_TYPE=c.LOG_TYPE_CODE
+
+	]]>
+	<dynamic prepend="where" >
+		<isNotEmpty prepend="and" property="startLogDate">
+			<![CDATA[a.LOG_DATE>='$startLogDate$ 00:00:00' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="endLogDate">
+			<![CDATA[a.LOG_DATE<='$endLogDate$ 23:59:59']]>
+		</isNotEmpty>
+	</dynamic>
+	order by a.LOG_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+
+
+</sqlMap>
+
+
+
+

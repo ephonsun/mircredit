@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysDeptAuthSQL">
+	<typeAlias alias="SysDeptAuth" type="com.banger.mobile.domain.model.user.SysDeptAuth" />
+	
+	<!-- 可管理机构表-->
+	<!-- SysDeptAuthSQL信息全字段  -->
+	<resultMap class="SysDeptAuth" id="SysDeptAuthResult">
+		<result column="DEPT_AUTH_ID" property="deptAuthId" />
+		<result column="USER_ID" property="userId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<cacheModel type="OSCACHE" id="SysDeptAuth-Cache" serialize="true" readOnly="true">
+		<flushInterval hours="24"/>
+		<flushOnExecute statement="addSysDeptAuth"/>
+		<flushOnExecute statement="updateSysDeptAuth"/>
+		<flushOnExecute statement="deleteSysDeptAuth"/>
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	  <select id="getAllDeptAuthForCache" resultMap="SysDeptAuthResult" cacheModel="SysDeptAuth-Cache">
+		<![CDATA[
+			select * from  SYS_DEPT_AUTH
+		]]>
+	  </select>
+
+		<!-- 增加一条可管理机构-->
+	<insert id="addSysDeptAuth" parameterClass="SysDeptAuth">
+     <![CDATA[
+		insert into SYS_DEPT_AUTH
+		(
+		 DEPT_AUTH_ID,
+		 USER_ID,
+		 ROLE_ID,
+		 DEPT_ID,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#deptAuthId#,
+		#userId#,
+	    #roleId#,
+	    #deptId#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="deptAuthId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_DEPT_AUTH 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 可管理机构修改-->
+	<update id="updateSysDeptAuth" parameterClass="SysDeptAuth">
+	 <![CDATA[
+             update SYS_DEPT_AUTH  set 
+		 ]]>	
+		 <isNotEmpty property="userId">
+				USER_ID=#userId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="roleId">
+				ROLE_ID=#roleId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="deptId">
+				DEPT_ID=#deptId#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where DEPT_AUTH_ID=#deptAuthId#
+         ]]> 
+	</update>
+	
+	
+	 <!-- 根据userid删除可管理机构-->	
+	<delete id="deleteSysDeptAuth"  parameterClass="java.util.Map">
+		 <![CDATA[
+            delete  from SYS_DEPT_AUTH where USER_ID=#userId# and ROLE_ID=#roleId#
+		 ]]>	
+	</delete>
+  
+  <!-- 根据id得到可管理机构-->	
+  <select id="getSysDeptAuthById"  resultMap="SysDeptAuthResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_DEPT_AUTH where DEPT_AUTH_ID=#roleAuthId#
+	]]>
+  </select>
+
+  <select id="getSysDeptAuthList" resultMap="SysDeptAuthResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_DEPT_AUTH where 1=1 
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ USER_ID=#userId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[ ROLE_ID =#roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[ DEPT_ID =#deptId#]]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+  </select>
+  
+  
+  
+</sqlMap>
+
+
+
+

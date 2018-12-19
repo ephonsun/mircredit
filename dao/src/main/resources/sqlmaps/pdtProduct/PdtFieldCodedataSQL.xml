@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtFieldCodedataSQL">
+	<typeAlias alias="PdtFieldCodedata" type="com.banger.mobile.domain.model.pdtProduct.PdtFieldCodedata" />
+	
+	<!-- 产品类型模版下拉字段项     信息全字段 -->
+	<resultMap class="PdtFieldCodedata" id="PdtFieldCodedataResult">
+	 	<result column="FIELD_CODEDATA_ID" property="fieldCodedataId" />
+		<result column="TEMPLATE_FIELD_ID" property="templateFieldId" />
+		<result column="FIELD_CODEDATA_KEY" property="fieldCodedataKey" />
+		<result column="FIELD_CODEDATA_VALUE" property="fieldCodedataValue" />
+		<result column="FIELD_CODEDATA_ORDER" property="fieldCodedataOrder" />
+		<result column="IS_DEL" property="isDel" /> 
+	    <result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>	
+	<cacheModel id="PdtFieldCodedata-Cache" type="LRU" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="addPdtFieldCodedata" />
+		<flushOnExecute statement="updateFieldCodeData" />
+		<flushOnExecute statement="updateFieldCodeDataByFeildId" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+	<!-- 获取所有模版字段代码表列表 -->
+	<select id="getAllPdtFieldCodedata"
+		resultMap="PdtFieldCodedataResult" cacheModel="PdtFieldCodedata-Cache">
+		<![CDATA[
+			select * from PDT_FIELD_CODEDATA where IS_DEL=0 Order by FIELD_CODEDATA_ORDER ASC
+		]]>
+	</select>
+	<!-- 新增模板字段 -->
+	<insert id="addPdtFieldCodedata" parameterClass="PdtFieldCodedata">
+		<![CDATA[
+			insert into PDT_FIELD_CODEDATA 
+			(
+				FIELD_CODEDATA_ID, 
+				TEMPLATE_FIELD_ID, 
+				FIELD_CODEDATA_KEY, 
+				FIELD_CODEDATA_VALUE, 
+				FIELD_CODEDATA_ORDER,
+				IS_DEL, 
+				CREATE_DATE, 
+				CREATE_USER
+			) values 
+			(
+				#fieldCodedataId#,
+				#templateFieldId#,
+				#fieldCodedataKey#,
+				#fieldCodedataValue#,
+				#fieldCodedataOrder#,
+				0,
+				current timestamp,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="fieldCodedataId" resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_PRODUCT
+		</selectKey>
+	</insert>
+	
+	<!-- 根据字段id查询下拉项 -->
+	<select id="getFieldCodeDataListByFieldId" resultMap="PdtFieldCodedataResult" parameterClass="java.lang.Integer"> 
+		<![CDATA[
+			select * from PDT_FIELD_CODEDATA where IS_DEL=0 and TEMPLATE_FIELD_ID=#templateFieldId# order by FIELD_CODEDATA_ORDER
+		]]>
+	</select>
+	
+	<!-- 根据id查询单个下拉项 -->
+	<select id="getFieldCodeDataById" resultMap="PdtFieldCodedataResult" parameterClass="java.lang.Integer"> 
+		<![CDATA[
+			select * from PDT_FIELD_CODEDATA where FIELD_CODEDATA_ID=#codedataId#
+		]]>
+	</select>
+	
+	<!-- 编辑下拉项 -->
+	<update id="updateFieldCodeData" parameterClass="PdtFieldCodedata">
+		update PDT_FIELD_CODEDATA  set
+			<isNotNull property="fieldCodedataOrder">
+				FIELD_CODEDATA_ORDER=#fieldCodedataOrder#,
+			</isNotNull>
+			<isNotNull property="isDel">
+				IS_DEL=#isDel#,
+			</isNotNull>
+			UPDATE_DATE=current timestamp,
+			UPDATE_USER=#updateUser#
+		where FIELD_CODEDATA_ID = #fieldCodedataId# 
+	</update>
+	
+	<!-- 根据字段id删除下拉项 -->
+	<update id="updateFieldCodeDataByFeildId" parameterClass="PdtFieldCodedata">
+		update PDT_FIELD_CODEDATA  set
+			<isNotNull property="isDel">
+				IS_DEL=#isDel#,
+			</isNotNull>
+			UPDATE_DATE=current timestamp,
+			UPDATE_USER=#updateUser#
+		where TEMPLATE_FIELD_ID = #templateFieldId# 
+	</update>
+</sqlMap>
+

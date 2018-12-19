@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskTaskTargetSQL">
+	<typeAlias alias="TskTaskTarget"
+		type="com.banger.mobile.domain.model.task.TskTaskTarget" />
+	<typeAlias alias="TaskTargetCustomer"
+		type="com.banger.mobile.domain.model.task.TaskTargetCustomer" />
+
+	<!-- 任务目标客户表-->
+	<!-- TskTaskTargetSQL信息全字段 -->
+	<resultMap class="TskTaskTarget" id="TskTaskTargetResult">
+		<result column="TASK_TARGET_ID" property="taskTargetId" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="IS_FINISH" property="isFinish"/>
+		<result column="COMM_PROGRESS_ID" property="commProgressId"/>
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="DEPT_ID" property="deptId"/>
+	</resultMap>
+	
+	<!-- 任务联系客户 -->
+	<resultMap class="TaskTargetCustomer" id="TaskTargetCustomerResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="TASK_TARGET_ID" property="taskTargetId" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="COMM_PROGRESS_ID" property="commProgressId"/>
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="SEX" property="sex" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="AGE" property="age" />
+		<result column="COMPANY" property="company" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="USER_NAME" property="userName" />
+		<result column="EXECUTE_NAME" property="executeName" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TYPE_NAME" property="calltypeName" />
+		<result column="DEPT_ID" property="deptId"/>
+	</resultMap>
+	
+	<!--查询任务的联系客户count -->
+	<select id="getTskTaskTargetCustomerCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+	    	SELECT COUNT(0) FROM (
+			SELECT distinct CT.*  FROM (
+		    	SELECT 
+			    (
+			        select max(CREATE_DATE) as START_DATE 
+			        from REC_RECORD_INFO AS rec  
+			        WHERE  rec.IS_DEL=0 AND rec.CALL_TYPE IN(1,2,4) AND USER_ID=RT.EXECUTE_USER_ID AND CUSTOMER_ID=RT.CUSTOMER_ID
+			    ),RT.*FROM (
+				    select CTT.*,u2.USER_NAME as EXECUTE_NAME from (
+					select 
+					target.TASK_ID,target.DEPT_ID,target.TASK_TARGET_ID,target.IS_FINISH,target.COMM_PROGRESS_ID,task.EXECUTE_USER_ID AS EXECUTE_USER_ID,
+					customer.CUSTOMER_ID,customer.CUSTOMER_NO,customer.CUSTOMER_NAME,cusType.CUSTOMER_TYPE_NAME,customer.DEFAULT_PHONE_TYPE,
+					customer.MOBILE_PHONE1,customer.MOBILE_PHONE2,customer.PHONE,customer.FAX,customer.CUSTOMER_TITLE,customer.SEX,
+					customer.AGE,customer.COMPANY,dept.DEPT_NAME,users.USER_NAME 
+					from TSK_TASK_TARGET as target 
+					left join TSK_TASK AS task on task.TASK_ID=target.TASK_ID  
+					left join CRM_CUSTOMER as customer on target.CUSTOMER_ID=customer.CUSTOMER_ID 
+					LEFT JOIN CRM_CUSTOMER_TYPE cusType on customer.CUSTOMER_TYPE_ID=cusType.CUSTOMER_TYPE_ID 
+					left join SYS_DEPT as dept on customer.BELONG_DEPT_ID=dept.DEPT_ID AND dept.IS_DEL=0 
+					left join SYS_USER as users on customer.BELONG_USER_ID=users.USER_ID AND users.IS_DEL=0 
+					where task.TASK_ID=$taskId$ or task.PARENT_TASK_ID=$taskId$) CTT 
+					left join SYS_USER as u2 on CTT.EXECUTE_USER_ID=U2.USER_ID
+				) AS RT 
+			) AS CT 
+			LEFT JOIN (
+		      	SELECT START_DATE,END_DATE FROM TSK_TASK WHERE IS_DEL=0 AND TASK_ID=$taskId$ 
+			) AS task ON to_char(CT.START_DATE,'yyyy-MM-dd')>=to_char(task.START_DATE,'yyyy-MM-dd') and to_char(CT.START_DATE,'yyyy-MM-dd')<=to_char(task.END_DATE,'yyyy-MM-dd') 
+			WHERE CT.CUSTOMER_ID IN(
+	    		select a.CUSTOMER_ID from CRM_CUSTOMER AS a WHERE 1=1 
+	    ]]>
+	    <isNotEmpty prepend="and" property="userIds">
+				<![CDATA[ a.BELONG_USER_ID in($userIds$) ]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="managerId">
+				<![CDATA[a.BELONG_USER_ID in($managerId$) ]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="customerMsg">
+			<![CDATA[
+				((a.CUSTOMER_NAME like '%$customerMsg$%')
+				or (a.CUSTOMER_NAME_PINYIN like '%$customerMsg$%')
+				or (a.CUSTOMER_NO = '$customerMsg$')
+				or (a.ID_CARD like '%$customerMsg$%')
+				or (a.COMPANY like '%$customerMsg$%')
+				or (a.MOBILE_PHONE1 like '%$customerMsg$%')
+				or (a.MOBILE_PHONE2 like '%$customerMsg$%')
+				or (a.PHONE like '%$customerMsg$%')
+				or (a.FAX like '%$customerMsg$%')) 
+			]]>
+		</isNotEmpty>
+	    <![CDATA[) ]]>
+	    <isNotEmpty property="userIdsContact">
+	    	<![CDATA[ 
+	    		and (CT.EXECUTE_USER_ID IN($userIdsContact$) 
+	    	]]>
+	    	<isNotEmpty property="roleType">
+	    		<![CDATA[ or CT.TASK_ID=$taskId$ ]]>
+	    	</isNotEmpty>
+	    	<![CDATA[
+		    	) 
+		    ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="taskDeptIds">
+	    	<![CDATA[ and CT.DEPT_ID in($taskDeptIds$) ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="treeId">
+	    		<![CDATA[ and CT.EXECUTE_USER_ID=$treeId$ ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="commProssId">
+	    	<![CDATA[ and CT.COMM_PROGRESS_ID=$commProssId$ ]]>
+	    </isNotEmpty>
+	    
+	    <isNotEmpty property="treeType">
+	    	<![CDATA[ and CT.DEPT_ID=$treeType$ AND EXECUTE_USER_ID IS NULL ]]>
+	    </isNotEmpty>
+	    <![CDATA[
+	    	) 
+	    ]]>
+	</select>
+	
+	<!-- 查询任务的联系客户分页 -->
+	<select id="getTskTaskTargetCustomerMap" resultMap="TaskTargetCustomerResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select k.* from (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+	    	SELECT 
+			(
+			    SELECT recType.CALL_TYPE_NAME FROM 
+			    REC_RECORD_INFO AS info     
+			    LEFT JOIN REC_CALL_TYPE AS recType ON info.CALL_TYPE=recType.CALL_TYPE_CODE  
+			    WHERE info.CUSTOMER_ID=C.CUSTOMER_ID AND TO_CHAR(info.CREATE_DATE,'yyyy-MM-dd hh24:mi:ss')=C.START_DATE 
+			    AND info.IS_DEL=0 AND info.CALL_TYPE IN(1,2,4) 
+			),C.* FROM (
+	    	SELECT distinct 
+		    (
+		        CASE WHEN CT.START_DATE>=(SELECT to_char(START_DATE,'yyyy-MM-dd') FROM TSK_TASK WHERE IS_DEL=0 AND TASK_ID=$taskId$) 
+		                    AND CT.START_DATE<=(SELECT to_char(END_DATE,'yyyy-MM-dd') FROM TSK_TASK WHERE IS_DEL=0 AND TASK_ID=$taskId$) 
+		        THEN CT.START_DATE ELSE NULL END
+		    ) AS START_DATE,CT.TASK_ID,CT.DEPT_ID,CT.TASK_TARGET_ID,CT.IS_FINISH,CT.COMM_PROGRESS_ID,CT.EXECUTE_USER_ID,      
+		    CT.CUSTOMER_ID,CT.CUSTOMER_NO,CT.CUSTOMER_NAME,CT.CUSTOMER_TYPE_NAME,CT.DEFAULT_PHONE_TYPE,      
+		    CT.MOBILE_PHONE1,CT.MOBILE_PHONE2,CT.PHONE,CT.FAX,CT.CUSTOMER_TITLE,CT.SEX,      
+		    CT.AGE,CT.COMPANY,CT.DEPT_NAME,CT.USER_NAME,CT.EXECUTE_NAME 
+	    	FROM (
+		    	SELECT 
+			    (
+			        select max(CREATE_DATE) as START_DATE 
+			        from REC_RECORD_INFO AS rec  
+			        WHERE  rec.IS_DEL=0 AND rec.CALL_TYPE IN(1,2,4) AND USER_ID=RT.EXECUTE_USER_ID AND CUSTOMER_ID=RT.CUSTOMER_ID
+			    ),RT.*FROM (
+				    select CTT.*,u2.USER_NAME as EXECUTE_NAME from (
+					select 
+					target.TASK_ID,target.DEPT_ID,target.TASK_TARGET_ID,target.IS_FINISH,target.COMM_PROGRESS_ID,task.EXECUTE_USER_ID AS EXECUTE_USER_ID,
+					customer.CUSTOMER_ID,customer.CUSTOMER_NO,customer.CUSTOMER_NAME,cusType.CUSTOMER_TYPE_NAME,customer.DEFAULT_PHONE_TYPE,
+					customer.MOBILE_PHONE1,customer.MOBILE_PHONE2,customer.PHONE,customer.FAX,customer.CUSTOMER_TITLE,customer.SEX,
+					customer.AGE,customer.COMPANY,dept.DEPT_NAME,users.USER_NAME 
+					from TSK_TASK_TARGET as target 
+					left join TSK_TASK AS task on task.TASK_ID=target.TASK_ID  
+					left join CRM_CUSTOMER as customer on target.CUSTOMER_ID=customer.CUSTOMER_ID 
+					LEFT JOIN CRM_CUSTOMER_TYPE cusType on customer.CUSTOMER_TYPE_ID=cusType.CUSTOMER_TYPE_ID 
+					left join SYS_DEPT as dept on customer.BELONG_DEPT_ID=dept.DEPT_ID AND dept.IS_DEL=0 
+					left join SYS_USER as users on customer.BELONG_USER_ID=users.USER_ID AND users.IS_DEL=0 
+					where task.TASK_ID=$taskId$ or task.PARENT_TASK_ID=$taskId$) CTT 
+					left join SYS_USER as u2 on CTT.EXECUTE_USER_ID=U2.USER_ID
+				) AS RT 
+			) AS CT 
+			LEFT JOIN (
+		      	SELECT START_DATE,END_DATE FROM TSK_TASK WHERE IS_DEL=0 AND TASK_ID=$taskId$ 
+			) AS task ON to_char(CT.START_DATE,'yyyy-MM-dd')>=to_char(task.START_DATE,'yyyy-MM-dd') and to_char(CT.START_DATE,'yyyy-MM-dd')<=to_char(task.END_DATE,'yyyy-MM-dd') 
+	    	WHERE CT.CUSTOMER_ID IN(
+	    		select a.CUSTOMER_ID from CRM_CUSTOMER AS a WHERE 1=1 
+	    ]]>
+	    <isNotEmpty prepend="and" property="userIds">
+				<![CDATA[ a.BELONG_USER_ID in($userIds$) ]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="managerId">
+				<![CDATA[ a.BELONG_USER_ID in($managerId$) ]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="customerMsg">
+			<![CDATA[
+				((a.CUSTOMER_NAME like '%$customerMsg$%')
+				or (a.CUSTOMER_NAME_PINYIN like '%$customerMsg$%')
+				or (a.CUSTOMER_NO = '$customerMsg$')
+				or (a.ID_CARD like '%$customerMsg$%')
+				or (a.COMPANY like '%$customerMsg$%')
+				or (a.MOBILE_PHONE1 like '%$customerMsg$%')
+				or (a.MOBILE_PHONE2 like '%$customerMsg$%')
+				or (a.PHONE like '%$customerMsg$%')
+				or (a.FAX like '%$customerMsg$%')) 
+			]]>
+		</isNotEmpty>
+	    <![CDATA[) ]]>
+	    <isNotEmpty property="userIdsContact">
+	    	<![CDATA[ 
+	    		and (CT.EXECUTE_USER_ID IN($userIdsContact$) 
+	    	]]>
+	    	<isNotEmpty property="roleType">
+	    		<![CDATA[ or CT.TASK_ID=$taskId$ ]]>
+	    	</isNotEmpty>
+	    	<![CDATA[
+	    		) 
+	    	]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="taskDeptIds">
+	    	<![CDATA[ and CT.DEPT_ID in($taskDeptIds$) ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="treeId">
+	    		<![CDATA[ and CT.EXECUTE_USER_ID=$treeId$ ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="commProssId">
+	    	<![CDATA[ and CT.COMM_PROGRESS_ID=$commProssId$ ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="treeType">
+	    	<![CDATA[ and CT.DEPT_ID=$treeType$ AND EXECUTE_USER_ID IS NULL ]]>
+	    </isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) C) g) k where k.NUMROW<=$endRow$) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 批量修改执行者 -->
+	<update id="UpdateExcuteUser" parameterClass="java.util.Map">
+		<![CDATA[
+			update TSK_TASK_TARGET AS target 
+			set 
+			target.UPDATE_DATE=#updateDate#,
+			target.UPDATE_USER=#updateUser#,
+			target.TASK_ID=(
+			    select task.TASK_ID from TSK_TASK as task 
+			    where task.PARENT_TASK_ID=#taskId# and task.EXECUTE_USER_ID=#executeUserId#
+			), 
+			target.DEPT_ID=(select DEPT_ID from SYS_USER WHERE USER_ID=#executeUserId#) 
+			where target.TASK_TARGET_ID=#customerId#
+	    ]]>
+	</update>
+	
+	<!-- 移除目标客户 -->
+	<delete id="DelTsakTargetCustomer" parameterClass="TskTaskTarget">
+		<![CDATA[
+			DELETE FROM TSK_TASK_TARGET WHERE TASK_TARGET_ID=#taskTargetId#
+		]]>
+	</delete>
+	
+	<!-- 返回任务执行者对应的联系客户数 -->
+	<select id="GetExcUserCustomerCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			select COUNT(0) from TSK_TASK WHERE PARENT_TASK_ID=$taskId$ AND EXECUTE_USER_ID=$executeUserId$
+		]]>
+	</select>
+	
+	<!-- 添加联系客户 -->
+	<insert id="InsertTskTaskTarget" parameterClass="TskTaskTarget">
+		<![CDATA[
+			INSERT INTO TSK_TASK_TARGET
+			(
+				TASK_TARGET_ID,
+				TASK_ID,
+				CUSTOMER_ID,
+				IS_FINISH,
+				DEPT_ID,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#taskTargetId#,
+				#taskId#,
+				#customerId#,
+				0,
+				#deptId#,
+				#createDate#,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="taskTargetId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_TASK_TARGET
+		</selectKey>
+	</insert>
+	
+	<!-- 根据任务ID和客户ID返回任务目标客户数 -->
+	<select id="GetByTaskCustomerCount" resultClass="java.lang.Integer" parameterClass="TskTaskTarget">
+		<![CDATA[
+			select count(0) from  
+			TSK_TASK_TARGET as target 
+			inner join TSK_TASK as task on task.TASK_ID=target.TASK_ID 
+			where (task.TASK_ID=$taskId$ or task.PARENT_TASK_ID=$taskId$) 
+			and target.CUSTOMER_ID=$customerId$
+		]]>
+	</select>
+	
+	<!-- 更改目标客户的联系情况 -->
+	<update id="IsCheckFinishTarget" parameterClass="TskTaskTarget">
+		<![CDATA[
+			UPDATE TSK_TASK_TARGET SET IS_FINISH=#isFinish# WHERE TASK_TARGET_ID=#taskTargetId# 
+		]]>
+	</update>
+	
+	<!-- 返回当前登录人所执行的未完成的联系客户数 -->
+	<select id="getByTskTargetNotFinish" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(0) FROM TSK_TASK_TARGET AS target 
+			left join TSK_TASK as task on task.TASK_ID=target.TASK_ID 
+			where task.PARENT_TASK_ID=#taskId# AND task.EXECUTE_USER_ID=$executeUserId$  AND IS_FINISH=0 
+		]]>
+	</select>
+	
+	<!-- 修改沟通进度 -->
+	<update id="UpdateCommProgress" parameterClass="TskTaskTarget">
+		<![CDATA[
+			UPDATE TSK_TASK_TARGET SET COMM_PROGRESS_ID=#commProgressId# WHERE TASK_TARGET_ID=#taskTargetId# 
+		]]>
+	</update>
+	
+	<!-- 查询下次联系任务的目标客户 -->
+	<select id="GetTaskTargetCustomerById" parameterClass="java.lang.Integer" resultMap="TaskTargetCustomerResult">
+		<![CDATA[
+			SELECT 
+		    TO_DATE(null) as START_DATE,'' as CALL_TYPE_NAME,
+		    RT.*FROM (
+		        select 
+		        CTT.*,u2.USER_NAME as EXECUTE_NAME from (
+		        select 
+		        target.TASK_ID,target.DEPT_ID,target.TASK_TARGET_ID,target.IS_FINISH,target.COMM_PROGRESS_ID,task.EXECUTE_USER_ID AS EXECUTE_USER_ID,
+		        customer.CUSTOMER_ID,customer.CUSTOMER_NO,customer.CUSTOMER_NAME,cusType.CUSTOMER_TYPE_NAME,customer.DEFAULT_PHONE_TYPE,
+		        customer.MOBILE_PHONE1,customer.MOBILE_PHONE2,customer.PHONE,customer.FAX,customer.CUSTOMER_TITLE,customer.SEX,
+		        customer.AGE,customer.COMPANY,dept.DEPT_NAME,users.USER_NAME 
+		        from TSK_TASK_TARGET as target 
+		        left join TSK_TASK AS task on task.TASK_ID=target.TASK_ID 
+		        left join CRM_CUSTOMER as customer on target.CUSTOMER_ID=customer.CUSTOMER_ID 
+		        LEFT JOIN CRM_CUSTOMER_TYPE cusType on customer.CUSTOMER_TYPE_ID=cusType.CUSTOMER_TYPE_ID 
+		        left join SYS_DEPT as dept on customer.BELONG_DEPT_ID=dept.DEPT_ID AND dept.IS_DEL=0 
+		        left join SYS_USER as users on customer.BELONG_USER_ID=users.USER_ID AND users.IS_DEL=0 
+		        where task.TASK_ID=$taskId$ or task.PARENT_TASK_ID=$taskId$) CTT 
+		        left join SYS_USER as u2 on CTT.EXECUTE_USER_ID=U2.USER_ID 
+		    ) AS RT
+		]]>
+	</select>
+	
+	<!-- 通话动态改变客户的下次联系任务 -->
+	<update id="UpdataNextTaskCustoemr" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE TSK_TASK_TARGET SET CUSTOMER_ID=#customerId# where TASK_ID=#taskId#
+		]]>
+	</update>
+	
+	<!-- 返回任务对应的联系客户的分配数 -->
+	<select id="GetTaskTargetCustomerCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+			select COUNT(0) from (
+			select 
+			target.TASK_ID,target.DEPT_ID,target.TASK_TARGET_ID,target.IS_FINISH,task.EXECUTE_USER_ID AS EXECUTE_USER_ID,
+			customer.CUSTOMER_ID,customer.CUSTOMER_NAME 
+			from TSK_TASK_TARGET as target 
+			left join TSK_TASK AS task on task.TASK_ID=target.TASK_ID  
+			left join CRM_CUSTOMER as customer on target.CUSTOMER_ID=customer.CUSTOMER_ID 
+			where task.TASK_ID=$taskId$ or task.PARENT_TASK_ID=$taskId$) as CT where 1=1 
+		]]>
+		<isNotEmpty property="userIdsContact">
+	    	<![CDATA[ 
+	    		and (CT.EXECUTE_USER_ID IN($userIdsContact$) 
+	    	]]>
+	    	<isNotEmpty property="roleType">
+	    		<![CDATA[ or CT.TASK_ID=$taskId$ ]]>
+	    	</isNotEmpty>
+	    	<![CDATA[
+		    	) 
+		    ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="taskDeptIds">
+	    	<![CDATA[ and CT.DEPT_ID in($taskDeptIds$) ]]>
+	    </isNotEmpty>
+	</select>
+	
+	<!-- 根据客户ID查询此客户的联系记录的时间是否在任务的时间范围内 -->
+	<select id="GetTaskTargetDateCustomerCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[ 
+			select count(distinct task2.START_DATE) from 
+			TSK_TASK_TARGET as target 
+			inner join TSK_TASK as task on task.TASK_ID=target.TASK_ID 
+			inner join TSK_TASK as task2 on task.PARENT_TASK_ID=task2.TASK_ID 
+			inner join(
+			    select USER_ID,max(START_DATE) as REC_DATE from REC_RECORD_INFO where  CUSTOMER_ID=$customerId$ and  CALL_TYPE in(1,2,4)  and IS_DEL=0  GROUP BY USER_ID 
+			) as rec on to_char(rec.REC_DATE,'yyyy-MM-dd')>=to_char(task2.START_DATE,'yyyy-MM-dd') and to_char(rec.REC_DATE,'yyyy-MM-dd')<=to_char(task2.END_DATE,'yyyy-MM-dd')  
+			and  task.EXECUTE_USER_ID=rec.USER_ID 
+			where target.CUSTOMER_ID=$customerId$		
+		]]>
+	</select>
+	
+	<!-- 根据客户ID修改客户的联系记录时间在任务的时间范围内的联系状态 -->
+	<update id="UpdateTargetCustomerById" parameterClass="java.util.Map">
+		<![CDATA[ 
+			update TSK_TASK_TARGET as T 
+			set IS_FINISH=$isFinish$,UPDATE_DATE=current timestamp,UPDATE_USER=$updateUser$   
+			WHERE exists(
+			select target.TASK_TARGET_ID from 
+			TSK_TASK_TARGET as target 
+			inner join TSK_TASK as task on task.TASK_ID=target.TASK_ID 
+			inner join TSK_TASK as task2 on task.PARENT_TASK_ID=task2.TASK_ID 
+			inner join(
+			    select USER_ID,max(START_DATE) as REC_DATE from REC_RECORD_INFO where  CUSTOMER_ID=$customerId$ and  CALL_TYPE in(1,2,4)  and IS_DEL=$isDel$  GROUP BY USER_ID 
+			) as rec on to_char(rec.REC_DATE,'yyyy-MM-dd')>=to_char(task2.START_DATE,'yyyy-MM-dd') and to_char(rec.REC_DATE,'yyyy-MM-dd')<=to_char(task2.END_DATE,'yyyy-MM-dd') 
+			and  task.EXECUTE_USER_ID=rec.USER_ID 
+			where target.CUSTOMER_ID=$customerId$ and T.TASK_TARGET_ID=target.TASK_TARGET_ID) 
+		]]>
+	</update>
+	
+	<!-- 根据客户ID修改客户的联系记录时间在任务的时间范围内的子任务完成状态 -->
+	<update id="UpdateParentTaskCustomerById" parameterClass="java.util.Map">
+		<![CDATA[ 
+			UPDATE TSK_TASK  AS T1 SET TASK_STATUS=$taskStatus$,FINISH_DATE=current timestamp,UPDATE_DATE=current timestamp,UPDATE_USER=$updateUser$  
+			where exists(
+			SELECT * FROM 
+			(
+			    select   
+			    (
+			        case when (select COUNT(1) from TSK_TASK_TARGET where TASK_ID=target.TASK_ID AND IS_FINISH=0)=0 then target.TASK_ID else null end 
+			    ) as TASK_ID 
+			    from     
+			    TSK_TASK_TARGET as target     
+			    inner join TSK_TASK as task on task.TASK_ID=target.TASK_ID     
+			    inner join TSK_TASK as task2 on task.PARENT_TASK_ID=task2.TASK_ID     
+			    inner join(        
+			    	select USER_ID,max(START_DATE) as REC_DATE from REC_RECORD_INFO where  CUSTOMER_ID=$customerId$ and  CALL_TYPE in(1,2,4)  and IS_DEL=$isDel$  GROUP BY USER_ID 
+			    ) as rec on to_char(rec.REC_DATE,'yyyy-MM-dd')>=to_char(task2.START_DATE,'yyyy-MM-dd') and to_char(rec.REC_DATE,'yyyy-MM-dd')<=to_char(task2.END_DATE,'yyyy-MM-dd')   
+			    and  task.EXECUTE_USER_ID=rec.USER_ID 
+			    where target.CUSTOMER_ID=$customerId$ 
+			) as T WHERE T.TASK_ID IS NOT NULL AND T1.TASK_ID=T.TASK_ID) 
+		]]>
+	</update>
+	
+	<!-- 根据客户ID修改客户的联系记录时间在任务的时间范围内的主(父)任务完成状态 -->
+	<update id="UpdateFatherTaskCustomerById" parameterClass="java.util.Map">
+		<![CDATA[ 
+			UPDATE TSK_TASK  AS TT SET TASK_STATUS=$taskStatus$,FINISH_DATE=current timestamp,UPDATE_DATE=current timestamp,UPDATE_USER=$updateUser$ 
+			where exists(
+			SELECT *FROM (
+			select  
+			(
+			    case when (SELECT COUNT(1) FROM TSK_TASK WHERE PARENT_TASK_ID=T1.PARENT_TASK_ID AND TASK_STATUS=0)=0 then T1.PARENT_TASK_ID 
+			    else 
+			        (SELECT *FROM table(getTaskId(T1.PARENT_TASK_ID))) 
+			    end
+			) as TASK_ID 
+			from TSK_TASK  AS T1 
+			where exists(
+			SELECT * FROM 
+			(
+			    select   
+			    (
+			        case when (select COUNT(1) from TSK_TASK_TARGET where TASK_ID=target.TASK_ID AND IS_FINISH=0)=0 then target.TASK_ID else null end 
+			    ) as TASK_ID 
+			    from     
+			    TSK_TASK_TARGET as target     
+			    inner join TSK_TASK as task on task.TASK_ID=target.TASK_ID     
+			    inner join TSK_TASK as task2 on task.PARENT_TASK_ID=task2.TASK_ID     
+			    inner join(        
+			    	select USER_ID,max(START_DATE) as REC_DATE from REC_RECORD_INFO where  CUSTOMER_ID=$customerId$ and  CALL_TYPE in(1,2,4)  and IS_DEL=$isDel$  GROUP BY USER_ID 
+			    ) as rec on to_char(rec.REC_DATE,'yyyy-MM-dd')>=to_char(task2.START_DATE,'yyyy-MM-dd') and to_char(rec.REC_DATE,'yyyy-MM-dd')<=to_char(task2.END_DATE,'yyyy-MM-dd') 
+			    and  task.EXECUTE_USER_ID=rec.USER_ID   where target.CUSTOMER_ID=$customerId$
+			) as T WHERE T.TASK_ID IS NOT NULL AND T1.TASK_ID=T.TASK_ID)) AS temp WHERE temp.TASK_ID IS NOT NULL and TT.TASK_ID=temp.TASK_ID) and TASK_STATUS<>2 
+		]]>
+	</update>
+</sqlMap>

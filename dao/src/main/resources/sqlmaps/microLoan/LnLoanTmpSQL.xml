@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnBalanceCashSQL">
+
+	<typeAlias alias="TmpLoanInfo" type="com.banger.mobile.domain.model.loan.TmpLoanInfo"/>
+	<typeAlias alias="TmpLoanAccount" type="com.banger.mobile.domain.model.loan.TmpLoanAccount"/>
+    <typeAlias alias="TmpLoanRepayment" type="com.banger.mobile.domain.model.loan.TmpLoanRepayment"/>
+
+    <resultMap class="TmpLoanInfo" id="TmpLoanInfoResult">
+       	<result column="ACCT_NO" property="acctNo"/>
+       	<result column="CONT_NO" property="contNo"/>
+       	<result column="REPAYMENT_ACCOUNT" property="repaymentAccount"/>
+       	<result column="ENTER_ACCOUNT" property="enterAccount"/>
+       	<result column="BILL_NO" property="billNo"/>
+       	<result column="CONT_NO_CN" property="contNoCn"/>
+       	<result column="LOAN_TERM" property="loanTerm"/>
+       	<result column="LOAN_START_DATE" property="loanStartDate"/>
+       	<result column="LOAN_END_DATE" property="loanEndDate"/>
+       	<result column="CONT_AMT" property="contAmt"/>
+       	<result column="LOAN_ID" property="loanId"/>
+    </resultMap>
+
+	<resultMap class="TmpLoanAccount" id="TmpLoanAccountResult">
+		<result column="ACCT_NO" property="acctNo"/>
+		<result column="BILL_NO" property="billNo"/>
+		<result column="CONT_NO" property="contNo"/>
+		<result column="CUST_NO" property="custNo"/>
+		<result column="LON_BAL" property="lonBal"/>
+		<result column="AUTO_DBT_ACCT_NO" property="autoDbtAcctNo"/>
+		<result column="ACCT_BAL" property="acctBal"/>
+		<result column="ACCOUNT_STAT" property="accountStat"/>
+		<result column="NEXT_REPAY" property="nextRepay"/>
+	</resultMap>
+
+	<resultMap class="TmpLoanRepayment" id="TmpLoanRepaymentResult">
+		<result column="ACCT_NO" property="acctNo"/>
+		<result column="TXN_LON_TYPE" property="txnLonType"/>
+		<result column="TRN_DATE" property="trnDate"/>
+		<result column="TRN_TIME" property="trnTime"/>
+		<result column="TRN_AMT" property="trnAmt"/>
+	</resultMap>
+
+
+    <update id="updateTmpLoanInfo" parameterClass="TmpLoanInfo">
+        update TMP_LOAN_INFO SET ACCT_NO = #acctNo#
+        <isNotEmpty property="loanId" prepend=",">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+        where ACCT_NO = #acctNo#
+    </update>
+
+
+    <select id="getTmpLoanInfoByAccount" resultMap="TmpLoanInfoResult" parameterClass="java.lang.String">
+		select * from TMP_LOAN_INFO where ACCT_NO = #acctNo# fetch first 1 rows only
+	</select>
+
+	<select id="getTmpLoanInfoByLoanId" resultMap="TmpLoanInfoResult" parameterClass="java.lang.Integer">
+		select * from TMP_LOAN_INFO where LOAN_ID=#loanId# fetch first 1 rows only
+	</select>
+
+	<select id="getTmpLoanAccountByLoanId" resultMap="TmpLoanAccountResult" parameterClass="java.lang.Integer">
+		select tlc.* from TMP_LOAN_INFO tli,TMP_LOAN_ACCOUNT tlc where tli.ACCT_NO = tlc.ACCT_NO AND tli.LOAN_ID=#loanId# fetch first 1 rows only
+	</select>
+
+	<select id="getTmpLoanInfoAll" resultMap="TmpLoanInfoResult" >
+		select * from TMP_LOAN_INFO
+	</select>
+
+	<select id="getTmpLoanAccountAll" resultMap="TmpLoanAccountResult" >
+		select * from TMP_LOAN_ACCOUNT
+	</select>
+
+	<select id="getTmpLoanRepaymentAll" resultMap="TmpLoanRepaymentResult" >
+		select * from TMP_LOAN_REPAYMENT
+	</select>
+
+
+</sqlMap>

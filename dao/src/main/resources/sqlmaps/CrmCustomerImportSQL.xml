@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerImportSQL">
+	<typeAlias alias="CrmCustomerImport" type="com.banger.mobile.domain.model.customer.CrmCustomerImport" />
+
+	<!--客户导入字段信息表-->
+	<!-- CrmCustomerImportSQL信息全字段 -->
+	<resultMap class="CrmCustomerImport" id="CrmCustomerImportResult">
+		<result column="CUSTOMER_IMPORT_ID" property="customerImportId" />
+		<result column="USER_ID" property="userId" />
+		<result column="CUSTOMER_FIELD_NAME" property="customerFieldName" />
+		<result column="IS_OVERWRITE" property="isOverWrite" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+		<!-- 增加客户导入字段记录信息-->
+	<insert id="addCrmCustomerImport" parameterClass="CrmCustomerImport">
+     <![CDATA[
+		insert into CRM_CUSTOMER_IMPORT
+		(
+		 CUSTOMER_IMPORT_ID,
+		 USER_ID,
+		 CUSTOMER_FIELD_NAME,
+		 IS_OVERWRITE,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#customerImportId#,
+		#userId#,
+	    #customerFieldName#,
+	    #isOverWrite#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="customerImportId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_CUSTOMER_IMPORT 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 导入记录修改-->
+	<update id="updateSysUser" parameterClass="CrmCustomerImport">
+	 <![CDATA[
+             update CRM_CUSTOMER_IMPORT  set 
+		 ]]>	
+		 <isNotEmpty property="userName">
+				CUSTOMER_FIELD_NAME=#customerFieldName#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where USER_ID=#userId#
+         ]]> 
+	</update>
+	
+	
+  
+	<!-- 根据ID删除用户记录 -->
+   <delete id="deleteCrmCustomerImportById" parameterClass="java.lang.Integer">
+	<![CDATA[
+		delete from CRM_CUSTOMER_IMPORT r where   r.USER_ID= #userId# 
+	]]>
+   </delete>
+	
+  
+  <!-- 查询所有数据 -->
+  <select id="getAllData" resultMap="CrmCustomerImportResult">
+  	select * from CRM_CUSTOMER_IMPORT  
+  </select>
+
+</sqlMap>

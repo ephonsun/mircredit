@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DataAuthSQL">
+	<typeAlias alias="SysDataAuth" type="com.banger.mobile.domain.model.dataAuth.SysDataAuth" />
+
+	<!-- 数据权限表 -->
+    <resultMap class="SysDataAuth" id="SysDataAuthResult">
+		<result column="DATA_ID" property="dataId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="DATA_AUTH_CODE" property="dataAuthCode" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<cacheModel type="OSCACHE" id="DataAuthSQL-Cache" serialize="true" readOnly="true">
+		<flushInterval hours="24"/>
+		<flushOnExecute statement="insertDataAuth"/>
+		<flushOnExecute statement="deleteDataAuth"/>
+	</cacheModel>
+	
+   <!-- 新增数据访问权限 -->
+  <insert id="insertDataAuth" parameterClass="SysDataAuth">
+ 	<![CDATA[
+ 		insert into SYS_DATA_AUTH
+ 		(
+ 			DATA_ID,
+			ROLE_ID,
+			DATA_AUTH_CODE,
+			CREATE_DATE,
+			CREATE_USER
+ 		)
+ 		values
+ 		(
+ 			#dataId#,
+			#roleId#,
+			#dataAuthCode#,
+			current timestamp,
+			#createUser#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="dataId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_SYS_DATA_AUTH
+ 	</selectKey>
+  </insert>
+   <!-- 删除数据权限-->
+  <delete id="deleteDataAuth" parameterClass="SysDataAuth">
+  	<![CDATA[
+  		delete from SYS_DATA_AUTH where DATA_ID = #dataId#
+  	]]>
+  </delete>
+  <!-- 根据roleId查询数据访问权限 -->
+  <select id="getDataAuthByRoleId" resultMap="SysDataAuthResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from SYS_DATA_AUTH where ROLE_ID = #roleId#
+  	]]>
+  </select>
+  
+  
+  
+  
+</sqlMap>

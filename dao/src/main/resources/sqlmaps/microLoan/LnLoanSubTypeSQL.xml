@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanSubTypeSQL">
+    <typeAlias alias="LnLoanType" type="com.banger.mobile.domain.model.loan.LnLoanType" />
+
+	<!--子表-->
+	<resultMap class="LnLoanSubType" id="LnLoanSubTypeResult" >
+		<result column="LOAN_SUB_TYPE_ID" property="loanSubTypeId" />
+		<result column="LOAN_TYPE_ID" property="loanTypeId" />
+		<result column="LOAN_SUB_TYPE_NAME" property="loanSubTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+   
+   <!--查询所有未删除的子类型-->
+   <select id="selLoanSubTypes" resultMap="LnLoanSubTypeResult">
+    <![CDATA[
+       SELECT * FROM  LN_LOAN_SUB_TYPE  WHERE IS_DEL=0 ORDER BY SORTNO
+    ]]>
+   </select>
+   
+   <!--通过id查询子类型-->
+   <select id="selLoanSubTypeById" parameterClass="java.lang.Integer" 
+           resultMap="LnLoanSubTypeResult">
+       <![CDATA[
+        SELECT * FROM  LN_LOAN_SUB_TYPE WHERE IS_DEL=0 AND LOAN_SUB_TYPE_ID=#id#
+       ]]>
+   </select>
+  
+   <!--  -->
+    <select id="selLoanSubTypeBySortNo" parameterClass="java.lang.Integer" 
+           resultMap="LnLoanSubTypeResult">
+       <![CDATA[
+         SELECT * FROM LN_LOAN_SUB_TYPE WHERE IS_DEL=0 AND SORTNO=#sortNo#
+       ]]>
+   </select>
+   
+   <!--通过id或sortNo查询子类型-->
+    <select id="selLoanSubTypeByName" parameterClass="java.lang.String" 
+           resultMap="LnLoanSubTypeResult">
+      <![CDATA[
+       SELECT * FROM LN_LOAN_SUB_TYPE WHERE IS_DEL=0 AND LOAN_SUB_TYPE_NAME=#loanSubTypeName#
+       ]]>
+   </select>
+   <!--  -->
+   <select id="selLoanSubTypeByAssign" parameterClass="LnLoanSubType" 
+   resultMap="LnLoanSubTypeResult">
+    <![CDATA[
+     SELECT * FROM LN_LOAN_SUB_TYPE WHERE IS_DEL=0
+    ]]>
+    <dynamic>
+       <isNotEmpty prepend="and" property="loanSubTypeId">
+          <![CDATA[
+            LOAN_SUB_TYPE_ID=$loanSubTypeId$
+          ]]>
+       </isNotEmpty>
+       <isNotEmpty prepend="and" property="sortNo">
+          <![CDATA[
+            SORTNO=#sortNo#
+          ]]>
+       </isNotEmpty>
+    </dynamic>
+   </select>
+  
+   <!--删除子类型（伪删除）-->
+   <update id="delLoanSubTypeById" parameterClass="java.lang.Integer">
+     <![CDATA[
+      UPDATE LN_LOAN_SUB_TYPE SET IS_DEL=1 WHERE LOAN_SUB_TYPE_ID=#loanSubTypeId#
+     ]]>
+   </update>
+   
+   <!--更新子类型-->
+   <update id="updLoanSubType" parameterClass="LnLoanSubType">
+    UPDATE LN_LOAN_SUB_TYPE SET
+     <isNotEmpty property="loanTypeId">
+         LOAN_TYPE_ID=#loanTypeId#,   
+     </isNotEmpty>
+     <isNotEmpty property="loanSubTypeName">
+        LOAN_SUB_TYPE_NAME=#loanSubTypeName#,
+     </isNotEmpty>
+     <isNotEmpty property="isActived">
+        IS_ACTIVED=#isActived#,
+     </isNotEmpty>
+     <isNotEmpty property="sortNo">
+        SORTNO=#sortNo#,
+     </isNotEmpty>
+     <isNotEmpty property="remark">
+        REMARK=#remark#,
+     </isNotEmpty>
+     <isNotEmpty property="updateUser">
+        UPDATE_USER=#updateUser#,
+     </isNotEmpty>
+     <![CDATA[
+      UPDATE_DATE=current timestamp
+          WHERE  LOAN_SUB_TYPE_ID=#loanSubTypeId#
+      ]]>
+   </update>
+   
+   <!--插入子类型-->
+   <insert id="insLoanSubType" parameterClass="LnLoanSubType">
+      <![CDATA[
+		INSERT INTO LN_LOAN_SUB_TYPE
+    	(
+    	LOAN_SUB_TYPE_ID,
+        LOAN_TYPE_ID,
+        IS_DEL,
+        LOAN_SUB_TYPE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        CREATE_USER
+    	)
+    	VALUES
+    	(
+    	#loanSubTypeId:INTEGER#,
+        #loanTypeId:INTEGER#,
+        0,
+        #loanSubTypeName:VARCHAR:NULL#,
+        (select count(*)+1 FROM LN_LOAN_SUB_TYPE),
+        1,
+	    current timestamp,
+        #createUser:INTEGER# 
+    	)
+      ]]>
+      <selectKey keyProperty="loanSubTypeId" resultClass="java.lang.Integer" type="pre">
+         VALUES NEXTVAL FOR SEQ_LN_LOAN_SUB_TYPE
+      </selectKey>
+   </insert>
+   
+   <!--通过父表查询子表的对应数据-->
+   <select id="selLoanSubTypesByAssign" parameterClass="LnLoanType" resultMap="LnLoanSubTypeResult">
+      SELECT * FROM LN_LOAN_SUB_TYPE  WHERE  IS_DEL=0
+       <dynamic>
+         <isNotEmpty property="loanTypeId" prepend="and">
+            LOAN_TYPE_ID=#loanTypeId#
+         </isNotEmpty>
+       </dynamic>  
+       ORDER BY SORTNO
+   </select>
+   <!--通过贷款类型ID获取贷款子类型-->
+    <select id="selLoanSubTypesByLoanTypeId" parameterClass="LnLoanSubType" resultMap="LnLoanSubTypeResult">
+       SELECT * FROM LN_LOAN_SUB_TYPE　 WHERE IS_DEL=0
+         <isNotEmpty property="loanTypeId" prepend="and">
+            LOAN_TYPE_ID=#loanTypeId#
+         </isNotEmpty>
+         <isNotEmpty property="loanSubTypeName" prepend="and">
+            LOAN_SUB_TYPE_NAME=#loanSubTypeName#
+         </isNotEmpty>
+          ORDER BY SORTNO
+    </select>
+    <!--查询所以没有删除并已经启用的子类型-->
+    <select id="getAllActivedSubType" resultMap="LnLoanSubTypeResult" parameterClass="java.util.Map">
+        SELECT * FROM LN_LOAN_SUB_TYPE WHERE IS_DEL != 1 AND IS_ACTIVED=1 ORDER BY SORTNO
+    </select>
+</sqlMap>
+
+
+
+

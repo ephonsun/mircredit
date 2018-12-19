@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanTypeSQL">
+	<typeAlias alias="LnLoanType" type="com.banger.mobile.domain.model.loan.LnLoanType" />
+    <typeAlias alias="LnLoanSubType" type="com.banger.mobile.domain.model.loan.LnLoanSubType" />
+
+	<!-- 贷款类型表 全字段  -->
+	
+	<resultMap class="LnLoanType" id="LnLoanTypeResult" >
+		<result column="LOAN_TYPE_ID" property="loanTypeId" />
+		<result column="LOAN_TYPE_NAME" property="loanTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+    <resultMap class="LnLoanSubType" id="LnLoanSubTypeResult" >
+        <result column="LOAN_TYPE_ID" property="loanTypeId" />
+        <result column="LOAN_SUB_TYPE_ID" property="loanSubTypeId" />
+        <result column="LOAN_SUB_TYPE_NAME" property="loanSubTypeName" />
+        <result column="IS_DEL" property="isDel" />
+        <result column="IS_ACTIVED" property="isActived" />
+        <result column="SORTNO" property="sortNo" />
+        <result column="REMARK" property="remark" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="UPDATE_DATE" property="updateDate" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="UPDATE_USER" property="updateUser" />
+    </resultMap>
+
+    <!-- 增加一种类型-->
+    <insert id="insertLoanType" parameterClass="LnLoanType">
+        <![CDATA[
+		INSERT INTO LN_LOAN_TYPE
+    	(
+        LOAN_TYPE_ID,
+        IS_DEL,
+        LOAN_TYPE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        CREATE_USER
+    	)
+    	VALUES
+    	(
+        #loanTypeId#,
+        #isDel#,
+        #loanTypeName#,
+        (select max(SORTNO)+1 FROM LN_LOAN_TYPE),
+        #isActived#,
+	    current timestamp,
+        #updateUser#
+    	)
+      ]]>
+        <selectKey keyProperty="loanTypeId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_LN_LOAN_TYPE
+        </selectKey>
+    </insert>
+
+
+    <!-- 类型修改-->
+    <update id="updateLoanType" parameterClass="LnLoanType">
+		UPDATE LN_LOAN_TYPE SET IS_DEL = #isDel#,
+		LOAN_TYPE_NAME = #loanTypeName#, SORTNO = #sortNo#,
+		IS_ACTIVED = #isActived#,
+		UPDATE_DATE = current timestamp,  UPDATE_USER = #updateUser# where
+		LOAN_TYPE_ID= #loanTypeId#
+	</update>
+
+    <!-- 根据ID删除类型 -->
+    <update id="deleteLoanTypeById" parameterClass="java.lang.Integer">
+		UPDATE LN_LOAN_TYPE SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where LOAN_TYPE_ID= #id#
+	</update>
+
+    <!-- 根据id得到类型 -->
+    <select id="getLoanTypeById" resultMap="LnLoanTypeResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from LN_LOAN_TYPE where LOAN_TYPE_ID=#id# AND IS_DEL = 0
+	    ]]>
+	</select>
+
+    <!-- 获取现有数据按排序SORTNO最大的 -->
+    <select id="getMaxSortNoLoanType" resultMap="LnLoanTypeResult">
+		<![CDATA[
+		select *  from LN_LOAN_TYPE WHERE IS_DEL = 0
+             Order by SORTNO ASC fetch first 1 rows only
+	    ]]>
+	</select>
+
+    <!-- 获取现有类型数据按排序SORTNO最小的 -->
+    <select id="getMinSortNoLoanType"
+            resultMap="LnLoanTypeResult">
+		<![CDATA[
+		select *  from LN_LOAN_TYPE WHERE IS_DEL = 0
+             Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+
+    <!-- 获取要移动的类型对象 -->
+    <select id="getNeedMoveLoanType"
+            resultMap="LnLoanTypeResult" parameterClass="java.util.Map">
+        select *  from LN_LOAN_TYPE WHERE IS_DEL = 0
+        <isNotEmpty prepend="" property="moveType">
+            <isEqual prepend="and" property="moveType" compareValue="Up">
+                <![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+            </isEqual>
+            <isNotEqual prepend="and" property="moveType" compareValue="Up">
+                <![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+            </isNotEqual>
+        </isNotEmpty>
+    </select>
+
+    <!-- 查询贷款类型 -->
+    <select id="getLoanTypeList" resultMap="LnLoanTypeResult">
+		SELECT * FROM LN_LOAN_TYPE WHERE IS_DEL = 0  ORDER BY SORTNO
+	</select>
+
+    <!-- 查询贷款类型 -->
+    <select id="getLoanSubTypeList" resultMap="LnLoanSubTypeResult" parameterClass="Integer">
+		SELECT * FROM LN_LOAN_SUB_TYPE WHERE IS_DEL = 0
+		AND LOAN_TYPE_ID = #loanTypeId#
+		ORDER BY SORTNO
+	</select>
+
+    <!--查询所有没有删除并且已经启用的贷款类型-->
+    <select id="getAllActivedType" resultMap="LnLoanTypeResult" parameterClass="java.util.Map">
+        SELECT * FROM LN_LOAN_TYPE WHERE IS_DEL != 1 AND IS_ACTIVED = 1
+    </select>
+    
+    <select id="getLoanTypeByName" resultMap="LnLoanTypeResult" parameterClass="java.lang.String">
+       SELECT * FROM  LN_LOAN_TYPE WHERE IS_DEL = 0 AND LOAN_TYPE_NAME = #loanTypeName#
+    </select>
+    
+    <select id="getLoanTypeByNameAndId" resultMap="LnLoanTypeResult" parameterClass="LnLoanType">
+       SELECT *　FROM LN_LOAN_TYPE WHERE IS_DEL=0 
+                 AND LOAN_TYPE_NAME = #loanTypeName#
+		         AND LOAN_TYPE_ID= #loanTypeId#
+    </select>
+</sqlMap>

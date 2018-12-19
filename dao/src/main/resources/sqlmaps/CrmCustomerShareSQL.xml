@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerShareSQL">
+	<typeAlias alias="BaseCrmCustomerShare" type="com.banger.mobile.domain.model.base.customer.BaseCrmCustomerShare" />
+	<typeAlias alias="CrmCustomerShare" type="com.banger.mobile.domain.model.customer.CrmCustomerShare" />
+	<typeAlias alias="CusShareUserBean" type="com.banger.mobile.domain.model.customer.CusShareUserBean" />
+
+	<resultMap class="BaseCrmCustomerShare" id="BaseCrmCustomerShareResult">
+		<result column="CUSTOMER_SHARED_ID" property="customerIdShareId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="USER_ID" property="userId" />
+		<result column="SHARE_USER_ID" property="shareUserId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="CusShareUserBean" id="CusShareUserBeanResult">
+	    <result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="ACCOUNT" property="account" />
+	</resultMap>
+	
+	<resultMap class="CrmCustomerShare" id="CrmCustomerShareResult" extends="BaseCrmCustomerShareResult">
+	</resultMap>
+
+	<!-- 新增共享记录  -->
+	<insert id="insertCrmCustomerShare" parameterClass="CrmCustomerShare">
+     <![CDATA[
+		insert into CRM_CUSTOMER_SHARED
+		(
+		 CUSTOMER_SHARED_ID,
+		 CUSTOMER_ID,
+		 USER_ID,
+		 SHARE_USER_ID,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER 
+		 )
+		values
+		(
+		#customerIdShareId#,
+		#customerId:INTEGER#,
+	    #userId:INTEGER#,
+	    #shareUserId:INTEGER#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="customerIdShareId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_CUSTOMER_SHARED 
+		</selectKey>
+	</insert>
+    
+	<!--去掉重复值-->
+    <delete id='delRepeatShare' parameterClass="java.lang.String">
+      delete from CRM_CUSTOMER_SHARED a
+      where ( a.CUSTOMER_ID,a.SHARE_USER_ID) in (select  CUSTOMER_ID, SHARE_USER_ID from CRM_CUSTOMER_SHARED group by  CUSTOMER_ID, SHARE_USER_ID  having count(*) > 1)
+      and CUSTOMER_SHARED_ID not in (select min(CUSTOMER_SHARED_ID) from CRM_CUSTOMER_SHARED group by  CUSTOMER_ID,SHARE_USER_ID having count(*)>1)
+    </delete>
+    
+    <!-- 取消共享客户 取消共享用户  -->
+   <delete id="cancelCustomerShare" parameterClass="java.util.Map">
+	<![CDATA[
+		delete from CRM_CUSTOMER_SHARED
+		where 
+		1=1
+	]]>
+	<dynamic prepend="">
+      <isPropertyAvailable property="customerIds">
+        <isNotEmpty prepend="and" property="customerIds">
+        	<![CDATA[CUSTOMER_ID in ($customerIds$)]]>  
+        </isNotEmpty>
+      </isPropertyAvailable>
+      <isPropertyAvailable property="shareSql">
+        <isNotEmpty prepend="and" property="shareSql">
+        	<![CDATA[($shareSql$)]]>  
+        </isNotEmpty>
+      </isPropertyAvailable>
+      <isPropertyAvailable property="userIds">
+        <isNotEmpty prepend="and" property="userIds">
+        	<![CDATA[SHARE_USER_ID in ($userIds$) or USER_ID in ($userIds$) ]]>  
+        </isNotEmpty>
+      </isPropertyAvailable>
+    </dynamic>
+   </delete>
+   
+   <!-- 客户所共享的用户集合  -->
+  <select id="getShareUsersByCusId" resultMap="CusShareUserBeanResult" parameterClass="java.lang.String">
+	<![CDATA[
+		select DISTINCT A.SHARE_USER_ID as USER_ID, B.USER_NAME, D.DEPT_NAME, B.ACCOUNT from CRM_CUSTOMER_SHARED A
+		left join SYS_USER B on A.SHARE_USER_ID=B.USER_ID   
+		left join CRM_CUSTOMER C on A.CUSTOMER_ID=C.CUSTOMER_ID
+		left join SYS_DEPT D on B.DEPT_ID=D.DEPT_ID   
+                   where 
+                   C.CUSTOMER_ID in ($value$)
+        order by B.ACCOUNT
+	]]>
+  </select>
+  
+  <!--获取我有权限的客户共享给过那些人-->
+    <select id="selectCustomerShareUser" resultMap="CusShareUserBeanResult" parameterClass="java.util.Map">
+      select A.SHARE_USER_ID as USER_ID, C.USER_NAME, D.DEPT_NAME, C.ACCOUNT from (
+      select DISTINCT SHARE_USER_ID from CRM_CUSTOMER_SHARED B
+      where 1=1
+      <dynamic>
+        <isPropertyAvailable property="UserId">
+          <isNotEmpty prepend="and" property="UserId">
+            B.USER_ID in ($UserId$)
+          </isNotEmpty>
+        </isPropertyAvailable>
+      </dynamic>
+      ) as A left join SYS_USER C on A.SHARE_USER_ID=C.USER_ID
+      left join SYS_DEPT D on C.DEPT_ID=D.DEPT_ID  
+    </select>
+    
+    <!--获取共享给我的人员-->
+    <select id="selectShareToMeUser" resultMap="CusShareUserBeanResult" parameterClass="java.util.Map">
+      select A.USER_ID, C.USER_NAME, D.DEPT_NAME, C.ACCOUNT from (
+      select DISTINCT USER_ID from CRM_CUSTOMER_SHARED B
+      where B.USER_ID != $UserId$
+      <dynamic>
+        <isPropertyAvailable property="shareUserId">
+          <isNotEmpty prepend="and" property="shareUserId">
+            B.SHARE_USER_ID in ($shareUserId$)
+          </isNotEmpty>
+        </isPropertyAvailable>
+      </dynamic>
+      ) as A left join SYS_USER C on A.USER_ID=C.USER_ID
+      left join SYS_DEPT D on C.DEPT_ID=D.DEPT_ID  
+      where A.USER_ID not in ($shareUserId$)
+    </select>
+</sqlMap>

@@ -1,0 +1,918 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskScheduleSQL">
+	<typeAlias alias="TskSchedule" type="com.banger.mobile.domain.model.microTask.TskSchedule" />
+	<typeAlias alias="PdtProductCustomerBean" type="com.banger.mobile.domain.model.microProduct.PdtProductCustomerBean"/>
+	
+	<!-- TskScheduleS全字段 -->
+	<resultMap class="TskSchedule" id="tskScheduleResult">
+		<!-- 基本字段 -->
+		<result column="SCHEDULE_ID" property="scheduleId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="USER_ID" property="userId"/>
+		<result column="CONTACT_DATE" property="contactDate" />
+		<result column="CONTACT_TYPE" property="contactType" />
+		<result column="REMARK" property="remark" />
+		<result column="ADD_DATE" property="addDate" />
+		<result column="COMM_PROGRESS_ID" property="commProgressId" />
+		<result column="STATUS" property="status" />
+        <result column="RECORD_INFO_ID" property="recordInfoId"/>
+		
+		<!-- 维护字段 -->
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- PdtProductCustomerBean全字段 -->
+	<resultMap class="PdtProductCustomerBean" id="pdtProductCustomerBeanResult">
+		<!-- 基本字段 -->
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="USER_ID" property="userId" />
+		<!-- 扩展字段 -->
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_TITLE" property="customerTitle"/>
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName"/>
+		<result column="CUSTOMER_TYPE_ID" property="customerTypeId"/>
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="ADDRESS" property="address" />
+		<result column="ID_CARD" property="idCard" />
+        <result column="IS_NOGOOD" property="isNoGood" />
+		<!-- 添加人员 -->
+		<result column="ADD_USER_NAME" property="userName" />
+		
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="REMARK_PC" property="remark" />
+		<!-- 维护字段 -->
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+		<!-- PdtProductCustomerBean部分字段 -->
+	<resultMap class="PdtProductCustomerBean" id="partPdtProductCustomerBeanResult">
+		<!-- 基本字段 -->
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="USER_ID" property="userId" />
+		<!-- 扩展字段 -->
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_TITLE" property="customerTitle"/>
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName"/>
+		<result column="CUSTOMER_TYPE_ID" property="customerTypeId"/>
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="ADDRESS" property="address" />
+		<result column="ID_CARD" property="idCard" />
+        <result column="IS_NOGOOD" property="isNoGood" />
+	
+		<!-- 维护字段 -->
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 客户列表 结果集 -->
+	<resultMap class="TskSchedule" id="customerListResult"  extends="tskScheduleResult" >
+		<!-- 产品_顾客 信息 -->	
+		<result property="pdtProductCustomerBean"  resultMap="TskScheduleSQL.pdtProductCustomerBeanResult" nullValue="null"  />
+	</resultMap>
+	<!-- 日程列表 结果集 -->
+	<resultMap class="TskSchedule" id="tskScheduleListResult"  extends="tskScheduleResult" >
+		<!-- 产品_顾客 信息 -->	
+		<result property="pdtProductCustomerBean"  resultMap="TskScheduleSQL.partPdtProductCustomerBeanResult" nullValue="null"  />
+	</resultMap>
+	
+	<!-- 日程列表 -->
+    <select id="getScheduleWithCustomerInfo" resultMap="tskScheduleListResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+
+        select t.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.BIRTHDAY,c.CUSTOMER_TYPE_ID,c.COMPANY ,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.AGE,
+        c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.BELONG_DEPT_ID,c.BELONG_USER_ID,c.ADDRESS,c.ID_CARD,cc.CUSTOMER_TYPE_NAME,c.IS_NOGOOD
+        from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        left join crm_customer_type as cc on c.customer_type_id=cc.customer_type_id
+        where 1=1
+        <isNotEmpty property="customerId" prepend="and">
+            c.CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[
+			(c.CUSTOMER_NAME LIKE '%$customerName$%' ESCAPE '^'
+			OR c.mobile_phone1 LIKE '%$customerName$%' ESCAPE '^'
+			OR c.mobile_phone2 LIKE '%$customerName$%' ESCAPE '^'
+			OR c.ADDRESS LIKE '%$customerName$%' ESCAPE '^'
+			)
+			]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerPhone" prepend="and">
+            <![CDATA[
+			(c.MOBILE_PHONE1 LIKE '%$customerPhone$%' ESCAPE '^'
+			OR c.MOBILE_PHONE2 LIKE '%$customerPhone$%' ESCAPE '^'
+			)
+			]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateFrom" prepend="and">
+            <![CDATA[ t.CONTACT_DATE >= #contactDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateEnd" prepend="and">
+            <![CDATA[ t.CONTACT_DATE <= #contactDateEnd# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactTypeId" prepend="and">
+            <![CDATA[ t.CONTACT_TYPE = #contactTypeId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="commProgressId" prepend="and">
+            <![CDATA[ t.COMM_PROGRESS_ID = #commProgressId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="noCancel" prepend="and">
+            t.STATUS != 2
+        </isNotEmpty>
+        <isEmpty property="noCancel">
+            <isNotEmpty property="status" prepend="and">
+                <![CDATA[ t.STATUS = #status# ]]>
+            </isNotEmpty>
+        </isEmpty>
+        <isNotEmpty property="past" prepend="and">
+            <![CDATA[ t.CONTACT_DATE < SYSDATE  and t.STATUS != 1]]>
+        </isNotEmpty>
+        <isNotEmpty property="noPast" prepend="and">
+            <![CDATA[ t.CONTACT_DATE > SYSDATE ]]>
+        </isNotEmpty>
+        <isNotEmpty property="isPad">
+            <isNotEmpty property="userId" prepend="and">
+                t.USER_ID = #userId#
+            </isNotEmpty>
+            <isNotEmpty property="userIds" prepend="and">
+                t.USER_ID in ($userIds$)
+            </isNotEmpty>
+        </isNotEmpty>
+        <isEmpty property="isPad" prepend="and">
+            t.schedule_id in
+            (select (select schedule_id from tsk_schedule where customer_id=temp.customer_id
+            <isNotEmpty property="userId" prepend="and">
+                user_id=#userId#
+            </isNotEmpty>
+            order by contact_date desc fetch first 1 row only)
+            from (select customer_id from tsk_schedule where
+            <isNotEmpty property="userId">
+                user_id=#userId#
+            </isNotEmpty>
+            group by customer_id) temp)
+        </isEmpty>
+
+        <isNotEmpty property="past">
+            <isNotEmpty property="isWebPoint">
+                order by t.status,t.contact_date
+            </isNotEmpty>
+            <isEmpty property="isWebPoint">
+                order by t.contact_date desc
+            </isEmpty>
+        </isNotEmpty>
+        <isEmpty property="past">
+            order by t.status,t.contact_date
+        </isEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+	<select id="getScheduleWithCustomerInfoCount"  resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(*)
+        from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        left join crm_customer_type as cc on c.customer_type_id=cc.customer_type_id
+        where 1=1
+        <isNotEmpty property="customerId" prepend="and">
+            c.CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[
+			(c.CUSTOMER_NAME LIKE '%$customerName$%' ESCAPE '^'
+			OR c.mobile_phone1 LIKE '%$customerName$%' ESCAPE '^'
+			OR c.mobile_phone2 LIKE '%$customerName$%' ESCAPE '^'
+			OR c.ADDRESS LIKE '%$customerName$%' ESCAPE '^'
+			)
+			]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerPhone" prepend="and">
+            <![CDATA[
+			(c.MOBILE_PHONE1 LIKE '%$customerPhone$%' ESCAPE '^'
+			OR c.MOBILE_PHONE2 LIKE '%$customerPhone$%' ESCAPE '^'
+			)
+			]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateFrom" prepend="and">
+            <![CDATA[ t.CONTACT_DATE >= #contactDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateEnd" prepend="and">
+            <![CDATA[ t.CONTACT_DATE <= #contactDateEnd# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactTypeId" prepend="and">
+            <![CDATA[ t.CONTACT_TYPE = #contactTypeId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="commProgressId" prepend="and">
+            <![CDATA[ t.COMM_PROGRESS_ID = #commProgressId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="noCancel" prepend="and">
+            t.STATUS != 2
+        </isNotEmpty>
+        <isEmpty property="noCancel">
+            <isNotEmpty property="status" prepend="and">
+                <![CDATA[ t.STATUS = #status# ]]>
+            </isNotEmpty>
+        </isEmpty>
+        <isNotEmpty property="past" prepend="and">
+            <![CDATA[ t.CONTACT_DATE < SYSDATE  and t.STATUS != 1]]>
+        </isNotEmpty>
+        <isNotEmpty property="noPast" prepend="and">
+            <![CDATA[ t.CONTACT_DATE > SYSDATE ]]>
+        </isNotEmpty>
+        <isNotEmpty property="isPad">
+            <isNotEmpty property="userId" prepend="and">
+                t.USER_ID = #userId#
+            </isNotEmpty>
+            <isNotEmpty property="userIds" prepend="and">
+                t.USER_ID in ($userIds$)
+            </isNotEmpty>
+        </isNotEmpty>
+        <isEmpty property="isPad" prepend="and">
+            t.schedule_id in
+            (select (select schedule_id from tsk_schedule where customer_id=temp.customer_id
+            <isNotEmpty property="userId" prepend="and">
+                user_id=#userId#
+            </isNotEmpty>
+            order by contact_date desc fetch first 1 row only)
+            from (select customer_id from tsk_schedule where
+            <isNotEmpty property="userId">
+                user_id=#userId#
+            </isNotEmpty>
+            group by customer_id) temp)
+        </isEmpty>
+	</select>
+	
+
+	<!-- 根据id查找 -->
+	<select id="getScheduleById"  resultMap="tskScheduleResult" parameterClass="java.lang.Integer" >
+		<![CDATA[
+			select * from TSK_SCHEDULE WHERE SCHEDULE_ID = #scheduleId#
+		]]>
+	</select>
+	
+	<!-- 获取用户日程count -->
+	<select id="getCustomerScheduleCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT count(*) FROM TSK_SCHEDULE WHERE STATUS=0
+		]]>
+		<isNotEmpty property="customerId" prepend="and">
+			CUSTOMER_ID = #customerId#
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+			USER_ID = #userId#
+		</isNotEmpty>
+	</select>
+
+    <!--判断给定用户是否有日程-->
+    <select id="judgeScheduleByCustomerId" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        SELECT count(*) FROM TSK_SCHEDULE WHERE status = 0
+        <isNotEmpty property="customerIds" prepend="and">
+            customer_id in
+            <iterate property="customerIds" open="(" close=")" conjunction=",">
+                #customerIds[]#
+            </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            user_id = #userId#
+        </isNotEmpty>
+    </select>
+
+	<!-- 查找所有的沟通进度的配置信息 返回HashMap -->
+	<select id="getCrmCommProgressInfo" resultClass="java.util.HashMap" >
+		<![CDATA[
+			select COMM_PROGRESS_ID  ,COMM_PROGRESS_NAME,SORTNO from CRM_COMM_PROGRESS where IS_DEL=0 order by SORTNO
+		]]>
+	</select>
+
+    <select id="getNo1CommProgressId" resultClass="java.lang.Integer">
+        select comm_progress_id from crm_comm_progress where is_del=0 order by sortno fetch first 1 rows only
+    </select>
+	
+	<!-- 客户类型 返回HashMap -->
+	<select id="getCustomerTypeList" resultClass="java.util.HashMap" >
+		<![CDATA[
+			select CUSTOMER_TYPE_ID,CUSTOMER_TYPE_NAME,SORTNO from CRM_CUSTOMER_TYPE where IS_DEL=0
+		]]>
+	</select>
+
+    <!-- 得到贷款 NEXT SEQ 值 -->
+    <select id="getNextScheduleId" resultClass="java.lang.Integer">
+	   	SELECT NEXTVAL FOR SEQ_TSK_SCHEDULE FROM SYSIBM.SYSDUMMY1
+   	</select>
+
+    <!-- 给用户新增日程 -->
+    <insert id="addNewSchedule" parameterClass="TskSchedule">
+        <![CDATA[
+			insert into TSK_SCHEDULE (
+				SCHEDULE_ID,
+				USER_ID,
+				CUSTOMER_ID,
+				CONTACT_DATE,
+				CONTACT_TYPE,
+				REMARK,
+				ADD_DATE,
+				COMM_PROGRESS_ID,
+				STATUS,
+				CREATE_DATE,
+				UPDATE_DATE,
+				CREATE_USER,
+				UPDATE_USER
+			) values(
+				#scheduleId:INTEGER#,
+				#userId#,
+				#customerId#,
+				#contactDate:TIMESTAMP#,
+				#contactType:INTEGER#,
+				#remark:VARCHAR#,
+				current timestamp,
+				#commProgressId:INTEGER#,
+				#status#,
+				current timestamp,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#
+			)
+		]]>
+    </insert>
+
+	<!-- 给用户新增日程 -->
+	<insert id="addNewScheduleForCustomer" parameterClass="TskSchedule">
+		<![CDATA[
+			insert into TSK_SCHEDULE (
+				SCHEDULE_ID, 
+				USER_ID,
+				CUSTOMER_ID,
+				CONTACT_DATE,
+				CONTACT_TYPE,
+				REMARK,
+				ADD_DATE,
+				COMM_PROGRESS_ID,
+				STATUS,
+				CREATE_DATE,
+				UPDATE_DATE,
+				CREATE_USER,
+				UPDATE_USER
+			) values(
+				#scheduleId#,
+				#userId#,
+				#customerId#,
+				#contactDate:TIMESTAMP#,
+				#contactType:INTEGER#,
+				#remark:VARCHAR#,
+				current timestamp,
+				#commProgressId:INTEGER#,
+				#status#,
+				current timestamp,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#
+			)
+		]]>
+		<selectKey keyProperty="scheduleId" type="pre" resultClass="java.lang.Integer">
+			values NEXTVAL for SEQ_TSK_SCHEDULE
+		</selectKey>
+	</insert>
+	
+	<!-- 编辑日程 -->
+	<update id="updateScheduleById" parameterClass="TskSchedule">
+		<![CDATA[update TSK_SCHEDULE set  SCHEDULE_ID = SCHEDULE_ID ]]>
+		<isNotEmpty property="contactDate" prepend=",">
+			<![CDATA[CONTACT_DATE =  #contactDate#]]>
+		</isNotEmpty>
+		<isNotEmpty property="contactType" prepend=",">
+			<![CDATA[CONTACT_TYPE = #contactType#]]>
+		</isNotEmpty>
+        <isNotNull property="remark" prepend=",">
+            <![CDATA[REMARK = #remark# ]]>
+        </isNotNull>
+        <!--
+		<isNotEmpty property="remark" prepend=",">
+            <![CDATA[REMARK = #remark# ]]>
+		</isNotEmpty>
+		-->
+		<isNotEmpty property="addDate" prepend=",">
+			<![CDATA[ADD_DATE = #addDate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="commProgressId" prepend=",">
+			<![CDATA[COMM_PROGRESS_ID = #commProgressId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="status" prepend=",">
+			<![CDATA[STATUS = #status# ]]>
+		</isNotEmpty>
+        <isNotEmpty property="recordInfoId" prepend=",">
+            <![CDATA[
+                    RECORD_INFO_ID = #recordInfoId#
+            ]]>
+        </isNotEmpty>
+		<![CDATA[ where 1=1 ]]>
+		<isNotEmpty property="scheduleId" prepend="and">
+			<![CDATA[
+				SCHEDULE_ID = #scheduleId#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+			<![CDATA[
+				CUSTOMER_ID = #customerId#
+			]]>
+		</isNotEmpty>
+	</update>
+	
+	<!-- 查询客户列表 -->
+    <select id="getCustomerList" resultMap="customerListResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+            select cc.CUSTOMER_ID,cc.CUSTOMER_NO,cc.CUSTOMER_NAME,cc.CUSTOMER_TITLE,cc.SEX,cc.AGE,cc.DEFAULT_PHONE_TYPE,cc.MOBILE_PHONE1,
+            cc.MOBILE_PHONE2,cc.PHONE,cc.FAX,cc.ID_CARD,cc.ADDRESS,cc.BELONG_USER_ID,cc.BELONG_DEPT_ID,cc.CUSTOMER_TYPE_ID,
+            t.*,cct.customer_type_name,pmpc.product_id,pmpc.remark as REMARK_PC,pmp.product_name,cc.IS_NOGOOD,
+            s.user_name as ADD_USER_NAME
+            from
+            (select c.*,(select schedule_id from tsk_schedule where customer_id=c.customer_id and user_id=#userId# order by add_date desc fetch first 1 row only),
+            (select product_customer_id from pdt_micro_product_customer where customer_id=c.customer_id and is_del != 1 order by create_date desc fetch first 1 row only),
+            (select product_id from pdt_micro_product_customer where customer_id=c.customer_id and is_del != 1 order by create_date desc fetch first 1 row only)
+            from crm_customer c where c.belong_user_id=#userId#) cc
+            left join tsk_schedule t on cc.schedule_id=t.schedule_id
+            left join crm_customer_type cct on cct.customer_type_id=cc.customer_type_id
+            left join pdt_micro_product_customer pmpc on pmpc.product_customer_id=cc.product_customer_id
+            left join pdt_micro_product pmp on pmp.product_id=cc.product_id
+            left join sys_user s on pmpc.user_id=s.user_id
+        where 1=1
+        <isNotEmpty property="isDel" prepend="and">
+            cc.IS_DEL=#isDel#
+        </isNotEmpty>
+        <isNotEmpty property="isTrash" prepend="and">
+            cc.IS_TRASH=#isTrash#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ (cc.CUSTOMER_NAME like '%$customerName$%' ESCAPE '^' or cc.mobile_phone1 like '%$customerName$%' ESCAPE '^' or
+         cc.mobile_phone2 like '%$customerName$%' ESCAPE '^' or cc.address like '%$customerName$%' ESCAPE '^')]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerType" prepend="and">
+            <![CDATA[ cc.CUSTOMER_TYPE_ID = #customerType# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="productName" prepend="and">
+            <![CDATA[ (pmp.PRODUCT_NAME like '%$productName$%' ESCAPE '^' or pmpc.remark like '%$productName$%' ESCAPE '^')]]>
+        </isNotEmpty>
+        <![CDATA[ order by cc.CUSTOMER_NAME_PINYIN ]]>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+    <!--查询客户列表数量-->
+	<select id="getCustomerListCount"  resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        <!--
+        select count(*)
+			from CRM_CUSTOMER as c inner join SYS_USER as S on c.BELONG_USER_ID = s.USER_ID
+            where c.BELONG_USER_ID=11
+        -->
+         select count(*)
+        from
+        (select c.*,(select schedule_id from tsk_schedule where schedule_id=c.customer_id and user_id=#userId# order by add_date desc fetch first 1 row only),
+        (select product_customer_id from pdt_micro_product_customer where customer_id=c.customer_id and is_del != 1 order by create_date desc fetch first 1 row only),
+        (select product_id from pdt_micro_product_customer where customer_id=c.customer_id and is_del != 1 order by create_date desc fetch first 1 row only)
+        from crm_customer c where c.belong_user_id=#userId#) cc
+        left join tsk_schedule t on cc.schedule_id=t.schedule_id
+        left join crm_customer_type cct on cct.customer_type_id=cc.customer_type_id
+        left join pdt_micro_product_customer pmpc on pmpc.product_customer_id=cc.product_customer_id
+        left join pdt_micro_product pmp on pmp.product_id=cc.product_id
+        left join sys_user s on pmpc.user_id=s.user_id
+        where 1=1
+        <isNotEmpty property="isDel" prepend="and">
+            cc.IS_DEL=#isDel#
+        </isNotEmpty>
+        <isNotEmpty property="isTrash" prepend="and">
+            cc.IS_TRASH=#isTrash#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+        	<![CDATA[ (cc.CUSTOMER_NAME like '%$customerName$%' ESCAPE '^' or cc.mobile_phone1 like '%$customerName$%' ESCAPE '^'
+         or cc.mobile_phone2 like '%$customerName$%' ESCAPE '^' or cc.address like '%$customerName$%' ESCAPE '^')]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerPhone" prepend="and">
+        	<![CDATA[ (cc.MOBILE_PHONE1 like '%$customerPhone$%' ESCAPE '^' or cc.MOBILE_PHONE2 like '%$customerPhone$%' ESCAPE '^')]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerType" prepend="and">
+            <![CDATA[ cc.CUSTOMER_TYPE_ID = #customerType# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="productName" prepend="and">
+            <![CDATA[ (pmp.PRODUCT_NAME like '%$productName$%' ESCAPE '^' or pmpc.remark like '%$productName$%' ESCAPE '^')]]>
+        </isNotEmpty>
+        
+	</select>
+
+    <!--以下为张芳萍所添加-->
+
+    <!--
+    基本显示信息。包括日程基本信息和客户基本信息
+    一、日程基本信息
+        客户姓名、联系时间、联系方式、添加时间、沟通进度、完成情况、日程备注
+    二、客户基本信息
+        1、主要信息
+        客户姓名、性别、称谓、客户编号、客户类型、所处行业、身份证、生日、单位、年龄、客户简介、
+        2、地区信息
+        省份、城市、地址、手机一、备注、手机二、备注、固定电话、传真、邮箱、最近联系时间、短信/彩信、
+    -->
+    <!--cc.customer_name,cc.customer_title,ts.schedule_id,ts.customer_id,ts.contact_date,ts.contact_type,ts.add_date,
+            ts.comm_progress_id,ts.status,ts.remark,cc.address,cc.DEFAULT_PHONE_TYPE-->
+    <select id="getCustomerDetail" parameterClass="java.util.Map" resultMap="tskScheduleListResult">
+            select t.* ,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.BIRTHDAY,c.CUSTOMER_TYPE_ID,
+					c.COMPANY ,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.AGE,c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.BELONG_DEPT_ID,
+					c.BELONG_USER_ID,c.ADDRESS,c.ID_CARD,cc.CUSTOMER_TYPE_NAME,c.IS_NOGOOD
+				from TSK_SCHEDULE as t
+				left join CRM_CUSTOMER as c on t.CUSTOMER_ID = c.CUSTOMER_ID
+				left join CRM_CUSTOMER_TYPE as cc on c.CUSTOMER_TYPE_ID = cc.CUSTOMER_TYPE_ID
+				where 1=1
+				<isNotEmpty property="scheduleId">
+                    and t.schedule_id=#scheduleId#
+				</isNotEmpty>
+    </select>
+
+    <!--用户意向产品-->
+    <resultMap class="PdtProductCustomerBean" id="pdtProductCustomerIntention">
+        <!--产品名-->
+        <result column="product_name" property="productName"/>
+        <!--意向说明-->
+        <result column="remark" property="remark"/>
+        <!--用户名-->
+        <result column="user_name" property="userName"/>
+        <!--意向产品添加时间-->
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <!--用户意向产品数量-->
+    <select id="getCustomerPDTProductCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        <![CDATA[
+			select count(*) from pdt_micro_product_customer pmpc
+			 inner join crm_customer cc on pmpc.customer_id=cc.customer_id
+			where 1=1 and pmpc.is_del = 0
+			and pmpc.create_date <= current timestamp
+        ]]>
+        <isNotEmpty property="startDate" prepend="and">
+            pmpc.create_date &gt;= #startDate#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ pmpc.customer_id=#customerId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            <![CDATA[(pmpc.user_id=#userId# or cc.belong_user_id=#userId#)]]>
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            (pmpc.user_id in ($userIds$) or cc.belong_user_id in ($userIds$))
+        </isNotEmpty>
+    </select>
+    <!--用户意向产品的列表信息-->
+    <select id="getCustomerPDTProductList" resultMap="pdtProductCustomerIntention" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select pmpc.create_date,pmp.product_name,pmpc.remark,su.user_name
+        from pdt_micro_product_customer pmpc
+        inner join CRM_CUSTOMER cc on pmpc.customer_id=cc.customer_id
+        left join PDT_MICRO_PRODUCT pmp on pmpc.product_id=pmp.product_id
+        left join sys_user su on pmpc.user_id=su.user_id
+        where 1=1 and pmpc.IS_DEL=0 and pmpc.create_date &lt;= current timestamp
+        <isNotEmpty property="startDate" prepend="and">
+            pmpc.create_date &gt;= #startDate#
+        </isNotEmpty>
+        <!--
+        timestampdiff(2,char(timestamp(current timestamp) - timestamp(pmpc.create_date))) &lt; 24*3600*180
+        and timestampdiff(2,char(timestamp(current timestamp) - timestamp(pmpc.create_date))) &gt;= 0
+        -->
+        <isNotEmpty property="customerId" prepend="and">
+            pmpc.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            <![CDATA[ (pmpc.user_id=#userId# or cc.belong_user_id=#userId#)]]>
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            (pmpc.user_id in ($userIds$) or cc.belong_user_id in ($userIds$))
+        </isNotEmpty>
+        order by pmpc.create_date desc
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <!--查看客户业务信息小页卡——日程安排-->
+    <select id="getTskScheduleCard" parameterClass="java.util.Map" resultMap="tskScheduleListResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <!--
+        select * from (select t.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.BIRTHDAY,c.CUSTOMER_TYPE_ID,c.COMPANY ,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.AGE,
+        c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.BELONG_DEPT_ID,c.BELONG_USER_ID,c.ADDRESS,c.ID_CARD,cc.CUSTOMER_TYPE_NAME,c.IS_NOGOOD
+        from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        left join crm_customer_type as cc on c.customer_type_id=cc.customer_type_id
+        where 1=1 and t.status != 0
+        <isNotEmpty property="customerId" prepend="and">
+            t.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userId">
+            t.user_id=#userId#
+        </isNotEmpty>
+        order by t.contact_date desc)
+
+        union all
+        -->
+
+        select * from (select t.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.BIRTHDAY,c.CUSTOMER_TYPE_ID,c.COMPANY ,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.AGE,
+        c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.BELONG_DEPT_ID,c.BELONG_USER_ID,c.ADDRESS,c.ID_CARD,cc.CUSTOMER_TYPE_NAME,c.IS_NOGOOD
+        from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        left join crm_customer_type as cc on c.customer_type_id=cc.customer_type_id
+        where 1=1
+        <isNotEmpty property="customerId" prepend="and">
+        t.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            t.USER_ID = #userId#
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            t.USER_ID in ($userIds$)
+        </isNotEmpty>
+        order by t.status,t.contact_date)
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <select id="getTskScheduleCountCard" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(*) from tsk_schedule t
+        where 1=1
+        <isNotEmpty property="customerId" prepend="and">
+            t.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            t.USER_ID = #userId#
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            t.USER_ID in ($userIds$)
+        </isNotEmpty>
+    </select>
+
+    <!--根据客户查询客户的所有日程信息-->
+    <select id="getTskScheduleByCusIds" parameterClass="java.util.Map" resultMap="tskScheduleResult">
+        select * from tsk_schedule
+        where 1=1
+        <isNotEmpty property="customerIds" prepend="and">
+            <!--判断是否为地图接口-->
+            <isNotEmpty property="isMap">
+                status != 2 and
+            </isNotEmpty>
+            <isNull property="isMap">
+                status=0 and
+            </isNull>
+            customer_id in ($customerIds$)
+        </isNotEmpty>
+    </select>
+
+    <!--删除客户日程-->
+    <delete id="deleteScheduleByCusId" parameterClass="java.util.Map">
+        delete tsk_schedule where
+        <isNotEmpty property="customerIds">
+            (status=0 or status is null) and customer_id in
+            <iterate property="customerIds" open="(" close=")" conjunction=",">
+                #customerIds[]#
+            </iterate>
+        </isNotEmpty>
+    </delete>
+
+    <!--合并客户日程-->
+    <update id="mergeCusSchedule" parameterClass="java.util.Map">
+        update tsk_schedule set
+        <isNotEmpty property="afterMergeCusId">
+            customer_id = #afterMergeCusId#
+        </isNotEmpty>
+        where
+        <isNotEmpty property="beforeMergeCusIds">
+            customer_id in
+            <iterate property="beforeMergeCusIds" conjunction="," open="(" close=")">
+                #beforeMergeCusIds[]#
+            </iterate>
+        </isNotEmpty>
+    </update>
+
+    <!--根据客户ID集，找出其中有日程的客户-->
+    <select id="getScheduleCusIds" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select customer_id from tsk_schedule
+        where 1=1
+        <isNotEmpty property="customerIds" prepend="and">
+            customer_id in ($customerIds$)
+        </isNotEmpty>
+        group by customer_id
+    </select>
+    
+    <!--得到7天内未完成的日程安排数量-->
+    <select id="getInTimeScheduleCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(1) from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        where status=0
+        <isNotEmpty property="userIds" prepend="and">
+            t.user_id in ($userIds$)
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            c.belong_user_id=#userId#
+        </isNotEmpty>
+        <!--
+        and
+        timestampdiff(2,char(timestamp(contact_date)-timestamp(current timestamp))) &lt; 24*3600*7
+        and timestampdiff(2,char(timestamp(contact_date)-timestamp(current timestamp))) &gt; 0
+        -->
+        <isNotEmpty property="startDate" prepend="and">
+            <![CDATA[ t.CONTACT_DATE > #startDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="endDate" prepend="and">
+            <![CDATA[ t.CONTACT_DATE < #endDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ (c.CUSTOMER_NAME like '%$customerName$%' or c.mobile_phone1 like '%$customerName$%' or
+         c.mobile_phone2 like '%$customerName$%' or c.ADDRESS like '%$customerName$%')]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactTypeId" prepend="and">
+            <![CDATA[ t.CONTACT_TYPE = #contactTypeId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateFrom" prepend="and">
+            <![CDATA[ t.CONTACT_DATE >= #contactDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateEnd" prepend="and">
+            <![CDATA[ t.CONTACT_DATE <= #contactDateEnd# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="past" prepend="and">
+            <![CDATA[ t.CONTACT_DATE < SYSDATE ]]>
+        </isNotEmpty>
+        <isNotEmpty property="noPast" prepend="and">
+            <![CDATA[ t.CONTACT_DATE > SYSDATE ]]>
+        </isNotEmpty>
+        <isNotEmpty property="commProgressId" prepend="and">
+            <![CDATA[ t.COMM_PROGRESS_ID = #commProgressId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="status" prepend="and">
+            <![CDATA[ t.STATUS = #status# ]]>
+        </isNotEmpty>
+    </select>
+
+    <!--得到7天内未完成的日程安排列表-->
+    <select id="getInTimeScheduleList" parameterClass="java.util.Map" resultMap="tskScheduleListResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select t.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.BIRTHDAY,c.CUSTOMER_TYPE_ID,c.COMPANY ,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.AGE,
+        c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.BELONG_DEPT_ID,c.BELONG_USER_ID,c.ADDRESS,c.ID_CARD,cc.CUSTOMER_TYPE_NAME,c.IS_NOGOOD
+        from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        left join crm_customer_type as cc on c.customer_type_id=cc.customer_type_id
+        where t.status=0
+        <isNotEmpty property="userIds" prepend="and">
+            t.user_id in ($userIds$)
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            c.belong_user_id=#userId#
+        </isNotEmpty>
+        <!--
+        and
+        timestampdiff(2,char(timestamp(t.contact_date)-timestamp(current timestamp))) &lt; 24*3600*7 and
+        timestampdiff(2,char(timestamp(t.contact_date)-timestamp(current timestamp))) &gt; 0
+        -->
+        <isNotEmpty property="startDate" prepend="and">
+            <![CDATA[ CONTACT_DATE > #startDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="endDate" prepend="and">
+            <![CDATA[ CONTACT_DATE < #endDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ (c.CUSTOMER_NAME like '%$customerName$%' or c.mobile_phone1 like '%$customerName$%' or
+         c.mobile_phone2 like '%$customerName$%' or c.ADDRESS like '%$customerName$%')]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactTypeId" prepend="and">
+            <![CDATA[ t.CONTACT_TYPE = #contactTypeId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateFrom" prepend="and">
+            <![CDATA[ t.CONTACT_DATE >= #contactDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="contactDateEnd" prepend="and">
+            <![CDATA[ t.CONTACT_DATE <= #contactDateEnd# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="past" prepend="and">
+            <![CDATA[ t.CONTACT_DATE < SYSDATE ]]>
+        </isNotEmpty>
+        <isNotEmpty property="noPast" prepend="and">
+            <![CDATA[ t.CONTACT_DATE > SYSDATE ]]>
+        </isNotEmpty>
+        <isNotEmpty property="commProgressId" prepend="and">
+            <![CDATA[ t.COMM_PROGRESS_ID = #commProgressId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="status" prepend="and">
+            <![CDATA[ t.STATUS = #status# ]]>
+        </isNotEmpty>
+        order by t.CONTACT_DATE
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <!--查出用户未完成的日程(如果出现多条，则返回最近的一条)-->
+    <select id="getUnFinishedSchedule" resultMap="tskScheduleListResult" parameterClass="java.util.Map">
+        select t.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.BIRTHDAY,c.CUSTOMER_TYPE_ID,c.COMPANY ,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.AGE,
+        c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.BELONG_DEPT_ID,c.BELONG_USER_ID,c.ADDRESS,c.ID_CARD,cc.CUSTOMER_TYPE_NAME,c.IS_NOGOOD
+        from tsk_schedule t
+        inner join crm_customer as c on t.customer_id=c.customer_id
+        left join crm_customer_type as cc on c.customer_type_id=cc.customer_type_id
+        where 1=1 and status=0
+        <isNotEmpty property="userId" prepend="and">
+            t.user_id=#userId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            t.customer_id=#customerId#
+        </isNotEmpty>
+        order by t.contact_date desc fetch first 1 rows only
+    </select>
+
+    <select id="getCusScheduleCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(1) from tsk_schedule where status=0
+        <isNotEmpty property="customerId" prepend="and">
+            customer_id=#customerId#
+        </isNotEmpty>
+    </select>
+    
+    <!--打电话更新日程-->
+    <update id="updateTaskSchedule" parameterClass="java.util.Map">
+        update tsk_schedule set
+        record_info_id = #recordInfoId#
+        where 1=1
+        <isNotEmpty property="customerId" prepend="and">
+            customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            user_id=#userId#
+        </isNotEmpty>
+        <isNotEmpty property="startDate" prepend="and">
+            date(CONTACT_DATE)= date(#startDate#)
+        </isNotEmpty>
+        
+    </update>
+</sqlMap>

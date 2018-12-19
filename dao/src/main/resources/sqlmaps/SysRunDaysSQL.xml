@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysRunDaysSQL">
+	<typeAlias alias="SysRunDays" type="com.banger.mobile.domain.model.sysRunDays.SysRunDays" />
+
+	<!-- 运行天数表 -->
+    <resultMap class="SysRunDays" id="SysRunDaysResult">
+		<result column="RUN_DAYS_ID" property="runDaysId" />
+		<result column="RUN_DATE" property="runDate" />
+		<result column="RUN_TYPE" property="runType" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	
+  <insert id="insertSysRunDays" parameterClass="SysRunDays">
+ 	<![CDATA[
+ 		insert into SYS_RUN_DAYS
+ 		(
+ 			RUN_DAYS_ID,
+			RUN_DATE,
+			RUN_TYPE
+ 		)
+ 		values
+ 		(
+ 			#runDaysId#,
+			current timestamp,
+			#runType#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="runDaysId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_SYS_RUN_DAYS
+ 	</selectKey>
+  </insert>
+
+  <!--  查询运行天数 -->
+  <select id="getSysRunDays" resultMap="SysRunDaysResult" >
+  	<![CDATA[
+  		select * from SYS_RUN_DAYS order by RUN_DATE desc
+  	]]>
+  </select>
+  
+</sqlMap>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMarketingAttachmentSQL">
+	<typeAlias alias="TskMarketingAttachment"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingAttachment" />
+
+	<!-- 营销任务附件表-->
+	<!-- TskMarketingAttachmentSQL信息全字段 -->
+	<resultMap class="TskMarketingAttachment" id="TskMarketingAttachmentResult">
+		<result column="ATTACHMENT_ID" property="attachmentId"/>
+		<result column="MARKETING_ID" property="marketingId" />
+		<result column="FILE_PATH" property="filePath"/>
+		<result column="FILE_NAME" property="fileName"/>
+		<result column="FILE_NAME_OLD" property="fileNameOld"/>
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 添加营销任务附件 -->
+	<insert id="addTskMarketingAttachment" parameterClass="TskMarketingAttachment">
+		<![CDATA[
+			INSERT INTO TSK_MARKETING_ATTACHMENT
+			(
+				ATTACHMENT_ID,
+				MARKETING_ID,
+				FILE_PATH,
+				FILE_NAME,
+				FILE_NAME_OLD,
+				FILE_SIZE,
+				UPLOAD_DATE,
+				CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+			)
+			VALUES
+			(
+				#attachmentId#,
+				#marketingId#,
+				#filePath#,
+				#fileName#,
+				#fileNameOld#,
+				#fileSize#,
+				current timestamp,
+				current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="attachmentId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_MARKETING_ATTACHMENT
+		</selectKey>
+	</insert>
+	
+	<!-- 删除营销任务附件  -->
+	<delete id="delTskMarketingAttachmentByConds" parameterClass="java.util.Map">
+			DELETE FROM TSK_MARKETING_ATTACHMENT WHERE 1=1
+			<isNotEmpty prepend="and" property="attachmentId">
+				<![CDATA[ATTACHMENT_ID = #attachmentId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="marketingId">
+				<![CDATA[MARKETING_ID = #marketingId#]]>
+			</isNotEmpty>
+	</delete>
+	
+	<!-- 查询营销任务附件 -->
+	<select id="getAllTskMarketingAttachmentByConds" resultMap="TskMarketingAttachmentResult" parameterClass="java.util.Map">
+		SELECT * FROM TSK_MARKETING_ATTACHMENT WHERE 1=1
+		<isNotEmpty prepend="and" property="attachmentId">
+			<![CDATA[ATTACHMENT_ID = #attachmentId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[MARKETING_ID = #marketingId#]]>
+		</isNotEmpty>
+	</select>
+	
+</sqlMap>

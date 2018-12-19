@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeUserRelationSQL">
+	<typeAlias alias="FeUserRelation" type="com.banger.mobile.domain.model.finance.FeUserRelation" />
+	<typeAlias alias="FeFinanceUser" type="com.banger.mobile.domain.model.finance.FeFinanceUser" />	
+	
+	<resultMap class="FeUserRelation" id="FeUserRelationResult">
+		<result column="RELATION_ID" property="relationId" />
+		<result column="RELATION_TYPE" property="relationType" />
+		<result column="USER_ID" property="userId" />
+		<result column="FE_ID" property="feId" />
+		<result column="IS_READ" property="isRead" />
+		<result column="IS_DISCESS" property="isDiscess" />
+		<result column="IS_COLLECT" property="isCollect" />
+		<result column="IS_SUPPORT" property="isSupport" />
+		<result column="IS_REPLY" property="isReply" />
+		<result column="READ_DATE" property="readDate" />
+		<result column="COLLECT_DATE" property="collectDate" />			
+	</resultMap>
+	
+	<resultMap class="FeFinanceUser" id="FeFinanceUserResult">
+		<result column="USER_ID" property="userId"/>
+		<result column="USER_NAME" property="userName"/>
+		<result column="BUESS_RANK" property="buessRank"/>
+		<result column="DEPT_ID" property="deptId"/>
+		<result column="READ_DATE" property="readDate"/>
+		<result column="COLLECT_DATE" property="collectDate"/>
+	</resultMap>
+	
+	<!-- 新增 -->
+	<insert id="insertUserRelation" parameterClass="FeUserRelation">
+	<![CDATA[		
+		INSERT INTO FE_USER_RELATION
+	    (
+	        RELATION_ID,
+	        RELATION_TYPE,
+	        USER_ID,
+	        FE_ID,
+	        IS_READ,
+	        IS_DISCESS,
+	        IS_COLLECT,
+	        IS_SUPPORT,
+	        IS_REPLY
+	        ]]>
+	        <isNotEmpty property="readDate">
+			<![CDATA[
+				,READ_DATE
+		  	]]>
+			</isNotEmpty>
+			<isNotEmpty property="collectDate">
+			<![CDATA[
+				,COLLECT_DATE
+		  	]]>
+		  	</isNotEmpty>
+		<![CDATA[	
+	    )
+	    VALUES
+	    (
+	        #relationId#,
+	        #relationType#,
+	        #userId#,
+	        #feId#,
+	        #isRead#,
+	        #isDiscess#,
+	        #isCollect#,
+	        #isSupport#,
+	        #isReply#]]>
+	        <isNotEmpty property="readDate">
+			<![CDATA[
+				,#readDate#
+		  	]]>
+			</isNotEmpty>
+			<isNotEmpty property="collectDate">
+			<![CDATA[
+				,#collectDate#
+		  	]]>
+	    	</isNotEmpty>
+	    <![CDATA[ ) ]]>
+	    <selectKey keyProperty="relationId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_FE_USER_RELATION
+		</selectKey>
+	</insert>
+
+
+	<!-- 更新 -->
+	<update id="updateUserRelation" parameterClass="FeUserRelation" >
+	<![CDATA[	
+		UPDATE
+	    	FE_USER_RELATION
+		SET
+		    RELATION_TYPE = #relationType#,
+		    USER_ID = #userId#,
+		    FE_ID = #feId#,
+		    IS_READ =  #isRead#,
+		    IS_DISCESS = #isDiscess#,
+		    IS_COLLECT =  #isCollect#,
+		    IS_SUPPORT = #isSupport#,
+	   		IS_REPLY = #isReply# ]]>
+	   		<isNotEmpty property="readDate">
+			<![CDATA[
+				,READ_DATE = #readDate#
+		  	]]>
+			</isNotEmpty>
+			<isNotEmpty property="collectDate">
+			<![CDATA[
+				,COLLECT_DATE = #collectDate#
+		  	]]>
+			</isNotEmpty>
+	<![CDATA[		
+		WHERE RELATION_ID = #relationId#
+	]]>
+	</update>
+	<!-- 查询 -->
+	<select id="getUserRelation" parameterClass="FeUserRelation" resultMap="FeUserRelationResult">
+	<![CDATA[ SELECT * FROM FE_USER_RELATION WHERE 1=1
+				AND RELATION_TYPE = #relationType# AND USER_ID = #userId# AND FE_ID = #feId#	
+	]]>
+	</select>	
+	
+	<!-- 查询 -->
+	<select id="getReadUserRelation" parameterClass="FeUserRelation" resultMap="FeUserRelationResult">
+	<![CDATA[ SELECT * FROM FE_USER_RELATION WHERE 1=1 and IS_READ = 1 and RELATION_TYPE = 0 and FE_ID = #feId#
+	]]>
+	</select>	
+	
+	<!-- 查看已阅读/已收藏 -->
+	<select id="getReadAndCollectUser" parameterClass="java.util.Map" resultMap="FeFinanceUserResult">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[ 
+			SELECT r.*,u.USER_NAME,u.DEPT_ID,u.BUESS_RANK 
+			FROM FE_USER_RELATION AS r 
+			LEFT JOIN SYS_USER AS u ON r.USER_ID = u.USER_ID
+			WHERE r.RELATION_TYPE=0
+		]]>
+		<dynamic prepend="">
+			<isNotEmpty prepend="and" property="articleId">
+				<![CDATA[ r.FE_ID=#articleId# ]]>
+			</isNotEmpty>			
+			<isNotEmpty prepend="AND" property="userIds">
+				<![CDATA[ r.USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+			<isEqual prepend="and" property="type" compareValue="collect">
+				<![CDATA[ r.IS_COLLECT = 1 ORDER BY r.COLLECT_DATE DESC ]]>
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="read">
+				<![CDATA[ r.IS_READ = 1 ORDER BY r.READ_DATE DESC]]>
+			</isEqual>
+		</dynamic>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 查看已阅读/已收藏count -->
+	<select id="getReadAndCollectUserCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT COUNT(*) 
+			FROM FE_USER_RELATION AS r 
+			LEFT JOIN SYS_USER AS u ON r.USER_ID = u.USER_ID
+			WHERE r.RELATION_TYPE=0
+		]]>
+		<dynamic prepend="">
+			<isNotEmpty prepend="and" property="articleId">
+				<![CDATA[ r.FE_ID=#articleId# ]]>
+			</isNotEmpty>			
+			<isNotEmpty prepend="AND" property="userIds">
+				<![CDATA[ r.USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+			<isEqual prepend="and" property="type" compareValue="collect">
+				<![CDATA[ r.IS_COLLECT = 1]]>
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="read">
+				<![CDATA[ r.IS_READ = 1]]>
+			</isEqual>
+		</dynamic>
+	</select>
+	
+	<!-- 查看未阅读 -->
+	<select id="getUnReadUser" parameterClass="java.util.Map" resultMap="FeFinanceUserResult">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[ 
+			 SELECT USER_ID,USER_NAME,DEPT_ID,BUESS_RANK,current timestamp AS READ_DATE,current timestamp AS COLLECT_DATE 
+			 FROM SYS_USER 
+			 WHERE 1=1
+		]]>
+		<dynamic prepend="">
+			<isNotEmpty prepend="and" property="articleId">
+				<![CDATA[ USER_ID NOT IN (SELECT USER_ID FROM FE_USER_RELATION WHERE IS_READ=1 AND RELATION_TYPE=0 AND FE_ID=#articleId#)]]>
+			</isNotEmpty>			
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+		<![CDATA[ 
+			 ORDER BY COLLATION_KEY_BIT(USER_NAME,'UCA500R1_LZH_AN_CX_EX_FX_HX_NX_S3')
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 查看未阅读count -->
+	<select id="getUnReadUserCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			 SELECT COUNT(*) 
+			 FROM SYS_USER 
+			 WHERE 1=1
+		]]>
+		<dynamic prepend="">
+			<isNotEmpty prepend="and" property="articleId">
+				<![CDATA[ USER_ID NOT IN (SELECT USER_ID FROM FE_USER_RELATION WHERE IS_READ=1 AND RELATION_TYPE=0 AND FE_ID=#articleId#)]]>
+			</isNotEmpty>			
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+</sqlMap>
+
+
+
+

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PlnReportTemplateSQL">
+	<typeAlias alias="PlnReportTemplate"
+		type="com.banger.mobile.domain.model.PlnReportTemplate.PlnReportTemplate" />
+	<typeAlias alias="PlnReportTemplateBean"
+		type="com.banger.mobile.domain.model.PlnReportTemplate.PlnReportTemplateBean" />
+
+	<!-- 理财规划报告模板表-->
+	<!-- PlnReportTemplate信息全字段 -->
+	<resultMap class="PlnReportTemplate" id="PlnReportTemplateResult">
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="TEMPLATE_NO" property="templateNo" />
+		<result column="INTERVAL_TYPE_ID" property="intervalTypeId" />
+		<result column="PLAN_TYPE_ID" property="planTypeId" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CONTENT" property="content" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- PlnReportTemplateBean信息全字段 -->
+	<resultMap class="PlnReportTemplateBean" id="PlnReportTemplateBeanResult" extends="PlnReportTemplateResult">
+		<result column="PLAN_TYPE_NAME" property="planTypeName" />
+		<result column="INTERVAL_TYPE_NAME" property="intervalTypeName" />
+	</resultMap>
+	
+	<!-- 理财规划模板分页count -->
+	<select id="getPlnReportTemplateCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+            select count(*) from PLN_REPORT_TEMPLATE p
+		    left join PLN_PLAN_TYPE t on p.PLAN_TYPE_ID = t.PLAN_TYPE_ID
+		    left join RSK_INTERVAL_TYPE r on p.INTERVAL_TYPE_ID = r.INTERVAL_TYPE_ID
+		    where p.IS_DEL=0 
+        ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ p.TEMPLATE_NO like'%$templateNo$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ p.TEMPLATE_NAME like '%$templateName$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="intervalTypeId">
+				<![CDATA[ p.INTERVAL_TYPE_ID=#intervalTypeId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isActived">
+				<![CDATA[ p.IS_ACTIVED=#isActived# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planTypeId">
+				<![CDATA[ p.PLAN_TYPE_ID=#planTypeId# ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!--理财规划模板分页列表 -->
+	<select id="getPlnReportTemplatePageMap" resultMap="PlnReportTemplateBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+		    select p.*,t.PLAN_TYPE_NAME,r.INTERVAL_TYPE_NAME from PLN_REPORT_TEMPLATE p
+		    left join PLN_PLAN_TYPE t on p.PLAN_TYPE_ID = t.PLAN_TYPE_ID
+		    left join RSK_INTERVAL_TYPE r on p.INTERVAL_TYPE_ID = r.INTERVAL_TYPE_ID
+		    where p.IS_DEL=0 
+	    ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ p.TEMPLATE_NO like'%$templateNo$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ p.TEMPLATE_NAME like '%$templateName$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="intervalTypeId">
+				<![CDATA[ p.INTERVAL_TYPE_ID=#intervalTypeId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isActived">
+				<![CDATA[ p.IS_ACTIVED=#isActived# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planTypeId">
+				<![CDATA[ p.PLAN_TYPE_ID=#planTypeId# ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by p.CREATE_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	
+	<!-- 新增理财规划模板 -->
+	<insert id="InsertPlnReportTemplate" parameterClass="PlnReportTemplate">
+		<![CDATA[
+		    INSERT INTO PLN_REPORT_TEMPLATE
+		    (
+		    	TEMPLATE_ID,
+		    	TEMPLATE_NAME,
+		    	TEMPLATE_NO,
+		    	INTERVAL_TYPE_ID,
+		    	PLAN_TYPE_ID,
+		    	IS_ACTIVED,
+		    	CONTENT,
+		    	IS_DEL,
+		    	CREATE_DATE,
+		    	CREATE_USER
+		    ) 
+		    VALUES
+		    (
+		    	#templateId#,
+		    	#templateName#,
+		    	#templateNo#,
+		    	#intervalTypeId#,
+		    	#planTypeId#,
+		    	#isActived#,
+		    	#content#,
+		    	#isDel#,
+		    	current timestamp,
+		    	#createUser#
+		    )
+	    ]]>
+	    <selectKey keyProperty="templateId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_PLN_REPORT_TEMPLATE
+		</selectKey>
+	</insert>
+	
+	<!-- 新建模板启用验证 -->
+	<select id="getPlanTemplate" resultMap="PlnReportTemplateResult" parameterClass="java.util.Map">
+	  <![CDATA[
+          select * from PLN_REPORT_TEMPLATE where IS_DEL = 0
+        ]]>
+        <dynamic>
+			<isNotEmpty prepend="and" property="planTypeId">
+				<![CDATA[ PLAN_TYPE_ID = #planTypeId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="intervalTypeId">
+				<![CDATA[ INTERVAL_TYPE_ID=#intervalTypeId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isActived">
+				<![CDATA[ IS_ACTIVED=#isActived# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ TEMPLATE_ID=#templateId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ TEMPLATE_NO=#templateNo# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ TEMPLATE_NAME='$templateName$' ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 编辑验证 -->
+	<select id="updateTempValidate" resultMap="PlnReportTemplateResult" parameterClass="java.util.Map">
+		<![CDATA[
+	    	select * from PLN_REPORT_TEMPLATE where IS_DEL = 0 
+        ]]>
+        <dynamic>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ TEMPLATE_ID !=#templateId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ TEMPLATE_NO=#templateNo# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ TEMPLATE_NAME='$templateName$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planTypeId">
+				<![CDATA[ PLAN_TYPE_ID = #planTypeId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="intervalTypeId">
+				<![CDATA[ INTERVAL_TYPE_ID=#intervalTypeId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isActived">
+				<![CDATA[ IS_ACTIVED=#isActived# ]]>
+			</isNotEmpty>
+		</dynamic>
+	
+	</select>
+	<!-- 编辑模板 -->
+	<update id="updateTemplate" parameterClass="PlnReportTemplate">
+
+  		update PLN_REPORT_TEMPLATE
+  		set 
+  			UPDATE_DATE = current timestamp
+  			<isNotEmpty prepend=",">
+  				TEMPLATE_NAME=#templateName#
+      		</isNotEmpty>
+      		<isNotEmpty prepend=",">
+  				TEMPLATE_NO=#templateNo#
+      		</isNotEmpty>
+  			<isNotEmpty prepend=",">
+  				INTERVAL_TYPE_ID=#intervalTypeId#
+      		</isNotEmpty>
+		    <isNotEmpty prepend=",">
+  				PLAN_TYPE_ID=#planTypeId#
+      		</isNotEmpty>
+      		<isNotEmpty prepend=",">
+  				IS_ACTIVED=#isActived#
+      		</isNotEmpty>
+      		<isNotEmpty prepend=",">
+  				CONTENT=#content#
+      		</isNotEmpty>
+  		where 
+  			TEMPLATE_ID = #templateId#
+	</update>
+	<!-- 伪删除模板 -->
+	<update id="delTemplate" parameterClass="java.lang.Integer">
+		update PLN_REPORT_TEMPLATE set IS_DEL = 1 where TEMPLATE_ID = #templateId#
+	</update>
+	<!--  启用停用模板 -->
+	<update id="activeTemplate" parameterClass="java.util.Map">
+		update PLN_REPORT_TEMPLATE set IS_ACTIVED = #isActive# where TEMPLATE_ID = #templateId#
+	</update>
+	
+</sqlMap>

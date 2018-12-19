@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMarketingPlanSQL">
+	<typeAlias alias="TskMarketingPlan"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingPlan" />
+	<typeAlias alias="TskMarketingPlanReport"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingPlanReport" />
+	<typeAlias alias="TskMarketing"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketing" />
+		
+	<!--营销计划主表 -->
+	<resultMap class="TskMarketingPlan" id="TskMarketingPlanResult">
+		<result column="PLAN_ID" property="planId" />
+		<result column="MARKETING_ID" property="marketingId" />
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+	</resultMap>
+	
+	<!--营销计划业务表 -->
+	<resultMap class="TskMarketingPlan" id="TskMarketingPlanBizResult">
+		<result column="PLAN_ID" property="planId" />
+		<result column="MARKETING_ID" property="marketingId" />
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="EXECUTE_USER_NAME" property="executeUserName" />
+		<result column="PLAN_TOTAL_TARGET" property="planTotalTarget" />
+		<result column="SALE_TOTAL_TARGET" property="saleTotalTarget" />
+		<result column="GRADE_NAME" property="gradeName" />
+		<result column="MARKETING_TITLE" property="marketingTitle" />
+	</resultMap>
+	
+	<!--营销计划报表result -->
+	<resultMap class="TskMarketingPlanReport" id="TskMarketingPlanReportResult">
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="EXECUTE_USER_NAME" property="executeUserName" />
+		<result column="PRODUCT_TARGET" property="productTarget" />
+		<result column="MARKETING_TARGET" property="marketingTarget" />
+		<result column="PLAN_TARGET" property="planTarget" />
+		<result column="SALE_MONEY" property="saleMoney" />
+		<result column="PERCENT" property="percent" />
+		<result column="TASK_COUNT" property="taskCount" />
+	</resultMap>	
+	
+	<!--任务result -->
+	<resultMap class="TskMarketing" id="TskMarketingResult">
+		<result column="MARKETING_ID" property="marketingId" />
+	</resultMap>		
+		
+	<!-- 新增计划主表 -->
+	<insert id="insertTskMarketingPlan" parameterClass="TskMarketingPlan">
+		<![CDATA[
+	 		insert into TSK_MARKETING_PLAN
+	 		(
+	 			PLAN_ID,
+				MARKETING_ID,
+				PLAN_DATE,
+				EXECUTE_USER_ID
+	 		)
+	 		values
+	 		(
+	 			#planId#,
+	 			#marketingId#,
+	 			#planDate#,
+	 			#executeUserId#
+	 		)
+	 	]]>
+		<selectKey keyProperty="planId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_TSK_MARKETING_PLAN
+		</selectKey>
+	</insert>
+
+	<!-- 查询计划明细 -->
+	<select id="getTskMarketingPlanListByMap" resultMap="TskMarketingPlanResult" parameterClass="java.util.Map">
+		<![CDATA[ 
+		select a.* from TSK_MARKETING_PLAN a
+		where 1=1
+		]]>
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[ 
+			a.MARKETING_ID = #marketingId#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDate">
+			<![CDATA[ 
+			a.PLAN_DATE = #planDate# 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="executeUserId">
+			<![CDATA[
+			a.EXECUTE_USER_ID = #executeUserId# 
+			]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询计划明细 -->
+	<select id="getTskMarketingPlanById" resultMap="TskMarketingPlanResult" parameterClass="Integer">
+		<![CDATA[ 
+		select a.* from TSK_MARKETING_PLAN a
+		where a.PLAN_ID = #planId#
+		]]>
+	</select>
+	
+	<!-- 查询计划包含产品数量 -->
+	<select id="getProductCountByMap" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select count(distinct b.PRODUCT_ID)
+			from TSK_MARKETING_PLAN a 
+			left join TSK_MARKETING_PLAN_DETAIL b on b.PLAN_ID = a.PLAN_ID
+			where 1=1
+		]]>
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[ a.MARKETING_ID = #marketingId# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userIds">
+			<![CDATA[ a.EXECUTE_USER_ID in ($userIds$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateFrom">
+			<![CDATA[ a.PLAN_DATE >= #planDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateTo">
+			<![CDATA[ a.PLAN_DATE <= #planDateTo# ]]>
+		</isNotEmpty>
+			
+	</select>
+	
+	<!-- 根据页数查询计划 -->
+	<select id="getMarketingPlanPage" resultMap="TskMarketingPlanBizResult"
+		parameterClass="java.util.Map">
+			<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+				<![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+		         ]]>
+				</isNotEmpty>
+			</isNotEmpty>
+			<![CDATA[
+				select a.*,b.USER_NAME as EXECUTE_USER_NAME,c.MARKETING_TITLE,d.MARKETING_GRADE_NAME as GRADE_NAME,
+				(
+					select sum(BUY_MONEY) as  SALE_TOTAL_TARGET from PDT_PRODUCT_CUSTOMER where PRODUCT_ID in 
+					(
+						select  p.PRODUCT_ID
+						FROM TSK_MARKETING_PLAN_DETAIL p where p.PLAN_ID = a.PLAN_ID
+					) and IS_DEL = 0 and (USER_ID = a.EXECUTE_USER_ID or COUNTER_USER_ID in 
+					(
+						select COUNTER_USER_ID from CRM_COUNTER_USER where USER_ID = a.EXECUTE_USER_ID
+					)
+					) and DATE(BUY_DATE) = DATE(a.PLAN_DATE)
+				),
+				(select sum(PLAN_DETAIL_TARGET) as  PLAN_TOTAL_TARGET from TSK_MARKETING_PLAN_DETAIL b where b.PLAN_ID = a.PLAN_ID) 
+				from TSK_MARKETING_PLAN a
+				inner join TSK_MARKETING c on c.MARKETING_ID = a.MARKETING_ID 
+				inner join TSK_MARKETING_GRADE d on d.MARKETING_GRADE_ID = c.GRADE_ID
+				inner join SYS_USER b on b.USER_ID = a.EXECUTE_USER_ID
+				where 1=1
+			]]>
+			<isNotEmpty prepend="and" property="marketingId">
+				<![CDATA[ a.MARKETING_ID = #marketingId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[ a.EXECUTE_USER_ID in ($userIds$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planDateFrom">
+				<![CDATA[ a.PLAN_DATE >= #planDateFrom# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planDateTo">
+				<![CDATA[ a.PLAN_DATE <= #planDateTo# ]]>
+			</isNotEmpty>
+			<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+					<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+				</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询总条数（分页） -->
+	<select id="getMarketingPlanPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select count(1) 
+			from TSK_MARKETING_PLAN a where 1=1
+		]]>
+		<isNotEmpty prepend="and" property="marketingId">
+				<![CDATA[ a.MARKETING_ID = #marketingId# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userIds">
+			<![CDATA[ a.EXECUTE_USER_ID in ($userIds$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateFrom">
+			<![CDATA[ a.PLAN_DATE >= #planDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateTo">
+			<![CDATA[ a.PLAN_DATE <= #planDateTo# ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 报表 -->
+	<select id="getMarketingPlanReport" resultMap="TskMarketingPlanReportResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select w.EXECUTE_USER_ID, w.EXECUTE_USER_NAME, w.PRODUCT_TARGET,
+		sum(MARKETING_TARGET) as  MARKETING_TARGET,
+		sum(PLAN_TARGET) as PLAN_TARGET,
+		sum(SALE_MONEY) as SALE_MONEY,
+		sum(SALE_MONEY) / sum(MARKETING_TARGET) as PERCENT,
+		SUM(IS_DEL) as TASK_COUNT  from
+		(
+		select s.MARKETING_ID,s.EXECUTE_USER_ID,s.EXECUTE_USER_NAME,s.PRODUCT_TARGET,
+	    sum(s.MARKETING_TARGET) as MARKETING_TARGET,sum(s.PLAN_TARGET) as PLAN_TARGET,
+	    sum(s.SALE_MONEY) as SALE_MONEY,s.IS_DEL 
+	    from(
+	        select a.MARKETING_ID,a.PLAN_ID,a.PLAN_DATE,a.EXECUTE_USER_ID,  
+	        (
+	            select USER_NAME from SYS_USER where USER_ID = a.EXECUTE_USER_ID
+	        ) as EXECUTE_USER_NAME,   
+	        (
+	            select GET_PRODUCT_TARGET(b.TEMPLATE_ID,b.SUB_TEMPLATE_NAME,b.PRODUCT_ID) 
+	            from TSK_MARKETING b where b.MARKETING_ID = a.MARKETING_ID
+	        ) as PRODUCT_TARGET,   
+	        (
+	            select sum(c.MARKETING_TARGET) from TSK_MARKETING_EXECUTE c 
+	            where c.MARKETING_ID = a.MARKETING_ID and c.USER_ID = a.EXECUTE_USER_ID
+	        ) as MARKETING_TARGET,   
+	        (
+	            select sum(e.PLAN_DETAIL_TARGET) from TSK_MARKETING_PLAN_DETAIL e 
+	            where e.PLAN_ID = a.PLAN_ID
+	        ) as PLAN_TARGET,   
+	        (   
+	            select sum(BUY_MONEY)  from PDT_PRODUCT_CUSTOMER    
+	            where PRODUCT_ID in (select PRODUCT_ID from TSK_MARKETING_PLAN_DETAIL where PLAN_ID = a.PLAN_ID)    
+	            and IS_DEL = 0 and (USER_ID = a.EXECUTE_USER_ID or COUNTER_USER_ID in(select COUNTER_USER_ID from CRM_COUNTER_USER where USER_ID = a.EXECUTE_USER_ID))    
+	            and DATE(BUY_DATE) = DATE(a.PLAN_DATE)   
+	        ) as SALE_MONEY,
+	        (
+	            select (CASE WHEN IS_DEL=0 THEN 1 ELSE 0 END) AS IS_DEL FROM TSK_MARKETING WHERE MARKETING_ID = a.MARKETING_ID
+	        ) AS IS_DEL
+	        from TSK_MARKETING_PLAN a where 1=1 
+		]]>
+		<isNotEmpty prepend="" property="planDateFrom">
+			<![CDATA[ and a.PLAN_DATE >= #planDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="" property="planDateTo">
+			<![CDATA[ and a.PLAN_DATE <= #planDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="" property="userIds">
+			<![CDATA[ and a.EXECUTE_USER_ID in ($userIds$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="" property="deptIds">
+			<![CDATA[ and a.EXECUTE_USER_ID in (select USER_ID from SYS_USER where DEPT_ID in ($deptIds$)) ]]>
+		</isNotEmpty>
+		<![CDATA[
+		) as s
+    	GROUP BY s.MARKETING_ID,s.EXECUTE_USER_ID,s.EXECUTE_USER_NAME,s.PRODUCT_TARGET,s.IS_DEL 
+		) as w
+		group by w.EXECUTE_USER_ID, w.EXECUTE_USER_NAME, w.PRODUCT_TARGET 
+		order by SALE_MONEY desc
+				
+		]]>
+	</select>
+	
+	<!-- 报表 -->
+	<select id="getReportRelativeMarketing" resultMap="TskMarketingResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select distinct a.MARKETING_ID from TSK_MARKETING_PLAN a
+		inner join TSK_MARKETING b on a.MARKETING_ID  = b.MARKETING_ID
+		where 1=1		
+		]]>
+		<isNotEmpty prepend="and" property="executeUserId">
+			<![CDATA[ a.EXECUTE_USER_ID = #executeUserId# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateFrom">
+			<![CDATA[ a.PLAN_DATE >= #planDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateTo">
+			<![CDATA[ a.PLAN_DATE <= #planDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTarget">
+			<![CDATA[ 
+			GET_PRODUCT_TARGET(b.TEMPLATE_ID,b.SUB_TEMPLATE_NAME,b.PRODUCT_ID) = #productTarget#
+			]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询营销任务是否存在营销计划 -->
+	<select id="GetTskPlanByMarketingId" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(*) FROM TSK_MARKETING_PLAN WHERE MARKETING_ID=$marketingId$
+		]]>
+	</select>
+</sqlMap>

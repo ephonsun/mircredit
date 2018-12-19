@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeArticleAttachmentSQL">
+	<typeAlias alias="BaseFeArticleAttachment"
+		type="com.banger.mobile.domain.model.base.finance.BaseFeArticleAttachment" />
+
+	<typeAlias alias="FeArticleAttachment"
+		type="com.banger.mobile.domain.model.finance.FeArticleAttachment" />
+
+	<!-- 文章附件表 -->
+	<!-- FeArticleAttachmentSQL信息全字段 -->
+	<resultMap class="BaseFeArticleAttachment" id="BaseFeArticleAttachmentResult">
+		<result column="ATTACHMENT_ID" property="attachmentId" />
+		<result column="ARTICLE_ID" property="articleId" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_NAME_OLD" property="fileNameOld" />
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="FeArticleAttachment" id="FeArticleAttachmentResult" extends="BaseFeArticleAttachmentResult">
+		
+	</resultMap>
+
+	<!-- 新建文章附件 -->
+	<insert id="insertFeArticleAttachment" parameterClass="FeArticleAttachment">
+		<![CDATA[
+		    INSERT INTO FE_ARTICLE_ATTACHMENT
+		    (
+		    	ATTACHMENT_ID,
+		    	ARTICLE_ID,
+				FILE_PATH,
+				FILE_NAME,
+				FILE_SIZE,
+				FILE_NAME_OLD,
+				UPLOAD_DATE,
+				CREATE_DATE,
+				CREATE_USER
+		    ) 
+		    VALUES
+		    (
+		    	#attachmentId#,
+				#articleId#,
+				#filePath#,
+				#fileName#,
+				#fileSize#,
+				#fileNameOld#,
+				#uploadDate#,
+				current timestamp,
+				#createUser#
+		    )
+	    ]]>
+		<selectKey keyProperty="attachmentId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_FE_ARTICLE_ATTACHMENT
+		</selectKey>
+	</insert>
+
+	<!--删除文章附件 -->
+	<update id="deleteFeArticleAttachment" parameterClass="FeArticleAttachment">
+		<![CDATA[
+			DELETE FROM  FE_ARTICLE_ATTACHMENT WHERE ATTACHMENT_ID = #attachmentId#
+		  ]]>
+	</update>
+
+	<!--通过文章ID查询文章附件 -->
+	<select  id="getFeArticleAttachments" parameterClass="java.lang.Integer"  resultMap="FeArticleAttachmentResult" >
+		<![CDATA[
+			SELECT * FROM  FE_ARTICLE_ATTACHMENT WHERE ARTICLE_ID = #articleId#
+		  ]]>
+	</select>
+	
+	<!--通过附件ID查询文章附件 -->
+	<select  id="getFeArticleAttachmentById" parameterClass="java.lang.Integer"  resultMap="FeArticleAttachmentResult" >
+		<![CDATA[
+			SELECT * FROM  FE_ARTICLE_ATTACHMENT WHERE ATTACHMENT_ID = #attachmentId#
+		  ]]>
+	</select>
+	
+	<update id="deleteFeArticleAttachmentByActicleId" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM  FE_ARTICLE_ATTACHMENT WHERE ARTICLE_ID = #articleId#
+		  ]]>
+	</update>
+</sqlMap>

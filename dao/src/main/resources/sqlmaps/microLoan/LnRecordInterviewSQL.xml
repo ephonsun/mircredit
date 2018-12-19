@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnRecordInterviewSQL">
+    <typeAlias alias="LnRecordInterview" type="com.banger.mobile.domain.model.loan.LnRecordInterview"/>
+
+    <resultMap id="LnRecordInterviewResult" class="LnRecordInterview">
+    	<result column="INTERVIEW_ID" property="interviewId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="INTERVIEW_OBJECT_NAME" property="interviewOjectName"/>
+        <result column="INTERVIEW_OBJECT_COMPANY" property="interviewObjectCompany"/>
+        <result column="INTERVIEW_OBJECT_POSITION" property="interviewObjectPosition"/>
+        <result column="INTERVIEW_OBJECT_PHONE" property="interviewObjectPhone"/>
+        <result column="INTERVIEW_PEOPLE_NAME" property="interviewPeopleName"/>
+        <result column="INTERVIEW_DATE" property="interviewDate" />
+        <result column="CHECK_INFORMATION" property="checkInformation" />
+        <result column="CHECK_COMPANY" property="checkCompany"/>
+        <result column="WORK_TIME" property="workTime"/>
+        <result column="INCOME" property="income"/>
+        <result column="MAJOR_BUSINESS" property="majorBusiness"/>
+        <result column="COMPANY_AGE" property="companyAge"/>
+        <result column="COMPANY_NUM" property="companyNum"/>
+        <result column="APPLICANT_EVALUATION" property="applicantEvaluation"/>
+        <result column="APPLICANT_FAMLIY_INFO" property="applicantFamliyInfo" />
+        <result column="CREATE_DATE" property="createDate" />
+       	<result column="UPDATE_DATE" property="updateDate" />
+    </resultMap>
+   
+    
+    <insert id="insertLnRecordInterview" parameterClass="LnRecordInterview">
+        INSERT INTO LN_RECORD_INTERVIEW
+    	(
+		    INTERVIEW_ID 
+		    <isNotEmpty property="loanId" prepend=",">
+				LOAN_ID
+			</isNotEmpty>          
+			<isNotEmpty property="interviewOjectName" prepend=",">
+				INTERVIEW_OBJECT_NAME
+			</isNotEmpty>
+			<isNotEmpty property="interviewObjectCompany" prepend=",">
+				INTERVIEW_OBJECT_COMPANY
+			</isNotEmpty>
+			<isNotEmpty property="interviewObjectPosition" prepend=",">
+				INTERVIEW_OBJECT_POSITION
+			</isNotEmpty>
+			<isNotEmpty property="interviewObjectPhone" prepend=",">
+				INTERVIEW_OBJECT_PHONE
+			</isNotEmpty>
+			<isNotEmpty property="interviewPeopleName" prepend=",">
+				INTERVIEW_PEOPLE_NAME
+			</isNotEmpty>
+			<isNotEmpty property="interviewDate" prepend=",">
+				INTERVIEW_DATE
+			</isNotEmpty>
+			<isNotEmpty property="checkInformation" prepend=",">
+				CHECK_INFORMATION
+			</isNotEmpty>
+			<isNotEmpty property="checkCompany" prepend=",">
+				CHECK_COMPANY
+			</isNotEmpty>
+			<isNotEmpty property="workTime" prepend=",">
+				WORK_TIME
+			</isNotEmpty>
+			<isNotEmpty property="income" prepend=",">
+				INCOME
+			</isNotEmpty>
+			<isNotEmpty property="majorBusiness" prepend=",">
+				MAJOR_BUSINESS
+			</isNotEmpty>
+			<isNotEmpty property="companyAge" prepend=",">
+				COMPANY_AGE 
+			</isNotEmpty>
+			<isNotEmpty property="companyNum" prepend=",">
+				COMPANY_NUM
+			</isNotEmpty>
+			<isNotEmpty property="applicantEvaluation" prepend=",">
+				APPLICANT_EVALUATION
+			</isNotEmpty>
+			<isNotEmpty property="applicantFamliyInfo" prepend=",">
+				APPLICANT_FAMLIY_INFO
+			</isNotEmpty>
+			,CREATE_DATE
+			,UPDATE_DATE			
+			)VALUES
+	    (
+	         #interviewId:INTEGER#
+	    	<isNotEmpty property="loanId" prepend=",">
+				#loanId:INTEGER#
+			</isNotEmpty>
+			<isNotEmpty property="interviewOjectName" prepend=",">
+				#interviewOjectName:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="interviewObjectCompany" prepend=",">
+				#interviewObjectCompany:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="interviewObjectPosition" prepend=",">
+				#interviewObjectPosition:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="interviewObjectPhone" prepend=",">
+				#interviewObjectPhone:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="interviewPeopleName" prepend=",">
+				#interviewPeopleName:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="interviewDate" prepend=",">
+				#interviewDate:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="checkInformation" prepend=",">
+				#checkInformation:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="checkCompany" prepend=",">
+				#checkCompany:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="workTime" prepend=",">
+				#workTime:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="income" prepend=",">
+				#income:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="majorBusiness" prepend=",">
+				#majorBusiness:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="companyAge" prepend=",">
+				#companyAge:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="companyNum" prepend=",">
+				#companyNum:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="applicantEvaluation" prepend=",">
+				#applicantEvaluation:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="applicantFamliyInfo" prepend=",">
+				#applicantFamliyInfo:VARCHAR#
+			</isNotEmpty>
+			,current timestamp
+			,current timestamp
+        )
+        <selectKey keyProperty="interviewId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_RECORD_INTERVIEW
+		</selectKey>
+    </insert>
+    
+     <select id="selectByInterviewPrimary" parameterClass="java.util.Map" resultMap="LnRecordInterviewResult">
+        SELECT * FROM LN_RECORD_INTERVIEW WHERE 1=1
+        <isNotEmpty property="interviewId" prepend="AND">
+		   		   		INTERVIEW_ID = #interviewId#
+		</isNotEmpty>
+        <isNotEmpty property="loanId" prepend="AND">
+		   		   		LOAN_ID = #loanId#
+		</isNotEmpty>
+         order by INTERVIEW_ID desc   fetch first 1 rows only
+     </select>
+    
+    <update id="updateLnRecordInterview" parameterClass="LnRecordInterview">
+        
+       UPDATE LN_RECORD_INTERVIEW SET
+  		 INTERVIEW_OBJECT_NAME=#interviewOjectName:VARCHAR:NULL#,
+		INTERVIEW_OBJECT_COMPANY=#interviewObjectCompany:VARCHAR:NULL#,
+		INTERVIEW_OBJECT_POSITION=#interviewObjectPosition:VARCHAR:NULL#,
+		INTERVIEW_OBJECT_PHONE=#interviewObjectPhone:VARCHAR:NULL#,
+		INTERVIEW_PEOPLE_NAME=#interviewPeopleName:VARCHAR:NULL#,
+		INTERVIEW_DATE=#interviewDate:VARCHAR:NULL#,
+		CHECK_INFORMATION=#checkInformation:VARCHAR:NULL#,
+		 CHECK_COMPANY=#checkCompany:VARCHAR:NULL#,
+		WORK_TIME=#workTime:VARCHAR:NULL#,
+		INCOME=#income:VARCHAR:NULL#,
+		MAJOR_BUSINESS=#majorBusiness:VARCHAR:NULL#,
+		COMPANY_AGE=#companyAge:VARCHAR:NULL#,
+		COMPANY_NUM=#companyNum:VARCHAR:NULL#,
+		APPLICANT_EVALUATION=#applicantEvaluation:VARCHAR:NULL#,
+		APPLICANT_FAMLIY_INFO=#applicantFamliyInfo:VARCHAR:NULL#,
+		UPDATE_DATE = current timestamp
+		WHERE INTERVIEW_ID = #interviewId#
+			
+    </update>     
+</sqlMap>

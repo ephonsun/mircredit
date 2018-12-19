@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MapRecordGpsSQL">
+	<typeAlias alias="MapRecordGps" type="com.banger.mobile.domain.model.map.MapRecordGps" />
+
+	<!-- 用户地理位置表-->
+	<!-- MapUserGpsSQL全字段 -->
+	<resultMap class="MapRecordGps" id="MapRecordGpsResult">
+		<result column="RECORD_GPS_ID" property="recordGpsId" />
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="GPS_LNG" property="gpsLng" />
+		<result column="GPS_LAT" property="gpsLat" />
+		<result column="FILE_NAME" property="recordName" />
+        <result column="START_DATE"  property="recordTime"></result>
+        <result column="RECORD_UPLOAD_USER" property="recordUploadUser"></result>
+        <result column="FILE_PATH" property="recordAddress"></result>
+        <result column="FILE_SIZE" property="fileSize"></result>
+	</resultMap>
+
+    <!-- 录音GPS位置，根据ID查询 -->
+    <select id="getMapRecordGpsById" resultMap="MapRecordGpsResult"  parameterClass="java.lang.Integer">
+       <![CDATA[
+           SELECT
+                a.TASK_TARGET_ID AS RECORD_GPS_ID,a.RECORD_INFO_ID,a.GPS_LNG ,a.GPS_LAT,b.START_DATE,f.FILE_NAME,
+                f.FILE_PATH,f.FILE_SIZE,c.USER_NAME as RECORD_UPLOAD_USER
+            FROM
+                      TSK_MICRO_TASK_TARGET a
+            LEFT JOIN REC_RECORD_INFO b
+            LEFT JOIN SYS_UPLOAD_FILE f on b.FILE_ID= f.FILE_ID
+            ON
+                a.RECORD_INFO_ID=b.RECORD_INFO_ID
+            LEFT JOIN SYS_USER c
+            ON
+                b.USER_ID=c.USER_ID
+            WHERE  a.TASK_TARGET_ID=#id#
+		]]>
+    </select>
+
+    <!-- 录音GPS位置，根据坐标查询 -->
+    <select id="getMapRecordGpsByCondition"  resultMap="MapRecordGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			 SELECT
+                a.TASK_TARGET_ID AS RECORD_GPS_ID,a.RECORD_INFO_ID,a.GPS_LNG ,a.GPS_LAT, b.START_DATE,d.FILE_NAME,
+                d.FILE_PATH,d.FILE_SIZE,c.USER_NAME as RECORD_UPLOAD_USER
+            FROM
+                      TSK_MICRO_TASK_TARGET a
+            LEFT JOIN REC_RECORD_INFO b
+            ON
+                a.RECORD_INFO_ID=b.RECORD_INFO_ID
+            LEFT JOIN SYS_USER c
+            ON
+                b.USER_ID=c.USER_ID
+            LEFT JOIN SYS_UPLOAD_FILE d
+            ON
+                d.FILE_ID=b.FILE_ID
+            WHERE
+                a.RECORD_INFO_ID is not null and a.RECORD_INFO_ID <>0   AND b.FILE_ID IS NOT NULL  and  a.USER_ID in ($InChargeUserIds$)
+		]]>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 录音GPS位置，根据坐标查询 -->
+    <select id="getMapRecordGpsByLngLat"  resultMap="MapRecordGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			 SELECT
+                a.TASK_TARGET_ID AS RECORD_GPS_ID,a.RECORD_INFO_ID,a.GPS_LNG ,a.GPS_LAT,b.START_DATE,f.FILE_NAME,
+                f.FILE_PATH,f.FILE_SIZE,c.USER_NAME as RECORD_UPLOAD_USER
+            FROM
+                      TSK_MICRO_TASK_TARGET a
+            LEFT JOIN REC_RECORD_INFO b
+            ON
+                a.RECORD_INFO_ID=b.RECORD_INFO_ID
+            LEFT JOIN SYS_USER c
+            ON
+                b.USER_ID=c.USER_ID
+            LEFT JOIN SYS_UPLOAD_FILE f
+            ON
+            b.FILE_ID= f.FILE_ID
+            WHERE
+                a.RECORD_INFO_ID is not null and a.RECORD_INFO_ID <>0 AND b.FILE_ID IS NOT NULL  and   a.USER_ID in ($InChargeUserIds$)
+		]]>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 录音GPS位置，根据坐标查询 -->
+    <select id="getMapRecordGpsListCount" resultClass="java.lang.Integer"  parameterClass="java.util.Map">
+        <![CDATA[
+			SELECT
+                 count(*)
+            FROM
+                      TSK_MICRO_TASK_TARGET a
+            LEFT JOIN REC_RECORD_INFO b
+            ON
+                a.RECORD_INFO_ID=b.RECORD_INFO_ID
+            LEFT JOIN SYS_USER c
+            ON
+                b.USER_ID=c.USER_ID
+            LEFT JOIN SYS_UPLOAD_FILE f on b.FILE_ID= f.FILE_ID
+            WHERE
+                a.RECORD_INFO_ID is not null and a.RECORD_INFO_ID <>0 AND b.FILE_ID IS NOT NULL  and  a.USER_ID in ($InChargeUserIds$)
+		]]>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 根据录音地址查询-->
+    <select id="getMapRecordGpsList" resultMap="MapRecordGpsResult"  parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <![CDATA[
+            SELECT
+                a.TASK_TARGET_ID AS RECORD_GPS_ID,a.RECORD_INFO_ID,a.GPS_LNG ,a.GPS_LAT,b.START_DATE,f.FILE_NAME,
+                f.FILE_PATH,f.FILE_SIZE,c.USER_NAME as RECORD_UPLOAD_USER
+            FROM
+                      TSK_MICRO_TASK_TARGET a
+            LEFT JOIN REC_RECORD_INFO b
+            ON
+                a.RECORD_INFO_ID=b.RECORD_INFO_ID
+            LEFT JOIN SYS_USER c
+            ON
+                b.USER_ID=c.USER_ID
+            LEFT JOIN SYS_UPLOAD_FILE f on b.FILE_ID= f.FILE_ID
+            WHERE
+                a.RECORD_INFO_ID is not null and a.RECORD_INFO_ID <>0 AND b.FILE_ID IS NOT NULL and  a.USER_ID in ($InChargeUserIds$)
+		]]>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from TSK_MICRO_TASK_TARGET where TASK_TARGET_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+</sqlMap>

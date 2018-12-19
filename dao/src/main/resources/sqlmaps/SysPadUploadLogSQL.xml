@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysPadUploadLogSQL"> 
+	<typeAlias alias="SysPadUploadLog" type="com.banger.mobile.domain.model.padManagement.SysPadUploadLog" />
+	
+	<!-- PADPAD上传记录表 -->
+	<resultMap class="SysPadUploadLog" id="SysPadUploadLogResult" >
+		<result column="UPLOAD_LOG_ID" property="uploadLogId" />
+		<result column="PAD_INFO_ID" property="padInfoId" />
+		<result column="COUNT_DATE" property="countDate" />
+		<result column="COUNT_UPLOAD" property="countUpload" />
+		<result column="COUNT_DOWNLOAD" property="countDownLoad" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 插入流量记录 -->
+	<insert id="AddPadUploadLog" parameterClass="SysPadUploadLog">
+		<![CDATA[
+			INSERT INTO SYS_PAD_UPLOAD_LOG
+			(
+				UPLOAD_LOG_ID,
+				PAD_INFO_ID,
+				COUNT_DATE,
+				COUNT_UPLOAD,
+				COUNT_DOWNLOAD,
+				CREATE_DATE
+			)
+			VALUES
+			(
+				#uploadLogId#,
+				#padInfoId#,
+				current timestamp,
+				(SELECT $countUpload$ -(CASE WHEN SUM(COUNT_UPLOAD) IS NULL THEN 0 ELSE SUM(COUNT_UPLOAD) END) FROM SYS_PAD_UPLOAD_LOG WHERE PAD_INFO_ID=$padInfoId$ AND COUNT_DATE>=#updateDate#),
+				(SELECT $countDownLoad$ -(CASE WHEN SUM(COUNT_DOWNLOAD) IS NULL THEN 0 ELSE SUM(COUNT_DOWNLOAD) END) FROM SYS_PAD_UPLOAD_LOG WHERE PAD_INFO_ID=$padInfoId$ AND COUNT_DATE>=#updateDate#),
+				current timestamp
+			)
+		]]>
+		<selectKey keyProperty="uploadLogId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_PAD_UPLOAD_LOG
+		</selectKey>
+	</insert>
+</sqlMap>
+
+
+
+

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+<sqlMap namespace="SysTeamUserSQL">
+    
+    <typeAlias alias="baseSysTeamUser" 	type="com.banger.mobile.domain.model.base.system.BaseSysTeamUser"></typeAlias>
+    <typeAlias alias="sysTeamUser" 	type="com.banger.mobile.domain.model.system.SysTeamUser"></typeAlias>
+    
+    <resultMap class="baseSysTeamUser" id="BaseSysTeamUserResult">
+        <result column="TEAM_USER_ID" property="teamUserId" />
+        <result column="TEAM_ID" property="teamId" />
+        <result column="USER_ID" property="userId" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="UPDATE_DATE" property="updateDate" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="UPDATE_USER" property="updateUser" />
+    </resultMap>
+    
+    <resultMap class="sysTeamUser" id="SysTeamUserResult" extends="BaseSysTeamUserResult">
+        <result column="USER_NAME" property="userName" />
+        <result column="ROLE_NAME" property="roleName" />
+        <result column="DEPT_NAME" property="deptName" />
+    </resultMap>
+    
+    <insert id="addSysTeamUser" parameterClass="baseSysTeamUser">
+        <![CDATA[
+        	insert into SYS_TEAM_USER
+        	(
+        		TEAM_USER_ID
+				,TEAM_ID
+				,USER_ID
+				,CREATE_DATE
+				,UPDATE_DATE
+				,CREATE_USER
+				,UPDATE_USER
+        	)values
+        	(
+        		#teamUserId:INTEGER#
+				,#teamId:INTEGER#
+			    ,#userId:INTEGER#
+			    ,current timestamp
+			    ,current timestamp
+			    ,#createUser:INTEGER#
+			    ,#updateUser:INTEGER#
+        	)
+        ]]>
+        
+		<selectKey keyProperty="teamUserId" resultClass="java.lang.Integer"	
+            type="pre">
+		    values NEXTVAL for SEQ_SYS_TEAM_USER
+		</selectKey>
+    </insert>
+    
+    <delete id="deleteSysTeamUserById" parameterClass="java.lang.Integer">
+		<![CDATA[delete from SYS_TEAM_USER where TEAM_USER_ID= #id#]]>
+	</delete>	
+      <delete id="deleteSysTeamUserByInfo" parameterClass="sysTeamUser">
+		<![CDATA[delete from SYS_TEAM_USER where USER_ID= #userId# and TEAM_ID = #teamId#]]>
+	</delete>	
+    <select id="getUserListByTeamId" resultMap="BaseSysTeamUserResult" parameterClass="java.lang.Integer">
+        Select * from SYS_TEAM_USER where TEAM_ID=#teamId#
+    </select>
+      <select id="getUserListById" resultMap="BaseSysTeamUserResult" parameterClass="java.lang.Integer">
+        Select * from SYS_TEAM_USER where TEAM_USER_ID=#teamUserId#
+    </select>
+    <select id="getUsedUserList" resultClass="java.lang.Integer" >
+		select distinct stu.user_id userId from  sys_team_user stu  
+		left join sys_team st on st.team_id = stu.team_id 
+		where stu.user_id in (select distinct srm.user_id from  sys_role_member srm  where srm.role_id in (5,7)) 
+		and st.is_del=0
+    </select>
+    
+    <select id="getUserIdsByChiefUserId" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+        
+           select
+        		su1.user_id
+		   from
+		        sys_team_user su1, sys_team_user su2
+		   where
+		     su1.team_id = su2.team_id and su2.user_id = #userId#
+    </select>
+    
+    
+</sqlMap>

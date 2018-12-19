@@ -1,0 +1,2547 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerSQL">
+	<typeAlias alias="BaseCrmCustomer"
+		type="com.banger.mobile.domain.model.base.customer.BaseCrmCustomer" />
+	<typeAlias alias="CrmCustomer"
+		type="com.banger.mobile.domain.model.customer.CrmCustomer" />
+	<typeAlias alias="CrmCustomerEva"
+		type="com.banger.mobile.domain.model.customer.CrmCustomerEva" />
+	<typeAlias alias="CrmExportBean"
+		type="com.banger.mobile.domain.model.customer.CrmExportBean" />
+	<typeAlias alias="CrmCustomerBirthday"
+		type="com.banger.mobile.domain.model.customer.CrmCustomerBirthday" />
+
+	<resultMap class="BaseCrmCustomer" id="BaseCrmCustomerResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="SEX" property="sex" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="AGE" property="age" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CUSTOMER_TYPE_ID" property="customerTypeId" />
+		<result column="CUSTOMER_INDUSTRY_ID" property="customerIndustryId" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="COMPANY" property="company" />
+		<result column="REMARK" property="remark" />
+		<result column="HEAD_SHOW" property="headshow" />
+		<result column="PROVINCE" property="province" />
+		<result column="CITY" property="city" />
+		<result column="ADDRESS" property="address" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE1_REMARK" property="mobilePhone1Remark" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="MOBILE_PHONE2_REMARK" property="mobilePhone2Remark" />
+		<result column="PHONE" property="phone" />
+		<result column="PHONE_EXT" property="phoneExt" />
+		<result column="FAX" property="fax" />
+		<result column="FAX_EXT" property="faxExt" />
+		<result column="EMAIL" property="email" />
+		<result column="TEMPLATE_IDS" property="templateIds" />
+		<result column="IS_TRASH" property="isTrash" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="IS_VISIT" property="isVisit" />
+		<result column="LAST_CONTACT_DATE" property="lastContactDate" />
+		<result column="LAST_CONTACT_TYPE" property="lastContactType" />
+		<result column="IS_RECEIVE_SMS" property="isReceiveSms" />
+		<result column="MOBILE_PHONE1_REGULAR" property="mobilePhone1Regular" />
+		<result column="MOBILE_PHONE2_REGULAR" property="mobilePhone2Regular" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="MEMO" property="memo" />
+		<result column="IS_NOGOOD" property="isNoGood" />		
+		<result column="CREDENTIAL_TYPE_ID" property="credentialTypeId" />
+		<result column="EDUCATIONAL_HISTORY_ID" property="educationalHistoryId" />
+		<result column="LIVING_CONDITION_ID" property="livingConditionId" />
+		<result column="UNIT_PROPERTY" property="unitProperty" />
+		<result column="POSITION" property="position" />
+		<result column="WORKING_SENIORITY" property="workingSeniority" />
+		<result column="MARITAL_STATUS_ID" property="maritalStatusId" />
+		<result column="SPOUSE_NAME" property="spouseName" />
+		<result column="SPOUSE_ID_CARD" property="spouseIdCard" />
+		<result column="SPOUSE_MOBILE_PHONE" property="spouseMobilePhone" />
+		<result column="SPOUSE_PHONE" property="spousePhone" />
+		<result column="SPOUSE_COMPANY" property="spouseCompany" />
+		<result column="SPOUSE_WORKING_SENIORITY" property="spouseWorkingSeniority" />
+		<result column="SPOUSE_COMPANY_PHONE" property="spouseCompanyPhone" />
+		<result column="SPOUSE_UNIT_PROPERTY" property="spouseUnitProperty" />
+		<result column="SPOUSE_POSITION" property="spousePosition" />
+		<result column="SPOUSE_COMPANY_ADDRESS" property="spouseCompanyAddress" />
+		<result column="MANAGE_COMPANY" property="manageCompany" />
+		<result column="MANAGE_SCOPE" property="manageScope" />
+		<result column="ORG_TYPE_ID" property="orgTypeId" />
+		<result column="OPENING_DATE" property="openingDate" />
+		<result column="ORG_CODE" property="orgCode" />
+		<result column="BUSSINESS_LICENCE" property="bussinessLicence" />
+		<result column="LEGAL_FORM_ID" property="legalFormId" />
+		<result column="ARTIFICIAL_PERSON" property="artificialPerson" />
+		<result column="MARKETING_MANAGER" property="marketingManager" />
+		<result column="EMPLOYEE_COUNT" property="employeeCount" />
+		<result column="IS_INNER_CUSTOMER" property="isInnerCustomer" />
+		<result column="MANAGE_PHONE" property="managePhone" />
+		<result column="MANAGE_ADDRESS" property="manageAddress" />
+		<result column="MANAGE_REMARK" property="manageRemark" />
+		<result column="IS_CONTINUE" property="isContinue" />
+
+		<result column="LIVING_ADDRESS" property="livingAddress" />
+		<result column="DWELLCODE" property="dwellCode" />
+		<result column="CENSUS_REGISTER" property="censusRegister" />
+		<result column="HOUSEATT" property="houseatt" />
+		<result column="RANK" property="rank" />
+		<result column="OCCUPATION" property="occupation" />
+		<result column="BGNYEAR" property="bgnyear" />
+		<result column="WORKTEL" property="worktel" />
+		<result column="SPOUSE_SEX" property="spouseSex" />
+		<result column="SPOUSE_RANK" property="spouseRank" />
+	</resultMap>
+
+	<resultMap class="CrmCustomer" id="TskCustomerResult">
+		<result column="FAX" property="fax" />
+		<result column="PHONE" property="phone" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="IS_SHARE" property="isShare" />
+		<result column="CUSTOMER_ID" property="customerId" />
+        <result column="CUSTOMER_NO" property="customerNo"/>
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="USER_NAME" property="userName" />
+	</resultMap>
+
+	<resultMap class="CrmCustomer" id="CrmCustomerResult" extends="BaseCrmCustomerResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="CUSTOMER_INDUSTRY_NAME" property="customerIndustryName" />
+		<result column="IS_SHARE" property="isShare" />
+		<result column="CREDENTIAL_TYPE_NAME" property="credentialTypeName" />
+		<result column="EDUCATIONAL_HISTORY_NAME" property="educationalHistoryName" />
+		<result column="LIVING_CONDITION_NAME" property="livingConditionName" />
+		<result column="MARITAL_STATUS_NAME" property="maritalStatusName" />
+		<result column="ORG_TYPE_NAME" property="orgTypeName" />
+		<result column="LEGAL_FORM_NAME" property="legalFormName" />
+
+
+	</resultMap>
+
+	<resultMap class="CrmCustomerBirthday" id="CrmCustomerBirthdayResult" extends="BaseCrmCustomerResult">
+		<result column="REMIND_CONTENT" property="remindContent" />
+		<result column="BIRTHDAY_CONTENT" property="birthdayContent" />
+	</resultMap>
+
+	<resultMap class="CrmCustomer" id="CrmCustomerBean" extends="BaseCrmCustomerResult">
+	</resultMap>
+
+	<resultMap class="CrmCustomerEva" id="CrmCustomerEvaResult"
+		extends="CrmCustomerResult">
+		<result column="TEST_REMARK" property="testRemark" />
+		<result column="TEST_DATE" property="testDate" />
+		<result column="IS_SHARE" property="isShare" />
+	</resultMap>
+	<resultMap class="CrmExportBean" id="CrmExportBeanResult"
+		extends="CrmCustomerResult">
+		<result column="ACCOUNT" property="account" />
+		<result column="DEPT_CODE" property="deptCode" />
+		<result column="EXT_FIELD_ID" property="extFieldId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="EXT_DATE01" property="extDate01" />
+		<result column="EXT_DATE02" property="extDate02" />
+		<result column="EXT_DATE03" property="extDate03" />
+		<result column="EXT_DATE04" property="extDate04" />
+		<result column="EXT_DATE05" property="extDate05" />
+		<result column="EXT_DATE06" property="extDate06" />
+		<result column="EXT_DATE07" property="extDate07" />
+		<result column="EXT_DATE08" property="extDate08" />
+		<result column="EXT_DATE09" property="extDate09" />
+		<result column="EXT_DATE10" property="extDate10" />
+		<result column="EXT_DATE11" property="extDate11" />
+		<result column="EXT_DATE12" property="extDate12" />
+		<result column="EXT_DATE13" property="extDate13" />
+		<result column="EXT_DATE14" property="extDate14" />
+		<result column="EXT_DATE15" property="extDate15" />
+		<result column="EXT_DATE16" property="extDate16" />
+		<result column="EXT_DATE17" property="extDate17" />
+		<result column="EXT_DATE18" property="extDate18" />
+		<result column="EXT_DATE19" property="extDate19" />
+		<result column="EXT_DATE20" property="extDate20" />
+		<result column="EXT_FLOAT01" property="extFloat01" />
+		<result column="EXT_FLOAT02" property="extFloat02" />
+		<result column="EXT_FLOAT03" property="extFloat03" />
+		<result column="EXT_FLOAT04" property="extFloat04" />
+		<result column="EXT_FLOAT05" property="extFloat05" />
+		<result column="EXT_FLOAT06" property="extFloat06" />
+		<result column="EXT_FLOAT07" property="extFloat07" />
+		<result column="EXT_FLOAT08" property="extFloat08" />
+		<result column="EXT_FLOAT09" property="extFloat09" />
+		<result column="EXT_FLOAT10" property="extFloat10" />
+		<result column="EXT_FLOAT11" property="extFloat11" />
+		<result column="EXT_FLOAT12" property="extFloat12" />
+		<result column="EXT_FLOAT13" property="extFloat13" />
+		<result column="EXT_FLOAT14" property="extFloat14" />
+		<result column="EXT_FLOAT15" property="extFloat15" />
+		<result column="EXT_FLOAT16" property="extFloat16" />
+		<result column="EXT_FLOAT17" property="extFloat17" />
+		<result column="EXT_FLOAT18" property="extFloat18" />
+		<result column="EXT_FLOAT19" property="extFloat19" />
+		<result column="EXT_FLOAT20" property="extFloat20" />
+		<result column="EXT_LONG_STRING01" property="extLongString01" />
+		<result column="EXT_LONG_STRING02" property="extLongString02" />
+		<result column="EXT_LONG_STRING03" property="extLongString03" />
+		<result column="EXT_LONG_STRING04" property="extLongString04" />
+		<result column="EXT_LONG_STRING05" property="extLongString05" />
+		<result column="EXT_LONG_STRING06" property="extLongString06" />
+		<result column="EXT_LONG_STRING07" property="extLongString07" />
+		<result column="EXT_LONG_STRING08" property="extLongString08" />
+		<result column="EXT_LONG_STRING09" property="extLongString09" />
+		<result column="EXT_LONG_STRING10" property="extLongString10" />
+		<result column="EXT_LONG_STRING11" property="extLongString11" />
+		<result column="EXT_LONG_STRING12" property="extLongString12" />
+		<result column="EXT_LONG_STRING13" property="extLongString13" />
+		<result column="EXT_LONG_STRING14" property="extLongString14" />
+		<result column="EXT_LONG_STRING15" property="extLongString15" />
+		<result column="EXT_LONG_STRING16" property="extLongString16" />
+		<result column="EXT_LONG_STRING17" property="extLongString17" />
+		<result column="EXT_LONG_STRING18" property="extLongString18" />
+		<result column="EXT_LONG_STRING19" property="extLongString19" />
+		<result column="EXT_LONG_STRING20" property="extLongString20" />
+		<result column="EXT_STRING01" property="extString01" />
+		<result column="EXT_STRING02" property="extString02" />
+		<result column="EXT_STRING03" property="extString03" />
+		<result column="EXT_STRING04" property="extString04" />
+		<result column="EXT_STRING05" property="extString05" />
+		<result column="EXT_STRING06" property="extString06" />
+		<result column="EXT_STRING07" property="extString07" />
+		<result column="EXT_STRING08" property="extString08" />
+		<result column="EXT_STRING09" property="extString09" />
+		<result column="EXT_STRING10" property="extString10" />
+		<result column="EXT_STRING11" property="extString11" />
+		<result column="EXT_STRING12" property="extString12" />
+		<result column="EXT_STRING13" property="extString13" />
+		<result column="EXT_STRING14" property="extString14" />
+		<result column="EXT_STRING15" property="extString15" />
+		<result column="EXT_STRING16" property="extString16" />
+		<result column="EXT_STRING17" property="extString17" />
+		<result column="EXT_STRING18" property="extString18" />
+		<result column="EXT_STRING19" property="extString19" />
+		<result column="EXT_STRING20" property="extString20" />
+		<result column="EXT_STRING21" property="extString21" />
+		<result column="EXT_STRING22" property="extString22" />
+		<result column="EXT_STRING23" property="extString23" />
+		<result column="EXT_STRING24" property="extString24" />
+		<result column="EXT_STRING25" property="extString25" />
+		<result column="EXT_STRING26" property="extString26" />
+		<result column="EXT_STRING27" property="extString27" />
+		<result column="EXT_STRING28" property="extString28" />
+		<result column="EXT_STRING29" property="extString29" />
+		<result column="EXT_STRING30" property="extString30" />
+		<result column="EXT_STRING31" property="extString31" />
+		<result column="EXT_STRING32" property="extString32" />
+		<result column="EXT_STRING33" property="extString33" />
+		<result column="EXT_STRING34" property="extString34" />
+		<result column="EXT_STRING35" property="extString35" />
+		<result column="EXT_STRING36" property="extString36" />
+		<result column="EXT_STRING37" property="extString37" />
+		<result column="EXT_STRING38" property="extString38" />
+		<result column="EXT_STRING39" property="extString39" />
+		<result column="EXT_STRING40" property="extString40" />
+		<result column="EXT_STRING41" property="extString41" />
+		<result column="EXT_STRING42" property="extString42" />
+		<result column="EXT_STRING43" property="extString43" />
+		<result column="EXT_STRING44" property="extString44" />
+		<result column="EXT_STRING45" property="extString45" />
+		<result column="EXT_STRING46" property="extString46" />
+		<result column="EXT_STRING47" property="extString47" />
+		<result column="EXT_STRING48" property="extString48" />
+		<result column="EXT_STRING49" property="extString49" />
+		<result column="EXT_STRING50" property="extString50" />
+		<result column="EXT_STRING51" property="extString51" />
+		<result column="EXT_STRING52" property="extString52" />
+		<result column="EXT_STRING53" property="extString53" />
+		<result column="EXT_STRING54" property="extString54" />
+		<result column="EXT_STRING55" property="extString55" />
+		<result column="EXT_STRING56" property="extString56" />
+		<result column="EXT_STRING57" property="extString57" />
+		<result column="EXT_STRING58" property="extString58" />
+		<result column="EXT_STRING59" property="extString59" />
+		<result column="EXT_STRING60" property="extString60" />
+	</resultMap>
+
+
+
+
+	<!-- 新增客户 -->
+	<insert id="addCrmCustomer" parameterClass="CrmCustomer">
+     <![CDATA[
+		insert into CRM_CUSTOMER
+		(
+		 CUSTOMER_ID,
+		 CUSTOMER_NAME,
+		 CUSTOMER_NAME_PINYIN,
+		 SEX,
+		 CUSTOMER_NO,
+		 CUSTOMER_TITLE,
+		 AGE,
+		 BIRTHDAY,
+		 CUSTOMER_TYPE_ID,
+		 CUSTOMER_INDUSTRY_ID,
+		 ID_CARD,
+		 COMPANY,
+		 REMARK,
+		 HEAD_SHOW,
+		 PROVINCE,
+		 CITY,
+		 ADDRESS,
+		 DEFAULT_PHONE_TYPE,
+		 MOBILE_PHONE1,
+		 MOBILE_PHONE1_REMARK,
+		 MOBILE_PHONE2,
+		 MOBILE_PHONE2_REMARK,
+		 PHONE,
+		 PHONE_EXT,
+		 FAX,
+		 FAX_EXT,
+		 EMAIL,
+		 TEMPLATE_IDS,
+		 IS_TRASH,
+		 IS_DEL,
+		 BELONG_DEPT_ID,
+		 BELONG_USER_ID,
+		 IS_VISIT,
+		 IS_RECEIVE_SMS,
+		 MOBILE_PHONE1_REGULAR,
+		 MOBILE_PHONE2_REGULAR,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER,
+		 MEMO,
+		 MANAGE_REMARK,
+		 MANAGE_ADDRESS,
+		 MANAGE_PHONE,
+		IS_INNER_CUSTOMER,
+		EMPLOYEE_COUNT,
+		MARKETING_MANAGER,
+		ARTIFICIAL_PERSON,
+		LEGAL_FORM_ID,
+		BUSSINESS_LICENCE,
+		ORG_CODE,		
+		OPENING_DATE,
+		ORG_TYPE_ID,
+		MANAGE_SCOPE,
+		MANAGE_COMPANY,
+		SPOUSE_COMPANY_ADDRESS,
+		SPOUSE_POSITION,
+		SPOUSE_UNIT_PROPERTY,
+		SPOUSE_COMPANY_PHONE,
+		SPOUSE_WORKING_SENIORITY,
+		SPOUSE_COMPANY,
+		SPOUSE_PHONE,
+		SPOUSE_MOBILE_PHONE,
+		SPOUSE_ID_CARD,
+		SPOUSE_NAME,
+		MARITAL_STATUS_ID,
+		WORKING_SENIORITY,
+		POSITION,
+		UNIT_PROPERTY,
+		LIVING_CONDITION_ID,
+		EDUCATIONAL_HISTORY_ID,
+		CREDENTIAL_TYPE_ID,
+
+		LIVING_ADDRESS,
+		DWELLCODE,
+		CENSUS_REGISTER,
+		HOUSEATT,
+		RANK,
+		OCCUPATION,
+		BGNYEAR,
+		worktel,
+		SPOUSE_SEX,
+		SPOUSE_RANK
+		 )
+		values
+		(
+		#customerId:INTEGER#,
+		#customerName:VARCHAR:NULL#,
+	    #customerNamePinyin:VARCHAR:NULL#,
+	    #sex:VARCHAR:NULL#,
+	    #customerNo:VARCHAR:NULL#,
+	    #customerTitle:VARCHAR:NULL#,
+	    #age:INTEGER#,
+	    #birthday:TIMESTAMP#,
+	    #customerTypeId:INTEGER#,
+	    #customerIndustryId:INTEGER#,
+	    #idCard:VARCHAR:NULL#,
+	    #company:VARCHAR:NULL#,
+	    #remark:VARCHAR:NULL#,
+	    #headshow:VARCHAR:NULL#,
+	    #province:VARCHAR:NULL#,
+	    #city:VARCHAR:NULL#,
+	    #address:VARCHAR:NULL#,
+	    #defaultPhoneType:INTEGER#,
+	    #mobilePhone1:VARCHAR:NULL#,
+	    #mobilePhone1Remark:VARCHAR:NULL#,
+	    #mobilePhone2:VARCHAR:NULL#,
+	    #mobilePhone2Remark:VARCHAR:NULL#,
+	    #phone:VARCHAR:NULL#,
+	    #phoneExt:VARCHAR:NULL#,
+	    #fax:VARCHAR:NULL#,
+	    #faxExt:VARCHAR:NULL#,
+	    #email:VARCHAR:NULL#,
+	    #templateIds:VARCHAR:NULL#,
+	    #isTrash:INTEGER#,
+	    #isDel:INTEGER#,
+	    #belongDeptId:INTEGER#,
+	    #belongUserId:INTEGER#,
+	    #isVisit:INTEGER#,
+	    #isReceiveSms:INTEGER#,
+	    #mobilePhone1Regular:VARCHAR:NULL#,
+	    #mobilePhone2Regular:VARCHAR:NULL#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser:INTEGER#,
+	    #updateUser:INTEGER#,
+	    #memo:VARCHAR:NULL#	,
+	    #manageRemark:VARCHAR:NULL#	,
+	    #manageAddress:VARCHAR:NULL#,
+	    #managePhone:VARCHAR:NULL#,
+		#isInnerCustomer:INTEGER:0#,
+		#employeeCount:VARCHAR:NULL#,
+		#marketingManager:VARCHAR:NULL#,
+		#artificialPerson:VARCHAR:NULL#,
+		#legalFormId:INTEGER:0#,
+		#bussinessLicence:VARCHAR:NULL#,
+		#orgCode:VARCHAR:NULL#,
+		#openingDate:TIMESTAMP#,
+		#orgTypeId:INTEGER:0#,
+		#manageScope:VARCHAR:NULL#,
+		#manageCompany:VARCHAR:NULL#,
+		#spouseCompanyAddress:VARCHAR:NULL#,
+		#spousePosition:VARCHAR:NULL#,
+		#spouseUnitProperty:VARCHAR:NULL#,
+		#spouseCompanyPhone:VARCHAR:NULL#,
+		#spouseWorkingSeniority:VARCHAR:NULL#,
+		#spouseCompany:VARCHAR:NULL#,
+		#spousePhone:VARCHAR:NULL#,
+		#spouseMobilePhone:VARCHAR:NULL#,
+		#spouseIdCard:VARCHAR:NULL#,
+		#spouseName:VARCHAR:NULL#,
+		#maritalStatusId:INTEGER:0#,
+		#workingSeniority:VARCHAR:NULL#,
+		#position:VARCHAR:NULL#,
+		#unitProperty:VARCHAR:NULL#,
+		#livingConditionId:INTEGER:0#,
+		#educationalHistoryId:INTEGER:0#,
+		#credentialTypeId:INTEGER:0#,
+
+		#livingAddress:VARCHAR:NULL#,
+		#dwellCode:VARCHAR:NULL#,
+		#censusRegister:VARCHAR:NULL#,
+		#houseatt:VARCHAR:NULL#,
+		#rank:VARCHAR:NULL#,
+		#occupation:VARCHAR:NULL#,
+		#bgnyear:VARCHAR:NULL#,
+		#worktel:VARCHAR:NULL#,
+		#spouseSex:VARCHAR:NULL#,
+		#spouseRank:VARCHAR:NULL#
+
+		)
+      ]]>
+		<selectKey keyProperty="customerId" resultClass="java.lang.Integer"	type="pre">
+			values NEXTVAL for SEQ_CRM_CUSTOMER
+		</selectKey>
+	</insert>
+
+	<!-- 修改客户 -->
+	<update id="updateCrmCustomer" parameterClass="CrmCustomer">
+		UPDATE
+		CRM_CUSTOMER
+		SET
+		<!--<isNotEmpty prepend="" property="customerName">-->
+			<!--CUSTOMER_NAME = #customerName:VARCHAR:NULL#-->
+		<!--</isNotEmpty>-->
+		<!--<isNotEmpty prepend="," property="customerNamePinyin">-->
+			<!--CUSTOMER_NAME_PINYIN = #customerNamePinyin:VARCHAR:NULL#-->
+		<!--</isNotEmpty>-->
+		<!--<isNotEmpty prepend="," property="sex">-->
+			<!--SEX =#sex:VARCHAR:NULL#-->
+		<!--</isNotEmpty>-->
+		<!--<isNotEmpty prepend="," property="customerNo">-->
+			<!--SEX =#sex:VARCHAR:NULL#-->
+		<!--</isNotEmpty>-->
+
+
+		CUSTOMER_NAME = #customerName:VARCHAR:NULL#
+		,CUSTOMER_NAME_PINYIN = #customerNamePinyin:VARCHAR:NULL#
+		,SEX =#sex:VARCHAR:NULL#
+		,CUSTOMER_NO = #customerNo:VARCHAR:NULL#
+		,CUSTOMER_TITLE = #customerTitle:VARCHAR:NULL#
+		,AGE = #age:INTEGER#
+		,BIRTHDAY = #birthday:TIMESTAMP#
+		,CUSTOMER_TYPE_ID =	#customerTypeId:INTEGER#
+		,CUSTOMER_INDUSTRY_ID =	#customerIndustryId:INTEGER#
+		,ID_CARD = #idCard:VARCHAR:NULL#
+		,COMPANY = #company:VARCHAR:NULL#
+		,REMARK = #remark:VARCHAR:NULL#
+		,HEAD_SHOW =#headshow:VARCHAR:NULL#
+		,PROVINCE = #province:VARCHAR:NULL#
+		,CITY =	#city:VARCHAR:NULL#
+		,ADDRESS = #address:VARCHAR:NULL#
+		,DEFAULT_PHONE_TYPE = #defaultPhoneType:INTEGER#
+		,MOBILE_PHONE1 =#mobilePhone1:VARCHAR:NULL#
+		,MOBILE_PHONE1_REMARK =	#mobilePhone1Remark:VARCHAR:NULL#
+		,MOBILE_PHONE2 =#mobilePhone2:VARCHAR:NULL#
+		,MOBILE_PHONE2_REMARK =	#mobilePhone2Remark:VARCHAR:NULL#
+		,PHONE = #phone:VARCHAR:NULL#
+		,PHONE_EXT = #phoneExt:VARCHAR:NULL#
+		,FAX = #fax:VARCHAR:NULL#
+		,FAX_EXT= #faxExt:VARCHAR:NULL#
+		,EMAIL = #email:VARCHAR:NULL#
+		,TEMPLATE_IDS =	#templateIds:VARCHAR:NULL#
+		,BELONG_DEPT_ID = #belongDeptId:INTEGER#
+		,BELONG_USER_ID = #belongUserId:INTEGER#
+		,IS_RECEIVE_SMS = #isReceiveSms:INTEGER#
+		,MOBILE_PHONE1_REGULAR = #mobilePhone1Regular:VARCHAR:NULL#
+		,MOBILE_PHONE2_REGULAR = #mobilePhone2Regular:VARCHAR:NULL#
+		,UPDATE_DATE = current timestamp
+		,UPDATE_USER = #updateUser:INTEGER#
+		,MEMO = #memo:VARCHAR:NULL#
+		,MANAGE_REMARK=#manageRemark:VARCHAR:NULL#
+		,MANAGE_ADDRESS=#manageAddress:VARCHAR:NULL#
+		,MANAGE_PHONE=#managePhone:VARCHAR:NULL#
+		,IS_INNER_CUSTOMER=#isInnerCustomer:INTEGER#
+		,EMPLOYEE_COUNT=#employeeCount:VARCHAR:NULL#
+		,MARKETING_MANAGER=#marketingManager:VARCHAR:NULL#
+		,ARTIFICIAL_PERSON=#artificialPerson:VARCHAR:NULL#
+		,LEGAL_FORM_ID=#legalFormId:INTEGER:0#
+		,BUSSINESS_LICENCE=#bussinessLicence:VARCHAR:NULL#
+		,ORG_CODE=#orgCode:VARCHAR:NULL#
+		,OPENING_DATE=#openingDate:TIMESTAMP#
+		,ORG_TYPE_ID=#orgTypeId:INTEGER:0#
+		,MANAGE_SCOPE=#manageScope:VARCHAR:NULL#
+		,MANAGE_COMPANY=#manageCompany:VARCHAR:NULL#
+		,SPOUSE_COMPANY_ADDRESS=#spouseCompanyAddress:VARCHAR:NULL#
+		,SPOUSE_POSITION=#spousePosition:VARCHAR:NULL#
+		,SPOUSE_UNIT_PROPERTY=#spouseUnitProperty:VARCHAR:NULL#
+		,SPOUSE_COMPANY_PHONE=#spouseCompanyPhone:VARCHAR:NULL#
+		,SPOUSE_WORKING_SENIORITY=#spouseWorkingSeniority:VARCHAR:NULL#
+		,SPOUSE_COMPANY=#spouseCompany:VARCHAR:NULL#
+		,SPOUSE_PHONE=#spousePhone:VARCHAR:NULL#
+		,SPOUSE_MOBILE_PHONE=#spouseMobilePhone:VARCHAR:NULL#
+		,SPOUSE_ID_CARD=#spouseIdCard:VARCHAR:NULL#
+		,SPOUSE_NAME=#spouseName:VARCHAR:NULL#
+		,MARITAL_STATUS_ID=#maritalStatusId:INTEGER:0#
+		,WORKING_SENIORITY=#workingSeniority:VARCHAR:NULL#
+		,POSITION=#position:VARCHAR:NULL#
+		,UNIT_PROPERTY=#unitProperty:VARCHAR:NULL#
+		,LIVING_CONDITION_ID=#livingConditionId:INTEGER:0#
+		,EDUCATIONAL_HISTORY_ID=#educationalHistoryId:INTEGER:0#
+		,CREDENTIAL_TYPE_ID=#credentialTypeId:INTEGER:0#
+		,IS_CONTINUE=#isContinue:VARCHAR:'1'#
+
+		,LIVING_ADDRESS=#livingAddress:VARCHAR:NULL#
+		,DWELLCODE=#dwellCode:VARCHAR:NULL#
+		,CENSUS_REGISTER=#censusRegister:VARCHAR:NULL#
+		,HOUSEATT=#houseatt:VARCHAR:NULL#
+		,RANK=#rank:VARCHAR:NULL#
+		,OCCUPATION=#occupation:VARCHAR:NULL#
+		,BGNYEAR=#bgnyear:VARCHAR:NULL#
+		,WORKTEL=#worktel:VARCHAR:NULL#
+		,SPOUSE_SEX=#spouseSex:VARCHAR:NULL#
+		,SPOUSE_RANK=#spouseRank:VARCHAR:NULL#
+
+		WHERE
+		CUSTOMER_ID = #customerId#
+	</update>
+
+	<update id="updateCrmCustomerHeadShow" parameterClass="java.util.Map">
+		UPDATE
+			CRM_CUSTOMER
+		SET
+			HEAD_SHOW = #headshow:VARCHAR:NULL#
+		WHERE
+		CUSTOMER_ID =#customerId#
+	</update>
+
+	<!-- 修改客户 -->
+	<update id="updateImpCrmCustomer" parameterClass="CrmCustomer">
+		UPDATE CRM_CUSTOMER SET UPDATE_DATE = current timestamp ,UPDATE_USER =
+		#updateUser:INTEGER#
+		<isNotEmpty property="customerName">
+			<![CDATA[,CUSTOMER_NAME = #customerName:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerNamePinyin">
+			<![CDATA[,CUSTOMER_NAME_PINYIN = #customerNamePinyin:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="sex">
+			<![CDATA[,SEX = #sex:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerTitle">
+			<![CDATA[,CUSTOMER_TITLE = #customerTitle:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="age">
+			<![CDATA[,AGE = #age:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="birthday">
+			<![CDATA[,BIRTHDAY = #birthday:TIMESTAMP#]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerTypeId">
+			<![CDATA[ ,CUSTOMER_TYPE_ID = #customerTypeId:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerIndustryId">
+			<![CDATA[ ,CUSTOMER_INDUSTRY_ID = #customerIndustryId:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="idCard">
+			<![CDATA[ ,ID_CARD = #idCard:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="company">
+			<![CDATA[ ,COMPANY = #company:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="remark">
+			<![CDATA[ ,REMARK = #remark:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="headshow">
+			<![CDATA[ ,HEAD_SHOW = #headshow:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="province">
+			<![CDATA[ ,PROVINCE = #province:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="city">
+			<![CDATA[,CITY = #city:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="address">
+			<![CDATA[ ,ADDRESS = #address:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="defaultPhoneType">
+			<![CDATA[,DEFAULT_PHONE_TYPE = #defaultPhoneType:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="mobilePhone1">
+			<![CDATA[,MOBILE_PHONE1 = #mobilePhone1:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="mobilePhone1Remark">
+			<![CDATA[ ,MOBILE_PHONE1_REMARK = #mobilePhone1Remark:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="mobilePhone2">
+			<![CDATA[,MOBILE_PHONE2 = #mobilePhone2:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="phone">
+			<![CDATA[,PHONE = #phone:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="phoneExt">
+			<![CDATA[,PHONE_EXT = #phoneExt:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="fax">
+			<![CDATA[,FAX = #fax:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="faxExt">
+			<![CDATA[,FAX_EXT = #faxExt:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="email">
+			<![CDATA[,EMAIL = #email:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="templateIds">
+			<![CDATA[,TEMPLATE_IDS = #templateIds:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="belongDeptId">
+			<![CDATA[,BELONG_DEPT_ID = #belongDeptId:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="belongUserId">
+			<![CDATA[,BELONG_USER_ID = #belongUserId:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="isReceiveSms">
+			<![CDATA[,IS_RECEIVE_SMS = #isReceiveSms:INTEGER#]]>
+		</isNotEmpty>
+		<isNotEmpty property="mobilePhone1Regular">
+			<![CDATA[,MOBILE_PHONE1_REGULAR = #mobilePhone1Regular:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		<isNotEmpty property="mobilePhone2Regular">
+			<![CDATA[,MOBILE_PHONE2_REGULAR = #mobilePhone2Regular:VARCHAR:NULL#]]>
+		</isNotEmpty>
+		WHERE CUSTOMER_ID = #customerId#
+	</update>
+
+	<!-- 用户更改归属 修改客户归属 -->
+	<update id="setCustomerOfChangeBelong" parameterClass="java.util.Map">
+		UPDATE
+		CRM_CUSTOMER SET
+		BELONG_DEPT_ID = #deptid#
+		WHERE BELONG_USER_ID = #userid#
+	</update>
+
+	<!-- 修改客户最近联系时间 -->
+	<update id="updateLastContactDate" parameterClass="java.util.Map">
+		UPDATE
+			CRM_CUSTOMER 
+		SET
+			LAST_CONTACT_DATE = #lastContactDate:TIMESTAMP#,
+			LAST_CONTACT_TYPE = #lastContactType:VARCHAR:NULL#
+		WHERE 
+			CUSTOMER_ID =	#customerId#
+	</update>
+
+	<!-- 修改客户号码 -->
+	<update id="updateCusPhoneNumber" parameterClass="CrmCustomer">
+		UPDATE CRM_CUSTOMER SET
+		<dynamic prepend="">
+			<isPropertyAvailable property="mobilePhone1">
+				<isNotEmpty prepend="" property="mobilePhone1">
+					MOBILE_PHONE1 =
+					#mobilePhone1:VARCHAR:NULL#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="mobilePhone2">
+				<isNotEmpty prepend="" property="mobilePhone2">
+					MOBILE_PHONE2 =
+					#mobilePhone2:VARCHAR:NULL#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="phone">
+				<isNotEmpty prepend="" property="phone">
+					PHONE =
+					#phone:VARCHAR:NULL#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="fax">
+				<isNotEmpty prepend="" property="fax">
+					FAX = #fax:VARCHAR:NULL#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+		WHERE CUSTOMER_ID = #customerId#
+	</update>
+
+	<!-- 设置拜访客户 -->
+	<update id="updateCrmCustomerByVisit" parameterClass="CrmCustomer">
+		UPDATE CRM_CUSTOMER r set r.IS_VISIT = <![CDATA[#isVisit#]]>
+		where r.CUSTOMER_ID= #customerId#
+	</update>
+
+	<!-- 更改客户归属 -->
+	<update id="modifyCusBelongTo" parameterClass="java.util.Map">
+		UPDATE CRM_CUSTOMER r set
+		r.BELONG_DEPT_ID = <![CDATA[$belongDeptId$]]>,
+		r.BELONG_USER_ID = <![CDATA[$belongUserId$]]>
+		where 1=1
+		<dynamic prepend="">
+			<isPropertyAvailable property="cusIds">
+				<isNotEmpty prepend="and" property="cusIds">
+          	<![CDATA[r.CUSTOMER_ID in ($cusIds$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+	</update>
+
+
+	<!-- 更改客户归属 -->
+	<update id="modifyCusBelongToAll" parameterClass="java.util.Map">
+		UPDATE CRM_CUSTOMER r set
+		r.BELONG_DEPT_ID = <![CDATA[$belongDeptId$]]>,
+		r.BELONG_USER_ID = <![CDATA[$belongUserId$]]>
+		where 1=1 and
+		r.CUSTOMER_ID in (select a.CUSTOMER_ID from CRM_CUSTOMER
+		as a where
+		a.BELONG_USER_ID = $transferUserid$ )
+	</update>
+
+	<!-- 删除客户类型则修改客户表的客户类型 -->
+	<update id="updateCrmCustomerByCrmCustomerTypeById"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_CUSTOMER SET CUSTOMER_TYPE_ID = 0 where
+		CUSTOMER_TYPE_ID= #Id#
+	</update>
+
+	<!-- 删除所处行业则修改客户表的所处行业ID为0 -->
+	<update id="updateCrmCustomerByCustomerIndustryId"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_CUSTOMER SET CUSTOMER_INDUSTRY_ID = 0 where
+		CUSTOMER_INDUSTRY_ID= #Id#
+	</update>
+
+	<!-- 删除用户则修改客户表的归属用户ID为0 -->
+	<update id="updateCrmCustomerBybelongUserId" parameterClass="java.lang.Integer">
+		UPDATE CRM_CUSTOMER SET BELONG_USER_ID = 0 where
+		BELONG_USER_ID= #Id#
+	</update>
+
+	<!--删除客户至垃圾箱 -->
+	<update id="Update_DeleteCustomers" parameterClass="java.lang.String">
+		UPDATE
+		CRM_CUSTOMER SET IS_TRASH = 1 where
+		CUSTOMER_ID in ($value$)
+	</update>
+
+	<!--还原垃圾箱 -->
+	<update id="Update_RestoreDustbin" parameterClass='java.util.Map'>
+		UPDATE CRM_CUSTOMER SET IS_TRASH = 0
+		where (IS_TRASH = 1)
+		<dynamic prepend="">
+			<isPropertyAvailable property="InChargeOfUserIds">
+				<isNotEmpty prepend="and" property="InChargeOfUserIds">
+					(
+          	<![CDATA[BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="InChargeOfDeptIds">
+				<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+            <![CDATA[BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+		)
+	</update>
+
+	<!--清空垃圾箱 -->
+	<update id="Update_CleanDustbin" parameterClass='java.util.Map'>
+		UPDATE CRM_CUSTOMER SET IS_DEL = 1
+		where (IS_TRASH = 1)
+		<dynamic prepend="">
+			<isPropertyAvailable property="InChargeOfUserIds">
+				<isNotEmpty prepend="and" property="InChargeOfUserIds">
+					(
+          	<![CDATA[BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="InChargeOfDeptIds">
+				<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+            <![CDATA[BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+		)
+	</update>
+
+	<!--还原客户 -->
+	<update id="Update_RestoreCustomers" parameterClass='java.lang.String'>
+		UPDATE
+		CRM_CUSTOMER SET IS_TRASH = 0
+		where (IS_TRASH = 1)
+		and CUSTOMER_ID in
+		($value$)
+	</update>
+
+	<!--彻底删除客户 -->
+	<update id="Update_CompleteDeleteCustomers" parameterClass='java.lang.String'>
+		UPDATE CRM_CUSTOMER SET IS_DEL = 1
+		where (IS_TRASH = 1)
+		and CUSTOMER_ID
+		in ($value$)
+	</update>
+
+	<!-- 删除客户 -->
+	<delete id="deleteCrmCustomerById" parameterClass="java.lang.Integer">
+		<![CDATA[ delete from CRM_CUSTOMER r where r.CUSTOMER_ID=#Id# ]]>
+	</delete>
+
+	<!-- 根据ID查询客户 -->
+	<select id="getCrmCustomerById" resultMap="CrmCustomerResult"
+		parameterClass="java.lang.Integer">
+	<![CDATA[ 
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME		
+        from CRM_CUSTOMER a
+        left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+        left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+        left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+        left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID        
+        left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        where a.CUSTOMER_ID=$Id$ 
+	]]>
+	</select>
+
+	<!-- 根据客户编号查询客户 -->
+	<select id="getCustomerByCustomerNo" resultMap="CrmCustomerResult"
+		parameterClass="java.lang.String">
+	<![CDATA[
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+		
+        from CRM_CUSTOMER a
+        left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+        left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+        left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+        left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+        
+        left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        
+        where a.IS_DEL = 0 and a.CUSTOMER_NO='$value$' 
+	]]>
+	</select>
+
+	<!-- 根据条件查询客户ID集合 -->
+	<select id="getCusByConditionByMap" resultMap="BaseCrmCustomerResult" parameterClass="java.util.Map">
+		select a.*
+		from CRM_CUSTOMER a where a.IS_DEL = 0
+		<isPropertyAvailable property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = $isTrash$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = $customerTypeId$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isContinue">
+			<![CDATA[a.IS_CONTINUE = $isContinue$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="minus">
+			<isEqual property="minus" compareValue="true">
+				<![CDATA[a.CUSTOMER_ID in (
+					select distinct lli.customer_id from ln_loan ll,ln_loan_info lli where ll.loan_id = lli.loan_id and ll.loan_status_id = 7
+					minus
+					select distinct lli.customer_id from ln_loan ll,ln_loan_info lli where ll.loan_id = lli.loan_id and ll.loan_status_id in(1,2,3,4,5,6)
+				)]]>
+			</isEqual>
+		</isNotEmpty>
+		<isPropertyAvailable property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[(a.LAST_CONTACT_DATE < #lastContactDate# or a.LAST_CONTACT_DATE is null)]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.MEMO like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = $isVisit$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE (g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+								compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 根据条件查询客户ID集合 -->
+	<select id="getCusByCondition" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		select a.CUSTOMER_ID
+		from CRM_CUSTOMER a where a.IS_DEL = 0
+		<isPropertyAvailable property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = $isTrash$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = $customerTypeId$]]>
+		</isNotEmpty>
+		<isPropertyAvailable property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[(a.LAST_CONTACT_DATE < #lastContactDate# or a.LAST_CONTACT_DATE is null)]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.MEMO like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = $isVisit$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE (g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+						compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 分页查询客户Count -->
+	<select id="getCrmCustomerCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		select count(0)
+		from CRM_CUSTOMER a where a.IS_DEL = 0
+		<isPropertyAvailable property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = $isTrash$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = $customerTypeId$]]>
+		</isNotEmpty>
+		<isPropertyAvailable property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[(a.LAST_CONTACT_DATE < #lastContactDate# or a.LAST_CONTACT_DATE is null)]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.MEMO like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="idCard">
+			<![CDATA[a.ID_CARD = '$idCard$']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="phoneNumber">
+			<![CDATA[(
+			(a.MOBILE_PHONE1 = '$phoneNumber$')
+			or (a.MOBILE_PHONE2 = '$phoneNumber$')
+			or (a.PHONE = '$phoneNumber$')
+			or (a.FAX = '$phoneNumber$')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[(
+			(a.MOBILE_PHONE1 like '%$padInput$%')
+			or (a.MOBILE_PHONE2 like '%$padInput$%')
+			or (a.PHONE like '%$padInput$%')
+			or (a.FAX like '%$padInput$%')
+			or (a.ID_CARD like '%$padInput$%')
+			or (a.CUSTOMER_NAME like '%$padInput$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = $isVisit$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[(a.BELONG_USER_ID in ($InChargeOfUserIds$) or a.BELONG_USER_ID=0)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[(a.BELONG_DEPT_ID in ($InChargeOfDeptIds$) or a.BELONG_DEPT_ID=0 )]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE (g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+						compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 分页查询客户 -->
+	<select id="getCrmCustomerParameterPageMap" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   ( ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME,
+			0 IS_SHARE,f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+			j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+            from CRM_CUSTOMER a
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+            left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+            left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+            
+            left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+	        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+	        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+	        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+	        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+	        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        
+            where a.IS_DEL = 0  
+        ]]>
+		<isPropertyAvailable property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = $isTrash$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = $customerTypeId$]]>
+		</isNotEmpty>
+		<isPropertyAvailable property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[(a.LAST_CONTACT_DATE < #lastContactDate# or a.LAST_CONTACT_DATE is null)]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.MEMO like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="idCard">
+			<![CDATA[a.ID_CARD = '$idCard$']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="phoneNumber">
+			<![CDATA[(
+			(a.MOBILE_PHONE1 = '$phoneNumber$')
+			or (a.MOBILE_PHONE2 = '$phoneNumber$')
+			or (a.PHONE = '$phoneNumber$')
+			or (a.FAX = '$phoneNumber$')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[(
+			(a.MOBILE_PHONE1 like '%$padInput$%')
+			or (a.MOBILE_PHONE2 like '%$padInput$%')
+			or (a.PHONE like '%$padInput$%')
+			or (a.FAX like '%$padInput$%')
+			or (a.ID_CARD like '%$padInput$%')
+			or (a.CUSTOMER_NAME like '%$padInput$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = $isVisit$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[(a.BELONG_USER_ID in ($InChargeOfUserIds$) or a.BELONG_USER_ID=0)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[(a.BELONG_DEPT_ID in ($InChargeOfDeptIds$) or a.BELONG_DEPT_ID=0 )]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[( a.BELONG_USER_ID = $InChargeOfUserIds$ or a.BELONG_USER_ID = 0 )]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				(g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+						compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+		order by
+		<isNotEmpty prepend="" property="isBenchRemind">
+			<![CDATA[ d.SORTNO, ]]>
+		</isNotEmpty>
+		a.CUSTOMER_NAME_PINYIN
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 是否是共享客户 -->
+	<select id="checkShareCus" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[ select count(0) from CRM_CUSTOMER_SHARED A where 1=1 ]]>
+		<isPropertyAvailable property="cusId">
+			<isNotEmpty prepend="and" property="cusId">
+				<![CDATA[A.CUSTOMER_ID = $cusId$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="userId">
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[A.SHARE_USER_ID in ($userId$)]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+
+	<!-- 查询选择客户 -->
+	<select id="selectCusByIds" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+		
+        from CRM_CUSTOMER a
+        left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+        left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+        left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+        left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+        left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        where a.IS_DEL = 0 and a.IS_TRASH = 0
+     	]]>
+		<dynamic prepend="">
+			<isPropertyAvailable property="customerIds">
+				<isNotEmpty prepend="and" property="customerIds">
+          	<![CDATA[CUSTOMER_ID in ($customerIds$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+		order by a.CUSTOMER_NAME_PINYIN
+	</select>
+
+	<!-- 查询选择客户 -->
+	<select id="selectCusByNos" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+        from CRM_CUSTOMER a
+        left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+        left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+        left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+        left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+        left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        where a.IS_DEL = 0 
+     	]]>
+		<dynamic prepend="">
+			<isPropertyAvailable property="customerNos">
+				<isNotEmpty prepend="and" property="customerNos">
+          	<![CDATA[CUSTOMER_NO in ($customerNos$)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+		order by a.CUSTOMER_NAME_PINYIN
+	</select>
+
+	<!-- 根据userid查询客户集合 -->
+	<select id="getCustomersByUserId" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+        from CRM_CUSTOMER a
+        left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+        left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+        left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+        left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+        left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        where a.IS_DEL = 0 and a.IS_TRASH = 0
+     	]]>
+		<dynamic prepend="">
+			<isPropertyAvailable property="userid">
+				<isNotEmpty prepend="and" property="userid">
+          	<![CDATA[a.BELONG_USER_ID = $userid$]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+		order by a.CUSTOMER_NAME_PINYIN
+	</select>
+
+	<!-- 导出查询客户 -->
+	<select id="queryExportCustomer" resultMap="CrmExportBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   ( ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		select a.*,f.*, b.USER_NAME, c.DEPT_NAME, b.ACCOUNT,c.DEPT_CODE,d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME,
+         	case when a.BELONG_DEPT_ID in ($InChargeOfDeptIds$) or  a.BELONG_USER_ID = $UserId$ then 0 else 1 end
+		    as IS_SHARE
+            from CRM_CUSTOMER a
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+            left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+            left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+            left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+            left join CRM_CUSTOMER_EXT_FIELD f on a.CUSTOMER_ID = f.CUSTOMER_ID
+            where a.IS_DEL = 0 
+     	]]>
+		<isPropertyAvailable property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = $isTrash$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = $customerTypeId$]]>
+		</isNotEmpty>
+		<isPropertyAvailable property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[(a.LAST_CONTACT_DATE < #lastContactDate# or a.LAST_CONTACT_DATE is null)]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.MEMO like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = $isVisit$]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				(g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+						compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(
+				a.CUSTOMER_ID in (
+				SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+		order by
+		<isNotEmpty prepend="" property="isBenchRemind">
+			<![CDATA[ d.SORTNO, ]]>
+		</isNotEmpty>
+		a.CUSTOMER_NAME_PINYIN
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 风险测评查询客户Count -->
+	<select id="getCustomerCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[ select count(0) from CRM_CUSTOMER a where a.IS_DEL = 0 and a.IS_TRASH=0 ]]>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[ a.CUSTOMER_NAME like '%$customerName$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerNo">
+			<![CDATA[ a.CUSTOMER_NO like '%$customerNo$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0 or a.BELONG_USER_ID is null
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(a.CUSTOMER_ID in (SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				(g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+						compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(a.CUSTOMER_ID in (SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on g.CUSTOMER_ID =
+				f.CUSTOMER_ID
+				WHERE f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 风险测评查询客户 -->
+	<select id="getCustomerMap" resultMap="CrmCustomerEvaResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+                   a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME,f.TEST_DATE,f.TEST_RESULT as  TEST_REMARK,
+                   case
+		              when a.BELONG_DEPT_ID in ($InChargeOfDeptIds$) or  a.BELONG_USER_ID = $UserId$
+		              then 0
+		              else 1
+		              end
+		              as IS_SHARE
+             from 
+                   CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+		    left join (select * from RSK_RESULT h1 where not exists (select * from RSK_RESULT h2 where h1.CUSTOMER_ID=h2.CUSTOMER_ID and h1.TEST_DATE<h2.TEST_DATE) order by h1.CUSTOMER_ID,h1.TEST_DATE desc)  f on a.CUSTOMER_ID=f.CUSTOMER_ID
+                   where 
+                   a.IS_DEL = 0  and a.IS_TRASH=0
+     ]]>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[
+			a.CUSTOMER_NAME like '%$customerName$%'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerNo">
+			<![CDATA[
+			a.CUSTOMER_NO like '%$customerNo$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+								left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+								f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(a.CUSTOMER_ID in (
+							SELECT DISTINCT f.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						and a.BELONG_USER_ID = 0 or a.BELONG_USER_ID is null
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+				(a.CUSTOMER_ID in (SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on f.CUSTOMER_ID =
+				g.CUSTOMER_ID
+				WHERE
+				(g.BELONG_USER_ID in ($InChargeOfUserIds$)
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				<isPropertyAvailable property="QueryDeptIds">
+					<isNotEqual prepend="and" property="QueryDeptIds"
+						compareValue="-1">
+						(g.BELONG_DEPT_ID in ($QueryDeptIds$))
+					</isNotEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="QueryUserIds">
+					<isNotEmpty prepend="and" property="QueryUserIds">
+						(g.BELONG_USER_ID in
+						($QueryUserIds$))
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						(f.SHARE_USER_ID =
+						$SharePresentUserId$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(a.CUSTOMER_ID in (SELECT DISTINCT f.CUSTOMER_ID FROM
+				CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on g.CUSTOMER_ID =
+				f.CUSTOMER_ID
+				WHERE f.SHARE_USER_ID in ($InChargeOfUserIds$)
+				AND
+				g.BELONG_USER_ID != $UserId$
+				<isPropertyAvailable property="InChargeOfDeptIds">
+					<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+						g.BELONG_DEPT_ID not
+						in ($InChargeOfDeptIds$)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+					<isNotEmpty prepend="and" property="SharePresentUserId">
+						f.USER_ID =
+						$SharePresentUserId$
+					</isNotEmpty>
+				</isPropertyAvailable>
+				))
+			</isEqual>
+		</isNotEmpty>
+		order by
+		<isNotEmpty prepend="" property="isBenchRemind">
+			<![CDATA[ d.SORTNO, ]]>
+		</isNotEmpty>
+		a.CUSTOMER_NAME_PINYIN
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+
+	<select id="getCustomersByTel" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME,	e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+		from CRM_CUSTOMER a
+		left join
+		SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+		left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+		left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+		left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID =e.CUSTOMER_INDUSTRY_ID
+		left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        
+		WHERE a.IS_DEL=0
+		and a.IS_TRASH = 0
+		and ( a.MOBILE_PHONE1 = '$tel$' or
+		a.MOBILE_PHONE2 =
+		'$tel$' or a.FAX = '$tel$'
+		or a.PHONE = '$tel$'
+		<isNotEmpty prepend="or" property="fulltel"> a.PHONE = '$fulltel$'
+		</isNotEmpty>
+		)
+	</select>
+
+	<select id="getRecentlyCustomers" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME,	e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+		from CRM_CUSTOMER a
+		left join
+		SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+		left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+		left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+		left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+		left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        
+		WHERE a.IS_DEL=0
+		and a.IS_TRASH = 0
+		and ( a.BELONG_USER_ID in ($userIds$)
+		<isNotEmpty prepend="or" property="deptIds">
+					<![CDATA[a.BELONG_DEPT_ID in ($deptIds$)]]>
+		</isNotEmpty>
+		)
+		<isNotEmpty prepend="and" property="key">
+		   		<![CDATA[( a.CUSTOMER_NAME_PINYIN like '$key$%' or a.CUSTOMER_NAME like '%$key$%' or a.CUSTOMER_NO like '%$key$%' or a.MOBILE_PHONE1 like '%$key$%' or a.MOBILE_PHONE2 like '%$key$%' or a.FAX like '%$key$%' or a.PHONE like '%$key$%' )]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="py">
+		   		<![CDATA[( a.CUSTOMER_NAME_PINYIN like '$py$%' )]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="tel">
+				<![CDATA[( a.MOBILE_PHONE1 like '%$tel$%' or a.MOBILE_PHONE2 like '%$tel$%' or a.FAX like '%$tel$%' or a.PHONE like '%$tel$%' )]]>
+		</isNotEmpty>
+		order by a.LAST_CONTACT_DATE desc fetch first 10 rows only
+	</select>
+
+	<!-- 根据号码查询客户 不包含权限 -->
+	<select id="selectCustomerByPhone" resultMap="CrmCustomerResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME, 0 as IS_SHARE,
+		f.LIVING_CONDITION_NAME,g.EDUCATIONAL_HISTORY_NAME,h.CREDENTIAL_TYPE_NAME,i.LEGAL_FORM_NAME,
+		j.MARITAL_STATUS_NAME,k.ORG_TYPE_NAME
+        from CRM_CUSTOMER a
+        left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+        left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+        left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+        left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+        left join CRM_LIVING_CONDITION f on a.LIVING_CONDITION_ID = f.LIVING_CONDITION_ID
+        left join CRM_EDUCATIONAL_HISTORY g on a.EDUCATIONAL_HISTORY_ID=g.EDUCATIONAL_HISTORY_ID
+        left join CRM_CREDENTIAL_TYPE h on a.CREDENTIAL_TYPE_ID=h.CREDENTIAL_TYPE_ID
+        left join CRM_LEGAL_FORM i on a.LEGAL_FORM_ID=i.LEGAL_FORM_ID
+        left join CRM_MARITAL_STATUS j on a.MARITAL_STATUS_ID=j.MARITAL_STATUS_ID
+        left join CRM_ORG_TYPE k on a.ORG_TYPE_ID=k.ORG_TYPE_ID
+        where 1=1
+		]]>
+		<dynamic prepend="">
+			<isPropertyAvailable property="phoneNumber">
+				<isNotEmpty prepend="and" property="phoneNumber">
+			<![CDATA[(
+			(a.MOBILE_PHONE1 = '$phoneNumber$')
+			or (a.MOBILE_PHONE2 = '$phoneNumber$')
+			or (a.PHONE = '$phoneNumber$')
+			or (a.FAX = '$phoneNumber$')
+			)]]>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		</dynamic>
+	</select>
+
+	<!-- 生日提醒count -->
+	<select id="getBirthdayRemindCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+			select count(0) from CRM_CUSTOMER a
+			where a.IS_DEL = 0 and a.IS_TRASH=0 and a.BELONG_USER_ID = $UserId$ and
+		]]>
+		<isEqual prepend="" property="SameYear" compareValue="1">
+			to_char(a.BIRTHDAY,'MM-DD')
+			between to_char('$BeginTime$','MM-DD')
+			and
+			to_char('$EndTime$','MM-DD')
+		</isEqual>
+		<isEqual prepend="" property="SameYear" compareValue="0">
+	        <![CDATA[ 
+	        (to_char(a.BIRTHDAY,'MM-DD') >= to_char('$BeginTime$','MM-DD')
+	        or
+	        to_char(a.BIRTHDAY,'MM-DD') <= to_char('$EndTime$','MM-DD'))
+	        ]]>
+		</isEqual>
+	</select>
+
+	<!-- 生日提醒 -->
+	<select id="queryBirthdayRemind" resultMap="CrmCustomerBirthdayResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   ( ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select a.*, 
+			case
+              when to_char(a.BIRTHDAY,'MM-DD') = to_char('$BeginTime$','MM-DD')
+              then '今天'
+              else to_char(a.BIRTHDAY,'yyyy-MM-DD')
+              end
+              as BIRTHDAY_CONTENT,
+			'' as REMIND_CONTENT 
+			from CRM_CUSTOMER a
+			left join CRM_CUSTOMER_TYPE b on a.CUSTOMER_TYPE_ID = b.CUSTOMER_TYPE_ID
+			where a.IS_DEL = 0 and a.IS_TRASH=0 and a.BELONG_USER_ID = $UserId$
+	        and
+		]]>
+		<isEqual prepend="" property="SameYear" compareValue="1">
+			to_char(a.BIRTHDAY,'MM-DD')
+			between to_char('$BeginTime$','MM-DD')
+			and
+			to_char('$EndTime$','MM-DD')
+		</isEqual>
+		<isEqual prepend="" property="SameYear" compareValue="0">
+	       <![CDATA[ 
+	        (to_char(a.BIRTHDAY,'MM-DD') >= to_char('$BeginTime$','MM-DD')
+	        or
+	        to_char(a.BIRTHDAY,'MM-DD') <= to_char('$EndTime$','MM-DD'))
+	       ]]>
+		</isEqual>
+		order by to_char(a.BIRTHDAY,'MM-DD'),b.SORTNO
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+		<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 根据id查询全字段 -->
+	<select id="getNextCustomerId" resultClass="java.lang.Integer">
+		SELECT NEXTVAL FOR
+		SEQ_CRM_CUSTOMER FROM SYSIBM.SYSDUMMY1
+	</select>
+	<!--****任务管理查询下次联系客户 *********** -->
+	<select id="getCustomerForTskNextContact" resultMap="CrmCustomerResult"
+		parameterClass="java.lang.Integer">
+		select
+		c.*,'' as USER_NAME,'' as DEPT_NAME,'' as
+		CUSTOMER_TYPE_NAME,'' as
+		CUSTOMER_INDUSTRY_NAME,
+		0 as IS_SHARE,
+		'' as LIVING_CONDITION_NAME,'' as EDUCATIONAL_HISTORY_NAME,
+		'' as CREDENTIAL_TYPE_NAME,'' as LEGAL_FORM_NAME,
+		'' as MARITAL_STATUS_NAME,'' as ORG_TYPE_NAME
+		from
+		TSK_CONTACT_TARGET t
+		left join CRM_CUSTOMER c on
+		c.CUSTOMER_ID=t.CUSTOMER_ID
+		where CONTACT_ID=$contactId$
+	</select>
+
+
+	<!-- 通过客户姓名和号码获取客户 -->
+	<select id="getCusByOrPhones" resultMap="TskCustomerResult"
+		parameterClass="java.util.Map">
+		SELECT g.IS_SHARE,a.Fax,a.PHONE,a.MOBILE_PHONE1,MOBILE_PHONE2,
+		a.CUSTOMER_ID,
+		a.CUSTOMER_NAME,
+		a.BELONG_USER_ID,b.USER_NAME
+		FROM CRM_CUSTOMER a
+		LEFT JOIN SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+		INNER JOIN (select * from (values
+		<isNotEmpty property="tskTargetList">
+			<iterate property="tskTargetList" conjunction=",">
+				( #tskTargetList[].customerName# ,
+				#tskTargetList[].phoneNumber#,#tskTargetList[].age#)
+			</iterate>
+		</isNotEmpty>
+         <![CDATA[
+             )AS (CUSTOMER_NAME,PHONE_NUMBER,IS_SHARE)) g  on (a.CUSTOMER_NAME=g.CUSTOMER_NAME
+            AND
+            (g.PHONE_NUMBER=a.FAX OR g.PHONE_NUMBER=a.PHONE OR
+			g.PHONE_NUMBER=a.MOBILE_PHONE1 OR
+			a.MOBILE_PHONE2=g.PHONE_NUMBER) AND g.IS_SHARE>0)
+		]]>
+	</select>
+
+	<!--更新客户为不良客户 -->
+	<update id="updateCrmCustomerIsNogood" parameterClass="java.util.Map">
+		UPDATE
+		CRM_CUSTOMER SET
+		IS_NOGOOD = 1
+		WHERE CUSTOMER_ID=#customerId#
+	</update>
+
+	<!--更新客户地址 -->
+	<update id="updateCrmCustomerAddress" parameterClass="java.util.Map">
+		UPDATE
+		CRM_CUSTOMER SET
+		ADDRESS = #address#
+		WHERE CUSTOMER_ID=#customerId#
+	</update>
+
+	<!--验证是否为不良客户 -->
+	<select id="checkIsNogoodCus" parameterClass="java.util.Map"
+		resultClass="Integer">
+		select count(1) from crm_customer where is_nogood=1
+		<isNotEmpty property="customerId" prepend="and">
+			customer_id=#customerId#
+		</isNotEmpty>
+	</select>
+
+	<!--根据客户身份证查询客户信息 -->
+	<select id="selectIdCardListByIdCard" parameterClass="java.util.Map"
+		resultMap="BaseCrmCustomerResult">
+		select * from crm_customer
+		where 1=1
+		<isNotEmpty property="idCardList" prepend="and">
+			id_card in
+			<iterate property="idCardList" open="(" close=")"
+				conjunction=",">
+				#idCardList[]#
+			</iterate>
+		</isNotEmpty>
+	</select>
+
+	<!-- 通过客户姓名和电话号码查找 -->
+	<select id="selectCrmCustomerByMap" parameterClass="java.util.Map"
+		resultMap="BaseCrmCustomerResult">
+        <![CDATA[
+          SELECT * FROM CRM_CUSTOMER
+                  WHERE CUSTOMER_NAME=#crmName#
+                    AND (
+                         MOBILE_PHONE1 = '$phoneNum$'
+                     OR  MOBILE_PHONE2 = '$phoneNum$'
+                     OR  FAX   = '$phoneNum$'
+		             OR  PHONE = '$phoneNum$'
+                    )
+        ]]>
+	</select>
+
+	<!-- 修改客户(随机列) -->
+	<update id="updateCustomerRandom" parameterClass="CrmCustomer">
+		UPDATE CRM_CUSTOMER SET UPDATE_DATE = current timestamp ,UPDATE_USER =
+		#updateUser:INTEGER#
+		<isNotNull property="customerName">
+            <![CDATA[,CUSTOMER_NAME = #customerName:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="customerNamePinyin">
+            <![CDATA[,CUSTOMER_NAME_PINYIN = #customerNamePinyin:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="sex">
+            <![CDATA[,SEX = #sex:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="customerTitle">
+            <![CDATA[,CUSTOMER_TITLE = #customerTitle:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="age">
+            <![CDATA[,AGE = #age:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="birthday">
+            <![CDATA[,BIRTHDAY = #birthday:TIMESTAMP#]]>
+		</isNotNull>
+		<isNotNull property="customerTypeId">
+            <![CDATA[ ,CUSTOMER_TYPE_ID = #customerTypeId:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="customerIndustryId">
+            <![CDATA[ ,CUSTOMER_INDUSTRY_ID = #customerIndustryId:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="credentialTypeId">
+			<![CDATA[ ,credential_Type_Id = #credentialTypeId:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="idCard">
+            <![CDATA[ ,ID_CARD = #idCard:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="company">
+            <![CDATA[ ,COMPANY = #company:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="remark">
+            <![CDATA[ ,REMARK = #remark:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="headshow">
+            <![CDATA[ ,HEAD_SHOW = #headshow:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="province">
+            <![CDATA[ ,PROVINCE = #province:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="city">
+            <![CDATA[,CITY = #city:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="address">
+            <![CDATA[ ,ADDRESS = #address:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="defaultPhoneType">
+            <![CDATA[,DEFAULT_PHONE_TYPE = #defaultPhoneType:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="mobilePhone1">
+            <![CDATA[,MOBILE_PHONE1 = #mobilePhone1:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="mobilePhone1Remark">
+            <![CDATA[ ,MOBILE_PHONE1_REMARK = #mobilePhone1Remark:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="mobilePhone2">
+            <![CDATA[,MOBILE_PHONE2 = #mobilePhone2:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="phone">
+            <![CDATA[,PHONE = #phone:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="phoneExt">
+            <![CDATA[,PHONE_EXT = #phoneExt:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="fax">
+            <![CDATA[,FAX = #fax:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="faxExt">
+            <![CDATA[,FAX_EXT = #faxExt:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="email">
+            <![CDATA[,EMAIL = #email:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="templateIds">
+            <![CDATA[,TEMPLATE_IDS = #templateIds:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="belongDeptId">
+            <![CDATA[,BELONG_DEPT_ID = #belongDeptId:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="belongUserId">
+            <![CDATA[,BELONG_USER_ID = #belongUserId:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="isReceiveSms">
+            <![CDATA[,IS_RECEIVE_SMS = #isReceiveSms:INTEGER#]]>
+		</isNotNull>
+		<isNotNull property="mobilePhone1Regular">
+            <![CDATA[,MOBILE_PHONE1_REGULAR = #mobilePhone1Regular:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="mobilePhone2Regular">
+            <![CDATA[,MOBILE_PHONE2_REGULAR = #mobilePhone2Regular:VARCHAR:NULL#]]>
+		</isNotNull>
+		<isNotNull property="memo">
+            <![CDATA[,MEMO = #memo:VARCHAR#]]>
+		</isNotNull>
+		WHERE CUSTOMER_ID = #customerId#
+	</update>
+
+    <!-- 根据客户姓名 跟身份证号查询-->
+    <select id="getCrmCustomerByIdcard" parameterClass="java.util.Map" resultMap="BaseCrmCustomerResult">
+        select *from CRM_CUSTOMER  WHERE 1=1
+        <isNotEmpty property="idCard" prepend="and">
+            ID_CARD=#idCard#
+        </isNotEmpty>
+		<isNotEmpty property="credentialTypeId" prepend="and">
+			credential_Type_Id=#credentialTypeId#
+		</isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            CUSTOMER_NAME=#customerName#
+        </isNotEmpty>
+    </select>
+
+    <select id="getCrmCustomerByCHM" parameterClass="java.lang.String" resultMap="BaseCrmCustomerResult">
+        select * from CRM_CUSTOMER where CUSTOMER_NO=#customerNo#
+    </select>
+
+    <!--获取拼音为空的记录-->
+    <select id="getCrmCustomerByPYisNull" resultMap="BaseCrmCustomerResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select * from crm_customer where customer_name_pinyin is null
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow# ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <select id="getCrmCustomerByPYisNullCount" resultClass="java.lang.Integer">
+        select count(*) from crm_customer where customer_name_pinyin is null
+    </select>
+
+</sqlMap>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnBusinessModeSQL">
+    <typeAlias alias="LnBusinessMode" type="com.banger.mobile.domain.model.loan.LnBusinessModel"/>
+
+    
+    <resultMap id="LnBusinessModeResult" class="LnBusinessMode">
+    	<result column="BUSINESS_ID" property="businessId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="UPPER_REACHES" property="upperReaches"/>
+        <result column="LOWER_REACHES" property="lowerReaches"/>
+        <result column="WORK_FLOW" property="workFlow"/>
+        <result column="CHANGE" property="change"/>
+        <result column="SORFT_INFO" property="sorftInfo"/>
+        <result column="OTHER" property="other" />
+        <result column="OFFICE_LEASE_CONTRACT" property="officeLeaseContract" />
+       	<result column="BUSINESS_HISTORY" property="businessHistory" />
+       	<result column="CREATE_DATE" property="createDate" />
+       	<result column="UPDATE_DATE" property="updateDate" />
+
+		<result column="BUSINESS_ORG" property="businessOrg" />
+        <result column="BUSINESS_FINANCE" property="businessFinance" />
+
+    </resultMap>
+    
+    <insert id="insertLnBusinessModel" parameterClass="LnBusinessMode">
+        INSERT INTO LN_BUSINESS_MODEL
+    	(
+		    BUSINESS_ID
+		    <isNotEmpty property="loanId" prepend=",">
+				LOAN_ID
+			</isNotEmpty>
+			<isNotEmpty property="upperReaches" prepend=",">
+				UPPER_REACHES
+			</isNotEmpty>
+			<isNotEmpty property="lowerReaches" prepend=",">
+				LOWER_REACHES
+			</isNotEmpty>
+			<isNotEmpty property="workFlow" prepend=",">
+				WORK_FLOW
+			</isNotEmpty>
+			<isNotEmpty property="change" prepend=",">
+				CHANGE
+			</isNotEmpty>
+			<isNotEmpty property="sorftInfo" prepend=",">
+				SORFT_INFO
+			</isNotEmpty>
+			<isNotEmpty property="other" prepend=",">
+				OTHER
+			</isNotEmpty>
+			<isNotEmpty property="officeLeaseContract" prepend=",">
+				OFFICE_LEASE_CONTRACT
+			</isNotEmpty>
+			<isNotEmpty property="businessHistory" prepend=",">
+				BUSINESS_HISTORY
+			</isNotEmpty>
+			<isNotEmpty property="businessOrg" prepend=",">
+				BUSINESS_ORG
+			</isNotEmpty>
+			<isNotEmpty property="businessFinance" prepend=",">
+				BUSINESS_FINANCE
+			</isNotEmpty>
+			,CREATE_DATE
+			,UPDATE_DATE
+
+			)VALUES
+	    (
+	       	#businessId:INTEGER#
+	       	<isNotEmpty property="loanId" prepend=",">
+				#loanId:INTEGER#
+			</isNotEmpty>
+			<isNotEmpty property="upperReaches" prepend=",">
+				#upperReaches:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="lowerReaches" prepend=",">
+				#lowerReaches:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="workFlow" prepend=",">
+				#workFlow:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="change" prepend=",">
+				#change:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="sorftInfo" prepend=",">
+				#sorftInfo:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="other" prepend=",">
+				#other:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="officeLeaseContract" prepend=",">
+				#officeLeaseContract:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="businessHistory" prepend=",">
+				#businessHistory:VARCHAR#
+			</isNotEmpty>
+		<isNotEmpty property="businessOrg" prepend=",">
+			#businessOrg:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="businessFinance" prepend=",">
+			#businessFinance:VARCHAR#
+		</isNotEmpty>
+			,current timestamp
+			,current timestamp
+
+        )
+        <selectKey keyProperty="businessId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_BUSINESS_MODEL
+		</selectKey>
+    </insert>
+    
+     <select id="selectByPrimary" parameterClass="java.util.Map" resultMap="LnBusinessModeResult">
+        SELECT * FROM LN_BUSINESS_MODEL WHERE 1=1
+        <isNotEmpty property="businessId" prepend="AND">
+		   		   		BUSINESS_ID = #businessId#
+		</isNotEmpty>
+        <isNotEmpty property="loanId" prepend="AND">
+		   		   		LOAN_ID = #loanId#
+		</isNotEmpty>
+         order by BUSINESS_ID desc   fetch first 1 rows only
+     </select>
+    
+     <update id="updateLnBusinessModel" parameterClass="LnBusinessMode">
+        
+        
+      UPDATE LN_BUSINESS_MODEL SET
+  		 UPPER_REACHES=#upperReaches:VARCHAR:NULL#,
+		LOWER_REACHES=#lowerReaches:VARCHAR:NULL#,
+		WORK_FLOW=#workFlow:VARCHAR:NULL#,
+		CHANGE=#change:VARCHAR:NULL#,
+		SORFT_INFO=#sorftInfo:VARCHAR:NULL#,
+		OTHER=#other:VARCHAR:NULL#,
+		OFFICE_LEASE_CONTRACT=#officeLeaseContract:VARCHAR:NULL#,
+		BUSINESS_HISTORY=#businessHistory:VARCHAR:NULL#,
+		UPDATE_DATE = current timestamp,
+		BUSINESS_ORG=#businessOrg:VARCHAR:NULL#,
+		BUSINESS_FINANCE=#businessFinance:VARCHAR:NULL#
+		WHERE BUSINESS_ID=#businessId#
+    </update>
+     
+</sqlMap>

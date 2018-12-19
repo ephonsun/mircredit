@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMicroTaskExecuteSQL">
+	<typeAlias alias="TskMicroTaskExecute"
+		type="com.banger.mobile.domain.model.microTask.TskMicroTaskExecute" />
+
+	<!-- 任务执行表 -->
+	<resultMap class="TskMicroTaskExecute" id="TskMicroTaskExecuteResult">
+		<result column="TASK_EXECUTE_ID" property="taskExecuteId" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="USER_ID" property="userId" />
+		<result column="TARGET_USER" property="targetUser" />
+		<result column="TARGET_DEPT" property="targetDept" />
+		<result column="TARGET_DEPT_UNASSIGN" property="targetDeptUnassign" />
+	</resultMap>
+
+	<resultMap class="TskMicroTaskExecute" id="TaskUserExecutableResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="TARGET_USER" property="targetUser" />
+	</resultMap>
+
+	<!-- 增加 -->
+	<insert id="addTskMicroTaskExecute" parameterClass="TskMicroTaskExecute">
+		<![CDATA[
+	 	INSERT INTO TSK_MICRO_TASK_EXECUTE
+		    (
+		        TASK_EXECUTE_ID,
+		        TASK_ID,
+		        DEPT_ID,
+		        USER_ID,
+		        TARGET_USER,
+		        TARGET_DEPT,
+		        TARGET_DEPT_UNASSIGN
+		    )
+			VALUES
+		    (
+		        #taskExecuteId#,
+		        #taskId#,
+				#deptId#,
+		        #userId#,
+		        #targetUser#,
+		        #targetDept#,
+		        #targetDeptUnassign#
+		    )
+      ]]>
+		<selectKey keyProperty="taskExecuteId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_MICRO_TASK_EXECUTE
+		</selectKey>
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delTskMicroTaskExecuteByConds" parameterClass="java.util.Map">
+		DELETE FROM TSK_MICRO_TASK_EXECUTE WHERE 1=1
+		<isNotEmpty prepend="and" property="taskExecuteId">
+			<![CDATA[TASK_EXECUTE_ID = #taskExecuteId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskId">
+			<![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="inChargeDepts">
+			<![CDATA[DEPT_ID IN ($inChargeDepts$)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="unAssignData">
+			<![CDATA[((USER_ID = 0 AND (TARGET_DEPT + TARGET_DEPT_UNASSIGN) = 0) OR (USER_ID > 0 AND TARGET_USER = 0))]]>
+		</isNotEmpty>
+	</delete>
+
+	<!-- 修改 -->
+	<update id="editTskMicroTaskExecute" parameterClass="TskMicroTaskExecute">
+		UPDATE
+		TSK_MICRO_TASK_EXECUTE
+		SET
+		<isNotNull property="taskId">
+			TASK_ID = #taskId#,
+		</isNotNull>
+		<isNotNull property="deptId">
+			DEPT_ID = #deptId#,
+		</isNotNull>
+		<isNotNull property="userId">
+			USER_ID = #userId#,
+		</isNotNull>
+		<isNotNull property="targetUser">
+			TARGET_USER = #targetUser#,
+		</isNotNull>
+		<isNotNull property="targetDept">
+			TARGET_DEPT = #targetDept#,
+		</isNotNull>
+		<isNotNull property="targetDeptUnassign">
+			TARGET_DEPT_UNASSIGN =
+			#targetDeptUnassign#
+		</isNotNull>
+		WHERE
+		<isNotNull property="taskExecuteId">
+			TASK_EXECUTE_ID = #taskExecuteId#
+		</isNotNull>
+	</update>
+
+	<!-- 查询我已经分配出去的任务目标 -->
+	<select id="getMyTargetByConds" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		SELECT SUM(TARGET) FROM (
+		<isEqual prepend="" property="role" compareValue="brMine">
+			SELECT TARGET_USER AS TARGET FROM TSK_MICRO_TASK_EXECUTE
+			WHERE 1=1
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[USER_ID = #userId#]]>
+			</isNotEmpty>
+		</isEqual>
+		<isEqual prepend="" property="role" compareValue="brDept">
+			SELECT TARGET_DEPT AS TARGET FROM TSK_MICRO_TASK_EXECUTE
+			WHERE 1=1
+			<isNotEmpty prepend="and" property="InChargeOfDeptIds">
+				<![CDATA[USER_ID = 0 AND DEPT_ID IN ($InChargeOfDeptIds$)]]>
+			</isNotEmpty>
+		</isEqual>
+		<isNotEmpty prepend="and" property="taskId">
+				<![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		)
+	</select>
+
+	<!-- 查询任务执行者已完成任务笔数 -->
+	<select id="getComTskNumByConds" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		SELECT
+		GET_FINISH_COUNT('$inChargeDeptUserMark$',A.TASK_ID,B.TASK_TYPE,B.START_DATE,B.END_DATE)
+		AS COM_TSK_NUM FROM TSK_MICRO_TASK_EXECUTE AS A
+		INNER JOIN
+		TSK_MICRO_TASK AS B ON A.TASK_ID = B.TASK_ID
+		WHERE 1=1
+		<isNotEmpty prepend="and" property="taskId">
+			<![CDATA[A.TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[A.DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[A.USER_ID = #userId#]]>
+		</isNotEmpty>
+	</select>
+
+	<!-- 查询所有任务执行者数据 -->
+	<select id="getAllTskMicroTaskExecuteByConds" resultMap="TskMicroTaskExecuteResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM TSK_MICRO_TASK_EXECUTE
+		WHERE 1=1
+		<isNotEmpty prepend="and" property="taskId">
+			<![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[DEPT_ID = #deptId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[USER_ID = #userId#]]>
+		</isNotEmpty>
+	</select>
+
+	<select id="getAllTskMicroTaskExecuteByCondsProgress" resultMap="TskMicroTaskExecuteResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM TSK_MICRO_TASK_EXECUTE
+		WHERE 1=1
+		<isNotEmpty prepend="and" property="taskId">
+			<![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+			<![CDATA[
+			DEPT_ID = #deptId# AND USER_ID = 0
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[USER_ID = #userId#]]>
+		</isNotEmpty>
+	</select>
+
+	<select id="getSysUsersByTask" resultMap="TskMicroTaskExecuteResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM TSK_MICRO_TASK_EXECUTE
+		WHERE 1=1
+		<isNotEmpty prepend="and" property="taskId">
+            <![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptId">
+            <![CDATA[
+			DEPT_ID = #deptId# AND USER_ID != 0
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="deptIds">
+			DEPT_ID in
+			<iterate property="deptIds" conjunction="," open="(" close=")">
+				#deptIds[]#
+			</iterate>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="belongUserIds">
+			USER_ID in
+			<iterate property="belongUserIds" open="(" close=")"
+				conjunction=",">
+				#belongUserIds[]#
+			</iterate>
+		</isNotEmpty>
+	</select>
+
+	<select id="getTaskUserExecutable" resultMap="TaskUserExecutableResult"
+		parameterClass="java.util.Map">
+		select task_id,
+		(select count(1) from
+		tsk_micro_task_execute e where e.task_id = t.task_id
+		and e.user_id =
+		#userId#) as TARGET_USER
+		from tsk_micro_task t where t.task_id in
+		($taskIds$)
+	</select>
+
+	<!--通过userId查询哪些user已经分配了任务 -->
+	<select id="getIsAllocateTaskByUserIds" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		SELECT USER_ID FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID !=#taskId#
+		<isNotEmpty prepend="AND" property="userIds">
+			USER_ID IN
+			<iterate property="userIds" open="(" close=")" conjunction=",">
+				#userIds[]#
+			</iterate>
+		</isNotEmpty>
+	</select>
+</sqlMap>

@@ -1,0 +1,1461 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MayDiffCustomerSQL">
+	<typeAlias alias="BaseCrmCustomer" type="com.banger.mobile.domain.model.base.customer.BaseCrmCustomer" />
+	<typeAlias alias="CrmCustomer" type="com.banger.mobile.domain.model.customer.CrmCustomer" />
+	<typeAlias alias="CrmCustomerEva" type="com.banger.mobile.domain.model.customer.CrmCustomerEva" />
+	<typeAlias alias="MayDiffCustomerName" type="com.banger.mobile.domain.model.customer.MayDiffCustomerName" />
+
+	<resultMap class="BaseCrmCustomer" id="BaseCrmCustomerResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="SEX" property="sex" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="AGE" property="age" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CUSTOMER_TYPE_ID" property="customerTypeId" />
+		<result column="CUSTOMER_INDUSTRY_ID" property="customerIndustryId" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="COMPANY" property="company" />
+		<result column="REMARK" property="remark" />
+		<result column="HEAD_SHOW" property="headshow" />
+		<result column="PROVINCE" property="province" />
+		<result column="CITY" property="city" />
+		<result column="ADDRESS" property="address" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE1_REMARK" property="mobilePhone1Remark" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="MOBILE_PHONE2_REMARK" property="mobilePhone2Remark" />
+		<result column="PHONE" property="phone" />
+		<result column="PHONE_EXT" property="phoneExt" />
+		<result column="FAX" property="fax" />
+		<result column="FAX_EXT" property="faxExt" />
+		<result column="EMAIL" property="email" />
+		<result column="TEMPLATE_IDS" property="templateIds" />
+		<result column="IS_TRASH" property="isTrash" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="IS_VISIT" property="isVisit" />
+		<result column="LAST_CONTACT_DATE" property="lastContactDate" />
+		<result column="IS_RECEIVE_SMS" property="isReceiveSms" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="CrmCustomer" id="CrmCustomerResult" extends="BaseCrmCustomerResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="CUSTOMER_INDUSTRY_NAME" property="customerIndustryName" />
+	</resultMap>
+
+	<resultMap class="MayDiffCustomerName" id="MayDiffCustomerNameResult">
+		<result column="COUNT_NUMBER" property="countNumber" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+	</resultMap>
+	
+	
+  <!-- 分页查询客户Count  -->
+  <select id="getMayDiffCustomerNameCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(1)
+                 from 
+                   (
+                   select * from (
+                   select a.CUSTOMER_NAME, count(a.CUSTOMER_NAME) as COUNT_NUMBER
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+             group by a.CUSTOMER_NAME
+             )  where COUNT_NUMBER >1
+           )
+     ]]>
+  </select>
+  
+  <!-- 分页查询客户  -->
+  <select id="getMayDiffCustomerNameParameterPageMap" resultMap="MayDiffCustomerNameResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select * from (
+		select 
+                   a.CUSTOMER_NAME, count(a.CUSTOMER_NAME) as COUNT_NUMBER
+             from 
+                   CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = $isTrash$]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = $customerTypeId$]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		 group by a.CUSTOMER_NAME 
+		 ) where COUNT_NUMBER >1
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=$endRow$ and tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <!-- 分页查询客户Count  -->
+  <select id="getMayDiffCustomerPhoneCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(1)
+                 from 
+                   (
+                   select * from (
+                   
+                   select dd.MOBILE_PHONE AS CUSTOMER_NAME, count(dd.MOBILE_PHONE) as COUNT_NUMBER from 
+                   (
+                   select distinct CUSTOMER_ID,MOBILE_PHONE from (
+                   
+                   select a.CUSTOMER_ID, a.MOBILE_PHONE1 as MOBILE_PHONE 
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+			union all
+			
+			select a.CUSTOMER_ID, a.MOBILE_PHONE2 as MOBILE_PHONE 
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+		)
+				) as dd
+				where dd.MOBILE_PHONE !=''
+				
+             	group by dd.MOBILE_PHONE
+             )  where COUNT_NUMBER >1
+           )
+     ]]>
+  </select>
+  
+  <!-- 分页查询客户  -->
+  <select id="getMayDiffCustomerPhoneParameterPageMap" resultMap="MayDiffCustomerNameResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		
+                   select * from (
+                   
+                   select dd.MOBILE_PHONE as CUSTOMER_NAME, count(dd.MOBILE_PHONE) as COUNT_NUMBER from 
+                   (
+                   
+                   select distinct CUSTOMER_ID,MOBILE_PHONE from (
+                   select a.CUSTOMER_ID, a.MOBILE_PHONE1 as MOBILE_PHONE 
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+			union all
+			
+			select a.CUSTOMER_ID, a.MOBILE_PHONE2 as MOBILE_PHONE 
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+		)
+				) as dd
+				where dd.MOBILE_PHONE !=''
+				
+             	group by dd.MOBILE_PHONE
+             )  where COUNT_NUMBER >1
+		 ]]>
+		 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+
+  <!-- 分页查询客户Count  -->
+  <select id="getMayDiffCustomerIdCardCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(1)
+                 from 
+                   (
+                   select * from (
+                   select a.ID_CARD as CUSTOMER_NAME, count(a.ID_CARD) as COUNT_NUMBER
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 and a.ID_CARD != ''
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+             group by a.ID_CARD
+             )  where COUNT_NUMBER >1
+           )
+     ]]>
+  </select>
+  
+  <!-- 分页查询客户  -->
+  <select id="getMayDiffCustomerIdCardParameterPageMap" resultMap="MayDiffCustomerNameResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select * from (
+		select 
+                   a.ID_CARD as CUSTOMER_NAME, count(a.ID_CARD) as COUNT_NUMBER
+             from 
+                   CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 and a.ID_CARD != ''
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		 group by a.ID_CARD 
+		 ) where COUNT_NUMBER >1
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <!-- 分页查询客户Count  -->
+  <select id="getMayDiffCustomerNamePhoneCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(1)
+                 from 
+                   (
+                   select * from (
+                   select (a.CUSTOMER_NAME ||'('||a.PHONE||')') as CUSTOMER_NAME, count(a.CUSTOMER_NAME) as COUNT_NUMBER
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 and a.PHONE != ''
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+             group by a.CUSTOMER_NAME, a.PHONE
+             )  where COUNT_NUMBER >1
+           )
+     ]]>
+  </select>
+  
+  <!-- 分页查询客户  -->
+  <select id="getMayDiffCustomerNamePhoneParameterPageMap" resultMap="MayDiffCustomerNameResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select * from (
+		select 
+                   (a.CUSTOMER_NAME ||'('||a.PHONE||')') as CUSTOMER_NAME, count(a.CUSTOMER_NAME) as COUNT_NUMBER
+             from 
+                   CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 and a.PHONE != ''
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		 group by a.CUSTOMER_NAME,a.PHONE
+		 ) where COUNT_NUMBER >1
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <!-- 分页查询客户Count  -->
+  <select id="getMayDiffCustomerNameCompanyCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(1)
+                 from 
+                   (
+                   select * from (
+                   select (a.CUSTOMER_NAME ||'('||a.COMPANY||')') as CUSTOMER_NAME, count(a.CUSTOMER_NAME) as COUNT_NUMBER
+                   from CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 and a.COMPANY != ''
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		<![CDATA[
+             group by a.CUSTOMER_NAME,a.COMPANY
+             )  where COUNT_NUMBER >1
+           )
+     ]]>
+  </select>
+  
+  <!-- 分页查询客户  -->
+  <select id="getMayDiffCustomerNameCompanyParameterPageMap" resultMap="MayDiffCustomerNameResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select * from (
+		select 
+                   (a.CUSTOMER_NAME ||'('||a.COMPANY||')') as CUSTOMER_NAME, count(a.CUSTOMER_NAME) as COUNT_NUMBER
+             from 
+                   CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 and a.COMPANY != ''
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(a.CUSTOMER_NAME like '%$customerName$%')
+			or (a.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			or (a.CUSTOMER_NO = '$customerName$')
+			or (a.ID_CARD like '%$customerName$%')
+			or (a.COMPANY like '%$customerName$%')
+			or (a.MOBILE_PHONE1 like '%$customerName$%')
+			or (a.MOBILE_PHONE2 like '%$customerName$%')
+			or (a.PHONE like '%$customerName$%')
+			or (a.FAX like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		 group by a.CUSTOMER_NAME,a.COMPANY
+		 ) where COUNT_NUMBER >1
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+
+
+  <!-- 查询相同客户  -->
+  <select id="getSameCustomerList" resultMap="CrmCustomerResult" parameterClass="java.util.Map">
+	<![CDATA[
+		select 
+                   a.*, b.USER_NAME, c.DEPT_NAME, d.CUSTOMER_TYPE_NAME, e.CUSTOMER_INDUSTRY_NAME
+             from 
+                   CRM_CUSTOMER a
+                   left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.BELONG_DEPT_ID=c.DEPT_ID
+                   left join CRM_CUSTOMER_TYPE d on a.CUSTOMER_TYPE_ID = d.CUSTOMER_TYPE_ID
+                   left join CRM_CUSTOMER_INDUSTRY e on a.CUSTOMER_INDUSTRY_ID = e.CUSTOMER_INDUSTRY_ID
+                   where 
+                   a.IS_DEL = 0 
+     ]]>
+     	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[a.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+     	<isNotEmpty prepend="and" property="customerTypeId">
+			<![CDATA[a.CUSTOMER_TYPE_ID = #customerTypeId#]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="lastContactDate">
+			<isEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE is null]]>
+			</isEmpty>
+			<isNotEmpty prepend="and" property="lastContactDate">
+				<![CDATA[a.LAST_CONTACT_DATE < #lastContactDate#]]>
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isNotEmpty prepend="and" property="customerName">
+			<isEqual property="diffType" compareValue="name">
+			<![CDATA[(
+			(a.CUSTOMER_NAME = #customerName#)
+			)]]>
+			</isEqual>
+			<isEqual property="diffType" compareValue="phone">
+			<![CDATA[(
+			(a.MOBILE_PHONE1 = #customerName#)
+			or (a.MOBILE_PHONE2 = #customerName#)
+			)]]>
+			</isEqual>
+			<isEqual property="diffType" compareValue="idcard">
+			<![CDATA[(
+			(a.ID_CARD = #customerName#)
+			)]]>
+			</isEqual>
+			<isEqual property="diffType" compareValue="namephone">
+			<![CDATA[(
+			(a.CUSTOMER_NAME|| '(' || a.PHONE || ')' = #customerName#)
+			)]]>
+			</isEqual>
+			<isEqual property="diffType" compareValue="namecompany">
+			<![CDATA[(
+			(a.CUSTOMER_NAME|| '(' || a.COMPANY || ')' = #customerName#)
+			)]]>
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isVisit">
+			<![CDATA[a.IS_VISIT = #isVisit#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isUsed">
+			<![CDATA[ a.CUSTOMER_ID not in($isUsed$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				<![CDATA[a.BELONG_USER_ID = $InChargeOfUserIds$]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				<![CDATA[a.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[a.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and a.BELONG_USER_ID = 0  
+					</isNotEmpty>	
+				</isPropertyAvailable>
+			</isEqual>
+		</isNotEmpty>
+		
+         order by a.CUSTOMER_NAME_PINYIN
+		
+  </select>
+  
+  <update id="mergeRecordInfo" parameterClass="java.util.Map">
+	<![CDATA[
+		update REC_RECORD_INFO set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergeTask" parameterClass="java.util.Map">
+	<![CDATA[
+		update TSK_MICRO_TASK_TARGET set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergePLAN" parameterClass="java.util.Map">
+	<![CDATA[
+		update TSK_PLAN_TARGET set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergeFriends" parameterClass="java.util.Map">
+	<![CDATA[
+		update CRM_CUSTOMER_RELATIVES set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergeOthersFriends" parameterClass="java.util.Map">
+	<![CDATA[
+		update CRM_CUSTOMER_RELATIVES set RELATIVES_ID = #customer1# where RELATIVES_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergeSMS" parameterClass="java.util.Map">
+	<![CDATA[
+		update SMS_SEND_DETAIL set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergeMMS" parameterClass="java.util.Map">
+	<![CDATA[
+		update MMS_SEND_DETAIL set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+  
+  <update id="mergeProductCustomer" parameterClass="java.util.Map">
+	<![CDATA[
+		update PDT_PRODUCT_CUSTOMER set CUSTOMER_ID = #customer1# where CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+   
+   <update id="deleteCrmCustomer" parameterClass="java.lang.Integer">
+	<![CDATA[
+		update CRM_CUSTOMER set IS_DEL = 1 where CUSTOMER_ID= #id#
+	]]>
+   </update>
+   
+   <update id="deleteCustomerSharedInfo" parameterClass="java.util.Map">
+	<![CDATA[
+		delete from CRM_CUSTOMER_SHARED where CUSTOMER_ID= #customer1# or CUSTOMER_ID= #customer2#
+	]]>
+  </update>
+   
+   <select id="countRecordInfo" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+	<![CDATA[
+		select count(CUSTOMER_ID) from REC_RECORD_INFO where CUSTOMER_ID= #customerId# and IS_DEL = 0
+	]]>
+   </select>
+   
+   <select id="countTask" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+	<![CDATA[
+		select count(CUSTOMER_ID) from TSK_MICRO_TASK_TARGET where CUSTOMER_ID= #customerId#
+	]]>
+   </select>
+   
+   <select id="countRelative" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+	<![CDATA[
+		select count(CUSTOMER_ID) from CRM_CUSTOMER_RELATIVES where CUSTOMER_ID= #customerId# or RELATIVES_ID= #customerId#
+	]]>
+   </select>
+   
+   <select id="countProduct" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+	<![CDATA[
+		select count(CUSTOMER_ID) from PDT_PRODUCT_CUSTOMER where CUSTOMER_ID= #customerId# and IS_DEL = 0
+	]]>
+   </select>
+</sqlMap>

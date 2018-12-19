@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="YDWD_LN_LOAN_BALANCE">
+  <resultMap class="com.banger.mobile.domain.model.loan.LnLoanBalance" id="abatorgenerated_LnLoanBalanceResult">
+    
+    <result column="LOAN_BALANCE_ID" jdbcType="INTEGER" property="loanBalanceId" />
+    <result column="LOAN_ID" jdbcType="INTEGER" property="loanId" />
+    <result column="DCRQ" jdbcType="TIMESTAMP" property="dcrq" />
+    <result column="BW" jdbcType="VARCHAR" property="bw" />
+    <result column="BWZC" jdbcType="VARCHAR" property="bwzc" />
+    <result column="BWFZ" jdbcType="VARCHAR" property="bwfz" />
+    <result column="FCSL" jdbcType="INTEGER" property="fcsl" />
+    <result column="FCAJSL" jdbcType="INTEGER" property="fcajsl" />
+    <result column="JDCSL" jdbcType="INTEGER" property="jdcsl" />
+    <result column="JDCAJSL" jdbcType="INTEGER" property="jdcajsl" />
+    <result column="HSFS" jdbcType="VARCHAR" property="hsfs" />
+    <result column="CSQYRQ" jdbcType="TIMESTAMP" property="csqyrq" />
+    <result column="CSQY" jdbcType="DECIMAL" property="csqy" />
+    <result column="CSQYMX" jdbcType="VARCHAR" property="csqymx" />
+    <result column="QJLR" jdbcType="DECIMAL" property="qjlr" />
+    <result column="HKBJ" jdbcType="DECIMAL" property="hkbj" />
+    <result column="QJZZ" jdbcType="DECIMAL" property="qjzz" />
+    <result column="SZ" jdbcType="DECIMAL" property="sz" />
+    <result column="QNTQ" jdbcType="DECIMAL" property="qntq" />
+    <result column="ZJ" jdbcType="DECIMAL" property="zj" />
+    <result column="BZ" jdbcType="DECIMAL" property="bz" />
+    <result column="NOTE" jdbcType="VARCHAR" property="note" />
+    <result column="FX" jdbcType="VARCHAR" property="fx" />
+    <result column="SM" jdbcType="VARCHAR" property="sm" />
+  </resultMap>
+  
+  <select id="selectBalanceByPrimary" parameterClass="com.banger.mobile.domain.model.loan.LnLoanBalance" resultMap="abatorgenerated_LnLoanBalanceResult">
+   
+    select LOAN_BALANCE_ID, LOAN_ID, DCRQ, BW, BWZC, BWFZ, FCSL, FCAJSL, JDCSL, JDCAJSL, HSFS,
+      CSQYRQ, CSQY, CSQYMX, QJLR, HKBJ, QJZZ, SZ, QNTQ, ZJ, BZ, NOTE, FX, SM
+    from LN_LOAN_BALANCE
+     where 1=1
+      <isNotNull prepend="and" property="loanBalanceId" >
+       LOAN_BALANCE_ID = #loanBalanceId:INTEGER#
+      </isNotNull>
+  	  <isNotNull prepend="and" property="loanId" >
+        LOAN_ID = #loanId:INTEGER#
+      </isNotNull>
+   
+  </select>
+  
+  
+ 
+  <insert id="insertBalance" parameterClass="com.banger.mobile.domain.model.loan.LnLoanBalance">
+   
+    insert into LN_LOAN_BALANCE (LOAN_BALANCE_ID, LOAN_ID, DCRQ, BW, BWZC, BWFZ, FCSL, FCAJSL,
+      JDCSL, JDCAJSL, HSFS, CSQYRQ, CSQY, CSQYMX, QJLR, HKBJ, QJZZ, SZ, QNTQ, ZJ, BZ, NOTE, FX, SM)
+    values (#loanBalanceId:INTEGER#, #loanId:INTEGER#, #dcrq:TIMESTAMP#, #bw:VARCHAR#,
+      #bwzc:VARCHAR#, #bwfz:VARCHAR#, #fcsl:INTEGER#, #fcajsl:INTEGER#, #jdcsl:INTEGER#,
+      #jdcajsl:INTEGER#, #hsfs:VARCHAR#, #csqyrq:TIMESTAMP#, #csqy:DECIMAL#, #csqymx:VARCHAR#,
+      #qjlr:DECIMAL#, #hkbj:DECIMAL#, #qjzz:DECIMAL#, #sz:DECIMAL#, #qntq:DECIMAL#, #zj:DECIMAL#,
+      #bz:DECIMAL#, #note:VARCHAR#, #fx:VARCHAR#, #sm:VARCHAR#)
+       <selectKey keyProperty="loanBalanceId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_LOAN_BALANCE
+		</selectKey>
+  </insert>
+  <update id="updateBalance" parameterClass="com.banger.mobile.domain.model.loan.LnLoanBalance">
+    
+    update LN_LOAN_BALANCE
+    set LOAN_ID = #loanId:INTEGER#,
+      DCRQ = #dcrq:TIMESTAMP#,
+      BW = #bw:VARCHAR#,
+      BWZC = #bwzc:VARCHAR#,
+      BWFZ = #bwfz:VARCHAR#,
+      FCSL = #fcsl:INTEGER#,
+      FCAJSL = #fcajsl:INTEGER#,
+      JDCSL = #jdcsl:INTEGER#,
+      JDCAJSL = #jdcajsl:INTEGER#,
+      HSFS = #hsfs:VARCHAR#,
+      CSQYRQ = #csqyrq:TIMESTAMP#,
+      CSQY = #csqy:DECIMAL#,
+      CSQYMX = #csqymx:VARCHAR#,
+      QJLR = #qjlr:DECIMAL#,
+      HKBJ = #hkbj:DECIMAL#,
+      QJZZ = #qjzz:DECIMAL#,
+      SZ = #sz:DECIMAL#,
+      QNTQ = #qntq:DECIMAL#,
+      ZJ = #zj:DECIMAL#,
+      BZ = #bz:DECIMAL#,
+      NOTE = #note:VARCHAR#,
+      FX = #fx:VARCHAR#,
+      SM = #sm:VARCHAR#
+    where LOAN_BALANCE_ID = #loanBalanceId:INTEGER#
+  </update>
+ 
+ 
+</sqlMap>

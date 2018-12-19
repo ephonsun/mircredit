@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanMonitorSQL">
+	<typeAlias alias="BaseLnLoanMonitor" type="com.banger.mobile.domain.model.base.loan.BaseLnLoanMonitor" />
+	<typeAlias alias="LnLoanMonitor" type="com.banger.mobile.domain.model.loan.LnLoanMonitor" />
+
+	<!-- 贷款类型表 全字段  -->
+	
+	<resultMap class="BaseLnLoanMonitor" id="LnLoanMonitorResult" >
+		<result column="LOAN_MON_ID" property="loanMonId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="MON_USER_ID" property="monUserId" />
+		<result column="MON_DATE" property="monDate" />
+		<result column="MON_TYPE" property="monType" />
+		<result column="REVISIT_TYPE" property="revisitType" />
+ 		<result column="USER_RESULT" property="userResult" />
+		<result column="FILE_IDS" property="fileIds" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="READ_TAG" property="readTag" />
+		<result column="REMAK" property="remak" />
+		<result column="CUSTOMER_STATUS" property="customerStatus" />
+		<result column="BIZ_STATUS" property="bizStatus" />
+		<result column="FINANCE_STATUS" property="financeStatus" />
+		<result column="GUARANTOR_STATUS" property="guarantorStatus" />
+		<result column="LEDGE_STATUS" property="ledgeStatus" />
+
+	</resultMap>
+
+
+	<resultMap class="LnLoanMonitor" id="LnLoanMonitorNResult" >
+		<result column="LOAN_MON_ID" property="loanMonId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="MON_USER_ID" property="monUserId" />
+		<result column="MON_DATE" property="monDate" />
+		<result column="MON_TYPE" property="monType" />
+		<result column="REVISIT_TYPE" property="revisitType" />
+ 		<result column="USER_RESULT" property="userResult" />
+		<result column="FILE_IDS" property="fileIds" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="USER_NAME" property="userName" />
+		<result column="MON_TYPE_NAME" property="monTypeName" />
+		<result column="REVISIT_TYPE_NAME" property="revisitTypeName" />
+		<result column="READ_TAG" property="readTag" />
+        <result column="REMAK" property="remak" />
+		<result column="CUSTOMER_STATUS" property="customerStatus" />
+		<result column="BIZ_STATUS" property="bizStatus" />
+		<result column="FINANCE_STATUS" property="financeStatus" />
+		<result column="GUARANTOR_STATUS" property="guarantorStatus" />
+		<result column="LEDGE_STATUS" property="ledgeStatus" />
+
+
+
+	</resultMap>
+
+<!-- 增加一种类型-->
+    <insert id="insertLoanMonitor" parameterClass="BaseLnLoanMonitor">
+        <![CDATA[
+		INSERT INTO LN_LOAN_MONITOR
+    	(
+        LOAN_MON_ID,
+        LOAN_ID,
+        MON_USER_ID,
+        MON_DATE,
+        MON_TYPE,
+        REVISIT_TYPE,
+        USER_RESULT,
+        CREATE_USER,
+        CREATE_DATE,
+        FILE_IDS,
+        READ_TAG,
+        CUSTOMER_STATUS,
+        BIZ_STATUS,
+		FINANCE_STATUS,
+		GUARANTOR_STATUS,
+		LEDGE_STATUS
+    	)
+    	VALUES
+    	(
+        #loanMonId#,
+        #loanId#,
+        #monUserId#,
+        #monDate#,
+        #monType#,
+        #revisitType#,
+        #userResult#,
+        #createUser#,
+	    current timestamp,
+        #fileIds#,
+        0,
+        #customerStatus#,
+        #bizStatus#,
+        #financeStatus#,
+        #guarantorStatus#,
+        #ledgeStatus#
+    	)
+      ]]>
+        <selectKey keyProperty="loanMonId"   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_LN_LOAN_MONITOR
+        </selectKey>
+    </insert>
+
+
+    <!-- 类型修改-->
+    <update id="updateLoanMonitor" parameterClass="BaseLnLoanMonitor">
+		UPDATE LN_LOAN_Monitor SET
+		MON_USER_ID = #monUserId#,
+		USER_RESULT=#userResult#,
+		UPDATE_USER = #updateUser#,
+		UPDATE_DATE = current timestamp
+	 <isNotEmpty property="monDate" prepend=",">
+          MON_DATE = #monDate#
+     </isNotEmpty>
+    <isNotEmpty property="monType" prepend=",">
+         MON_TYPE = #monType#
+     </isNotEmpty>
+	 <isNotEmpty property="revisitType" prepend=",">
+        REVISIT_TYPE = #revisitType#
+     </isNotEmpty>
+	<isNotEmpty property="customerStatus" prepend=",">
+		CUSTOMER_STATUS = #customerStatus#
+	</isNotEmpty>
+	<isNotEmpty property="bizStatus" prepend=",">
+		BIZ_STATUS = #bizStatus#
+	</isNotEmpty>
+	<isNotEmpty property="financeStatus" prepend=",">
+		FINANCE_STATUS = #financeStatus#
+	</isNotEmpty>
+	<isNotEmpty property="guarantorStatus" prepend=",">
+		GUARANTOR_STATUS = #guarantorStatus#
+	</isNotEmpty>
+	<isNotEmpty property="ledgeStatus" prepend=",">
+		LEDGE_STATUS = #ledgeStatus#
+	</isNotEmpty>
+		  where
+		LOAN_MON_ID= #loanMonId#
+	</update>
+	<!-- 类型修改-->
+    <update id="updateLoanMonitorfile" parameterClass="BaseLnLoanMonitor">
+		UPDATE LN_LOAN_Monitor SET LOAN_MON_ID =  #loanMonId#
+		<isNotEmpty property="monUserId" prepend=",">
+			MON_USER_ID = #monUserId#
+		</isNotEmpty>
+		<isNotEmpty property="fileIds" prepend=",">
+			FILE_IDS=#fileIds#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+			UPDATE_USER = #updateUser#
+		</isNotEmpty>
+			,UPDATE_DATE = current timestamp
+		where
+			LOAN_MON_ID= #loanMonId#	    
+	</update>
+	
+    <update id = "updateReadTag" parameterClass="java.util.Map">
+		UPDATE LN_LOAN_Monitor SET READ_TAG =1
+        <isNotEmpty property="remak" prepend=",">
+            remak=#remak#
+        </isNotEmpty>
+		where LOAN_MON_ID= #loanMonId#
+	</update>
+	    
+    <!-- 根据ID删除类型 -->
+    <update id="deleteLoanMonitorById" parameterClass="java.lang.Integer">
+		delete LN_LOAN_MONITOR
+		where LOAN_MON_ID= #id#
+	</update>
+
+    <!-- 根据id得到类型 -->
+    <select id="getLoanMonitorById" resultMap="LnLoanMonitorResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from LN_LOAN_MONITOR where LOAN_MON_ID=#id#
+	    ]]>
+	</select>
+	<!-- 根据id得到类型 -->
+    <select id="getLoanMonitorListByLoanId" resultMap="LnLoanMonitorNResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		 select llm.*,su.USER_NAME,l.DICTIONARY_VALUE MON_TYPE_NAME,ll.DICTIONARY_VALUE REVISIT_TYPE_NAME
+		 from LN_LOAN_MONITOR llm
+		 left join sys_user su on su.user_id = MON_USER_ID
+         left join LN_LOAN_INFO_DICTIONARY l on llm.MON_TYPE=l.DICTIONARY_KEY and l.DICTIONARY_NAME='JKLX'
+         left join LN_LOAN_INFO_DICTIONARY ll on llm.REVISIT_TYPE=ll.DICTIONARY_KEY and ll.DICTIONARY_NAME='HFLX'
+		 where loan_id =#loanId# 
+	    ]]>
+	</select>
+</sqlMap>

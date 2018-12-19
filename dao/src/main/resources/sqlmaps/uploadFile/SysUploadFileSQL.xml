@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysUploadFileSQL">
+    <typeAlias alias="SysUploadFile" type="com.banger.mobile.domain.model.uploadFile.SysUploadFile" />
+    <resultMap id="SysUploadFileResult" class="SysUploadFile">
+        <result property="fileId" column="FILE_ID" />
+        <result property="storageType" column="STORAGE_TYPE" />
+        <result property="fileName" column="FILE_NAME" />
+        <result property="filePath" column="FILE_PATH" />
+        <result property="uploadFileName" column="UPLOAD_FILE_NAME" />
+        <result property="uploadDate" column="UPLOAD_DATE" />
+        <result property="uploadUserId" column="UPLOAD_USER_ID" />
+        <result property="fileSize" column="FILE_SIZE" />
+        <result property="fileMd5" column="FILE_MD5" />
+        <result property="caseNo" column="CASE_NO" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="createUser" column="CREATE_USER" />
+        <result property="updateUser" column="UPDATE_USER" />
+    </resultMap>
+       <resultMap id="SysUploadFileListResult" class="SysUploadFile">
+     	<result property="userName" column="USER_NAME" />
+        <result property="fileId" column="FILE_ID" />
+        <result property="uploadFileName" column="UPLOAD_FILE_NAME" />
+        <result property="uploadDate" column="UPLOAD_DATE" />
+    </resultMap>
+
+    <!-- 新增上传文件 -->
+    <insert id="insertSysUploadFile" parameterClass="SysUploadFile">
+        INSERT INTO SYS_UPLOAD_FILE
+        (
+         FILE_ID,
+         STORAGE_TYPE,
+         FILE_NAME,
+         FILE_PATH,
+         UPLOAD_FILE_NAME,
+         UPLOAD_DATE,
+         UPLOAD_USER_ID,
+         FILE_SIZE,
+         FILE_MD5,
+         CASE_NO,
+         CREATE_DATE,
+         UPDATE_DATE,
+         CREATE_USER,
+         UPDATE_USER
+        )
+        VALUES
+        (
+         #fileId:INTEGER#,
+         #storageType:VARCHAR:NULL#,
+         #fileName:VARCHAR:NULL#,
+         #filePath:VARCHAR:NULL#,
+         #uploadFileName:VARCHAR:NULL#,
+         current timestamp,
+         #uploadUserId:INTEGER#,
+         #fileSize:BIGINT#,
+         #fileMd5:VARCHAR:NULL#,
+         #caseNo:VARCHAR:NULL#,
+         current timestamp,
+         current timestamp,
+         #createUser:INTEGER#,
+         #updateUser:INTEGER#
+        )
+        <selectKey keyProperty="fileId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_SYS_UPLOAD_FILE
+        </selectKey>
+    </insert>
+
+    <!-- 更新上传文件 -->
+    <update id="updateSysUploadFile" parameterClass="SysUploadFile">
+        UPDATE SYS_UPLOAD_FILE SET
+        <isNotEmpty property="storageType">
+            STORAGE_TYPE = #storageType#,
+        </isNotEmpty>
+        <isNotEmpty property="fileName">
+            FILE_NAME = #fileName#,
+        </isNotEmpty>
+        <isNotEmpty property="filePath">
+            FILE_PATH = #filePath#,
+        </isNotEmpty>
+        <isNotEmpty property="uploadFileName">
+            UPLOAD_FILE_NAME = #uploadFileName#,
+        </isNotEmpty>
+        <isNotEmpty property="uploadDate">
+            UPLOAD_DATE = #uploadDate#,
+        </isNotEmpty>
+        <isNotEmpty property="uploadUserId">
+            UPLOAD_USER_ID = #uploadUserId#,
+        </isNotEmpty>
+        <isNotEmpty property="fileSize">
+            FILE_SIZE = #fileSize#,
+        </isNotEmpty>
+        <isNotEmpty property="fileMd5">
+            FILE_MD5 = #fileMd5#,
+        </isNotEmpty>
+        <isNotEmpty property="caseNo">
+            CASE_NO = #caseNo#,
+        </isNotEmpty>
+        <isNotEmpty property="updateUser">
+            UPDATE_USER = #updateUser#,
+        </isNotEmpty>
+        UPDATE_DATE = current timestamp
+        WHERE FILE_ID =#fileId#
+
+    </update>
+
+    <!-- 删除上传文件 -->
+    <delete id="deleteSysUploadFile" parameterClass="Integer">
+        DELETE FROM SYS_UPLOAD_FILE WHERE FILE_ID = #fileId#
+    </delete>
+
+    <!-- 根据文件ID获取文件信息 -->
+    <select id="getSysUploadFileById" parameterClass="Integer" resultMap="SysUploadFileResult">
+        SELECT * FROM SYS_UPLOAD_FILE WHERE FILE_ID = #fileId#
+    </select>
+	<!-- 根据贷款ID获取文件附件 -->
+    <select id="queryForUploadFormList"  parameterClass="java.util.Map" resultMap="SysUploadFileListResult">
+		select suf.FILE_ID, suf.UPLOAD_FILE_NAME,suf.UPLOAD_DATE,su.USER_NAME
+		from sys_upload_file suf 
+		left join sys_user su on su.USER_ID = suf.UPLOAD_USER_ID
+		left join dat_form df on  df.file_id = suf.file_id
+		left join dat_customer_data dcd on dcd.CUSTOMER_DATA_ID = df.CUSTOMER_DATA_ID
+		where dcd.loan_id = #loanId#
+    </select>
+    <!-- 根据文件名称获取文件信息 -->
+    <select id="queryByFileName" parameterClass="Integer" resultMap="SysUploadFileResult">
+        SELECT * FROM SYS_UPLOAD_FILE WHERE FILE_NAME = #fileName#
+    </select>
+
+    <select id="queryForUplaodCms" resultMap="SysUploadFileResult">
+        SELECT * FROM SYS_UPLOAD_FILE WHERE STORAGE_TYPE = 'file' and CASE_NO is not null
+        order by  update_date desc fetch first 1000 rows only
+    </select>
+
+    <select id="queryForDeleteCms" parameterClass="String" resultMap="SysUploadFileResult">
+        <![CDATA[
+        SELECT * FROM SYS_UPLOAD_FILE WHERE STORAGE_TYPE = 'cm' and Date(update_date) = #date#
+        ]]>
+    </select>
+
+    <update id="batchUpdateStorageType" parameterClass="SysUploadFile">
+        UPDATE SYS_UPLOAD_FILE
+        SET
+        STORAGE_TYPE = 'cm',
+        UPDATE_DATE = current timestamp
+        WHERE
+        FILE_NAME = #fileName#
+    </update>
+
+</sqlMap>

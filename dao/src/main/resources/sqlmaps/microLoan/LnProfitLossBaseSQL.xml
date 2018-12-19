@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="LnProfitLossBaseSQL" >
+  <resultMap id="lnProfitLossBaseResult" class="com.banger.mobile.domain.model.loan.LnProfitLossBase" >
+  <!--  <result column="ID" property="profitLossId" jdbcType="INTEGER" />-->
+    <result column="LOAN_ID" property="loanId" jdbcType="INTEGER" />
+    <result column="BEGIN_TIME" property="beginTime" jdbcType="TIMESTAMP" />
+    <result column="END_TIME" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="LAST_MONTH_RATE" property="lastMonthRate" jdbcType="INTEGER" />
+    <result column="MONTH_NUMBER" property="monthNumber" jdbcType="INTEGER" />
+    <result column="GROSS_RATE_REMARK" property="grossRateRemark" jdbcType="VARCHAR" />
+ <!--   <result column="SELLING_RATE" property="sellingRate" jdbcType="DOUBLE" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />-->
+    <result column="CREATE_USER" property="createUser" jdbcType="INTEGER" />
+    <result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="UPDATE_USER" property="updateUser" jdbcType="INTEGER" />
+    <result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
+    
+  </resultMap>
+
+  <select id="selectProfitLossBaseByPrimary" resultMap="lnProfitLossBaseResult" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossBase" >
+    
+    select  LOAN_ID, BEGIN_TIME, END_TIME, LAST_MONTH_RATE,
+    MONTH_NUMBER, GROSS_RATE_REMARK, CREATE_USER, CREATE_DATE, UPDATE_USER, UPDATE_DATE
+    from LN_PROFIT_LOSS_BASE WHERE 1=1
+   <!--   <isNotEmpty property="profitLossId" prepend="AND">
+		   		   		ID = #profitLossId:INTEGER#
+		</isNotEmpty>-->
+      <isNotEmpty property="loanId" prepend="AND">
+		   		   		LOAN_ID = #loanId#
+		</isNotEmpty>
+        ORDER BY CREATE_DATE
+  </select>
+ 
+  <delete id="deleteLnProfitLossBase" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossBase" >
+   
+    delete from LN_PROFIT_LOSS_BASE
+    where LOAN_ID = #loanId:INTEGER#
+  </delete>
+ 
+  <insert id="insertLnProfitLossBase" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossBase" >
+   
+    insert into LN_PROFIT_LOSS_BASE (LOAN_ID, BEGIN_TIME, END_TIME, LAST_MONTH_RATE,
+    MONTH_NUMBER, GROSS_RATE_REMARK, CREATE_USER, CREATE_DATE, UPDATE_USER, UPDATE_DATE)
+    values (#loanId:INTEGER#, #beginTime:TIMESTAMP#, #endTime:TIMESTAMP#, #lastMonthRate:INTEGER#, #monthNumber:INTEGER#,
+      #grossRateRemark:VARCHAR#, #createUser:INTEGER#, #createDate:TIMESTAMP#, #updateUser:INTEGER#,
+      #updateDate:TIMESTAMP#)
+     <!--  <selectKey keyProperty="loanId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_PROFIT_LOSS_PROD
+		</selectKey>-->
+      
+  </insert>
+  <update id="updateLnProfitLossBase" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossBase" >
+    update LN_PROFIT_LOSS_BASE
+    set 
+      BEGIN_TIME = #beginTime:TIMESTAMP#,
+      END_TIME = #endTime:TIMESTAMP#,LAST_MONTH_RATE = #lastMonthRate:INTEGER#,MONTH_NUMBER = #monthNumber:INTEGER#,
+      GROSS_RATE_REMARK = #grossRateRemark:VARCHAR#,
+      UPDATE_USER = #updateUser:INTEGER#,
+      UPDATE_DATE = #updateDate:TIMESTAMP#
+    where LOAN_ID = #loanId:INTEGER#
+  </update>
+
+</sqlMap>

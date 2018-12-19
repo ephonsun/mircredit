@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnValidationRightsSQL">
+
+    <typeAlias alias="LnValidationRights" type="com.banger.mobile.domain.model.loan.LnValidationRights"/>
+
+    <resultMap class="LnValidationRights" id="LnValidationRightsResult">
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+
+       	<result column="RIGHTS_BEGIN_DATE" property="rightsBeginDate"/>
+       	<result column="RIGHTS_BEGIN_AMOUNT" property="rightsBeginAmount"/>
+       	<result column="RIGHTS_BEGIN_REMARK" property="rightsBeginRemark"/>
+       	<result column="INCREASE_AMOUNT" property="increaseAmount"/>
+       	<result column="INCREASE_FINANCING" property="increaseFinancing"/>
+       	<result column="INCREASE_VALUE" property="increaseValue"/>
+       	<result column="INCREASE_REMARK" property="increaseRemark"/>
+       	<result column="LESSEN_AMOUNT" property="lessenAmount"/>
+       	<result column="LESSEN_VALUE" property="lessenValue"/>
+       	<result column="LESSEN_REMARK" property="lessenRemark"/>
+       	<result column="RIGHTS_DUE_AMOUNT" property="rightsDueAmount"/>
+       	<result column="RIGHTS_REAL_AMOUNT" property="rightsRealAmount"/>
+       	<result column="RIGHTS_DEPRECIATION_VALUE" property="rightsDepreciationValue"/>
+       	<result column="RIGHTS_DEPRECIATION_RATE" property="rightsDepreciationRate"/>
+
+    </resultMap>
+
+    <delete id="deleteValidationRights" parameterClass="Integer">
+         DELETE FROM LN_VALIDATION_RIGHTS WHERE LOAN_ID = #loanId#
+    </delete>
+
+    <insert id="insertValidationRights" parameterClass="LnValidationRights">
+        INSERT INTO LN_VALIDATION_RIGHTS
+         (
+         	LOAN_ID,
+			RIGHTS_BEGIN_DATE,
+        	RIGHTS_BEGIN_AMOUNT,
+			RIGHTS_BEGIN_REMARK ,
+        	INCREASE_AMOUNT,
+        	INCREASE_FINANCING,
+        	INCREASE_VALUE,
+			INCREASE_REMARK,
+        	LESSEN_AMOUNT,
+        	LESSEN_VALUE,
+			LESSEN_REMARK ,
+        	RIGHTS_DUE_AMOUNT,
+        	RIGHTS_REAL_AMOUNT ,
+        	RIGHTS_DEPRECIATION_VALUE,
+        	RIGHTS_DEPRECIATION_RATE,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE
+         )
+         VALUES
+         (
+			#loanId:INTEGER#,
+			#rightsBeginDate:TIMESTAMP#,
+			#rightsBeginAmount:DECIMAL#,
+			#rightsBeginRemark:VARCHAR#,
+			#increaseAmount:DECIMAL#,
+			#increaseFinancing:DECIMAL#,
+			#increaseValue:DECIMAL#,
+			#increaseRemark:VARCHAR#,
+			#lessenAmount:DECIMAL#,
+			#lessenValue:DECIMAL#,
+			#lessenRemark:VARCHAR#,
+			#rightsDueAmount:DECIMAL#,
+ 			#rightsRealAmount:DECIMAL#,
+			#rightsDepreciationValue:DECIMAL#,
+			#rightsDepreciationRate:DOUBLE#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#
+         )
+    </insert>
+
+
+    <update id="updateValidationRights" parameterClass="LnValidationRights">
+        update LN_VALIDATION_RIGHTS SET LOAN_ID=LOAN_ID
+        <isNotEmpty property="rightsBeginDate" prepend=",">
+			RIGHTS_BEGIN_DATE = #rightsBeginDate#
+		</isNotEmpty>
+		<isNotEmpty property="rightsBeginAmount" prepend=",">
+			RIGHTS_BEGIN_AMOUNT = #rightsBeginAmount#
+		</isNotEmpty>
+		<isNotEmpty property="rightsBeginRemark" prepend=",">
+			RIGHTS_BEGIN_REMARK = #rightsBeginRemark#
+		</isNotEmpty>
+		<isNotEmpty property="increaseAmount" prepend=",">
+			INCREASE_AMOUNT = #increaseAmount#
+		</isNotEmpty>
+		<isNotEmpty property="increaseFinancing" prepend=",">
+			INCREASE_FINANCING = #increaseFinancing#
+		</isNotEmpty>
+		<isNotEmpty property="increaseValue" prepend=",">
+			INCREASE_VALUE = #increaseValue#
+		</isNotEmpty>
+		<isNotEmpty property="increaseRemark" prepend=",">
+			INCREASE_REMARK = #increaseRemark#
+		</isNotEmpty>
+		<isNotEmpty property="lessenAmount" prepend=",">
+			LESSEN_AMOUNT = #lessenAmount#
+		</isNotEmpty>
+		<isNotEmpty property="lessenValue" prepend=",">
+			LESSEN_VALUE = #lessenValue#
+		</isNotEmpty>
+		<isNotEmpty property="lessenRemark" prepend=",">
+			LESSEN_REMARK = #lessenRemark#
+		</isNotEmpty>
+		<isNotEmpty property="rightsDueAmount" prepend=",">
+			RIGHTS_DUE_AMOUNT = #rightsDueAmount#
+		</isNotEmpty>
+		<isNotEmpty property="rightsRealAmount" prepend=",">
+			RIGHTS_REAL_AMOUNT = #rightsRealAmount#
+		</isNotEmpty>
+		<isNotEmpty property="rightsDepreciationValue" prepend=",">
+			RIGHTS_DEPRECIATION_VALUE = #rightsDepreciationValue#
+		</isNotEmpty>
+		<isNotEmpty property="rightsDepreciationRate" prepend=",">
+			RIGHTS_DEPRECIATION_RATE = #rightsDepreciationRate#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+        where LOAN_ID=#loanId#
+    </update>
+
+
+    <select id="getLnValidationRightsById" resultMap="LnValidationRightsResult" parameterClass="java.lang.Integer">
+		select * from LN_VALIDATION_RIGHTS where loan_id=#loanId#
+    </select>
+
+</sqlMap>

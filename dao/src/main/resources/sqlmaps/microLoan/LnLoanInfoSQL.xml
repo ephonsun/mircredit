@@ -1,0 +1,2191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+		"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanInfoSQL">
+	<typeAlias alias="LnLoanInfo" type="com.banger.mobile.domain.model.loan.LnLoanInfo" />
+
+	<resultMap id="LnLoanInfoResult" class="LnLoanInfo">
+		<result column="LOAN_INFO_ID"	property="loanInfoId"/>
+		<result column="LOAN_ID"	property="loanId"/>
+		<result column="CUSTOMER_ID"	property="customerId"/>
+		<result column="IS_NO_GOOD"  property="isNoGood"/>
+		<result column="REFUSE_LOAN_STATE_ID"	property="refuseLoanStateId"/>
+		<result column="REFUSE_REASON_TYPE_ID"	property="refuseReasonTypeId"/>
+		<result column="REFUSE_REASON_SUB_TYPE_ID"	property="refuseReasonSubTypeId"/>
+		<result column="REFUSE_CONTENT"	property="refuseContent"/>
+		<result column="TOGETHER_SURVEY_USER_ID"	property="togetherSurveyUserId"/>
+		<result column="TOGETHER_SURVEY_DATE"	property="togetherSurveyDate"/>
+		<result column="ASSIGN_REMARK"	property="assignRemark"/>
+		<result column="REGISTER_MICRO_BIZ_CENTER"	property="registerMicroBizCenter"/>
+		<result column="REGISTER_RECOMMEND_BANK"	property="registerRecommendBank"/>
+		<result column="REGISTER_APPLY_DATE"	property="registerApplyDate"/>
+		<result column="REGISTER_LOAN_DATE"	property="registerLoanDate"/>
+		<result column="REGISTER_INFO_SOURCE_IDS"	property="registerInfoSourceIds"/>
+		<result column="REGISTER_DIRECT_MARKET"	property="registerDirectMarket"/>
+		<result column="REGISTER_EXIST_CUS_INTRODUCT"	property="registerExistCusIntroduct"/>
+		<result column="REGISTER_INFO_SOURCE_OTHER"	property="registerInfoSourceOther"/>
+		<result column="APP_LOAN_TYPE_ID"	property="appLoanTypeId"/>
+		<result column="APP_LOAN_SUB_TYPE_ID"	property="appLoanSubTypeId"/>
+		<result column="APP_MONEY"	property="appMoney"/>
+		<result column="APP_LIMIT_YEAR"	property="appLimitYear"/>
+		<result column="APP_REPAYMENT_MONTH"	property="appRepaymentMonth"/>
+		<result column="APP_LOAN_PURPOSE"	property="appLoanPurpose"/>
+		<result column="APP_GUARANTOR_WAY_ID"	property="appGuarantorWayId"/>
+		<result column="APP_MORTGAGE_ID"	property="appMortgageId"/>
+		<result column="APP_MORTGAGE_OTHER"	property="appMortgageOther"/>
+		<result column="APP_PLEDGE_OTHER"	property="appPledgeOther"/>
+		<result column="APP_PLEDGE_ID"	property="appPledgeId"/>
+		<result column="APP_MAX_INSTALLMENT_MONEY"	property="appMaxInstallmentMoney"/>
+		<result column="APP_TOTAL_PROJECT_COST"	property="appTotalProjectCost"/>
+		<result column="APP_USER_DETAIL"	property="appUserDetail"/>
+		<result column="CUS_NAME"	property="cusName"/>
+		<result column="CUS_BIRTHDAY"	property="cusBirthday"/>
+		<result column="CUS_SEX"	property="cusSex"/>
+		<result column="CUS_IDTYPE_ID"	property="cusIdtypeId"/>
+		<result column="CUS_IDCARD"	property="cusIdcard"/>
+		<result column="CUS_MOBILE_PHONE"	property="cusMobilePhone"/>
+		<result column="CUS_PHONE"	property="cusPhone"/>
+		<result column="CUS_EDUCATION_ID"	property="cusEducationId"/>
+		<result column="CUS_LIVING_STATUS_ID"	property="cusLivingStatusId"/>
+		<result column="CUS_LIVING_ADDRESS"	property="cusLivingAddress"/>
+		<result column="CUS_ADDRESS"	property="cusAddress"/>
+		<result column="CUS_MARRIAGE"	property="cusMarriage"/>
+		
+		<result column="IS_LOCAL"	property="isLocal"/>
+		<result column="CUS_REGISTERED_RESIDENCE"	property="cusRegisteredResidence"/>
+		<result column="CUS_LIVING_TYPE_ID"	property="cusLivingTypeId"/>
+		<result column="CUS_LIVING_START_DATE"	property="cusLivingStartDate"/>
+		<result column="CUS_HOUSE_PATTERN"	property="cusHousePattern"/>
+		<result column="CUS_HOUSE_AREA"	property="cusHouseArea"/>
+		<result column="CUS_HOUSE_DECORATE_ID"	property="cusHouseDecorateId"/>
+		<result column="CUS_ECONOMIC_STATE"	property="cusEconomicState"/>
+		<result column="CUS_NOTE"	property="cusNote"/>
+		<result column="CUS_NET_AGE"	property="cusNetAge"/>
+		<result column="CUS_COMMON_OPERATER_NAME"	property="cusCommonOperaterName"/>
+		<result column="CUS_COMMON_OPERATER_IDCARD"	property="cusCommonOperaterIdcard"/>
+		<result column="CUS_COMMON_OPERATER_MOBILE_PHO"	property="cusCommonOperaterMobilePhone"/>
+		<result column="CUS_FIRST_IMPRESS"	property="cusFirstImpress"/>
+		<result column="CUS_MATE_NAME"	property="cusMateName"/>
+		<result column="CUS_MATE_IDCARD"	property="cusMateIdcard"/>
+		<result column="CUS_COMPANY_NAME"	property="cusCompanyName"/>
+		<result column="CUS_MATE_MOBILE_PHONE"	property="cusMateMobilePhone"/>
+		<result column="CUS_MATE_PHONE"	property="cusMatePhone"/>
+		<result column="CUS_MATE_COMPANY_PHONE"	property="cusMateCompanyPhone"/>
+		<result column="CUS_COMPANY_NATURE"	property="cusCompanyNature"/>
+		<result column="CUS_MATE_JOB"	property="cusMateJob"/>
+		<result column="CUS_MATE_WORK_YEAR"	property="cusMateWorkYear"/>
+		<result column="CUS_MATE_ADDRESS"	property="cusMateAddress"/>
+		<result column="CUS_MATE_MONTHLY_INCOMING_ID"	property="cusMateMonthlyIncomingId"/>
+		<result column="CUS_CHD_INFO"	property="cusChdInfo"/>
+		<result column="CUS_FAMILY_NUM"	property="cusFamilyNum"/>
+		<result column="CUS_PARENT_INFO"	property="cusParentInfo"/>
+		<result column="CUS_LOCAL_YEAR"	property="cusLocalYear"/>
+		<result column="COMPANY_NAME"	property="companyName"/>
+		<result column="COMPANY_NATURE"	property="companyNature"/>
+		<result column="COMPANY_JOB"	property="companyJob"/>
+		<result column="COMPANY_WORK_YEAR"	property="companyWorkYear"/>
+		<result column="COMPANY_MONTHLY_INCOMING"	property="companyMonthlyIncoming"/>
+		<result column="COMPANY_ADDRESS"	property="companyAddress"/>
+		<result column="BIZ_COMPANY"	property="bizCompany"/>
+		<result column="BIZ_SCOPE"	property="bizScope"/>
+		<result column="BIZ_ORG_ID"	property="bizOrgId"/>
+		<result column="BIZ_ORG_CODE"	property="bizOrgCode"/>
+		<result column="BIZ_LICENSE_NUM"	property="bizLicenseNum"/>
+		<result column="BIZ_SOCIAL_CREDIT_NUM"	property="bizSocialCreditNum"/>
+		<result column="BIZ_ACTUAL_OPERATOR"	property="bizActualOperator"/>
+		<result column="BIZ_ADDRESS"	property="bizAddress"/>
+		<result column="BIZ_SHAREHOLDER_PROPORTION"	property="bizShareholderProportion"/>
+		<result column="BIZ_PLACE_ID"	property="bizPlaceId"/>
+		<result column="BIZ_AREA"	property="bizArea"/>
+		<result column="BIZ_LAW_FORM_ID"	property="bizLawFormId"/>
+		<result column="BIZ_LEAGL"	property="bizLeagl"/>
+		<result column="BIZ_LEAGL_MOBILE_PHONE"	property="bizLeaglMobilePhone"/>
+		<result column="BIZ_EMPLOYEE_NUM"	property="bizEmployeeNum"/>
+		<result column="BIZ_OPEN_DATE"	property="bizOpenDate"/>
+		<result column="BIZ_IS_BELONG_MYBANK"	property="bizIsBelongMybank"/>
+		<result column="BIZ_MYBANK_NO"	property="bizMybankNo"/>
+		<result column="BIZ_NOTE"	property="bizNote"/>
+		<result column="CAF_MONTHLY_SALES"	property="cafMonthlySales"/>
+		<result column="CAF_BUSY_SEASON"	property="cafBusySeason"/>
+		<result column="CAF_LOW_SEASON"	property="cafLowSeason"/>
+		<result column="CAF_RECEIVABLE_MONEY"	property="cafReceivableMoney"/>
+		<result column="CAF_GROSS_MARGIN"	property="cafGrossMargin"/>
+		<result column="CAF_NET_MARGIN"	property="cafNetMargin"/>
+		<result column="CAF_INVENTORY"	property="cafInventory"/>
+		<result column="CAF_DEBT"	property="cafDebt"/>
+		<result column="CAF_TOTAL_MONEY"	property="cafTotalMoney"/>
+		<result column="CAF_OTHER"	property="cafOther"/>
+		<result column="CAF_TOTAL_CREDIT_CARD"	property="cafTotalCreditCard"/>
+		<result column="CAF_TOTAL_CREDIT_MONEY"	property="cafTotalCreditMoney"/>
+		<result column="CAF_TOTAL_OVERDRAFT_MONEY"	property="cafTotalOverdraftMoney"/>
+		<result column="CAF_OVERDUE_SITUATION"	property="cafOverdueSituation"/>
+		<result column="CAF_LOAN_CARD"	property="cafLoanCard"/>
+		<result column="CAF_BORROWER_CREIDT_DESC"	property="cafBorrowerCreidtDesc"/>
+		<result column="CAF_GUARANTOR_CREIDT_DESC"	property="cafGuarantorCreidtDesc"/>
+		<result column="ADVICE_MONEY"	property="adviceMoney"/>
+		<result column="ADVICE_LIMIT_YEAR"	property="adviceLimitYear"/>
+		<result column="ADVICE_RATE"	property="adviceRate"/>
+		<result column="ADVICE_REPAY_DATE"	property="adviceRepayDate"/>
+		<result column="ADVICE_LEND_WAY_ID"	property="adviceLendWayId"/>
+		<result column="ADVICE_REPAY_WAY_ID"	property="adviceRepayWayId"/>
+		<result column="ADVICE_OTHER"	property="adviceOther"/>
+		<result column="ADVICE_NOTE"	property="adviceNote"/>
+		<result column="ADVICE_VERDICT"	property="adviceVerdict"/>
+		<result column="RESULT_MONEY"	property="resultMoney"/>
+		<result column="RESULT_LIMIT_YEAR"	property="resultLimitYear"/>
+		<result column="RESULT_RATE"	property="resultRate"/>
+		<result column="RESULT_REPAY_DATE"	property="resultRepayDate"/>
+		<result column="RESULT_INSTAL_REPAY_MONEY"	property="resultInstalRepayMoney"/>
+		<result column="RESULT_RISK_WARM"	property="resultRiskWarm"/>
+		<result column="RESULT_SURVEY_EXIS_PROBLEMS"	property="resultSurveyExisProblems"/>
+		<result column="RESULT_NOTE"	property="resultNote"/>
+		<result column="RESULT_VERDICT"	property="resultVerdict"/>
+		<result column="RESULT_REPAY_WAY_ID"	property="resultRepayWayId"/>
+		<result column="RESULT_PURPOSE"	property="resultPurpose"/>
+		<result column="IS_CRM_TASK"	property="isCrmTask"/>
+		<result column="ADVANCE_REPAY"	property="advanceRepay"/>
+		<result column="LN_MODE"	property="lnMode"/>
+		<result column="LN_BENEFIT"	property="lnBenefit"/>
+		<result column="ORIGINAL_RATE"	property="originalRate"/>
+		<result column="RESULT_LN_PREMISS"	property="resultLnPremiss"/>
+		<result column="LEND_CONTRACT_NUM"	property="lendContractNum"/>
+		<result column="LEND_CONFRIM_CONTRACT_NUM"	property="lendConfrimContractNum"/>
+		<result column="LEND_NOTE"	property="lendNote"/>
+		<result column="REGISTER_SAVE_STATUS"	property="registerSaveStatus"/>
+		<result column="APPLICATION_INFO"	property="applicationInfo"/>
+		<result column="PERSONAL_INFO"	property="personalInfo"/>
+		<result column="FAMILY_INFO"	property="familyInfo"/>
+		<result column="BUSINESS_INFO"	property="businessInfo"/>
+		<result column="SIGN_INFO"	property="signInfo"/>
+		<result column="SIGN_INFO_PATH"	property="signInfoPath"/>
+		<result column="APP_FORM_BAK"	property="appFormBak"/>
+		<result column="CREATE_DATE"	property="createDate"/>
+		<result column="UPDATE_DATE"	property="updateDate"/>
+
+		<result column="REGISTER_SOURCE_FFKKHJS"	property="registerSourceFFKKHJS"/>
+		<result column="REGISTER_SOURCE_WX"	property="registerSourceWX"/>
+		<result column="REGISTER_SOURCE_MM"	property="registerSourceMM"/>
+		<result column="REGISTER_SOURCE_CCK"	property="registerSourceCCK"/>
+		<result column="REGISTER_SOURCE_HNYGJS"	property="registerSourceHNYGJS"/>
+		<result column="REGISTER_SOURCE_DHYX"	property="registerSourceDHYX"/>
+		<result column="REGISTER_SOURCE_HZSHTJ"	property="registerSourceHZSHTJ"/>
+		<result column="REGISTER_SOURCE_ZXSQ"	property="registerSourceZXSQ"/>
+
+		<result column="GUARANTY_INCOME_CHECK" property="guarantyIncomeCheck"/>
+		<result column="GUARANTY_DEBT_REMARK"	property="guarantyDebtRemark"/>
+		<result column="GUARANTY_OTHER_REMARK" property="guarantyOtherRemark"/>
+
+		<result column="SEASON_REMARK"	property="seasonRemark"/>
+		<result column="IS_SEASON" property="isSeason"/>
+	</resultMap>
+
+
+	<insert id="insertLnLoanInfo" parameterClass="LnLoanInfo">
+		INSERT INTO LN_LOAN_INFO
+		(
+		LOAN_INFO_ID,
+		LOAN_ID,
+		CUSTOMER_ID,
+		IS_NO_GOOD,
+		REFUSE_LOAN_STATE_ID,
+		REFUSE_REASON_TYPE_ID,
+		REFUSE_REASON_SUB_TYPE_ID,
+		REFUSE_CONTENT,
+		TOGETHER_SURVEY_USER_ID,
+		TOGETHER_SURVEY_DATE,
+		ASSIGN_REMARK,
+		REGISTER_MICRO_BIZ_CENTER,
+		REGISTER_RECOMMEND_BANK,
+		REGISTER_APPLY_DATE,
+		REGISTER_LOAN_DATE,
+		REGISTER_INFO_SOURCE_IDS,
+		REGISTER_DIRECT_MARKET,
+		REGISTER_EXIST_CUS_INTRODUCT,
+		REGISTER_INFO_SOURCE_OTHER,
+		APP_LOAN_TYPE_ID,
+		APP_LOAN_SUB_TYPE_ID,
+		APP_MONEY,
+		APP_LIMIT_YEAR,
+		APP_REPAYMENT_MONTH,
+		APP_LOAN_PURPOSE,
+		APP_GUARANTOR_WAY_ID,
+		APP_MORTGAGE_ID,
+		APP_PLEDGE_ID,
+		APP_MAX_INSTALLMENT_MONEY,
+		APP_TOTAL_PROJECT_COST,
+		APP_USER_DETAIL,
+		APP_MORTGAGE_OTHER,
+		APP_PLEDGE_OTHER,
+		CUS_NAME,
+		CUS_BIRTHDAY,
+		CUS_SEX,
+		CUS_IDTYPE_ID,
+		CUS_IDCARD,
+		CUS_MOBILE_PHONE,
+		CUS_PHONE,
+		CUS_EDUCATION_ID,
+		CUS_LIVING_STATUS_ID,
+		CUS_ADDRESS,
+		CUS_MARRIAGE,
+		IS_LOCAL,
+		CUS_REGISTERED_RESIDENCE,
+		CUS_LIVING_TYPE_ID,
+		CUS_LIVING_START_DATE,
+		CUS_LIVING_ADDRESS,
+		CUS_HOUSE_PATTERN,
+		CUS_HOUSE_AREA,
+		CUS_HOUSE_DECORATE_ID,
+		CUS_ECONOMIC_STATE,
+		CUS_NOTE,
+		CUS_NET_AGE,
+		CUS_COMMON_OPERATER_NAME,
+		CUS_COMMON_OPERATER_IDCARD,
+		CUS_COMMON_OPERATER_MOBILE_PHO,
+		CUS_FIRST_IMPRESS,
+		CUS_MATE_NAME,
+		CUS_MATE_IDCARD,
+		CUS_COMPANY_NAME,
+		CUS_MATE_MOBILE_PHONE,
+		CUS_MATE_PHONE,
+		CUS_MATE_COMPANY_PHONE,
+		CUS_COMPANY_NATURE,
+		CUS_MATE_JOB,
+		CUS_MATE_WORK_YEAR,
+		CUS_MATE_ADDRESS,
+		CUS_MATE_MONTHLY_INCOMING_ID,
+		CUS_CHD_INFO,
+		CUS_FAMILY_NUM,
+		CUS_PARENT_INFO,
+		CUS_LOCAL_YEAR,
+		COMPANY_NAME,
+		COMPANY_NATURE,
+		COMPANY_JOB,
+		COMPANY_WORK_YEAR,
+		COMPANY_MONTHLY_INCOMING,
+		COMPANY_ADDRESS,
+		BIZ_COMPANY,
+		BIZ_SCOPE,
+		BIZ_ORG_ID,
+		BIZ_ORG_CODE,
+		BIZ_LICENSE_NUM,
+		BIZ_SOCIAL_CREDIT_NUM,
+		BIZ_ACTUAL_OPERATOR,
+		BIZ_ADDRESS,
+		BIZ_SHAREHOLDER_PROPORTION,
+		BIZ_PLACE_ID,
+		BIZ_AREA,
+		BIZ_LAW_FORM_ID,
+		BIZ_LEAGL,
+		BIZ_LEAGL_MOBILE_PHONE,
+		BIZ_EMPLOYEE_NUM,
+		BIZ_OPEN_DATE,
+		BIZ_IS_BELONG_MYBANK,
+		BIZ_MYBANK_NO,
+		BIZ_NOTE,
+		CAF_MONTHLY_SALES,
+		CAF_BUSY_SEASON,
+		CAF_LOW_SEASON,
+		CAF_RECEIVABLE_MONEY,
+		CAF_GROSS_MARGIN,
+		CAF_NET_MARGIN,
+		CAF_INVENTORY,
+		CAF_DEBT,
+		CAF_TOTAL_MONEY,
+		CAF_OTHER,
+		CAF_TOTAL_CREDIT_CARD,
+		CAF_TOTAL_CREDIT_MONEY,
+		CAF_TOTAL_OVERDRAFT_MONEY,
+		CAF_OVERDUE_SITUATION,
+		CAF_LOAN_CARD,
+		CAF_BORROWER_CREIDT_DESC,
+		CAF_GUARANTOR_CREIDT_DESC,
+		ADVICE_MONEY,
+		ADVICE_LIMIT_YEAR,
+		ADVICE_RATE,
+		ADVICE_REPAY_DATE,
+		ADVICE_LEND_WAY_ID,
+		ADVICE_REPAY_WAY_ID,
+		ADVICE_OTHER,
+		ADVICE_NOTE,
+		RESULT_MONEY,
+		RESULT_LIMIT_YEAR,
+		RESULT_RATE,
+		RESULT_REPAY_DATE,
+		RESULT_INSTAL_REPAY_MONEY,
+		RESULT_RISK_WARM,
+		RESULT_SURVEY_EXIS_PROBLEMS,
+		RESULT_NOTE,
+		LEND_CONTRACT_NUM ,
+		LEND_CONFRIM_CONTRACT_NUM,
+		LEND_NOTE,
+		REGISTER_SAVE_STATUS,
+		APPLICATION_INFO,
+		PERSONAL_INFO,
+		FAMILY_INFO,
+		BUSINESS_INFO,
+		SIGN_INFO,
+		SIGN_INFO_PATH,
+		APP_FORM_BAK,
+		CREATE_DATE,
+		UPDATE_DATE,
+		REGISTER_SOURCE_FFKKHJS,
+		REGISTER_SOURCE_WX,
+		REGISTER_SOURCE_MM,
+		REGISTER_SOURCE_CCK,
+		REGISTER_SOURCE_HNYGJS,
+		REGISTER_SOURCE_DHYX,
+		REGISTER_SOURCE_HZSHTJ,
+		REGISTER_SOURCE_ZXSQ,
+		GUARANTY_INCOME_CHECK,
+		GUARANTY_DEBT_REMARK,
+		GUARANTY_OTHER_REMARK,
+		SEASON_REMARK,
+		IS_SEASON
+		)
+		VALUES
+		(
+		#loanInfoId:INTEGER#,
+		#loanId:INTEGER#,
+		#customerId:INTEGER#,
+		#isNoGood:INTEGER#,
+		#refuseLoanStateId:VARCHAR:NULL#,
+		#refuseReasonTypeId:VARCHAR:NULL#,
+		#refuseReasonSubTypeId:VARCHAR:NULL#,
+		#refuseContent:VARCHAR:NULL#,
+		#togetherSurveyUserId:INTEGER#,
+		#togetherSurveyDate:TIMESTAMP#,
+		#assignRemark:VARCHAR:NULL#,
+		#registerMicroBizCenter:INTEGER#,
+		#registerRecommendBank:INTEGER#,
+		#registerApplyDate:TIMESTAMP#,
+		#registerLoanDate:TIMESTAMP#,
+		#registerInfoSourceIds:VARCHAR:NULL#,
+		#registerDirectMarket:VARCHAR:NULL#,
+		#registerExistCusIntroduct:VARCHAR:NULL#,
+		#registerInfoSourceOther:VARCHAR:NULL#,
+		#appLoanTypeId:VARCHAR:NULL#,
+		#appLoanSubTypeId:VARCHAR:NULL#,
+		#appMoney:DECIMAL#,
+		#appLimitYear:VARCHAR:NULL#,
+		#appRepaymentMonth:VARCHAR:NULL#,
+		#appLoanPurpose:VARCHAR:NULL#,
+		#appGuarantorWayId:VARCHAR:NULL#,
+		#appMortgageId:VARCHAR:NULL#,
+		#appPledgeId:VARCHAR:NULL#,
+		#appMaxInstallmentMoney:VARCHAR:NULL#,
+		#appTotalProjectCost:VARCHAR:NULL#,
+		#appUserDetail:VARCHAR:NULL#,
+		#appMortgageOther:VARCHAR:NULL#,
+		#appPledgeOther:VARCHAR:NULL#,
+		#cusName:VARCHAR:NULL#,
+		#cusBirthday:VARCHAR:NULL#,
+		#cusSex:VARCHAR:NULL#,
+		#cusIdtypeId:VARCHAR:NULL#,
+		#cusIdcard:VARCHAR:NULL#,
+		#cusMobilePhone:VARCHAR:NULL#,
+		#cusPhone:VARCHAR:NULL#,
+		#cusEducationId:VARCHAR:NULL#,
+		#cusLivingStatusId:VARCHAR:NULL#,
+		#cusAddress:VARCHAR:NULL#,
+		#cusMarriage:VARCHAR:NULL#,
+		#isLocal:VARCHAR:NULL#,
+		#cusRegisteredResidence:VARCHAR:NULL#,
+		#cusLivingTypeId:VARCHAR:NULL#,
+		#cusLivingStartDate:VARCHAR:NULL#,
+		#cusLivingAddress:VARCHAR:NULL#,
+		#cusHousePattern:VARCHAR:NULL#,
+		#cusHouseArea:VARCHAR:NULL#,
+		#cusHouseDecorateId:VARCHAR:NULL#,
+		#cusEconomicState:VARCHAR:NULL#,
+		#cusNote:VARCHAR:NULL#,
+		#cusNetAge:VARCHAR:NULL#,
+		#cusCommonOperaterName:VARCHAR:NULL#,
+		#cusCommonOperaterIdcard:VARCHAR:NULL#,
+		#cusCommonOperaterMobilePhone:VARCHAR:NULL#,
+		#cusFirstImpress:VARCHAR:NULL#,
+		#cusMateName:VARCHAR:NULL#,
+		#cusMateIdcard:VARCHAR:NULL#,
+		#cusCompanyName:VARCHAR:NULL#,
+		#cusMateMobilePhone:VARCHAR:NULL#,
+		#cusMatePhone:VARCHAR:NULL#,
+		#cusMateCompanyPhone:VARCHAR:NULL#,
+		#cusCompanyNature:VARCHAR:NULL#,
+		#cusMateJob:VARCHAR:NULL#,
+		#cusMateWorkYear:VARCHAR:NULL#,
+		#cusMateAddress:VARCHAR:NULL#,
+		#cusMateMonthlyIncomingId:VARCHAR:NULL#,
+		#cusChdInfo:VARCHAR:NULL#,
+		#cusFamilyNum:VARCHAR:NULL#,
+		#cusParentInfo:VARCHAR:NULL#,
+		#cusLocalYear:VARCHAR:NULL#,
+		#companyName:VARCHAR:NULL#,
+		#companyNature:VARCHAR:NULL#,
+		#companyJob:VARCHAR:NULL#,
+		#companyWorkYear:VARCHAR:NULL#,
+		#companyMonthlyIncoming:VARCHAR:NULL#,
+		#companyAddress:VARCHAR:NULL#,
+		#bizCompany:VARCHAR:NULL#,
+		#bizScope:VARCHAR:NULL#,
+		#bizOrgId:VARCHAR:NULL#,
+		#bizOrgCode:VARCHAR:NULL#,
+		#bizLicenseNum:VARCHAR:NULL#,
+		#bizSocialCreditNum:VARCHAR:NULL#,
+		#bizActualOperator:VARCHAR:NULL#,
+		#bizAddress:VARCHAR:NULL#,
+		#bizShareholderProportion:VARCHAR:NULL#,
+		#bizPlaceId:VARCHAR:NULL#,
+		#bizArea:VARCHAR:NULL#,
+		#bizLawFormId:VARCHAR:NULL#,
+		#bizLeagl:VARCHAR:NULL#,
+		#bizLeaglMobilePhone:VARCHAR:NULL#,
+		#bizEmployeeNum:VARCHAR:NULL#,
+		#bizOpenDate:VARCHAR:NULL#,
+		#bizIsBelongMybank:VARCHAR:NULL#,
+		#bizMybankNo:VARCHAR:NULL#,
+		#bizNote:VARCHAR:NULL#,
+		#cafMonthlySales:VARCHAR:NULL#,
+		#cafBusySeason:VARCHAR:NULL#,
+		#cafLowSeason:VARCHAR:NULL#,
+		#cafReceivableMoney:VARCHAR:NULL#,
+		#cafGrossMargin:VARCHAR:NULL#,
+		#cafNetMargin:VARCHAR:NULL#,
+		#cafInventory:VARCHAR:NULL#,
+		#cafDebt:VARCHAR:NULL#,
+		#cafTotalMoney:VARCHAR:NULL#,
+		#cafOther:VARCHAR:NULL#,
+		#cafTotalCreditCard:VARCHAR:NULL#,
+		#cafTotalCreditMoney:VARCHAR:NULL#,
+		#cafTotalOverdraftMoney:VARCHAR:NULL#,
+		#cafOverdueSituation:VARCHAR:NULL#,
+		#cafLoanCard:VARCHAR:NULL#,
+		#cafBorrowerCreidtDesc:VARCHAR:NULL#,
+		#cafGuarantorCreidtDesc:VARCHAR:NULL#,
+		#adviceMoney:VARCHAR:NULL#,
+		#adviceLimitYear:VARCHAR:NULL#,
+		#adviceRate:VARCHAR:NULL#,
+		#adviceRepayDate:VARCHAR:NULL#,
+		#adviceLendWayId:VARCHAR:NULL#,
+		#adviceRepayWayId:VARCHAR:NULL#,
+		#adviceOther:VARCHAR:NULL#,
+		#adviceNote:VARCHAR:NULL#,
+		#resultMoney:VARCHAR:NULL#,
+		#resultLimitYear:VARCHAR:NULL#,
+		#resultRate:VARCHAR:NULL#,
+		#resultRepayDate:VARCHAR:NULL#,
+		#resultInstalRepayMoney:VARCHAR:NULL#,
+		#resultRiskWarm:VARCHAR:NULL#,
+		#resultSurveyExisProblems:VARCHAR:NULL#,
+		#resultNote:VARCHAR:NULL#,
+		#lendContractNum:VARCHAR:NULL#,
+		#lendConfrimContractNum:VARCHAR:NULL#,
+		#lendNote:VARCHAR:NULL#,
+		#registerSaveStatus:VARCHAR:NULL#,
+		#applicationInfo:VARCHAR:NULL#,
+		#personalInfo:VARCHAR:NULL#,
+		#familyInfo:VARCHAR:NULL#,
+		#businessInfo:VARCHAR:NULL#,
+		#signInfo:VARCHAR:NULL#,
+		#signInfoPath:VARCHAR:NULL#,
+		#appFormBak:VARCHAR:NULL#,
+		current timestamp,
+		current timestamp,
+		#registerSourceFFKKHJS:VARCHAR:NULL#,
+		#registerSourceWX:VARCHAR:NULL#,
+		#registerSourceMM:VARCHAR:NULL#,
+		#registerSourceCCK:VARCHAR:NULL#,
+		#registerSourceHNYGJS:VARCHAR:NULL#,
+		#registerSourceDHYX:VARCHAR:NULL#,
+		#registerSourceHZSHTJ:VARCHAR:NULL#,
+		#registerSourceZXSQ:VARCHAR:NULL#,
+		#guarantyIncomeCheck:VARCHAR:NULL#,
+		#guarantyDebtRemark:VARCHAR:NULL#,
+		#guarantyOtherRemark:VARCHAR:NULL#,
+		#seasonRemark:VARCHAR:NULL#,
+		#isSeason:VARCHAR:NULL#
+		)
+		<selectKey keyProperty="loanInfoId" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_LOAN_INFO
+		</selectKey>
+	</insert>
+
+
+
+	<insert id="insertLnLoanInfoSelective" parameterClass="LnLoanInfo">
+		INSERT INTO LN_LOAN_INFO
+		(
+		<isNotEmpty property="loanInfoId" prepend=",">
+			LOAN_INFO_ID
+		</isNotEmpty>
+		<isNotEmpty property="loanId" prepend=",">
+			LOAN_ID
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend=",">
+			CUSTOMER_ID
+		</isNotEmpty>
+		<isNotEmpty property="isNoGood" prepend=",">
+			IS_NO_GOOD
+		</isNotEmpty>
+		<isNotEmpty property="refuseLoanStateId" prepend=",">
+			REFUSE_LOAN_STATE_ID
+		</isNotEmpty>
+		<isNotEmpty property="refuseReasonTypeId" prepend=",">
+			REFUSE_REASON_TYPE_ID
+		</isNotEmpty>
+		<isNotEmpty property="refuseReasonSubTypeId" prepend=",">
+			REFUSE_REASON_SUB_TYPE_ID
+		</isNotEmpty>
+		<isNotEmpty property="refuseContent" prepend=",">
+			REFUSE_CONTENT
+		</isNotEmpty>
+		<isNotEmpty property="togetherSurveyUserId" prepend=",">
+			TOGETHER_SURVEY_USER_ID
+		</isNotEmpty>
+		<isNotEmpty property="togetherSurveyDate" prepend=",">
+			TOGETHER_SURVEY_DATE
+		</isNotEmpty>
+		<isNotEmpty property="assignRemark" prepend=",">
+			ASSIGN_REMARK
+		</isNotEmpty>
+		<isNotEmpty property="registerMicroBizCenter" prepend=",">
+			REGISTER_MICRO_BIZ_CENTER
+		</isNotEmpty>
+		<isNotEmpty property="registerRecommendBank" prepend=",">
+			REGISTER_RECOMMEND_BANK
+		</isNotEmpty>
+		<isNotEmpty property="registerApplyDate" prepend=",">
+			REGISTER_APPLY_DATE
+		</isNotEmpty>
+		<isNotEmpty property="registerLoanDate" prepend=",">
+			REGISTER_LOAN_DATE
+		</isNotEmpty>
+		<isNotEmpty property="registerInfoSourceIds" prepend=",">
+			REGISTER_INFO_SOURCE_IDS
+		</isNotEmpty>
+		<isNotEmpty property="registerDirectMarket" prepend=",">
+			REGISTER_DIRECT_MARKET
+		</isNotEmpty>
+		<isNotEmpty property="registerExistCusIntroduct" prepend=",">
+			REGISTER_EXIST_CUS_INTRODUCT
+		</isNotEmpty>
+		<isNotEmpty property="registerInfoSourceOther" prepend=",">
+			REGISTER_INFO_SOURCE_OTHER
+		</isNotEmpty>
+		<isNotEmpty property="appLoanTypeId" prepend=",">
+			APP_LOAN_TYPE_ID
+		</isNotEmpty>
+		<isNotEmpty property="appLoanSubTypeId" prepend=",">
+			APP_LOAN_SUB_TYPE_ID
+		</isNotEmpty>
+		<isNotEmpty property="appMoney" prepend=",">
+			APP_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="appLimitYear" prepend=",">
+			APP_LIMIT_YEAR
+		</isNotEmpty>
+		<isNotEmpty property="appRepaymentMonth" prepend=",">
+			APP_REPAYMENT_MONTH
+		</isNotEmpty>
+		<isNotEmpty property="appLoanPurpose" prepend=",">
+			APP_LOAN_PURPOSE
+		</isNotEmpty>
+		<isNotEmpty property="appGuarantorWayId" prepend=",">
+			APP_GUARANTOR_WAY_ID
+		</isNotEmpty>
+		<isNotEmpty property="appMortgageId" prepend=",">
+			APP_MORTGAGE_ID
+		</isNotEmpty>
+		<isNotEmpty property="appPledgeId" prepend=",">
+			APP_PLEDGE_ID
+		</isNotEmpty>
+		<isNotEmpty property="appMaxInstallmentMoney" prepend=",">
+			APP_MAX_INSTALLMENT_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="appTotalProjectCost" prepend=",">
+			APP_TOTAL_PROJECT_COST
+		</isNotEmpty>
+		<isNotEmpty property="appUserDetail" prepend=",">
+			APP_USER_DETAIL
+		</isNotEmpty>
+		<isNotEmpty property="appMortgageOther" prepend=",">
+			APP_MORTGAGE_OTHER
+		</isNotEmpty>
+		<isNotEmpty property="appPledgeOther" prepend=",">
+			APP_PLEDGE_OTHER
+		</isNotEmpty>
+		<isNotEmpty property="cusName" prepend=",">
+			CUS_NAME
+		</isNotEmpty>
+		<isNotEmpty property="cusBirthday" prepend=",">
+			CUS_BIRTHDAY
+		</isNotEmpty>
+		<isNotEmpty property="cusSex" prepend=",">
+			CUS_SEX
+		</isNotEmpty>
+		<isNotEmpty property="cusIdtypeId" prepend=",">
+			CUS_IDTYPE_ID
+		</isNotEmpty>
+		<isNotEmpty property="cusIdcard" prepend=",">
+			CUS_IDCARD
+		</isNotEmpty>
+		<isNotEmpty property="cusMobilePhone" prepend=",">
+			CUS_MOBILE_PHONE
+		</isNotEmpty>
+		<isNotEmpty property="cusPhone" prepend=",">
+			CUS_PHONE
+		</isNotEmpty>
+		<isNotEmpty property="cusEducationId" prepend=",">
+			CUS_EDUCATION_ID
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingStatusId" prepend=",">
+			CUS_LIVING_STATUS_ID
+		</isNotEmpty>
+		<isNotEmpty property="cusAddress" prepend=",">
+			CUS_ADDRESS
+		</isNotEmpty>
+		<isNotEmpty property="cusMarriage" prepend=",">
+			CUS_MARRIAGE
+		</isNotEmpty>
+		<isNotEmpty property="isLocal" prepend=",">
+			IS_LOCAL
+		</isNotEmpty>
+		<isNotEmpty property="cusRegisteredResidence" prepend=",">
+			CUS_REGISTERED_RESIDENCE
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingTypeId" prepend=",">
+			CUS_LIVING_TYPE_ID
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingStartDate" prepend=",">
+			CUS_LIVING_START_DATE
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingAddress" prepend=",">
+			CUS_LIVING_ADDRESS
+		</isNotEmpty>
+		<isNotEmpty property="cusHousePattern" prepend=",">
+			CUS_HOUSE_PATTERN
+		</isNotEmpty>
+		<isNotEmpty property="cusHouseArea" prepend=",">
+			CUS_HOUSE_AREA
+		</isNotEmpty>
+		<isNotEmpty property="cusHouseDecorateId" prepend=",">
+			CUS_HOUSE_DECORATE_ID
+		</isNotEmpty>
+		<isNotEmpty property="cusEconomicState" prepend=",">
+			CUS_ECONOMIC_STATE
+		</isNotEmpty>
+		<isNotEmpty property="cusNote" prepend=",">
+			CUS_NOTE
+		</isNotEmpty>
+		<isNotEmpty property="cusNetAge" prepend=",">
+			CUS_NET_AGE
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterName" prepend=",">
+			CUS_COMMON_OPERATER_NAME
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterIdcard" prepend=",">
+			CUS_COMMON_OPERATER_IDCARD
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterMobilePhone" prepend=",">
+			CUS_COMMON_OPERATER_MOBILE_PHO
+		</isNotEmpty>
+		<isNotEmpty property="cusFirstImpress" prepend=",">
+			CUS_FIRST_IMPRESS
+		</isNotEmpty>
+		<isNotEmpty property="cusMateName" prepend=",">
+			CUS_MATE_NAME
+		</isNotEmpty>
+		<isNotEmpty property="cusMateIdcard" prepend=",">
+			CUS_MATE_IDCARD
+		</isNotEmpty>
+		<isNotEmpty property="cusCompanyName" prepend=",">
+			CUS_COMPANY_NAME
+		</isNotEmpty>
+		<isNotEmpty property="cusMateMobilePhone" prepend=",">
+			CUS_MATE_MOBILE_PHONE
+		</isNotEmpty>
+		<isNotEmpty property="cusMatePhone" prepend=",">
+			CUS_MATE_PHONE
+		</isNotEmpty>
+		<isNotEmpty property="cusMateCompanyPhone" prepend=",">
+			CUS_MATE_COMPANY_PHONE
+		</isNotEmpty>
+		<isNotEmpty property="cusCompanyNature" prepend=",">
+			CUS_COMPANY_NATURE
+		</isNotEmpty>
+		<isNotEmpty property="cusMateJob" prepend=",">
+			CUS_MATE_JOB
+		</isNotEmpty>
+		<isNotEmpty property="cusMateWorkYear" prepend=",">
+			CUS_MATE_WORK_YEAR
+		</isNotEmpty>
+		<isNotEmpty property="cusMateAddress" prepend=",">
+			CUS_MATE_ADDRESS
+		</isNotEmpty>
+		<isNotEmpty property="cusMateMonthlyIncomingId" prepend=",">
+			CUS_MATE_MONTHLY_INCOMING_ID
+		</isNotEmpty>
+		<isNotEmpty property="cusChdInfo" prepend=",">
+			CUS_CHD_INFO
+		</isNotEmpty>
+		<isNotEmpty property="cusFamilyNum" prepend=",">
+			CUS_FAMILY_NUM
+		</isNotEmpty>
+		<isNotEmpty property="cusParentInfo" prepend=",">
+			CUS_PARENT_INFO
+		</isNotEmpty>
+		<isNotEmpty property="cusLocalYear" prepend=",">
+			CUS_LOCAL_YEAR
+		</isNotEmpty>
+		<isNotEmpty property="companyName" prepend=",">
+			COMPANY_NAME
+		</isNotEmpty>
+		<isNotEmpty property="companyNature" prepend=",">
+			COMPANY_NATURE
+		</isNotEmpty>
+		<isNotEmpty property="companyJob" prepend=",">
+			COMPANY_JOB
+		</isNotEmpty>
+		<isNotEmpty property="companyWorkYear" prepend=",">
+			COMPANY_WORK_YEAR
+		</isNotEmpty>
+		<isNotEmpty property="companyMonthlyIncoming" prepend=",">
+			COMPANY_MONTHLY_INCOMING
+		</isNotEmpty>
+		<isNotEmpty property="companyAddress" prepend=",">
+			COMPANY_ADDRESS
+		</isNotEmpty>
+		<isNotEmpty property="bizCompany" prepend=",">
+			BIZ_COMPANY
+		</isNotEmpty>
+		<isNotEmpty property="bizScope" prepend=",">
+			BIZ_SCOPE
+		</isNotEmpty>
+		<isNotEmpty property="bizOrgId" prepend=",">
+			BIZ_ORG_ID
+		</isNotEmpty>
+		<isNotEmpty property="bizOrgCode" prepend=",">
+			BIZ_ORG_CODE
+		</isNotEmpty>
+		<isNotEmpty property="bizLicenseNum" prepend=",">
+			BIZ_LICENSE_NUM
+		</isNotEmpty>
+		<isNotEmpty property="bizSocialCreditNum" prepend=",">
+			BIZ_SOCIAL_CREDIT_NUM
+		</isNotEmpty>
+		<isNotEmpty property="bizActualOperator" prepend=",">
+			BIZ_ACTUAL_OPERATOR
+		</isNotEmpty>
+		<isNotEmpty property="bizAddress" prepend=",">
+			BIZ_ADDRESS
+		</isNotEmpty>
+		<isNotEmpty property="bizShareholderProportion" prepend=",">
+			BIZ_SHAREHOLDER_PROPORTION
+		</isNotEmpty>
+		<isNotEmpty property="bizPlaceId" prepend=",">
+			BIZ_PLACE_ID
+		</isNotEmpty>
+		<isNotEmpty property="bizArea" prepend=",">
+			BIZ_AREA
+		</isNotEmpty>
+		<isNotEmpty property="bizLawFormId" prepend=",">
+			BIZ_LAW_FORM_ID
+		</isNotEmpty>
+		<isNotEmpty property="bizLeagl" prepend=",">
+			BIZ_LEAGL
+		</isNotEmpty>
+		<isNotEmpty property="bizLeaglMobilePhone" prepend=",">
+			BIZ_LEAGL_MOBILE_PHONE
+		</isNotEmpty>
+		<isNotEmpty property="bizEmployeeNum" prepend=",">
+			BIZ_EMPLOYEE_NUM
+		</isNotEmpty>
+		<isNotEmpty property="bizOpenDate" prepend=",">
+			BIZ_OPEN_DATE
+		</isNotEmpty>
+		<isNotEmpty property="bizIsBelongMybank" prepend=",">
+			BIZ_IS_BELONG_MYBANK
+		</isNotEmpty>
+		<isNotEmpty property="bizMybankNo" prepend=",">
+			BIZ_MYBANK_NO
+		</isNotEmpty>
+		<isNotEmpty property="bizNote" prepend=",">
+			BIZ_NOTE
+		</isNotEmpty>
+		<isNotEmpty property="cafMonthlySales" prepend=",">
+			CAF_MONTHLY_SALES
+		</isNotEmpty>
+		<isNotEmpty property="cafBusySeason" prepend=",">
+			CAF_BUSY_SEASON
+		</isNotEmpty>
+		<isNotEmpty property="cafLowSeason" prepend=",">
+			CAF_LOW_SEASON
+		</isNotEmpty>
+		<isNotEmpty property="cafReceivableMoney" prepend=",">
+			CAF_RECEIVABLE_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="cafGrossMargin" prepend=",">
+			CAF_GROSS_MARGIN
+		</isNotEmpty>
+		<isNotEmpty property="cafNetMargin" prepend=",">
+			CAF_NET_MARGIN
+		</isNotEmpty>
+		<isNotEmpty property="cafInventory" prepend=",">
+			CAF_INVENTORY
+		</isNotEmpty>
+		<isNotEmpty property="cafDebt" prepend=",">
+			CAF_DEBT
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalMoney" prepend=",">
+			CAF_TOTAL_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="cafOther" prepend=",">
+			CAF_OTHER
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalCreditCard" prepend=",">
+			CAF_TOTAL_CREDIT_CARD
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalCreditMoney" prepend=",">
+			CAF_TOTAL_CREDIT_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalOverdraftMoney" prepend=",">
+			CAF_TOTAL_OVERDRAFT_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="cafOverdueSituation" prepend=",">
+			CAF_OVERDUE_SITUATION
+		</isNotEmpty>
+		<isNotEmpty property="cafLoanCard" prepend=",">
+			CAF_LOAN_CARD
+		</isNotEmpty>
+		<isNotEmpty property="cafBorrowerCreidtDesc" prepend=",">
+			CAF_BORROWER_CREIDT_DESC
+		</isNotEmpty>
+		<isNotEmpty property="cafGuarantorCreidtDesc" prepend=",">
+			CAF_GUARANTOR_CREIDT_DESC
+		</isNotEmpty>
+		<isNotEmpty property="adviceMoney" prepend=",">
+			ADVICE_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="adviceLimitYear" prepend=",">
+			ADVICE_LIMIT_YEAR
+		</isNotEmpty>
+		<isNotEmpty property="adviceRate" prepend=",">
+			ADVICE_RATE
+		</isNotEmpty>
+		<isNotEmpty property="adviceRepayDate" prepend=",">
+			ADVICE_REPAY_DATE
+		</isNotEmpty>
+		<isNotEmpty property="adviceLendWayId" prepend=",">
+			ADVICE_LEND_WAY_ID
+		</isNotEmpty>
+		<isNotEmpty property="adviceRepayWayId" prepend=",">
+			ADVICE_REPAY_WAY_ID
+		</isNotEmpty>
+		<isNotEmpty property="adviceOther" prepend=",">
+			ADVICE_OTHER
+		</isNotEmpty>
+		<isNotEmpty property="adviceNote" prepend=",">
+			ADVICE_NOTE
+		</isNotEmpty>
+		<isNotEmpty property="resultMoney" prepend=",">
+			RESULT_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="resultLimitYear" prepend=",">
+			RESULT_LIMIT_YEAR
+		</isNotEmpty>
+		<isNotEmpty property="resultRate" prepend=",">
+			RESULT_RATE
+		</isNotEmpty>
+		<isNotEmpty property="resultRepayDate" prepend=",">
+			RESULT_REPAY_DATE
+		</isNotEmpty>
+		<isNotEmpty property="resultInstalRepayMoney" prepend=",">
+			RESULT_INSTAL_REPAY_MONEY
+		</isNotEmpty>
+		<isNotEmpty property="resultRiskWarm" prepend=",">
+			RESULT_RISK_WARM
+		</isNotEmpty>
+		<isNotEmpty property="resultSurveyExisProblems" prepend=",">
+			RESULT_SURVEY_EXIS_PROBLEMS
+		</isNotEmpty>
+		<isNotEmpty property="resultNote" prepend=",">
+			RESULT_NOTE
+		</isNotEmpty>
+		<isNotEmpty property="lendContractNum" prepend=",">
+			LEND_CONTRACT_NUM
+		</isNotEmpty>
+		<isNotEmpty property="lendConfrimContractNum" prepend=",">
+			LEND_CONFRIM_CONTRACT_NUM
+		</isNotEmpty>
+		<isNotEmpty property="lendNote" prepend=",">
+			LEND_NOTE
+		</isNotEmpty>
+		<isNotEmpty property="registerSaveStatus" prepend=",">
+			REGISTER_SAVE_STATUS
+		</isNotEmpty>
+		<isNotEmpty property="applicationInfo" prepend=",">
+			APPLICATION_INFO
+		</isNotEmpty>
+		<isNotEmpty property="personalInfo" prepend=",">
+			PERSONAL_INFO
+		</isNotEmpty>
+		<isNotEmpty property="familyInfo" prepend=",">
+			FAMILY_INFO
+		</isNotEmpty>
+		<isNotEmpty property="businessInfo" prepend=",">
+			BUSINESS_INFO
+		</isNotEmpty>
+		<isNotEmpty property="signInfo" prepend=",">
+			SIGN_INFO
+		</isNotEmpty>
+		<isNotEmpty property="signInfoPath" prepend=",">
+			SIGN_INFO_PATH
+		</isNotEmpty>
+		<isNotEmpty property="appFormBak" prepend=",">
+			APP_FORM_BAK
+		</isNotEmpty>
+
+		<isNotEmpty property="registerSourceFFKKHJS" prepend=",">
+			REGISTER_SOURCE_FFKKHJS
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceWX" prepend=",">
+			REGISTER_SOURCE_WX
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceMM" prepend=",">
+			REGISTER_SOURCE_MM
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceCCK" prepend=",">
+			REGISTER_SOURCE_CCK
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceHNYGJS" prepend=",">
+			REGISTER_SOURCE_HNYGJS
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceDHYX" prepend=",">
+			REGISTER_SOURCE_DHYX
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceHZSHTJ" prepend=",">
+			REGISTER_SOURCE_HZSHTJ
+		</isNotEmpty>
+		<isNotEmpty property="guarantyIncomeCheck" prepend=",">
+			GUARANTY_INCOME_CHECK
+		</isNotEmpty>
+		<isNotEmpty property="guarantyDebtRemark" prepend=",">
+			GUARANTY_DEBT_REMARK
+		</isNotEmpty>
+		<isNotEmpty property="guarantyOtherRemark" prepend=",">
+			GUARANTY_OTHER_REMARK
+		</isNotEmpty>
+
+		<isNotEmpty property="seasonRemark" prepend=",">
+			SEASON_REMARK
+		</isNotEmpty>
+		<isNotEmpty property="isSeason" prepend=",">
+			IS_SEASON
+		</isNotEmpty>
+
+
+		<isNotEmpty property="registerSourceZXSQ" prepend=",">
+			REGISTER_SOURCE_ZXSQ
+		</isNotEmpty>
+		,CREATE_DATE
+		,UPDATE_DATE
+		)
+		VALUES
+		(
+		<isNotEmpty property="loanInfoId" prepend=",">
+			#loanInfoId:INTEGER#
+		</isNotEmpty>
+		<isNotEmpty property="loanId" prepend=",">
+			#loanId:INTEGER#
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend=",">
+			#customerId:INTEGER#
+		</isNotEmpty>
+		<isNotEmpty property="isNoGood" prepend=",">
+			#isNoGood:INTEGER#
+		</isNotEmpty>
+		<isNotEmpty property="refuseLoanStateId" prepend=",">
+			#refuseLoanStateId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="refuseReasonTypeId" prepend=",">
+			#refuseReasonTypeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="refuseReasonSubTypeId" prepend=",">
+			#refuseReasonSubTypeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="refuseContent" prepend=",">
+			#refuseContent:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="togetherSurveyUserId" prepend=",">
+			#togetherSurveyUserId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="togetherSurveyDate" prepend=",">
+			#togetherSurveyDate:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="assignRemark" prepend=",">
+			#assignRemark:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerMicroBizCenter" prepend=",">
+			#registerMicroBizCenter:INTEGER#
+		</isNotEmpty>
+		<isNotEmpty property="registerRecommendBank" prepend=",">
+			#registerRecommendBank:INTEGER#
+		</isNotEmpty>
+		<isNotEmpty property="registerApplyDate" prepend=",">
+			#registerApplyDate:TIMESTAMP#
+		</isNotEmpty>
+		<isNotEmpty property="registerLoanDate" prepend=",">
+			#registerLoanDate:TIMESTAMP#
+		</isNotEmpty>
+		<isNotEmpty property="registerInfoSourceIds" prepend=",">
+			#registerInfoSourceIds:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerDirectMarket" prepend=",">
+			#registerDirectMarket:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerExistCusIntroduct" prepend=",">
+			#registerExistCusIntroduct:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerInfoSourceOther" prepend=",">
+			#registerInfoSourceOther:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appLoanTypeId" prepend=",">
+			#appLoanTypeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appLoanSubTypeId" prepend=",">
+			#appLoanSubTypeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appMoney" prepend=",">
+			#appMoney:DECIMAL#
+		</isNotEmpty>
+		<isNotEmpty property="appLimitYear" prepend=",">
+			#appLimitYear:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appRepaymentMonth" prepend=",">
+			#appRepaymentMonth:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appLoanPurpose" prepend=",">
+			#appLoanPurpose:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appGuarantorWayId" prepend=",">
+			#appGuarantorWayId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appMortgageId" prepend=",">
+			#appMortgageId:VARCHAR:NULL#,
+		</isNotEmpty>
+		<isNotEmpty property="appPledgeId" prepend=",">
+			#appPledgeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appMaxInstallmentMoney" prepend=",">
+			#appMaxInstallmentMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appTotalProjectCost" prepend=",">
+			#appTotalProjectCost:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appUserDetail" prepend=",">
+			#appUserDetail:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appMortgageOther" prepend=",">
+			#appMortgageOther:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appPledgeOther" prepend=",">
+			#appPledgeOther:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusName" prepend=",">
+			#cusName:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusBirthday" prepend=",">
+			#cusBirthday:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusSex" prepend=",">
+			#cusSex:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusIdtypeId" prepend=",">
+			#cusIdtypeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusIdcard" prepend=",">
+			#cusIdcard:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMobilePhone" prepend=",">
+			#cusMobilePhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusPhone" prepend=",">
+			#cusPhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusEducationId" prepend=",">
+			#cusEducationId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingStatusId" prepend=",">
+			#cusLivingStatusId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusAddress" prepend=",">
+			#cusAddress:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMarriage" prepend=",">
+			#cusMarriage:VARCHAR:NULL#
+		</isNotEmpty>
+			<isNotEmpty property="isLocal" prepend=",">
+			#isLocal:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusRegisteredResidence" prepend=",">
+			#cusRegisteredResidence:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingTypeId" prepend=",">
+			#cusLivingTypeId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingStartDate" prepend=",">
+			#cusLivingStartDate:VARCHAR:NULL#,
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingAddress" prepend=",">
+			#cusLivingAddress:VARCHAR:NULL#,
+		</isNotEmpty>
+		<isNotEmpty property="cusHousePattern" prepend=",">
+			#cusHousePattern:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusHouseArea" prepend=",">
+			#cusHouseArea:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusHouseDecorateId" prepend=",">
+			#cusHouseDecorateId:VARCHAR:NULL#
+		</isNotEmpty>
+
+		<isNotEmpty property="cusEconomicState" prepend=",">
+			#cusEconomicState:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusNote" prepend=",">
+			#cusNote:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusNetAge" prepend=",">
+			#cusNetAge:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterName" prepend=",">
+			#cusCommonOperaterName:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterIdcard" prepend=",">
+			#cusCommonOperaterIdcard:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterMobilePhone" prepend=",">
+			#cusCommonOperaterMobilePhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusFirstImpress" prepend=",">
+			#cusFirstImpress:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateName" prepend=",">
+			#cusMateName:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateIdcard" prepend=",">
+			#cusMateIdcard:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusCompanyName" prepend=",">
+			#cusCompanyName:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateMobilePhone" prepend=",">
+			#cusMateMobilePhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMatePhone" prepend=",">
+			#cusMatePhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateCompanyPhone" prepend=",">
+			#cusMateCompanyPhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusCompanyNature" prepend=",">
+			#cusCompanyNature:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateJob" prepend=",">
+			#cusMateJob:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateWorkYear" prepend=",">
+			#cusMateWorkYear:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateAddress" prepend=",">
+			#cusMateAddress:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateMonthlyIncomingId" prepend=",">
+			#cusMateMonthlyIncomingId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusChdInfo" prepend=",">
+			#cusChdInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusFamilyNum" prepend=",">
+			#cusFamilyNum:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusParentInfo" prepend=",">
+			#cusParentInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cusLocalYear" prepend=",">
+			#cusLocalYear:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="companyName" prepend=",">
+			#companyName:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="companyNature" prepend=",">
+			#companyNature:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="companyJob" prepend=",">
+			#companyJob:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="companyWorkYear" prepend=",">
+			#companyWorkYear:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="companyMonthlyIncoming" prepend=",">
+			#companyMonthlyIncoming:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="companyAddress" prepend=",">
+			#companyAddress:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizCompany" prepend=",">
+			#bizCompany:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizScope" prepend=",">
+			#bizScope:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizOrgId" prepend=",">
+			#bizOrgId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizOrgCode" prepend=",">
+			#bizOrgCode:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizLicenseNum" prepend=",">
+			#bizLicenseNum:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizSocialCreditNum" prepend=",">
+			#bizSocialCreditNum:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizActualOperator" prepend=",">
+			#bizActualOperator:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizAddress" prepend=",">
+			#bizAddress:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizShareholderProportion" prepend=",">
+			#bizShareholderProportion:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizPlaceId" prepend=",">
+			#bizPlaceId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizArea" prepend=",">
+			#bizArea:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizLawFormId" prepend=",">
+			#bizLawFormId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizLeagl" prepend=",">
+			#bizLeagl:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizLeaglMobilePhone" prepend=",">
+			#bizLeaglMobilePhone:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizEmployeeNum" prepend=",">
+			#bizEmployeeNum:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizOpenDate" prepend=",">
+			#bizOpenDate:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizIsBelongMybank" prepend=",">
+			#bizIsBelongMybank:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizMybankNo" prepend=",">
+			#bizMybankNo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="bizNote" prepend=",">
+			#bizNote:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafMonthlySales" prepend=",">
+			#cafMonthlySales:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafBusySeason" prepend=",">
+			#cafBusySeason:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafLowSeason" prepend=",">
+			#cafLowSeason:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafReceivableMoney" prepend=",">
+			#cafReceivableMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafGrossMargin" prepend=",">
+			#cafGrossMargin:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafNetMargin" prepend=",">
+			#cafNetMargin:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafInventory" prepend=",">
+			#cafInventory:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafDebt" prepend=",">
+			#cafDebt:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalMoney" prepend=",">
+			#cafTotalMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafOther" prepend=",">
+			#cafOther:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalCreditCard" prepend=",">
+			#cafTotalCreditCard:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalCreditMoney" prepend=",">
+			#cafTotalCreditMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalOverdraftMoney" prepend=",">
+			#cafTotalOverdraftMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafOverdueSituation" prepend=",">
+			#cafOverdueSituation:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafLoanCard" prepend=",">
+			#cafLoanCard:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafBorrowerCreidtDesc" prepend=",">
+			#cafBorrowerCreidtDesc:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="cafGuarantorCreidtDesc" prepend=",">
+			#cafGuarantorCreidtDesc:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceMoney" prepend=",">
+			#adviceMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceLimitYear" prepend=",">
+			#adviceLimitYear:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceRate" prepend=",">
+			#adviceRate:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceRepayDate" prepend=",">
+			#adviceRepayDate:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceLendWayId" prepend=",">
+			#adviceLendWayId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceRepayWayId" prepend=",">
+			#adviceRepayWayId:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceOther" prepend=",">
+			#adviceOther:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="adviceNote" prepend=",">
+			#adviceNote:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultMoney" prepend=",">
+			#resultMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultLimitYear" prepend=",">
+			#resultLimitYear:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultRate" prepend=",">
+			#resultRate:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultRepayDate" prepend=",">
+			#resultRepayDate:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultInstalRepayMoney" prepend=",">
+			#resultInstalRepayMoney:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultRiskWarm" prepend=",">
+			#resultRiskWarm:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultSurveyExisProblems" prepend=",">
+			#resultSurveyExisProblems:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="resultNote" prepend=",">
+			#resultNote:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="lendContractNum" prepend=",">
+			#lendContractNum:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="lendConfrimContractNum" prepend=",">
+			#lendConfrimContractNum:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="lendNote" prepend=",">
+			#lendNote:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSaveStatus" prepend=",">
+			#registerSaveStatus:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="applicationInfo" prepend=",">
+			#applicationInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="personalInfo" prepend=",">
+			#personalInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="familyInfo" prepend=",">
+			#familyInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="businessInfo" prepend=",">
+			#businessInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="signInfo" prepend=",">
+			#signInfo:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="signInfoPath" prepend=",">
+			#signInfoPath:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="appFormBak" prepend=",">
+			#appFormBak:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceFFKKHJS" prepend=",">
+			#registerSourceFFKKHJS:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceWX" prepend=",">
+			#registerSourceWX:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceMM" prepend=",">
+			#registerSourceMM:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceCCK" prepend=",">
+			#registerSourceCCK:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceHNYGJS" prepend=",">
+			#registerSourceHNYGJS:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceDHYX" prepend=",">
+			#registerSourceDHYX:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceHZSHTJ" prepend=",">
+			#registerSourceHZSHTJ:VARCHAR:NULL#
+		</isNotEmpty>
+
+		<isNotEmpty property="guarantyIncomeCheck" prepend=",">
+			#guarantyIncomeCheck:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="guarantyDebtRemark" prepend=",">
+			#guarantyDebtRemark:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="guarantyOtherRemark" prepend=",">
+			#guarantyOtherRemark:VARCHAR:NULL#
+		</isNotEmpty>
+
+
+		<isNotEmpty property="seasonRemark" prepend=",">
+			#seasonRemark:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="isSeason" prepend=",">
+			#isSeason:VARCHAR:NULL#
+		</isNotEmpty>
+
+		<isNotEmpty property="registerSourceZXSQ" prepend=",">
+			#registerSourceZXSQ:VARCHAR:NULL#
+		</isNotEmpty>
+		,current timestamp
+		,current timestamp
+		)
+		<selectKey keyProperty="loanInfoId" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_LOAN_INFO
+		</selectKey>
+	</insert>
+
+
+
+	<update id="updateLnLoanInfo" parameterClass="LnLoanInfo">
+		UPDATE LN_LOAN_INFO SET  UPDATE_DATE = current timestamp
+
+		<isNotEmpty property="loanId" prepend=",">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend=",">
+			CUSTOMER_ID = #customerId#
+		</isNotEmpty>
+		<isNotEmpty property="refuseLoanStateId" prepend=",">
+			REFUSE_LOAN_STATE_ID = #refuseLoanStateId#
+		</isNotEmpty>
+		<isNotEmpty property="isNoGood" prepend=",">
+			IS_NO_GOOD = #isNoGood#
+		</isNotEmpty>
+		<isNotEmpty property="refuseReasonTypeId" prepend=",">
+			REFUSE_REASON_TYPE_ID = #refuseReasonTypeId#
+		</isNotEmpty>
+		<isNotEmpty property="refuseReasonSubTypeId" prepend=",">
+			REFUSE_REASON_SUB_TYPE_ID = #refuseReasonSubTypeId#
+		</isNotEmpty>
+		<isNotEmpty property="refuseContent" prepend=",">
+			REFUSE_CONTENT = #refuseContent#
+		</isNotEmpty>
+		<isNotEmpty property="togetherSurveyUserId" prepend=",">
+			<isGreaterThan property="togetherSurveyUserId" compareValue="0">
+				TOGETHER_SURVEY_USER_ID = #togetherSurveyUserId#
+			</isGreaterThan>
+		</isNotEmpty>
+		<isNotEmpty property="togetherSurveyDate" prepend=",">
+			TOGETHER_SURVEY_DATE = #togetherSurveyDate#
+		</isNotEmpty>
+		<isNotEmpty property="assignRemark" prepend=",">
+			ASSIGN_REMARK = #assignRemark#
+		</isNotEmpty>
+		<isNotEmpty property="registerMicroBizCenter" prepend=",">
+			REGISTER_MICRO_BIZ_CENTER = #registerMicroBizCenter#
+		</isNotEmpty>
+		<isNotEmpty property="registerRecommendBank" prepend=",">
+			REGISTER_RECOMMEND_BANK = #registerRecommendBank#
+		</isNotEmpty>
+		<isNotEmpty property="registerApplyDate" prepend=",">
+			REGISTER_APPLY_DATE = #registerApplyDate#
+		</isNotEmpty>
+		<isNotEmpty property="registerLoanDate" prepend=",">
+			REGISTER_LOAN_DATE = #registerLoanDate#
+		</isNotEmpty>
+		<isNotEmpty property="registerInfoSourceIds" prepend=",">
+			REGISTER_INFO_SOURCE_IDS = #registerInfoSourceIds#
+		</isNotEmpty>
+		<isNotEmpty property="registerDirectMarket" prepend=",">
+			REGISTER_DIRECT_MARKET = #registerDirectMarket#
+		</isNotEmpty>
+		<isNotEmpty property="registerExistCusIntroduct" prepend=",">
+			REGISTER_EXIST_CUS_INTRODUCT = #registerExistCusIntroduct#
+		</isNotEmpty>
+		<isNotEmpty property="registerInfoSourceOther" prepend=",">
+			REGISTER_INFO_SOURCE_OTHER = #registerInfoSourceOther#
+		</isNotEmpty>
+		<isNotEmpty property="appLoanTypeId" prepend=",">
+			<isGreaterThan property="appLoanTypeId" compareValue="0">
+				APP_LOAN_TYPE_ID = #appLoanTypeId#
+			</isGreaterThan>
+		</isNotEmpty>
+		<isNotEmpty property="appLoanSubTypeId" prepend=",">
+				APP_LOAN_SUB_TYPE_ID = #appLoanSubTypeId#
+		</isNotEmpty>
+		<isNotEmpty property="appMoney" prepend=",">
+			APP_MONEY = #appMoney#
+		</isNotEmpty>
+		<isNotEmpty property="appLimitYear" prepend=",">
+			APP_LIMIT_YEAR = #appLimitYear#
+		</isNotEmpty>
+		<isNotEmpty property="appRepaymentMonth" prepend=",">
+			APP_REPAYMENT_MONTH = #appRepaymentMonth#
+		</isNotEmpty>
+		<isNotEmpty property="appLoanPurpose" prepend=",">
+			APP_LOAN_PURPOSE = #appLoanPurpose#
+		</isNotEmpty>
+		<isNotEmpty property="appGuarantorWayId" prepend=",">
+			APP_GUARANTOR_WAY_ID = #appGuarantorWayId#
+		</isNotEmpty>
+		<isNotEmpty property="appMortgageId" prepend=",">
+			APP_MORTGAGE_ID = #appMortgageId#
+		</isNotEmpty>
+		<isNotEmpty property="appPledgeId" prepend=",">
+			APP_PLEDGE_ID = #appPledgeId#
+		</isNotEmpty>
+		<isNotEmpty property="appMaxInstallmentMoney" prepend=",">
+			APP_MAX_INSTALLMENT_MONEY = #appMaxInstallmentMoney#
+		</isNotEmpty>
+		<isNotEmpty property="appTotalProjectCost" prepend=",">
+			APP_TOTAL_PROJECT_COST = #appTotalProjectCost#
+		</isNotEmpty>
+		<isNotEmpty property="appUserDetail" prepend=",">
+			APP_USER_DETAIL = #appUserDetail#
+		</isNotEmpty>
+		<isNotEmpty property="appMortgageOther" prepend=",">
+			APP_MORTGAGE_OTHER = #appMortgageOther#
+		</isNotEmpty>
+		<isNotEmpty property="appPledgeOther" prepend=",">
+			APP_PLEDGE_OTHER = #appPledgeOther#
+		</isNotEmpty>
+		<isNotEmpty property="cusName" prepend=",">
+			CUS_NAME = #cusName#
+		</isNotEmpty>
+		<isNotEmpty property="cusBirthday" prepend=",">
+			CUS_BIRTHDAY = #cusBirthday#
+		</isNotEmpty>
+		<isNotEmpty property="cusSex" prepend=",">
+			CUS_SEX = #cusSex#
+		</isNotEmpty>
+		<isNotEmpty property="cusIdtypeId" prepend=",">
+			<isGreaterThan property="cusIdtypeId" compareValue="0">
+				CUS_IDTYPE_ID = #cusIdtypeId#
+			</isGreaterThan>
+		</isNotEmpty>
+		<isNotEmpty property="cusIdcard" prepend=",">
+			CUS_IDCARD = #cusIdcard#
+		</isNotEmpty>
+		<isNotEmpty property="cusMobilePhone" prepend=",">
+			CUS_MOBILE_PHONE = #cusMobilePhone#
+		</isNotEmpty>
+		<isNotEmpty property="cusPhone" prepend=",">
+			CUS_PHONE = #cusPhone#
+		</isNotEmpty>
+		<isNotEmpty property="cusEducationId" prepend=",">
+			CUS_EDUCATION_ID = #cusEducationId#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingAddress" prepend=",">
+			CUS_LIVING_ADDRESS = #cusLivingAddress#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingStatusId" prepend=",">
+			CUS_LIVING_STATUS_ID = #cusLivingStatusId#
+		</isNotEmpty>
+		<isNotEmpty property="cusAddress" prepend=",">
+			CUS_ADDRESS = #cusAddress#
+		</isNotEmpty>
+		<isNotEmpty property="cusMarriage" prepend=",">
+			CUS_MARRIAGE = #cusMarriage#
+		</isNotEmpty>
+		<isNotEmpty property="isLocal" prepend=",">
+			IS_LOCAL = #isLocal#
+		</isNotEmpty>
+		<isNotEmpty property="cusRegisteredResidence" prepend=",">
+			CUS_REGISTERED_RESIDENCE = #cusRegisteredResidence#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingTypeId" prepend=",">
+			CUS_LIVING_TYPE_ID = #cusLivingTypeId#
+		</isNotEmpty>
+		<isNotEmpty property="cusLivingStartDate" prepend=",">
+			CUS_LIVING_START_DATE = #cusLivingStartDate#
+		</isNotEmpty>
+		<isNotEmpty property="cusHousePattern" prepend=",">
+			CUS_HOUSE_PATTERN = #cusHousePattern#
+		</isNotEmpty>
+		<isNotEmpty property="cusHouseArea" prepend=",">
+			CUS_HOUSE_AREA = #cusHouseArea#
+		</isNotEmpty>
+		<isNotEmpty property="cusHouseDecorateId" prepend=",">
+			CUS_HOUSE_DECORATE_ID = #cusHouseDecorateId#
+		</isNotEmpty>
+		<isNotEmpty property="cusEconomicState" prepend=",">
+			CUS_ECONOMIC_STATE = #cusEconomicState#
+		</isNotEmpty>
+		<isNotEmpty property="cusNote" prepend=",">
+			CUS_NOTE = #cusNote#
+		</isNotEmpty>
+		<isNotEmpty property="cusNetAge" prepend=",">
+			CUS_NET_AGE = #cusNetAge#
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterName" prepend=",">
+			CUS_COMMON_OPERATER_NAME = #cusCommonOperaterName#
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterIdcard" prepend=",">
+			CUS_COMMON_OPERATER_IDCARD = #cusCommonOperaterIdcard#
+		</isNotEmpty>
+		<isNotEmpty property="cusCommonOperaterMobilePhone" prepend=",">
+			CUS_COMMON_OPERATER_MOBILE_PHO = #cusCommonOperaterMobilePhone#
+		</isNotEmpty>
+		<isNotEmpty property="cusFirstImpress" prepend=",">
+			CUS_FIRST_IMPRESS = #cusFirstImpress#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateName" prepend=",">
+			CUS_MATE_NAME = #cusMateName#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateIdcard" prepend=",">
+			CUS_MATE_IDCARD = #cusMateIdcard#
+		</isNotEmpty>
+		<isNotEmpty property="cusCompanyName" prepend=",">
+			CUS_COMPANY_NAME = #cusCompanyName#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateMobilePhone" prepend=",">
+			CUS_MATE_MOBILE_PHONE = #cusMateMobilePhone#
+		</isNotEmpty>
+		<isNotEmpty property="cusMatePhone" prepend=",">
+			CUS_MATE_PHONE = #cusMatePhone#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateCompanyPhone" prepend=",">
+			CUS_MATE_COMPANY_PHONE = #cusMateCompanyPhone#
+		</isNotEmpty>
+		<isNotEmpty property="cusCompanyNature" prepend=",">
+			CUS_COMPANY_NATURE = #cusCompanyNature#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateJob" prepend=",">
+			CUS_MATE_JOB = #cusMateJob#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateWorkYear" prepend=",">
+			CUS_MATE_WORK_YEAR = #cusMateWorkYear#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateAddress" prepend=",">
+			CUS_MATE_ADDRESS = #cusMateAddress#
+		</isNotEmpty>
+		<isNotEmpty property="cusMateMonthlyIncomingId" prepend=",">
+			CUS_MATE_MONTHLY_INCOMING_ID = #cusMateMonthlyIncomingId#
+		</isNotEmpty>
+		<isNotEmpty property="cusChdInfo" prepend=",">
+			CUS_CHD_INFO = #cusChdInfo#
+		</isNotEmpty>
+		<isNotEmpty property="cusFamilyNum" prepend=",">
+			CUS_FAMILY_NUM = #cusFamilyNum#
+		</isNotEmpty>
+		<isNotEmpty property="cusParentInfo" prepend=",">
+			CUS_PARENT_INFO = #cusParentInfo#
+		</isNotEmpty>
+		<isNotEmpty property="cusLocalYear" prepend=",">
+			CUS_LOCAL_YEAR = #cusLocalYear#
+		</isNotEmpty>
+		<isNotEmpty property="companyName" prepend=",">
+			COMPANY_NAME = #companyName#
+		</isNotEmpty>
+		<isNotEmpty property="companyNature" prepend=",">
+			COMPANY_NATURE = #companyNature#
+		</isNotEmpty>
+		<isNotEmpty property="companyJob" prepend=",">
+			COMPANY_JOB = #companyJob#
+		</isNotEmpty>
+		<isNotEmpty property="companyWorkYear" prepend=",">
+			COMPANY_WORK_YEAR = #companyWorkYear#
+		</isNotEmpty>
+		<isNotEmpty property="companyMonthlyIncoming" prepend=",">
+			COMPANY_MONTHLY_INCOMING = #companyMonthlyIncoming#
+		</isNotEmpty>
+		<isNotEmpty property="companyAddress" prepend=",">
+			COMPANY_ADDRESS = #companyAddress#
+		</isNotEmpty>
+		<isNotEmpty property="bizCompany" prepend=",">
+			BIZ_COMPANY = #bizCompany#
+		</isNotEmpty>
+		<isNotEmpty property="bizScope" prepend=",">
+			BIZ_SCOPE = #bizScope#
+		</isNotEmpty>
+		<isNotEmpty property="bizOrgId" prepend=",">
+			BIZ_ORG_ID = #bizOrgId#
+		</isNotEmpty>
+		<isNotEmpty property="bizOrgCode" prepend=",">
+			BIZ_ORG_CODE = #bizOrgCode#
+		</isNotEmpty>
+		<isNotEmpty property="bizLicenseNum" prepend=",">
+			BIZ_LICENSE_NUM = #bizLicenseNum#
+		</isNotEmpty>
+		<isNotEmpty property="bizSocialCreditNum" prepend=",">
+			BIZ_SOCIAL_CREDIT_NUM = #bizSocialCreditNum#
+		</isNotEmpty>
+		<isNotEmpty property="bizActualOperator" prepend=",">
+			BIZ_ACTUAL_OPERATOR = #bizActualOperator#
+		</isNotEmpty>
+		<isNotEmpty property="bizAddress" prepend=",">
+			BIZ_ADDRESS = #bizAddress#
+		</isNotEmpty>
+		<isNotEmpty property="bizShareholderProportion" prepend=",">
+			BIZ_SHAREHOLDER_PROPORTION = #bizShareholderProportion#
+		</isNotEmpty>
+		<isNotEmpty property="bizPlaceId" prepend=",">
+			BIZ_PLACE_ID = #bizPlaceId#
+		</isNotEmpty>
+		<isNotEmpty property="bizArea" prepend=",">
+			BIZ_AREA = #bizArea#
+		</isNotEmpty>
+		<isNotEmpty property="bizLawFormId" prepend=",">
+			BIZ_LAW_FORM_ID = #bizLawFormId#
+		</isNotEmpty>
+		<isNotEmpty property="bizLeagl" prepend=",">
+			BIZ_LEAGL = #bizLeagl#
+		</isNotEmpty>
+		<isNotEmpty property="bizLeaglMobilePhone" prepend=",">
+			BIZ_LEAGL_MOBILE_PHONE = #bizLeaglMobilePhone#
+		</isNotEmpty>
+		<isNotEmpty property="bizEmployeeNum" prepend=",">
+			BIZ_EMPLOYEE_NUM = #bizEmployeeNum#
+		</isNotEmpty>
+		<isNotEmpty property="bizOpenDate" prepend=",">
+			BIZ_OPEN_DATE = #bizOpenDate#
+		</isNotEmpty>
+		<isNotEmpty property="bizIsBelongMybank" prepend=",">
+			BIZ_IS_BELONG_MYBANK = #bizIsBelongMybank#
+		</isNotEmpty>
+		<isNotEmpty property="bizNote" prepend=",">
+			BIZ_NOTE = #bizNote#
+		</isNotEmpty>
+		<isNotEmpty property="cafMonthlySales" prepend=",">
+			CAF_MONTHLY_SALES = #cafMonthlySales#
+		</isNotEmpty>
+		<isNotEmpty property="cafBusySeason" prepend=",">
+			CAF_BUSY_SEASON = #cafBusySeason#
+		</isNotEmpty>
+		<isNotEmpty property="cafLowSeason" prepend=",">
+			CAF_LOW_SEASON = #cafLowSeason#
+		</isNotEmpty>
+		<isNotEmpty property="isSeason" prepend=",">
+			IS_SEASON = #isSeason#
+		</isNotEmpty>
+		<isNotEmpty property="seasonRemark" prepend=",">
+			SEASON_REMARK = #seasonRemark#
+		</isNotEmpty>
+		<isNotEmpty property="cafReceivableMoney" prepend=",">
+			CAF_RECEIVABLE_MONEY = #cafReceivableMoney#
+		</isNotEmpty>
+		<isNotEmpty property="cafGrossMargin" prepend=",">
+			CAF_GROSS_MARGIN = #cafGrossMargin#
+		</isNotEmpty>
+		<isNotEmpty property="cafNetMargin" prepend=",">
+			CAF_NET_MARGIN = #cafNetMargin#
+		</isNotEmpty>
+		<isNotEmpty property="cafInventory" prepend=",">
+			CAF_INVENTORY = #cafInventory#
+		</isNotEmpty>
+		<isNotEmpty property="cafDebt" prepend=",">
+			CAF_DEBT = #cafDebt#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalMoney" prepend=",">
+			CAF_TOTAL_MONEY = #cafTotalMoney#
+		</isNotEmpty>
+		<isNotEmpty property="cafOther" prepend=",">
+			CAF_OTHER = #cafOther#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalCreditCard" prepend=",">
+			CAF_TOTAL_CREDIT_CARD = #cafTotalCreditCard#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalCreditMoney" prepend=",">
+			CAF_TOTAL_CREDIT_MONEY = #cafTotalCreditMoney#
+		</isNotEmpty>
+		<isNotEmpty property="cafTotalOverdraftMoney" prepend=",">
+			CAF_TOTAL_OVERDRAFT_MONEY = #cafTotalOverdraftMoney#
+		</isNotEmpty>
+		<isNotEmpty property="cafOverdueSituation" prepend=",">
+			CAF_OVERDUE_SITUATION = #cafOverdueSituation#
+		</isNotEmpty>
+		<isNotEmpty property="cafLoanCard" prepend=",">
+			CAF_LOAN_CARD = #cafLoanCard#
+		</isNotEmpty>
+		<isNotEmpty property="cafBorrowerCreidtDesc" prepend=",">
+			CAF_BORROWER_CREIDT_DESC = #cafBorrowerCreidtDesc#
+		</isNotEmpty>
+		<isNotEmpty property="cafGuarantorCreidtDesc" prepend=",">
+			CAF_GUARANTOR_CREIDT_DESC = #cafGuarantorCreidtDesc#
+		</isNotEmpty>
+		<isNotEmpty property="adviceMoney" prepend=",">
+			ADVICE_MONEY = #adviceMoney#
+		</isNotEmpty>
+		<isNotEmpty property="adviceLimitYear" prepend=",">
+			ADVICE_LIMIT_YEAR = #adviceLimitYear#
+		</isNotEmpty>
+		<isNotEmpty property="adviceRate" prepend=",">
+			ADVICE_RATE = #adviceRate#
+		</isNotEmpty>
+		<isNotEmpty property="adviceRepayDate" prepend=",">
+			ADVICE_REPAY_DATE = #adviceRepayDate#
+		</isNotEmpty>
+		<isNotEmpty property="adviceLendWayId" prepend=",">
+			ADVICE_LEND_WAY_ID = #adviceLendWayId#
+		</isNotEmpty>
+		<isNotEmpty property="adviceRepayWayId" prepend=",">
+			ADVICE_REPAY_WAY_ID = #adviceRepayWayId#
+		</isNotEmpty>
+		<isNotEmpty property="adviceOther" prepend=",">
+			ADVICE_OTHER = #adviceOther#
+		</isNotEmpty>
+		<isNotEmpty property="adviceNote" prepend=",">
+			ADVICE_NOTE = #adviceNote#
+		</isNotEmpty>
+		<isNotEmpty property="adviceVerdict" prepend=",">
+			ADVICE_VERDICT = #adviceVerdict#
+		</isNotEmpty>
+		<isNotEmpty property="resultMoney" prepend=",">
+			RESULT_MONEY = #resultMoney#
+		</isNotEmpty>
+		<isNotEmpty property="resultLimitYear" prepend=",">
+			RESULT_LIMIT_YEAR = #resultLimitYear#
+		</isNotEmpty>
+		<isNotEmpty property="resultRate" prepend=",">
+			RESULT_RATE = #resultRate#
+		</isNotEmpty>
+		<isNotEmpty property="resultRepayDate" prepend=",">
+			RESULT_REPAY_DATE = #resultRepayDate#
+		</isNotEmpty>
+		<isNotEmpty property="resultInstalRepayMoney" prepend=",">
+			RESULT_INSTAL_REPAY_MONEY = #resultInstalRepayMoney#
+		</isNotEmpty>
+		<isNotEmpty property="resultRiskWarm" prepend=",">
+			RESULT_RISK_WARM = #resultRiskWarm#
+		</isNotEmpty>
+		<isNotEmpty property="resultSurveyExisProblems" prepend=",">
+			RESULT_SURVEY_EXIS_PROBLEMS = #resultSurveyExisProblems#
+		</isNotEmpty>
+		<isNotEmpty property="resultNote" prepend=",">
+			RESULT_NOTE = #resultNote#
+		</isNotEmpty>
+		<isNotEmpty property="resultVerdict" prepend=",">
+			RESULT_VERDICT = #resultVerdict#
+		</isNotEmpty>
+		<isNotEmpty property="resultRepayWayId" prepend=",">
+			RESULT_REPAY_WAY_ID = #resultRepayWayId#
+		</isNotEmpty>
+		<isNotEmpty property="resultPurpose" prepend=",">
+			RESULT_PURPOSE = #resultPurpose#
+		</isNotEmpty>
+		<isNotEmpty property="isCrmTask" prepend=",">
+			IS_CRM_TASK = #isCrmTask#
+		</isNotEmpty>
+		<isNotEmpty property="advanceRepay" prepend=",">
+			ADVANCE_REPAY = #advanceRepay#
+		</isNotEmpty>
+		<isNotEmpty property="lnMode" prepend=",">
+			LN_MODE = #lnMode#
+		</isNotEmpty>
+		<isNotEmpty property="lnBenefit" prepend=",">
+			LN_BENEFIT = #lnBenefit#
+		</isNotEmpty>
+		<isNotEmpty property="originalRate" prepend=",">
+			ORIGINAL_RATE = #originalRate#
+		</isNotEmpty>
+		<isNotEmpty property="resultLnPremiss" prepend=",">
+			RESULT_LN_PREMISS = #resultLnPremiss#
+		</isNotEmpty>
+		<isNotEmpty property="lendContractNum" prepend=",">
+			LEND_CONTRACT_NUM  = #lendContractNum#
+		</isNotEmpty>
+		<isNotEmpty property="lendConfrimContractNum" prepend=",">
+			LEND_CONFRIM_CONTRACT_NUM = #lendConfrimContractNum#
+		</isNotEmpty>
+		<isNotEmpty property="lendNote" prepend=",">
+			LEND_NOTE = #lendNote#
+		</isNotEmpty>
+		<isNotEmpty property="registerSaveStatus" prepend=",">
+			REGISTER_SAVE_STATUS = #registerSaveStatus#
+		</isNotEmpty>
+
+		<isNotEmpty property="applicationInfo" prepend=",">
+			APPLICATION_INFO = #applicationInfo#
+		</isNotEmpty>
+
+		<isNotEmpty property="personalInfo" prepend=",">
+			PERSONAL_INFO = #personalInfo#
+		</isNotEmpty>
+
+		<isNotEmpty property="familyInfo" prepend=",">
+			FAMILY_INFO = #familyInfo#
+		</isNotEmpty>
+
+		<isNotEmpty property="businessInfo" prepend=",">
+			BUSINESS_INFO = #businessInfo#
+		</isNotEmpty>
+
+		<isNotEmpty property="signInfo" prepend=",">
+			SIGN_INFO = #signInfo#
+		</isNotEmpty>
+		<isNotEmpty property="signInfoPath" prepend=",">
+			SIGN_INFO_PATH = #signInfoPath#
+		</isNotEmpty>
+		<isNotEmpty property="appFormBak" prepend=",">
+			APP_FORM_BAK = #appFormBak:VARCHAR:NULL#
+		</isNotEmpty>
+
+		<isNotEmpty property="registerSourceFFKKHJS" prepend=",">
+			REGISTER_SOURCE_FFKKHJS = #registerSourceFFKKHJS:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceWX" prepend=",">
+			REGISTER_SOURCE_WX = #registerSourceWX:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceMM" prepend=",">
+			REGISTER_SOURCE_MM = #registerSourceMM:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceCCK" prepend=",">
+			REGISTER_SOURCE_CCK = #registerSourceCCK:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceHNYGJS" prepend=",">
+			REGISTER_SOURCE_HNYGJS = #registerSourceHNYGJS:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceDHYX" prepend=",">
+			REGISTER_SOURCE_DHYX = #registerSourceDHYX:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceHZSHTJ" prepend=",">
+			REGISTER_SOURCE_HZSHTJ = #registerSourceHZSHTJ:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="registerSourceZXSQ" prepend=",">
+			REGISTER_SOURCE_ZXSQ = #registerSourceZXSQ:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="guarantyIncomeCheck" prepend=",">
+			GUARANTY_INCOME_CHECK = #guarantyIncomeCheck:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="guarantyDebtRemark" prepend=",">
+			GUARANTY_DEBT_REMARK = #guarantyDebtRemark:VARCHAR:NULL#
+		</isNotEmpty>
+		<isNotEmpty property="guarantyOtherRemark" prepend=",">
+			GUARANTY_OTHER_REMARK = #guarantyOtherRemark:VARCHAR:NULL#
+		</isNotEmpty>
+
+		WHERE
+		<isNotEmpty property="loanId" prepend="">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+
+	</update>
+
+	<update id="updateLnLoanInfoWhitOutNull" parameterClass="LnLoanInfo">
+		UPDATE LN_LOAN_INFO SET  UPDATE_DATE = current timestamp,
+		<isNotEmpty property="cusName" prepend="">
+			CUS_NAME = #cusName#,
+		</isNotEmpty>
+		<isNotEmpty property="cusBirthday" prepend="">
+			CUS_BIRTHDAY = #cusBirthday#,
+		</isNotEmpty>
+		<isNotEmpty property="cusSex" prepend="">
+			CUS_SEX = #cusSex#,
+		</isNotEmpty>
+		<isNotEmpty property="cusIdtypeId" prepend="">
+			CUS_IDTYPE_ID = #cusIdtypeId#,
+		</isNotEmpty>
+		<isNotEmpty property="cusIdcard" prepend="">
+			CUS_IDCARD = #cusIdcard#,
+		</isNotEmpty>
+		<isNotEmpty property="refuseLoanStateId" prepend="">
+			REFUSE_LOAN_STATE_ID = #refuseLoanStateId:VARCHAR:NULL#,
+		</isNotEmpty>
+		CUSTOMER_ID = #customerId:INTEGER#,
+		REFUSE_REASON_TYPE_ID = #refuseReasonTypeId:VARCHAR:NULL#,
+		REFUSE_REASON_SUB_TYPE_ID = #refuseReasonSubTypeId:VARCHAR:NULL#,
+		REFUSE_CONTENT = #refuseContent:VARCHAR:NULL#,
+		ASSIGN_REMARK =  #assignRemark:VARCHAR:NULL#,
+		REGISTER_MICRO_BIZ_CENTER = #registerMicroBizCenter:INTEGER#,
+		REGISTER_RECOMMEND_BANK = #registerRecommendBank:INTEGER#,
+		REGISTER_APPLY_DATE = #registerApplyDate:TIMESTAMP#,
+		REGISTER_LOAN_DATE = #registerLoanDate:TIMESTAMP#,
+		REGISTER_INFO_SOURCE_IDS = #registerInfoSourceIds:VARCHAR:NULL#,
+		REGISTER_DIRECT_MARKET = #registerDirectMarket:VARCHAR:NULL#,
+		REGISTER_EXIST_CUS_INTRODUCT = #registerExistCusIntroduct:VARCHAR:NULL#,
+		REGISTER_INFO_SOURCE_OTHER = #registerInfoSourceOther:VARCHAR:NULL#,
+		APP_LOAN_TYPE_ID = #appLoanTypeId:VARCHAR:NULL#,
+		APP_LOAN_SUB_TYPE_ID = #appLoanSubTypeId:VARCHAR:NULL#,
+		APP_MONEY = #appMoney:NUMERIC#,
+		APP_LIMIT_YEAR = #appLimitYear:VARCHAR:NULL#,
+		APP_REPAYMENT_MONTH = #appRepaymentMonth:VARCHAR:NULL#,
+		APP_LOAN_PURPOSE = #appLoanPurpose:VARCHAR:NULL#,
+		APP_GUARANTOR_WAY_ID = #appGuarantorWayId:VARCHAR:NULL#,
+		APP_MORTGAGE_ID = #appMortgageId:VARCHAR:NULL#,
+		APP_PLEDGE_ID = #appPledgeId:VARCHAR:NULL#,
+		APP_MAX_INSTALLMENT_MONEY = #appMaxInstallmentMoney:VARCHAR:NULL#,
+		APP_TOTAL_PROJECT_COST = #appTotalProjectCost:VARCHAR:NULL#,
+		APP_USER_DETAIL = #appUserDetail:VARCHAR:NULL#,
+		CUS_BIRTHDAY = #cusBirthday:VARCHAR:NULL#,
+		CUS_MOBILE_PHONE = #cusMobilePhone:VARCHAR:NULL#,
+		CUS_PHONE = #cusPhone:VARCHAR:NULL#,
+		CUS_EDUCATION_ID = #cusEducationId:VARCHAR:NULL#,
+		CUS_LIVING_STATUS_ID = #cusLivingStatusId:VARCHAR:NULL#,
+		CUS_ADDRESS = #cusAddress:VARCHAR:NULL#,
+		CUS_MARRIAGE = #cusMarriage:VARCHAR:NULL#,
+		IS_LOCAL = #isLocal:VARCHAR:NULL#,
+		CUS_REGISTERED_RESIDENCE = #cusRegisteredResidence:VARCHAR:NULL#,
+		CUS_LIVING_TYPE_ID = #cusLivingTypeId:VARCHAR:NULL#,
+		CUS_LIVING_START_DATE = #cusLivingStartDate:VARCHAR:NULL#,
+		CUS_HOUSE_PATTERN = #cusHousePattern:VARCHAR:NULL#,
+		CUS_HOUSE_AREA = #cusHouseArea:VARCHAR:NULL#,
+		CUS_HOUSE_DECORATE_ID = #cusHouseDecorateId:VARCHAR:NULL#,
+		CUS_ECONOMIC_STATE = #cusEconomicState:VARCHAR:NULL#,
+		CUS_NOTE = #cusNote:VARCHAR:NULL#,
+		CUS_NET_AGE = #cusNetAge:VARCHAR:NULL#,
+		CUS_COMMON_OPERATER_NAME = #cusCommonOperaterName:VARCHAR:NULL#,
+		CUS_COMMON_OPERATER_IDCARD = #cusCommonOperaterIdcard:VARCHAR:NULL#,
+		CUS_COMMON_OPERATER_MOBILE_PHO = #cusCommonOperaterMobilePhone:VARCHAR:NULL#,
+		CUS_FIRST_IMPRESS = #cusFirstImpress:VARCHAR:NULL#,
+		CUS_MATE_NAME = #cusMateName:VARCHAR:NULL#,
+		CUS_MATE_IDCARD = #cusMateIdcard:VARCHAR:NULL#,
+		CUS_COMPANY_NAME = #cusCompanyName:VARCHAR:NULL#,
+		CUS_MATE_MOBILE_PHONE = #cusMateMobilePhone:VARCHAR:NULL#,
+		CUS_MATE_PHONE = #cusMatePhone:VARCHAR:NULL#,
+		CUS_MATE_COMPANY_PHONE = #cusMateCompanyPhone:VARCHAR:NULL#,
+		CUS_COMPANY_NATURE = #cusCompanyNature:VARCHAR:NULL#,
+		CUS_MATE_JOB = #cusMateJob:VARCHAR:NULL#,
+		CUS_MATE_WORK_YEAR = #cusMateWorkYear:VARCHAR:NULL#,
+		CUS_MATE_ADDRESS = #cusMateAddress:VARCHAR:NULL#,
+		CUS_MATE_MONTHLY_INCOMING_ID = #cusMateMonthlyIncomingId:VARCHAR:NULL#,
+		CUS_CHD_INFO = #cusChdInfo:VARCHAR:NULL#,
+		CUS_FAMILY_NUM = #cusFamilyNum:VARCHAR:NULL#,
+		CUS_PARENT_INFO = #cusParentInfo:VARCHAR:NULL#,
+		CUS_LOCAL_YEAR = #cusLocalYear:VARCHAR:NULL#,
+		COMPANY_NAME = #companyName:VARCHAR:NULL#,
+		COMPANY_NATURE = #companyNature:VARCHAR:NULL#,
+		COMPANY_JOB = #companyJob:VARCHAR:NULL#,
+		COMPANY_WORK_YEAR = #companyWorkYear:VARCHAR:NULL#,
+		COMPANY_MONTHLY_INCOMING = #companyMonthlyIncoming:VARCHAR:NULL#,
+		COMPANY_ADDRESS = #companyAddress:VARCHAR:NULL#,
+		BIZ_COMPANY = #bizCompany:VARCHAR:NULL#,
+		BIZ_SCOPE = #bizScope:VARCHAR:NULL#,
+		BIZ_ORG_ID = #bizOrgId:VARCHAR:NULL#,
+		BIZ_ORG_CODE = #bizOrgCode:VARCHAR:NULL#,
+		BIZ_LICENSE_NUM = #bizLicenseNum:VARCHAR:NULL#,
+		BIZ_SOCIAL_CREDIT_NUM = #bizSocialCreditNum:VARCHAR:NULL#,
+		BIZ_ACTUAL_OPERATOR = #bizActualOperator:VARCHAR:NULL#,
+		BIZ_ADDRESS = #bizAddress:VARCHAR:NULL#,
+		BIZ_SHAREHOLDER_PROPORTION = #bizShareholderProportion:VARCHAR:NULL#,
+		BIZ_PLACE_ID = #bizPlaceId:VARCHAR:NULL#,
+		BIZ_AREA = #bizArea:VARCHAR:NULL#,
+		BIZ_LAW_FORM_ID = #bizLawFormId:VARCHAR:NULL#,
+		BIZ_LEAGL = #bizLeagl:VARCHAR:NULL#,
+		BIZ_LEAGL_MOBILE_PHONE = #bizLeaglMobilePhone:VARCHAR:NULL#,
+		BIZ_EMPLOYEE_NUM = #bizEmployeeNum:VARCHAR:NULL#,
+		BIZ_OPEN_DATE = #bizOpenDate:VARCHAR:NULL#,
+		BIZ_IS_BELONG_MYBANK = #bizIsBelongMybank:VARCHAR:NULL#,
+		BIZ_NOTE = #bizNote:VARCHAR:NULL#,
+		CAF_MONTHLY_SALES = #cafMonthlySales:VARCHAR:NULL#,
+		CAF_BUSY_SEASON = #cafBusySeason:VARCHAR:NULL#,
+		CAF_LOW_SEASON = #cafLowSeason:VARCHAR:NULL#,
+		CAF_RECEIVABLE_MONEY = #cafReceivableMoney:VARCHAR:NULL#,
+		CAF_GROSS_MARGIN = #cafGrossMargin:VARCHAR:NULL#,
+		CAF_INVENTORY = #cafInventory:VARCHAR:NULL#,
+		CAF_DEBT = #cafDebt:VARCHAR:NULL#,
+		CAF_TOTAL_MONEY = #cafTotalMoney:VARCHAR:NULL#,
+		CAF_OTHER = #cafOther:VARCHAR:NULL#,
+		CAF_TOTAL_CREDIT_CARD = #cafTotalCreditCard:VARCHAR:NULL#,
+		CAF_TOTAL_CREDIT_MONEY = #cafTotalCreditMoney:VARCHAR:NULL#,
+		CAF_TOTAL_OVERDRAFT_MONEY = #cafTotalOverdraftMoney:VARCHAR:NULL#,
+		CAF_OVERDUE_SITUATION = #cafOverdueSituation:VARCHAR:NULL#,
+		CAF_LOAN_CARD = #cafLoanCard:VARCHAR:NULL#,
+		CAF_BORROWER_CREIDT_DESC = #cafBorrowerCreidtDesc:VARCHAR:NULL#,
+		CAF_GUARANTOR_CREIDT_DESC = #cafGuarantorCreidtDesc:VARCHAR:NULL#,
+		ADVICE_MONEY = #adviceMoney:VARCHAR:NULL#,
+		ADVICE_LIMIT_YEAR = #adviceLimitYear:VARCHAR:NULL#,
+		ADVICE_RATE = #adviceRate:VARCHAR:NULL#,
+		ADVICE_REPAY_DATE = #adviceRepayDate:VARCHAR:NULL#,
+		ADVICE_LEND_WAY_ID = #adviceLendWayId:VARCHAR:NULL#,
+		ADVICE_REPAY_WAY_ID = #adviceRepayWayId:VARCHAR:NULL#,
+		ADVICE_OTHER = #adviceOther:VARCHAR:NULL#,
+		ADVICE_NOTE = #adviceNote:VARCHAR:NULL#,
+		RESULT_MONEY = #resultMoney:VARCHAR:NULL#,
+		RESULT_LIMIT_YEAR = #resultLimitYear:VARCHAR:NULL#,
+		RESULT_RATE = #resultRate:VARCHAR:NULL#,
+		RESULT_REPAY_DATE = #resultRepayDate:VARCHAR:NULL#,
+		RESULT_INSTAL_REPAY_MONEY = #resultInstalRepayMoney:VARCHAR:NULL#,
+		RESULT_RISK_WARM = #resultRiskWarm:VARCHAR:NULL#,
+		RESULT_SURVEY_EXIS_PROBLEMS = #resultSurveyExisProblems:VARCHAR:NULL#,
+		RESULT_NOTE = #resultNote:VARCHAR:NULL#,
+		LEND_CONTRACT_NUM  = #lendContractNum:VARCHAR:NULL#,
+		LEND_CONFRIM_CONTRACT_NUM = #lendConfrimContractNum:VARCHAR:NULL#,
+		LEND_NOTE = #lendNote:VARCHAR:NULL#,
+		IS_NO_GOOD = #isNoGood:INTEGER#,
+		APP_MORTGAGE_OTHER = #appMortgageOther:VARCHAR:NULL#,
+		APP_PLEDGE_OTHER = #appPledgeOther:VARCHAR:NULL#,
+		REGISTER_SAVE_STATUS = #registerSaveStatus:VARCHAR:NULL#,
+		APPLICATION_INFO = #applicationInfo:VARCHAR:NULL#,
+		PERSONAL_INFO = #personalInfo:VARCHAR:NULL#,
+		FAMILY_INFO = #familyInfo:VARCHAR:NULL#,
+		BUSINESS_INFO = #businessInfo:VARCHAR:NULL#,
+		SIGN_INFO = #signInfo:VARCHAR:NULL#,
+		SIGN_INFO_PATH = #signInfoPath:VARCHAR:NULL#,
+		REGISTER_SOURCE_FFKKHJS= #registerSourceFFKKHJS:VARCHAR:NULL#,
+		REGISTER_SOURCE_WX= #registerSourceWX:VARCHAR:NULL#,
+		REGISTER_SOURCE_MM= #registerSourceMM:VARCHAR:NULL#,
+		REGISTER_SOURCE_CCK= #registerSourceCCK:VARCHAR:NULL#,
+		REGISTER_SOURCE_HNYGJS= #registerSourceHNYGJS:VARCHAR:NULL#,
+		REGISTER_SOURCE_DHYX= #registerSourceDHYX:VARCHAR:NULL#,
+		REGISTER_SOURCE_HZSHTJ= #registerSourceHZSHTJ:VARCHAR:NULL#,
+		REGISTER_SOURCE_ZXSQ= #registerSourceZXSQ:VARCHAR:NULL#
+		WHERE
+		<isNotEmpty property="loanId" prepend="">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+	</update>
+
+	<select id="selectLoanInfoList" parameterClass="java.util.Map" resultMap="LnLoanInfoResult">
+		SELECT * FROM LN_LOAN_INFO  WHERE 1=1
+		<isNotEmpty property="loanId" prepend="and">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+			CUSTOMER_ID = #customerId#
+		</isNotEmpty>
+	</select>
+
+
+	<update id="updateLoanInfoLoanAccount" parameterClass="java.util.Map">
+		UPDATE LN_LOAN_INFO SET UPDATE_DATE = current timestamp
+		<isNotEmpty property="loanAccount" prepend=",">
+			LOAN_ACCOUNT = #loanAccount#
+		</isNotEmpty>
+		WHERE
+		SERIAL_NUMBER=#serialNumber#
+	</update>
+
+	<delete id="deleteLoanInfo" parameterClass="java.lang.Integer">
+        delete from LN_LOAN_INFO where loan_id = #loanId#
+    </delete>
+
+	<select id="getAppLoanTypeIdByLoanId" resultClass="java.lang.String" parameterClass = "java.lang.Integer">
+		<![CDATA[ 
+			SELECT APP_LOAN_TYPE_ID FROM LN_LOAN_INFO WHERE LOAN_ID = #loanId#
+	    ]]>
+	</select>
+
+	<select id="getAdviceMoneyByLoanId" resultClass="java.lang.String" parameterClass = "java.lang.Integer">
+		<![CDATA[ 
+			SELECT ADVICE_MONEY FROM LN_LOAN_INFO WHERE LOAN_ID = #loanId#
+	    ]]>
+	</select>
+
+</sqlMap>

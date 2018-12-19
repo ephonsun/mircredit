@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TelephoneSQL">
+	<typeAlias alias="MobileAttibution" type="com.banger.mobile.domain.model.record.RecordInfo" />
+	<typeAlias alias="TelephoneCode" type="com.banger.mobile.domain.model.record.RecordInfoBean" />
+	
+	<typeAlias alias="SpecialNumber" type="com.banger.mobile.domain.model.talk.TlkSpecialNumber" />
+
+	<!-- 高级搜索客户  -->
+	<resultMap class="SpecialNumber" id="SpecialNumberResult">
+		<result column="NUMBER" property="number" />
+		<result column="NUMBER_NAME" property="name" />
+	</resultMap>
+	
+	<select id="getPhoneAreaNameByCode" resultClass="java.lang.String" parameterClass="java.lang.String" >
+		SELECT AREA_NAME FROM TLK_TELEPHONE_CODE WHERE PHONE_CODE = '$value$'
+	</select>
+	
+	<select id="getAreaCodeByNumber" resultClass="java.lang.String" parameterClass="java.lang.String" >
+		SELECT PHONE_CODE FROM TLK_MOBILE_ATTIBUTION WHERE MOBILE_NUMBER_PER = '$value$'
+	</select>
+	
+	<select id="getSpecialNumbers" resultMap="SpecialNumberResult" >
+		SELECT * FROM TLK_SPECIALNUMBER
+	</select>
+	
+</sqlMap>
+
+
+
+

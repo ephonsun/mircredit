@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SyncSettingSQL">
+	<typeAlias alias="SyncSetting"
+		type="com.banger.mobile.domain.model.syncSetting.SyncSetting" />
+
+	<!-- 客户资料同步设置表-->
+	<!-- SyncSettingSQL信息全字段 -->
+	<resultMap class="SyncSetting" id="SyncSettingResult">
+		<result column="SYNC_SETTING_ID" property="syncSettingId" />
+		<result column="IS_ACTIVE" property="isActived" />
+		<result column="SYNC_TIME" property="syncTime" />
+		<result column="FTP_HOST" property="ftpHost" />
+		<result column="FTP_PORT" property="ftpPort" />
+		<result column="FTP_ACCOUNT" property="ftpAccount" />
+		<result column="FTP_PASSWORD" property="ftpPassword" />
+		<result column="FTP_SYNC_DIR" property="ftpSyncDir" />
+		<result column="FTP_SYNC_FILE" property="ftpSyncFile"/>
+	</resultMap>
+	
+	<!-- 获取客户资料同步设置数据 -->
+	<select id="GetSyncSettingById" resultMap="SyncSettingResult">
+		<![CDATA[
+			select * from SYS_SYNC_SETTING 
+		]]>
+	</select>
+	
+	<!-- 修改客户资料同步数据 -->
+	<update id="updateSyncSetting" parameterClass="SyncSetting">
+		<![CDATA[
+			update SYS_SYNC_SETTING a
+			set
+				a.IS_ACTIVE=#isActived#,
+				a.SYNC_TIME=#syncTime#,
+				a.FTP_HOST=#ftpHost#,
+				a.FTP_PORT=#ftpPort#,
+				a.FTP_ACCOUNT=#ftpAccount#,
+				a.FTP_PASSWORD=#ftpPassword#,
+				a.FTP_SYNC_DIR=#ftpSyncDir#,
+				a.FTP_SYNC_FILE=#ftpSyncFile#
+			where
+				a.SYNC_SETTING_ID=1
+		]]>
+	</update>
+
+</sqlMap>

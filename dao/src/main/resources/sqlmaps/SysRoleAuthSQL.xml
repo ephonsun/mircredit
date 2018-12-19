@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysRoleAuthSQL">
+	<typeAlias alias="SysRoleAuth" type="com.banger.mobile.domain.model.user.SysRoleAuth" />
+	
+	<!-- 可管理角色模板表-->
+	<!-- SysRoleAuthSQL信息全字段  -->
+	<resultMap class="SysRoleAuth" id="SysRoleAuthResult">
+		<result column="ROLE_AUTH_ID" property="roleAuthId" />
+		<result column="USER_ID" property="userId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条可管理角色-->
+	<insert id="addSysRoleAuth" parameterClass="SysRoleAuth">
+     <![CDATA[
+		insert into SYS_ROLE_AUTH
+		(
+		 ROLE_AUTH_ID,
+		 USER_ID,
+		 ROLE_ID,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#roleAuthId#,
+		#userId#,
+	    #roleId#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="roleAuthId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_ROLE_AUTH 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 可管理角色修改-->
+	<update id="updateSysRoleAuth" parameterClass="SysRoleAuth">
+	 <![CDATA[
+             update SYS_ROLE_AUTH  set 
+		 ]]>	
+		 <isNotEmpty property="userId">
+				USER_ID=#userId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="roleId">
+				ROLE_ID=#roleId#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where ROLE_AUTH_ID=#roleAuthId#
+         ]]> 
+	</update>
+	
+	 <!-- 根据userid删除可管理角色-->	
+	<delete id="deleteSysRoleAuth"  parameterClass="java.lang.Integer">
+		 <![CDATA[
+            delete  from SYS_ROLE_AUTH where USER_ID=#userId#
+		 ]]>	
+	</delete>
+	
+  
+  <!-- 根据id得到可管理角色-->	
+  <select id="getSysRoleAuthById"  resultMap="SysRoleAuthResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_ROLE_AUTH where ROLE_AUTH_ID=#roleAuthId#
+	]]>
+  </select>
+
+  <select id="getSysRoleAuthList" resultMap="SysRoleAuthResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_ROLE_AUTH where 1=1 
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ USER_ID=#userId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[ ROLE_ID =#roleId#]]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+  </select>
+</sqlMap>
+
+
+
+

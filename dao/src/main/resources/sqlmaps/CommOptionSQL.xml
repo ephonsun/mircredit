@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommOptionSQL.xml">
+	<typeAlias alias="BaseCommOption" type="com.banger.mobile.domain.model.base.communication.BaseCommThemeOption" />	
+	<typeAlias alias="CommOption" type="com.banger.mobile.domain.model.communication.CommThemeOption" />	
+	
+	<resultMap class="BaseCommOption" id="BaseCommOptionResult">
+		<result column="OPTION_ID" property="optionId" />
+		<result column="THEME_ID" property="themeId" />
+		<result column="OPTION_CONTENT" property="optionContent" />
+		<result column="OPTION_SELECT_COUNT" property="selectOptionCount" />
+			
+	</resultMap>
+	<resultMap class="CommOption" extends="BaseCommOptionResult" id="CommOptionResult">
+		
+		<result column="PERCENT" property="percent" />
+	</resultMap>
+	
+	<!-- 新增投票 -->
+	<insert id="addCommOption" parameterClass="CommOption">
+		<![CDATA[	
+			INSERT INTO
+			    COMM_THEME_OPTION
+			    (
+			        OPTION_ID,
+					THEME_ID,
+					OPTION_CONTENT,
+					OPTION_SELECT_COUNT
+			    )
+			    Values
+			    ( 
+			       	#optionId#,
+					#themeId#,
+					#optionContent:VARCHAR#,
+					#selectOptionCount:INTEGER#
+				)
+		]]>	
+		<selectKey keyProperty="optionId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_COMM_THEME_OPTION
+		</selectKey>	
+	</insert>
+	
+	<!-- 删除投票-->
+	<update id="deleteCommOption"  parameterClass="java.lang.Integer" >	
+	<![CDATA[ 
+		DELETE FROM COMM_THEME_OPTION WHERE THEME_ID = #themeId# ]]>	
+	</update>
+	
+	<!-- 编辑投票-->
+	<update id="updateCommOption"  parameterClass="CommOption" >	
+	<![CDATA[ 
+		UPDATE COMM_THEME_OPTION SET OPTION_SELECT_COUNT = (OPTION_SELECT_COUNT+1) WHERE OPTION_ID = #optionId# ]]>	
+	</update>
+	
+	
+	<!-- 通过ID获取投票 -->
+	<select id="getCommOptionById" parameterClass="java.lang.Integer" resultMap="CommOptionResult">
+	<![CDATA[ 	
+		select  x.*,decimal(round(CAST(OPTION_SELECT_COUNT AS DOUBLE)/total*100,2),20,2) as PERCENT
+   		from (
+		select a.*,case  sum(a.OPTION_SELECT_COUNT)over()  when 0 then 1 else sum(a.OPTION_SELECT_COUNT)over() end total
+   		from  COMM_THEME_OPTION a where a.THEME_ID = #themeId#
+        ) x
+	]]>	
+	</select>
+	
+</sqlMap>
+
+
+
+

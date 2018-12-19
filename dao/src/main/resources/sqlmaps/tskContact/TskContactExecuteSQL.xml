@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskContactExecuteSQL">
+	<typeAlias alias="BaseTskContactExecute"
+		type="com.banger.mobile.domain.model.base.tskContact.BaseTskContactExecute" />
+	<typeAlias alias="TskContactDaily"
+		type="com.banger.mobile.domain.model.tskContact.TskContactDaily" />
+	<typeAlias alias="ExecuterAttrPlugin"
+		type="com.banger.mobile.domain.model.tskContact.ExecuterAttrPlugin" />
+	<typeAlias alias="TaskContactExeDetail"
+		type="com.banger.mobile.domain.model.tskContact.TaskContactExeDetail" />
+	<typeAlias alias="TskExecuteUser"
+		type="com.banger.mobile.domain.model.tskContact.TskExecuteUser" />
+	
+
+	<!-- 任务执行者表-->
+	<!-- BaseTskContactExecute信息全字段 -->
+	<resultMap class="BaseTskContactExecute" id="BaseTskContactExecuteResult">
+		<result column="EXECUTE_ID" property="executeId" />
+		<result column="CONTACT_ID" property="contactId" />
+		<result column="USER_ID" property="userId"/>
+	</resultMap>
+	
+	<!-- 任务日均联系量 -->
+	<resultMap class="TskContactDaily" id="TskContactDailyResult">
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="TOTAL_TARGET" property="totalTarget" />
+	</resultMap>
+	<!-- 联系客户列表机构人员树 -->
+	<resultMap class="ExecuterAttrPlugin" id="ExecuterAttrPluginResult">
+		<result column="ID" property="id" />
+		<result column="PARENT_ID" property="parentId" />
+		<result column="TEXT_NAME" property="textName" />
+		<result column="TYPE" property="type" />
+		<result column="COUNTS" property="counts" />
+		<result column="FINISH_COUNT" property="finishCount" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="IS_DEL" property="isDel" />
+	</resultMap>
+	<!-- 查看任务执行者日均量 -->
+	<resultMap class="TaskContactExeDetail" id="TaskContactExeDetailResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="LEFT_TARGET" property="leftTarget" />
+		<result column="TOTAL_TARGET" property="totalTarget" />
+	</resultMap>
+	
+	<!-- 批量修改执行者的执行者实体 -->
+	<resultMap class="TskExecuteUser" id="TskExecuteUserResult" extends="BaseTskContactExecuteResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />		
+		<result column="ACCOUNT" property="account" />		
+	</resultMap>
+	
+	
+	<!-- 插入任务执行者 -->
+	<insert id="insertTskExecuter" parameterClass="BaseTskContactExecute">
+		<![CDATA[
+		INSERT INTO
+	    TSK_CONTACT_EXECUTE
+	    (
+	        EXECUTE_ID,
+	        CONTACT_ID,
+	        USER_ID
+	    )
+	    VALUES
+	    (
+	        #executeId#,
+	        #contactId#,
+	        #userId#
+	    )
+	    ]]>
+     	<selectKey keyProperty="executeId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_CONTACT_EXECUTE
+		</selectKey>
+	</insert>
+	
+	<!-- 根据任务ID删除执行者 -->
+	<delete id="delExecuteByTaskId" parameterClass="java.lang.Integer">
+		<![CDATA[ DELETE FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID = #contactId#]]>
+	</delete>
+	
+	<!-- 根据主键ID删除执行者 -->
+	<delete id="deleteExecute" parameterClass="BaseTskContactExecute">
+		<![CDATA[ DELETE FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID = #contactId# AND USER_ID=#userId# ]]>
+	</delete>
+	
+	<!-- 根据任务ID查找所有的执行者 -->
+	<select id="getExecuteByTaskId" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		<![CDATA[
+			SELECT USER_ID FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID = #contactId#
+		]]>
+	</select>
+	<!-- 根据任务ID查找所有的执行者list -->
+	<select id="getAllExeListByContactId" parameterClass="java.lang.Integer" resultMap="BaseTskContactExecuteResult">
+		<![CDATA[
+			SELECT * FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID = #contactId#
+		]]>
+	</select>
+		
+	<!--根据任务id查询实体集合  -->
+	<select id="getExecuteListByContactId" parameterClass="java.lang.Integer" resultMap="BaseTskContactExecuteResult">
+		<![CDATA[
+			SELECT * FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID=#contactId#
+		]]>
+	</select>
+	
+	<!--确认分配任务，每日联系量列表 -->
+	<select id="getDailyContactNumList" parameterClass="java.lang.Integer" resultMap="TskContactDailyResult">
+	<![CDATA[  
+		select a.*, u.user_name from (
+			select user_id, count(*) as TOTAL_TARGET
+			from ( select e.user_id,t.* from TSK_CONTACT_EXECUTE as e
+			inner join tsk_contact_target as t on t.execute_id = e.execute_id
+			where e.contact_id = #value# 
+			) group by  user_id) as a 
+		left join sys_user as u on u.user_id = a.user_id
+		order by TOTAL_TARGET desc	
+	]]>
+	</select>
+	<!-- 获取已经有分配的联系客户的UserId集合 -->
+	<select id="getHaveTargetExecuteList" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		<![CDATA[ select distinct e.user_id from tsk_contact_execute as e 
+				inner join tsk_contact_target as t on t.execute_id = e.execute_id
+				where e.contact_id = #value#
+		]]>
+	</select>
+	<!-- 联系客户列表机构人员树 -->
+	<select id="getExecuterAttrPlugin" parameterClass="java.util.Map" resultMap="ExecuterAttrPluginResult">
+	<![CDATA[select e.user_id as id,u.dept_id as parent_id ,u.user_name as text_name,'U' as type,
+		u.is_Actived,u.is_del,
+		case when t1.counts is null then 0 else t1.counts end as counts,
+		case when t2.counts is null then 0 else t2.counts end as finish_Count
+		from tsk_contact_execute as e
+		left join sys_user as u on  e.user_id=u.user_id
+		left join (select execute_id ,count(1) as counts from tsk_contact_target where contact_id = #contactId# group by execute_id) as t1 on t1.execute_id = e.execute_id
+		left join (select execute_id ,count(1) as counts from tsk_contact_target where contact_id = #contactId# and is_finish=1 group by execute_id) as t2 on t2.execute_id = e.execute_id
+		where e.contact_id = #contactId# and e.user_id in ($userIds$)
+		order by COLLATION_KEY_BIT(u.user_name,'UCA500R1_LZH_AN_CX_EX_FX_HX_NX_S3')
+	]]>
+	</select>
+	
+	<!-- 查看任务详情各执行者的日均量（人员） -->
+	<select id="getExecuterDetail" parameterClass="java.util.Map" resultMap="TaskContactExeDetailResult">
+	<![CDATA[ 
+		select u.user_name,c.start_date,c.end_date,
+			(select count(1) from tsk_contact_target as t where t.execute_id = e.execute_id and t.is_finish =0 ) as left_target,
+			(select count(1) from tsk_contact_target as t where t.execute_id = e.execute_id ) as total_target
+		from tsk_contact_execute as e
+		left join sys_user as u on e.user_id = u.user_id
+		left join tsk_contact as c on c.contact_id = e.contact_id
+		where e.contact_id = #contactId# and e.user_id = #userId#
+	]]>
+	</select>
+	<!-- 查看任务详情各执行者的日均量（机构） -->
+	<select id="getExecuterDetailForDept" parameterClass="java.util.Map" resultMap="TaskContactExeDetailResult">
+	<![CDATA[ 
+		select '' as user_name,start_date,end_date, sum(left_target) as left_target,sum(total_target) as total_target
+		from(
+		    select u.user_name,c.start_date,c.end_date,
+		            (select count(1) from tsk_contact_target as t where t.execute_id = e.execute_id and t.is_finish =0 ) as left_target,
+		            (select count(1) from tsk_contact_target as t where t.execute_id = e.execute_id ) as total_target
+		    from tsk_contact_execute as e
+		    left join sys_user as u on e.user_id = u.user_id
+		    left join tsk_contact as c on c.contact_id = e.contact_id
+		    where e.contact_id = #contactId# and e.user_id in ($userId$)
+		) group by start_date,end_date
+	]]>
+	</select>
+	
+	<!-- 获取所有的执行者列表 -->
+	<select id="getExecuteUserList" parameterClass="java.util.Map" resultMap="TskExecuteUserResult">
+	<![CDATA[  
+		select e.*,u.user_name,u.dept_id,u.account,d.dept_name from tsk_contact_execute as e
+		left join sys_user as u on u.user_id= e.user_id and u.is_del=0 and u.IS_ACTIVED=1
+		left join sys_dept as d on d.dept_id=u.dept_id
+		where u.dept_id = #deptId# and e.contact_id = #contactId#
+		order by COLLATION_KEY_BIT(u.user_name,'UCA500R1_LZH_AN_CX_EX_FX_HX_NX_S3')
+	]]>
+	</select>
+</sqlMap>

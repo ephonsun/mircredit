@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskQuestionOptionSQL">
+	<typeAlias alias="RskQuestionOption" type="com.banger.mobile.domain.model.evaluation.RskQuestionOption" />
+	<typeAlias alias="Option" type="com.banger.mobile.domain.model.pad.Option" />
+
+	<!-- 风险测评题目选项表-->
+	<!-- RskQuestionOptionSQL信息全字段  -->
+	<resultMap class="RskQuestionOption" id="RskQuestionOptionResult">
+		<result column="QUESTION_OPTION_ID" property="questionOptionId" />
+		<result column="QUESTION_ID" property="questionId" />
+		<result column="SORTNO" property="sortno" />
+		<result column="OPTION_DETAIL" property="optionDetail" />
+		<result column="SCORE" property="score" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- PAD 字段  -->
+	<resultMap class="Option" id="OptionResult">
+		<result column="QUESTION_OPTION_ID" property="optionId" />
+		<result column="SORTNO" property="sortno" />
+		<result column="OPTION_DETAIL" property="optionDetail" />
+	</resultMap>
+
+
+		<!-- 增加一条风险测评模板题目-->
+	<insert id="addRskQuestionOption" parameterClass="RskQuestionOption">
+     <![CDATA[
+		insert into RSK_QUESTION_OPTION
+		(
+		 QUESTION_OPTION_ID,
+		 QUESTION_ID,
+		 SORTNO,
+		 OPTION_DETAIL,
+		 SCORE,
+		 IS_DEL,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#questionOptionId#,
+		#questionId#,
+	    #sortno#,
+	    #optionDetail#,
+	    #score#,
+	    #isDel#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="questionOptionId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_RSK_QUESTION_OPTION 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 风险测评模板题目修改-->
+	<update id="updateRskQuestionOption" parameterClass="RskQuestionOption">
+	 <![CDATA[
+             update RSK_QUESTION_OPTION  set 
+		 ]]>	
+		 <isNotEmpty property="questionId">
+				QUESTION_ID=#questionId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="sortno">
+				SORTNO=#sortno#,
+		 </isNotEmpty>
+		  <isNotEmpty property="optionDetail">
+				OPTION_DETAIL=#optionDetail#,
+		 </isNotEmpty>
+		 <isNotEmpty property="score">
+				SCORE=#score#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isDel">
+				IS_DEL=#isDel#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where QUESTION_OPTION_ID=#questionOptionId#
+         ]]> 
+	</update>
+ 
+  	<!-- 风险测评模板题目分页count -->
+  <select id="getRskQuestionOptionCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   RSK_QUESTION_OPTION where IS_DEL=0
+     ]]>
+     <dynamic>
+			<isNotEmpty prepend="and" property="questionId">
+				<![CDATA[ QUESTION_ID=#questionId#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  
+  	<!-- 根据id得到风险测评模板题目-->	
+  <select id="getRskQuestionOptionById"  resultMap="RskQuestionOptionResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_QUESTION_OPTION where QUESTION_OPTION_ID=#questionOptionId# and IS_DEL=0
+	]]>
+  </select>
+  
+  <!-- 删除题目下所有选项 -->
+  <delete id="delRskQuestionOptionByQuestionId" parameterClass="java.lang.Integer">
+  	<![CDATA[
+		delete  from RSK_QUESTION_OPTION where QUESTION_ID=#questionId# and IS_DEL=0
+	]]>
+  </delete>
+  
+  	<!-- 分页记录 -->
+  <select id="getRskQuestionOptionPageMap" resultMap="RskQuestionOptionResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		  select 
+                   *
+             from 
+                  RSK_QUESTION_OPTION where IS_DEL=0
+	]]>
+	<dynamic>
+			<isNotEmpty prepend="and" property="questionId">
+				<![CDATA[ QUESTION_ID=#questionId#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by SORTNO 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+
+  <!-- PAD 取得试卷题目-->	
+  <select id="getAllQuestionOptionForPad"  resultMap="OptionResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select QUESTION_OPTION_ID,SORTNO,OPTION_DETAIL 
+		from RSK_QUESTION_OPTION 
+		where QUESTION_ID=#questionId# and IS_DEL=0
+		order by SORTNO
+	]]>
+  </select>
+  
+  <!-- PAD 取得试卷所有选项-->	
+  <select id="getRskQuestionOptionByTemplateId"  resultMap="RskQuestionOptionResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select o.*
+		from RSK_QUESTION_OPTION o
+		inner join RSK_TEMPLATE_QUESTION q on o.QUESTION_ID = q.QUESTION_ID
+		where q.TEMPLATE_ID=#templateId# and o.IS_DEL=0
+	]]>
+  </select>
+
+</sqlMap>
+
+
+
+

@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="WebserviceLnLoanSQL">
+    <typeAlias alias="PadLoan" type="com.banger.mobile.domain.model.pad.PadLoan" />
+    
+    <typeAlias alias="PadLoanInfo" type="com.banger.mobile.domain.model.pad.PadLoanInfo" />
+    
+    <resultMap class="PadLoan" id="PadLoanResult">
+        <result column="LOAN_ID" property="loanId" />
+        <result column="LOAN_STATUS_ID" property="loanStatusId" />
+        <result column="LOAN_STATUS_NAME" property="loanStatusName" />
+        <result column="CUSTOMER_ID" property="customerId" />
+        <result column="BELONG_USER_ID" property="belongUserId" />
+        <result column="CUSTOMER_NAME" property="customerName" />
+        <result column="CUSTOMER_TITLE" property="customerTitle" />
+        <result column="ID_CARD" property="idCard" />
+        <result column="PHONE" property="phone" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="APPLY_USER_ID" property="applyUserId" />        
+        <result column="APPLY_USER_NAME" property="applyUserName" />
+        <result column="APPLY_SUBMIT_DATE" property="applySubmitDate" />  
+        <result column="ASSIGN_USER_ID" property="assignUserId" />
+        <result column="ASSIGN_USER_NAME" property="assignUserName" />
+        <result column="ASSIGN_SUBMIT_DATE" property="assignSubmitDate" />
+        <result column="SURVEY_USER_ID" property="surveyUserId" />
+        <result column="SURVEY_USER_NAME" property="surveyUserName" />
+        <result column="SURVEY_SUBMIT_DATE" property="surveySubmitDate" />
+        <result column="APPROVE_PROCESS_ID" property="approveProcessId" />
+        <result column="APPROVE_DIRECTOR_USER_ID" property="approveDirectorUserId" />               
+        <result column="APPROVE_DIRECTOR_USER_NAME" property="approveDirectorUserName" />
+        <result column="APPROVE_DIRECTOR_PASS_DATE" property="approveDirectorPassDate" />        
+        <result column="APPROVE_CENTER_USER_ID1" property="approveCenterUserId1" />
+        <result column="APPROVE_CENTER_USER_NAME1" property="approveCenterUserName1" />
+        <result column="APPROVE_CENTER_USER_ID2" property="approveCenterUserId2" />
+        <result column="APPROVE_CENTER_USER_NAME2" property="approveCenterUserName2" />
+        <result column="APPROVE_CENTER_PASS_DATE" property="approveCenterPassDate" />        
+        <result column="APPROVE_BACKER_USER_ID" property="approveBackerUserId" />
+        <result column="APPROVE_BACKER_USER_NAME" property="approveBackerUserName" />
+        <result column="APPROVE_BACKER_PASS_DATE" property="approveBackerPassDate" />                        
+        <result column="LEND_USER_ID" property="lendUserId" />
+        <result column="LEND_USER_NAME" property="lendUserName" />
+        <result column="LEND_SAVE_DATE" property="lendSaveDate" />
+        <result column="LEND_CONTRACT_CHECK_DATE" property="lendContractCheckDate" />
+        <result column="LEND_CONTRACT_CHECK_STATUS_ID" property="lendContractCheckStatusId" />
+        <result column="EVENT_ID" property="eventId" />
+        <result column="IS_REJECT" property="isReject" />
+    </resultMap>
+    
+    <resultMap class="PadLoanInfo" id="PadLoanInfoResult">
+        <result column="LOAN_INFO_ID" property="loanInfoId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="IS_NO_GOOD" property="isNoGood" />
+		<result column="REFUSE_LOAN_STATE_ID" property="refuseLoanStateId" />
+		<result column="REFUSE_REASON_TYPE_ID" property="refuseReasonTypeId" />
+		<result column="REFUSE_REASON_SUB_TYPE_ID" property="refuseReasonSubTypeId" />
+		<result column="REFUSE_CONTENT" property="refuseContent" />
+		<result column="TOGETHER_SURVEY_USER_ID"	property="togetherSurveyUserId"/>
+		<result column="TOGETHER_SURVEY_DATE"	property="togetherSurveyDate"/>
+		<result column="REGISTER_MICRO_BIZ_CENTER" property="registerMicroBizCenter" />
+		<result column="REGISTER_RECOMMEND_BANK" property="registerRecommendBank" />
+		<result column="REGISTER_APPLY_DATE" property="registerApplyDate" />
+		<result column="REGISTER_LOAN_DATE" property="registerLoanDate" />
+		<result column="REGISTER_INFO_SOURCE_IDS" property="registerInfoSourceIds" />
+		<result column="REGISTER_DIRECT_MARKET" property="registerDirectMarket" />
+		<result column="REGISTER_EXIST_CUS_INTRODUCT" property="registerExistCusIntroduct" />
+		<result column="REGISTER_INFO_SOURCE_OTHER" property="registerInfoSourceOther" />
+		<result column="APP_LOAN_TYPE_ID" property="appLoanTypeId" />
+		<result column="APP_MONEY" property="appMoney" />
+		<result column="APP_LIMIT_YEAR" property="appLimitYear" />
+		<result column="APP_REPAYMENT_MONTH" property="appRepaymentMonth" />
+		<result column="APP_LOAN_PURPOSE" property="appLoanPurpose" />
+		<result column="APP_GUARANTOR_WAY_ID" property="appGuarantorWayId" />
+		<result column="APP_MORTGAGE_ID" property="appMortgageId" />
+		<result column="APP_PLEDGE_ID" property="appPledgeId" />
+		<result column="APP_MORTGAGE_OTHER" property="appMortgageOther" />
+		<result column="APP_PLEDGE_OTHER" property="appPledgeOther" />
+		<result column="APP_MAX_INSTALLMENT_MONEY" property="appMaxInstallmentMoney" />
+		<result column="APP_TOTAL_PROJECT_COST" property="appTotalProjectCost" />
+		<result column="APP_USER_DETAIL" property="appUserDetail" />
+		<result column="CUS_NAME" property="cusName" />
+		<result column="CUS_BIRTHDAY" property="cusBirthday" />
+		<result column="CUS_SEX" property="cusSex" />
+		<result column="CUS_IDTYPE_ID" property="cusIdtypeId" />
+		<result column="CUS_IDCARD" property="cusIdcard" />
+		<result column="CUS_MOBILE_PHONE" property="cusMobilePhone" />
+		<result column="CUS_PHONE" property="cusPhone" />
+		<result column="CUS_EDUCATION_ID" property="cusEducationId" />
+		<result column="CUS_LIVING_STATUS_ID" property="cusLivingStatusId" />
+		<result column="CUS_ADDRESS" property="cusAddress" />
+		<result column="CUS_MARRIAGE" property="cusMarriage" />
+		<result column="CUS_REGISTERED_RESIDENCE" property="cusRegisteredResidence" />
+		<result column="CUS_LIVING_TYPE_ID" property="cusLivingTypeId" />
+		<result column="CUS_LIVING_ADDRESS" property="cusLivingAddress" />
+		<result column="CUS_LIVING_START_DATE" property="cusLivingStartDate" />
+		<result column="CUS_HOUSE_PATTERN" property="cusHousePattern" />
+		<result column="CUS_HOUSE_AREA" property="cusHouseArea" />
+		<result column="CUS_HOUSE_DECORATE_ID" property="cusHouseDecorateId" />
+		<result column="CUS_ECONOMIC_STATE" property="cusEconomicState" />
+		<result column="CUS_NOTE" property="cusNote" />
+		<result column="CUS_NET_AGE" property="cusNetAge" />
+		<result column="CUS_COMMON_OPERATER_NAME" property="cusCommonOperaterName" />
+		<result column="CUS_COMMON_OPERATER_IDCARD" property="cusCommonOperaterIdcard" />
+		<result column="CUS_COMMON_OPERATER_MOBILE_PHO" property="cusCommonOperaterMobilePhone" />
+		<result column="CUS_FIRST_IMPRESS" property="cusFirstImpress" />
+		<result column="CUS_MATE_NAME" property="cusMateName" />
+		<result column="CUS_MATE_IDCARD" property="cusMateIdcard" />
+		<result column="CUS_COMPANY_NAME" property="cusCompanyName" />
+		<result column="CUS_MATE_MOBILE_PHONE" property="cusMateMobilePhone" />
+		<result column="CUS_MATE_PHONE" property="cusMatePhone" />
+		<result column="CUS_MATE_COMPANY_PHONE" property="cusMateCompanyPhone" />
+		<result column="CUS_COMPANY_NATURE" property="cusCompanyNature" />
+		<result column="CUS_MATE_JOB" property="cusMateJob" />
+		<result column="CUS_MATE_WORK_YEAR" property="cusMateWorkYear" />
+		<result column="CUS_MATE_ADDRESS" property="cusMateAddress" />
+		<result column="CUS_MATE_MONTHLY_INCOMING_ID" property="cusMateMonthlyIncomingId" />
+		<result column="CUS_CHD_INFO" property="cusChdInfo" />
+		<result column="CUS_FAMILY_NUM" property="cusFamilyNum" />
+		<result column="CUS_PARENT_INFO" property="cusParentInfo" />
+		<result column="CUS_LOCAL_YEAR" property="cusLocalYear" />
+		<result column="COMPANY_NAME" property="companyName" />
+		<result column="COMPANY_NATURE" property="companyNature" />
+		<result column="COMPANY_JOB" property="companyJob" />
+		<result column="COMPANY_WORK_YEAR" property="companyWorkYear" />
+		<result column="COMPANY_MONTHLY_INCOMING" property="companyMonthlyIncoming" />
+		<result column="COMPANY_ADDRESS" property="companyAddress" />
+		<result column="BIZ_COMPANY" property="bizCompany" />
+		<result column="BIZ_SCOPE" property="bizScope" />
+		<result column="BIZ_ORG_ID" property="bizOrgId" />
+		<result column="BIZ_ORG_CODE" property="bizOrgCode" />
+		<result column="BIZ_LICENSE_NUM" property="bizLicenseNum" />
+		<result column="BIZ_SOCIAL_CREDIT_NUM" property="bizSocialCreditNum" />
+		<result column="BIZ_ACTUAL_OPERATOR" property="bizActualOperator" />
+		<result column="BIZ_ADDRESS" property="bizAddress" />
+		<result column="BIZ_SHAREHOLDER_PROPORTION" property="bizShareholderProportion" />
+		<result column="BIZ_PLACE_ID" property="bizPlaceId" />
+		<result column="BIZ_AREA" property="bizArea" />
+		<result column="BIZ_LAW_FORM_ID" property="bizLawFormId" />
+		<result column="BIZ_LEAGL" property="bizLeagl" />
+		<result column="BIZ_LEAGL_MOBILE_PHONE" property="bizLeaglMobilePhone" />
+		<result column="BIZ_EMPLOYEE_NUM" property="bizEmployeeNum" />
+		<result column="BIZ_OPEN_DATE" property="bizOpenDate" />
+		<result column="BIZ_IS_BELONG_MYBANK" property="bizIsBelongMybank" />
+		<result column="BIZ_NOTE" property="bizNote" />
+		<result column="CAF_MONTHLY_SALES" property="cafMonthlySales" />
+		<result column="CAF_BUSY_SEASON" property="cafBusySeason" />
+		<result column="CAF_LOW_SEASON" property="cafLowSeason" />
+		<result column="CAF_RECEIVABLE_MONEY" property="cafReceivableMoney" />
+		<result column="CAF_GROSS_MARGIN" property="cafGrossMargin" />
+		<result column="CAF_NET_MARGIN" property="cafNetMargin" />
+		<result column="CAF_INVENTORY" property="cafInventory" />
+		<result column="CAF_DEBT" property="cafDebt" />
+		<result column="CAF_TOTAL_MONEY" property="cafTotalMoney" />
+		<result column="CAF_OTHER" property="cafOther" />
+		<result column="CAF_TOTAL_CREDIT_CARD" property="cafTotalCreditCard" />
+		<result column="CAF_TOTAL_CREDIT_MONEY" property="cafTotalCreditMoney" />
+		<result column="CAF_TOTAL_OVERDRAFT_MONEY" property="cafTotalOverdraftMoney" />
+		<result column="CAF_OVERDUE_SITUATION" property="cafOverdueSituation" />
+		<result column="CAF_LOAN_CARD" property="cafLoanCard" />
+		<result column="CAF_BORROWER_CREIDT_DESC" property="cafBorrowerCreidtDesc" />
+		<result column="CAF_GUARANTOR_CREIDT_DESC" property="cafGuarantorCreidtDesc" />
+		<result column="ADVICE_MONEY" property="adviceMoney" />
+		<result column="ADVICE_LIMIT_YEAR" property="adviceLimitYear" />
+		<result column="ADVICE_RATE" property="adviceRate" />
+		<result column="ADVICE_REPAY_DATE" property="adviceRepayDate" />
+		<result column="ADVICE_LEND_WAY_ID" property="adviceLendWayId" />
+		<result column="ADVICE_REPAY_WAY_ID" property="adviceRepayWayId" />
+		<result column="ADVICE_OTHER" property="adviceOther" />
+		<result column="ADVICE_NOTE" property="adviceNote" />
+		<result column="RESULT_MONEY" property="resultMoney" />
+		<result column="RESULT_LIMIT_YEAR" property="resultLimitYear" />
+		<result column="RESULT_RATE" property="resultRate" />
+		<result column="RESULT_REPAY_DATE" property="resultRepayDate" />
+		<result column="RESULT_INSTAL_REPAY_MONEY" property="resultInstalRepayMoney" />
+		<result column="RESULT_RISK_WARM" property="resultRiskWarm" />
+		<result column="RESULT_SURVEY_EXIS_PROBLEMS" property="resultSurveyExisProblems" />
+		<result column="RESULT_NOTE" property="resultNote" />
+		<result column="LEND_CONTRACT_NUM" property="lendContractNum" />
+		<result column="LEND_CONFRIM_CONTRACT_NUM" property="lendConfrimContractNum" />
+		<result column="LEND_NOTE" property="lendNote" />
+		<result column="REGISTER_SAVE_STATUS" property="registerSaveStatus" />
+		<result column="APPLICATION_INFO" property="applicationInfo" />
+		<result column="PERSONAL_INFO" property="personalInfo" />
+		<result column="FAMILY_INFO" property="familyInfo" />
+		<result column="BUSINESS_INFO" property="businessInfo" />
+		<result column="SIGN_INFO" property="signInfo" />
+		<result column="SIGN_INFO_PATH" property="signInfoPath" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />  
+		<result column="REGISTER_SOURCE_FFKKHJS"	property="registerSourceFFKKHJS"/>
+        <result column="REGISTER_SOURCE_WX"	property="registerSourceWX"/>
+        <result column="REGISTER_SOURCE_MM"	property="registerSourceMM"/>
+        <result column="REGISTER_SOURCE_CCK"	property="registerSourceCCK"/>
+        <result column="REGISTER_SOURCE_HNYGJS"	property="registerSourceHNYGJS"/>
+        <result column="REGISTER_SOURCE_DHYX"	property="registerSourceDHYX"/>
+        <result column="REGISTER_SOURCE_HZSHTJ"	property="registerSourceHZSHTJ"/>
+        <result column="REGISTER_SOURCE_ZXSQ"	property="registerSourceZXSQ"/>
+
+		<result column="IS_LOCAL"	property="isLocal"/>
+        <result column="IS_SEASON"	property="isSeason"/>
+        <result column="SEASON_REMARK"	property="seasonRemark"/>
+        <result column="APP_LOAN_SUB_TYPE_ID"	property="appLoanSubTypeId"/>
+        <result column="ADVICE_VERDICT"	property="adviceVerdict"/>
+
+		<result column="RESULT_VERDICT"	property="resultVerdict"/>
+		<result column="RESULT_REPAY_WAY_ID"	property="resultRepayWayId"/>
+		<result column="RESULT_PURPOSE"	property="resultPurpose"/>
+		<result column="IS_CRM_TASK"	property="isCrmTask"/>
+		<result column="ADVANCE_REPAY"	property="advanceRepay"/>
+		<result column="LN_MODE"	property="lnMode"/>
+		<result column="LN_BENEFIT"	property="lnBenefit"/>
+		<result column="ORIGINAL_RATE"	property="originalRate"/>
+		<result column="RESULT_LN_PREMISS"	property="resultLnPremiss"/>
+
+		<!--
+        <result column="APP_LOAN_TYPE_NAME" property="appLoanTypeName" />
+        <result column="CUS_IDTYPE_NAME" property="cusIdtypeName" />
+        <result column="APP_GUARANTOR_WAY_NAME" property="appGuarantorWayName" />
+        <result column="APP_MORTGAGE_NAME" property="appMortgageName" />
+        <result column="APP_PLEDGE_NAME" property="appPledgeName" />
+        <result column="BIZ_ORG_NAME" property="bizOrgName" />
+        <result column="BIZ_PLACE_NAME" property="bizPlaceName" />
+        <result column="BIZ_LAW_FORM_NAME" property="bizLawFormName" />
+        <result column="CUS_LIVING_STATUS_NAME" property="cusLivingStatusName" />
+        <result column="CUS_LIVING_TYPE_NAME" property="cusLivingTypeName" />
+        <result column="CUS_HOUSE_DECORATE_NAME" property="cusHouseDecorateName" />
+        <result column="CUS_MARRIAGE_NAME" property="cusMarriageName" />
+        <result column="CUS_MATE_MONTHLY_INCOMING_NAME" property="cusMateMonthlyIncomingName" />
+        <result column="CUS_EDUCATION_NAME" property="cusEducationName" />
+        <result column="COMPANY_MONTHLY_INCOMING_NAME" property="companyMonthlyIncomingValue" />
+        <result column="REGISTER_MICRO_BIZ_CENTER_NAME" property="registerMicroBizCenterName" />
+        <result column="REGISTER_RECOMMEND_BANK_NAME" property="registerRecommendBankName" />
+         -->
+    </resultMap>
+    
+    
+    
+    
+    <select id="getPadLoanList" parameterClass="java.util.Map" resultMap="PadLoanResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        Select 
+        	ll.LOAN_ID,ll.LOAN_STATUS_ID,lls.LOAN_STATUS_NAME,lli.CUSTOMER_ID,cc.BELONG_USER_ID, cc.CUSTOMER_NAME,
+        	cc.CUSTOMER_TITLE,cc.ID_CARD,
+        	case when cc.DEFAULT_PHONE_TYPE = 1 then cc.MOBILE_PHONE1 when cc.DEFAULT_PHONE_TYPE = 2 then cc.MOBILE_PHONE2 
+        		 when cc.DEFAULT_PHONE_TYPE = 3 then cc.PHONE  when cc.DEFAULT_PHONE_TYPE = 4 then cc.FAX end PHONE,
+        	ll.CREATE_DATE,
+        	ll.APPLY_USER_ID,A.USER_NAME APPLY_USER_NAME,ll.APPLY_SUBMIT_DATE,
+        	ll.ASSIGN_USER_ID,B.USER_NAME ASSIGN_USER_NAME,ll.ASSIGN_SUBMIT_DATE,
+        	ll.SURVEY_USER_ID,C.USER_NAME SURVEY_USER_NAME,ll.SURVEY_SUBMIT_DATE,
+        	ll.APPROVE_PROCESS_ID,
+        	ll.APPROVE_DIRECTOR_USER_ID,D.USER_NAME APPROVE_DIRECTOR_USER_NAME,ll.APPROVE_DIRECTOR_PASS_DATE,
+        	ll.APPROVE_CENTER_USER_ID1,E.USER_NAME APPROVE_CENTER_USER_NAME1,
+        	ll.APPROVE_CENTER_USER_ID2,F.USER_NAME APPROVE_CENTER_USER_NAME2,ll.APPROVE_CENTER_PASS_DATE,
+        	ll.APPROVE_BACKER_USER_ID,G.USER_NAME APPROVE_BACKER_USER_NAME,ll.APPROVE_BACKER_PASS_DATE,
+        	ll.LEND_USER_ID,H.USER_NAME LEND_USER_NAME,ll.LEND_SAVE_DATE,ll.LEND_CONTRACT_CHECK_DATE,ll.LEND_CONTRACT_CHECK_STATUS_ID,
+        	ll.EVENT_ID,ll.IS_REJECT
+        from ln_loan ll 
+        inner join ln_loan_info lli on ll.loan_id=lli.loan_id  
+        inner join crm_customer cc on lli.customer_id=cc.customer_id
+        inner join LN_LOAN_STATUS lls on ll.LOAN_STATUS_ID=lls.LOAN_STATUS_ID
+        left join SYS_USER A ON A.USER_ID=ll.APPLY_USER_ID
+        left join SYS_USER B ON B.USER_ID=ll.ASSIGN_USER_ID
+        left join SYS_USER C ON C.USER_ID=ll.SURVEY_USER_ID
+        left join SYS_USER D ON D.USER_ID=ll.APPROVE_DIRECTOR_USER_ID
+        left join SYS_USER E ON E.USER_ID=ll.APPROVE_CENTER_USER_ID1
+        left join SYS_USER F ON F.USER_ID=ll.APPROVE_CENTER_USER_ID2
+        left join SYS_USER G ON G.USER_ID=ll.APPROVE_BACKER_USER_ID
+        left join SYS_USER H ON H.USER_ID=ll.LEND_USER_ID
+        where 1=1
+        <!--贷款状态-->
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>  
+              
+        <!-- 查询条件 (客户姓名，联系电话，证件号码) -->
+        <isNotEmpty prepend="and" property="customerInfo">  
+            (
+           	cc.customer_name LIKE '%$customerInfo$%' ESCAPE '^'
+           	or cc.id_card LIKE '%$customerInfo$%' ESCAPE '^'
+           	or cc.mobile_phone1 LIKE '%$customerInfo$%' ESCAPE '^'
+           	or cc.mobile_phone2 LIKE '%$customerInfo$%' ESCAPE '^'
+           	or cc.phone LIKE '%$customerInfo$%' ESCAPE '^'
+           	or cc.fax LIKE '%$customerInfo$%' ESCAPE '^'
+           	)
+        </isNotEmpty>     
+           
+        <!-- 查询条件(贷款分配->申请提交人员) -->
+        <isNotEmpty prepend="and" property="applyUserId">
+            ll.APPLY_USER_ID = #applyUserId#
+        </isNotEmpty>
+        
+        <!-- 贷款申请数据权限(只能看到当前用户创建的申请数据) -->
+        <isNotEmpty prepend="and" property="createUserId">
+        	ll.CREATE_USER = #createUserId#            
+        </isNotEmpty>    
+        
+        <!-- 贷款分配数据权限(只能看到分配者为当前用户的待分配数据) -->
+        <isNotEmpty prepend="and" property="assignUserId">
+        	ll.ASSIGN_USER_ID = #assignUserId#            
+        </isNotEmpty> 
+        
+        <!-- 贷款调查数据权限(只能看到调查者为当前用户的待调查数据) -->
+        <isNotEmpty prepend="and" property="surveyUserId">
+        	ll.SURVEY_USER_ID = #surveyUserId#            
+        </isNotEmpty> 
+        
+        <!-- 贷款审批数据权限 (approveUserId)-->
+        <isNotEmpty prepend="and" property="approveUserId">
+       	    <![CDATA[
+       	    (
+       	    (APPROVE_PROCESS_ID = 2 and ll.APPROVE_BACKER_USER_ID = #approveUserId#)   
+       	    or(APPROVE_PROCESS_ID = 1 and ll.APPROVE_DIRECTOR_USER_ID=#approveUserId# and (ll.APPROVE_CENTER_USER_ID1 is null or ll.APPROVE_CENTER_USER_ID1 = 0))      
+       	    or(APPROVE_PROCESS_ID = 1 and (ll.APPROVE_DIRECTOR_USER_ID is not null or ll.APPROVE_DIRECTOR_USER_ID !=0) and ll.APPROVE_CENTER_USER_ID1 = #approveUserId#)
+       	    )]]>
+        </isNotEmpty> 
+        
+        <!-- 贷款放款数据权限(lendUserId) -->
+        <isNotEmpty prepend="and" property="lendUserId">
+            ll.LEND_USER_ID = #lendUserId#
+       	</isNotEmpty>
+       	
+        <!-- 所有贷款数据权限(userRole,curUserId) -->
+        <isNotEmpty prepend="and" property="userRole">
+			<isEqual property="userRole" compareValue="4" ><!-- 审批人员 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.APPROVE_DIRECTOR_USER_ID = #curUserId# 
+				    or ll.APPROVE_CENTER_USER_ID1=#curUserId# 
+				    or ll.APPROVE_CENTER_USER_ID2=#curUserId# 
+				    or ll.APPROVE_BACKER_USER_ID =#curUserId# 
+				    )
+				</isNotEmpty>
+			</isEqual>
+			<isEqual property="userRole" compareValue="5" ><!-- 团队主管 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.ASSIGN_USER_ID = #curUserId# 
+				    or ll.APPLY_USER_ID in (Select user_id from SYS_TEAM_USER where team_Id in (select team_Id from SYS_TEAM_USER where user_Id =#curUserId#))
+				    or ll.APPROVE_BACKER_USER_ID in (Select user_id from SYS_TEAM_USER where team_Id in (select team_Id from SYS_TEAM_USER where user_Id =#curUserId#))
+				    or ll.LEND_USER_ID in (Select user_id from SYS_TEAM_USER where team_Id in (select team_Id from SYS_TEAM_USER where user_Id =#curUserId#))
+				    )
+				</isNotEmpty>
+			</isEqual>
+			<isEqual property="userRole" compareValue="6" ><!-- 后台人员 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.APPROVE_BACKER_USER_ID =#curUserId#
+				    or ll.LEND_USER_ID = #curUserId#
+				    or ll.APPLY_USER_ID = #curUserId#
+				    )
+				</isNotEmpty>
+			</isEqual>
+			<isEqual property="userRole" compareValue="7" ><!-- 客户经理 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    (ll.APPLY_USER_ID = #curUserId# and ll.LOAN_STATUS_ID in (1,2,11,12))
+				    or (ll.SURVEY_USER_ID = #curUserId# and ll.LOAN_STATUS_ID in (3,4,5,6,7,13,14,15))
+				    )
+				</isNotEmpty>
+			</isEqual>			
+        </isNotEmpty>
+            
+        order by ll.create_date desc
+        
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>        
+    </select>
+    
+    <select id="getPadLoanCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(1) from ln_loan ll 
+        inner join ln_loan_info lli on ll.loan_id=lli.loan_id    
+        where 1=1
+        <!--贷款状态-->
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>  
+              
+        <!-- 查询条件 (客户姓名，联系电话，证件号码) -->
+        <isNotEmpty prepend="and" property="customerInfo">
+            lli.customer_id in 
+            (Select customer_id from crm_customer c where 
+            	c.customer_name LIKE '%$customerInfo$%' ESCAPE '^'
+            	or c.id_card LIKE '%$customerInfo$%' ESCAPE '^'
+            	or c.mobile_phone1 LIKE '%$customerInfo$%' ESCAPE '^'
+            	or c.mobile_phone2 LIKE '%$customerInfo$%' ESCAPE '^'
+            	or c.phone LIKE '%$customerInfo$%' ESCAPE '^'
+            	or c.fax LIKE '%$customerInfo$%' ESCAPE '^'
+            )
+        </isNotEmpty>     
+           
+        <!-- 查询条件(贷款分配->申请提交人员) -->
+        <isNotEmpty prepend="and" property="applyUserId">
+            ll.APPLY_USER_ID = #applyUserId#
+        </isNotEmpty>
+        
+        <!-- 贷款申请数据权限(只能看到当前用户创建的申请数据) -->
+        <isNotEmpty prepend="and" property="createUserId">
+        	ll.APPLY_USER_ID = #createUserId#            
+        </isNotEmpty> 
+        
+        <!-- 贷款分配数据权限(只能看到分配者为当前用户的待分配数据) -->
+        <isNotEmpty prepend="and" property="assignUserId">
+        	ll.ASSIGN_USER_ID = #assignUserId#            
+        </isNotEmpty> 
+        
+        <!-- 贷款调查数据权限(只能看到调查者为当前用户的待调查数据) -->
+        <isNotEmpty prepend="and" property="surveyUserId">
+        	ll.SURVEY_USER_ID = #surveyUserId#            
+        </isNotEmpty> 
+        
+        <!-- 贷款审批数据权限 (approveUserId)-->
+       	<isNotEmpty prepend="and" property="approveUserId">
+       	    <![CDATA[
+       	    (
+       	    (APPROVE_PROCESS_ID = 2 and ll.APPROVE_BACKER_USER_ID = #approveUserId#)   
+       	    or(APPROVE_PROCESS_ID = 1 and ll.APPROVE_DIRECTOR_USER_ID=#approveUserId# and (ll.APPROVE_CENTER_USER_ID1 is null or ll.APPROVE_CENTER_USER_ID1 = 0))      
+       	    or(APPROVE_PROCESS_ID = 1 and (ll.APPROVE_DIRECTOR_USER_ID is not null or ll.APPROVE_DIRECTOR_USER_ID !=0) and ll.APPROVE_CENTER_USER_ID1 = #approveUserId#)
+       	    )]]>
+        </isNotEmpty> 
+        
+       	<!-- 贷款放款数据权限(lendUserId) -->
+        <isNotEmpty prepend="and" property="lendUserId">
+            ll.LEND_USER_ID = #lendUserId#
+       	</isNotEmpty>
+       	
+       	<!-- 所有贷款数据权限(userRole,curUserId) -->
+        <isNotEmpty prepend="and" property="userRole">
+			<isEqual property="userRole" compareValue="4" ><!-- 审批人员 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.APPROVE_DIRECTOR_USER_ID = #curUserId# 
+				    or ll.APPROVE_CENTER_USER_ID1=#curUserId# 
+				    or ll.APPROVE_CENTER_USER_ID2=#curUserId# 
+				    or ll.APPROVE_BACKER_USER_ID =#curUserId# 
+				    )
+				</isNotEmpty>
+			</isEqual>
+			<isEqual property="userRole" compareValue="5" ><!-- 团队主管 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.ASSIGN_USER_ID = #curUserId# 
+				    or ll.APPLY_USER_ID in (Select user_id from SYS_TEAM_USER where team_Id in (select team_Id from SYS_TEAM_USER where user_Id =#curUserId#))
+				    or ll.APPROVE_BACKER_USER_ID in (Select user_id from SYS_TEAM_USER where team_Id in (select team_Id from SYS_TEAM_USER where user_Id =#curUserId#))
+				    or ll.LEND_USER_ID in (Select user_id from SYS_TEAM_USER where team_Id in (select team_Id from SYS_TEAM_USER where user_Id =#curUserId#))
+				    )
+				</isNotEmpty>
+			</isEqual>
+			<isEqual property="userRole" compareValue="6" ><!-- 后台人员 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.APPROVE_BACKER_USER_ID =#curUserId#
+				    or ll.LEND_USER_ID = #curUserId#
+				    or ll.APPLY_USER_ID = #curUserId#
+				    )
+				</isNotEmpty>
+			</isEqual>
+			<isEqual property="userRole" compareValue="7" ><!-- 客户经理 -->
+				<isNotEmpty property="curUserId">
+				    (
+				    ll.APPLY_USER_ID = #curUserId#
+				    or ll.SURVEY_USER_ID = #curUserId# 
+				    )
+				</isNotEmpty>
+			</isEqual>			
+        </isNotEmpty>        
+    </select>
+    
+    
+    <select id="getPanLoanById" parameterClass="java.lang.Integer" resultMap="PadLoanResult">
+        Select 
+        	ll.LOAN_ID,ll.LOAN_STATUS_ID,lls.LOAN_STATUS_NAME,lli.CUSTOMER_ID,cc.BELONG_USER_ID, cc.CUSTOMER_NAME,
+        	cc.CUSTOMER_TITLE,cc.ID_CARD,
+        	case when cc.DEFAULT_PHONE_TYPE = 1 then cc.MOBILE_PHONE1 when cc.DEFAULT_PHONE_TYPE = 2 then cc.MOBILE_PHONE2 
+        		 when cc.DEFAULT_PHONE_TYPE = 3 then cc.PHONE  when cc.DEFAULT_PHONE_TYPE = 4 then cc.FAX end PHONE,
+        	ll.CREATE_DATE,
+        	ll.APPLY_USER_ID,A.USER_NAME APPLY_USER_NAME,ll.APPLY_SUBMIT_DATE,
+        	ll.ASSIGN_USER_ID,B.USER_NAME ASSIGN_USER_NAME,ll.ASSIGN_SUBMIT_DATE,
+        	ll.SURVEY_USER_ID,C.USER_NAME SURVEY_USER_NAME,ll.SURVEY_SUBMIT_DATE,
+        	ll.APPROVE_PROCESS_ID,
+        	ll.APPROVE_DIRECTOR_USER_ID,D.USER_NAME APPROVE_DIRECTOR_USER_NAME,ll.APPROVE_DIRECTOR_PASS_DATE,
+        	ll.APPROVE_CENTER_USER_ID1,E.USER_NAME APPROVE_CENTER_USER_NAME1,
+        	ll.APPROVE_CENTER_USER_ID2,F.USER_NAME APPROVE_CENTER_USER_NAME2,ll.APPROVE_CENTER_PASS_DATE,
+        	ll.APPROVE_BACKER_USER_ID,G.USER_NAME APPROVE_BACKER_USER_NAME,ll.APPROVE_BACKER_PASS_DATE,
+        	ll.LEND_USER_ID,H.USER_NAME LEND_USER_NAME,ll.LEND_SAVE_DATE,ll.LEND_CONTRACT_CHECK_DATE,ll.LEND_CONTRACT_CHECK_STATUS_ID,
+        	ll.EVENT_ID,ll.IS_REJECT
+        from ln_loan ll 
+        inner join ln_loan_info lli on ll.loan_id=lli.loan_id  
+        inner join crm_customer cc on lli.customer_id=cc.customer_id
+        inner join LN_LOAN_STATUS lls on ll.LOAN_STATUS_ID=lls.LOAN_STATUS_ID
+        left join SYS_USER A ON A.USER_ID=ll.APPLY_USER_ID
+        left join SYS_USER B ON B.USER_ID=ll.ASSIGN_USER_ID
+        left join SYS_USER C ON C.USER_ID=ll.SURVEY_USER_ID
+        left join SYS_USER D ON D.USER_ID=ll.APPROVE_DIRECTOR_USER_ID
+        left join SYS_USER E ON E.USER_ID=ll.APPROVE_CENTER_USER_ID1
+        left join SYS_USER F ON F.USER_ID=ll.APPROVE_CENTER_USER_ID2
+        left join SYS_USER G ON G.USER_ID=ll.APPROVE_BACKER_USER_ID
+        left join SYS_USER H ON H.USER_ID=ll.LEND_USER_ID
+        where ll.loan_id = #loanId#
+    </select>
+    
+    
+    <select id="getPanLoanInfoById" parameterClass="java.lang.Integer" resultMap="PadLoanInfoResult">
+    	select * from LN_LOAN_INFO ll where ll.loan_id = #loanId#
+    </select>
+    
+    <select id="getPadLoanCountByLoanStatus" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(0) from LN_LOAN ll where 1=1
+        <!--贷款状态-->
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>  
+    </select>
+</sqlMap>

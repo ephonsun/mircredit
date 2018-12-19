@@ -1,0 +1,2636 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanSQL">
+    <typeAlias alias="LnLoan" type="com.banger.mobile.domain.model.loan.LnLoan"/>
+    <typeAlias alias="LnLoanInfo" type="com.banger.mobile.domain.model.loan.LnLoanInfo"/>
+    <typeAlias alias="NoLoanInfo" type="com.banger.mobile.domain.model.loan.NoLoanInfo"/>
+    <typeAlias alias="CrmCustomer" type="com.banger.mobile.domain.model.customer.CrmCustomer"/>
+    <typeAlias alias="LnLoanType" type="com.banger.mobile.domain.model.loan.LnLoanType"/>
+    <typeAlias alias="LnLoanCustomerBean" type="com.banger.mobile.domain.model.loan.LnLoanCustomerBean"/>
+    <typeAlias alias="LnLoanSubType" type="com.banger.mobile.domain.model.loan.LnLoanSubType"/>
+    <typeAlias alias="LnLoanStatus" type="com.banger.mobile.domain.model.loan.LnLoanStatus"/>
+    <typeAlias alias="LnOpHistory" type="com.banger.mobile.domain.model.loan.LnOpHistory"/>
+    <!--共同借贷人-->
+    <typeAlias alias="LnLoanCoBorrowerBean" type="com.banger.mobile.domain.model.loan.LnLoanCoBorrowerBean"/>
+    <!--担保人-->
+    <typeAlias alias="LnLoanGuarantorBean" type="com.banger.mobile.domain.model.loan.LnLoanGuarantorBean"/>
+    <typeAlias alias="LoanUser" type="com.banger.mobile.domain.model.loan.LoanUser"/>
+    <typeAlias alias="LnCancelReason" type="com.banger.mobile.domain.model.loan.LnCancelReason"/>
+    <typeAlias alias="LnLoanInfo" type="com.banger.mobile.domain.model.loan.LnLoanInfo"/>
+    <!--贷款数量统计信息-->
+    <typeAlias alias="LoanCountReportBean" type="com.banger.mobile.domain.model.report.LoanCountReportBean"/>
+	<!--LnLoanInfo部分字段-->
+    <resultMap id="partLoanUserInfoResult" class="LnLoanInfo">
+        <result property="appMoney" column="app_money"/>
+    </resultMap>
+   	<!--ln_repayment_plan部分字段-->
+    <resultMap id="partrepayMentPlanResult" class="LnLoan">
+        <result property="lnRepaymentPlan.planDate" column="plan_date"/>
+        <result property="lnRepaymentPlan.updateDate" column="update_date"/>
+        <result property="lnRepaymentPlan.principal" column="PRINCIPAL"/>
+        <result property="lnRepaymentPlan.interest" column="INTEREST"/>
+        <result property="lnRepaymentPlan.remaining" column="REMAINING"/>
+    </resultMap>
+    <!--LnLoan全字段-->
+    <resultMap class="LnLoan" id="LnLoanResult">
+        <result column="LOAN_ID" property="loanId"/>
+		<result column="LOAN_STATUS_ID" property="loanStatusId"/>
+		<result column="REPAYMENT_STATUS" property="repaymentStatus"/>
+		<result column="LAST_CLIENT_QUERY_DATE" property="lastClientQueryDate"/>
+		<result column="LOAN_REJECT_USER_ID" property="loanRejectUserId"/>
+		<result column="LOAN_REJECT_DATE" property="loanRejectDate"/>
+		<result column="VERIFY_USER_ID" property="verifyUserId"/>
+		<result column="IS_VERIFY" property="isVerify"/>
+		<result column="EVENT_ID" property="eventId"/>
+		<result column="APPLY_USER_ID" property="applyUserId"/>
+		<result column="APPLY_SUBMIT_DATE" property="applySubmitDate"/>
+		<result column="ASSIGN_USER_ID" property="assignUserId"/>
+		<result column="ASSIGN_SUBMIT_DATE" property="assignSubmitDate"/>
+		<result column="SURVEY_USER_ID" property="surveyUserId"/>
+		<result column="SURVEY_SUBMIT_DATE" property="surveySubmitDate"/>
+		<result column="IS_REJECT" property="isReject"/>
+		<result column="APPROVE_PROCESS_ID" property="approveProcessId"/>
+		<result column="APPROVE_DIRECTOR_USER_ID" property="approveDirectorUserId"/>
+		<result column="APPROVE_DIRECTOR_PASS_DATE" property="approveDirectorPassDate"/>
+		<result column="APPROVE_DIRECTOR_REJECT_DATE" property="approveDirectorRejectDate"/>
+		<result column="APPROVE_CENTER_USER_ID1" property="approveCenterUserId1"/>
+		<result column="APPROVE_CENTER_USER_ID2" property="approveCenterUserId2"/>
+		<result column="APPROVE_CENTER_PASS_DATE" property="approveCenterPassDate"/>
+		<result column="APPROVE_CENTER_REJECT_DATE" property="approveCenterRejectDate"/>
+		<result column="APPROVE_BACKER_USER_ID" property="approveBackerUserId"/>
+		<result column="APPROVE_BACKER_PASS_DATE" property="approveBackerPassDate"/>
+		<result column="APPROVE_BACKER_REJECT_DATE" property="approveBackerRejectDate"/>
+		<result column="LEND_USER_ID" property="lendUserId"/>
+		<result column="LEND_SAVE_DATE" property="lendSaveDate"/>
+		<result column="LEND_CONTRACT_CHECK_DATE" property="lendContractCheckDate"/>
+		<result column="LEND_CONTRACT_CHECK_STATUS_ID" property="lendContractCheckStatusId"/>
+		<result column="CREATE_DATE" property="createDate"/>
+		<result column="UPDATE_DATE" property="updateDate"/>
+		<result column="CREATE_USER" property="createUser"/>
+		<result column="UPDATE_USER" property="updateUser"/>
+		<result column="APPROVE_BAK_MSG" property="approveBakMsg"/>
+    </resultMap>
+	<!-- 贷款信息所有字段 -->
+    <resultMap id="LnLoanInfoResult" class="LnLoanInfo">
+        <result column="LOAN_INFO_ID"	property="loanInfoId"/>
+		<result column="LOAN_ID"	property="loanId"/>
+		<result column="CUSTOMER_ID"	property="customerId"/>
+		<result column="IS_NO_GOOD"  property="isNoGood"/>
+		<result column="REFUSE_LOAN_STATE_ID"	property="refuseLoanStateId"/>
+		<result column="REFUSE_REASON_TYPE_ID"	property="refuseReasonTypeId"/>
+		<result column="REFUSE_REASON_SUB_TYPE_ID"	property="refuseReasonSubTypeId"/>
+		<result column="REFUSE_CONTENT"	property="refuseContent"/>
+		<result column="TOGETHER_SURVEY_USER_ID"	property="togetherSurveyUserId"/>
+		<result column="TOGETHER_SURVEY_DATE"	property="togetherSurveyDate"/>
+		<result column="ASSIGN_REMARK"	property="assignRemark"/>
+		<result column="REGISTER_MICRO_BIZ_CENTER"	property="registerMicroBizCenter"/>
+		<result column="REGISTER_RECOMMEND_BANK"	property="registerRecommendBank"/>
+		<result column="REGISTER_APPLY_DATE"	property="registerApplyDate"/>
+		<result column="REGISTER_LOAN_DATE"	property="registerLoanDate"/>
+		<result column="REGISTER_INFO_SOURCE_IDS"	property="registerInfoSourceIds"/>
+		<result column="REGISTER_DIRECT_MARKET"	property="registerDirectMarket"/>
+		<result column="REGISTER_EXIST_CUS_INTRODUCT"	property="registerExistCusIntroduct"/>
+		<result column="REGISTER_INFO_SOURCE_OTHER"	property="registerInfoSourceOther"/>
+		<result column="APP_LOAN_TYPE_ID"	property="appLoanTypeId"/>
+		<result column="APP_MONEY"	property="appMoney"/>
+		<result column="APP_LIMIT_YEAR"	property="appLimitYear"/>
+		<result column="APP_REPAYMENT_MONTH"	property="appRepaymentMonth"/>
+		<result column="APP_LOAN_PURPOSE"	property="appLoanPurpose"/>
+		<result column="APP_GUARANTOR_WAY_ID"	property="appGuarantorWayId"/>
+		<result column="APP_MORTGAGE_ID"	property="appMortgageId"/>
+		<result column="APP_MORTGAGE_OTHER"	property="appMortgageOther"/>
+		<result column="APP_PLEDGE_OTHER"	property="appPledgeOther"/>
+		<result column="APP_PLEDGE_ID"	property="appPledgeId"/>
+		<result column="APP_MAX_INSTALLMENT_MONEY"	property="appMaxInstallmentMoney"/>
+		<result column="APP_TOTAL_PROJECT_COST"	property="appTotalProjectCost"/>
+		<result column="APP_USER_DETAIL"	property="appUserDetail"/>
+		<result column="CUS_NAME"	property="cusName"/>
+		<result column="CUS_BIRTHDAY"	property="cusBirthday"/>
+		<result column="CUS_SEX"	property="cusSex"/>
+		<result column="CUS_IDTYPE_ID"	property="cusIdtypeId"/>
+		<result column="CUS_IDCARD"	property="cusIdcard"/>
+		<result column="CUS_MOBILE_PHONE"	property="cusMobilePhone"/>
+		<result column="CUS_PHONE"	property="cusPhone"/>
+		<result column="CUS_EDUCATION_ID"	property="cusEducationId"/>
+		<result column="CUS_LIVING_STATUS_ID"	property="cusLivingStatusId"/>
+		<result column="CUS_LIVING_ADDRESS"	property="cusLivingAddress"/>
+		<result column="CUS_ADDRESS"	property="cusAddress"/>
+		<result column="CUS_MARRIAGE"	property="cusMarriage"/>
+		<result column="CUS_REGISTERED_RESIDENCE"	property="cusRegisteredResidence"/>
+		<result column="CUS_LIVING_TYPE_ID"	property="cusLivingTypeId"/>
+		<result column="CUS_LIVING_START_DATE"	property="cusLivingStartDate"/>
+		<result column="CUS_HOUSE_PATTERN"	property="cusHousePattern"/>
+		<result column="CUS_HOUSE_AREA"	property="cusHouseArea"/>
+		<result column="CUS_HOUSE_DECORATE_ID"	property="cusHouseDecorateId"/>
+		<result column="CUS_ECONOMIC_STATE"	property="cusEconomicState"/>
+		<result column="CUS_NOTE"	property="cusNote"/>
+		<result column="CUS_NET_AGE"	property="cusNetAge"/>
+		<result column="CUS_COMMON_OPERATER_NAME"	property="cusCommonOperaterName"/>
+		<result column="CUS_COMMON_OPERATER_IDCARD"	property="cusCommonOperaterIdcard"/>
+		<result column="CUS_COMMON_OPERATER_MOBILE_PHO"	property="cusCommonOperaterMobilePhone"/>
+		<result column="CUS_FIRST_IMPRESS"	property="cusFirstImpress"/>
+		<result column="CUS_MATE_NAME"	property="cusMateName"/>
+		<result column="CUS_MATE_IDCARD"	property="cusMateIdcard"/>
+		<result column="CUS_COMPANY_NAME"	property="cusCompanyName"/>
+		<result column="CUS_MATE_MOBILE_PHONE"	property="cusMateMobilePhone"/>
+		<result column="CUS_MATE_PHONE"	property="cusMatePhone"/>
+		<result column="CUS_MATE_COMPANY_PHONE"	property="cusMateCompanyPhone"/>
+		<result column="CUS_COMPANY_NATURE"	property="cusCompanyNature"/>
+		<result column="CUS_MATE_JOB"	property="cusMateJob"/>
+		<result column="CUS_MATE_WORK_YEAR"	property="cusMateWorkYear"/>
+		<result column="CUS_MATE_ADDRESS"	property="cusMateAddress"/>
+		<result column="CUS_MATE_MONTHLY_INCOMING_ID"	property="cusMateMonthlyIncomingId"/>
+		<result column="CUS_CHD_INFO"	property="cusChdInfo"/>
+		<result column="CUS_FAMILY_NUM"	property="cusFamilyNum"/>
+		<result column="CUS_PARENT_INFO"	property="cusParentInfo"/>
+		<result column="CUS_LOCAL_YEAR"	property="cusLocalYear"/>
+		<result column="COMPANY_NAME"	property="companyName"/>
+		<result column="COMPANY_NATURE"	property="companyNature"/>
+		<result column="COMPANY_JOB"	property="companyJob"/>
+		<result column="COMPANY_WORK_YEAR"	property="companyWorkYear"/>
+		<result column="COMPANY_MONTHLY_INCOMING"	property="companyMonthlyIncoming"/>
+		<result column="COMPANY_ADDRESS"	property="companyAddress"/>
+		<result column="BIZ_COMPANY"	property="bizCompany"/>
+		<result column="BIZ_SCOPE"	property="bizScope"/>
+		<result column="BIZ_ORG_ID"	property="bizOrgId"/>
+		<result column="BIZ_ORG_CODE"	property="bizOrgCode"/>
+		<result column="BIZ_LICENSE_NUM"	property="bizLicenseNum"/>
+		<result column="BIZ_SOCIAL_CREDIT_NUM"	property="bizSocialCreditNum"/>
+		<result column="BIZ_ACTUAL_OPERATOR"	property="bizActualOperator"/>
+		<result column="BIZ_ADDRESS"	property="bizAddress"/>
+		<result column="BIZ_SHAREHOLDER_PROPORTION"	property="bizShareholderProportion"/>
+		<result column="BIZ_PLACE_ID"	property="bizPlaceId"/>
+		<result column="BIZ_AREA"	property="bizArea"/>
+		<result column="BIZ_LAW_FORM_ID"	property="bizLawFormId"/>
+		<result column="BIZ_LEAGL"	property="bizLeagl"/>
+		<result column="BIZ_LEAGL_MOBILE_PHONE"	property="bizLeaglMobilePhone"/>
+		<result column="BIZ_EMPLOYEE_NUM"	property="bizEmployeeNum"/>
+		<result column="BIZ_OPEN_DATE"	property="bizOpenDate"/>
+		<result column="BIZ_IS_BELONG_MYBANK"	property="bizIsBelongMybank"/>
+		<result column="BIZ_MYBANK_NO"    property="bizMybankNo"/>
+		<result column="BIZ_NOTE"	property="bizNote"/>
+		<result column="CAF_MONTHLY_SALES"	property="cafMonthlySales"/>
+		<result column="CAF_BUSY_SEASON"	property="cafBusySeason"/>
+		<result column="CAF_LOW_SEASON"	property="cafLowSeason"/>
+		<result column="CAF_RECEIVABLE_MONEY"	property="cafReceivableMoney"/>
+		<result column="CAF_GROSS_MARGIN"	property="cafGrossMargin"/>
+		<result column="CAF_NET_MARGIN"    property="cafNetMargin"/>
+		<result column="CAF_INVENTORY"	property="cafInventory"/>
+		<result column="CAF_DEBT"	property="cafDebt"/>
+		<result column="CAF_TOTAL_MONEY"	property="cafTotalMoney"/>
+		<result column="CAF_OTHER"	property="cafOther"/>
+		<result column="CAF_TOTAL_CREDIT_CARD"	property="cafTotalCreditCard"/>
+		<result column="CAF_TOTAL_CREDIT_MONEY"	property="cafTotalCreditMoney"/>
+		<result column="CAF_TOTAL_OVERDRAFT_MONEY"	property="cafTotalOverdraftMoney"/>
+		<result column="CAF_OVERDUE_SITUATION"	property="cafOverdueSituation"/>
+		<result column="CAF_LOAN_CARD"	property="cafLoanCard"/>
+		<result column="CAF_BORROWER_CREIDT_DESC"	property="cafBorrowerCreidtDesc"/>
+		<result column="CAF_GUARANTOR_CREIDT_DESC"	property="cafGuarantorCreidtDesc"/>
+		<result column="ADVICE_MONEY"	property="adviceMoney"/>
+		<result column="ADVICE_LIMIT_YEAR"	property="adviceLimitYear"/>
+		<result column="ADVICE_RATE"	property="adviceRate"/>
+		<result column="ADVICE_REPAY_DATE"	property="adviceRepayDate"/>
+		<result column="ADVICE_LEND_WAY_ID"	property="adviceLendWayId"/>
+		<result column="ADVICE_REPAY_WAY_ID"	property="adviceRepayWayId"/>
+		<result column="ADVICE_OTHER"	property="adviceOther"/>
+		<result column="ADVICE_NOTE"	property="adviceNote"/>
+		<result column="RESULT_MONEY"	property="resultMoney"/>
+		<result column="RESULT_LIMIT_YEAR"	property="resultLimitYear"/>
+		<result column="RESULT_RATE"	property="resultRate"/>
+		<result column="RESULT_REPAY_DATE"	property="resultRepayDate"/>
+		<result column="RESULT_INSTAL_REPAY_MONEY"	property="resultInstalRepayMoney"/>
+		<result column="RESULT_RISK_WARM"	property="resultRiskWarm"/>
+		<result column="RESULT_SURVEY_EXIS_PROBLEMS"	property="resultSurveyExisProblems"/>
+		<result column="RESULT_NOTE"	property="resultNote"/>
+		<result column="LEND_CONTRACT_NUM"	property="lendContractNum"/>
+		<result column="LEND_CONFRIM_CONTRACT_NUM"	property="lendConfrimContractNum"/>
+		<result column="LEND_NOTE"	property="lendNote"/>
+		<result column="REGISTER_SAVE_STATUS"	property="registerSaveStatus"/>
+		<result column="APPLICATION_INFO"	property="applicationInfo"/>
+		<result column="PERSONAL_INFO"	property="personalInfo"/>
+		<result column="FAMILY_INFO"	property="familyInfo"/>
+		<result column="BUSINESS_INFO"	property="businessInfo"/>
+		<result column="SIGN_INFO"	property="signInfo"/>
+		<result column="SIGN_INFO_PATH"	property="signInfoPath"/>
+		<result column="APP_FORM_BAK"	property="appFormBak"/>
+		<result column="CREATE_DATE"	property="createDate"/>
+		<result column="UPDATE_DATE"	property="updateDate"/>
+        
+    </resultMap>
+    
+    
+    <!--所有贷款列表用到的贷款相关的字段-->
+    <resultMap id="AllLoanResult" class="LnLoan" extends="LnLoanResult">
+       <!--  <result column="EXCEPTION_ASSIGN_USER_NAMES" property="exceptionAssignUserNames"/> -->
+    </resultMap>
+
+    <!-- CrmCustomer部分字段 -->
+    <resultMap class="CrmCustomer" id="partCrmCustomerResult">
+        <!-- 基本字段 -->
+        <result column="CUSTOMER_ID" property="customerId"/>
+        <!--
+        <result column="USER_ID" property="userId" />
+        -->
+        <!-- 扩展字段 -->
+        <result column="CUSTOMER_NO" property="customerNo"/>
+        <result column="CUSTOMER_NAME" property="customerName"/>
+        <result column="CUSTOMER_TITLE" property="customerTitle"/>
+        <!--
+        <result column="CUSTOMER_TYPE_NAME" property="customerTypeName"/>
+        -->
+        <result column="CUSTOMER_TYPE_ID" property="customerTypeId"/>
+        <result column="SEX" property="sex"/>
+        <result column="BIRTHDAY" property="birthday"/>
+        <result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType"/>
+        <result column="MOBILE_PHONE1" property="mobilePhone1"/>
+        <result column="MOBILE_PHONE2" property="mobilePhone2"/>
+        <result column="PHONE" property="phone"/>
+        <result column="FAX" property="fax"/>
+        <result column="ID_CARD" property="idCard"/>
+        <result column="AGE" property="age"/>
+        <result column="IS_NOGOOD_CUS" property="isNoGood"/>
+
+        <result column="BELONG_USER_ID" property="belongUserId"/>
+        <result column="BELONG_DEPT_ID" property="belongDeptId"/>
+    </resultMap>
+
+    <!--SysUser部分字段-->
+    <resultMap id="loanUserResult" class="LoanUser">
+        <result property="applyUserName" column="APPLY_USER_NAME"/>
+        <result property="belongUserName" column="BELONG_USER_NAME"/>
+    </resultMap>
+
+    <resultMap id="allLoanUserResult" class="LoanUser" extends="loanUserResult">
+        <result property="surveyUserName" column="SURVEY_USER_NAME"/>
+    </resultMap>
+
+    <resultMap id="verifyLoanUserResult" class="LoanUser" extends="loanUserResult">
+        <result property="verifyUserName" column="VERIFY_USER_NAME"/>
+    </resultMap>
+
+    <!--pad端贷款分配的提交人员显示-->
+    <resultMap id="padAssignApplyUserResult" class="LoanUser">
+        <result property="applyUserName" column="APPLY_USER_NAME"/>
+    </resultMap>
+
+    <!--LnLoanType部分字段-->
+    <resultMap id="partLnLoanTypeResult" class="LnLoanType">
+        <result property="loanTypeName" column="LOAN_TYPE_NAME"/>
+    </resultMap>
+
+    <!--LnLoanSubType部分字段-->
+    <resultMap id="partLnLoanSubTypeResult" class="LnLoanSubType">
+        <result property="loanSubTypeName" column="LOAN_SUB_TYPE_NAME"/>
+    </resultMap>
+
+    <!--LnLoanStatus部分字段-->
+    <resultMap id="partLnLoanStatusResult" class="LnLoanStatus">
+        <result property="loanStatusName" column="LOAN_STATUS_NAME"/>
+    </resultMap>
+	
+    
+    <!--所有贷款列表 结果集-->
+    <resultMap id="LnLoanListResult" class="LnLoan" extends="AllLoanResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnLoanSQL.partCrmCustomerResult" nullValue="null"/>
+  <!--       <result property="lnLoanTypeBean" resultMap="LnLoanSQL.partLnLoanTypeResult" nullValue="null"/>
+        <result property="lnLoanSubTypeBean" resultMap="LnLoanSQL.partLnLoanSubTypeResult" nullValue="null"/>
+        <result property="sysUser" resultMap="LnLoanSQL.loanUserResult" nullValue="null"/>
+        <result property="lnLoanStatus" resultMap="LnLoanSQL.partLnLoanStatusResult" nullValue="null"/> -->
+        <result property="sysUser" resultMap="LnLoanSQL.loanUserResult" nullValue="null"/>
+        <result property="lnLoanInfoBean" resultMap="LnLoanSQL.LnLoanInfoResult" nullValue="null"/> 
+        <result property="loanInfoId" column="loan_info_id"/>
+    </resultMap>
+      <!--所有贷款列表 结果集-->
+    <resultMap id="LnLoanListInfoResult" class="LnLoan" extends="AllLoanResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnLoanSQL.partCrmCustomerResult" nullValue="null"/>
+        <result property="lnLoanInfoBean.appMoney" column="app_money"/>
+        <result property="lnRepaymentPlan.planDate" column="plan_date"/>
+        <result property="lnRepaymentPlan.updateDate" column="update_date"/>
+        <result property="lnRepaymentPlan.principal" column="PRINCIPAL"/>
+        <result property="lnRepaymentPlan.interest" column="INTEREST"/>
+        <result property="lnRepaymentPlan.paidPrincipal" column="PAID_PRINCIPAL"/>
+        <result property="lnRepaymentPlan.paidInterest" column="PAID_INTEREST"/>
+        <result property="lnRepaymentPlan.remaining" column="REMAINING"/>
+         <result property="lnRepaymentPlan.accountRemaining" column="ACCOUNT_REMAINING"/>
+        <!--       <result property="lnLoanTypeBean" resultMap="LnLoanSQL.partLnLoanTypeResult" nullValue="null"/>
+        <result property="lnLoanSubTypeBean" resultMap="LnLoanSQL.partLnLoanSubTypeResult" nullValue="null"/>
+        <result property="sysUser" resultMap="LnLoanSQL.loanUserResult" nullValue="null"/>
+        <result property="lnLoanStatus" resultMap="LnLoanSQL.partLnLoanStatusResult" nullValue="null"/> -->
+      	<result property="loanInfoId" column="loan_info_id"/>
+        <result property="loanStatusName" column="LOAN_STATUS_NAME"/>
+        <result property="lnLoanTypeBean.loanTypeName" column="DICTIONARY_VALUE"/>
+         <result property="appMoney" column="appMoney"/>
+         <result property="surveyUserName" column="survey_user_name"/>
+    </resultMap>
+    <!--控制台 所有贷款列表 结果集-->
+    <resultMap id="WPLnLoanListResult" class="LnLoan" extends="AllLoanResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnLoanSQL.partCrmCustomerResult" nullValue="null"/>
+        <result property="lnLoanTypeBean" resultMap="LnLoanSQL.partLnLoanTypeResult" nullValue="null"/>
+        <result property="lnLoanSubTypeBean" resultMap="LnLoanSQL.partLnLoanSubTypeResult" nullValue="null"/>
+        <result property="sysUser" resultMap="LnLoanSQL.allLoanUserResult" nullValue="null"/>
+        <result property="lnLoanStatus" resultMap="LnLoanSQL.partLnLoanStatusResult" nullValue="null"/>
+    </resultMap>
+
+    <!--申请贷款列表 结果集-->
+    <resultMap id="ApplyLoanListResult" class="LnLoan" extends="LnLoanResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnLoanSQL.partCrmCustomerResult" nullValue="null"/>
+        <result property="lnLoanTypeBean" resultMap="LnLoanSQL.partLnLoanTypeResult" nullValue="null"/>
+        <result property="sysUser" resultMap="LnLoanSQL.padAssignApplyUserResult" nullValue="null"/>
+        <result property="loanInfoId" column="loan_info_id"/>
+        <result property="appLoanTypeName" column="appLoanTypeName"/>
+        <result property="appMoney" column="appMoney"/>
+        <result property="applyUserName" column="APPLY_USER_NAME"/>
+    </resultMap>
+
+    <!--审批贷款列表 结果集-->
+    <resultMap id="AssessLoanListResult" class="LnLoan" extends="LnLoanResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnLoanSQL.partCrmCustomerResult" nullValue="null"/>
+        <result property="lnLoanTypeBean" resultMap="LnLoanSQL.partLnLoanTypeResult" nullValue="null"/>
+    </resultMap>
+
+    <!--审计贷款列表 结果集-->
+    <resultMap id="VerifyLoanListResult" class="LnLoan" extends="LnLoanResult">
+        <!--产品_顾客 信息-->
+        <result property="crmCustomer" resultMap="LnLoanSQL.partCrmCustomerResult" nullValue="null"/>
+        <result property="lnLoanTypeBean" resultMap="LnLoanSQL.partLnLoanTypeResult" nullValue="null"/>
+        <result property="lnLoanSubTypeBean" resultMap="LnLoanSQL.partLnLoanSubTypeResult" nullValue="null"/>
+        <result property="sysUser" resultMap="LnLoanSQL.verifyLoanUserResult" nullValue="null"/>
+        <result property="lnLoanStatus" resultMap="LnLoanSQL.partLnLoanStatusResult" nullValue="null"/>
+    </resultMap>
+
+    <!--根据用户ID，得到其相关贷款的各个状态的贷款总数-->
+    <resultMap id="CountLoanStatusResult" class="LnLoan">
+        <result property="statusCount" column="STATUS_COUNT"/>
+        <result property="loanStatusId" column="LOAN_STATUS_ID"/>
+    </resultMap>
+
+    <!--未同步申请信息的贷款部分字段-->
+    <resultMap id="NoLoanInfoResult" class="NoLoanInfo">
+        <result property="loanId" column="LOAN_ID"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="idCard" column="ID_CARD"/>
+        <result property="genDate" column="GEN_DATE"/>
+        <result property="loanTypeId" column="LOAN_TYPE_ID"/>
+    </resultMap>
+
+    <!--贷款数量统计信息-->
+    <resultMap id="LoanCountReportBeanResult" class="LoanCountReportBean">
+        <result property="loanStatusId" column="LOAN_STATUS_ID"/>
+        <result property="statusCount" column="STATUS_COUNT"/>
+        <result property="applyUserId" column="APPLY_USER_ID"/>
+        <result property="surveyUserId" column="SURVEY_USER_ID"/>
+        <result property="beforeAssignDeptId" column="BEFORE_ASSIGN_DEPT_ID"/>
+        <result property="afterAssignDepthId" column="AFTER_ASSIGN_DEPT_ID"/>
+    </resultMap>
+
+    <!-- 删除贷款 -->
+    <delete id="deleteLoanOptimize" parameterClass="Integer">
+         DELETE FROM LN_LOAN WHERE LOAN_ID = #loanId#
+    </delete>
+
+    
+    <!--获取所有贷款总数-->
+    <select id="selectLoanCountOptimize" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        <![CDATA[
+        select count(1) from ln_loan ll
+        left join ln_loan_info li on ll.loan_id = li.loan_id
+        left join crm_customer c on li.customer_id=c.customer_id
+        left join crm_customer_type cc on c.customer_type_id=cc.customer_type_id
+        left join ln_exception_dun_assign leda on ll.loan_id = leda.loan_id
+        where 1 = 1  ]]>
+        <isNotEmpty property="monIsCheck">
+            <isEqual prepend="and"  property="monIsCheck" compareValue="1"> 
+            	exists (select 1 from LN_LOAN_Monitor where  (READ_TAG =0 OR  READ_TAG IS NULL) AND LOAN_ID =LL.LOAN_ID)     
+            </isEqual>
+            <isEqual prepend="and"  property="monIsCheck" compareValue="0">
+               not exists (select 1 from LN_LOAN_Monitor where  (READ_TAG =0 OR  READ_TAG IS NULL) AND LOAN_ID =LL.LOAN_ID)  
+            </isEqual>
+        </isNotEmpty>
+            
+        <isNotEmpty property="monitored">
+	        <isEqual prepend="and"  property="monitored" compareValue="1"> 
+	            exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID) 
+	        </isEqual>
+	        <isEqual prepend="and"  property="monitored" compareValue="0">    
+	           not exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID) 
+	        </isEqual>
+        </isNotEmpty>
+        <isNotEmpty property="nomontype">
+            <isEqual prepend="and"  property="nomontype" compareValue="1">
+                <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < ll.LEND_CONTRACT_CHECK_DATE +  30 day and llm.MON_DATE > ll.LEND_CONTRACT_CHECK_DATE and llm.MON_TYPE=1  and llm.LOAN_ID = ll.LOAN_ID  and ll.LOAN_STATUS_ID != 7  )]]>
+            </isEqual>
+            <isEqual prepend="and"  property="nomontype" compareValue="0">
+                <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < current date - 1 day  and llm.MON_DATE>current date - 6 MONTHS    and llm.MON_TYPE=4  and llm.LOAN_ID = ll.LOAN_ID    and ll.LOAN_STATUS_ID != 7 )]]>
+            </isEqual>
+            <isEqual prepend="and"  property="nomontype" compareValue="2">
+                <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm  where  llm.REVISIT_TYPE = 2   and llm.LOAN_ID = ll.LOAN_ID )]]>
+            </isEqual>
+        </isNotEmpty>
+       <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="startCreateDate">
+            <![CDATA[
+            ll.create_date >= #startCreateDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endCreateDate">
+            <![CDATA[
+            ll.create_date <= #endCreateDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.apply_submit_date >= #applyStartDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.apply_submit_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="resultRepayDate">
+            <![CDATA[
+            li.RESULT_REPAY_DATE = #resultRepayDate#
+            ]]>
+        </isNotEmpty>
+     <!--    查询所有贷款条件(主要条件) 张芳萍
+        客户经理 -->
+
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+
+          	(
+                  (ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+                  (ll.SURVEY_USER_ID = #surveyUserId# and ll.loan_status_id >= 3)or
+          		(ll.lend_user_id = #surveyUserId#)
+              )
+          	]]>
+        </isNotEmpty>
+
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+              (ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+              (ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+              (ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+        
+        <isNotEmpty property="belongUserId" prepend="and">
+            (
+            (ll.apply_user_id=#belongUserId# and (ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+            
+            (ll.loan_status_id=2 and ll.apply_user_id=#belongUserId#) or
+           
+            (ll.survey_user_id=#belongUserId# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12)
+            )
+        </isNotEmpty>
+   <!--      业务主管(web端) -->
+        <isNotEmpty property="belongUserIds" prepend="and">
+              ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+  <!--       业务主管(pad端) -->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+           
+            )
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsCheckout">
+            <isEqual property="loanIsCheckout" compareValue="1">
+                ll.IS_CHECKOUT =#loanIsCheckout#
+            </isEqual>
+            <isNotEqual property="loanIsCheckout" compareValue="1">
+                (ll.IS_CHECKOUT = 0 OR ll.IS_CHECKOUT IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongUserIds" prepend="and">
+            c.belong_user_id in ($cusBelongUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongDeptIds" prepend="and">
+            c.belong_dept_id in ($cusBelongDeptIds$)
+        </isNotEmpty>
+ <!--        待分配(未分配归属用户的客户) -->
+        <isPropertyAvailable property="unAllocate" prepend="and">
+            (c.belong_user_id is null or c.belong_user_id = 0)
+        </isPropertyAvailable>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty> 
+        <isNotEmpty prepend="and" property="surveyUser">
+            ll.survey_user_id in (Select USER_ID from SYS_USER WHERE USER_NAME LIKE '%$surveyUser$%' and is_del=0 and is_actived =1)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="isReject">
+            <isEqual property="isReject" compareValue="1">
+                ll.IS_REJECT = 1
+            </isEqual>
+            <isEqual property="isReject" compareValue="0">
+                (ll.IS_REJECT != 1 or ll.IS_REJECT is null)
+            </isEqual>
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID = #loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty property="teamId" prepend="and">
+            ll.survey_user_id in (Select user_id from sys_team_user where team_id = #teamId#) 
+        </isNotEmpty>
+    </select>
+
+    <!--查找所有贷款列表 不分页for导出列表excel-->
+    <select id="selectLoanListOptimizeNoPage" resultMap="LnLoanListResult" parameterClass="java.util.Map">
+        select llif.loan_info_id,llcc.*,llt.loan_type_name,llst.loan_sub_type_name,
+        su.USER_NAME as APPLY_USER_NAME,suu.USER_NAME as BELONG_USER_NAME,
+        GET_LN_USER_NAMES_BY_LOAN_ID(llcc.loan_id) as EXCEPTION_ASSIGN_USER_NAMES,lls.LOAN_STATUS_NAME
+        from (
+
+        select         ll.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        c.MOBILE_PHONE1,c.MOBILE_PHONE2,         c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as         IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID
+        from ln_loan ll
+        left join crm_customer c on ll.customer_id=c.customer_id
+        where 1=1
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="startCreateDate">
+            <![CDATA[
+            ll.create_date >= #startCreateDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endCreateDate">
+            <![CDATA[
+            ll.create_date <= #endCreateDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.apply_date >= #applyStartDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.apply_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        
+        <!--查询所有贷款条件(主要条件) 张芳萍 -->
+        <!--客户经理-->
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+            (
+          		(ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+          		(ll.SURVEY_USER_ID = #surveyUserId# and ll.loan_status_id >= 3)or
+          		(ll.lend_user_id = #surveyUserId#)
+          	)
+          	]]>
+        </isNotEmpty>
+        
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+          	(ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+          	(ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+          	(ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+        <!--业务主管(web端)-->
+        <isNotEmpty property="belongUserIds" prepend="and">
+           ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+        <!--业务主管(pad端)-->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            <!--
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+            -->
+            )
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsCheckout">
+            <isEqual property="loanIsCheckout" compareValue="1">
+                ll.IS_CHECKOUT =#loanIsCheckout#
+            </isEqual>
+            <isNotEqual property="loanIsCheckout" compareValue="1">
+                (ll.IS_CHECKOUT = 0 OR ll.IS_CHECKOUT IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongUserIds" prepend="and">
+            c.belong_user_id in ($cusBelongUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongDeptIds" prepend="and">
+            c.belong_dept_id in ($cusBelongDeptIds$)
+        </isNotEmpty>
+        <!--待分配(未分配归属用户的客户)-->
+        <isPropertyAvailable property="unAllocate" prepend="and">
+            (c.belong_user_id is null or c.belong_user_id = 0)
+        </isPropertyAvailable>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        <!--系统贷款催收 start-->
+        <!--正常催收情况-->
+        <isNotEmpty prepend="and" property="repaymentDate">
+            <![CDATA[
+              ll.LOAN_ID in (select pppp.LOAN_ID from LN_REPAYMENT_PLAN pppp where pppp.LOAN_ID = ll.LOAN_ID and
+              Date(pppp.PLAN_DATE) <= Date('$repaymentDate$') and Date(pppp.PLAN_DATE) >= Date('$repaymentDateSmall$'))
+              and ll.IS_NOGOOD != 1
+            ]]>
+        </isNotEmpty>
+        <!--异常催收情况-->
+        <isNotEmpty prepend="and" property="exceptionRepaymentDate">
+            <![CDATA[
+              ll.LOAN_ID in (select lerp.LOAN_ID from LN_EXCEPTION_REPAYMENT_PLAN lerp where lerp.LOAN_ID = ll.LOAN_ID and
+              Date(lerp.PLAN_DATE) <= Date('$exceptionRepaymentDate$') and Date(lerp.PLAN_DATE) >= Date('$exceptionRepaymentDateSmall$'))
+              and ll.IS_NOGOOD = 1
+            ]]>
+        </isNotEmpty>
+        <!--系统贷款催收 end-->
+        order by ll.create_date desc
+         )
+        llcc
+        <!--
+        left join crm_customer_type cc on llcc.customer_type_id=cc.customer_type_id
+        -->
+        left join ln_loan_type llt on llcc.loan_type_id=llt.loan_type_id
+        left join ln_loan_sub_type llst on llcc.loan_sub_type_id = llst.loan_sub_type_id
+        left join sys_user su on llcc.SURVEY_USER_ID=su.user_id
+        left join sys_user suu on llcc.belong_user_id = suu.user_id
+        left join ln_loan_status lls on llcc.loan_status_id=lls.loan_status_id
+        left join ln_loan_info llif on llcc.loan_id = llif.loan_id
+    </select>
+
+    <!--查找所有贷款列表-->
+    <!-- <select id="selectLoanListOptimize" resultMap="LnLoanListResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+			select 
+			    ll.* ,li.loan_info_id , c.customer_name , c.mobile_phone1,c.sex ,
+			    li.app_money, li.cus_name, li.cus_idcard ,
+			    c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        		c.MOBILE_PHONE1,c.MOBILE_PHONE2, c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,
+        		c.IS_NOGOOD as IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID
+			from 
+			    ln_loan_info li , ln_loan ll , crm_customer c
+			 where
+			 li.loan_id = ll.loan_id   and li.customer_id = c.customer_id 
+		 order by ll.create_date desc
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select> -->
+    
+    
+    
+    
+    
+    
+   <select id="selectLoanListOptimize" resultMap="LnLoanListResult" parameterClass="java.util.Map">
+        select llif.*,llcc.*,
+        su.USER_NAME as APPLY_USER_NAME,suu.USER_NAME as BELONG_USER_NAME,
+        GET_LN_USER_NAMES_BY_LOAN_ID(llcc.loan_id) as EXCEPTION_ASSIGN_USER_NAMES,lls.LOAN_STATUS_NAME
+        from (
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select         ll.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        c.MOBILE_PHONE1,c.MOBILE_PHONE2,         c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as         IS_NOGOOD_CUS,
+        c.BELONG_DEPT_ID,c.BELONG_USER_ID,li.loan_info_id
+        from ln_loan ll
+        left join ln_loan_info li on li.loan_id = ll.loan_id
+        left join crm_customer c on li.customer_id=c.customer_id
+        where 1=1
+        <isNotEmpty property="monIsCheck">
+            <isEqual prepend="and"  property="monIsCheck" compareValue="1"> 
+            	exists (select 1 from LN_LOAN_Monitor where  (READ_TAG =0 OR  READ_TAG IS NULL) AND LOAN_ID =LL.LOAN_ID)     
+            </isEqual>
+            <isEqual prepend="and"  property="monIsCheck" compareValue="0">
+               not exists (select 1 from LN_LOAN_Monitor where  (READ_TAG =0 OR  READ_TAG IS NULL) AND LOAN_ID =LL.LOAN_ID)  
+            </isEqual>
+        </isNotEmpty>
+        
+        <isNotEmpty property="monitored">
+	        <isEqual prepend="and"  property="monitored" compareValue="1"> 
+	            exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID) 
+	        </isEqual>
+	        <isEqual prepend="and"  property="monitored" compareValue="0">    
+	           not exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID) 
+	        </isEqual>
+        </isNotEmpty>
+       <isNotEmpty property="nomontype">
+           <isEqual prepend="and"  property="nomontype" compareValue="1">
+               <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < ll.LEND_CONTRACT_CHECK_DATE +  30 day and llm.MON_DATE > ll.LEND_CONTRACT_CHECK_DATE and llm.MON_TYPE=1  and llm.LOAN_ID = ll.LOAN_ID  and ll.LOAN_STATUS_ID != 7  )]]>
+           </isEqual>
+           <isEqual prepend="and"  property="nomontype" compareValue="0">
+               <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < current date - 1 day  and llm.MON_DATE>current date - 6 MONTHS    and llm.MON_TYPE=4  and llm.LOAN_ID = ll.LOAN_ID    and ll.LOAN_STATUS_ID != 7 )]]>
+           </isEqual>
+           <isEqual prepend="and"  property="nomontype" compareValue="2">
+               <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm  where  llm.REVISIT_TYPE = 2   and llm.LOAN_ID = ll.LOAN_ID )]]>
+           </isEqual>
+       </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="startCreateDate">
+            <![CDATA[
+            ll.create_date >= #startCreateDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endCreateDate">
+            <![CDATA[
+            ll.create_date <= #endCreateDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.apply_submit_date >= #applyStartDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.apply_submit_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="resultRepayDate">
+            <![CDATA[
+            li.RESULT_REPAY_DATE = #resultRepayDate#
+            ]]>
+        </isNotEmpty>
+       <!--  查询所有贷款条件(主要条件) 张芳萍
+        客户经理 -->
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+
+          	(
+          		(ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+          		(ll.SURVEY_USER_ID = #surveyUserId# and ll.loan_status_id >= 3) or
+          		(ll.lend_user_id = #surveyUserId#)
+          	)
+          	]]>
+        </isNotEmpty>
+
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+          	(ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+          	(ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+          	(ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+     <!--    业务主管(web端) -->
+        <isNotEmpty property="belongUserIds" prepend="and">
+            	ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+      <!--   业务主管(pad端) -->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+           
+            )
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsCheckout">
+            <isEqual property="loanIsCheckout" compareValue="1">
+                ll.IS_CHECKOUT =#loanIsCheckout#
+            </isEqual>
+            <isNotEqual property="loanIsCheckout" compareValue="1">
+                (ll.IS_CHECKOUT = 0 OR ll.IS_CHECKOUT IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongUserIds" prepend="and">
+            c.belong_user_id in ($cusBelongUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongDeptIds" prepend="and">
+            c.belong_dept_id in ($cusBelongDeptIds$)
+        </isNotEmpty>
+       <!--  待分配(未分配归属用户的客户) -->
+        <isPropertyAvailable property="unAllocate" prepend="and">
+            (c.belong_user_id is null or c.belong_user_id = 0)
+        </isPropertyAvailable>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="surveyUser">
+            ll.survey_user_id in (Select USER_ID from SYS_USER WHERE USER_NAME LIKE '%$surveyUser$%' and is_del=0 and is_actived =1)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="isReject">
+            <isEqual property="isReject" compareValue="1">
+                ll.IS_REJECT = 1
+            </isEqual>
+            <isEqual property="isReject" compareValue="0">
+                (ll.IS_REJECT != 1 or ll.IS_REJECT is null)
+            </isEqual>
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID = #loanTypeId#
+        </isNotEmpty>
+        
+        <isNotEmpty property="teamId" prepend="and">
+            ll.survey_user_id in (Select user_id from sys_team_user where team_id = #teamId#) 
+        </isNotEmpty>
+        
+       <!--  系统贷款催收 start 正常催收情况 -->
+        <isNotEmpty prepend="and" property="repaymentDate">
+            <![CDATA[
+              ll.LOAN_ID in (select pppp.LOAN_ID from LN_REPAYMENT_PLAN pppp where pppp.LOAN_ID = ll.LOAN_ID and
+              Date(pppp.PLAN_DATE) <= Date('$repaymentDate$') and Date(pppp.PLAN_DATE) >= Date('$repaymentDateSmall$'))
+              and ll.IS_NOGOOD != 1
+            ]]>
+        </isNotEmpty>
+     <!--    异常催收情况 -->
+        <isNotEmpty prepend="and" property="exceptionRepaymentDate">
+            <![CDATA[
+              ll.LOAN_ID in (select lerp.LOAN_ID from LN_EXCEPTION_REPAYMENT_PLAN lerp where lerp.LOAN_ID = ll.LOAN_ID and
+              Date(lerp.PLAN_DATE) <= Date('$exceptionRepaymentDate$') and Date(lerp.PLAN_DATE) >= Date('$exceptionRepaymentDateSmall$'))
+              and ll.IS_NOGOOD = 1
+            ]]>
+        </isNotEmpty>
+        <!-- 系统贷款催收 end -->
+       order by ll.create_date desc
+
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty> )
+        llcc
+        left join ln_loan_info llif on llcc.loan_id = llif.loan_id
+        left join sys_user su on llcc.SURVEY_USER_ID=su.user_id
+        left join sys_user suu on llcc.belong_user_id = suu.user_id
+        left join ln_loan_status lls on llcc.loan_status_id=lls.loan_status_id
+        
+    </select>
+
+    <!--申请(分配或调查)贷款总数-->
+    <select id="getApplyLoanCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select count(1) from ln_loan ll
+        left join ln_loan_info li on ll.loan_id = li.loan_id
+        left join crm_customer c on li.customer_id=c.customer_id
+        
+        where 1=1
+        <!--pad端按提交人搜索分配贷款时用-->
+        <isNotEmpty property="applyUserId" prepend="and">
+            ll.apply_user_id=#applyUserId#
+        </isNotEmpty>
+        <!--pad端已经指定分配人员-->
+        <isNotEmpty property="assignUserId" prepend="and">
+            ll.assign_user_id=#assignUserId#
+        </isNotEmpty>
+        <!--申请贷款用-->
+        <isNotEmpty prepend="and" property="createUserId">
+            ll.apply_user_id=#createUserId#
+        </isNotEmpty>
+        <!--调查贷款用-->
+        <isNotEmpty property="unExamNeedUserId" prepend="and">
+            ll.survey_user_id=#unExamNeedUserId#
+        </isNotEmpty>
+
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>
+
+        <!--申请贷款用-->
+        <isNotEmpty prepend="and" property="startCreateDate">
+            <![CDATA[
+            ll.create_date >= #startCreateDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endCreateDate">
+            <![CDATA[
+            ll.create_date <= #endCreateDate#
+            ]]>
+        </isNotEmpty>
+        <!--分配贷款用-->
+        <isNotEmpty prepend="and" property="applyStartDate">
+            ll.APPLY_DATE &gt;= #applyStartDate#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            ll.APPLY_DATE &lt;= #applyEndDate#
+        </isNotEmpty>
+        <!--调查贷款用-->
+        <isNotEmpty property="startAssignDate" prepend="and">
+            <![CDATA[
+              ll.ASSIGN_SUBMIT_DATE >= #startAssignDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endAssignDate">
+            <![CDATA[
+              ll.ASSIGN_SUBMIT_DATE <= #endAssignDate#
+            ]]>
+        </isNotEmpty>
+
+        <!--申请贷款用-->
+        <isNotEmpty property="createUserIds" prepend="and">
+            ll.apply_user_id in ($createUserIds$)
+        </isNotEmpty>
+        <!--分配贷款用-->
+        <isNotEmpty property="applyUserIds" prepend="and">
+            apply_user_id in
+            <iterate property="applyUserIds" open="(" close=")" conjunction=",">
+                #applyUserIds[]#
+            </iterate>
+        </isNotEmpty>
+        <!--调查贷款用-->
+        <isNotEmpty property="unExamNeedUserIds" prepend="and">
+            ll.survey_user_id in ($unExamNeedUserIds$)
+        </isNotEmpty>
+
+        <isNotEmpty prepend="and" property="loanTypeId">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+    </select>
+    <!--申请(分配或调查)贷款列表-->
+    <select id="getApplyLoanList" parameterClass="java.util.Map" resultMap="ApplyLoanListResult">
+        select info.loan_info_id,llcc.*, lld.DICTIONARY_VALUE AS loan_type_name,su.USER_NAME as APPLY_USER_NAME
+        from (
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+          select 
+        ll.*,li.APP_LOAN_TYPE_ID,li.APP_MONEY appMoney,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as  IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID,
+         (select ld.DICTIONARY_VALUE from ln_loan_info_dictionary ld where ld.dictionary_key = li.APP_LOAN_TYPE_ID and ld.dictionary_name = 'DKLX') appLoanTypeName
+        from ln_loan ll
+        left join ln_loan_info li on ll.loan_id = li.loan_id
+        left join crm_customer c on li.customer_id=c.customer_id
+        where 1=1
+        <!--申请贷款用-->
+        <isNotEmpty prepend="and" property="createUserId">
+            ll.apply_user_id=#createUserId#
+        </isNotEmpty>
+        <!--调查贷款用-->
+        <isNotEmpty property="unExamNeedUserId" prepend="and">
+            ll.survey_user_id=#unExamNeedUserId#
+        </isNotEmpty>
+
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>
+
+        <!--申请贷款用-->
+        <isNotEmpty prepend="and" property="startCreateDate">
+            <![CDATA[
+            ll.create_date >= #startCreateDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endCreateDate">
+            <![CDATA[
+            ll.create_date <= #endCreateDate#
+            ]]>
+        </isNotEmpty>
+        <!--分配贷款用-->
+        <isNotEmpty prepend="and" property="applyStartDate">
+            ll.APPLY_SUBMIT_DATE &gt;= #applyStartDate#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            ll.APPLY_SUBMIT_DATE &lt;= #applyEndDate#
+        </isNotEmpty>
+         <isNotEmpty property="assignUserId" prepend="and">
+            ll.assign_user_id=#assignUserId#
+        </isNotEmpty>
+        <!--调查贷款用-->
+        <isNotEmpty property="startAssignDate" prepend="and">
+            <![CDATA[
+              ll.ASSIGN_SUBMIT_DATE >= #startAssignDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endAssignDate">
+            <![CDATA[
+              ll.ASSIGN_SUBMIT_DATE <= #endAssignDate#
+            ]]>
+        </isNotEmpty>
+
+        <!--申请贷款用-->
+        <isNotEmpty property="createUserIds" prepend="and">
+            ll.apply_user_id in ($createUserIds$)
+        </isNotEmpty>
+        <!--分配贷款用-->
+        <isNotEmpty property="applyUserIds" prepend="and">
+            apply_user_id in
+            <iterate property="applyUserIds" open="(" close=")" conjunction=",">
+                #applyUserIds[]#
+            </iterate>
+        </isNotEmpty>
+        <!--调查贷款用-->
+        <isNotEmpty property="unExamNeedUserIds" prepend="and">
+            ll.survey_user_id in ($unExamNeedUserIds$)
+        </isNotEmpty>
+
+        <isNotEmpty prepend="and" property="loanTypeId">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        order by ll.create_date desc
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty> )
+        llcc
+        <!--
+        left join crm_customer_type cc on llcc.customer_type_id=cc.customer_type_id
+        -->
+         left join ln_loan_info_dictionary lld on llcc.APP_LOAN_TYPE_ID=lld.DICTIONARY_KEY and lld.DICTIONARY_name = 'DKLX'
+       	left join sys_user su on llcc.apply_user_id=su.user_id
+        left join ln_loan_info info on info.loan_id = llcc.loan_id
+    </select>
+
+    <!--审批贷款总数-->
+    <select id="getAssessLoanCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(1) from ln_loan ll
+        left join crm_customer c on ll.customer_id=c.customer_id
+        where 1=1
+        <isNotEmpty prepend="and" property="submitApproveStartDate">
+            ll.SUBMIT_DATE &gt;= #submitApproveStartDate#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="submitApproveEndDate">
+            ll.SUBMIT_DATE &lt;= #submitApproveEndDate#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            ll.APPLY_SUBMIT_DATE &gt;= #applyStartDate#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            ll.APPLY_SUBMIT_DATE &lt;= #applyEndDate#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>
+        <isNotEmpty property="approvalUserIds" prepend="and">
+            c.belong_user_id in ($approvalUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="approvalDeptId" prepend="and">
+            c.belong_dept_id=#approvalDeptId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanTypeId">
+            ll.loan_type_id=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customerName">
+            c.customer_name=#customerName#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="idCard">
+            c.id_card=#idCard#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="phone">
+            (
+            c.phone=#phone#
+            or c.mobile_phone1=#phone#
+            or c.mobile_phone2=#phone#
+            )
+        </isNotEmpty>
+    </select>
+    <!--获得惟一的审批贷款-->
+    <select id="getAssessLoanAlone" parameterClass="java.util.Map" resultMap="AssessLoanListResult">
+        select llcc.*,llt.loan_type_name
+        from (
+            select         ll.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+            c.MOBILE_PHONE1,c.MOBILE_PHONE2,         c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as         IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID
+            from ln_loan ll
+            left join crm_customer c on ll.customer_id=c.customer_id
+            where 1=1
+            <isNotEmpty prepend="and" property="submitApproveStartDate">
+                ll.SUBMIT_DATE &gt;= #submitApproveStartDate#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="submitApproveEndDate">
+                ll.SUBMIT_DATE &lt;= #submitApproveEndDate#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="applyStartDate">
+                ll.APPLY_SUBMIT_DATE &gt;= #applyStartDate#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="applyEndDate">
+                ll.APPLY_SUBMIT_DATE &lt;= #applyEndDate#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="loanStatusId">
+                ll.loan_status_id = #loanStatusId#
+            </isNotEmpty>
+            <isNotEmpty property="approvalUserIds" prepend="and">
+                c.belong_user_id in ($approvalUserIds$)
+            </isNotEmpty>
+            <isNotEmpty property="approvalDeptId" prepend="and">
+                c.belong_dept_id=#approvalDeptId#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="loanTypeId">
+                ll.loan_type_id=#loanTypeId#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="customerName">
+                c.customer_name=#customerName#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="idCard">
+                c.id_card=#idCard#
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="phone">
+                (
+                c.phone=#phone#
+                or c.mobile_phone1=#phone#
+                or c.mobile_phone2=#phone#
+                )
+            </isNotEmpty>
+            ) llcc
+        left join ln_loan_type llt on llcc.loan_type_id=llt.loan_type_id
+    </select>
+
+    <!--查询ods未核实贷款-->
+    <!--AND (LL.LEND_CONTRACT_CHECK_STATUS_ID !=1 OR  LL.LEND_CONTRACT_CHECK_STATUS_ID IS NULL)-->
+    <select id="getUnCheckLoanByContractNo" parameterClass="java.lang.String" resultMap="LnLoanResult">
+        SELECT LL.*
+        FROM LN_LOAN LL,LN_LOAN_INFO LLI
+        WHERE LL.LOAN_ID = LLI.LOAN_ID
+        AND LLI.LEND_CONTRACT_NUM = #contNo#
+        ORDER BY LL.UPDATE_DATE DESC  fetch first 1 rows only
+    </select>
+
+    <!--未放贷 及放贷后 贷款总数 -->
+    <select id="getMakeLoanCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(1)
+  		from ln_loan_info li
+        		
+			left join ln_loan ll on ll.loan_id = li.loan_id
+        	left join crm_customer c on li.customer_id=c.customer_id
+        	left join (select  * from ln_loan_info_dictionary where DICTIONARY_NAME='DKLX') llid on llid.DICTIONARY_KEY = li.APP_LOAN_TYPE_ID
+        	left join ln_loan_status lls on lls.LOAN_STATUS_ID = ll.LOAN_STATUS_ID
+        	left join  (select * from ln_repayment_plan where plan_date =  (select min(plan_date) from ln_repayment_plan  where plan_date >= (SELECT current date FROM sysibm.sysdummy1))) lrp on lrp.loan_id=li.loan_id
+        	left join  (select * from ln_exception_repayment_plan where plan_date =  (select min(plan_date) from ln_exception_repayment_plan  where plan_date > (SELECT current date FROM sysibm.sysdummy1))) lerp on lerp.loan_id=li.loan_id
+        	where 1=1
+            <isNotEmpty prepend="and" property="appLoanTypeId">
+                li.APP_LOAN_TYPE_ID=#appLoanTypeId#
+            </isNotEmpty>
+        	<isNotEmpty prepend="and" property="resultRepayDate">
+        	   <![CDATA[
+        	   ( li.RESULT_REPAY_DATE=#resultRepayDate# )
+        	   ]]>
+        	</isNotEmpty>
+            <isNotEmpty property="monitored">
+            <isEqual prepend="and"  property="monitored" compareValue="1">
+                exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID)
+            </isEqual>
+            <isEqual prepend="and"  property="monitored" compareValue="0">
+                not exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID)
+            </isEqual>
+            </isNotEmpty>
+            <isNotEmpty property="montype">
+                <isEqual prepend="and"  property="montype" compareValue="1">
+                    <![CDATA[ exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < ll.LEND_CONTRACT_CHECK_DATE +  30 day  and llm.MON_TYPE=1  and llm.LOAN_ID = ll.LOAN_ID  and ll.LOAN_STATUS_ID != 7 )]]>
+                </isEqual>
+                <isEqual prepend="and"  property="montype" compareValue="0">
+                    <![CDATA[ exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < current date - 1 day  and llm.MON_DATE>current date - 6 MONTHS    and llm.MON_TYPE=4  and llm.LOAN_ID = ll.LOAN_ID    and ll.LOAN_STATUS_ID != 7 )]]>
+                </isEqual>
+            </isNotEmpty>
+            <isNotEmpty property="nomontype">
+                <isEqual prepend="and"  property="nomontype" compareValue="1">
+                    <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < ll.LEND_CONTRACT_CHECK_DATE +  30 day and llm.MON_DATE > ll.LEND_CONTRACT_CHECK_DATE and llm.MON_TYPE=1  and llm.LOAN_ID = ll.LOAN_ID  and ll.LOAN_STATUS_ID != 7  )]]>
+                </isEqual>
+                <isEqual prepend="and"  property="nomontype" compareValue="0">
+                    <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < current date - 1 day  and llm.MON_DATE>current date - 6 MONTHS    and llm.MON_TYPE=4  and llm.LOAN_ID = ll.LOAN_ID    and ll.LOAN_STATUS_ID != 7 )]]>
+                </isEqual>
+                <isEqual prepend="and"  property="nomontype" compareValue="2">
+                    <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm  where  llm.REVISIT_TYPE = 2   and llm.LOAN_ID = ll.LOAN_ID )]]>
+                </isEqual>
+            </isNotEmpty>
+        	<isNotEmpty prepend="and" property="AfterDateTag">
+        	   <isEqual property="AfterDateTag" compareValue="0">
+                	 <![CDATA[ll.LEND_CONTRACT_CHECK_DATE <= #contractCheckDate# ]]>
+            	</isEqual>
+            	<isEqual property="AfterDateTag" compareValue="1">
+                	ll.LEND_CONTRACT_CHECK_DATE >=#contractCheckDate#
+            	</isEqual>
+        	</isNotEmpty>
+       	<isNotEmpty prepend="and" property="lendStartDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE >= #lendStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendEndDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE <= #lendEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #repaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+         <!--  查询所有贷款条件(主要条件) 张芳萍
+        客户经理 -->
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+            (
+          		(ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+          		(ll.SURVEY_USER_ID = #surveyUserId# and ll.loan_status_id >= 3) or
+          		(ll.lend_user_id = #surveyUserId#)
+          	)
+          	]]>
+        </isNotEmpty>
+        
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+          	(ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+          	(ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+          	(ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+     <!--    业务主管(web端) -->
+        <isNotEmpty property="belongUserIds" prepend="and">
+            	ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+      <!--   业务主管(pad端) -->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+            )
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="isPaidTag">
+            <![CDATA[
+            lrp.PAID_TAG = #isPaidTag#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentStartDate">
+            <![CDATA[
+            lerp.plan_date >= #erepaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentEndDate">
+            <![CDATA[
+            lerp.plan_date <= #erepaymentEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="approveDirectorUserId">
+            ll.APPROVE_DIRECTOR_USER_ID = #approveDirectorUserId# and ll.APPROVE_CENTER_USER_ID1 is null
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.apply_submit_date >= #applyStartDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.apply_submit_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanTypeId">
+            llid.DICTIONARY_KEY = #loanTypeId#
+        </isNotEmpty>
+    </select>
+	<select id="getMakeLoanList" parameterClass="java.util.Map" resultMap="LnLoanListInfoResult">
+	  <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+		select 
+			    ll.* ,li.loan_info_id ,li.app_money appMoney, c.customer_name , c.mobile_phone1,c.sex ,
+			    li.app_money, li.cus_name, li.cus_idcard ,
+			    c.CUSTOMER_ID,c.CUSTOMER_NAME,c.CUSTOMER_TITLE,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        		c.MOBILE_PHONE1,c.MOBILE_PHONE2, c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,
+        		c.IS_NOGOOD as IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID,
+				llid.DICTIONARY_VALUE,lls.LOAN_STATUS_NAME,lrp.plan_date,lrp.update_date,lrp.PRINCIPAL,lrp.PAID_PRINCIPAL,
+        		lrp.INTEREST,lrp.PAID_INTEREST,lrp.REMAINING,lrp.ACCOUNT_REMAINING,lerp.plan_date eplan_date,lerp.update_date eupdate_date,lerp.owed_PRINCIPAL,
+        		lerp.owed_INTEREST,lerp.paid_PRINCIPAL,
+        		lerp.paid_INTEREST,lerp.REMAINING eREMAINING,su.user_name as survey_user_name
+        		from ln_loan_info li
+        		
+			left join ln_loan ll on ll.loan_id = li.loan_id
+			left join sys_user su on su.user_id = ll.survey_user_id
+        	left join crm_customer c on li.customer_id=c.customer_id
+        	left join (select  * from ln_loan_info_dictionary where DICTIONARY_NAME='DKLX') llid on llid.DICTIONARY_KEY = li.APP_LOAN_TYPE_ID
+        	left join ln_loan_status lls on lls.LOAN_STATUS_ID = ll.LOAN_STATUS_ID
+        	left join  (select * from ln_repayment_plan where plan_date =  (select min(plan_date) from ln_repayment_plan  where plan_date >= (SELECT current date FROM sysibm.sysdummy1))) lrp on lrp.loan_id=li.loan_id
+        	left join  (select * from ln_exception_repayment_plan where plan_date =  (select min(plan_date) from ln_exception_repayment_plan  where plan_date > (SELECT current date FROM sysibm.sysdummy1))) lerp on lerp.loan_id=li.loan_id
+        	where 1=1
+            <isNotEmpty property="notMonitoredType" prepend="and">
+                   not EXISTS (select 1 from LN_LOAN_Monitor where LOAN_ID =LL.LOAN_ID AND MON_TYPE=#notMonitoredType#)
+            </isNotEmpty>
+            <isNotEmpty prepend="and" property="appLoanTypeId">
+                li.APP_LOAN_TYPE_ID=#appLoanTypeId#
+            </isNotEmpty>
+        	<isNotEmpty prepend="and" property="resultRepayDate">
+        	   <![CDATA[
+        	   ( li.RESULT_REPAY_DATE=#resultRepayDate# )
+        	   ]]>
+        	</isNotEmpty>
+           <isNotEmpty property="monitored">
+            <isEqual prepend="and"  property="monitored" compareValue="1">
+                exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID)
+            </isEqual>
+            <isEqual prepend="and"  property="monitored" compareValue="0">
+                not exists (select 1 from LN_LOAN_Monitor where MON_DATE>current date - 2 day AND LOAN_ID =LL.LOAN_ID)
+            </isEqual>
+            </isNotEmpty>
+            <isNotEmpty property="montype">
+            <isEqual prepend="and"  property="montype" compareValue="1">
+                <![CDATA[ exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < ll.LEND_CONTRACT_CHECK_DATE +  30 day  and llm.MON_TYPE=1  and llm.LOAN_ID = ll.LOAN_ID  and ll.LOAN_STATUS_ID != 7 )]]>
+            </isEqual>
+            <isEqual prepend="and"  property="montype" compareValue="0">
+                <![CDATA[ exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < current date - 1 day  and llm.MON_DATE>current date - 6 MONTHS    and llm.MON_TYPE=4  and llm.LOAN_ID = ll.LOAN_ID    and ll.LOAN_STATUS_ID != 7 )]]>
+            </isEqual>
+            </isNotEmpty>
+            <isNotEmpty property="nomontype">
+            <isEqual prepend="and"  property="nomontype" compareValue="1">
+                <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < ll.LEND_CONTRACT_CHECK_DATE +  30 day  and llm.MON_TYPE=1  and llm.LOAN_ID = ll.LOAN_ID  and ll.LOAN_STATUS_ID != 7 )]]>
+            </isEqual>
+            <isEqual prepend="and"  property="nomontype" compareValue="0">
+                <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm    where llm.MON_DATE < current date - 1 day  and llm.MON_DATE>current date - 6 MONTHS    and llm.MON_TYPE=4  and llm.LOAN_ID = ll.LOAN_ID    and ll.LOAN_STATUS_ID != 7 )]]>
+            </isEqual>
+            <isEqual prepend="and"  property="nomontype" compareValue="2">
+                <![CDATA[ not exists (select  1 from LN_LOAN_Monitor llm  where  llm.REVISIT_TYPE = 2  and llm.LOAN_ID = ll.LOAN_ID)]]>
+            </isEqual>
+            </isNotEmpty>
+        	<isNotEmpty prepend="and" property="AfterDateTag">
+        	   <isEqual property="AfterDateTag" compareValue="0">
+                	 <![CDATA[ll.LEND_CONTRACT_CHECK_DATE <= #contractCheckDate# ]]>
+            	</isEqual>
+            	<isEqual property="AfterDateTag" compareValue="1">
+                	ll.LEND_CONTRACT_CHECK_DATE >=#contractCheckDate#
+            	</isEqual>
+        	</isNotEmpty>
+        	
+        	<isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        	</isNotEmpty>
+        	<isNotEmpty prepend="and" property="lendStartDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE >= #lendStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendEndDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE <= #lendEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #repaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+         <isNotEmpty prepend="and" property="isPaidTag">
+            <![CDATA[
+            lrp.PAID_TAG = #isPaidTag#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentStartDate">
+            <![CDATA[
+            lerp.plan_date >= #erepaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentEndDate">
+            <![CDATA[
+            lerp.plan_date <= #erepaymentEndDate#
+            ]]>
+        </isNotEmpty> 
+        
+         <!--  查询所有贷款条件(主要条件) 张芳萍
+        客户经理 -->
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+            (
+          		(ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+          		(ll.SURVEY_USER_ID = #surveyUserId# and ll.loan_status_id >= 3) or
+          		(ll.lend_user_id = #surveyUserId#)
+          	)
+          	]]>
+        </isNotEmpty>
+        
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+          	(ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+          	(ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+          	(ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+     <!--    业务主管(web端) -->
+        <isNotEmpty property="belongUserIds" prepend="and">
+            	ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+      <!--   业务主管(pad端) -->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+           
+            )
+        </isNotEmpty>
+               	
+        	<isNotEmpty prepend="and" property="lendUserId">
+        	    ll.lend_user_id = #lendUserId#
+        	</isNotEmpty>
+            <isNotEmpty prepend="and" property="approveDirectorUserId">
+        	    ll.APPROVE_DIRECTOR_USER_ID = #approveDirectorUserId# and ll.APPROVE_CENTER_USER_ID1 is null
+        	</isNotEmpty>
+            <isNotEmpty prepend="and" property="cusName">
+        	    li.CUS_NAME LIKE '%$cusName$%' ESCAPE '^'
+        	</isNotEmpty>
+        	<isNotEmpty  property="approvalStartDate">
+        	    <isNotEmpty prepend="and" property="approvalEndDate">
+        	       <![CDATA[ 
+        	       (( ll.APPROVE_CENTER_PASS_DATE >= #approvalStartDate# and ll.APPROVE_CENTER_PASS_DATE <= #approvalEndDate#) or (ll.APPROVE_BACKER_PASS_DATE >=  #approvalStartDate# and ll.APPROVE_BACKER_PASS_DATE <= #approvalEndDate#))
+        	       ]]>
+        	    </isNotEmpty>
+        	</isNotEmpty>
+        	<isNotEmpty property="applyStartDate">
+        	    <isNotEmpty prepend="and" property="applyEndDate">
+        	       <![CDATA[ 
+        	       ( ll.APPLY_SUBMIT_DATE >= #applyStartDate# and ll.APPLY_SUBMIT_DATE <= #applyEndDate#)
+        	       ]]>
+        	    </isNotEmpty>
+        	</isNotEmpty>
+        	<isNotEmpty prepend="and" property="approveCenterUserId1">
+        	   <![CDATA[
+        	   ( ll.APPROVE_CENTER_USER_ID1=#approveCenterUserId1# or  ll.APPROVE_CENTER_USER_ID2=#approveCenterUserId1# or ll.APPROVE_BACKER_USER_ID = #approveCenterUserId1#)
+        	   ]]>
+        	</isNotEmpty>
+
+
+            order by  c.CUSTOMER_NAME  asc
+	        <isNotEmpty property="startRow">
+	            <isNotEmpty property="endRow">
+	                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+	                ]]>
+	            </isNotEmpty>
+	        </isNotEmpty>
+	</select>
+    <!--未放贷 及放贷后 贷款列表
+    <select id="getMakeLoanList" parameterClass="java.util.Map" resultMap="LnLoanListResult">
+        select llif.loan_info_id,llcc.*,llt.loan_type_name,llst.loan_sub_type_name,
+        su.USER_NAME as APPLY_USER_NAME,suu.USER_NAME as BELONG_USER_NAME,
+        GET_LN_USER_NAMES_BY_LOAN_ID(llcc.loan_id) as EXCEPTION_ASSIGN_USER_NAMES,lls.LOAN_STATUS_NAME
+        from (
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select         ll.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        c.MOBILE_PHONE1,c.MOBILE_PHONE2,         c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as         IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID
+        from ln_loan ll
+        left join crm_customer c on ll.customer_id=c.customer_id
+        where 1=1
+
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>
+        <isNotEmpty property="surveyUserIds" prepend="and">
+            ll.SURVEY_USER_ID in
+            <iterate property="surveyUserIds" open="(" close=")" conjunction=",">
+                #surveyUserIds[]#
+            </iterate>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="surveyUserId">
+            ll.SURVEY_USER_ID=#surveyUserId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="approvalStartDate">
+            <![CDATA[
+            ll.approve_pass_date2 >= #approvalStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="approvalEndDate">
+            <![CDATA[
+            ll.approve_pass_date2 <= #approvalEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.apply_date >= #applyStartDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.apply_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendStartDate">
+            <![CDATA[
+            ll.lend_date >= #lendStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendEndDate">
+            <![CDATA[
+            ll.lend_date <= #lendEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsCheckout">
+            <isEqual property="loanIsCheckout" compareValue="1">
+                ll.IS_CHECKOUT =#loanIsCheckout#
+            </isEqual>
+            <isNotEqual property="loanIsCheckout" compareValue="1">
+                (ll.IS_CHECKOUT = 0 OR ll.IS_CHECKOUT IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="isNogood">
+            <isEqual property="isNogood" compareValue="1">
+                ll.IS_NOGOOD =#isNogood#
+            </isEqual>
+            <isEqual property="isNogood" compareValue="0">
+                (ll.IS_NOGOOD = 0 OR ll.IS_NOGOOD IS NULL)
+            </isEqual>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+               ll.REPAYMENT_DATE >= #repaymentStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+              ll.REPAYMENT_DATE <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="status">
+            ll.REPAYMENT_STATUS=#status#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        
+        <isNotEmpty prepend="" property="loanStatusId">
+            <isEqual property="loanStatusId" compareValue="5">
+                order by ll.approve_pass_date2
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="6">
+                <isNotEmpty property="isConfirm" prepend="">
+                    order by ll.is_checkout,ll.lend_date
+                </isNotEmpty>
+                <isNotEmpty property="isDun" prepend="">
+                    order by case when ll.repayment_status =0 then 3 ELSE ll.repayment_status end,ll.repayment_date
+                </isNotEmpty>
+            </isEqual>
+        </isNotEmpty>    
+        order by ll.create_date desc
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty> )
+        llcc
+        left join ln_loan_type llt on llcc.loan_type_id=llt.loan_type_id
+        left join ln_loan_sub_type llst on llcc.loan_sub_type_id = llst.loan_sub_type_id
+        left join sys_user su on llcc.apply_user_id=su.user_id
+        left join sys_user suu on llcc.belong_user_id = suu.user_id
+        left join ln_loan_status lls on llcc.loan_status_id=lls.loan_status_id
+        left join ln_loan_info llif on llcc.loan_id = llif.loan_id
+    </select> -->
+
+    <!-- 审计贷款总数-->
+    <select id="getVerifyLoanCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+         select count(1) from ln_loan ll
+        LEFT JOIN ln_loan_info lli ON ll.loan_id=lli.loan_id
+        left join crm_customer c on lli.customer_id=c.customer_id
+        where 1=1
+        <isNotEmpty property="belongUserIds" prepend="and">
+            (
+            (ll.apply_user_id in ($belongUserIds$) and (ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+            (ll.survey_user_id in ($belongUserIds$) and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12)
+            <isNotEmpty property="assignverifyUserIds" prepend="or">
+                (ll.verify_user_id in ($assignverifyUserIds$))
+            </isNotEmpty>
+            )
+        </isNotEmpty>
+        <!--客户经理-->
+        <isNotEmpty property="belongUserId" prepend="and">
+            (
+            (ll.apply_user_id=#belongUserId# and (ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+            <!--
+            (ll.loan_status_id=2 and ll.apply_user_id=#belongUserId#) or
+            -->
+            (ll.survey_user_id=#belongUserId# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12)
+            <isNotEmpty property="assignverifyUserId" prepend="or">
+                (ll.verify_user_id=#assignverifyUserId#)
+            </isNotEmpty>
+            )
+        </isNotEmpty>
+        <isNotEmpty property="notQueryStatusId" prepend="and">
+            ll.loan_status_id != #notQueryStatusId#
+        </isNotEmpty>
+		<isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty property="createStartDate" prepend="and">
+            <![CDATA[
+            ll.create_date >= #createStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="createEndDate" prepend="and">
+            <![CDATA[
+            ll.create_date <= #createEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.create_date >= #applyStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.create_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="verifyStartDate" prepend="and">
+            <![CDATA[
+            ll.verify_date >= #verifyStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="verifyEndDate" prepend="and">
+            <![CDATA[
+            ll.verify_date <= #verifyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusIds" prepend="and">
+            (<iterate property="loanStatusIds" conjunction="or">
+            ll.loan_status_id= #loanStatusIds[]#
+        </iterate>)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsCheckout">
+            <isEqual property="loanIsCheckout" compareValue="1">
+                ll.IS_CHECKOUT =#loanIsCheckout#
+            </isEqual>
+            <isNotEqual property="loanIsCheckout" compareValue="1">
+                (ll.IS_CHECKOUT = 0 OR ll.IS_CHECKOUT IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsVerify">
+            <isEqual property="loanIsVerify" compareValue="1">
+                ll.IS_VERIFY =#loanIsVerify#
+            </isEqual>
+            <isNotEqual property="loanIsVerify" compareValue="1">
+                (ll.IS_VERIFY = 0 OR ll.IS_VERIFY IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsVerifyPass">
+            ll.IS_VERIFY_PASS=#loanIsVerifyPass#
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongUserIds" prepend="and">
+            c.belong_user_id in ($cusBelongUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongDeptIds" prepend="and">
+            c.belong_dept_id in ($cusBelongDeptIds$)
+        </isNotEmpty>
+        <isPropertyAvailable property="unAllocate" prepend="and">
+            (c.belong_user_id is null or c.belong_user_id = 0)
+        </isPropertyAvailable>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID=#loanStatusId#
+        </isNotEmpty>
+    </select>
+
+    <!--审计贷款列表 -->
+    <select id="getVerifyLoanList" resultClass="java.util.Map" resultMap="VerifyLoanListResult">
+        select llcc.*,llt.loan_type_name,llst.loan_sub_type_name,
+        su.USER_NAME as APPLY_USER_NAME,suu.USER_NAME as BELONG_USER_NAME,suuuu.USER_NAME as VERIFY_USER_NAME,
+        lls.LOAN_STATUS_NAME
+        from (
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select         ll.*,lli.*,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        c.MOBILE_PHONE1,c.MOBILE_PHONE2,         c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,
+        c.IS_NOGOOD as         IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID
+        from ln_loan ll
+        LEFT JOIN ln_loan_info lli ON ll.loan_id=lli.loan_id
+        left join crm_customer c on lli.customer_id=c.customer_id
+        where 1=1
+        <isNotEmpty property="belongUserIds" prepend="and">
+            (
+            (ll.apply_user_id in ($belongUserIds$) and (ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+            (ll.survey_user_id in ($belongUserIds$) and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12)
+            <isNotEmpty property="assignverifyUserIds" prepend="or">
+                (ll.verify_user_id in ($assignverifyUserIds$))
+            </isNotEmpty>
+            )
+        </isNotEmpty>
+        <!--客户经理-->
+        <isNotEmpty property="belongUserId" prepend="and">
+            (
+            (ll.apply_user_id=#belongUserId# and (ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+            <!--
+            (ll.loan_status_id=2 and ll.apply_user_id=#belongUserId#) or
+            -->
+            (ll.survey_user_id=#belongUserId# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12)
+            <isNotEmpty property="assignverifyUserId" prepend="or">
+                (ll.verify_user_id=#assignverifyUserId#)
+            </isNotEmpty>
+            )
+        </isNotEmpty>
+        <isNotEmpty property="notQueryStatusId" prepend="and">
+            ll.loan_status_id != #notQueryStatusId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanStatusId">
+            ll.loan_status_id = #loanStatusId#
+        </isNotEmpty>
+        <isNotEmpty property="createStartDate" prepend="and">
+            <![CDATA[
+            ll.create_date >= #createStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="createEndDate" prepend="and">
+            <![CDATA[
+            ll.create_date <= #createEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.create_date >= #applyStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.create_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="verifyStartDate" prepend="and">
+            <![CDATA[
+            ll.verify_date >= #verifyStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="verifyEndDate" prepend="and">
+            <![CDATA[
+            ll.verify_date <= #verifyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusIds" prepend="and">
+            (<iterate property="loanStatusIds" conjunction="or">
+            ll.loan_status_id= #loanStatusIds[]#
+        </iterate>)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsCheckout">
+            <isEqual property="loanIsCheckout" compareValue="1">
+                ll.IS_CHECKOUT =#loanIsCheckout#
+            </isEqual>
+            <isNotEqual property="loanIsCheckout" compareValue="1">
+                (ll.IS_CHECKOUT = 0 OR ll.IS_CHECKOUT IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsVerify">
+            <isEqual property="loanIsVerify" compareValue="1">
+                ll.IS_VERIFY =#loanIsVerify#
+            </isEqual>
+            <isNotEqual property="loanIsVerify" compareValue="1">
+                (ll.IS_VERIFY = 0 OR ll.IS_VERIFY IS NULL)
+            </isNotEqual>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanIsVerifyPass">
+            ll.IS_VERIFY_PASS=#loanIsVerifyPass#
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongUserIds" prepend="and">
+            c.belong_user_id in ($cusBelongUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="cusBelongDeptIds" prepend="and">
+            c.belong_dept_id in ($cusBelongDeptIds$)
+        </isNotEmpty>
+        <isPropertyAvailable property="unAllocate" prepend="and">
+            (c.belong_user_id is null or c.belong_user_id = 0)
+        </isPropertyAvailable>
+        <isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        </isNotEmpty>
+        <isNotEmpty property="randSort" prepend="">
+            order by case when repayment_status is null or repayment_status=0 or repayment_status=2 then 0 ELSE repayment_status end desc, rand()
+        </isNotEmpty>
+        <isNotEmpty property="verifySort" prepend="">
+            order by ll.create_date
+        </isNotEmpty>
+        <isNotEmpty property="applySort" prepend="">
+            order by ll.create_date DESC
+        </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty> )
+        llcc
+        left join ln_loan_type llt on llcc.app_loan_type_id=llt.loan_type_id
+        left join ln_loan_sub_type llst on llcc.app_loan_sub_type_id = llst.loan_sub_type_id
+        left join sys_user su on llcc.apply_user_id=su.user_id
+        left join sys_user suu on llcc.belong_user_id = suu.user_id
+        left join sys_user suuuu on llcc.verify_user_id = suuuu.user_id
+        left join ln_loan_status lls on llcc.loan_status_id=lls.loan_status_id
+    </select>
+    <!--控制台 贷款求总-->
+    <select id="getLoanCountByLoanStatusIdOptimize" resultMap="CountLoanStatusResult" parameterClass="java.util.Map">
+        select count(1) as status_count,ll.loan_status_id from ln_loan ll
+        left join ln_loan_info lli on ll.loan_id=lli.loan_id 
+        left join crm_customer c on lli.customer_id=c.customer_id
+        where 1=1
+        <!--客户经理(组长)、业务主管-->
+        <!--团队主管 后台-->
+        <isNotEmpty property="userIds" prepend="and">
+           (
+            ((ll.loan_status_id=1 or ll.loan_status_id=2) and ll.apply_user_id in ($userIds$)) or
+            ((ll.loan_status_id=3 or ll.loan_status_id=4 or ll.loan_status_id=5 or (ll.loan_status_id=6 )) and ll.survey_user_id in ($userIds$))
+            <!-- or
+            待审批
+            (ll.loan_status_id=4 and c.belong_user_id in ($userIds$))
+            -->
+            )
+        </isNotEmpty>
+        <!--客户经理(组长)-->
+        <isNotEmpty property="userId" prepend="and">
+            (
+            (ll.loan_status_id=1 and ll.apply_user_id=#userId#) or
+            ((ll.loan_status_id=3 or ll.loan_status_id=4 or ll.loan_status_id=5  or ll.loan_status_id=6 ) and ll.survey_user_id=#userId#)
+            )
+
+        </isNotEmpty>
+            <!--审批(组长)-->
+        <isNotEmpty property="userId2" prepend="and">
+            (
+            (( ll.loan_status_id=4 or ll.loan_status_id=5 or ll.loan_status_id=6 ) and ll.APPROVE_CENTER_USER_ID1=#userId2#) or
+            (( ll.loan_status_id=4 or ll.loan_status_id=5 or ll.loan_status_id=6) and ll.APPROVE_CENTER_USER_ID2=#userId2#)
+            )
+        </isNotEmpty>
+        <!--//后台-->
+        <isNotEmpty property="userId3" prepend="and">
+            (
+            ll.loan_status_id=1  or
+            ll.loan_status_id=2  or
+            ll.loan_status_id=3  or
+            ll.loan_status_id=4  or
+            ll.loan_status_id=5 
+            )
+        </isNotEmpty>
+        group by ll.loan_status_id
+    </select>
+    <!--控制台 贷款列表-->
+    <select id="getWPLoanListOptimize" parameterClass="java.util.Map" resultMap="WPLnLoanListResult">
+        select llcc.*,llt.DICTIONARY_VALUE loan_type_name,'' loan_sub_type_name,
+        su.USER_NAME as APPLY_USER_NAME,suu.USER_NAME as BELONG_USER_NAME,suuu.user_name as survey_user_name,
+        GET_LN_USER_NAMES_BY_LOAN_ID(llcc.loan_id) as EXCEPTION_ASSIGN_USER_NAMES,lls.LOAN_STATUS_NAME
+        from (
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select         ll.*,lli.APP_LOAN_TYPE_ID,c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        c.MOBILE_PHONE1,c.MOBILE_PHONE2,         c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,c.IS_NOGOOD as         IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID
+        from ln_loan ll
+        left join ln_loan_info lli on ll.loan_id=lli.loan_id
+        left join crm_customer c on lli.customer_id=c.customer_id
+        where 1=1
+        <!--以下是控制台需要的查询条件-->
+        <!--以下是单个状态下的查询-->
+        <!--客户经理(组长)-->
+        <isNotEmpty property="createUser" prepend="and">
+            ll.apply_user_id=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="surveyUserId" prepend="and">
+            ll.survey_user_id=#surveyUserId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.loan_status_id=#loanStatusId#
+        </isNotEmpty>
+        <isNotEmpty property="approvalDeptId" prepend="and">
+            c.belong_dept_id=#approvalDeptId#
+        </isNotEmpty>
+        <!--业务主管-->
+        <isNotEmpty property="createUsers" prepend="and">
+            ll.apply_user_id in ($createUsers$)
+        </isNotEmpty>
+        <isNotEmpty property="applyUserIds" prepend="and">
+            ll.apply_user_id in ($applyUserIds$)
+        </isNotEmpty>
+        <isNotEmpty property="surveyUserIds" prepend="and">
+            ll.survey_user_id in ($surveyUserIds$)
+        </isNotEmpty>
+        <!--两种权限：客户经理(组长)、业务主管-->
+        <!--全状态下的查询，也就是查询所有贷款申请-->
+        <isNotEmpty property="isAllLoan" prepend="and">
+            (1=2
+            <!--客户经理-->
+            <isNotEmpty property="allLoanUserId" prepend="or">
+                (ll.apply_user_id=#allLoanUserId# and (ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                <!--
+                (ll.loan_status_id=2 and ll.apply_user_id=#belongUserId#) or
+                -->
+                (ll.survey_user_id=#allLoanUserId# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12)
+            </isNotEmpty>
+            <!--业务主管-->
+            <isNotEmpty property="managerUserIds" prepend="or">
+                (
+                ((ll.loan_status_id=1 or ll.loan_status_id=2 or ll.loan_status_id=11 or ll.loan_status_id=12) and ll.apply_user_id in ($managerUserIds$)) or
+                (ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and ll.loan_status_id != 12 and ll.survey_user_id in ($managerUserIds$))
+                )
+            </isNotEmpty>
+            )
+        </isNotEmpty>
+        <!--查单个状态下的贷款的排序方式-->
+        <isNotEmpty prepend="" property="loanStatusId">
+            <isEqual property="loanStatusId" compareValue="1">
+                order by ll.create_date
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="2">
+                order by ll.APPLY_SUBMIT_DATE
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="3">
+                order by ll.ASSIGN_SUBMIT_DATE
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="4">
+                order by ll.create_date desc
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="5">
+                order by ll.APPROVE_DIRECTOR_PASS_DATE
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="6">
+                order by ll.LEND_SAVE_DATE
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="8">
+                order by ll.APPROVE_CENTER_REJECT_DATE
+            </isEqual>
+            <isEqual property="loanStatusId" compareValue="9">
+                order by ll.APPROVE_CENTER_REJECT_DATE
+            </isEqual>
+        </isNotEmpty>
+        <!--全状态下的贷款的排序方式-->
+        <isNotEmpty property="isAllLoan">
+            order by ll.create_date desc
+        </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty> )
+        llcc
+        <!--
+        left join crm_customer_type cc on llcc.customer_type_id=cc.customer_type_id
+        -->
+        left join LN_LOAN_INFO_DICTIONARY llt on llcc.APP_LOAN_TYPE_ID=llt.DICTIONARY_KEY and llt.DICTIONARY_NAME='DKLX'
+        left join sys_user su on llcc.apply_user_id=su.user_id
+        left join sys_user suu on llcc.belong_user_id = suu.user_id
+        left join sys_user suuu on llcc.survey_user_id=suuu.user_id
+        left join ln_loan_status lls on llcc.loan_status_id=lls.loan_status_id
+    </select>
+    <!--得到还未同步贷款申请信息的贷款数量-->
+    <select id="getNoLoanInfoLoanCount" resultClass="Integer">
+        select count(1)
+        from ln_loan ll
+        left join ln_loan_info lli on ll.loan_id=lli.loan_id
+        left join crm_customer cc on ll.customer_id=cc.customer_id
+        where lli.loan_id is null or lli.loan_id=0
+    </select>
+    <!--得到还未同步贷款申请信息的贷款列表-->
+    <select id="getNoLoanInfoLoanList" parameterClass="java.util.Map" resultMap="NoLoanInfoResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select ll.loan_id,cc.customer_name,cc.id_card,ll.create_date as gen_date,ll.loan_type_id from ln_loan ll
+        left join ln_loan_info lli on ll.loan_id=lli.loan_id
+        left join crm_customer cc on ll.customer_id=cc.customer_id
+        where lli.loan_id is null or lli.loan_id=0
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <!--贷款数量统计报表(分配前的)-->
+    <select id="selectLoanCountReportByStatus" parameterClass="java.util.Map" resultMap="LoanCountReportBeanResult">
+        select ll.loan_status_id,count(1) as status_count
+        <isNotEmpty property="userIds" prepend=",">
+            ll.apply_user_id,ll.survey_user_id,0 as BEFORE_ASSIGN_DEPT_ID,0 as AFTER_ASSIGN_DEPT_ID
+        </isNotEmpty>
+        <isNotEmpty property="deptIds" prepend=",">
+            su.dept_id as BEFORE_ASSIGN_DEPT_ID,suu.dept_id as AFTER_ASSIGN_DEPT_ID,0 as apply_user_id,0 as survey_user_id
+        </isNotEmpty>
+        from ln_loan ll
+        <isNotEmpty property="deptIds">
+            left join sys_user su on su.user_id=ll.apply_user_id
+            left join sys_user suu on suu.user_id=ll.survey_user_id
+        </isNotEmpty>
+        where 1=1
+        <isNotEmpty property="startDate" prepend="and">
+            ll.create_date &gt;= #startDate#
+        </isNotEmpty>
+        <isNotEmpty property="endDate" prepend="and">
+            ll.create_date &lt;= #endDate#
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            (((ll.loan_status_id &lt;= 2 or ll.loan_status_id=11 or ll.loan_status_id=12) and ll.apply_user_id in ($userIds$))
+            or
+            ((ll.loan_status_id &gt;= 3 and ll.loan_status_id!=11 and ll.loan_status_id!=12) and ll.survey_user_id in ($userIds$)))
+            group by ll.loan_status_id,ll.apply_user_id,ll.survey_user_id
+        </isNotEmpty>
+        <isNotEmpty property="deptIds" prepend="and">
+            (((ll.loan_status_id &lt;= 2 or ll.loan_status_id=11 or ll.loan_status_id=12) and su.dept_id in ($deptIds$))
+            or
+            ((ll.loan_status_id &gt;= 3 and ll.loan_status_id!=11 and ll.loan_status_id!=12) and suu.dept_id in ($deptIds$)))
+            group by ll.loan_status_id,su.dept_id,suu.dept_id
+        </isNotEmpty>
+    </select>
+    
+    
+    <!-- 异常还款贷款信息 -->
+    <select id="getMakeExLoanList" parameterClass="java.util.Map" resultMap="LnLoanListInfoResult">
+	  <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+	select 
+			    ll.* ,li.loan_info_id ,li.app_money appMoney, c.customer_name , c.mobile_phone1,c.sex ,
+			    li.app_money, li.cus_name, li.cus_idcard ,
+			    c.CUSTOMER_ID,c.CUSTOMER_NAME,c.SEX,c.BIRTHDAY,c.CUSTOMER_NO,c.CUSTOMER_TITLE,c.CUSTOMER_TYPE_ID,
+        		c.MOBILE_PHONE1,c.MOBILE_PHONE2, c.DEFAULT_PHONE_TYPE,c.PHONE,c.FAX,c.ID_CARD,c.AGE,
+        		c.IS_NOGOOD as IS_NOGOOD_CUS,c.BELONG_DEPT_ID,c.BELONG_USER_ID,
+				llid.DICTIONARY_VALUE,lls.LOAN_STATUS_NAME,lrp.plan_date,lrp.update_date,lrp.PRINCIPAL,lrp.PAID_PRINCIPAL,
+        		lrp.INTEREST,lrp.PAID_INTEREST,lrp.REMAINING,lrp.ACCOUNT_REMAINING
+        		from ln_loan_info li
+        		
+			left join ln_loan ll on ll.loan_id = li.loan_id
+        	left join crm_customer c on li.customer_id=c.customer_id
+        	left join (select  *  from ln_loan_info_dictionary where DICTIONARY_NAME='DKLX') llid on llid.DICTIONARY_KEY = li.APP_LOAN_TYPE_ID
+        	left join ln_loan_status lls on lls.LOAN_STATUS_ID = ll.LOAN_STATUS_ID
+        	<![CDATA[ left join  (select * from ln_repayment_plan where plan_date =  (select max(plan_date) from ln_repayment_plan  where plan_date < (SELECT current date FROM sysibm.sysdummy1))) lrp on lrp.loan_id=li.loan_id
+        	]]>
+        	where 1=1 
+        	<isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        	</isNotEmpty>
+        	<isNotEmpty prepend="and" property="lendStartDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE >= #lendStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendEndDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE <= #lendEndDate#
+            ]]>
+        </isNotEmpty>
+            <!--  查询所有贷款条件(主要条件) 张芳萍        客户经理 -->
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+            (
+          		(ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+          		(ll.SURVEY_USER_ID = #surveyUserId# and ll.loan_status_id >= 3)or
+          		(ll.lend_user_id = #surveyUserId#)
+          	)
+          	]]>
+        </isNotEmpty>
+        
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+          	(ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+          	(ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+          	(ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+     <!--    业务主管(web端) -->
+        <isNotEmpty property="belongUserIds" prepend="and">
+            	ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+      <!--   业务主管(pad端) -->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+           
+            )
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #repaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+      
+        <isNotEmpty prepend="and" property="isPaidTag">
+            <![CDATA[
+            lrp.PAID_TAG = #isPaidTag#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #erepaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #erepaymentEndDate#
+            ]]>
+        </isNotEmpty>        	
+        	<isNotEmpty prepend="and" property="lendUserId">
+        	    ll.lend_user_id = #lendUserId#
+        	</isNotEmpty>
+            <isNotEmpty prepend="and" property="approveDirectorUserId">
+        	    ll.APPROVE_DIRECTOR_USER_ID = #approveDirectorUserId# and ll.APPROVE_CENTER_USER_ID1 is null
+        	</isNotEmpty>
+            <isNotEmpty prepend="and" property="cusName">
+        	    li.CUS_NAME LIKE '%$cusName$%' ESCAPE '^'
+        	</isNotEmpty>
+        	<isNotEmpty  property="approvalStartDate">
+        	    <isNotEmpty prepend="and" property="approvalEndDate">
+        	       <![CDATA[ 
+        	       (( ll.APPROVE_CENTER_PASS_DATE >= #approvalStartDate# and ll.APPROVE_CENTER_PASS_DATE <= #approvalEndDate#) or (ll.APPROVE_BACKER_PASS_DATE >=  #approvalStartDate# and ll.APPROVE_BACKER_PASS_DATE <= #approvalEndDate#))
+        	       ]]>
+        	    </isNotEmpty>
+        	</isNotEmpty>
+        	<isNotEmpty property="applyStartDate">
+        	    <isNotEmpty prepend="and" property="applyEndDate">
+        	       <![CDATA[ 
+        	       ( ll.APPLY_SUBMIT_DATE >= #applyStartDate# and ll.APPLY_SUBMIT_DATE <= #applyEndDate#)
+        	       ]]>
+        	    </isNotEmpty>
+        	</isNotEmpty>
+        	<isNotEmpty prepend="and" property="approveCenterUserId1">
+        	   <![CDATA[( ll.APPROVE_CENTER_USER_ID1=#approveCenterUserId1# or ll.APPROVE_BACKER_USER_ID = #approveCenterUserId1#)]]>
+        	</isNotEmpty>
+			 order by ll.create_date desc
+	        <isNotEmpty property="startRow">
+	            <isNotEmpty property="endRow">
+	                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+	                ]]>
+	            </isNotEmpty>
+	        </isNotEmpty>
+	</select>
+	
+    <!--异常 贷款总数 -->
+    <select id="getMakeExLoanCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(1)
+  		from ln_loan_info li
+			left join ln_loan ll on ll.loan_id = li.loan_id
+        	left join crm_customer c on li.customer_id=c.customer_id
+        	left join (select  * from ln_loan_info_dictionary where DICTIONARY_NAME='DKLX') llid on llid.DICTIONARY_KEY = li.APP_LOAN_TYPE_ID
+        	left join ln_loan_status lls on lls.LOAN_STATUS_ID = ll.LOAN_STATUS_ID
+        	 <![CDATA[ left join  (select * from ln_repayment_plan where plan_date =  (select max(plan_date) from ln_repayment_plan  where plan_date < (SELECT current date FROM sysibm.sysdummy1))) lrp on lrp.loan_id=li.loan_id
+        	 ]]>
+        	where 1=1 
+			<isNotEmpty prepend="and" property="customer">
+            (
+            c.customer_name LIKE '%$customer$%' ESCAPE '^'
+            or c.id_card LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone1 LIKE '%$customer$%' ESCAPE '^'
+            or c.mobile_phone2 LIKE '%$customer$%' ESCAPE '^'
+            or c.phone LIKE '%$customer$%' ESCAPE '^'
+            or c.fax LIKE '%$customer$%' ESCAPE '^'
+            )
+        	</isNotEmpty>
+        	<isNotEmpty prepend="and" property="lendStartDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE >= #lendStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendEndDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE <= #lendEndDate#
+            ]]>
+        </isNotEmpty>
+            <!--  查询所有贷款条件(主要条件) 张芳萍        客户经理 -->
+        <isNotEmpty property="surveyUserId" prepend="and">
+            <![CDATA[
+            (
+          		(ll.apply_user_id = #surveyUserId#  and ll.loan_status_id = 1 )  or
+          		(ll.SURVEY_USER_ID = #surveyUserId# and  (  ll.loan_status_id < 3 or  ll.loan_status_id =3)) or
+          		(ll.lend_user_id = #surveyUserId#   and  ll.loan_status_id>3)
+          	)
+          	]]>
+        </isNotEmpty>
+        
+         <isNotEmpty property="approveBackerUserId" prepend="and">
+         (
+          	(ll.APPROVE_BACKER_USER_ID = #approveBackerUserId# and ll.loan_status_id >= 4) or 
+          	(ll.APPROVE_CENTER_USER_ID1 = #approveBackerUserId# and ll.loan_status_id >= 4) or
+          	(ll.APPROVE_CENTER_USER_ID2 = #approveBackerUserId# and ll.loan_status_id >= 4)
+         )
+        </isNotEmpty>
+     <!--    业务主管(web端) -->
+        <isNotEmpty property="belongUserIds" prepend="and">
+            	ll.ASSIGN_USER_ID in ($belongUserIds$)
+        </isNotEmpty>
+
+      <!--   业务主管(pad端) -->
+        <isNotEmpty property="belongUserIdsForPad" prepend="and">
+            (
+            <isNotEmpty property="belongUserIdForPad">
+                (ll.apply_user_id=#belongUserIdForPad# and (ll.loan_status_id=1 or ll.loan_status_id=11 or ll.loan_status_id=12)) or
+                (ll.survey_user_id=#belongUserIdForPad# and ll.loan_status_id &gt;= 3 and ll.loan_status_id != 11 and
+                ll.loan_status_id != 12) or
+            </isNotEmpty>
+            (ll.loan_status_id=2 and ll.apply_user_id in ($belongUserIdsForPad$))
+            
+            or
+            (ll.loan_status_id=4 and ll.survey_user_id in ($belongUserIdsForPad$))
+           
+            )
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #repaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+      
+        <isNotEmpty prepend="and" property="isPaidTag">
+            <![CDATA[
+            lrp.PAID_TAG = #isPaidTag#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #erepaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #erepaymentEndDate#
+            ]]>
+        </isNotEmpty>        	
+        	<isNotEmpty prepend="and" property="lendUserId">
+        	    ll.lend_user_id = #lendUserId#
+        	</isNotEmpty>
+            <isNotEmpty prepend="and" property="approveDirectorUserId">
+        	    ll.APPROVE_DIRECTOR_USER_ID = #approveDirectorUserId# and ll.APPROVE_CENTER_USER_ID1 is null
+        	</isNotEmpty>
+            <isNotEmpty prepend="and" property="cusName">
+        	    li.CUS_NAME LIKE '%$cusName$%' ESCAPE '^'
+        	</isNotEmpty>
+        	<isNotEmpty  property="approvalStartDate">
+        	    <isNotEmpty prepend="and" property="approvalEndDate">
+        	       <![CDATA[ 
+        	       (( ll.APPROVE_CENTER_PASS_DATE >= #approvalStartDate# and ll.APPROVE_CENTER_PASS_DATE <= #approvalEndDate#) or (ll.APPROVE_BACKER_PASS_DATE >=  #approvalStartDate# and ll.APPROVE_BACKER_PASS_DATE <= #approvalEndDate#))
+        	       ]]>
+        	    </isNotEmpty>
+        	</isNotEmpty>
+        	<isNotEmpty property="applyStartDate">
+        	    <isNotEmpty prepend="and" property="applyEndDate">
+        	       <![CDATA[ 
+        	       ( ll.APPLY_SUBMIT_DATE >= #applyStartDate# and ll.APPLY_SUBMIT_DATE <= #applyEndDate#)
+        	       ]]>
+        	    </isNotEmpty>
+        	</isNotEmpty>
+        	<isNotEmpty prepend="and" property="approveCenterUserId1">
+        	   <![CDATA[( ll.APPROVE_CENTER_USER_ID1=#approveCenterUserId1# or ll.APPROVE_BACKER_USER_ID = #approveCenterUserId1#)]]>
+        	</isNotEmpty>
+       	<!-- 
+        	
+       	<isNotEmpty prepend="and" property="lendStartDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE >= #lendStartDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="lendEndDate">
+            <![CDATA[
+            ll.LEND_CONTRACT_CHECK_DATE <= #lendEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="loanTypeId" prepend="and">
+            li.APP_LOAN_TYPE_ID=#loanTypeId#
+        </isNotEmpty>
+        <isNotEmpty property="loanStatusId" prepend="and">
+            ll.LOAN_STATUS_ID in ($loanStatusId$)
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #repaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="repaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #repaymentEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="isPaidTag">
+            <![CDATA[
+            lrp.PAID_TAG = #isPaidTag#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentStartDate">
+            <![CDATA[
+            lrp.plan_date >= #erepaymentStartDate#
+               ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="erepaymentEndDate">
+            <![CDATA[
+            lrp.plan_date <= #erepaymentEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="approveDirectorUserId">
+            ll.APPROVE_DIRECTOR_USER_ID = #approveDirectorUserId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyStartDate">
+            <![CDATA[
+            ll.apply_submit_date >= #applyStartDate#
+             ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="applyEndDate">
+            <![CDATA[
+            ll.apply_submit_date <= #applyEndDate#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="loanTypeId">
+            llid.DICTIONARY_KEY = #loanTypeId#
+        </isNotEmpty>
+         -->
+    </select>
+    
+    
+    <select id="selectLoanById" resultMap="LnLoanResult" parameterClass="java.util.Map">
+        select * from ln_loan where loan_id=#loanId#
+    </select>
+    
+    <select id="cusCheck" resultClass="com.banger.mobile.domain.model.loan.CusCheck" parameterClass="java.util.Map">
+        
+ 		select 
+		        *
+		 from
+		 (     
+		        select
+		            cu.CUSTOMER_NAME userName, cu.ID_CARD idCard, ll.LOAN_REJECT_DATE applyDate, st.team_name applyBank, su.user_name director, ls.LOAN_STATUS_NAME loanStatus,
+					case when li.REFUSE_REASON_TYPE_ID =1 then
+		            	ld1.dictionary_value ||'(银行拒绝)'
+                    when li.REFUSE_REASON_TYPE_ID =2 then
+                    	ld2.dictionary_value ||'(客户拒绝)'
+		            else
+                    	''
+       		        end
+		            rejectContent,
+		             '借款人' as identity
+		        from 
+		            ln_loan ll
+		            left join ln_loan_info li on ll.loan_id = li.loan_id
+		            left join crm_customer cu on li.customer_id = cu.customer_id
+		            left join sys_user su on ll.SURVEY_USER_ID = su.user_id
+		            left join sys_team st on li.REGISTER_MICRO_BIZ_CENTER = st.team_id
+		            left join ln_loan_status ls on ll.LOAN_STATUS_ID = ls.LOAN_STATUS_ID
+		            left join ln_loan_info_dictionary ld1 on  ld1.dictionary_key = li.REFUSE_REASON_SUB_TYPE_ID and ld1.dictionary_name = 'YHJJ'
+		            left join ln_loan_info_dictionary ld2 on  ld2.dictionary_key = li.REFUSE_REASON_SUB_TYPE_ID and ld2.dictionary_name = 'KHJJ'
+		            where
+		            li.customer_id in ($cusIds$) and ll.loan_status_id > 1 AND ll.Loan_Id != #loanId#
+		             
+		        union
+		        select
+		                       
+		            cu.CUSTOMER_NAME userName, cu.ID_CARD idCard, ll.LOAN_REJECT_DATE applyDate, st.team_name applyBank, su.user_name director, ls.LOAN_STATUS_NAME loanStatus,
+					case when li.REFUSE_REASON_TYPE_ID =1 then
+		            	ld1.dictionary_value ||'(银行拒绝)'
+                    when li.REFUSE_REASON_TYPE_ID =2 then
+                    	ld2.dictionary_value ||'(客户拒绝)'
+		            else
+                    	''
+       		        end
+		            rejectContent,
+		            '共同借款人' as identity
+		        from 
+		            ln_loan ll
+		            left join ln_loan_info li on ll.loan_id = li.loan_id
+		            left join ln_loan_co_borrower lb on ll.LOAN_ID = lb.LOAN_ID
+		            left join crm_customer cu on lb.customer_id = cu.customer_id
+		            left join sys_user su on ll.SURVEY_USER_ID = su.user_id
+		            left join sys_team st on li.REGISTER_MICRO_BIZ_CENTER = st.team_id
+		            left join ln_loan_status ls on ll.LOAN_STATUS_ID = ls.LOAN_STATUS_ID
+		            left join ln_loan_info_dictionary ld1 on  ld1.dictionary_key = li.REFUSE_REASON_SUB_TYPE_ID and ld1.dictionary_name = 'YHJJ'
+		            left join ln_loan_info_dictionary ld2 on  ld2.dictionary_key = li.REFUSE_REASON_SUB_TYPE_ID and ld2.dictionary_name = 'KHJJ'
+		            where
+		            lb.customer_id in  ($cusIds$) and ll.loan_status_id > 1 AND ll.Loan_Id != #loanId#
+		               
+		        union
+		        select
+		                      
+		             cu.CUSTOMER_NAME userName, cu.ID_CARD idCard, ll.LOAN_REJECT_DATE applyDate, st.team_name applyBank, su.user_name director, ls.LOAN_STATUS_NAME loanStatus,
+					case when li.REFUSE_REASON_TYPE_ID =1 then
+		            	ld1.dictionary_value ||'(银行拒绝)'
+                    when li.REFUSE_REASON_TYPE_ID =2 then
+                    	ld2.dictionary_value ||'(客户拒绝)'
+		            else
+                    	''
+       		        end
+		            rejectContent,
+		             '保证人' as identity
+		        from 
+		            ln_loan ll
+		            left join ln_loan_info li on ll.loan_id = li.loan_id
+		            left join ln_loan_guarantor lg on ll.LOAN_ID = lg.LOAN_ID
+		            left join crm_customer cu on lg.customer_id = cu.customer_id
+		            left join sys_user su on ll.SURVEY_USER_ID = su.user_id
+		            left join sys_team st on li.REGISTER_MICRO_BIZ_CENTER = st.team_id
+		            left join ln_loan_status ls on ll.LOAN_STATUS_ID = ls.LOAN_STATUS_ID
+		            left join ln_loan_info_dictionary ld1 on  ld1.dictionary_key = li.REFUSE_REASON_SUB_TYPE_ID and ld1.dictionary_name = 'YHJJ'
+		            left join ln_loan_info_dictionary ld2 on  ld2.dictionary_key = li.REFUSE_REASON_SUB_TYPE_ID and ld2.dictionary_name = 'KHJJ'
+		            where
+		            lg.customer_id in  ($cusIds$) and ll.loan_status_id > 1 AND ll.Loan_Id != #loanId#
+		        union
+		        select 
+		        	name userName,CERTID idCard,to_date(trim(APPLYDATE),'yyyymmdd') applyDate,UNITNAME applyBank,
+		        	EXECUTORNAME director,STATUS loanStatus ,REASON rejectContent, IDENTIFICATION identity 
+		        from CUS_VERIFI_DATA where customer_id in  ($cusIds$)
+		        
+		)g
+		order by userName, identity desc
+        
+    </select>
+        
+    <update id="updateAssign" parameterClass="java.lang.Integer">
+        <![CDATA[
+        	update LN_LOAN set  ASSIGN_SUBMIT_DATE = null,LOAN_STATUS_ID=1,EVENT_ID=1 where LOAN_ID=#loanId# 
+        ]]>
+   
+        
+    </update>
+    
+</sqlMap>

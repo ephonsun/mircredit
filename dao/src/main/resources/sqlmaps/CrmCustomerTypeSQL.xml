@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerTypeSQL">
+	<typeAlias alias="CrmCustomerType"
+		type="com.banger.mobile.domain.model.system.CrmCustomerType" />
+
+	<!-- 客户类型表-->
+	<!-- CrmCustomerTypeSQL信息全字段 -->
+	<resultMap class="CrmCustomerType" id="CrmCustomerTypeResult">
+		<result column="CUSTOMER_TYPE_ID" property="customerTypeId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种客户类型-->
+	<insert id="addCrmCustomerType" parameterClass="CrmCustomerType">
+		<![CDATA[
+		INSERT INTO CRM_CUSTOMER_TYPE
+    	(
+        CUSTOMER_TYPE_ID,
+        IS_DEL,
+        CUSTOMER_TYPE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #customerTypeId#,
+        #isDel#,
+        #customerTypeName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="customerTypeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_CUSTOMER_TYPE
+		</selectKey>
+	</insert>
+
+
+	<!-- 客户类型修改-->
+	<update id="updateCrmCustomerType"
+		parameterClass="CrmCustomerType">
+		UPDATE CRM_CUSTOMER_TYPE SET IS_DEL = #isDel#,
+		CUSTOMER_TYPE_NAME = #customerTypeName#, SORTNO = #sortNo#,
+		IS_ACTIVED = #isActived#, CREATE_DATE = #createDate#,
+		UPDATE_DATE =
+		<![CDATA[current timestamp]]>, CREATE_USER = #createUser#, UPDATE_USER = #updateUser# where
+		CUSTOMER_TYPE_ID= #customerTypeId#
+	</update>
+
+	<!-- 根据ID删除客户类型 -->
+	<update id="deleteCrmCustomerTypeById"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_CUSTOMER_TYPE SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where CUSTOMER_TYPE_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到客户类型 -->
+	<select id="getCrmCustomerTypeById"
+		resultMap="CrmCustomerTypeResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_CUSTOMER_TYPE where CUSTOMER_TYPE_ID=#Id#
+	]]>
+	</select>
+	
+	<!-- 根据客户类型名称获取相同客户类型名称的数据 -->
+	<select id="getSameCrmCustomerTypeByName"
+		resultMap="CrmCustomerTypeResult"
+		parameterClass="CrmCustomerType">
+		<![CDATA[
+		select * from CRM_CUSTOMER_TYPE where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="customerTypeId">
+     		<isNotEqual prepend="and" property="customerTypeId" compareValue="0">
+			<![CDATA[CUSTOMER_TYPE_ID != #customerTypeId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerTypeName">
+			<![CDATA[CUSTOMER_TYPE_NAME = #customerTypeName#]]>
+		</isNotEmpty>
+	
+	</select>
+
+	<!-- 获取客户类型列表 -->
+	<select id="getAllCrmCustomerType"
+		resultMap="CrmCustomerTypeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_CUSTOMER_TYPE WHERE IS_DEL = 0
+             Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 获取现有客户类型数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmCustomerType"
+		resultMap="CrmCustomerTypeResult">
+		<![CDATA[
+		select *  from CRM_CUSTOMER_TYPE WHERE IS_DEL = 0
+             Order by SORTNO ASC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取现有客户类型数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmCustomerType"
+		resultMap="CrmCustomerTypeResult">
+		<![CDATA[
+		select *  from CRM_CUSTOMER_TYPE WHERE IS_DEL = 0
+             Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取要移动的客户类型对象 -->
+	<select id="getNeedMoveCrmCustomerType"
+		resultMap="CrmCustomerTypeResult" parameterClass="java.util.Map">
+		select *  from CRM_CUSTOMER_TYPE WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmCustomerIndustrySQL">
+	<typeAlias alias="CrmCustomerIndustry" 	type="com.banger.mobile.domain.model.system.CrmCustomerIndustry" />
+
+	<!-- 行业类型表-->
+	<!-- CrmCustomerIndustrySQL信息全字段 -->
+	<resultMap class="CrmCustomerIndustry" id="CrmCustomerIndustryResult">
+		<result column="CUSTOMER_INDUSTRY_ID" property="customerIndustryId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CUSTOMER_INDUSTRY_NAME" property="customerIndustryName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种行业类型-->
+	<insert id="addCrmCustomerIndustry" parameterClass="CrmCustomerIndustry">
+		<![CDATA[
+		INSERT INTO CRM_CUSTOMER_INDUSTRY
+    	(
+        CUSTOMER_INDUSTRY_ID,
+        IS_DEL,
+        CUSTOMER_INDUSTRY_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #customerIndustryId#,
+        #isDel#,
+        #customerIndustryName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="customerIndustryId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_CUSTOMER_INDUSTRY
+		</selectKey>
+	</insert>
+
+
+	<!-- 行业类型修改-->
+	<update id="updateCrmCustomerIndustry"
+		parameterClass="CrmCustomerIndustry">
+		UPDATE CRM_CUSTOMER_INDUSTRY SET IS_DEL = #isDel#,
+		CUSTOMER_INDUSTRY_NAME = #customerIndustryName#, SORTNO = #sortNo#,
+		IS_ACTIVED = #isActived#, CREATE_DATE = #createDate#,
+		UPDATE_DATE =
+		<![CDATA[current timestamp]]>, CREATE_USER = #createUser#, UPDATE_USER = #updateUser# where
+		CUSTOMER_INDUSTRY_ID= #customerIndustryId#
+	</update>
+
+	<!-- 根据ID删除行业类型 -->
+	<update id="deleteCrmCustomerIndustryById"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_CUSTOMER_INDUSTRY SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where CUSTOMER_INDUSTRY_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到行业类型 -->
+	<select id="getCrmCustomerIndustryById"
+		resultMap="CrmCustomerIndustryResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_CUSTOMER_INDUSTRY where CUSTOMER_INDUSTRY_ID=#id# 
+	]]>
+	</select>
+	
+		<!-- 根据行业名得到行业类型 -->
+	<select id="getCrmCustomerIndustryByName"
+		resultMap="CrmCustomerIndustryResult"
+		parameterClass="java.lang.String">
+		<![CDATA[
+		select * from CRM_CUSTOMER_INDUSTRY where CUSTOMER_INDUSTRY_NAME=#name# 
+	]]>
+	</select>
+	
+	<!-- 根据行业类型名称获取相同行业类型名称的数据 -->
+	<select id="getSameCrmCustomerIndustryByName"
+		resultMap="CrmCustomerIndustryResult"
+		parameterClass="CrmCustomerIndustry">
+		<![CDATA[
+		select * from CRM_CUSTOMER_INDUSTRY where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="customerIndustryId">
+     		<isNotEqual prepend="and" property="customerIndustryId" compareValue="0">
+			<![CDATA[CUSTOMER_INDUSTRY_ID != #customerIndustryId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerIndustryName">
+			<![CDATA[CUSTOMER_INDUSTRY_NAME = #customerIndustryName#]]>
+		</isNotEmpty>
+	
+	</select>
+
+	<!-- 获取行业类型列表 -->
+	<select id="getAllCrmCustomerIndustry"
+		resultMap="CrmCustomerIndustryResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_CUSTOMER_INDUSTRY WHERE IS_DEL = 0
+             Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 获取现有行业类型数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmCustomerIndustry"
+		resultMap="CrmCustomerIndustryResult">
+		<![CDATA[
+		select *  from CRM_CUSTOMER_INDUSTRY WHERE IS_DEL = 0
+             Order by SORTNO ASC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取现有行业类型数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmCustomerIndustry"
+		resultMap="CrmCustomerIndustryResult">
+		<![CDATA[
+		select *  from CRM_CUSTOMER_INDUSTRY WHERE IS_DEL = 0
+             Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取要移动的行业类型对象 -->
+	<select id="getNeedMoveCrmCustomerIndustry"
+		resultMap="CrmCustomerIndustryResult" parameterClass="java.util.Map">
+		select *  from CRM_CUSTOMER_INDUSTRY WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

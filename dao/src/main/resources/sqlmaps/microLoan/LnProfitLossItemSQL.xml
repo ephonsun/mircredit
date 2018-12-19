@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="LnProfitLossItemSQL" >
+  <resultMap id="lnProfitLossItemResult" class="com.banger.mobile.domain.model.loan.LnProfitLossItem" >
+  <!--  <result column="ID" property="profitLossId" jdbcType="INTEGER" />-->
+    <result column="ITEM_ID" property="itemId" jdbcType="INTEGER" />
+    <result column="LOAN_ID" property="loanId" jdbcType="INTEGER" />
+    <result column="ITEM_NAME" property="itemName" jdbcType="VARCHAR" />
+    <result column="LAST_YEAR_AMOUNT" property="lastYearAmount" jdbcType="DECIMAL" />
+    <result column="CURR_YEAR_AMOUNT" property="currYearAmount" jdbcType="DECIMAL" />
+    <result column="TOTAL_AMOUNT" property="totalAmount" jdbcType="DECIMAL" />
+    <result column="AVERAGE_AMOUNT" property="averageAmount" jdbcType="DECIMAL" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="TYPE" property="type" jdbcType="VARCHAR" />
+    <result column="CREATE_USER" property="createUser" jdbcType="INTEGER" />
+    <result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="UPDATE_USER" property="updateUser" jdbcType="INTEGER" />
+    <result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+    <!--<resultMap id="itemIdList" class="java.lang.Integer">-->
+        <!--<result column="ITEM_ID" property="itemId" jdbcType="INTEGER" />-->
+    <!--</resultMap>-->
+
+  <select id="selectItemListByType" resultMap="lnProfitLossItemResult" parameterClass="java.util.Map">
+    
+    select * from LN_PROFIT_LOSS_ITEM WHERE LOAN_ID = #loanId# AND TYPE = #type#
+
+  </select>
+
+
+    <select id="selectOneItemById" resultMap="lnProfitLossItemResult" parameterClass="java.lang.Integer" >
+
+        select * from LN_PROFIT_LOSS_ITEM WHERE ITEM_ID = #itemId:INTEGER#
+
+    </select>
+    <!--<select id="selectAllItemId" resultMap="itemIdList" parameterMap="java.lang.Integer" >-->
+
+        <!--select ITEM_ID from LN_PROFIT_LOSS_ITEM WHERE LOAN_ID = #loanId:INTEGER#;-->
+
+    <!--</select>-->
+ 
+  <delete id="deleteLnProfitLossItem" parameterClass="java.lang.Integer" >
+    delete from LN_PROFIT_LOSS_ITEM
+    where ITEM_ID = #itemId:INTEGER#
+  </delete>
+
+    <delete id="deleteLnProfitLossItems" parameterClass="java.lang.Integer" >
+        delete from LN_PROFIT_LOSS_ITEM
+        where LOAN_ID = #loanId:INTEGER#
+    </delete>
+
+
+  <insert id="insertLnProfitLossItem" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossItem" >
+    insert into
+    LN_PROFIT_LOSS_ITEM
+    (
+        ITEM_ID,
+        LOAN_ID,
+        ITEM_NAME,
+        LAST_YEAR_AMOUNT,
+        CURR_YEAR_AMOUNT,
+        TOTAL_AMOUNT,
+        AVERAGE_AMOUNT,
+        REMARK,
+        TYPE,
+        CREATE_USER,
+        CREATE_DATE,
+        UPDATE_USER,
+        UPDATE_DATE)
+    values
+    (
+      #itemId:INTEGER#,
+      #loanId:INTEGER#,
+      #itemName:VARCHAR#,
+      #lastYearAmount:DECIMAL#,
+      #currYearAmount:DECIMAL#,
+      #totalAmount:DECIMAL#,
+      #averageAmount:DECIMAL#,
+      #remark:VARCHAR#,
+      #type:VARCHAR#,
+      #createUser:INTEGER#,
+      #createDate:TIMESTAMP#,
+      #updateUser:INTEGER#,
+      #updateDate:TIMESTAMP#
+      )
+      <selectKey keyProperty="itemId"
+                 resultClass="java.lang.Integer" type="pre">
+          values NEXTVAL for SEQ_LN_PROFIT_LOSS_ITEM
+      </selectKey>
+  </insert>
+  <update id="updateLnProfitLossItem" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossItem" >
+    update LN_PROFIT_LOSS_ITEM
+    set  ITEM_ID = #itemId#
+      <isNotEmpty property="itemName" prepend=",">
+          ITEM_NAME = #itemName#
+      </isNotEmpty>
+      <isNotEmpty property="totalAmount" prepend=",">
+          TOTAL_AMOUNT = #totalAmount#
+      </isNotEmpty>
+      <isNotEmpty property="averageAmount" prepend=",">
+          AVERAGE_AMOUNT = #averageAmount#
+      </isNotEmpty>
+      <isNotEmpty property="lastYearAmount" prepend=",">
+          LAST_YEAR_AMOUNT = #lastYearAmount#
+      </isNotEmpty>
+      <isNotEmpty property="currYearAmount" prepend=",">
+          CURR_YEAR_AMOUNT = #currYearAmount#
+      </isNotEmpty>
+      <isNotEmpty property="remark" prepend=",">
+          REMARK = #remark#
+      </isNotEmpty>
+      <isNotEmpty property="createUser" prepend=",">
+          CREATE_USER = #createUser#
+      </isNotEmpty>
+      <isNotEmpty property="createDate" prepend=",">
+          CREATE_DATE = #createDate#
+      </isNotEmpty>
+      <isNotEmpty property="updateUser" prepend=",">
+          UPDATE_USER = #updateUser#
+      </isNotEmpty>
+      <isNotEmpty property="updateDate" prepend=",">
+          UPDATE_DATE = #updateDate#
+      </isNotEmpty>
+     where ITEM_ID = #itemId:INTEGER#
+  </update>
+
+    <select id="sumProfitLossItemByType" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+        select sum(TOTAL_AMOUNT) from LN_PROFIT_LOSS_ITEM where LOAN_ID=#loanId# AND TYPE=#type#
+    </select>
+
+</sqlMap>

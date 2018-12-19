@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtNoticeSQL">
+	<typeAlias alias="PdtNotice"
+		type="com.banger.mobile.domain.model.microProduct.PdtNotice" />
+
+	<!-- 通知SQL-->
+	<resultMap class="PdtNotice" id="PdtNoticeResult">
+		<result column="NOTICE_ID" property="noticeId" />
+		<result column="NOTICE_NO" property="noticeNo" />
+		<result column="NOTICE_NAME" property="noticeName" />
+		<result column="NOTICE_UPDATE_DATE" property="noticeUpdateDate" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_TYPE" property="fileType" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 修改-->
+	<update id="editPdtNotice" parameterClass="PdtNotice">
+		<![CDATA[	
+		UPDATE
+		   PDT_MICRO_NOTICE
+		SET 
+	        NOTICE_NO = #noticeNo#,
+	        NOTICE_NAME = #noticeName#,
+	        NOTICE_UPDATE_DATE = #noticeUpdateDate#,
+	        FILE_NAME = #fileName#,
+	        FILE_PATH = #filePath#,
+	        FILE_TYPE = #fileType#,
+		    UPDATE_DATE =  current timestamp, 
+		    UPDATE_USER = #updateUser#  
+		WHERE 
+		  NOTICE_ID = #noticeId#
+		  ]]>
+	</update>
+
+	<!-- 查询单个通知数据 -->
+	<select id="getPdtNoticeById" resultMap="PdtNoticeResult" parameterClass="int">
+		SELECT * FROM PDT_MICRO_NOTICE WHERE NOTICE_ID = #noticeId#
+	</select>
+	
+	<!-- 查询通知（分页查询） -->
+	<select id="getPdtNoticePageByConds" resultMap="PdtNoticeResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+			SELECT A.*,B.IS_READ FROM PDT_MICRO_NOTICE AS A 
+				LEFT JOIN (SELECT * FROM PDT_MICRO_NOTICE_USER WHERE USER_ID = #userId#) AS B ON A.NOTICE_ID = B.NOTICE_ID
+			WHERE 1=1
+			<isNotEmpty prepend="and" property="noticeName">
+				<![CDATA[A.NOTICE_NAME LIKE '%$noticeName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isRead">
+				<isEqual prepend="" property="isRead" compareValue="0" >
+					<![CDATA[((B.IS_READ = #isRead#) OR (B.IS_READ IS NULL))]]>
+				</isEqual>
+				<isEqual prepend="" property="isRead" compareValue="1" >
+					<![CDATA[B.IS_READ = #isRead#]]>
+				</isEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createStartDate">
+					<![CDATA[A.NOTICE_UPDATE_DATE >= #createStartDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createEndDate">
+					<![CDATA[A.NOTICE_UPDATE_DATE <= #createEndDate# ]]>
+			</isNotEmpty>
+			ORDER BY A.NOTICE_UPDATE_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询通知（分页求和） -->
+	<select id="getPdtNoticePageCountByConds" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		SELECT COUNT(0) FROM PDT_MICRO_NOTICE AS A
+				LEFT JOIN (SELECT * FROM PDT_MICRO_NOTICE_USER WHERE USER_ID = #userId#) AS B ON A.NOTICE_ID = B.NOTICE_ID
+			WHERE 1=1
+			<isNotEmpty prepend="and" property="noticeName">
+				<![CDATA[A.NOTICE_NAME LIKE '%$noticeName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isRead">
+				<isEqual prepend="" property="isRead" compareValue="0" >
+					<![CDATA[((B.IS_READ = #isRead#) OR (B.IS_READ IS NULL))]]>
+				</isEqual>
+				<isEqual prepend="" property="isRead" compareValue="1" >
+					<![CDATA[B.IS_READ = #isRead#]]>
+				</isEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createStartDate">
+					<![CDATA[A.NOTICE_UPDATE_DATE >= #createStartDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createEndDate">
+					<![CDATA[A.NOTICE_UPDATE_DATE <= #createEndDate# ]]>
+			</isNotEmpty>
+	</select>
+</sqlMap>

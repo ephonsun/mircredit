@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysParamSQL">
+	<typeAlias alias="SysParam" type="com.banger.mobile.domain.model.param.SysParam" />
+	<typeAlias alias="SysParamFlow" type="com.banger.mobile.domain.model.param.SysParamFlow" />
+
+
+	<!-- SysParamFlowSQL信息全字段 -->
+	<resultMap class="SysParamFlow" id="SysParamFlowResult">
+		<result column="PARAM_ID" property="paramId" />
+		<result column="PARAM_KEY" property="paramKey" />
+		<result column="PARAM_VALUE" property="paramValue" />
+	</resultMap>
+	
+	<cacheModel id="sysParamsCache" type="OSCACHE" serialize="true"
+		readOnly="true" >
+		<flushInterval hours="24" />
+		<flushOnExecute statement="updateMaxFlow" />
+		<flushOnExecute statement="updateIsActive" />
+		<flushOnExecute statement="updateIsActiveForWeb" />
+		<flushOnExecute statement="updateSysParam" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+	<!-- 设置最大流量 -->
+	<update id="updateMaxFlow" parameterClass="java.lang.Integer">
+		<![CDATA[ 
+				UPDATE SYS_PARAM SET PARAM_VALUE=#paramValue# WHERE PARAM_ID=6 
+		]]>
+	</update>
+	<!-- 设置是否启用限流 -->
+	<update id="updateIsActive" parameterClass="java.lang.Integer">
+		<![CDATA[ 
+				UPDATE SYS_PARAM SET PARAM_VALUE=#paramValue# WHERE PARAM_ID=5 
+		]]>
+	</update>
+	<update id="updateIsActiveForWeb" parameterClass="java.lang.Integer">
+		<![CDATA[ 
+				UPDATE SYS_PARAM SET PARAM_VALUE=#paramValue# WHERE PARAM_ID=19 
+		]]>
+	</update>
+	<!-- 查看流量控制参数 -->
+	<select id="getFlowControlParam" resultMap="SysParamFlowResult" cacheModel="sysParamsCache" >
+		<![CDATA[ 
+			SELECT 
+				a.PARAM_ID,
+				a.PARAM_KEY,
+				a.PARAM_VALUE
+			FROM 
+				SYS_PARAM a
+			WHERE 
+			    a.PARAM_ID IN( 5 ,6 ,19) 
+	    ]]>
+	</select>
+	
+	<!-- 获取系统设置信息 -->
+	<select id="getSysParam" resultMap="SysParamFlowResult" cacheModel="sysParamsCache" >
+	<![CDATA[ 
+			SELECT 
+				a.PARAM_ID,
+				a.PARAM_KEY,
+				a.PARAM_VALUE
+			FROM 
+				SYS_PARAM a
+	    ]]>
+	</select>
+	
+	<!-- 修改系统设置 -->
+	<update id="updateSysParam" parameterClass="java.util.Map">
+		<![CDATA[ 
+			UPDATE SYS_PARAM SET PARAM_VALUE=#paramValue# WHERE PARAM_KEY=#paramKey#
+	    ]]>
+	</update>
+	
+	<!-- 查询不被权限拦截的action -->
+	<select id="getExcludeActions" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'EXCLUDEACTION'
+	    ]]>
+	</select>
+		
+	<!-- 获取录音系统存放位置 -->
+	<select id="getRecordPath" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'RECORD_PATH'
+	    ]]>
+	</select>
+	
+	<!-- 获取录音存储预警值 -->
+	<select id="getCueSize" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'RECORD_CUE_SIZE'
+	    ]]>
+	</select>
+	
+	<!-- 获取录音存储预警值 -->
+	<select id="getMaxAppLoanMoney" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'MAX_APP_LOAN_MONEY'
+	    ]]>
+	</select>
+	
+	<select id="getXFDDoubleApprovalTag" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'DOUBLE_APPROVAL_XFD_TAG'
+	    ]]>
+	</select>
+	
+	<select id="getXFDDoubleApprovalValue" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'DOUBLE_APPROVAL_XFD_VALUE'
+	    ]]>
+	</select>
+	
+	<select id="getJYDDoubleApprovalTag" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'DOUBLE_APPROVAL_JYD_TAG'
+	    ]]>
+	</select>
+
+	<select id="getJYDDoubleApprovalValue" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'DOUBLE_APPROVAL_JYD_VALUE'
+	    ]]>
+	</select>
+
+    
+	<!-- 获取录音存储预警值 -->
+	<select id="getMaxDunLoanTime" resultClass="java.lang.String">
+		<![CDATA[ 
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'MAX_DUN_LOAN_TIME'
+	    ]]>
+	</select>
+
+	<!-- 获取录音存储预警值 -->
+	<select id="getParamValueByKey" resultClass="java.lang.String" parameterClass="java.lang.String">
+		<![CDATA[
+			SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = #key#
+	    ]]>
+	</select>
+</sqlMap>
+
+
+
+

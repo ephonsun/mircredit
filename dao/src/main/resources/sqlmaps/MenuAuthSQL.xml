@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MenuAuthSQL">
+    <typeAlias alias="MenuAuthBean" type="com.banger.mobile.domain.model.menuAuth.MenuAuthBean"/>
+    <typeAlias alias="SysMenu" type="com.banger.mobile.domain.model.menuAuth.SysMenu"/>
+    <typeAlias alias="SysMenuAuth" type="com.banger.mobile.domain.model.menuAuth.SysMenuAuth"/>
+
+    <!-- 菜单权限树 -->
+    <resultMap class="MenuAuthBean" id="MenuAuthBeanResult">
+        <result column="MENU_ID" property="menuId"/>
+        <result column="MENU_PARENT_ID" property="menuParentId"/>
+        <result column="MENU_NAME" property="menuName"/>
+        <result column="TYPE" property="type"/>
+        <result column="URL" property="url"/>
+    </resultMap>
+
+    <!-- 菜单表 -->
+    <resultMap class="SysMenu" id="SysMenuResult">
+        <result column="MENU_ID" property="menuId"/>
+        <result column="MENU_CODE" property="menuCode"/>
+        <result column="MENU_NAME" property="menuName"/>
+        <result column="MENU_PARENT_ID" property="menuParentId"/>
+        <result column="URL" property="url"/>
+        <result column="IS_LEAF" property="isLeaf"/>
+        <result column="SORTNO" property="sortno"/>
+        <result column="ICON" property="icon"/>
+        <result column="REMARK" property="remark"/>
+        <result column="IS_DEL" property="isDel"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+    </resultMap>
+
+    <!-- 菜单权限角色表 -->
+    <resultMap class="SysMenuAuth" id="SysMenuAuthResult">
+        <result column="MENU_AUTH_ID" property="menuAuthId"/>
+        <result column="ROLE_ID" property="roleId"/>
+        <result column="MENU_ID" property="menuId"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+    </resultMap>
+
+    <!-- 新增角色功能权限 -->
+    <insert id="addMenuAuth" parameterClass="SysMenuAuth">
+        <![CDATA[
+ 		insert into SYS_MENU_AUTH
+ 		(
+ 			MENU_AUTH_ID,
+			ROLE_ID,
+			MENU_ID,
+			CREATE_DATE,
+			CREATE_USER
+ 		)
+ 		values
+ 		(
+ 			#menuAuthId#,
+			#roleId#,
+			#menuId#,
+			current timestamp,
+			#createUser#
+ 		)
+ 	]]>
+        <selectKey keyProperty="menuAuthId" resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_SYS_MENU_AUTH
+        </selectKey>
+    </insert>
+    <!-- 查询相应的菜单 -->
+    <select id="getMenuList" resultMap="SysMenuResult" parameterClass="java.lang.String">
+		<![CDATA[
+			select * from SYS_MENU where MENU_ID in ($value$) order by MENU_PARENT_ID,SORTNO
+        ]]>
+	</select>
+    <!-- 根据角色查询菜单权限 -->
+    <select id="getMenuAuthByRoleId" resultMap="SysMenuAuthResult" parameterClass="java.lang.Integer">
+	  	<![CDATA[
+
+			select * from SYS_MENU_AUTH where ROLE_ID= #roleId#
+
+        ]]>
+  	</select>
+
+    <!--根据menuId删除角色菜单权限  -->
+    <delete id="deleteMenuAuthByMenuId" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_MENU_AUTH where MENU_AUTH_ID = #menuAuthId#
+  	]]>
+  </delete>
+    <!-- 查询菜单权限树 -->
+    <select id="getMenuAuthTree" resultMap="MenuAuthBeanResult">
+  	<![CDATA[
+
+  		select MENU_ID,MENU_PARENT_ID,MENU_NAME,'MENU' as TYPE,URL from SYS_MENU where  IS_DEL<>1
+
+        ]]>
+  </select>
+
+    <!-- 查询菜单权限树 -->
+    <!--select MENU_ID,MENU_PARENT_ID,MENU_NAME,'MENU' as TYPE,URL from SYS_MENU  where MENU_ID<>10 and MENU_PARENT_ID<>10 and IS_DEL<>1-->
+    <select id="getRoleMenuAuthTree" resultMap="MenuAuthBeanResult">
+  	<![CDATA[
+  			select MENU_ID,MENU_PARENT_ID,MENU_NAME,'MENU' as TYPE,URL from SYS_MENU  where  IS_DEL<>1
+        ]]>
+  </select>
+
+
+
+    <!-- 查看角色对应的菜单权限 -->
+  <select id="getDetailMenuByRoleId" resultMap="MenuAuthBeanResult" parameterClass="java.lang.Integer">
+     <![CDATA[
+      select  m.MENU_ID,m.MENU_PARENT_ID,m.MENU_NAME,'MENU' as TYPE,m.URL
+      from SYS_MENU as m,SYS_MENU_AUTH as ma where m.MENU_ID=ma.MENU_ID and ma.ROLE_ID=#roleId#
+     ]]>
+  </select>
+
+</sqlMap>

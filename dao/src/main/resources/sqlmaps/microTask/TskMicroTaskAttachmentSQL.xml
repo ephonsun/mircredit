@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMicroTaskAttachmentSQL">
+	<typeAlias alias="TskMicroTaskAttachment"
+		type="com.banger.mobile.domain.model.microTask.TskMicroTaskAttachment" />
+	<!-- 任务附件表-->
+	<resultMap class="TskMicroTaskAttachment" id="TskMicroTaskAttachmentResult">
+		<result column="ATTACHMENT_ID" property="attachmentId" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_NAME_OLD" property="fileNameOld" />
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 添加 -->
+	<insert id="addTskMicroTaskAttachment" parameterClass="TskMicroTaskAttachment">
+		<![CDATA[
+			INSERT INTO TSK_MICRO_TASK_ATTACHMENT
+			(
+				ATTACHMENT_ID,
+				TASK_ID,
+				FILE_PATH,
+				FILE_NAME,
+				FILE_NAME_OLD,
+				FILE_SIZE,
+				UPLOAD_DATE,
+				CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+			)
+			VALUES
+			(
+				#attachmentId#,
+				#taskId#,
+				#filePath#,
+				#fileName#,
+				#fileNameOld#,
+				#fileSize#,
+				current timestamp,
+				current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="attachmentId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_MICRO_TASK_ATTACHMENT
+		</selectKey>
+	</insert>
+	
+	<!-- 删除  -->
+	<delete id="delTskMicroTaskAttachmentByConds" parameterClass="java.util.Map">
+			DELETE FROM TSK_MICRO_TASK_ATTACHMENT WHERE 1=1
+			<isNotEmpty prepend="and" property="attachmentId">
+				<![CDATA[ATTACHMENT_ID = #attachmentId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskId">
+				<![CDATA[TASK_ID = #taskId#]]>
+			</isNotEmpty>
+	</delete>
+	
+	<!-- 查询所有任务附件 -->
+	<select id="getAllTskMicroTaskAttachmentByConds" resultMap="TskMicroTaskAttachmentResult" parameterClass="java.util.Map">
+		SELECT * FROM TSK_MICRO_TASK_ATTACHMENT WHERE 1=1
+		<isNotEmpty prepend="and" property="attachmentId">
+			<![CDATA[ATTACHMENT_ID = #attachmentId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskId">
+			<![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

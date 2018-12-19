@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="JfMyCustomerSQL">
+	<typeAlias alias="JfMyCustomer" type="com.banger.mobile.domain.model.points.JfMyCustomer" />
+
+	<!-- 积分商城客户 -->
+    <resultMap class="JfMyCustomer" id="JfMyCustomerResult">
+		<result column="CUS_ID" property="cusId" />
+		<result column="CUSTOMER_CODE" property="customerCode" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="BELONG_TO_DEPT" property="belongToDept" />
+        <result column="ID_CARD" property="idCard" />
+        <result column="PHONE_NUMBER1" property="phoneNumber1" />
+        <result column="AUM_VALUE" property="aumValue" />
+        <result column="USER_ID" property="userId"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+	</resultMap>
+	
+
+  <!-- 查询积分商城客户 -->
+  <select id="searchMyCustomer" resultMap="JfMyCustomerResult"  parameterClass="java.util.Map">
+  <isNotEmpty property="startRow">
+      <isNotEmpty property="endRow">
+          <![CDATA[SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   ( ]]>
+      </isNotEmpty>
+  </isNotEmpty>
+  	<![CDATA[
+  		select CUS_ID, CUSTOMER_CODE,CUSTOMER_NAME ,BELONG_TO_DEPT,BELONG_TO_DEPT,ID_CARD ,PHONE_NUMBER1,AUM_VALUE,USER_ID ,UPDATE_DATE
+  		from JF_MY_CUSTOMER
+  		where  USER_ID=#userId#
+  	]]>
+      <isNotEmpty prepend="and" property="input">
+          <![CDATA[( CUSTOMER_NAME like '%$input$%'or ID_CARD like'%$input$%'  or PHONE_NUMBER1 like '%$input$%') ]]>
+      </isNotEmpty>
+      <isNotEmpty property="startRow">
+          <isNotEmpty property="endRow">
+              <![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+          </isNotEmpty>
+      </isNotEmpty>
+  </select>
+
+    <!-- 查询积分商城客户 -->
+    <select id="searchMyCustomerCount"  resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        <![CDATA[
+  		select count(0) from JF_MY_CUSTOMER where  USER_ID=#userId#
+        ]]>
+        <isNotEmpty prepend="and" property="input">
+            <![CDATA[( CUSTOMER_NAME like '%$input$%'or ID_CARD like'%$input$%'  or PHONE_NUMBER1 like '%$input$%') ]]>
+        </isNotEmpty>
+    </select>
+
+
+
+    <!-- 根据客户编码取积分客户 -->
+    <select id="getMyCustomerByCustomerCode" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        <![CDATA[
+  		select count(*) from JF_MY_CUSTOMER where   USER_ID=#userId#
+         ]]>
+        <isNotEmpty prepend="and" property="customerCode">
+            <![CDATA[  CUSTOMER_CODE=#customerCode#  ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="idCard">
+            <![CDATA[  ID_CARD=#idCard#  ]]>
+        </isNotEmpty>
+    </select>
+
+  
+   <!-- 添加积分商城客户 -->
+  <insert id="addMyCustomer" parameterClass="JfMyCustomer">
+ 	<![CDATA[
+ 		insert into JF_MY_CUSTOMER
+ 		(
+ 			CUS_ID,
+			CUSTOMER_CODE,
+			CUSTOMER_NAME,
+			BELONG_TO_DEPT,
+			ID_CARD,
+			PHONE_NUMBER1,
+			AUM_VALUE,
+			USER_ID,
+			UPDATE_DATE
+ 		)
+ 		values
+ 		(
+ 			#cusId#,
+ 			#customerCode#,
+ 			#customerName#,
+ 			#belongToDept#,
+			#idCard#,
+			#phoneNumber1#,
+			#aumValue#,
+			#userId#,
+			current timestamp
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="cusId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_JF_MY_CUSTOMER
+ 	</selectKey>
+  </insert>
+   <!--删除积分商城客户  -->
+  <delete id="removeMyCustomer"  parameterClass="java.util.Map">
+  	<![CDATA[
+  		delete from JF_MY_CUSTOMER where CUSTOMER_CODE in ($customerCodeArray$)
+  	]]>
+  </delete>
+</sqlMap>

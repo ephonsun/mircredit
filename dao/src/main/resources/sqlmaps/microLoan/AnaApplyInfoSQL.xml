@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="AnaApplyInfoSQL">
+    <typeAlias alias="AnaApplyInfo" type="com.banger.mobile.domain.model.loan.AnaApplyInfo"/>
+    <typeAlias alias="ApplyAddressInfo" type="com.banger.mobile.domain.model.loan.ApplyAddressInfo"/>
+    <typeAlias alias="AnaChildren" type="com.banger.mobile.domain.model.loan.AnaChildren"/>
+    <!--申请人信息-->
+    <resultMap id="AnaApplyInfoResult" class="AnaApplyInfo">
+        <result property="applyInfoId" column="APPLY_INFO_ID"/>
+        <result property="loanId" column="LOAN_ID"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="idCard" column="ID_CARD"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="nativeProvince" column="NATIVE_PROVINCE"/>
+        <result property="nativeCity" column="NATIVE_CITY"/>
+        <result property="nativeDistrict" column="NATIVE_DISTRICT"/>
+        <result property="nativeAddress" column="NATIVE_ADDRESS"/>
+        <result property="livingProvince" column="LIVING_PROVINCE"/>
+        <result property="livingCity" column="LIVING_CITY"/>
+        <result property="livingDistrict" column="LIVING_DISTRICT"/>
+        <result property="livingAddress" column="LIVING_ADDRESS"/>
+        <result property="company" column="COMPANY"/>
+        <result property="job" column="JOB"/>
+        <result property="companyPhone" column="COMPANY_PHONE"/>
+        <result property="annualIncoming" column="ANNUAL_INCOMING"/>
+        <result property="familyCount" column="FAMILY_COUNT"/>
+        <result property="familyPhone" column="FAMILY_PHONE"/>
+        <result property="memo" column="MEMO"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+    </resultMap>
+    <!--详细地址-->
+    <resultMap id="ApplyAddressInfoResult" class="ApplyAddressInfo">
+        <result property="proName" column="pro_name"/>
+        <result property="cityName" column="city_name"/>
+        <result property="disName" column="dis_name"/>
+        <result property="proRemark" column="pro_remark"/>
+    </resultMap>
+    <!--家庭成员-->
+    <resultMap id="AnaChildrenResult" class="AnaChildren">
+        <result property="childrenId" column="CHILDREN_ID"/>
+        <result property="applyInfoId" column="APPLY_INFO_ID"/>
+        <result property="childrenInfo" column="CHILDREN_INFO"/>
+        <result property="childrenInfoOther" column="CHILDREN_INFO_OTHER"/>
+    </resultMap>
+
+    <!--添加申请人信息-->
+    <insert id="insertApplyInfo" parameterClass="AnaApplyInfo">
+        INSERT INTO ANA_APPLY_INFO
+        (
+            APPLY_INFO_ID,
+            LOAN_ID,
+            CUSTOMER_NAME,
+            ID_CARD,
+            MOBILE_PHONE,
+            NATIVE_PROVINCE,
+            NATIVE_CITY,
+            NATIVE_DISTRICT,
+            NATIVE_ADDRESS,
+            LIVING_PROVINCE,
+            LIVING_CITY,
+            LIVING_DISTRICT,
+            LIVING_ADDRESS,
+            COMPANY,
+            JOB,
+            COMPANY_PHONE,
+            ANNUAL_INCOMING,
+            FAMILY_COUNT,
+            FAMILY_PHONE,
+            MEMO,
+            UPDATE_DATE
+        )
+        VALUES
+        (
+            #applyInfoId:INTEGER#,
+            #loanId:INTEGER#,
+            #customerName:VARCHAR:NULL#,
+            #idCard:VARCHAR:NULL#,
+            #mobilePhone:VARCHAR:NULL#,
+            #nativeProvince:INTEGER#,
+            #nativeCity:INTEGER#,
+            #nativeDistrict:INTEGER#,
+            #nativeAddress:VARCHAR:NULL#,
+            #livingProvince:INTEGER#,
+            #livingCity:INTEGER#,
+            #livingDistrict:INTEGER#,
+            #livingAddress:VARCHAR:NULL#,
+            #company:VARCHAR:NULL#,
+            #job:VARCHAR:NULL#,
+            #companyPhone:VARCHAR:NULL#,
+            #annualIncoming:DECIMAL#,
+            #familyCount:INTEGER#,
+            #familyPhone:VARCHAR:NULL#,
+            #memo:VARCHAR:NULL#,
+            current timestamp
+        )
+    </insert>
+    
+    <insert id="insertAnaChildren" parameterClass="AnaChildren">
+        INSERT INTO ANA_CHILDREN
+        (
+            CHILDREN_ID,
+            APPLY_INFO_ID,
+            CHILDREN_INFO,
+            CHILDREN_INFO_OTHER
+        )
+        VALUES
+        (
+            #childrenId:INTEGER#,
+            #applyInfoId:INTEGER#,
+            #childrenInfo:VARCHAR:NULL#,
+            #childrenInfoOther:VARCHAR:NULL#
+        )
+        <selectKey keyProperty="childrenId" resultClass="Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_ANA_CHILDREN
+        </selectKey>
+    </insert>
+
+    <select id="getNextApplyInfoId" resultClass="Integer">
+        SELECT NEXTVAL FOR SEQ_ANA_APPLY_INFO FROM SYSIBM.SYSDUMMY1
+    </select>
+
+    <!--查询某贷款的上会分析表的申请人信息-->
+    <select id="selectApplyInfoByLoanId" parameterClass="java.util.Map" resultMap="AnaApplyInfoResult">
+        select * from ANA_APPLY_INFO where loan_id=#loanId#
+    </select>
+    <!--查询具体地址情况-->
+    <select id="selectApplyAddressInfoList" parameterClass="java.util.Map" resultMap="ApplyAddressInfoResult">
+        select ap.pro_name,ac.city_name,ad.dis_name,ap.pro_remark
+        from ANA_PROVINCE ap
+        left join ANA_city ac on ap.pro_id=ac.pro_id
+        left join ANA_district ad on ac.city_id=ad.city_id
+        where 1=1
+        <isNotEmpty property="proId" prepend="and">
+            ap.pro_id=#proId#
+        </isNotEmpty>
+        <isNotEmpty property="cityId" prepend="and">
+            ac.city_id=#cityId#
+        </isNotEmpty>
+        <isNotEmpty property="disId" prepend="and">
+            ad.distric_id=#disId#
+        </isNotEmpty>
+    </select>
+    <!--查询家庭成员情况-->
+    <select id="selectChildrenInfoList" parameterClass="Integer" resultMap="AnaChildrenResult">
+        select * from ANA_CHILDREN
+        where apply_info_id=#applyInfoId#
+    </select>
+    <!--更新申请人信息-->
+    <update id="updateApplyInfo" parameterClass="AnaApplyInfo">
+        UPDATE ANA_APPLY_INFO SET
+        APPLY_INFO_ID=#applyInfoId:INTEGER#,
+        LOAN_ID=#loanId:INTEGER#,
+        CUSTOMER_NAME=#customerName:VARCHAR:NULL#,
+        ID_CARD=#idCard:VARCHAR:NULL#,
+        MOBILE_PHONE=#mobilePhone:VARCHAR:NULL#,
+        NATIVE_PROVINCE=#nativeProvince:INTEGER#,
+        NATIVE_CITY=#nativeCity:INTEGER#,
+        NATIVE_DISTRICT=#nativeDistrict:INTEGER#,
+        NATIVE_ADDRESS=#nativeAddress:VARCHAR:NULL#,
+        LIVING_PROVINCE=#livingProvince:INTEGER#,
+        LIVING_CITY=#livingCity:INTEGER#,
+        LIVING_DISTRICT=#livingDistrict:INTEGER#,
+        LIVING_ADDRESS=#livingAddress:VARCHAR:NULL#,
+        COMPANY=#company:VARCHAR:NULL#,
+        JOB=#job:VARCHAR:NULL#,
+        COMPANY_PHONE=#companyPhone:VARCHAR:NULL#,
+        ANNUAL_INCOMING=#annualIncoming:DECIMAL#,
+        FAMILY_COUNT=#familyCount:INTEGER#,
+        FAMILY_PHONE=#familyPhone:VARCHAR:NULL#,
+        MEMO=#memo:VARCHAR:NULL#,
+        UPDATE_DATE=current timestamp
+        WHERE APPLY_INFO_ID=#applyInfoId#
+    </update>
+
+    <!--更新家庭成员表-->
+    <update id="updateAnaChildren" parameterClass="AnaChildren">
+        UPDATE ANA_CHILDREN SET
+        CHILDREN_ID=#childrenId:INTEGER#,
+        APPLY_INFO_ID=#applyInfoId:INTEGER#,
+        CHILDREN_INFO=#childrenInfo:VARCHAR:NULL#,
+        CHILDREN_INFO_OTHER=#childrenInfoOther:VARCHAR:NULL#
+        WHERE CHILDREN_ID=#childrenId#
+    </update>
+    <!--删除家庭成员信息-->
+    <delete id="deleteAnaChildren" parameterClass="Integer">
+        DELETE FROM ANA_CHILDREN
+        WHERE APPLY_INFO_ID=#applyInfoId#
+    </delete>
+</sqlMap>

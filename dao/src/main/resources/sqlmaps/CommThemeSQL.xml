@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommThemeSQL">
+	<typeAlias alias="CommTheme"
+		type="com.banger.mobile.domain.model.communication.CommTheme" />
+	<typeAlias alias="ThemePanel"
+		type="com.banger.mobile.domain.model.communication.ThemePanel" />
+
+	<!-- CommThemeSQL信息全字段 -->
+	<resultMap class="CommTheme" id="CommThemeResult">
+		<result column="THEME_ID" property="themeId" />
+		<result column="PARTITION_ID" property="partitionId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="THEME_TYPE" property="themeType" />
+		<result column="THEME_TITLE" property="themeTitle" />
+		<result column="THEME_CONTENT" property="themeContent" />
+		<result column="IS_TOP" property="isTop" />
+		<result column="THEME_TOP_DATE" property="themeTopDate" />
+		<result column="THEME_REPLY_COUNT" property="themeReplyCount" />
+		<result column="THEME_READ_COUNT" property="themeReadCount" />
+		<result column="THEME_COLLECT_COUNT" property="themeCollectCount" />
+		<result column="SELECT_OPTION_COUNT" property="selectOptionCount" />
+		<result column="COUNT_VOTES_DAYS" property="countVotesDays" />
+		<result column="SHOW_OPTION_RESULT" property="showOptionResult" />
+		<result column="SHOW_OPTION_USER" property="showOptionUser" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="LAST_REPLAY_DATE" property="lastReplyDate" />
+		<result column="THEME_USER_COUNT" property="themeUserCount" />
+		<result column="THEME_USER_REPLAY_COUNT" property="themeUserReplayCount" />
+	</resultMap>
+	<!-- 管理面板 -->
+	<resultMap class="ThemePanel" id="ThemePanelResult">
+		<result column="THEME_ID" property="themeId" />
+		<result column="PARTITION_ID" property="partitionId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="THEME_TITLE" property="themeTitle" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="USER_NAME" property="userName" />
+		<result column="LAST_REPLAY_DATE" property="lastReplayDate" />
+		<result column="COLLECT_DATE" property="collectDate" />
+		<result column="TEMPLATE_USER_ID" property="templateUserId"/>
+		<result column="THEME_TYPE" property="themeType" />
+	</resultMap>
+	
+	<!-- 交流区分页count -->
+	<select id="GetCommThemeCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(0) FROM COMM_THEME AS THEME 
+			WHERE THEME.IS_TOP=0 AND THEME.IS_DEL=0 AND THEME.PARTITION_ID=$partitionId$ AND THEME.TEMPLATE_ID=$templateId$ 
+		]]>
+		<isNotEmpty property="themeTitle">
+			<![CDATA[
+				AND THEME.THEME_TITLE LIKE '%$themeTitle$%' 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeType">
+			<![CDATA[
+				AND THEME.THEME_TYPE=$themeType$  
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="sDate">
+			<![CDATA[
+				AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')>='$sDate$' AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')<='$eDate$' 
+			]]>
+		</isNotEmpty>
+	</select>
+	<!-- 交流区分页 -->
+	<select id="GetCommThemePageMap" resultMap="CommThemeResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT 
+			(
+			    SELECT MAX(CREATE_DATE) FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND  THEME_ID=THEME.THEME_ID 
+			) AS LAST_REPLAY_DATE,0 AS THEME_USER_COUNT,0 AS THEME_USER_REPLAY_COUNT,
+			USERS.USER_NAME,'' AS DEPT_NAME,THEME.* FROM COMM_THEME AS THEME 
+			LEFT JOIN SYS_USER AS USERS ON USERS.USER_ID=THEME.CREATE_USER 
+			WHERE THEME.IS_TOP=0 AND THEME.IS_DEL=0 AND THEME.PARTITION_ID=$partitionId$ AND THEME.TEMPLATE_ID=$templateId$ 
+		]]>
+		<isNotEmpty property="themeTitle">
+			<![CDATA[
+				AND THEME.THEME_TITLE LIKE '%$themeTitle$%' 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeType">
+			<![CDATA[
+				AND THEME.THEME_TYPE=$themeType$  
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="sDate">
+			<![CDATA[
+				AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')>='$sDate$' AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')<='$eDate$' 
+			]]>
+		</isNotEmpty>
+		ORDER BY THEME.CREATE_DATE DESC 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询置顶的主题总数 -->
+	<select id="GetTopCommThemeCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(0) FROM COMM_THEME AS THEME 
+			WHERE THEME.IS_TOP=1 AND THEME.IS_DEL=0 AND THEME.PARTITION_ID=$partitionId$ AND THEME.TEMPLATE_ID=$templateId$ 
+		]]>
+		<isNotEmpty property="themeTitle">
+			<![CDATA[
+				AND THEME.THEME_TITLE LIKE '%$themeTitle$%' 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeType">
+			<![CDATA[
+				AND THEME.THEME_TYPE=$themeType$  
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="sDate">
+			<![CDATA[
+				AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')>='$sDate$' AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')<='$eDate$' 
+			]]>
+		</isNotEmpty>
+	</select>
+	<!-- 查询置顶的主题(最多显示5条) -->
+	<select id="GetTopCommThemeList" resultMap="CommThemeResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT 
+			(
+			    SELECT MAX(CREATE_DATE) FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND THEME_ID=THEME.THEME_ID 
+			) AS LAST_REPLAY_DATE,0 AS THEME_USER_COUNT,0 AS THEME_USER_REPLAY_COUNT,
+			USERS.USER_NAME,'' AS DEPT_NAME,THEME.* FROM COMM_THEME AS THEME 
+			LEFT JOIN SYS_USER AS USERS ON USERS.USER_ID=THEME.CREATE_USER 
+			WHERE THEME.IS_TOP=1 AND THEME.IS_DEL=0 AND THEME.PARTITION_ID=$partitionId$ AND THEME.TEMPLATE_ID=$templateId$ 
+		]]>
+		<isNotEmpty property="themeTitle">
+			<![CDATA[
+				AND THEME.THEME_TITLE LIKE '%$themeTitle$%' 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeType">
+			<![CDATA[
+				AND THEME.THEME_TYPE=$themeType$  
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="sDate">
+			<![CDATA[
+				AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')>='$sDate$' AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')<='$eDate$' 
+			]]>
+		</isNotEmpty>
+		ORDER BY THEME.CREATE_DATE DESC fetch first 5 rows only 
+	</select>
+	
+	<!-- 发表主题 -->
+	<insert id="InsertCommTheme" parameterClass="CommTheme">
+		<![CDATA[ 
+			insert into COMM_THEME 
+			(
+				THEME_ID, 
+				PARTITION_ID, 
+				TEMPLATE_ID, 
+				THEME_TYPE, 
+				THEME_TITLE, 
+				THEME_CONTENT, 
+				IS_TOP, 
+				THEME_REPLY_COUNT, 
+				THEME_READ_COUNT, 
+				THEME_COLLECT_COUNT, 
+				SELECT_OPTION_COUNT, 
+				COUNT_VOTES_DAYS, 
+				SHOW_OPTION_RESULT, 
+				SHOW_OPTION_USER, 
+				IS_DEL, 
+				CREATE_DATE, 
+				CREATE_USER
+			) values 
+			(
+				$themeId$,
+				#partitionId#,
+				#templateId#, 
+				#themeType#, 
+				#themeTitle#, 
+				#themeContent:VARCHAR#, 
+				0,
+				0,
+				0,
+				0,
+				#selectOptionCount:INTEGER#,
+				#countVotesDays:INTEGER#,
+				#showOptionResult:INTEGER#,
+				#showOptionUser:INTEGER#, 
+				0,
+				current timestamp,
+				#createUser#
+			 )
+	    ]]>
+	    <selectKey keyProperty="themeId" resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_COMM_THEME
+		</selectKey>
+	</insert>
+	
+	<!-- 查询用户的某一分区主题COUNT -->
+	<select id="GetUserThemeCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(0) FROM COMM_THEME WHERE PARTITION_ID=$partitionId$ AND IS_DEL=0 
+			AND TEMPLATE_ID IN(SELECT TEMPLATE_ID FROM COMM_TEMPLATE WHERE PARTITION_ID=$partitionId$ AND IS_DEL=0) 
+		]]>
+		<isNotEmpty property="userId">
+			<![CDATA[
+				AND CREATE_USER=$userId$ 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="createDate">
+			<![CDATA[
+				AND TEMPLATE_ID=$templateId$ AND '$createDate$'=TO_CHAR(CREATE_DATE,'yyyy-MM-dd') 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeType">
+			<![CDATA[
+				AND THEME_TYPE=$themeType$ 
+			]]>
+		</isNotEmpty>
+	</select>
+	<!-- 统计用户的某一分区的COUNT -->
+	<select id="GetUserPartitionCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(REL.RELATION_ID) FROM COMM_USER_RELATION AS REL 
+			LEFT JOIN COMM_THEME AS THEME ON REL.COMM_ID=THEME.THEME_ID 
+			WHERE THEME.PARTITION_ID=$partitionId$ AND THEME.IS_DEL=0 
+			AND REL.USER_ID=$userId$ AND REL.IS_COLLECT=1
+		]]>
+	</select>
+	<!-- 统计用户的某一分区帖子COUNT -->
+	<select id="GetUserReplyCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(*) FROM (
+			SELECT REP.THEME_ID FROM COMM_THEME_REPLY AS REP 
+			LEFT JOIN COMM_THEME  AS THEME ON REP.THEME_ID=THEME.THEME_ID AND REP.IS_DEL=0 
+			WHERE THEME.PARTITION_ID=$partitionId$ AND THEME.IS_DEL=0 
+		]]>
+		<isNotEmpty property="userId">
+			<![CDATA[
+				AND REP.CREATE_USER=$userId$ 
+			]]>
+		</isNotEmpty>
+		 GROUP BY REP.THEME_ID)
+	</select>
+	
+	<!-- 查看帖子内容 -->
+	<select id="GetCommThemeById" parameterClass="java.lang.Integer" resultMap="CommThemeResult">
+		<![CDATA[
+			SELECT 
+			(
+			    SELECT COUNT(0) FROM COMM_THEME WHERE IS_DEL=0 AND CREATE_USER=THEME.CREATE_USER 
+			) AS THEME_USER_COUNT,
+			(
+			    SELECT COUNT(0) FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND CREATE_USER=THEME.CREATE_USER
+			) AS THEME_USER_REPLAY_COUNT,
+			USERS.USER_NAME,DEPT.DEPT_NAME,TO_DATE(NULL) AS LAST_REPLAY_DATE,THEME.* FROM COMM_THEME AS THEME 
+			LEFT JOIN SYS_USER AS USERS ON USERS.USER_ID=THEME.CREATE_USER 
+			LEFT JOIN SYS_DEPT AS DEPT ON DEPT.DEPT_ID=USERS.DEPT_ID 
+			WHERE THEME.THEME_ID=$themeId$
+		]]>
+	</select>
+	<!-- 修改帖子查看数(查看一次+1) -->
+	<update id="UpdateThemeReadCount" parameterClass="java.lang.Integer">
+		<![CDATA[
+			UPDATE COMM_THEME SET THEME_READ_COUNT=THEME_READ_COUNT+1 WHERE THEME_ID=$themeId$ 
+		]]>
+	</update>
+	
+	<!-- 根据版块ID统计主题数 -->
+	<select id="GetTemplateThemeCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(0) FROM COMM_THEME WHERE TEMPLATE_ID=$templateId$ AND IS_DEL=0
+		]]>
+	</select>
+	
+	<!-- 帖子置顶 -->
+	<update id="ThemeIsTop" parameterClass="CommTheme">
+		<![CDATA[
+			UPDATE COMM_THEME 
+			SET IS_TOP=#isTop#,THEME_TOP_DATE=current timestamp,UPDATE_DATE=current timestamp,UPDATE_USER=$updateUser$ 
+			WHERE THEME_ID=$themeId$ 
+		]]>
+	</update>
+	
+	<!-- 编辑主题 -->
+	<update id="UpdateCommTheme" parameterClass="CommTheme">
+		<![CDATA[
+			UPDATE COMM_THEME 
+			SET THEME_TITLE=#themeTitle#,THEME_CONTENT=#themeContent#,
+		]]>
+		<isNotEmpty property="selectOptionCount">
+			<![CDATA[
+				SELECT_OPTION_COUNT=#selectOptionCount#,
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="countVotesDays">
+			<![CDATA[
+				COUNT_VOTES_DAYS=#countVotesDays#,
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="showOptionResult">
+			<![CDATA[
+				SHOW_OPTION_RESULT=#showOptionResult#,
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="showOptionUser">
+			<![CDATA[
+				SHOW_OPTION_USER=#showOptionUser#,
+			]]>
+		</isNotEmpty>
+		<![CDATA[
+			UPDATE_DATE=current timestamp,UPDATE_USER=$updateUser$ 
+			WHERE THEME_ID=$themeId$ 
+		]]>
+	</update>
+	
+	<!-- 删除主题/投票 -->
+	<update id="DeleteCommTheme" parameterClass="CommTheme">
+		<![CDATA[
+			UPDATE COMM_THEME SET IS_DEL=1,UPDATE_DATE=current timestamp,UPDATE_USER=$updateUser$ 
+			WHERE THEME_ID=$themeId$ 
+		]]>
+	</update>
+	
+	<!-- 修改帖子回复数(新增回复+1，删除回复-1) -->
+	<update id="UpdateThemeReplyCount" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE COMM_THEME 
+		]]>
+		<isNotEmpty property="add">
+			<![CDATA[ SET THEME_REPLY_COUNT=THEME_REPLY_COUNT+1  ]]>
+		</isNotEmpty>
+		<isNotEmpty property="del">
+			<![CDATA[ SET THEME_REPLY_COUNT=THEME_REPLY_COUNT-1  ]]>
+		</isNotEmpty>
+		<![CDATA[
+			WHERE THEME_ID=$themeId$ 
+		]]>
+	</update>
+	
+	<!-- 管理面板、个人主题、个人帖子、个人收藏分页count -->
+	<select id="GetThemePanelCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(THEME.THEME_ID) FROM COMM_THEME AS THEME 
+			LEFT JOIN COMM_TEMPLATE AS TEMP ON TEMP.TEMPLATE_ID=THEME.TEMPLATE_ID 
+			WHERE THEME.IS_DEL=0 
+		]]>
+		<isNotEmpty property="theme">
+			<![CDATA[ AND THEME.CREATE_USER=$userId$ ]]>
+		</isNotEmpty>
+		<![CDATA[ 
+			AND THEME.PARTITION_ID=$partitionId$ 
+			AND THEME.TEMPLATE_ID IN(SELECT TEMPLATE_ID FROM COMM_TEMPLATE WHERE PARTITION_ID=$partitionId$ AND IS_DEL=0) 
+		]]>
+		<isNotEmpty property="templateId">
+			<![CDATA[ AND THEME.TEMPLATE_ID=$templateId$ ]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeTitle">
+			<![CDATA[ AND THEME.THEME_TITLE like '%$themeTitle$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')>='$startDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')<='$endDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="replyTheme">
+			<![CDATA[
+				AND THEME.THEME_ID IN(SELECT DISTINCT THEME_ID FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND CREATE_USER=$userId$)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="relation">
+			<![CDATA[
+				AND THEME.THEME_ID IN(SELECT COMM_ID FROM COMM_USER_RELATION WHERE USER_ID=$userId$ AND IS_COLLECT=1) 
+			]]>
+		</isNotEmpty>
+	</select>
+	<!-- 管理面板、个人主题、个人帖子、个人收藏分页 -->
+	<select id="GetThemePanelPageMap" resultMap="ThemePanelResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT THEME.THEME_ID,THEME.THEME_TYPE,THEME.PARTITION_ID,THEME.TEMPLATE_ID,TEMP.CREATE_USER AS TEMPLATE_USER_ID,THEME_TITLE,USERS.USER_NAME,THEME.CREATE_DATE,TEMP.TEMPLATE_NAME,
+			(
+			    SELECT MAX(CREATE_DATE) FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND  THEME_ID=THEME.THEME_ID 
+			) AS LAST_REPLAY_DATE,
+			(
+			    SELECT COLLECT_DATE FROM COMM_USER_RELATION WHERE COMM_ID=THEME.THEME_ID AND USER_ID=$userId$  AND IS_COLLECT=1 
+			) AS COLLECT_DATE 
+			FROM COMM_THEME AS THEME
+			LEFT JOIN SYS_USER AS USERS ON USERS.USER_ID=THEME.CREATE_USER 
+			LEFT JOIN COMM_TEMPLATE AS TEMP ON TEMP.TEMPLATE_ID=THEME.TEMPLATE_ID
+			WHERE THEME.IS_DEL=0 
+		]]>
+		<isNotEmpty property="theme">
+			<![CDATA[ AND THEME.CREATE_USER=$userId$ ]]>
+		</isNotEmpty>
+		<![CDATA[
+			AND THEME.PARTITION_ID=$partitionId$
+			AND THEME.TEMPLATE_ID IN(SELECT TEMPLATE_ID FROM COMM_TEMPLATE WHERE PARTITION_ID=$partitionId$ AND IS_DEL=0)  
+		]]>
+		<isNotEmpty property="templateId">
+			<![CDATA[ AND THEME.TEMPLATE_ID=$templateId$ ]]>
+		</isNotEmpty>
+		<isNotEmpty property="themeTitle">
+			<![CDATA[ AND THEME.THEME_TITLE like '%$themeTitle$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')>='$startDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND TO_CHAR(THEME.CREATE_DATE,'yyyy-MM-dd')<='$endDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="replyTheme">
+			<![CDATA[
+				AND THEME.THEME_ID IN(SELECT DISTINCT THEME_ID FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND CREATE_USER=$userId$)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="relation">
+			<![CDATA[
+				AND THEME.THEME_ID IN(SELECT COMM_ID FROM COMM_USER_RELATION WHERE USER_ID=$userId$ AND IS_COLLECT=1) 
+			]]>
+		</isNotEmpty>
+		$orderby$ 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 帖子是否被删除 -->
+	<select id="IsThemeDelete" resultClass="java.lang.Integer" parameterClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT COUNT(0) FROM COMM_THEME WHERE THEME_ID=$themeId$ AND IS_DEL=0
+		]]>
+	</select>
+</sqlMap>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysWebFlowControlSQL">
+	<typeAlias alias="SysWebFlowControl" type="com.banger.mobile.domain.model.sysWebFlowControl.SysWebFlowControl" />
+	<typeAlias alias="SysWebFlowControlInfo" type="com.banger.mobile.domain.model.sysWebFlowControl.SysWebFlowControlInfo" />
+
+
+	<!-- SysWebFlowControl信息全字段 -->
+	<resultMap class="SysWebFlowControl" id="SysWebFlowControlResult">
+		<result column="FLOW_CONTROL_ID" property="flowControlId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="IS_ACTIVED" property="isActive" />
+		<result column="MAXBPS" property="maxBps" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+	</resultMap>
+	
+	<resultMap class="SysWebFlowControlInfo" id="SysWebFlowControlInfoResult">
+		<result column="DEPT_ID" property="deptId" />
+		<result column="DEPT_PARENT_ID" property="deptParentId" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="IS_ACTIVED" property="isActive" />
+		<result column="MAXBPS" property="maxBPS" />
+	</resultMap>
+	
+	   <!-- 更新 -->
+	<update id="updateFlowControl" parameterClass="SysWebFlowControl">
+  <![CDATA[
+  	update SYS_WEB_FLOW_CONTROL a
+  		set 
+  			a.IS_ACTIVED=#isActive#,
+  			a.MAXBPS=#maxBps#,
+  			a.UPDATE_DATE=current timestamp
+  		where 
+  			a.DEPT_ID = #deptId#
+  	]]>
+  </update>
+  
+   <!-- 查询 -->
+  <select id="getAllFlowControl"   resultMap="SysWebFlowControlInfoResult">
+  	<![CDATA[
+  		select 
+  			a.DEPT_ID,
+  			b.DEPT_PARENT_ID,
+  			a.IS_ACTIVED,
+  			a.MAXBPS,
+  			b.DEPT_NAME
+  		 from 
+  		 	SYS_WEB_FLOW_CONTROL a
+  		 LEFT JOIN
+  		 	SYS_DEPT b
+  		 ON a.DEPT_ID=b.DEPT_ID
+  		 WHERE 
+  		 	b.IS_DEL=0
+  		 ORDER BY
+  		 	b.DEPT_SEARCH_CODE			
+  	]]>
+  </select>
+  
+  <!-- 查询 -->
+  <select id="getFlowControlByAccount"  resultMap="SysWebFlowControlResult" parameterClass="String">
+  	<![CDATA[
+  		select 
+  			a.*
+  		 from 
+  		 	SYS_WEB_FLOW_CONTROL a
+  		 LEFT JOIN
+  		 	SYS_USER b
+  		 ON a.DEPT_ID=b.DEPT_ID
+  		 WHERE 
+  		 	b.ACCOUNT=#account#		
+  	]]>
+  </select>
+  
+  <!-- 删除 -->
+  <delete id="deleteFlowControl" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete * from SYS_WEB_FLOW_CONTROL where DEPT_ID=#deptId#
+  	]]>
+  </delete>
+	<!-- 增加一条配置-->
+	<insert id="insertFlowControl" parameterClass="SysWebFlowControl">
+     <![CDATA[
+		insert into SYS_WEB_FLOW_CONTROL
+		(
+		 FLOW_CONTROL_ID,
+		 DEPT_ID,
+		 IS_ACTIVED,
+		 MAXBPS,
+		 CREATE_DATE,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#flowControlId#,
+		#deptId#,
+	    #isActive#,
+	    #maxBps#,
+		current timestamp,
+		current timestamp
+		)
+      ]]>
+		<selectKey keyProperty="flowControlId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_WEB_FLOW_CONTROL 
+		</selectKey>
+	</insert>	
+
+</sqlMap>
+
+
+
+

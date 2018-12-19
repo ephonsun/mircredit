@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeKnowledgebaseTypeSQL">
+	<typeAlias alias="FeKnowledgebaseType" type="com.banger.mobile.domain.model.finance.FeKnowledgebaseType" />	
+	
+	<resultMap class="FeKnowledgebaseType" id="FeKnowledgebaseTypeResult">
+		<result column="KNOWLEDGEBASE_TYPE_ID" property="knowledgebaseTypeId" />
+		<result column="PARENT_ID" property="parentId" />
+		<result column="KNOWLEDGEBASE_TYPE_NAME" property="knowledgebaseTypeName" />
+		<result column="ORDER_ID" property="orderId" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<result column="PARENT_NAME" property="parentName" />
+	</resultMap>
+	
+	<!-- 新增知识库分类  -->
+	<insert id="addKnowledgeType" parameterClass="FeKnowledgebaseType">
+	<![CDATA[	
+		INSERT
+		INTO
+		    FE_KNOWLEDGEBASE_TYPE
+		    (
+		        KNOWLEDGEBASE_TYPE_ID,
+		        PARENT_ID,
+		        KNOWLEDGEBASE_TYPE_NAME,
+		        ORDER_ID,
+		        USER_ID,
+		        IS_DEL,
+		        CREATE_DATE,
+		        CREATE_USER
+		    )		  
+		   	SELECT
+		        #knowledgebaseTypeId#,
+		        #parentId#,
+		        #knowledgebaseTypeName#,
+		        case when max(ORDER_ID) is null then 1 else max(ORDER_ID)+1 end,
+		        #userId#,
+		        0,
+		        #createDate#,
+		        #createUser#
+		    FROM FE_KNOWLEDGEBASE_TYPE WHERE PARENT_ID = #parentId# AND USER_ID = #userId#	
+		]]>	
+		<selectKey keyProperty="knowledgebaseTypeId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_FE_KNOWLEDGEBASE_TYPE
+		</selectKey>	
+	</insert>
+	
+	<!-- 删除知识库分类 -->
+	<update id="deleteKnowledgeType" parameterClass="FeKnowledgebaseType">
+		<![CDATA[UPDATE FE_KNOWLEDGEBASE_TYPE SET IS_DEL = 1,UPDATE_DATE = #updateDate# WHERE KNOWLEDGEBASE_TYPE_ID = #knowledgebaseTypeId#]]>
+	</update>
+	
+	<!-- 获取个人的所有知识库分类集合 -->
+	<select id="getSelfKnowledgeTypeList" parameterClass="java.util.Map" resultMap="FeKnowledgebaseTypeResult">
+		<![CDATA[ SELECT t.*,'' as PARENT_NAME FROM FE_KNOWLEDGEBASE_TYPE t WHERE IS_DEL = 0 AND USER_ID = #userId# ORDER BY PARENT_ID ASC,ORDER_ID ASC]]>
+	</select>
+	
+	<!-- 通过Id获取知识库分类 -->
+	<select id="getKnowledgeTypeById" parameterClass="java.lang.Integer" resultMap="FeKnowledgebaseTypeResult">
+		<![CDATA[ SELECT k.*,t.KNOWLEDGEBASE_TYPE_NAME as PARENT_NAME FROM FE_KNOWLEDGEBASE_TYPE k
+    				LEFT JOIN FE_KNOWLEDGEBASE_TYPE t ON k.PARENT_ID = t.KNOWLEDGEBASE_TYPE_ID
+ 				WHERE k.IS_DEL = 0 AND k.KNOWLEDGEBASE_TYPE_ID =#value# ]]>
+	</select>	
+	
+	<!-- 上移下移查询目标知识库分类 -->
+	<select id="getDesKnowledgeType" parameterClass="java.util.Map" resultMap="FeKnowledgebaseTypeResult">
+	<![CDATA[
+		SELECT t.*,'' as PARENT_NAME FROM FE_KNOWLEDGEBASE_TYPE t WHERE IS_DEL = 0 AND USER_ID = #userId#  AND PARENT_ID = #parentId# AND ORDER_ID	
+	]]>	
+	<dynamic prepend="">
+		<isEqual prepend="" property="type" compareValue="up">
+			<![CDATA[ < #orderId# ]]> ORDER BY ORDER_ID DESC
+		</isEqual>
+		<isEqual prepend="" property="type" compareValue="down">
+			<![CDATA[ > #orderId# ]]> ORDER BY ORDER_ID ASC
+		</isEqual>
+	</dynamic>	
+	<![CDATA[ FETCH FIRST 1 ROW ONLY ]]>		
+	</select>
+	
+	<!-- 编辑知识库分类 -->
+	<update id="updateKnowledgeType" parameterClass="FeKnowledgebaseType">
+	<![CDATA[
+		UPDATE
+    		FE_KNOWLEDGEBASE_TYPE
+		SET
+		    PARENT_ID = #parentId#,
+		    KNOWLEDGEBASE_TYPE_NAME = #knowledgebaseTypeName#,
+		    ORDER_ID = #orderId#,
+		    USER_ID = #userId#,
+		    IS_DEL = #isDel#,		
+			UPDATE_DATE = #updateDate#
+	]]>	
+		<isNotEmpty property="updateUser">
+		<![CDATA[
+			,UPDATE_USER = #updateUser#
+	    ]]>
+		</isNotEmpty>
+	<![CDATA[	WHERE  KNOWLEDGEBASE_TYPE_ID = #knowledgebaseTypeId#
+	]]>		
+	</update>
+	
+	<!-- 通过Id获取知识库分类 -->
+	<select id="getKnowledgeType" parameterClass="FeKnowledgebaseType" resultMap="FeKnowledgebaseTypeResult">
+		<![CDATA[ SELECT k.*, '' as PARENT_NAME FROM FE_KNOWLEDGEBASE_TYPE k
+			WHERE k.IS_DEL = 0
+		]]>
+		<isNotEmpty prepend="AND" property="userId">
+		<![CDATA[
+			k.USER_ID = #userId#
+	    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="parentId">
+		<![CDATA[
+			k.PARENT_ID = #parentId#
+	    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="knowledgebaseTypeName">
+		<![CDATA[
+			k.KNOWLEDGEBASE_TYPE_NAME = #knowledgebaseTypeName#
+	    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="knowledgebaseTypeId">
+		<![CDATA[
+			k.KNOWLEDGEBASE_TYPE_ID<> #knowledgebaseTypeId#
+	    ]]>
+		</isNotEmpty>		
+	</select>	
+	
+</sqlMap>
+
+
+
+

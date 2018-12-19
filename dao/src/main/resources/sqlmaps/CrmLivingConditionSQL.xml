@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmLivingConditionSQL">
+	<typeAlias alias="CrmLivingCondition" type="com.banger.mobile.domain.model.livingCondition.LivingCondition" />
+
+	<!-- CrmLivingConditionSQL信息全字段 -->
+	<resultMap class="CrmLivingCondition" id="CrmLivingConditionResult">
+		<result column="LIVING_CONDITION_ID" property="livingConditionId" />
+		<result column="LIVING_CONDITION_NAME" property="livingConditionName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种教育程度-->
+	<insert id="addCrmLivingCondition" parameterClass="CrmLivingCondition">
+		<![CDATA[
+		INSERT INTO CRM_LIVING_CONDITION
+    	(
+        LIVING_CONDITION_ID,
+        IS_DEL,
+        LIVING_CONDITION_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #livingConditionId#,
+        #isDel#,
+        #livingConditionName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="livingConditionId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_LIVING_CONDITION
+		</selectKey>
+	</insert>
+
+
+	<!-- 教育程度修改-->
+	<update id="updateCrmLivingCondition" parameterClass="CrmLivingCondition">
+		UPDATE CRM_LIVING_CONDITION SET 
+			IS_DEL = #isDel#,
+			LIVING_CONDITION_NAME = #livingConditionName#, 
+			SORTNO = #sortNo#,
+			IS_ACTIVED = #isActived#, 
+			CREATE_DATE = #createDate#,
+			UPDATE_DATE =<![CDATA[current timestamp]]>, 
+			CREATE_USER = #createUser#, 
+			UPDATE_USER = #updateUser# 
+		where
+			LIVING_CONDITION_ID= #livingConditionId#
+	</update>
+
+	<!-- 根据ID删除教育程度 -->
+	<update id="deleteCrmLivingConditionById" parameterClass="java.lang.Integer">
+		UPDATE CRM_LIVING_CONDITION SET 
+			IS_DEL = 1, 
+			UPDATE_DATE =<![CDATA[current timestamp]]>
+		where 
+			LIVING_CONDITION_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到教育程度 -->
+	<select id="getCrmLivingConditionById" resultMap="CrmLivingConditionResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_LIVING_CONDITION where LIVING_CONDITION_ID=#Id#
+	]]>
+	</select>
+	
+	<!-- 根据教育程度名称获取相同教育程度名称的数据 -->
+	<select id="getSameCrmLivingConditionByName" resultMap="CrmLivingConditionResult" parameterClass="CrmLivingCondition">
+		<![CDATA[select * from CRM_LIVING_CONDITION where  IS_DEL = 0]]>
+     	<isNotEmpty prepend="" property="livingConditionId">
+     		<isNotEqual prepend="and" property="livingConditionId" compareValue="0">
+			<![CDATA[LIVING_CONDITION_ID != #livingConditionId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="livingConditionName">
+			<![CDATA[LIVING_CONDITION_NAME = #livingConditionName#]]>
+		</isNotEmpty>	
+	</select>
+
+	<!-- 获取教育程度列表 -->
+	<select id="getAllCrmLivingCondition" resultMap="CrmLivingConditionResult">
+	    <![CDATA[
+		select * from CRM_LIVING_CONDITION
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC
+        ]]>
+	</select>
+
+	<!-- 获取现有教育程度数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmLivingCondition" resultMap="CrmLivingConditionResult">
+		<![CDATA[
+		select *  from CRM_LIVING_CONDITION 
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取现有教育程度数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmLivingCondition" resultMap="CrmLivingConditionResult">
+		<![CDATA[
+		select *  from CRM_LIVING_CONDITION 
+		WHERE IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取要移动的教育程度对象 -->
+	<select id="getNeedMoveCrmLivingCondition" resultMap="CrmLivingConditionResult" parameterClass="java.util.Map">
+		select *  from CRM_LIVING_CONDITION WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

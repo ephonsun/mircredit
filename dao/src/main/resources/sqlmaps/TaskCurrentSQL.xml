@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TaskCurrentSQL">
+
+	<!-- 已经执行或正在执行的任务 -->
+	<resultMap id="taskCurrentMap"
+		class="com.banger.mobile.domain.model.quartz.TaskCurrent">
+		<result property="id" column="ID" />
+		<result property="gmtCreate" column="GMT_CREATE" />
+		<result property="gmtModify" column="GMT_MODIFY" />		
+		<result property="taskInsName" column="TASK_INS_NAME" />
+		<result property="className" column="CLASS_NAME" />
+		<result property="runStart" column="RUN_START" />
+	</resultMap>
+
+	
+	<!-- 根据任务实例名获取已经执行的任务（包括正在执行的） -->
+	<select id="find_task_current_by_taskInsName" resultMap="taskCurrentMap">
+		SELECT A.ID,A.GMT_CREATE,A.GMT_MODIFY,A.TASK_INS_NAME,A.CLASS_NAME,A.RUN_START FROM CRM_TASK_CURRENT A WHERE
+		A.TASK_INS_NAME=#taskInsName#
+	</select>
+
+	<insert id="insert_task_current"
+		parameterClass="com.banger.mobile.domain.model.quartz.TaskCurrent">
+	<![CDATA[
+			insert into CRM_TASK_CURRENT
+			(ID,GMT_CREATE,GMT_MODIFY,TASK_INS_NAME,CLASS_NAME,RUN_START )values( #id#,
+			current timestamp,
+			current timestamp,
+			#taskInsName#,
+			#className#,
+			#runStart#
+			 )
+	]]>
+	<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_TASK_CURRENT
+ 	</selectKey>
+	</insert>
+	
+	<typeAlias alias="taskCurrent" type="com.banger.mobile.domain.model.quartz.TaskCurrent"/>
+	<resultMap class="taskCurrent" id="taskCurrentResult">
+		<result column="ID" property="id"/>
+		<result column="GMT_CREATE" property="gmtCreate"/>
+		<result column="GMT_MODIFY" property="gmtModify"/>
+		<result column="TASK_INS_NAME" property="taskInsName"/>
+		<result column="CLASS_NAME" property="className"/>
+		<result column="RUN_START" property="runStart"/>
+	</resultMap>
+	<!-- create TaskCurrent object -->
+	<insert id="addTaskCurrent" parameterClass="taskCurrent">
+	<![CDATA[
+			insert into CRM_TASK_CURRENT
+			(ID,GMT_CREATE,GMT_MODIFY,TASK_INS_NAME,CLASS_NAME,RUN_START )values( #id#,
+			#gmtCreate#,
+			#gmtModify#,
+			#taskInsName#,
+			#className#,
+			#runStart#
+			 )
+	]]>
+	<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_CRM_TASK_CURRENT
+ 	</selectKey>
+	</insert>
+	<!-- update TaskCurrent object -->
+	<update id="editTaskCurrent" parameterClass="taskCurrent">
+	<![CDATA[
+			update CRM_TASK_CURRENT set GMT_CREATE = #gmtCreate#,
+			GMT_MODIFY = #gmtModify#,
+			TASK_INS_NAME = #taskInsName#,
+			CLASS_NAME = #className#,
+			RUN_START = #runStart#
+			 where ID = #id#
+			
+	]]>
+	</update>
+	<!-- delete TaskCurrent object -->
+	<delete id="removeTaskCurrent" parameterClass="java.lang.Integer">
+	<![CDATA[
+			delete from CRM_TASK_CURRENT where CRM_TASK_CURRENT.ID = #value# 
+	]]>
+	</delete>
+	<!-- search TaskCurrent object -->
+	<select id="getTaskCurrent" parameterClass="java.lang.Integer" resultMap="taskCurrentResult">
+	<![CDATA[
+			select CRM_TASK_CURRENT.* from CRM_TASK_CURRENT where CRM_TASK_CURRENT.ID = #value# 
+	]]>
+	</select>
+	<!-- searchAll TaskCurrent List -->
+	<select id="getTaskCurrents" resultMap="taskCurrentResult">
+	<![CDATA[
+			select CRM_TASK_CURRENT.* from CRM_TASK_CURRENT
+	]]>
+	</select>
+</sqlMap>  		

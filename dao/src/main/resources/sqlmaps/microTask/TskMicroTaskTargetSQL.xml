@@ -1,0 +1,1113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMicroTaskTargetSQL">
+	<typeAlias alias="TskMicroTaskTarget"
+		type="com.banger.mobile.domain.model.microTask.TskMicroTaskTarget" />
+	<!-- 任务目标客户表 -->
+	<resultMap class="TskMicroTaskTarget" id="QueryByPhoneResult">
+		<result column="TASK_TARGET_ID" property="taskTargetId" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE_NUMBER" property="phoneNumber" />
+		<result column="CALL_DATE" property="callDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="USER_ID" property="userId" />
+		<result column="REMARK" property="remark" />
+		<result column="RECORD_DATE" property="recordDate" />
+		<result column="RECORD_ADDRESS" property="recordAddress" />
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="IS_OLD_CUSTOMER" property="isOldCustomer" />
+		<result column="GPS_LNG" property="gpsLng" />
+		<result column="GPS_LAT" property="gpsLat" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!--任务目标客户表 -->
+	<resultMap class="TskMicroTaskTarget" id="QueryByPhoneAndUserResult">
+		<result column="TASK_TARGET_ID" property="taskTargetId"/>
+		<result column="AGE" property="age" />
+		<result column="USER_ID" property="userId" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE_NUMBER" property="phoneNumber" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+	</resultMap>
+
+
+	<!-- 任务目标客户表 -->
+	<resultMap class="TskMicroTaskTarget" id="TskMicroTaskTargetResult">
+		<result column="TASK_TARGET_ID" property="taskTargetId" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE_NUMBER" property="phoneNumber" />
+		<result column="CALL_DATE" property="callDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="USER_ID" property="userId" />
+		<result column="REMARK" property="remark" />
+		<result column="RECORD_DATE" property="recordDate" />
+		<result column="RECORD_ADDRESS" property="recordAddress" />
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="GPS_LNG" property="gpsLng" />
+		<result column="GPS_LAT" property="gpsLat" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="IS_OLD_CUSTOMER" property="isOldCustomer" />
+
+		<result column="CALL_USER_NAME" property="callUserName" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="IS_NOGOOD" property="isNoGood" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="ADDRESS" property="address" />
+
+		<result column="FILE_ID" property="fileId" />
+
+		<!-- 任务信息 -->
+		<result column="TASK_TYPE" property="taskType" />
+		<result column="TASK_TITLE" property="taskTitle" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinYin"/>
+	</resultMap>
+
+
+	<!-- 增加 -->
+	<insert id="addTskTaskTarget" parameterClass="TskMicroTaskTarget">
+		<![CDATA[
+	 	INSERT INTO TSK_MICRO_TASK_TARGET
+		    (
+		        TASK_TARGET_ID,
+		        TASK_ID,
+		        CUSTOMER_ID,
+		        IS_FINISH,
+		        DEPT_ID,
+		        CUSTOMER_NAME,
+		        PHONE_NUMBER,
+		        CALL_DATE,
+		        CALL_TIME,
+		        USER_ID,
+		        REMARK,
+		        RECORD_DATE,
+		        RECORD_ADDRESS,
+		        RECORD_INFO_ID,
+		        IS_OLD_CUSTOMER,
+		        GPS_LNG,
+		        GPS_LAT,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #taskTargetId#,
+		        #taskId:INTEGER#,
+				#customerId:INTEGER#,
+		        #isFinish:INTEGER#,
+		        #deptId:INTEGER#,
+		        #customerName:VARCHAR:NULL#,
+		        #phoneNumber:VARCHAR:NULL#,
+		        #callDate:TIMESTAMP#,
+				#callTime:INTEGER#,
+				#userId:INTEGER#,
+				#remark:VARCHAR:NULL#,
+				#recordDate:TIMESTAMP#,
+				#recordAddress:VARCHAR:NULL#,
+				#recordInfoId:INTEGER#,
+				#isOldCustomer:INTEGER#,
+				#gpsLng:VARCHAR:NULL#,
+				#gpsLat:VARCHAR:NULL#,
+		        current timestamp,
+			    current timestamp,
+		        #createUser:INTEGER#,
+		        #updateUser:INTEGER#
+		    )
+      ]]>
+		<selectKey keyProperty="taskTargetId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_MICRO_TASK_TARGET
+		</selectKey>
+	</insert>
+
+	<!-- 修改 -->
+	<update id="editTskTaskTargetCustomer" parameterClass="TskMicroTaskTarget">
+		<![CDATA[	
+		UPDATE
+		   TSK_MICRO_TASK_TARGET
+		SET 
+	        CUSTOMER_ID = #customerId:INTEGER#,
+	        CUSTOMER_NAME = #customerName:VARCHAR:NULL#,
+	        IS_OLD_CUSTOMER = #isOldCustomer:INTEGER#,
+		    UPDATE_DATE =  current timestamp,
+		    UPDATE_USER = #updateUser:INTEGER#
+		WHERE 
+		  TASK_TARGET_ID = #taskTargetId#
+		  ]]>
+	</update>
+	<!--更新任务目标 -->
+	<update id="editTskTaskTargets" parameterClass="TskMicroTaskTarget">
+      <![CDATA[	
+		UPDATE
+		   TSK_MICRO_TASK_TARGET
+		SET 
+		    CUSTOMER_ID = #customerId:INTEGER:NULL#,
+	        CUSTOMER_NAME = #customerName:VARCHAR:NULL#,
+	        PHONE_NUMBER  = #phoneNumber:VARCHAR:NULL#,
+		    UPDATE_DATE =  current timestamp,
+		    UPDATE_USER = #createUser:INTEGER#
+		WHERE 1=1 ]]>
+		<isNotEmpty property="taskTargetId" prepend="AND">
+			TASK_TARGET_ID
+			= #taskTargetId#
+		</isNotEmpty>
+	</update>
+
+	<update id="editTskNoNameAndExists">
+
+	</update>
+	<!--执行任务时修改任务目标信息 -->
+	<update id="editTskTaskTargetInfo" parameterClass="TskMicroTaskTarget">
+      <![CDATA[
+          UPDATE TSK_MICRO_TASK_TARGET 
+             SET CUSTOMER_ID    = #customerId:INTEGER#,
+                 UPDATE_USER    = #updateUser#,
+                 UPDATE_DATE    =current timestamp
+           WHERE RECORD_INFO_ID = #recordInfoId#
+        ]]>
+	</update>
+
+
+	<delete id="delTskTaskTarget" parameterClass="int">
+		DELETE FROM
+		TSK_MICRO_TASK_TARGET WHERE TASK_TARGET_ID = #taskTargetId#
+	</delete>
+
+	<select id="getTargetListByPage" resultMap="TskMicroTaskTargetResult"
+		parameterClass="java.util.HashMap">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, k.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		 select g.* from(
+			select a.TASK_TARGET_ID,
+        a.TASK_ID ,
+        a.USER_ID ,
+        a.CUSTOMER_ID ,
+        a.IS_FINISH ,
+        a.DEPT_ID ,
+        a.RECORD_DATE ,
+        a.RECORD_ADDRESS,
+        a.RECORD_INFO_ID ,
+        a.CREATE_DATE ,
+        a.UPDATE_DATE ,
+        a.CREATE_USER ,
+        a.UPDATE_USER ,
+        a.IS_OLD_CUSTOMER ,
+        a.GPS_LNG,
+        a.GPS_LAT,
+        b.AGE, b.SEX, b.CUSTOMER_TITLE,b.BIRTHDAY,b.IS_NOGOOD,b.ID_CARD,b.ADDRESS,b.CUSTOMER_NAME_PINYIN,
+            d.FILE_ID,
+			t.TASK_TYPE,t.TASK_TITLE,t.START_DATE,t.END_DATE,
+			d.START_DATE AS CALL_DATE,d.CALL_TIME AS CALL_TIME,
+		(CASE WHEN a.IS_FINISH IS NOT NULL AND a.IS_FINISH = 1 
+		      THEN (SELECT USER_NAME FROM SYS_USER WHERE USER_ID = a.CREATE_USER)
+		 END ) AS CALL_USER_NAME,
+	    (CASE
+	        WHEN a.IS_FINISH IS NOT NULL AND a.IS_FINISH = 1 
+	        THEN d.REMARK
+	        WHEN d.REMARK IS NULL OR d.REMARK = ''
+	        THEN a.REMARK
+	      END) AS REMARK,
+		(CASE 
+            WHEN a.PHONE_NUMBER IS NOT NULL AND a.PHONE_NUMBER != '' THEN a.PHONE_NUMBER
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 1 THEN b.MOBILE_PHONE1 
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 2 THEN b.MOBILE_PHONE2 
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 3 THEN b.PHONE 
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 4 THEN b.FAX
+            END) AS PHONE_NUMBER,
+        (CASE 
+               WHEN a.CUSTOMER_ID IS NULL
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID<=0
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID>0
+               THEN b.CUSTOMER_NAME
+             END )AS  CUSTOMER_NAME
+			from (select * from TSK_MICRO_TASK_TARGET 
+			]]>
+			<isNotEmpty property="isPad">
+				<![CDATA[ 
+					where TASK_TARGET_ID IN(
+						SELECT MAX(TASK_TARGET_ID) FROM TSK_MICRO_TASK_TARGET WHERE CUSTOMER_ID>0 AND TASK_ID =#taskId# AND USER_ID=#userId# GROUP BY TASK_ID,CUSTOMER_ID
+						UNION ALL
+						SELECT TASK_TARGET_ID FROM TSK_MICRO_TASK_TARGET WHERE CUSTOMER_ID=0 AND TASK_ID =#taskId# AND USER_ID=#userId#
+					) 
+				]]>
+			</isNotEmpty>
+			<![CDATA[
+			) a
+			left join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+		    LEFT JOIN TSK_MICRO_TASK e on a.TASK_ID = e.TASK_ID
+            LEFT JOIN SYS_USER c on c.USER_ID = e.ASSIGN_USER_ID
+			left join REC_RECORD_INFO d on a.RECORD_INFO_ID= d.RECORD_INFO_ID
+			left join TSK_MICRO_TASK t on t.TASK_ID = a.TASK_ID
+			where 1=1 ) g WHERE 1=1
+        ]]>
+		<isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ g.TASK_ID = #taskId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerName" prepend="and">
+        	<![CDATA[ g.CUSTOMER_NAME like '%$customerName$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="phoneNumber" prepend="and">
+        	<![CDATA[ g.PHONE_NUMBER like '%$phoneNumber$%']]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateFrom" prepend="and">
+        	<![CDATA[ g.CALL_DATE >= #callDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateTo" prepend="and">
+        	<![CDATA[ g.CALL_DATE <= #callDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateFrom" prepend="and">
+            <![CDATA[ g.RECORD_DATE >= #recordDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateTo" prepend="and">
+            <![CDATA[ g.RECORD_DATE <= #recordDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isFinish" prepend="and">
+        	<![CDATA[ g.IS_FINISH = #isFinish# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+        	<![CDATA[ g.USER_ID = #userId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="inChargeUserIds" prepend="and">
+        	<![CDATA[ g.USER_ID IN ($inChargeUserIds$)  ]]>
+		</isNotEmpty>
+		<isEqual property="belongToType" compareValue="brMine"
+			prepend="and">
+            <![CDATA[  g.IS_FINISH = 1 ]]>
+		</isEqual>
+		<isNotEmpty property="customerQuery" prepend="and">
+        	<![CDATA[ (g.CUSTOMER_NAME like '%$customerQuery$%' ESCAPE '^' OR g.PHONE_NUMBER like '%$customerQuery$%' ESCAPE '^' )]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordAddress" prepend="and">
+        	<![CDATA[ g.RECORD_ADDRESS like '%$recordAddress$%' ESCAPE '^' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ g.CUSTOMER_ID = #customerId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="myExc">
+			<![CDATA[ order by g.IS_FINISH ASC,g.CUSTOMER_NAME_PINYIN ASC ]]>
+		</isNotEmpty>
+		<isEmpty property="myExc">
+			<![CDATA[ order by g.IS_FINISH ASC,g.CALL_DATE DESC,g.RECORD_DATE DESC ]]>
+		</isEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) k ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<select id="getTargetListByPageCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.HashMap">
+		<![CDATA[
+			SELECT COUNT(1) FROM (SELECT rownumber() over() AS NUMROW, k.* from   (
+		                                                 select g.* from(
+			select a.TASK_TARGET_ID,
+        a.TASK_ID ,
+        a.USER_ID ,
+        a.CUSTOMER_ID ,
+        a.IS_FINISH ,
+        a.DEPT_ID ,
+        a.REMARK ,
+        a.RECORD_DATE ,
+        a.RECORD_ADDRESS,
+        a.RECORD_INFO_ID ,
+        a.CREATE_DATE ,
+        a.UPDATE_DATE ,
+        a.CREATE_USER ,
+        a.UPDATE_USER ,
+        a.IS_OLD_CUSTOMER ,
+        a.GPS_LNG,
+        a.GPS_LAT,
+        b.AGE, b.SEX, b.CUSTOMER_TITLE,b.BIRTHDAY,b.IS_NOGOOD,b.ID_CARD,b.ADDRESS,
+        c.USER_NAME as CALL_USER_NAME,d.FILE_ID,
+			t.TASK_TYPE,t.TASK_TITLE,t.START_DATE,t.END_DATE,
+			d.START_DATE AS CALL_DATE,d.CALL_TIME AS CALL_TIME,
+		(CASE 
+            WHEN a.CUSTOMER_ID <=0 THEN a.PHONE_NUMBER
+            WHEN a.CUSTOMER_ID IS NULL THEN a.PHONE_NUMBER
+            WHEN b.DEFAULT_PHONE_TYPE = 1 THEN b.MOBILE_PHONE1 
+            WHEN b.DEFAULT_PHONE_TYPE = 2 THEN b.MOBILE_PHONE2 
+            WHEN b.DEFAULT_PHONE_TYPE = 3 THEN b.PHONE 
+            WHEN b.DEFAULT_PHONE_TYPE = 4 THEN b.FAX
+            END) AS PHONE_NUMBER,
+        (CASE 
+               WHEN a.CUSTOMER_ID IS NULL
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID<=0
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID>0
+               THEN b.CUSTOMER_NAME
+             END )AS  CUSTOMER_NAME
+			from (select * from TSK_MICRO_TASK_TARGET 
+			]]>
+			<isNotEmpty property="isPad">
+				<![CDATA[ 
+					where TASK_TARGET_ID IN(
+						SELECT MAX(TASK_TARGET_ID) FROM TSK_MICRO_TASK_TARGET WHERE CUSTOMER_ID>0 AND TASK_ID =#taskId# AND USER_ID=#userId# GROUP BY TASK_ID,CUSTOMER_ID
+						UNION ALL
+						SELECT TASK_TARGET_ID FROM TSK_MICRO_TASK_TARGET WHERE CUSTOMER_ID=0 AND TASK_ID =#taskId# AND USER_ID=#userId#
+					) 
+				]]>
+			</isNotEmpty>
+			<![CDATA[
+			) a
+			left join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+			LEFT JOIN TSK_MICRO_TASK e on a.TASK_ID = e.TASK_ID
+            LEFT JOIN SYS_USER c on c.USER_ID = e.ASSIGN_USER_ID
+			left join REC_RECORD_INFO d on a.RECORD_INFO_ID= d.RECORD_INFO_ID
+			left join TSK_MICRO_TASK t on t.TASK_ID = a.TASK_ID
+			where 1=1 ) g WHERE 1=1
+        ]]>
+		<isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ g.TASK_ID = #taskId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerName" prepend="and">
+        	<![CDATA[ g.CUSTOMER_NAME like '%$customerName$%' ESCAPE '^' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="phoneNumber" prepend="and">
+        	<![CDATA[ g.PHONE_NUMBER like '%$phoneNumber$%' ESCAPE '^' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateFrom" prepend="and">
+        	<![CDATA[ g.CALL_DATE >= #callDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateTo" prepend="and">
+        	<![CDATA[ g.CALL_DATE <= #callDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateFrom" prepend="and">
+            <![CDATA[ g.RECORD_DATE >= #recordDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateTo" prepend="and">
+            <![CDATA[ g.RECORD_DATE <= #recordDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isFinish" prepend="and">
+        	<![CDATA[ g.IS_FINISH = #isFinish# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+        	<![CDATA[ g.USER_ID = #userId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="inChargeUserIds" prepend="and">
+        	<![CDATA[ g.USER_ID IN ($inChargeUserIds$)]]>
+		</isNotEmpty>
+		<isEqual property="belongToType" compareValue="brMine"
+			prepend="and">
+            <![CDATA[  g.IS_FINISH = 1 ]]>
+		</isEqual>
+		<isNotEmpty property="customerQuery" prepend="and">
+        	<![CDATA[ (g.CUSTOMER_NAME like '%$customerQuery$%' ESCAPE '^' OR g.PHONE_NUMBER like '%$customerQuery$%' ESCAPE '^')]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordAddress" prepend="and">
+        	<![CDATA[ g.RECORD_ADDRESS like '%$recordAddress$%' ESCAPE '^' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ g.CUSTOMER_ID = #customerId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isOldCustomer" prepend="and">
+            <![CDATA[ g.IS_OLD_CUSTOMER = #isOldCustomer#]]>
+		</isNotEmpty>
+		<isNotEmpty property="userIds" prepend="and">
+			(
+			<iterate property="userIds" conjunction="or">
+				g.USER_ID=
+				#userIds[]#
+			</iterate>
+			)
+		</isNotEmpty>
+		<![CDATA[) k ) tmp]]>
+	</select>
+
+
+    <select id="getTargetListForPad" resultMap="TskMicroTaskTargetResult"
+            parameterClass="java.util.HashMap">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, k.* from   (
+	         ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <![CDATA[
+		 select g.* from(
+			select a.TASK_TARGET_ID,
+        a.TASK_ID ,
+        a.USER_ID ,
+        a.CUSTOMER_ID ,
+        a.IS_FINISH ,
+        a.DEPT_ID ,
+        a.RECORD_DATE ,
+        a.RECORD_ADDRESS,
+        a.RECORD_INFO_ID ,
+        a.CREATE_DATE ,
+        a.UPDATE_DATE ,
+        a.CREATE_USER ,
+        a.UPDATE_USER ,
+        a.IS_OLD_CUSTOMER ,
+        a.GPS_LNG,
+        a.GPS_LAT,
+        b.AGE, b.SEX, b.CUSTOMER_TITLE,b.BIRTHDAY,b.IS_NOGOOD,b.ID_CARD,b.ADDRESS,b.CUSTOMER_NAME_PINYIN,
+            d.FILE_ID,
+			t.TASK_TYPE,t.TASK_TITLE,t.START_DATE,t.END_DATE,
+			d.START_DATE AS CALL_DATE,d.CALL_TIME AS CALL_TIME,
+		c.USER_NAME AS CALL_USER_NAME,
+	    e.REMARK AS REMARK,
+		(CASE
+            WHEN a.PHONE_NUMBER IS NOT NULL AND a.PHONE_NUMBER != '' THEN a.PHONE_NUMBER
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 1 THEN b.MOBILE_PHONE1
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 2 THEN b.MOBILE_PHONE2
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 3 THEN b.PHONE
+            WHEN a.CUSTOMER_ID>0 AND b.DEFAULT_PHONE_TYPE = 4 THEN b.FAX
+            END) AS PHONE_NUMBER,
+        (CASE
+               WHEN a.CUSTOMER_ID IS NULL
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID<=0
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID>0
+               THEN b.CUSTOMER_NAME
+             END )AS  CUSTOMER_NAME
+			from TSK_MICRO_TASK_TARGET a
+			left join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+		    LEFT JOIN TSK_MICRO_TASK e on a.TASK_ID = e.TASK_ID
+            LEFT JOIN SYS_USER c on c.USER_ID = e.ASSIGN_USER_ID
+			left join REC_RECORD_INFO d on a.RECORD_INFO_ID= d.RECORD_INFO_ID
+			left join TSK_MICRO_TASK t on t.TASK_ID = a.TASK_ID
+			where 1=1 ) g WHERE 1=1
+        ]]>
+        <isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ g.TASK_ID = #taskId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ g.CUSTOMER_NAME like '%$customerName$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="phoneNumber" prepend="and">
+            <![CDATA[ g.PHONE_NUMBER like '%$phoneNumber$%']]>
+        </isNotEmpty>
+        <isNotEmpty property="callDateFrom" prepend="and">
+            <![CDATA[ g.CALL_DATE >= #callDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="callDateTo" prepend="and">
+            <![CDATA[ g.CALL_DATE <= #callDateTo# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="recordDateFrom" prepend="and">
+            <![CDATA[ g.RECORD_DATE >= #recordDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="recordDateTo" prepend="and">
+            <![CDATA[ g.RECORD_DATE <= #recordDateTo# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="isFinish" prepend="and">
+            <![CDATA[ g.IS_FINISH = #isFinish# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            <![CDATA[ g.USER_ID = #userId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="inChargeUserIds" prepend="and">
+            <![CDATA[ g.USER_ID IN ($inChargeUserIds$)  ]]>
+        </isNotEmpty>
+        <isEqual property="belongToType" compareValue="brMine"
+                 prepend="and">
+            <![CDATA[  g.IS_FINISH = 1 ]]>
+        </isEqual>
+        <isNotEmpty property="customerQuery" prepend="and">
+            <![CDATA[ (g.CUSTOMER_NAME like '%$customerQuery$%' OR g.PHONE_NUMBER like '%$customerQuery$%')]]>
+        </isNotEmpty>
+        <isNotEmpty property="recordAddress" prepend="and">
+            <![CDATA[ g.RECORD_ADDRESS like '%$recordAddress$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ g.CUSTOMER_ID = #customerId# ]]>
+        </isNotEmpty>
+        <![CDATA[
+			order by g.CALL_DATE DESC,g.RECORD_DATE DESC
+		]]>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) k ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <select id="getTargetListForPadCount" resultClass="java.lang.Integer"
+            parameterClass="java.util.HashMap">
+        <![CDATA[
+			SELECT COUNT(1) FROM (SELECT rownumber() over() AS NUMROW, k.* from   (
+		                                                 select g.* from(
+			select a.TASK_TARGET_ID,
+        a.TASK_ID ,
+        a.USER_ID ,
+        a.CUSTOMER_ID ,
+        a.IS_FINISH ,
+        a.DEPT_ID ,
+        a.REMARK ,
+        a.RECORD_DATE ,
+        a.RECORD_ADDRESS,
+        a.RECORD_INFO_ID ,
+        a.CREATE_DATE ,
+        a.UPDATE_DATE ,
+        a.CREATE_USER ,
+        a.UPDATE_USER ,
+        a.IS_OLD_CUSTOMER ,
+        a.GPS_LNG,
+        a.GPS_LAT,
+        b.AGE, b.SEX, b.CUSTOMER_TITLE,b.BIRTHDAY,b.IS_NOGOOD,b.ID_CARD,b.ADDRESS,
+        c.USER_NAME as CALL_USER_NAME,d.FILE_ID,
+			t.TASK_TYPE,t.TASK_TITLE,t.START_DATE,t.END_DATE,
+			d.START_DATE AS CALL_DATE,d.CALL_TIME AS CALL_TIME,
+		(CASE
+            WHEN a.CUSTOMER_ID <=0 THEN a.PHONE_NUMBER
+            WHEN a.CUSTOMER_ID IS NULL THEN a.PHONE_NUMBER
+            WHEN b.DEFAULT_PHONE_TYPE = 1 THEN b.MOBILE_PHONE1
+            WHEN b.DEFAULT_PHONE_TYPE = 2 THEN b.MOBILE_PHONE2
+            WHEN b.DEFAULT_PHONE_TYPE = 3 THEN b.PHONE
+            WHEN b.DEFAULT_PHONE_TYPE = 4 THEN b.FAX
+            END) AS PHONE_NUMBER,
+        (CASE
+               WHEN a.CUSTOMER_ID IS NULL
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID<=0
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID>0
+               THEN b.CUSTOMER_NAME
+             END )AS  CUSTOMER_NAME
+			from TSK_MICRO_TASK_TARGET a
+			left join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+			LEFT JOIN TSK_MICRO_TASK e on a.TASK_ID = e.TASK_ID
+            LEFT JOIN SYS_USER c on c.USER_ID = e.ASSIGN_USER_ID
+			left join REC_RECORD_INFO d on a.RECORD_INFO_ID= d.RECORD_INFO_ID
+			left join TSK_MICRO_TASK t on t.TASK_ID = a.TASK_ID
+			where 1=1 ) g WHERE 1=1
+        ]]>
+        <isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ g.TASK_ID = #taskId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ g.CUSTOMER_NAME like '%$customerName$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="phoneNumber" prepend="and">
+            <![CDATA[ g.PHONE_NUMBER like '%$phoneNumber$%']]>
+        </isNotEmpty>
+        <isNotEmpty property="callDateFrom" prepend="and">
+            <![CDATA[ g.CALL_DATE >= #callDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="callDateTo" prepend="and">
+            <![CDATA[ g.CALL_DATE <= #callDateTo# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="recordDateFrom" prepend="and">
+            <![CDATA[ g.RECORD_DATE >= #recordDateFrom# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="recordDateTo" prepend="and">
+            <![CDATA[ g.RECORD_DATE <= #recordDateTo# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="isFinish" prepend="and">
+            <![CDATA[ g.IS_FINISH = #isFinish# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="and">
+            <![CDATA[ g.USER_ID = #userId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="inChargeUserIds" prepend="and">
+            <![CDATA[ g.USER_ID IN ($inChargeUserIds$)]]>
+        </isNotEmpty>
+        <isEqual property="belongToType" compareValue="brMine"
+                 prepend="and">
+            <![CDATA[  g.IS_FINISH = 1 ]]>
+        </isEqual>
+        <isNotEmpty property="customerQuery" prepend="and">
+            <![CDATA[ (g.CUSTOMER_NAME like '%$customerQuery$%' OR g.PHONE_NUMBER like '%$customerQuery$%')]]>
+        </isNotEmpty>
+        <isNotEmpty property="recordAddress" prepend="and">
+            <![CDATA[ g.RECORD_ADDRESS like '%$recordAddress$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ g.CUSTOMER_ID = #customerId# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="isOldCustomer" prepend="and">
+            <![CDATA[ g.IS_OLD_CUSTOMER = #isOldCustomer#]]>
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            (
+            <iterate property="userIds" conjunction="or">
+                g.USER_ID=
+                #userIds[]#
+            </iterate>
+            )
+        </isNotEmpty>
+        <![CDATA[) k ) tmp]]>
+    </select>
+
+	<select id="getTargetList" resultMap="TskMicroTaskTargetResult"
+		parameterClass="java.util.HashMap">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+        <![CDATA[
+			select a.TASK_TARGET_ID,
+        a.TASK_ID ,
+        a.USER_ID ,
+        a.CUSTOMER_ID ,
+        a.IS_FINISH ,
+        a.DEPT_ID ,
+        a.CALL_DATE ,
+        t.REMARK ,
+        a.RECORD_DATE ,
+        a.RECORD_ADDRESS,
+        a.RECORD_INFO_ID ,
+        a.CREATE_DATE ,
+        a.UPDATE_DATE ,
+        a.CREATE_USER ,
+        a.UPDATE_USER ,
+        a.IS_OLD_CUSTOMER ,
+        a.GPS_LNG,
+        a.GPS_LAT,
+        b.AGE, b.SEX, b.CUSTOMER_TITLE,b.BIRTHDAY,b.IS_NOGOOD,b.ID_CARD,b.ADDRESS,b.CUSTOMER_NAME_PINYIN,
+        c.USER_NAME as CALL_USER_NAME,d.FILE_ID,
+			t.TASK_TYPE,t.TASK_TITLE,t.START_DATE,t.END_DATE,
+		(CASE
+			 WHEN t.TASK_TYPE=2 THEN a.CALL_TIME
+             WHEN t.TASK_TYPE=3 THEN d.CALL_TIME
+             END) AS CALL_TIME,
+		(CASE
+            WHEN a.CUSTOMER_ID <=0 THEN a.PHONE_NUMBER
+            WHEN a.CUSTOMER_ID IS NULL THEN a.PHONE_NUMBER
+            WHEN b.DEFAULT_PHONE_TYPE = 1 THEN b.MOBILE_PHONE1
+            WHEN b.DEFAULT_PHONE_TYPE = 2 THEN b.MOBILE_PHONE2
+            WHEN b.DEFAULT_PHONE_TYPE = 3 THEN b.PHONE
+            WHEN b.DEFAULT_PHONE_TYPE = 4 THEN b.FAX
+            END) AS PHONE_NUMBER,
+        (CASE
+               WHEN a.CUSTOMER_ID IS NULL
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID<=0
+               THEN a.CUSTOMER_NAME
+               WHEN a.CUSTOMER_ID>0
+               THEN b.CUSTOMER_NAME
+             END )AS  CUSTOMER_NAME
+			from TSK_MICRO_TASK_TARGET a
+			left join CRM_CUSTOMER b on a.CUSTOMER_ID = b.CUSTOMER_ID
+			left join REC_RECORD_INFO d on a.RECORD_INFO_ID= d.RECORD_INFO_ID
+			left join TSK_MICRO_TASK t on t.TASK_ID = a.TASK_ID
+			LEFT JOIN SYS_USER c ON c.USER_ID = t.ASSIGN_USER_ID
+			where 1=1
+        ]]>
+		<isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ a.TASK_ID = #taskId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ a.CUSTOMER_NAME like '%$customerName$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="phoneNumber" prepend="and">
+            <![CDATA[ a.PHONE_NUMBER like '%$phoneNumber$%']]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateFrom" prepend="and">
+            <![CDATA[ a.CALL_DATE >= #callDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateTo" prepend="and">
+            <![CDATA[ a.CALL_DATE <= #callDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateFrom" prepend="and">
+            <![CDATA[ a.RECORD_DATE >= #recordDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateTo" prepend="and">
+            <![CDATA[ a.RECORD_DATE <= #recordDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isFinish" prepend="and">
+            <![CDATA[ a.IS_FINISH = #isFinish# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+            <![CDATA[ a.USER_ID = #userId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="inChargeUserIds" prepend="and">
+            <![CDATA[ a.USER_ID IN ($inChargeUserIds$)]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerQuery" prepend="and">
+            <![CDATA[ (a.CUSTOMER_NAME like '%$customerQuery$%' OR a.PHONE_NUMBER like '%$customerQuery$%')]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordAddress" prepend="and">
+            <![CDATA[ a.RECORD_ADDRESS like '%$recordAddress$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ a.CUSTOMER_ID = #customerId# ]]>
+		</isNotEmpty>
+        <![CDATA[
+			order by a.CALL_DATE DESC,a.RECORD_DATE DESC
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<select id="getTargetListCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.HashMap">
+        <![CDATA[
+			select count(1) from TSK_MICRO_TASK_TARGET a where 1=1
+        ]]>
+		<isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ a.TASK_ID = #taskId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ a.CUSTOMER_NAME like '%$customerName$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="phoneNumber" prepend="and">
+            <![CDATA[ a.PHONE_NUMBER like '%$phoneNumber$%']]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateFrom" prepend="and">
+            <![CDATA[ a.CALL_DATE >= #callDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="callDateTo" prepend="and">
+            <![CDATA[ a.CALL_DATE <= #callDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateFrom" prepend="and">
+            <![CDATA[ a.RECORD_DATE >= #recordDateFrom# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordDateTo" prepend="and">
+            <![CDATA[ a.RECORD_DATE <= #recordDateTo# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isFinish" prepend="and">
+            <![CDATA[ a.IS_FINISH = #isFinish# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+            <![CDATA[ a.USER_ID = #userId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="inChargeUserIds" prepend="and">
+            <![CDATA[ a.USER_ID IN ($inChargeUserIds$)]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerQuery" prepend="and">
+            <![CDATA[ (a.CUSTOMER_NAME like '%$customerQuery$%' OR a.PHONE_NUMBER like '%$customerQuery$%')]]>
+		</isNotEmpty>
+		<isNotEmpty property="recordAddress" prepend="and">
+            <![CDATA[ a.RECORD_ADDRESS like '%$recordAddress$%' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ a.CUSTOMER_ID = #customerId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isOldCustomer" prepend="and">
+            <![CDATA[a.IS_OLD_CUSTOMER = #isOldCustomer#]]>
+		</isNotEmpty>
+		<isNotEmpty property="userIds" prepend="and">
+			(
+			<iterate property="userIds" conjunction="or">
+				a.USER_ID=
+				#userIds[]#
+			</iterate>
+			)
+		</isNotEmpty>
+	</select>
+
+	<select id="getTskMicroTaskTargetByPhone" resultMap="QueryByPhoneResult"
+		parameterClass="java.lang.String">
+		SELECT * FROM TSK_MICRO_TASK_TARGET WHERE PHONE_NUMBER
+		= #phoneNumber#
+	</select>
+
+	<select id="getMicroTaskTargetEqualsTarget" resultClass="java.lang.Integer"
+		parameterClass="TskMicroTaskTarget">
+	   <![CDATA[SELECT COUNT(1) FROM (SELECT (CASE
+		WHEN t.CUSTOMER_ID IS NULL THEN
+		t.PHONE_NUMBER
+		WHEN t.CUSTOMER_ID <=0 THEN t.PHONE_NUMBER
+		WHEN
+		c.DEFAULT_PHONE_TYPE = 1 THEN c.MOBILE_PHONE1
+		WHEN c.DEFAULT_PHONE_TYPE
+		= 2 THEN c.MOBILE_PHONE2
+		WHEN c.DEFAULT_PHONE_TYPE = 3 THEN c.PHONE
+		WHEN c.DEFAULT_PHONE_TYPE = 4 THEN c.FAX
+		END) AS PHONE_NUMBER FROM
+		TSK_MICRO_TASK_TARGET t
+		LEFT JOIN CRM_CUSTOMER c ON t.CUSTOMER_ID =
+		c.CUSTOMER_ID
+		WHERE 1=1]]>
+		
+		<isEmpty property="gpsLat">
+			<isNotEmpty property="phoneNumber" prepend="and">
+				PHONE_NUMBER = #phoneNumber#
+			</isNotEmpty>
+			<isNotEmpty property="customerName" prepend="and">
+				t.CUSTOMER_NAME=#customerName#
+			</isNotEmpty>
+		</isEmpty>
+		
+		<isNotEmpty property="taskId" prepend="and">
+			t.TASK_ID = #taskId#
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+			t.USER_ID = #userId#
+		</isNotEmpty>
+		<isNotEmpty property="customerId" prepend="and">
+			t.CUSTOMER_Id=#customerId#
+		</isNotEmpty>
+		
+		<isNotEmpty property="gpsLat">
+			 OR (t.CUSTOMER_NAME=#customerName# and t.PHONE_NUMBER=#phoneNumber# and t.TASK_ID = #taskId# and t.USER_ID = #userId#) 
+		</isNotEmpty>
+		)
+	</select>
+
+	<select id="getMicroTaskTargetById" resultMap="QueryByPhoneResult"
+		parameterClass="Integer">
+		SELECT * FROM TSK_MICRO_TASK_TARGET WHERE
+		TASK_TARGET_ID = #taskTargetId#
+	</select>
+
+	<!-- 修改 -->
+	<update id="autoFinish" parameterClass="HashMap">
+		<![CDATA[
+		UPDATE TSK_MICRO_TASK_TARGET a
+        SET
+        a.IS_FINISH = 1,
+        a.RECORD_INFO_ID = #recordInfoId#,
+        a.UPDATE_DATE =  current timestamp
+        ]]>
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="taskTargetId" prepend="and">
+		  <![CDATA[a.TASK_TARGET_ID=#taskTargetId#]]>
+			</isNotEmpty>
+		</dynamic>
+	</update>
+
+	<!-- 实地营销任务自动完成 -->
+	<update id="autoFinishFoot" parameterClass="HashMap">
+		<![CDATA[
+		UPDATE TSK_MICRO_TASK_TARGET a
+        SET
+        a.IS_FINISH = 1,
+        a.RECORD_INFO_ID = #recordInfoId#,
+        a.UPDATE_DATE =  current timestamp
+        WHERE
+        (select t.START_DATE from TSK_MICRO_TASK t where t.TASK_ID = a.TASK_ID) <= #currentDate#
+        AND (select tt.END_DATE from TSK_MICRO_TASK tt where tt.TASK_ID = a.TASK_ID) >= #currentDate#
+        AND a.USER_ID = #userId#
+        AND a.TASK_ID = #taskId#
+        AND a.CUSTOMER_ID = #customerId#
+        AND a.RECORD_DATE = #recordDate#
+	    ]]>
+	</update>
+
+	<update id="autoFinishInSystem" parameterClass="HashMap">
+		<![CDATA[
+		UPDATE TSK_MICRO_TASK_TARGET a
+        SET
+        a.IS_FINISH = 1,
+        a.CALL_DATE = #callDate#,
+        a.CALL_TIME = #callTime#,
+        a.RECORD_INFO_ID = #recordInfoId#,
+        a.UPDATE_DATE =  current timestamp
+        WHERE
+        (select t.START_DATE from TSK_MICRO_TASK t where t.TASK_ID = a.TASK_ID) <= #currentDate#
+        AND (select tt.END_DATE from TSK_MICRO_TASK tt where tt.TASK_ID = a.TASK_ID) >= #currentDate#
+        AND a.USER_ID = #userId#
+        AND a.CUSTOMER_ID = #customerId#
+        AND a.TASK_ID = #taskId#
+	    ]]>
+	</update>
+
+	<update id="autoFinishOutSystem" parameterClass="HashMap">
+		<![CDATA[
+		UPDATE TSK_MICRO_TASK_TARGET a
+        SET
+        a.IS_FINISH = 1,
+        a.CALL_DATE = #callDate#,
+        a.CALL_TIME = #callTime#,
+        a.RECORD_INFO_ID = #recordInfoId#,
+        a.UPDATE_DATE =  current timestamp
+        WHERE
+        (select t.START_DATE from TSK_MICRO_TASK t where t.TASK_ID = a.TASK_ID) <= #currentDate#
+        AND (select tt.END_DATE from TSK_MICRO_TASK tt where tt.TASK_ID = a.TASK_ID) >= #currentDate#
+        AND a.USER_ID = #userId#
+        AND a.CUSTOMER_NAME = #customerName#
+        AND a.PHONE_NUMBER = #phoneNumber#
+        AND a.TASK_ID = #taskId#
+	    ]]>
+	</update>
+
+	<update id="autoFinishOutSystemOverride" parameterClass="HashMap">
+		<![CDATA[
+		UPDATE TSK_MICRO_TASK_TARGET a
+        SET
+        a.IS_FINISH = 1,
+        a.CUSTOMER_ID = #customerId#,
+        a.CALL_DATE = #callDate#,
+        a.CALL_TIME = #callTime#,
+        a.RECORD_INFO_ID = #recordInfoId#,
+        a.UPDATE_DATE =  current timestamp
+        WHERE
+        (select t.START_DATE from TSK_MICRO_TASK t where t.TASK_ID = a.TASK_ID) <= #currentDate#
+        AND (select tt.END_DATE from TSK_MICRO_TASK tt where tt.TASK_ID = a.TASK_ID) >= #currentDate#
+        AND a.USER_ID = #userId#
+        AND a.PHONE_NUMBER = #phoneNumber#
+        AND a.TASK_ID = #taskId#
+	    ]]>
+	</update>
+
+	<select id="getMicroTaskTargetByNameAndNum" resultMap="QueryByPhoneResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM TSK_MICRO_TASK_TARGET
+		WHERE
+		PHONE_NUMBER IN
+		($phoneNumber$)
+	</select>
+
+	<select id="getMicroTaskTargetByParameterMap" resultMap="QueryByPhoneResult"
+		parameterClass="java.util.HashMap">
+		SELECT * FROM TSK_MICRO_TASK_TARGET WHERE 1=1
+		<isNotEmpty property="customerId" prepend="and">
+            <![CDATA[ CUSTOMER_ID =#customerId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="taskId" prepend="and">
+            <![CDATA[ TASK_ID =#taskId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+            <![CDATA[ USER_ID =#userId# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="customerName" prepend="and">
+            <![CDATA[ CUSTOMER_NAME =#customerName# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="phoneNumber" prepend="and">
+            <![CDATA[ PHONE_NUMBER =#phoneNumber# ]]>
+		</isNotEmpty>
+	</select>
+	<select id="queryByPhonesAndNames" resultMap="QueryByPhoneAndUserResult"
+		parameterClass="java.util.HashMap">
+	     <![CDATA[SELECT x.*,temp.AGE FROM ((SELECT
+                                         t.TASK_TARGET_ID,
+                                         t.USER_ID,
+                                         t.CUSTOMER_ID,
+                                         t.TASK_ID,
+                             (
+                              CASE
+                                    WHEN t.CUSTOMER_ID IS NULL
+                                    THEN t.PHONE_NUMBER
+                                    WHEN t.CUSTOMER_ID <=0
+                                    THEN t.PHONE_NUMBER
+                                    WHEN c.DEFAULT_PHONE_TYPE = 1
+                                    THEN c.MOBILE_PHONE1
+                                    WHEN c.DEFAULT_PHONE_TYPE = 2
+                                    THEN c.MOBILE_PHONE2
+                                    WHEN c.DEFAULT_PHONE_TYPE = 3
+                                    THEN c.PHONE
+                                    WHEN c.DEFAULT_PHONE_TYPE = 4
+                                    THEN c.FAX
+                               END) AS PHONE_NUMBER,
+                            (
+                             CASE
+                                    WHEN t.CUSTOMER_ID IS NULL
+                                    THEN t.CUSTOMER_NAME
+                                    WHEN t.CUSTOMER_ID>0
+                                    THEN c.CUSTOMER_NAME
+                                    WHEN t.CUSTOMER_ID<=0
+                                    THEN t.CUSTOMER_NAME
+                               END) AS CUSTOMER_NAME ,
+                           (
+                            CASE
+                                   WHEN t.CUSTOMER_ID IS NULL
+                                   THEN 0
+                                   WHEN t.CUSTOMER_ID<=0
+                                   THEN 0
+                                   WHEN t.CUSTOMER_ID>0
+                                   THEN c.BELONG_USER_ID
+                               END) AS BELONG_USER_ID
+                      FROM  TSK_MICRO_TASK_TARGET t LEFT JOIN CRM_CUSTOMER c
+                        ON
+                            t.CUSTOMER_ID=c.CUSTOMER_ID ) x
+                INNER JOIN
+                           (
+                               SELECT * FROM (VALUES ]]>
+		<isNotEmpty property="tskTargetList">
+			<iterate property="tskTargetList" conjunction=",">
+				(#tskTargetList[].taskId# , #tskTargetList[].userId# ,
+				#tskTargetList[].phoneNumber#,#tskTargetList[].age#,#tskTargetList[].customerName#)
+			</iterate>
+		</isNotEmpty>
+                   <![CDATA[
+                           ) AS (TASKID, USERID , PHONENUMBER, AGE, CUSTOMERNAME)
+                           ) temp
+                         ON
+                           (
+                             temp.TASKID=x.TASK_ID 
+                             AND temp.USERID=x.USER_ID 
+                             AND temp.PHONENUMBER=x.PHONE_NUMBER 
+                             AND temp.CUSTOMERNAME=x.CUSTOMER_NAME 
+                             AND temp.AGE>0
+                            ))
+                   ]]>
+	</select>
+
+	<!-- 执行营销任务时将新增的客户ID赋给任务 -->
+	<update id="exeMarkTaskAssignCusId" parameterClass="HashMap">
+		<![CDATA[
+		UPDATE TSK_MICRO_TASK_TARGET a
+        SET
+          a.CUSTOMER_ID=$cusId$ 
+        WHERE (a.CUSTOMER_ID IS NULL OR a.CUSTOMER_ID = 0)
+        ]]>
+		<isNotEmpty property="taskTargetId" prepend="and">
+		  <![CDATA[a.TASK_TARGET_ID=#taskTargetId#]]>
+		</isNotEmpty>
+		AND a.IS_FINISH = 1
+	</update>
+
+	<!--通过电话号码，任务ID查询任务目标 -->
+	<select id="getListByPhoneAndTaskId" parameterClass="HashMap"
+		resultMap="QueryByPhoneAndUserResult">
+	    <![CDATA[
+	       SELECT TASK_TARGET_ID,USER_ID,CUSTOMER_ID,TASK_ID,CUSTOMER_NAME,0 as PHONE_NUMBER,0 as BELONG_USER_ID FROM TSK_MICRO_TASK_TARGET
+	    ]]>
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="userId" prepend="and">
+		      	<![CDATA[USER_ID = #userId#]]>
+			</isNotEmpty>
+			<isNotEmpty property="phoneNumber" prepend="and">
+	          	<![CDATA[PHONE_NUMBER = #phoneNumber#]]>
+			</isNotEmpty>
+			<isNotEmpty property="taskId" prepend="and">
+			  	<![CDATA[TASK_ID=#taskId#]]>
+			</isNotEmpty>
+			AND IS_FINISH = 1
+		</dynamic>
+	</select>
+
+    <select id="getCustomerTaskCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(*) from tsk_micro_task_target where is_finish = 0
+        <isNotEmpty property="userId" prepend="and">
+            user_id=#userId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            customer_id=#customerId#
+        </isNotEmpty>
+    </select>
+
+</sqlMap>

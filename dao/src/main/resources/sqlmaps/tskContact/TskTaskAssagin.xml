@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="AssignTaskBeanSQL"> 
+	<typeAlias alias="TskContactReportBean"
+		type="com.banger.mobile.domain.model.tskContact.TskContactReportBean" />
+	<typeAlias alias="CusRelatedTskContactBean"
+		type="com.banger.mobile.domain.model.tskContact.CusRelatedTskContactBean" />
+		
+	<typeAlias alias="TaskPlanCustomerDetailBean"
+		type="com.banger.mobile.domain.model.tskContact.TaskPlanCustomerDetailBean" />
+	<typeAlias alias="TskTaskPlanReportBean"
+		type="com.banger.mobile.domain.model.tskContact.TskTaskPlanReportBean" />
+	
+	<!-- 任务完成统计报表 -->
+	<resultMap class="TskContactReportBean" id="TskContactReportBeanResult">
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="EXECUTE_USER_NAME" property="executeUserName" />
+		<result column="TASK_COUNT" property="taskCount"/>
+		<result column="FINISH_RATE" property="finishRate"/>
+		<result column="TWENTY_FIVE_RATE" property="twentyFiveRate" />
+		<result column="FIFTY_RATE" property="fiftyRate" />
+		<result column="SEVENTY_FIVE_RATE" property="seventyFiveRate" />
+		<result column="HUNDRED_RATE" property="hundredRate" />
+	</resultMap>
+	
+	<!-- 计划执行情况统计报表 -->
+	<resultMap class="TskTaskPlanReportBean" id="TskTaskPlanReportBeanResult">
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="EXECUTE_USER_NAME" property="executeUserName" />
+		<result column="PLAN_COUNT" property="planCount"/>
+		<result column="PLAN_FINISH_COUNT" property="planFinishCount"/>
+		<result column="PLAN_FINISH_LEVEL_COUNT" property="planFinishLevelCount" />
+		<result column="PLAN_LEVEL_COUNT" property="planLevelCount" />
+		<result column="PLAN_TASK_COUNT" property="planTaskCount" />
+		<result column="PLAN_RATE" property="planRate" />
+	</resultMap>
+	
+	<!-- 计划执行情况报表明细 -->
+	<resultMap class="TaskPlanCustomerDetailBean" id="TaskPlanCustomerDetailBeanResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="TASK_PLAN_ID" property="taskPlanId" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="TASK_PLAN_DATE" property="taskPlanDate" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="REMARK" property="remark" />
+		<result column="TASK_PLAN_COUNT" property="taskPlanCount" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="SEX" property="sex" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="AGE" property="age" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="USER_NAME" property="userName" />
+		<result column="PHONE_NO" property="phoneNo"/>
+		<result column="CUSTOMER_NAME_EXTERNAL" property="customerNameExternal" />
+		<result column="IS_DEL" property="isDel"/>
+	</resultMap>
+	
+	<!-- CusRelatedTskContactBean报表明细 -->
+	<resultMap class="CusRelatedTskContactBean" id="CusRelatedTskContactBeanResult">
+		<result column="CONTACT_ID" property="contactId" />
+		<result column="CONTACT_TITLE" property="contactTitle" />
+		<result column="START_DATE" property="startDate"/>
+		<result column="END_DATE" property="endDate" />		
+		<result column="IS_EMERGENCY" property="isEmergency" />
+		<result column="TASK_PURPOSE_NAME" property="contactPurposeName"/>		
+		<result column="USER_NAME" property="assignUserName" />
+		<result column="HASFINISHED" property="hasFinishedTask" />
+		<result column="TOTAL" property="totalTask" />
+		<result column="FINISH_RATE" property="finishRate"/>
+	</resultMap>
+	
+	<!-- 任务完成统计报表 -->
+	<select id="GetTaskReportList" parameterClass="java.util.Map" resultMap="TskContactReportBeanResult">
+		<![CDATA[
+		SELECT AAAA.*,U.USER_NAME as EXECUTE_USER_NAME FROM (SELECT USER_ID as execute_user_id,Count(0) as TASK_COUNT ,
+			CASE WHEN sum(TOTAL_EXECUTE)=0 THEN 0 ELSE cast(SUM(FINISH_EXECUTE)*1.0/sum(TOTAL_EXECUTE)*100 as decimal(18,1))END AS FINISH_RATE,
+			sum(CASE WHEN RATE>=0 AND RATE<=25 THEN 1 ELSE 0 END ) as TWENTY_FIVE_RATE,
+			sum(CASE WHEN RATE>25 AND RATE<=50 THEN 1 ELSE 0 END ) as FIFTY_RATE,
+			sum(CASE WHEN RATE>50 AND RATE<=75 THEN 1 ELSE 0 END ) as SEVENTY_FIVE_RATE,
+			sum(CASE WHEN RATE>75 AND RATE<=100 THEN 1 ELSE 0 END ) as HUNDRED_RATE 
+		FROM (
+			Select CONTACT_ID,EXECUTE_ID,USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE,
+				CASE WHEN TOTAL_EXECUTE=0 THEN 0 ELSE cast(FINISH_EXECUTE*1.0/TOTAL_EXECUTE*100 as decimal(18,1))END AS RATE
+			from (
+					Select A.CONTACT_ID,B.EXECUTE_ID,B.USER_ID,
+						(Select Count(0) from TSK_CONTACT_TARGET where EXECUTE_ID = B.EXECUTE_ID) as TOTAL_EXECUTE,
+						(Select Count(0) from TSK_CONTACT_TARGET where EXECUTE_ID = B.EXECUTE_ID AND IS_FINISH = 1) as FINISH_EXECUTE
+					from TSK_CONTACT as A INNER JOIN TSK_CONTACT_EXECUTE AS B on A.CONTACT_ID=B.CONTACT_ID and A.IS_NEXT_CONTACT=0 AND A.IS_SUSPEND=0
+					WHERE A.IS_DEL=0 
+		]]>
+		 <isNotEmpty property="purpostId">
+		 	<![CDATA[
+		 		and A.CONTACT_PURPOSE=$purpostId$
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="userIds">
+		 	<![CDATA[
+		 		and B.USER_ID IN ($userIds$)
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeDateSearch">
+		 	<![CDATA[
+		 		$executeDateSearch$
+		 	]]>
+		 </isNotEmpty>
+		 <![CDATA[ 
+		 	) as AA WHERE AA.TOTAL_EXECUTE>0) AS AAA GROUP BY USER_ID) AS AAAA
+		LEFT JOIN SYS_USER AS U ON U.USER_ID = AAAA.execute_user_id order by FINISH_RATE DESC 
+		 ]]>
+	</select>
+	
+	<!-- 任务完成统计报表(分配者) -->
+	<select id="GetTaskReportAssignList" parameterClass="java.util.Map" resultMap="TskContactReportBeanResult">
+		<![CDATA[ 
+			SELECT AAAA.*,U.USER_NAME as EXECUTE_USER_NAME FROM (SELECT ASSIGN_USER_ID as execute_user_id,Count(0) as TASK_COUNT ,
+			    CASE WHEN sum(TOTAL_EXECUTE)=0 THEN 0 ELSE cast(SUM(FINISH_EXECUTE)*1.0/sum(TOTAL_EXECUTE)*100 as decimal(18,1))END AS FINISH_RATE,
+			    sum(CASE WHEN RATE>=0 AND RATE<=25 THEN 1 ELSE 0 END ) as TWENTY_FIVE_RATE,
+			    sum(CASE WHEN RATE>25 AND RATE<=50 THEN 1 ELSE 0 END ) as FIFTY_RATE,
+			    sum(CASE WHEN RATE>50 AND RATE<=75 THEN 1 ELSE 0 END ) as SEVENTY_FIVE_RATE,
+			    sum(CASE WHEN RATE>75 AND RATE<=100 THEN 1 ELSE 0 END ) as HUNDRED_RATE 
+			FROM (
+			    Select CONTACT_ID,ASSIGN_USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE,
+			        CASE WHEN TOTAL_EXECUTE=0 THEN 0 ELSE cast(FINISH_EXECUTE*1.0/TOTAL_EXECUTE*100 as decimal(18,1))END AS RATE
+			    from (
+			            SELECT A.CONTACT_ID,A.ASSIGN_USER_ID,
+			                (Select Count(0) from TSK_CONTACT_TARGET where CONTACT_ID = A.CONTACT_ID) as TOTAL_EXECUTE,
+			                (Select Count(0) from TSK_CONTACT_TARGET where CONTACT_ID = A.CONTACT_ID AND IS_FINISH = 1) as FINISH_EXECUTE
+			            FROM TSK_CONTACT as A INNER JOIN TSK_CONTACT_TARGET AS B on A.CONTACT_ID=B.CONTACT_ID and A.IS_NEXT_CONTACT=0 AND A.IS_SUSPEND=0
+			            WHERE A.IS_DEL=0 
+		  ]]>
+		 <isNotEmpty property="purpostId">
+		 	<![CDATA[
+		 		and A.CONTACT_PURPOSE=$purpostId$ 
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="userIds">
+		 	<![CDATA[
+		 		and A.ASSIGN_USER_ID IN ($userIds$)
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeDateSearch">
+		 	<![CDATA[
+		 		$executeDateSearch$
+		 	]]>
+		 </isNotEmpty>
+		 <![CDATA[
+			         ) AS AA WHERE AA.TOTAL_EXECUTE>0 
+			    group by CONTACT_ID,ASSIGN_USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE 
+			) 
+			AS AAA GROUP BY ASSIGN_USER_ID) AS AAAA
+			LEFT JOIN SYS_USER AS U ON U.USER_ID = AAAA.execute_user_id order by FINISH_RATE DESC 
+	    ]]>
+	</select>
+	
+	<!-- 计划执行情况统计报表 -->
+	<select id="GetTaskPlanReportList" parameterClass="java.util.Map" resultMap="TskTaskPlanReportBeanResult">
+		<![CDATA[
+			SELECT 
+			    EXECUTE_USER_ID,
+			    (SELECT USER_NAME FROM SYS_USER WHERE USER_ID=EXECUTE_USER_ID) AS EXECUTE_USER_NAME,
+			    Count(0) as PLAN_COUNT,
+			    sum(case when FINISH_LEVEL=0 then 0 else 1 end) as PLAN_FINISH_COUNT,
+			    sum(case when FINISH_LEVEL=1 then 1 else 0 end) as PLAN_FINISH_LEVEL_COUNT,
+			    sum(case when FINISH_LEVEL=2 then 1 else 0 end) as PLAN_LEVEL_COUNT,
+			    case when Count(0)=0 or Count(0) is null then 0 else cast(sum(case when FINISH_LEVEL=0 then 0 else 1 end)*1.0/Count(0)*100 as decimal(18,1)) end as PLAN_RATE,
+				0 AS PLAN_TASK_COUNT
+			FROM TSK_PLAN AS A inner join TSK_PLAN_TARGET as B on A.PLAN_ID=B.PLAN_ID
+			WHERE EXECUTE_USER_ID IN ($userIds$)  
+		]]>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND to_char(TASK_PLAN_DATE,'yyyy-MM-dd')>='$startDate$'	]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND to_char(TASK_PLAN_DATE,'yyyy-MM-dd')<='$endDate$'	]]>
+		</isNotEmpty>
+		<![CDATA[
+			group by EXECUTE_USER_ID
+			order by PLAN_FINISH_COUNT desc
+		]]>
+	</select>
+	
+	<!-- 查询计划执行情况客户列表明细count -->
+	<select id="GetTaskPlanCustomerCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+	      <![CDATA[
+			Select 
+			    COUNT(0)
+			FROM TSK_PLAN AS A 
+			inner join TSK_PLAN_TARGET as B on A.PLAN_ID=B.PLAN_ID
+			LEFT JOIN CRM_CUSTOMER AS c ON c.CUSTOMER_ID=B.CUSTOMER_ID 
+			LEFT JOIN SYS_USER AS u ON u.USER_ID=c.BELONG_USER_ID 
+			WHERE 
+			    A.EXECUTE_USER_ID=$executeUserId$ 
+		]]> 
+		<isNotEmpty property="planFinishCount">
+			<![CDATA[ AND B.FINISH_LEVEL IN (1,2) ]]>
+		</isNotEmpty>
+		<isNotEmpty property="planFinishLevelCount">
+			<![CDATA[ AND B.FINISH_LEVEL=1 ]]>
+		</isNotEmpty>
+		<isNotEmpty property="planLevelCount">
+			<![CDATA[ AND B.FINISH_LEVEL=2 ]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND to_char(A.TASK_PLAN_DATE,'yyyy-MM-dd')>='$startDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND to_char(A.TASK_PLAN_DATE,'yyyy-MM-dd')<='$endDate$' ]]>
+		</isNotEmpty>
+	</select>
+
+	<!-- 查询计划执行情况客户列表明细列表 -->
+	<select id="GetTaskPlanCustomerPage" resultMap="TaskPlanCustomerDetailBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select k.* from (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+			Select 
+			     B.CUSTOMER_ID,B.CUSTOMER_NAME as CUSTOMER_NAME_EXTERNAL,B.PHONE_NO,B.PLAN_ID AS TASK_PLAN_ID,A.EXECUTE_USER_ID,A.TASK_PLAN_DATE,B.FINISH_LEVEL AS IS_FINISH,B.REMARK,
+			     c.CUSTOMER_NAME,c.SEX,c.CUSTOMER_TITLE,c.DEFAULT_PHONE_TYPE,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.PHONE,c.FAX,c.AGE,c.IS_TRASH as IS_DEL,
+			     case when B.CUSTOMER_ID=0 then #deptName# else u.USER_NAME end as USER_NAME,
+			     CASE WHEN B.CUSTOMER_ID=0 or 
+			     (
+					select num from (
+					    select customer_id,user_id,count(1) as num from (
+					        select * from (select t.customer_id,c.contact_id,
+					                         case when e.user_id is null then 0 else e.user_id end as user_id
+					                         from tsk_contact_target as t
+					                         left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+					                                    and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+					                                    and c.is_next_contact =0 and c.is_del=0 and c.IS_SUSPEND=0
+					         left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+					         where contact_id is not null
+					    ) group by customer_id,user_id
+					) where customer_id=B.CUSTOMER_ID and user_id=$executeUserId$
+			     ) is null
+			     THEN 0 ELSE  
+			     (
+					select num from (
+					    select customer_id,user_id,count(1) as num from (
+					        select * from (select t.customer_id,c.contact_id,
+					                         case when e.user_id is null then 0 else e.user_id end as user_id
+					                         from tsk_contact_target as t
+					                         left join tsk_contact as c on t.contact_id = c.contact_id and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+					                                    and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+					                                    and c.is_next_contact =0 and c.is_del=0 and c.IS_SUSPEND=0
+					         left join tsk_contact_execute as e on e.execute_id = t.execute_id) 
+					         where contact_id is not null
+					    ) group by customer_id,user_id
+					) where customer_id=B.CUSTOMER_ID and user_id=$executeUserId$
+			     ) END as TASK_PLAN_COUNT
+			FROM TSK_PLAN AS A 
+			inner join TSK_PLAN_TARGET as B on A.PLAN_ID=B.PLAN_ID
+			LEFT JOIN CRM_CUSTOMER AS c ON c.CUSTOMER_ID=B.CUSTOMER_ID 
+			LEFT JOIN SYS_USER AS u ON u.USER_ID=c.BELONG_USER_ID 
+			WHERE 
+			    A.EXECUTE_USER_ID=$executeUserId$ 
+		]]> 
+		<isNotEmpty property="planFinishCount">
+			<![CDATA[ AND B.FINISH_LEVEL IN (1,2) ]]>
+		</isNotEmpty>
+		<isNotEmpty property="planFinishLevelCount">
+			<![CDATA[ AND B.FINISH_LEVEL=1 ]]>
+		</isNotEmpty>
+		<isNotEmpty property="planLevelCount">
+			<![CDATA[ AND B.FINISH_LEVEL=2 ]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<![CDATA[ AND to_char(A.TASK_PLAN_DATE,'yyyy-MM-dd')>='$startDate$' ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<![CDATA[ AND to_char(A.TASK_PLAN_DATE,'yyyy-MM-dd')<='$endDate$' ]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY B.FINISH_LEVEL,A.TASK_PLAN_DATE ASC 
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g) k where k.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 任务完成情况统计报表明细(执行者)count -->
+	<select id="GetTaskReportDetailCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+	<![CDATA[	
+	  select count(1)
+			from tsk_contact as c
+			INNER join ( 
+				Select CONTACT_ID,EXECUTE_ID,USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE,
+					CASE WHEN TOTAL_EXECUTE=0 THEN 0 ELSE cast(FINISH_EXECUTE*1.0/TOTAL_EXECUTE*100 as decimal(18,1))END AS RATE
+				from (
+					Select A.CONTACT_ID,B.EXECUTE_ID,B.USER_ID,
+						(Select Count(0) from TSK_CONTACT_TARGET where EXECUTE_ID = B.EXECUTE_ID) as TOTAL_EXECUTE,
+						(Select Count(0) from TSK_CONTACT_TARGET where EXECUTE_ID = B.EXECUTE_ID AND IS_FINISH = 1) as FINISH_EXECUTE
+					from TSK_CONTACT as A INNER JOIN TSK_CONTACT_EXECUTE AS B on A.CONTACT_ID=B.CONTACT_ID and A.IS_NEXT_CONTACT=0 AND A.IS_SUSPEND=0
+			WHERE A.IS_DEL=0 
+		]]>
+		<isNotEmpty property="purpostId">
+		 	<![CDATA[
+		 		AND A.CONTACT_PURPOSE=$purpostId$
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeUserId">
+		 	<![CDATA[
+		 		AND B.USER_ID IN ($executeUserId$)
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeDateSearch">
+		 	<![CDATA[
+		 		$executeDateSearch$
+		 	]]>
+		 </isNotEmpty>
+		<![CDATA[		
+				) as AA WHERE AA.TOTAL_EXECUTE>0
+			) as AAA on AAA.CONTACT_ID = C.CONTACT_ID 
+		]]>
+		<isNotEmpty property="startRateFlag">
+			<![CDATA[AND AAA.RATE>$startRateFlag$ AND AAA.RATE<=$endRateFlag$]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 任务完成情况统计报表明细(执行者)List -->
+	<select id="GetTaskReportDetailPageMap" parameterClass="java.util.Map" resultMap="CusRelatedTskContactBeanResult">
+		<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+					<![CDATA[SELECT * FROM (select k.* from (SELECT rownumber() over() AS NUMROW, g.* from   (
+		         ]]>
+				</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[    
+			select c.*,p.TASK_PURPOSE_NAME,u.user_name,AAA.TOTAL_EXECUTE AS TOTAL,
+			        AAA.FINISH_EXECUTE AS HASFINISHED,
+			        AAA.RATE AS FINISH_RATE
+			from tsk_contact as c
+			left join TSK_TASK_PURPOSE as p on p.TASK_PURPOSE_ID=c.contact_purpose
+			left join sys_user as u on u.user_id=c.assign_user_id
+			INNER join ( 
+			Select CONTACT_ID,EXECUTE_ID,USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE,
+			CASE WHEN TOTAL_EXECUTE=0 THEN 0 ELSE cast(FINISH_EXECUTE*1.0/TOTAL_EXECUTE*100 as decimal(18,1))END AS RATE
+			from (
+			Select A.CONTACT_ID,B.EXECUTE_ID,B.USER_ID,
+			(Select Count(0) from TSK_CONTACT_TARGET where EXECUTE_ID = B.EXECUTE_ID) as TOTAL_EXECUTE,
+			(Select Count(0) from TSK_CONTACT_TARGET where EXECUTE_ID = B.EXECUTE_ID AND IS_FINISH = 1) as FINISH_EXECUTE
+			from TSK_CONTACT as A INNER JOIN TSK_CONTACT_EXECUTE AS B on A.CONTACT_ID=B.CONTACT_ID and A.IS_NEXT_CONTACT=0 AND A.IS_SUSPEND=0
+			WHERE A.IS_DEL=0 
+		]]>
+		<isNotEmpty property="purpostId">
+		 	<![CDATA[
+		 		AND A.CONTACT_PURPOSE=$purpostId$
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeUserId">
+		 	<![CDATA[
+		 		AND B.USER_ID IN ($executeUserId$)
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeDateSearch">
+		 	<![CDATA[
+		 		$executeDateSearch$
+		 	]]>
+		 </isNotEmpty>
+		<![CDATA[		
+				) as AA WHERE AA.TOTAL_EXECUTE>0
+			) as AAA on AAA.CONTACT_ID = C.CONTACT_ID 
+		]]>
+		<isNotEmpty property="startRateFlag">
+			<![CDATA[AND AAA.RATE>$startRateFlag$ AND AAA.RATE<=$endRateFlag$]]>
+		</isNotEmpty>
+		<![CDATA[		
+			
+			ORDER BY c.IS_EMERGENCY DESC,END_DATE
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) k where k.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$ ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 任务完成情况统计报表明细(分配者)count-->
+	<select id="GetTaskReportAssaginDetailCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+	<![CDATA[	
+	 	select count(1)
+		from tsk_contact as c
+		left join sys_user as u on u.user_id=c.assign_user_id
+		INNER join ( 
+		    Select CONTACT_ID,ASSIGN_USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE,
+		        CASE WHEN TOTAL_EXECUTE=0 THEN 0 ELSE cast(FINISH_EXECUTE*1.0/TOTAL_EXECUTE*100 as decimal(18,1))END AS RATE
+		    from (
+		        SELECT A.CONTACT_ID,A.ASSIGN_USER_ID,
+		            (Select Count(0) from TSK_CONTACT_TARGET where CONTACT_ID = A.CONTACT_ID) as TOTAL_EXECUTE,
+		            (Select Count(0) from TSK_CONTACT_TARGET where CONTACT_ID = A.CONTACT_ID AND IS_FINISH = 1) as FINISH_EXECUTE
+		        FROM TSK_CONTACT as A INNER JOIN TSK_CONTACT_TARGET AS B on A.CONTACT_ID=B.CONTACT_ID and A.IS_NEXT_CONTACT=0 AND A.IS_SUSPEND=0
+		        WHERE A.IS_DEL=0
+		        ]]>
+		<isNotEmpty property="purpostId">
+		 	<![CDATA[
+		 		and A.CONTACT_PURPOSE=$purpostId$ 
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeUserId">
+		 	<![CDATA[
+		 		and A.ASSIGN_USER_ID IN ($executeUserId$)
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeDateSearch">
+		 	<![CDATA[
+		 		$executeDateSearch$
+		 	]]>
+		 </isNotEmpty>
+		<![CDATA[ 
+		        ) AS AA WHERE AA.TOTAL_EXECUTE>0
+		    group by CONTACT_ID,ASSIGN_USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE
+		) as AAA on AAA.CONTACT_ID = C.CONTACT_ID 
+		]]>
+		<isNotEmpty property="startRateFlag">
+			<![CDATA[ AND AAA.RATE>$startRateFlag$ AND AAA.RATE<=$endRateFlag$]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 任务完成情况统计报表明细(分配者)List -->
+	<select id="GetTaskReportAssaginDetailPageMap" parameterClass="java.util.Map" resultMap="CusRelatedTskContactBeanResult">
+	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (select k.* from (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+	</isNotEmpty>
+	<![CDATA[    
+		select c.*,p.TASK_PURPOSE_NAME,u.user_name,AAA.TOTAL_EXECUTE AS TOTAL,
+			AAA.FINISH_EXECUTE AS HASFINISHED,
+			AAA.RATE AS FINISH_RATE
+		from tsk_contact as c
+		left join TSK_TASK_PURPOSE as p on p.TASK_PURPOSE_ID=c.contact_purpose
+		left join sys_user as u on u.user_id=c.assign_user_id
+		INNER join ( 
+		    Select CONTACT_ID,ASSIGN_USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE,
+		        CASE WHEN TOTAL_EXECUTE=0 THEN 0 ELSE cast(FINISH_EXECUTE*1.0/TOTAL_EXECUTE*100 as decimal(18,1))END AS RATE
+		    from (
+		        SELECT A.CONTACT_ID,A.ASSIGN_USER_ID,
+		            (Select Count(0) from TSK_CONTACT_TARGET where CONTACT_ID = A.CONTACT_ID) as TOTAL_EXECUTE,
+		            (Select Count(0) from TSK_CONTACT_TARGET where CONTACT_ID = A.CONTACT_ID AND IS_FINISH = 1) as FINISH_EXECUTE
+		        FROM TSK_CONTACT as A INNER JOIN TSK_CONTACT_TARGET AS B on A.CONTACT_ID=B.CONTACT_ID and A.IS_NEXT_CONTACT=0 AND A.IS_SUSPEND=0
+		        WHERE A.IS_DEL=0 
+		        ]]>
+		         <isNotEmpty property="purpostId">
+		 	<![CDATA[
+		 		and A.CONTACT_PURPOSE=$purpostId$ 
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeUserId">
+		 	<![CDATA[
+		 		and A.ASSIGN_USER_ID IN ($executeUserId$)
+		 	]]>
+		 </isNotEmpty>
+		 <isNotEmpty property="executeDateSearch">
+		 	<![CDATA[
+		 		$executeDateSearch$
+		 	]]>
+		 </isNotEmpty>
+		<![CDATA[ 
+		        ) AS AA WHERE AA.TOTAL_EXECUTE>0
+		    group by CONTACT_ID,ASSIGN_USER_ID,TOTAL_EXECUTE,FINISH_EXECUTE
+		) as AAA on AAA.CONTACT_ID = C.CONTACT_ID 
+		]]>
+		<isNotEmpty property="startRateFlag">
+			<![CDATA[ AND AAA.RATE>$startRateFlag$ AND AAA.RATE<=$endRateFlag$]]>
+		</isNotEmpty>
+		<![CDATA[		
+			ORDER BY c.IS_EMERGENCY DESC,END_DATE
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) k where k.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$ ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+</sqlMap>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtTemplateFieldSQL">
+	<typeAlias alias="PdtTemplateField" type="com.banger.mobile.domain.model.pdtProduct.PdtTemplateField" />
+	
+	<!-- 产品类型模版字段表 信息全字段 -->
+	<resultMap class="PdtTemplateField" id="PdtTemplateFieldResult">
+	 	<result column="TEMPLATE_FIELD_ID" property="templateFieldId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="TEMPLATE_FIELD_NAME" property="templateFieldName" />
+		<result column="TEMPLATE_FIELD_TYPE" property="templateFieldType" />
+		<result column="TEMPLATE_FIELD_ORDER" property="templateFieldOrder" />
+		<result column="TEMPLATE_FIELD_SEARCH" property="templateFieldSearch" />
+		<result column="TEMPLATE_FIELD_EXT" property="templateFieldExt" />
+		<result column="IS_BUILTIN" property="isBuiltin" />
+		<result column="IS_DEL" property="isDel" /> 
+	    <result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<cacheModel id="PdtTemplateField-Cache" type="LRU" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="insertPdtTemplateField" />
+		<flushOnExecute statement="updateDefaultPdtTemplateField" />
+		<flushOnExecute statement="updateTemplateField" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+	<!-- 新增模板字段 -->
+	<insert id="insertPdtTemplateField" parameterClass="PdtTemplateField">
+		<![CDATA[
+			insert into PDT_TEMPLATE_FIELD 
+			(
+				TEMPLATE_FIELD_ID, 
+				TEMPLATE_ID, 
+				TEMPLATE_FIELD_NAME, 
+				TEMPLATE_FIELD_TYPE, 
+				TEMPLATE_FIELD_ORDER, 
+				TEMPLATE_FIELD_SEARCH, 
+				TEMPLATE_FIELD_EXT, 
+				IS_BUILTIN, 
+				IS_DEL, 
+				CREATE_DATE, 
+				CREATE_USER
+			) values 
+			(
+				#templateFieldId#,
+				#templateId#,
+				#templateFieldName#,
+				#templateFieldType#,
+				#templateFieldOrder#,
+				#templateFieldSearch#,
+				#templateFieldExt:VARCHAR:null#,
+				#isBuiltin#,
+				0,
+				current timestamp,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="templateFieldId" resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_PRODUCT
+		</selectKey>
+	</insert>
+	
+	<!-- 查询模板下的所有字段 -->
+	<select id="getTempFieldsByTempId" resultMap="PdtTemplateFieldResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+			select * from PDT_TEMPLATE_FIELD where IS_DEL=0 and TEMPLATE_ID = #templateId# 
+			order by TEMPLATE_FIELD_ORDER
+		]]>
+	</select>
+	
+	<!-- 编辑默认模板字段 -->
+	<update id="updateDefaultPdtTemplateField" parameterClass="PdtTemplateField">
+		update PDT_TEMPLATE_FIELD set
+			TEMPLATE_FIELD_NAME=#templateFieldName#,
+			UPDATE_DATE=current timestamp,
+			UPDATE_USER=#updateUser#
+		where TEMPLATE_ID = #templateId# and TEMPLATE_FIELD_ORDER=1
+	</update>
+	 
+	<!-- 获取所有产品模版字段列表 -->
+	<select id="getAllPdtTemplateField"
+		resultMap="PdtTemplateFieldResult" cacheModel="PdtTemplateField-Cache">
+	<![CDATA[
+		select * from PDT_TEMPLATE_FIELD where IS_DEL=0 order by TEMPLATE_FIELD_ORDER asc
+	]]>
+	</select>
+
+	<!-- 根据字段id查询字段对象 -->
+	<select id="getPdtTemplateFieldById" resultMap="PdtTemplateFieldResult" parameterClass="java.lang.Integer">
+		select * from PDT_TEMPLATE_FIELD where TEMPLATE_FIELD_ID=#templateFieldId#
+	</select>
+	
+	<!-- 编辑默认模板字段 -->
+	<update id="updateTemplateField" parameterClass="PdtTemplateField">
+		update PDT_TEMPLATE_FIELD set
+			<isNotEmpty property="templateFieldName">
+				TEMPLATE_FIELD_NAME=#templateFieldName#,
+			</isNotEmpty>
+			<isNotEmpty property="templateFieldOrder">
+				TEMPLATE_FIELD_ORDER=#templateFieldOrder#,
+			</isNotEmpty>
+			<isNotEmpty property="templateFieldExt">
+				TEMPLATE_FIELD_EXT=#templateFieldExt#,
+			</isNotEmpty>
+			<isNotNull property="templateFieldSearch">
+				TEMPLATE_FIELD_SEARCH=#templateFieldSearch#,
+			</isNotNull>
+			<isNotNull property="isBuiltin">
+				IS_BUILTIN=#isBuiltin#,
+			</isNotNull>
+			<isNotNull property="isDel">
+				IS_DEL=#isDel#,
+			</isNotNull>
+			UPDATE_DATE=current timestamp,
+			UPDATE_USER=#updateUser#
+		where TEMPLATE_FIELD_ID = #templateFieldId# 
+	</update>
+</sqlMap>
+

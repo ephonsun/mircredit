@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PadInfoSQL"> 
+	<typeAlias alias="PadInfo" type="com.banger.mobile.domain.model.padManagement.PadInfoCopy" />
+	
+	<!-- PAD设备信息 -->
+	<resultMap class="PadInfo" id="PadInfoResult" >
+		<result column="PAD_INFO_ID" property="padInfoId" />
+		<result column="PAD_CODE" property="padCode" />
+		<result column="SERIAL_NUMBER" property="serialNumber" />
+		<!--<result column="BRAND_TYPE_ID" property="brandTypeId" />
+		<result column="BRAND_SUB_TYPE_ID" property="brandSubTypeId" />
+		<result column="USE_STATUS" property="useStatus" />-->
+		<result column="USER_ID" property="userId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<!--<result column="USE_PERSONNEL" property="usePersonnel"/>
+		<result column="LOGIN_NAME" property="loginName"/>-->
+		<result column="LOGIN_DATE" property="loginDate"/>
+		<!--<result column="LOG_TYPE" property="logType"/>
+		<result column="BRAND_TYPE_NAME" property="brandTypeName"/>
+		<result column="BRAND_SUB_TYPE_NAME" property="padSubTypeName"/>
+		<result column="COUNT_UPLOAD" property="countUpload"/>
+		<result column="COUNT_DOWNLOAD" property="countDownLoad"/>-->
+
+		<result column="BRAND_TYPE" property="brandType"/>
+		<result column="BRAND_SUB_TYPE" property="brandSubType"/>
+		<result column="STATUS" property="status"/>
+		<result column="USER_NAME" property="userName"/>
+
+
+
+
+
+	</resultMap>
+
+	<!--&lt;!&ndash; pad信息列表分页Count &ndash;&gt;-->
+	<select id="GetPadInfoPageCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		select  count    from  SYS_PAD_INFO sp  INNER  join SYS_USER su  on  sp.USER_ID=su.USER_ID
+
+		where 1=1
+		<dynamic>
+			<isNotEmpty property="serialNumber" prepend="and" >
+				<![CDATA[(
+           	SERIAL_NUMBER LIKE '%$serialNumber$%'
+            )]]>
+			</isNotEmpty>
+			<isNotEmpty property="brandType" prepend="and">
+				BRAND_TYPE LIKE '%$brandType$%'
+			</isNotEmpty>
+			<isNotEmpty property="brandSubType" prepend="and">
+				BRAND_SUB_TYPE LIKE '%$brandSubType$%'
+			</isNotEmpty>
+			<isNotEmpty property="userId" prepend="and">
+				su.USER_ID=#userId#
+			</isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and">
+				<![CDATA[
+				LOGIN_DATE >= #startDate#
+				   ]]>
+			</isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and">
+				<![CDATA[
+				LOGIN_DATE <= #endDate#
+				   ]]>
+			</isNotEmpty>
+
+
+		</dynamic>
+
+	</select>
+
+	<!--&lt;!&ndash; pad信息列表分页 &ndash;&gt;
+	<select id="GetPadInfoPage" parameterClass="java.util.Map" resultMap="PadInfoResult">
+		<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+				<![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+		         ]]>
+				</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT P.* FROM(
+			SELECT U.USER_NAME AS USE_PERSONNEL,0 AS COUNT_UPLOAD,0 AS COUNT_DOWNLOAD,
+			(SELECT USERS.USER_NAME AS LOGIN_NAME FROM SYS_PAD_LOG AS SP LEFT JOIN SYS_USER AS USERS ON SP.USER_ID=USERS.USER_ID AND USERS.IS_DEL=0
+			WHERE SP.PAD_LOG_ID=(SELECT MAX(PAD_LOG_ID) FROM SYS_PAD_LOG WHERE PAD_INFO_ID=P.PAD_INFO_ID)),
+			(SELECT LOG_TYPE FROM SYS_PAD_LOG WHERE PAD_LOG_ID=(SELECT MAX(PAD_LOG_ID) FROM SYS_PAD_LOG WHERE PAD_INFO_ID=P.PAD_INFO_ID)) AS LOG_TYPE,
+			(SELECT MAX(LOGIN_DATE) FROM SYS_PAD_LOG WHERE LOG_TYPE=1 AND PAD_INFO_ID=P.PAD_INFO_ID) AS LOGIN_DATE,
+			B.BRAND_TYPE_NAME,S.BRAND_SUB_TYPE_NAME,P.* FROM SYS_PAD_INFO AS P
+			LEFT JOIN SYS_USER AS U ON P.USER_ID=U.USER_ID AND U.IS_DEL=0
+			LEFT JOIN SYS_BRAND_TYPE AS B ON P.BRAND_TYPE_ID=B.BRAND_TYPE_ID
+			LEFT JOIN SYS_BRAND_SUB_TYPE AS S ON P.BRAND_SUB_TYPE_ID=S.BRAND_SUB_TYPE_ID WHERE P.USE_STATUS<>4) P
+			WHERE 1=1
+		]]>
+		<dynamic>
+			<isNotEmpty property="padCode">
+				<![CDATA[ AND P.PAD_CODE LIKE '%$padCode$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty property="serialNumber">
+				<![CDATA[ AND P.SERIAL_NUMBER LIKE '%$serialNumber$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty property="brandTypeId">
+				<![CDATA[ AND P.BRAND_TYPE_ID=$brandTypeId$ ]]>
+			</isNotEmpty>
+			<isNotEmpty property="brandSubTypeId">
+				<![CDATA[ AND P.BRAND_SUB_TYPE_ID=$brandSubTypeId$ ]]>
+			</isNotEmpty>
+			<isNotEmpty property="userId">
+				<![CDATA[ AND P.USER_ID=$userId$ ]]>
+			</isNotEmpty>
+			<isNotEmpty property="useStatus">
+				<![CDATA[ AND P.USE_STATUS=$useStatus$ ]]>
+			</isNotEmpty>
+			<isNotEmpty property="startDate">
+				<![CDATA[ AND P.LOGIN_DATE>=#startDate# ]]>
+			</isNotEmpty>
+			<isNotEmpty property="endDate">
+				<![CDATA[ AND P.LOGIN_DATE<=#endDate# ]]>
+			</isNotEmpty>
+			<isNotEmpty property="logIn">
+				<![CDATA[ AND P.LOG_TYPE=1 ]]>
+			</isNotEmpty>
+			<isNotEmpty property="logOut">
+				<![CDATA[ AND P.LOG_TYPE=2 OR P.LOG_TYPE IS NULL ]]>
+			</isNotEmpty>
+		</dynamic>
+		 ORDER BY P.CREATE_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	&lt;!&ndash; 添加PAD信息 &ndash;&gt;
+	<insert id="InsertPadInfo" parameterClass="PadInfo">
+		<![CDATA[
+			INSERT INTO SYS_PAD_INFO
+			(
+				PAD_INFO_ID,
+				PAD_CODE,
+				SERIAL_NUMBER,
+				BRAND_TYPE_ID,
+				BRAND_SUB_TYPE_ID,
+				USE_STATUS,
+				USER_ID,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#padInfoId#,
+				#padCode#,
+				#serialNumber#,
+				#brandTypeId:INTEGER#,
+				#brandSubTypeId:INTEGER#,
+				#useStatus:INTEGER#,
+				#userId:INTEGER#,
+				current timestamp,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="padInfoId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_PAD_INFO
+		</selectKey>
+	</insert>
+	
+	&lt;!&ndash; 编辑pad信息 &ndash;&gt;
+	<update id="UpdatePadInfo" parameterClass="PadInfo">
+		<![CDATA[ 
+			UPDATE SYS_PAD_INFO SET 
+				PAD_CODE=#padCode#,
+				SERIAL_NUMBER=#serialNumber#,
+				BRAND_TYPE_ID=#brandTypeId:INTEGER#,
+				BRAND_SUB_TYPE_ID=#brandSubTypeId:INTEGER#,
+				USE_STATUS=#useStatus:INTEGER#,
+				USER_ID=#userId:INTEGER#,
+				UPDATE_DATE=current timestamp,
+				UPDATE_USER=#updateUser#
+			WHERE PAD_INFO_ID=#padInfoId#
+		]]>
+	</update>
+	
+	&lt;!&ndash; 根据pad编号查询pad信息 &ndash;&gt;
+	<select id="GetPadInfoByPadCode" parameterClass="PadInfo" resultMap="PadInfoResult">
+		<![CDATA[ 
+			SELECT '' AS USE_PERSONNEL,'' AS BRAND_TYPE_NAME,'' AS BRAND_SUB_TYPE_NAME,0 AS COUNT_UPLOAD,0 AS COUNT_DOWNLOAD,
+			'' AS LOGIN_NAME,current timestamp AS LOGIN_DATE,0 AS LOG_TYPE,P.* 
+			FROM SYS_PAD_INFO AS P WHERE P.USE_STATUS<>4 AND  P.PAD_CODE=#padCode# 
+		]]>
+	</select>
+-->
+	<update id="UpdatePadInfoCopy" parameterClass="java.util.Map">
+			UPDATE SYS_PAD_INFO SET
+			    STATUS=#status#,
+				USER_ID=#userId#,
+				UPDATE_DATE=#updateDate#,
+				UPDATE_USER=#updateUser#,
+				LOGIN_DATE=#loginDate#
+			WHERE SERIAL_NUMBER=#serialNumber#
+
+	</update>
+	<!--&lt;!&ndash; 添加PAD信息 &ndash;&gt;-->
+	<insert id="InsertPadInfoCopy" parameterClass="java.util.Map">
+
+			INSERT INTO SYS_PAD_INFO
+			(
+				PAD_INFO_ID,
+				SERIAL_NUMBER,
+				BRAND_TYPE,
+				BRAND_SUB_TYPE,
+				STATUS,
+				USER_ID,
+				CREATE_DATE,
+				CREATE_USER,
+				LOGIN_DATE
+			)
+			VALUES
+			(
+				#padInfoId:INTEGER#,
+				#serialNumber:VARCHAR:NULL#,
+				#brandType:INTEGER#,
+				#brandSubType:INTEGER#,
+				#status:INTEGER#,
+				#userId:INTEGER#,
+				#createDate:TIMESTAMP#,
+				#createUser:INTEGER#,
+				#loginDate:TIMESTAMP#
+			)
+
+		<selectKey keyProperty="padInfoId" resultClass="java.lang.Integer"
+				   type="pre">
+			values NEXTVAL for SEQ_SYS_PAD_INFO
+		</selectKey>
+	</insert>
+
+
+
+	<!--查所有-->
+	<!-- 根据pad编号查询pad信息 -->
+	<select id="queryPadInfo" parameterClass="java.util.Map" resultMap="PadInfoResult">
+		select  sp.* , su.USER_NAME   from  SYS_PAD_INFO sp  INNER  join SYS_USER su  on  sp.USER_ID=su.USER_ID
+
+		where 1=1
+		<dynamic>
+		<isNotEmpty property="serialNumber" prepend="and" >
+			<![CDATA[(
+           	SERIAL_NUMBER LIKE '%$serialNumber$%'
+            )]]>
+		</isNotEmpty>
+		<isNotEmpty property="brandType" prepend="and">
+			BRAND_TYPE LIKE '%$brandType$%'
+		</isNotEmpty>
+		<isNotEmpty property="brandSubType" prepend="and">
+			BRAND_SUB_TYPE LIKE '%$brandSubType$%'
+		</isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+			su.USER_ID=#userId#
+		</isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and">
+		           <![CDATA[
+				LOGIN_DATE >= #startDate#
+				   ]]>
+			</isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and">
+				<![CDATA[
+				LOGIN_DATE <= #endDate#
+				   ]]>
+			</isNotEmpty>
+			<isNotEmpty property="status" prepend="and">
+				STATUS = #status#
+			</isNotEmpty>
+
+
+		</dynamic>
+
+
+	</select>
+
+
+	
+	<!--&lt;!&ndash; 根据pad序列号查询pad信息 &ndash;&gt;-->
+	<select id="GetPadInfoBySerialNumber" parameterClass="String" resultMap="PadInfoResult">
+		select  sp.* , su.USER_NAME   from  SYS_PAD_INFO sp  INNER  join SYS_USER su  on  sp.USER_ID=su.USER_ID
+		where  SERIAL_NUMBER=#serialNumber# fetch first 1 rows only
+	</select>
+	
+	<!--&lt;!&ndash; 查询pad信息 &ndash;&gt;
+	<select id="GetPadInfoById" parameterClass="PadInfo" resultMap="PadInfoResult">
+		<![CDATA[ 
+			SELECT U.USER_NAME AS USE_PERSONNEL,B.BRAND_TYPE_NAME,S.BRAND_SUB_TYPE_NAME,
+			(SELECT SUM(COUNT_UPLOAD) AS COUNT_UPLOAD FROM SYS_PAD_UPLOAD_LOG WHERE PAD_INFO_ID=P.PAD_INFO_ID),
+			(SELECT SUM(COUNT_DOWNLOAD) AS COUNT_DOWNLOAD FROM SYS_PAD_UPLOAD_LOG WHERE PAD_INFO_ID=P.PAD_INFO_ID),
+			(SELECT LOG_TYPE FROM SYS_PAD_LOG WHERE PAD_LOG_ID=(SELECT MAX(PAD_LOG_ID) FROM SYS_PAD_LOG WHERE USER_ID=P.USER_ID  AND PAD_INFO_ID=P.PAD_INFO_ID)) AS LOG_TYPE,
+			'' AS LOGIN_NAME,current timestamp AS LOGIN_DATE,P.* 
+			FROM SYS_PAD_INFO AS P 
+			LEFT JOIN SYS_USER AS U ON P.USER_ID=U.USER_ID AND U.IS_DEL=0 
+			LEFT JOIN SYS_BRAND_TYPE AS B ON P.BRAND_TYPE_ID=B.BRAND_TYPE_ID 
+			LEFT JOIN SYS_BRAND_SUB_TYPE AS S ON P.BRAND_SUB_TYPE_ID=S.BRAND_SUB_TYPE_ID 
+			WHERE P.USE_STATUS<>4 AND P.PAD_INFO_ID=#padInfoId# 
+		]]>
+	</select>
+	
+	&lt;!&ndash; 启用、禁用、停用PAD &ndash;&gt;
+	<update id="ChangePadStatus" parameterClass="PadInfo">
+		<![CDATA[ 
+			UPDATE SYS_PAD_INFO SET 
+				USE_STATUS=#useStatus:INTEGER#,
+		]]>
+		<isNotEmpty property="userId">
+			<![CDATA[ USER_ID=#userId:INTEGER#, ]]>
+		</isNotEmpty>
+		<![CDATA[
+				UPDATE_DATE=current timestamp,
+				UPDATE_USER=#updateUser#
+			WHERE PAD_INFO_ID=#padInfoId# 
+		]]>
+	</update>
+	
+	&lt;!&ndash; PAD管理-禁用停用(登录验证) &ndash;&gt;
+	<select id="GetPadUseStatus" parameterClass="java.util.Map" resultMap="PadInfoResult">
+		<![CDATA[ 
+			SELECT U.ACCOUNT AS USE_PERSONNEL,'' AS BRAND_TYPE_NAME,'' AS BRAND_SUB_TYPE_NAME,0 AS COUNT_UPLOAD,0 AS COUNT_DOWNLOAD,
+			'' AS LOGIN_NAME,current timestamp AS LOGIN_DATE,0 AS LOG_TYPE,P.* 
+			FROM SYS_PAD_INFO AS P 
+			LEFT JOIN SYS_USER AS U ON U.USER_ID=P.USER_ID AND U.IS_DEL=0 
+			WHERE P.USE_STATUS<>4 AND P.SERIAL_NUMBER=#serialNumber# 
+		]]>
+	</select>-->
+</sqlMap>
+
+
+
+

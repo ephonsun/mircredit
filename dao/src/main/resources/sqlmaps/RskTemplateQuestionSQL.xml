@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskTemplateQuestionSQL">
+	<typeAlias alias="RskTemplateQuestion" type="com.banger.mobile.domain.model.evaluation.RskTemplateQuestion" />
+	<typeAlias alias="Question" type="com.banger.mobile.domain.model.pad.Question" />
+
+	<!-- 风险测评模板题目表-->
+	<!-- RskTemplateQuestionSQL信息全字段  -->
+	<resultMap class="RskTemplateQuestion" id="RskTemplateQuestionResult">
+		<result column="QUESTION_ID" property="questionId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="QUESTION_DETAIL" property="questionDetail" />
+		<result column="QUESTION_TYPE" property="questionType" />
+		<result column="SORTNO" property="sortno" />
+		<result column="HIGHEST_SCORE" property="highestScore" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- pad 字段  -->
+	<resultMap class="Question" id="QuestionResult">
+		<result column="QUESTION_ID" property="questionId" />
+		<result column="QUESTION_DETAIL" property="questionDetail" />
+		<result column="QUESTION_TYPE" property="questionType" />
+		<result column="SORTNO" property="sortno" />
+	</resultMap>
+
+		<!-- 增加一条风险测评模板题目-->
+	<insert id="addRskTemplateQuestion" parameterClass="RskTemplateQuestion">
+     <![CDATA[
+		insert into RSK_TEMPLATE_QUESTION
+		(
+		 QUESTION_ID,
+		 TEMPLATE_ID,
+		 QUESTION_DETAIL,
+		 QUESTION_TYPE,
+		 SORTNO,
+		 HIGHEST_SCORE,
+		 IS_DEL,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#questionId#,
+		#templateId#,
+	    #questionDetail#,
+	    #questionType#,
+	    #sortno#,
+	    #highestScore#,
+	    #isDel#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="questionId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_RSK_TEMPLATE_QUESTION 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 风险测评模板题目修改-->
+	<update id="updateRskTemplateQuestion" parameterClass="RskTemplateQuestion">
+	 <![CDATA[
+             update RSK_TEMPLATE_QUESTION  set 
+		 ]]>	
+		 <isNotEmpty property="templateId">
+				TEMPLATE_ID=#templateId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="questionDetail">
+				QUESTION_DETAIL=#questionDetail#,
+		 </isNotEmpty>
+		 <isNotEmpty property="sortno">
+				SORTNO=#sortno#,
+		 </isNotEmpty>
+		  <isNotEmpty property="questionType">
+				QUESTION_TYPE=#questionType#,
+		 </isNotEmpty>
+		 <isNotEmpty property="highestScore">
+				HIGHEST_SCORE=#highestScore#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isDel">
+				IS_DEL=#isDel#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where QUESTION_ID=#questionId#
+         ]]> 
+	</update>
+ 
+  	<!-- 风险测评模板题目分页count -->
+  <select id="getRskTemplateQuestionCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   RSK_TEMPLATE_QUESTION a
+                   left join RSK_INTERVAL_TYPE b on a.QUESTION_TYPE=b.INTERVAL_TYPE_ID 
+                   where a.IS_DEL=0
+     ]]>
+      <dynamic>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ TEMPLATE_ID=#templateId#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  
+  
+  	<!-- 根据id得到风险测评模板题目-->	
+  <select id="getRskTemplateQuestionById"  resultMap="RskTemplateQuestionResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_TEMPLATE_QUESTION where QUESTION_ID=#questionId# and IS_DEL=0 
+	]]>
+  </select>
+  
+  
+    <!-- 风险测评模板题目是否重复-->	
+  <select id="checkQuestionName" resultClass="java.lang.Integer"  parameterClass="java.util.Map">
+	<![CDATA[
+		select count(*)  from RSK_TEMPLATE_QUESTION where QUESTION_DETAIL=#questionName# and TEMPLATE_ID=#templateId# and IS_DEL=0 
+	]]>
+  </select>
+  
+  
+   <!-- 根据id得到风险测评题目最大的排序号-->	
+  <select id="getRskTemplateQuestionSortnoMax"  resultMap="RskTemplateQuestionResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_TEMPLATE_QUESTION where TEMPLATE_ID=#templateId#  order by SORTNO desc  fetch first 1  rows only
+	]]>
+  </select>
+  
+  	<!-- 分页记录 -->
+  <select id="getRskTemplateQuestionPageMap" resultMap="RskTemplateQuestionResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		  select 
+                   *
+             from 
+                   RSK_TEMPLATE_QUESTION a
+                   left join RSK_INTERVAL_TYPE b on a.QUESTION_TYPE=b.INTERVAL_TYPE_ID 
+                   where a.IS_DEL=0
+	]]>
+	 <dynamic>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ TEMPLATE_ID=#templateId#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by a.SORTNO
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		
+  </select>
+  <select id="getRskTemplateQuestionList" resultMap="RskTemplateQuestionResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		  select 
+                   *
+             from 
+                   RSK_TEMPLATE_QUESTION a
+                   left join RSK_INTERVAL_TYPE b on a.QUESTION_TYPE=b.INTERVAL_TYPE_ID 
+                   where a.IS_DEL=0
+	]]>
+	 <dynamic>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ a.TEMPLATE_ID=#templateId#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by a.SORTNO
+ </select>		
+  
+
+  <!-- for pad 取得试题 -->
+  <select id="getAllTemplateQuestionForPad"  resultMap="QuestionResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select QUESTION_ID,QUESTION_DETAIL,QUESTION_TYPE,SORTNO 
+		from RSK_TEMPLATE_QUESTION 
+		where TEMPLATE_ID=#templateId# and IS_DEL=0
+		order by SORTNO
+	]]>
+  </select>
+
+</sqlMap>
+
+
+
+

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanGuarantorSQL">
+	<typeAlias alias="LnLoanGuarantor" type="com.banger.mobile.domain.model.loan.LnLoanGuarantor" />
+	<typeAlias alias="LnLoanGuarantorBean" type="com.banger.mobile.domain.model.loan.LnLoanGuarantorBean" />
+
+	<!-- 担保人表 全字段  -->
+	
+	<resultMap class="LnLoanGuarantor" id="LnLoanGuarantorResult" >
+		<result column="GUARANTOR_ID" property="guarantorId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="COMPANY_ADDRESS" property="companyAddress" />
+		<result column="PETITIONER_RELATE" property="petitionerRelate" />
+		<result column="IS_KOWN_LOAN" property="isKownLoan" />
+		<result column="IS_EXCEPTION" property="isException" />
+		<result column="CHECK_MESSAGE" property="checkMessage" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!--申请贷款 客户字段-->
+    <resultMap class="LnLoanGuarantorBean" id="LnLoanGuarantorBeanResult" extends="LnLoanGuarantorResult">
+        <result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="COMPANY" property="company" />
+		<result column="FAX" property="fax" />
+		<result column="ID_CARD" property="idCard" />
+        <result column="BELONG_USER_ID" property="belongUserId"/>
+	</resultMap>
+
+    <!-- 删除 -->
+    <delete id="deleteLnLoanGuarantor" parameterClass="Integer">
+        DELETE FROM LN_LOAN_GUARANTOR WHERE GUARANTOR_ID = #guId#
+    </delete>
+
+	<!-- 增加 -->
+	<insert id="addLnLoanGuarantor" parameterClass="LnLoanGuarantor">
+		<![CDATA[
+	 	INSERT INTO LN_LOAN_GUARANTOR
+		    (
+		        GUARANTOR_ID,
+		        LOAN_ID,
+		        CUSTOMER_ID,
+		        COMPANY_ADDRESS,
+		        PETITIONER_RELATE,
+		        IS_KOWN_LOAN,
+		        IS_EXCEPTION,
+		        CHECK_MESSAGE,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #guarantorId#,
+		        #loanId:INTEGER#,
+				#customerId:INTEGER#,
+				#companyAddress:VARCHAR:NULL#,
+				#petitionerRelate:VARCHAR:NULL#,
+				#isKownLoan:INTEGER#,
+				#isException:INTEGER#,
+				#checkMessage:VARCHAR:NULL#,
+		        current timestamp,
+			    current timestamp,
+		        #createUser:INTEGER#,
+		        #updateUser:INTEGER#
+		    )
+      ]]>
+		<selectKey keyProperty="guarantorId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_LOAN_GUARANTOR
+		</selectKey>
+	</insert>
+	
+	<!-- 查询所有担保人数据 -->
+	<select id="getAllLnLoanGuarantorBeanByConds" resultMap="LnLoanGuarantorBeanResult" parameterClass="java.util.Map">
+		SELECT A.*,B.CUSTOMER_ID,B.COMPANY,B.CUSTOMER_NAME,B.DEFAULT_PHONE_TYPE,B.MOBILE_PHONE1,B.MOBILE_PHONE2,B.PHONE,
+        B.FAX,B.ID_CARD,B.BELONG_USER_ID
+        FROM LN_LOAN_GUARANTOR AS A
+		INNER JOIN CRM_CUSTOMER AS B ON A.CUSTOMER_ID = B.CUSTOMER_ID
+		WHERE 1=1
+		<isNotEmpty prepend="and" property="loanId">
+			<![CDATA[A.LOAN_ID = #loanId#]]>
+		</isNotEmpty>
+	</select>
+
+    <!--修改担保人数据 先删除原先的担保人数据，然后再插入新的担保人数据-->
+    <delete id="deleteLoanGuarantorById" parameterClass="Integer">
+        delete ln_loan_guarantor where loan_id=#loanId#
+    </delete>
+
+    <update id="updateLoanGuarantorById" parameterClass="com.banger.mobile.domain.model.loan.LnLoanGuarantor">
+        UPDATE LN_LOAN_GUARANTOR SET LOAN_ID=#loanId:INTEGER#
+        <isNotEmpty property="customerId" prepend=",">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="companyAddress" prepend=",">
+            COMPANY_ADDRESS=#companyAddress#
+        </isNotEmpty>
+        <isNotEmpty property="petitionerRelate" prepend=",">
+            PETITIONER_RELATE=#petitionerRelate#
+        </isNotEmpty>
+         <isNotEmpty property="isKownLoan" prepend=",">
+            IS_KOWN_LOAN=#isKownLoan#
+        </isNotEmpty>
+        
+        <isNotEmpty property="isException" prepend=",">
+            IS_EXCEPTION=#isException#
+        </isNotEmpty>
+        
+        <isNotEmpty property="checkMessage" prepend=",">
+            CHECK_MESSAGE=#checkMessage#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+    </update>
+
+    <select id="getGuarantorCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        SELECT COUNT(1) FROM LN_LOAN_GUARANTOR WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+    </select>
+
+    <update id="updateLoanGuarantor" parameterClass="java.util.Map">
+        UPDATE LN_LOAN_GUARANTOR SET LOAN_ID=LOAN_ID ,UPDATE_DATE=#updateDate#,UPDATE_USER=#updateUser#
+        <isNotEmpty property="oldCustomerId" prepend=",">
+            CUSTOMER_ID=#oldCustomerId#
+        </isNotEmpty>
+        <isNotEmpty property="companyAddress" prepend=",">
+            COMPANY_ADDRESS=#companyAddress#
+        </isNotEmpty>
+        <isNotEmpty property="petitionerRelate" prepend=",">
+            PETITIONER_RELATE=#petitionerRelate#
+        </isNotEmpty>
+         <isNotEmpty property="isKownLoan" prepend=",">
+            IS_KOWN_LOAN=#isKownLoan#
+        </isNotEmpty>
+
+        <isNotEmpty property="isException" prepend=",">
+            IS_EXCEPTION=#isException#
+        </isNotEmpty>
+
+        <isNotEmpty property="checkMessage" prepend=",">
+            CHECK_MESSAGE=#checkMessage#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="oldCustomerId" prepend="and">
+            CUSTOMER_ID=#oldCustomerId#
+        </isNotEmpty>
+    </update>
+
+    <update id="updateLoanGuarantorByLoan" parameterClass="java.util.Map">
+        UPDATE LN_LOAN_GUARANTOR SET LOAN_ID=LOAN_ID,UPDATE_DATE=current timestamp
+        <isNotEmpty property="customerId" prepend=",">
+            CUSTOMER_ID=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="companyAddress" prepend=",">
+            COMPANY_ADDRESS=#companyAddress#
+        </isNotEmpty>
+        <isNotEmpty property="petitionerRelate" prepend=",">
+            PETITIONER_RELATE=#petitionerRelate#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            LOAN_ID=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="oldCustomerId" prepend="and">
+            CUSTOMER_ID=#oldCustomerId#
+        </isNotEmpty>
+    </update>
+
+    <select id="selectGuarantorSingle" parameterClass="java.util.Map" resultMap="LnLoanGuarantorResult">
+         select * from LN_LOAN_GUARANTOR
+         where loan_id=#loanId# and customer_id=#customerId# fetch first 1 row only
+    </select>
+
+    <delete id="delGuaByLoanCustomerId" parameterClass="java.util.Map">
+        delete from LN_LOAN_GUARANTOR where loan_id=#loanId# and customer_id=#customerId#
+    </delete>
+
+    <delete id="delDeletedGuaByCusList" parameterClass="java.util.Map">
+        delete from LN_LOAN_GUARANTOR where loan_id=#loanId# and customer_id not in
+        <iterate property="customerIdList" open="(" close=")" conjunction=",">
+            #customerIdList[]#
+        </iterate>
+    </delete>
+
+    <select id="getCusIdListByLoanId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+        select customer_id from LN_LOAN_GUARANTOR where loan_id=#loanId#
+    </select>
+    <delete id="deleteLnLoanGuarantorByLoanId" parameterClass="java.lang.Integer">
+        delete from LN_LOAN_GUARANTOR where loan_id=#loanId#
+    </delete>
+</sqlMap>
+
+
+
+

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SpecialDataAuthSQL">
+	<typeAlias alias="SpecialDataAuthBean" type="com.banger.mobile.domain.model.specialData.SpecialDataAuthBean" />
+	<typeAlias alias="SpecialDataAuth" type="com.banger.mobile.domain.model.specialData.SpecialDataAuth" />
+
+	<!-- 数据权限树 -->
+    <resultMap class="SpecialDataAuthBean" id="SpecialDataAuthBeanResult">
+		<result column="DATA_ID" property="dataId" />
+		<result column="DATA_PARENT_ID" property="dataParentId" />
+		<result column="DATA_NAME" property="dataName" />
+		<result column="TYPE" property="type" />
+        <result column="DATA_CODE" property="dataCode"/>
+	</resultMap>
+	
+	<!-- 数据权限角色表 -->
+	  <resultMap class="SpecialDataAuth" id="SpecialDataAuthResult">
+		<result column="DATA_AUTH_ID" property="dataAuthId" />
+		<result column="ROLE_ID" property="roleId" />
+		<result column="DATA_ID" property="dataId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<cacheModel type="OSCACHE" id="DataAuthSQL-Cache" serialize="true" readOnly="true">
+		<flushInterval hours="24"/>
+		<flushOnExecute statement="insertSysDataAuth"/>
+		<flushOnExecute statement="deleteSysDataAuth"/>
+	</cacheModel>
+	
+  <!-- 查询数据权限树 -->
+  <select id="getDataAuthTree" resultMap="SpecialDataAuthBeanResult">
+  	<![CDATA[
+  		select DATA_ID,DATA_PARENT_ID,DATA_NAME,'Data' as TYPE,DATA_CODE  from SYS_DATA where IS_DEL = 0
+  	]]>
+  </select>
+  <!-- 查看角色对应的数据权限 -->
+  <select id="getDetailDataByRoleId" resultMap="SpecialDataAuthBeanResult" parameterClass="java.lang.Integer">
+  <![CDATA[
+  select Data.DATA_ID,Data.DATA_PARENT_ID,Data.DATA_NAME,'Data' as TYPE ,Data.DATA_CODE
+  	  from SYS_DATA as Data,SYS_DATA_AUTH as AUTH where Data.IS_DEL = 0 AND Data.DATA_ID=AUTH.DATA_ID and AUTH.ROLE_ID=#roleId# 
+  	]]>
+  </select>
+  
+   <!-- 新增角色数据权限 -->
+  <insert id="insertSysDataAuth" parameterClass="SpecialDataAuth">
+ 	<![CDATA[
+ 		insert into SYS_DATA_AUTH
+ 		(
+ 			DATA_AUTH_ID,
+			ROLE_ID,
+			DATA_ID,
+			CREATE_DATE,
+			CREATE_USER
+ 		)
+ 		values
+ 		(
+ 			#dataAuthId#,
+			#roleId#,
+			#dataId#,
+			current timestamp,
+			#createUser#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="dataAuthId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_SYS_DATA_AUTH
+ 	</selectKey>
+  </insert>
+   <!--删除角色数据权限  -->
+  <delete id="deleteSysDataAuth" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_DATA_AUTH where ROLE_ID = #roleId#
+  	]]>
+  </delete>
+   <!--根据DataId删除角色数据权限  -->
+  <delete id="deleteDataAuthByDataId" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from SYS_DATA_AUTH where DATA_AUTH_ID = #dataAuthId#
+  	]]>
+  </delete>
+  <!-- 根据角色id查询数据权限 -->
+  <select id="getSysDataAuthByRoleId" resultMap="SpecialDataAuthResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from SYS_DATA_AUTH where   ROLE_ID = #roleId#
+  	]]>
+  </select>
+
+    <!-- 根据角色id查询数据权限 -->
+    <select id="getSysDataAuthByMap" resultMap="SpecialDataAuthResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select * from SYS_DATA_AUTH where ROLE_ID in($roleIds$) and DATA_ID in(select DATA_ID from SYS_DATA where IS_DEL = 0 AND DATA_PARENT_ID=#modeType#)
+  	]]>
+  </select>
+  
+  <!-- 根据角色id集合查询数据id -->
+  <select id="getSysDataIdListByRoleId" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+  	select distinct DATA_ID from SYS_DATA_AUTH where ROLE_ID in ($value$)
+  </select>
+
+
+    <!-- 查看角色对应的数据权限 -->
+    <select id="getSysDataAuthCondition" resultMap="SpecialDataAuthBeanResult" parameterClass="java.util.Map">
+  <![CDATA[
+      select d.DATA_ID,d.DATA_PARENT_ID,d.DATA_NAME,'Data' as TYPE ,d.DATA_CODE
+  	  from SYS_DATA as d,SYS_DATA_AUTH as a
+  	  where   d.DATA_ID=a.DATA_ID and a.ROLE_ID in($roleIds$) and a.DATA_ID in(select DATA_ID from SYS_DATA where IS_DEL = 0 AND DATA_CODE=#dataCode#)
+        ]]>
+  </select>
+  
+</sqlMap>

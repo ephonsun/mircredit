@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnExceptionRepaymentPlanSQL">
+    <typeAlias alias="LnExceptionRepaymentPlan" type="com.banger.mobile.domain.model.loan.LnExceptionRepaymentPlan"/>
+
+    <!--LnCancelReason全字段-->
+    <resultMap id="LnExceptionRepaymentPlanResult" class="LnExceptionRepaymentPlan">
+        <result column="EXCEPTION_REPAYMENT_PLAN_ID" property="exceptionRepaymentPlanId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="PLAN_DATE" property="planDate"/>
+        <result column="OWED_PRINCIPAL" property="owedPrincipal"/>
+        <result column="OWED_INTEREST" property="owedInterest"/>
+        <result column="PAID_PRINCIPAL" property="paidPrincipal"/>
+        <result column="PAID_INTEREST" property="paidInterest"/>
+        <result column="REMAINING" property="remaining"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+        <result column="SORTNO" property="sortno" />
+        <result column="STATUS" property="status" />
+    </resultMap>
+
+    <!--查询贷款的异常还款计划-->
+    <select id="queryLnExceptionRepaymentPlan" resultMap="LnExceptionRepaymentPlanResult"  parameterClass="Integer">
+        select * from ln_exception_repayment_plan WHERE loan_id = #loanId#
+         ORDER BY  PLAN_DATE DESC
+    </select>
+
+    <!--查询贷款-->
+    <select id="queryLnExceptionRepaymentPlanById" resultMap="LnExceptionRepaymentPlanResult"  parameterClass="Integer">
+        select * from ln_exception_repayment_plan WHERE EXCEPTION_REPAYMENT_PLAN_ID = #exceptionRepaymentPlanId#
+    </select>
+
+    <!--插入 异常还款计划-->
+    <insert id="insertExceptionRepaymentPlan" parameterClass="LnExceptionRepaymentPlan">
+        INSERT INTO LN_EXCEPTION_REPAYMENT_PLAN
+        (
+        EXCEPTION_REPAYMENT_PLAN_ID,
+        LOAN_ID,
+        PLAN_DATE,
+        OWED_PRINCIPAL,
+        OWED_INTEREST,
+        PAID_PRINCIPAL,
+        PAID_INTEREST,
+        REMAINING,
+        STATUS,
+        SORTNO
+        )
+        VALUES
+        (
+        #exceptionRepaymentPlanId:INTEGER#,
+        #loanId:INTEGER#,
+        #planDate:TIMESTAMP#,
+        #owedPrincipal:DECIMAL#,
+        #owedInterest:DECIMAL#,
+        #paidPrincipal:DECIMAL#,
+        #paidInterest:DECIMAL#,
+        #remaining:DECIMAL#,
+        #status:INTEGER#,
+        #sortno:INTEGER#
+        )
+        <selectKey keyProperty="exceptionRepaymentPlanId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_LN_REPAYMENT_PLAN
+        </selectKey>
+    </insert>
+
+    <!--删除异常还款计划-->
+    <delete id="deleteExceptionRepaymentPlan" parameterClass="Integer">
+        DELETE FROM LN_EXCEPTION_REPAYMENT_PLAN WHERE EXCEPTION_REPAYMENT_PLAN_ID = #exceptionRepaymentPlanId#
+    </delete>
+
+    <!--删除异常还款计划-->
+    <delete id="deleteRepaymentPlanByLoanId" parameterClass="Integer">
+        DELETE FROM LN_EXCEPTION_REPAYMENT_PLAN WHERE LOAN_ID = #loanId#
+    </delete>
+
+    <!--修改 异常还款计划-->
+    <update id="updateExceptionRepaymentPlan" parameterClass="java.util.Map">
+        UPDATE LN_EXCEPTION_REPAYMENT_PLAN SET EXCEPTION_REPAYMENT_PLAN_ID=#exceptionRepaymentPlanId#
+        <isNotEmpty property="status" prepend=",">
+            STATUS=#status#
+        </isNotEmpty>
+        <isNotEmpty property="paidPrincipal" prepend=",">
+            PAID_PRINCIPAL =#paidPrincipal#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="exceptionRepaymentPlanId" prepend="and">
+            EXCEPTION_REPAYMENT_PLAN_ID=#exceptionRepaymentPlanId#
+        </isNotEmpty>
+    </update>
+
+    <!--根据 sortno修改 异常还款计划-->
+    <update id="updateExceptionRepaymentPlanBySortno" parameterClass="java.util.Map">
+        UPDATE LN_EXCEPTION_REPAYMENT_PLAN SET SORTNO=#sortno#
+        <isNotEmpty property="paidPrincipal" prepend=",">
+            PAID_PRINCIPAL=#paidPrincipal#
+        </isNotEmpty>
+        <isNotEmpty property="owedPrincipal" prepend=",">
+            OWED_PRINCIPAL=#owedPrincipal#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="sortno" prepend="and">
+            SORTNO=#sortno#
+        </isNotEmpty>
+    </update>
+
+    <!--得到贷款的最后一期还款期号-->
+    <select id="getLastExceptionSortNoByLoanId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+        select sortno from LN_EXCEPTION_REPAYMENT_PLAN
+        where loan_id=#loanId#
+        order by sortno desc fetch first 1 rows only
+    </select>
+
+    <!--得到贷款的下一期还款期号-->
+    <select id="getExceptionNextSortNoByLoanId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select sortno from LN_EXCEPTION_REPAYMENT_PLAN
+        where loan_id=#loanId#
+        and sortno &gt; #sortno#
+        order by sortno asc fetch first 1 rows only
+    </select>
+
+    <!--得到某笔贷款的最后一期异常还款计划记录-->
+    <select id="getLastExceptionRepaymentPlan" resultMap="LnExceptionRepaymentPlanResult"  parameterClass="Integer">
+        select * from ln_exception_repayment_plan WHERE loan_id = #loanId#
+--         ORDER BY  PLAN_DATE DESC
+--         fetch first 1 rows only
+    </select>
+
+    <!--修改某贷款的sortno号-->
+    <update id="updateSortNoByLoanId" parameterClass="java.util.Map">
+        UPDATE LN_EXCEPTION_REPAYMENT_PLAN SET SORTNO=SORTNO-1
+        WHERE LOAN_ID=#loanId# AND SORTNO &gt; #sortno#
+    </update>
+</sqlMap>

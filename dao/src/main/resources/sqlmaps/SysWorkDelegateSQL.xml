@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysWorkDelegateSQL">
+	<typeAlias alias="SysWorkDelegate" type="com.banger.mobile.domain.model.user.SysWorkDelegate" />
+	
+	<!-- 工作托管表-->
+	<!-- SysWorkDelegateSQL信息全字段  -->
+	<resultMap class="SysWorkDelegate" id="SysWorkDelegateResult">
+		<result column="WORK_DELEGATE_ID" property="workDelegateId" />
+		<result column="USER_ID" property="userId" />
+		<result column="DELEGATE_USER_ID" property="delegateUserId" />
+		<result column="MANAGER_USER_ID" property="managerUserId" />
+		<result column="DELEGATE_DATE" property="delegateDate" />
+		<result column="IS_CANCEL" property="isCancel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条工作托管-->
+	<insert id="addSysWorkDelegate" parameterClass="SysWorkDelegate">
+     <![CDATA[
+		insert into SYS_WORK_DELEGATE
+		(
+		 WORK_DELEGATE_ID,
+		 USER_ID,
+		 DELEGATE_USER_ID,
+		 MANAGER_USER_ID,
+		 DELEGATE_DATE,
+		 IS_CANCEL,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#workDelegateId#,
+		#userId#,
+	    #delegateUserId#,
+	    #managerUserId#,
+	    #delegateDate#,
+	    #isCancel#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="workDelegateId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_WORK_DELEGATE 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 工作托管修改-->
+	<update id="updateSysWorkDelegate" parameterClass="SysWorkDelegate">
+	 <![CDATA[
+             update SYS_WORK_DELEGATE  set 
+		 ]]>	
+		 <isNotEmpty property="userId">
+				USER_ID=#userId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="managerUserId">
+				MANAGER_USER_ID=#managerUserId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="delegateUserId">
+				DELEGATE_USER_ID=#delegateUserId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isCancel">
+				IS_CANCEL=#isCancel#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where WORK_DELEGATE_ID=#workDelegateId#
+         ]]> 
+	</update>
+	
+  
+  <!-- 根据id得到工作托管-->	
+  <select id="getSysWorkDelegateById"  resultMap="SysWorkDelegateResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_WORK_DELEGATE where WORK_DELEGATE_ID=#workDelegateId#
+	]]>
+  </select>
+
+  <select id="getSysWorkDelegateList" resultMap="SysWorkDelegateResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_WORK_DELEGATE where 1=1 
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ USER_ID=#userId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="managerUserId">
+			<![CDATA[ MANAGER_USER_ID =#managerUserId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="delegateUserId">
+			<![CDATA[ DELEGATE_USER_ID =#delegateUserId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isCancel">
+			<![CDATA[ IS_CANCEL =#isCancel#]]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+  </select>
+</sqlMap>
+
+
+
+

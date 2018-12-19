@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="LnProfitLossProdSQL" >
+  <resultMap id="lnProfitLossProdResult" class="com.banger.mobile.domain.model.loan.LnProfitLossProd" >
+    <result column="ID" property="profitLossId" jdbcType="INTEGER" />
+    <result column="LOAN_ID" property="loanId" jdbcType="INTEGER" />
+    <result column="PRODUCT_NAME" property="productName" jdbcType="VARCHAR" />
+    <result column="SELLING_PRICE" property="sellingPrice" jdbcType="DECIMAL" />
+    <result column="COST_PRICE" property="costPrice" jdbcType="DECIMAL" />
+    <result column="GROSS_VALUE" property="grossValue" jdbcType="DECIMAL" />
+    <result column="GROSS_RATE" property="grossRate" jdbcType="DOUBLE" />
+    <result column="SELLING_RATE" property="sellingRate" jdbcType="DOUBLE" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="CREATE_USER" property="createUser" jdbcType="INTEGER" />
+    <result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="UPDATE_USER" property="updateUser" jdbcType="INTEGER" />
+    <result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
+    
+  </resultMap>
+  
+  <select id="selectProfitLossByPrimary" resultMap="lnProfitLossProdResult" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossProd" >
+    
+    select ID, LOAN_ID, PRODUCT_NAME, SELLING_PRICE, COST_PRICE,
+      GROSS_VALUE, GROSS_RATE, SELLING_RATE, REMARK, CREATE_USER, CREATE_DATE, UPDATE_USER, UPDATE_DATE
+    from LN_PROFIT_LOSS_PROD WHERE 1=1
+      <isNotEmpty property="profitLossId" prepend="AND">
+		   		   		ID = #profitLossId:INTEGER#
+		</isNotEmpty>
+        <isNotEmpty property="loanId" prepend="AND">
+		   		   		LOAN_ID = #loanId#
+		</isNotEmpty>
+        ORDER BY ID
+  </select>
+ 
+  <delete id="deleteProd" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossProd" >
+   
+    delete from LN_PROFIT_LOSS_PROD
+    where ID = #profitLossId:INTEGER# AND LOAN_ID = #loanId:INTEGER#
+  </delete>
+ 
+  <insert id="insertProd" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossProd" >
+   
+    insert into LN_PROFIT_LOSS_PROD (ID, LOAN_ID, PRODUCT_NAME, SELLING_PRICE, COST_PRICE,
+      GROSS_VALUE, GROSS_RATE, SELLING_RATE, REMARK, CREATE_USER, CREATE_DATE, UPDATE_USER, UPDATE_DATE)
+    values (#profitLossId:INTEGER#, #loanId:INTEGER#, #productName:VARCHAR#,
+      #sellingPrice:DECIMAL#, #costPrice:DECIMAL#, #grossValue:DECIMAL#, 
+      #grossRate:DOUBLE#, #sellingRate:DOUBLE#, #remark:VARCHAR#, 
+      #createUser:INTEGER#, #createDate:TIMESTAMP#, #updateUser:INTEGER#, 
+      #updateDate:TIMESTAMP#)
+       <selectKey keyProperty="profitLossId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_PROFIT_LOSS_PROD
+		</selectKey>
+      
+  </insert>
+  <update id="updateProd" parameterClass="com.banger.mobile.domain.model.loan.LnProfitLossProd" >
+    update LN_PROFIT_LOSS_PROD
+    set 
+      PRODUCT_NAME = #productName:VARCHAR#,
+      SELLING_PRICE = #sellingPrice:DECIMAL#,
+      COST_PRICE = #costPrice:DECIMAL#,
+      GROSS_VALUE = #grossValue:DECIMAL#,
+      GROSS_RATE = #grossRate:DOUBLE#,
+      SELLING_RATE = #sellingRate:DOUBLE#,
+      REMARK = #remark:VARCHAR#,
+      UPDATE_USER = #updateUser:INTEGER#,
+      UPDATE_DATE = #updateDate:TIMESTAMP#
+    where ID = #profitLossId:INTEGER# AND LOAN_ID = #loanId:INTEGER#
+  </update>
+
+
+  <select id="getProfitLossProdByLoanId" resultMap="lnProfitLossProdResult" parameterClass="java.lang.Integer">
+    select * from LN_PROFIT_LOSS_PROD where LOAN_ID=#loanId#
+  </select>
+
+
+</sqlMap>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PlnReportTemplateVarSQL">
+	<typeAlias alias="PlnReportTemplateVar"
+		type="com.banger.mobile.domain.model.PlnReportTemplate.PlnReportTemplateVar" />
+	<typeAlias alias="PlnVarType"
+		type="com.banger.mobile.domain.model.PlnReportTemplate.PlnVarType" />
+	<typeAlias alias="PlnVarTypeSub"
+		type="com.banger.mobile.domain.model.PlnReportTemplate.PlnVarTypeSub" />
+
+	<!-- 理财规划报告模板变量表-->
+	<!-- PlnReportTemplateVar信息全字段 -->
+	<resultMap class="PlnReportTemplateVar" id="PlnReportTemplateVarResult">
+		<result column="VAR_ID" property="varId" />
+		<result column="VAR_TYPE_ID" property="varTypeId" />
+		<result column="SUB_ID" property="subId" />
+		<result column="VAR_NAME" property="varName" />
+		<result column="VAR_TAG" property="varTag" />
+		<result column="VAR_EXPRESSION" property="varExpression" />
+		<result column="SORTNO" property="sortno" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- 规划报告变量类型 -->
+	<!--  PlnVarType信息全字段 -->
+	<resultMap class="PlnVarType" id="PlnVarTypeResult">
+		<result column="VAR_TYPE_ID" property="varTypeId" />
+		<result column="PLAN_TYPE_ID" property="planTypeId" />
+		<result column="VAR_TYPE_CODE" property="varTypeCode" />
+		<result column="VAR_TYPE_NAME" property="varTypeName" />
+		<result column="SORTNO" property="sortno" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- 规划报告变量子类型 -->
+	<!--  PlnVarTypeSub信息全字段 -->
+	<resultMap class="PlnVarTypeSub" id="PlnVarTypeSubResult">
+		<result column="SUB_ID" property="subId" />
+		<result column="VAR_TYPE_ID" property="varTypeId" />
+		<result column="SUB_CODE" property="subCode" />
+		<result column="SUB_NAME" property="subName" />
+		<result column="SORTNO" property="sortno" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 查询 第一级变量类型-->
+	<select id="getAllPlnVarType" resultMap="PlnVarTypeResult" >
+		<![CDATA[
+           select * from PLN_VAR_TYPE order by SORTNO
+        ]]>
+	</select>
+	<!-- 查询对应的第二级变量类型 -->
+	<select id="getVarTypeSub" resultMap="PlnVarTypeSubResult" >
+		<![CDATA[
+           select * from PLN_VAR_TYPE_SUB order by SORTNO
+        ]]>
+	</select>
+	<!-- 查询对应的变量 -->
+	<select id="getPlnVar" resultMap="PlnReportTemplateVarResult" >
+		<![CDATA[
+           select * from PLN_REPORT_TEMPLATE_VAR order by SORTNO
+        ]]>
+	</select>
+	
+	
+</sqlMap>

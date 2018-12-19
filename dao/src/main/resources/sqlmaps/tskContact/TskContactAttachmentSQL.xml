@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskContactAttachmentSQL">
+	<typeAlias alias="TskContactAttachment"
+		type="com.banger.mobile.domain.model.tskContact.TskContactAttachment" />
+
+	<!-- 任务附件表-->
+	<!-- TskTaskAttachmentSQL信息全字段 -->
+	<resultMap class="TskContactAttachment" id="TskContactAttachmentResult">
+		<result column="ATTACHMENT_ID" property="attachmentId"/>
+		<result column="CONTACT_ID" property="contactId" />
+		<result column="FILE_PATH" property="filePath"/>
+		<result column="FILE_NAME" property="fileName"/>
+		<result column="FILE_NAME_OLD" property="fileNameOld"/>
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 插入任务附件 -->
+	<insert id="InsertTaskAttachment" parameterClass="TskContactAttachment">
+		<![CDATA[
+			INSERT INTO TSK_CONTACT_ATTACHMENT
+			(
+				ATTACHMENT_ID,
+				CONTACT_ID,
+				FILE_PATH,
+				FILE_NAME,
+				FILE_NAME_OLD,
+				FILE_SIZE,
+				UPLOAD_DATE,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#attachmentId#,
+				#contactId#,
+				#filePath#,
+				#fileName#,
+				#fileNameOld#,
+				#fileSize#,
+				#uploadDate#,
+				#createDate#,
+				#createUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="attachmentId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_CONTACT_ATTACHMENT
+		</selectKey>
+	</insert>
+	
+	<!-- 删除任务指定的附件  -->
+	<delete id="DelTaskByAttr" parameterClass="TskContactAttachment">
+		<![CDATA[
+			DELETE FROM TSK_CONTACT_ATTACHMENT WHERE ATTACHMENT_ID=#attachmentId# AND CONTACT_ID=#contactId#
+		]]>
+	</delete>
+	
+	<!-- 查询任务的附件 -->
+	<select id="GetTaskByAttr" parameterClass="java.lang.Integer" resultMap="TskContactAttachmentResult">
+		<![CDATA[
+			SELECT * FROM TSK_CONTACT_ATTACHMENT WHERE CONTACT_ID=#contactId#
+		]]>
+	</select>
+	
+	<!-- 获取指定附件 -->
+	<select id="GetTaskAttrById" parameterClass="java.lang.Integer" resultMap="TskContactAttachmentResult">
+		<![CDATA[
+			SELECT * FROM TSK_CONTACT_ATTACHMENT WHERE ATTACHMENT_ID=#attachmentId#
+		]]>
+	</select>
+	
+	<!-- 根据任务ID删除所有附件 -->
+	<delete id="DelTaskByTaskId" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM TSK_CONTACT_ATTACHMENT WHERE CONTACT_ID=#value#
+		]]>
+	</delete>
+	
+</sqlMap>

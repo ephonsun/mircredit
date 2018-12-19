@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommThemeReplySQL">
+	<typeAlias alias="CommThemeReply"
+		type="com.banger.mobile.domain.model.communication.CommThemeReply" />
+
+	<!-- CommThemeReplySQL信息全字段 -->
+	<resultMap class="CommThemeReply" id="CommThemeReplyResult">
+		<result column="REPLY_ID" property="replyId" />
+		<result column="THEME_ID" property="themeId" />
+		<result column="REPLY_CONTENT" property="replyContent" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="THEME_USER_COUNT" property="themeUserCount" />
+		<result column="THEME_USER_REPLAY_COUNT" property="themeUserReplayCount" />
+	</resultMap>
+	
+	<!-- 查询回复帖子count -->
+	<select id="GetThemeReplyCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(0) FROM COMM_THEME_REPLY AS REP WHERE REP.THEME_ID=$themeId$ AND REP.IS_DEL=0
+		]]>
+	</select>
+	<!-- 查询回复帖子 -->
+	<select id="GetThemeReplyPageMap" resultMap="CommThemeReplyResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT 
+			(
+			    SELECT COUNT(0) FROM COMM_THEME WHERE IS_DEL=0 AND CREATE_USER=REP.CREATE_USER 
+			) AS THEME_USER_COUNT,
+			(
+			    SELECT COUNT(0) FROM COMM_THEME_REPLY WHERE IS_DEL=0 AND CREATE_USER=REP.CREATE_USER
+			) AS THEME_USER_REPLAY_COUNT,
+			USERS.USER_NAME,DEPT.DEPT_NAME,REP.* 
+			FROM COMM_THEME_REPLY AS REP 
+			LEFT JOIN SYS_USER AS USERS ON USERS.USER_ID=REP.CREATE_USER 
+			LEFT JOIN SYS_DEPT AS DEPT ON DEPT.DEPT_ID=USERS.DEPT_ID 
+			WHERE REP.THEME_ID=$themeId$ AND REP.IS_DEL=0 
+		]]>
+		ORDER BY REP.CREATE_DATE ASC 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 删除回复 -->
+	<update id="DeleteThemeReply" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE COMM_THEME_REPLY SET IS_DEL=1 
+		]]>
+		<isNotEmpty property="themeId">
+			<![CDATA[
+				WHERE THEME_ID=$themeId$ 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="replyId">
+			<![CDATA[
+				WHERE REPLY_ID=$replyId$ 
+			]]>
+		</isNotEmpty>
+	</update>
+	
+	<!-- 新建回复 -->
+	<insert id="InsertThemeReply" parameterClass="CommThemeReply">
+		<![CDATA[
+			INSERT INTO COMM_THEME_REPLY
+			(REPLY_ID,THEME_ID,REPLY_CONTENT,IS_DEL,CREATE_DATE,CREATE_USER)
+			VALUES
+			($replyId$,#themeId#,#replyContent#,0,current timestamp,#createUser#)
+		]]>
+		<selectKey keyProperty="replyId" resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_COMM_THEME_REPLY
+		</selectKey>
+	</insert>
+	
+	<!-- 编辑回复 -->
+	<update id="UpdateThemeReply" parameterClass="CommThemeReply">
+		<![CDATA[
+			UPDATE COMM_THEME_REPLY SET REPLY_CONTENT=#replyContent#,UPDATE_DATE=current timestamp,UPDATE_USER=#updateUser# 
+			WHERE REPLY_ID=$replyId$
+		]]>
+	</update>
+	
+	<!-- 查询回复信息 -->
+	<select id="GetThemeReplyById" parameterClass="java.lang.Integer" resultMap="CommThemeReplyResult">
+		<![CDATA[
+			SELECT 0 AS THEME_USER_COUNT,0 AS THEME_USER_REPLAY_COUNT,'' AS USER_NAME,'' AS DEPT_NAME,REP.* 
+			FROM COMM_THEME_REPLY AS REP WHERE REP.REPLY_ID=$replyId$ AND REP.IS_DEL=0 
+		]]>
+	</select>
+</sqlMap>

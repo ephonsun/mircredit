@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MicroTaskReportSQL">
+	<typeAlias alias="LoanTaskReportBean" type="com.banger.mobile.domain.model.microReport.LoanTaskReportBean" />
+	<!-- 任务表-->
+	<resultMap class="LoanTaskReportBean" id="LoanTaskReporResult">
+		<result column="DEPT_ID" property="deptId" />
+		<result column="DEPT_NAME" property="deptName" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="TASK_ID" property="taskId" />
+		<result column="TASK_TITLE" property="taskTitle" />
+		<result column="TASK_TARGET" property="taskTarget" />
+		<result column="FINISH_COUNT" property="finishCount" />
+		<result column="COM_PERCENT" property="comPercent"/>
+		<result column="DC_COUNT" property="DCcount" />
+		<result column="SP_COUNT" property="SPcount" />
+		<result column="FD_COUNT" property="FDcount" />
+		
+		<result column="TASK_TYPE" property="taskType" />
+	</resultMap>
+	
+
+	<!-- 贷款任务报表统计列表 -执行者 -->
+	<select id="getLoanTaskReportList" resultMap="LoanTaskReporResult" parameterClass="java.util.Map">
+		<![CDATA[ 
+			SELECT 
+			G.*,CASE WHEN G.TASK_TARGET > 0 THEN CAST(G.FINISH_COUNT*1.0/G.TASK_TARGET*100 as decimal(18,2)) ELSE 0 END AS COM_PERCENT 
+			FROM( 
+			SELECT TT.DEPT_ID,TT.DEPT_NAME,TT.USER_ID,TT.USER_NAME,TT.TASK_ID,TT.TASK_TITLE,TT.TASK_TYPE,TT.TASK_TARGET,
+			(
+			    SELECT COUNT(1) AS FINISH_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID IN (6,7)
+			    AND LEND_DATE >= TT.START_DATE AND LEND_DATE <= TT.END_DATE AND SUBMIT_USER_ID=TT.USER_ID
+			),
+			(
+			    SELECT COUNT(1) AS DC_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID=3 
+			    AND LEND_DATE >= TT.START_DATE AND LEND_DATE <= TT.END_DATE AND SUBMIT_USER_ID=TT.USER_ID
+			),
+			(
+			    SELECT COUNT(1) AS SP_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID=4 
+			    AND LEND_DATE >= TT.START_DATE AND LEND_DATE <= TT.END_DATE AND SUBMIT_USER_ID=TT.USER_ID
+			),
+			(
+			    SELECT COUNT(1) AS FD_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID=5 
+			    AND LEND_DATE >= TT.START_DATE AND LEND_DATE <= TT.END_DATE AND SUBMIT_USER_ID=TT.USER_ID
+			) 
+			FROM(
+			    SELECT D.DEPT_ID,D.DEPT_NAME,E.*,U.USER_NAME,T.TASK_TITLE,T.TASK_TYPE,T.START_DATE,T.END_DATE 
+			    FROM TSK_MICRO_TASK T 
+			    RIGHT JOIN (
+			        SELECT EXC.TASK_ID,EXC.USER_ID,EXC.TARGET_USER AS TASK_TARGET FROM TSK_MICRO_TASK_EXECUTE EXC
+			        WHERE EXC.USER_ID IN($userIds$) GROUP BY EXC.TASK_ID,EXC.USER_ID,EXC.TARGET_USER
+			    ) E ON T.TASK_ID=E.TASK_ID
+			    LEFT JOIN SYS_USER U ON U.USER_ID=E.USER_ID 
+			    LEFT JOIN SYS_DEPT D ON U.DEPT_ID=D.DEPT_ID 
+			    WHERE T.IS_DEL=0 AND T.TASK_STATUS<>2 
+		]]>
+		<isEqual prepend="and" property="taskType" compareValue="1">
+			<![CDATA[ T.TASK_TYPE=1 ]]>
+		</isEqual>
+		<isEqual prepend="and" property="taskType" compareValue="2">
+			<![CDATA[ T.TASK_TYPE IN(2,3) ]]>
+		</isEqual>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[
+			T.TASK_TITLE=#taskTitle# 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[
+				(T.START_DATE <= #endDate# and T.END_DATE >= #startDate#)
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isEmpty prepend="and" property="endDate">
+				<![CDATA[T.END_DATE >= #startDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<isEmpty prepend="and" property="startDate">
+				<![CDATA[T.START_DATE <= #endDate# ]]>
+			</isEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			 ORDER BY D.DEPT_NAME ASC 
+			) TT) G
+		]]>
+	</select>
+  
+  <!-- 贷款任务报表统计列表 -机构-->
+	<select id="getLoanTaskReportDeptList" resultMap="LoanTaskReporResult" parameterClass="java.util.Map">
+		<![CDATA[ 
+			SELECT G.*,CASE WHEN G.TASK_TARGET > 0 THEN CAST(G.FINISH_COUNT*1.0/G.TASK_TARGET*100 as decimal(18,2)) ELSE 0 END AS COM_PERCENT 
+			FROM(
+			SELECT D.DEPT_ID,D.DEPT_NAME,E.TASK_ID,E.USER_ID,'' AS USER_NAME,T.TASK_TITLE,T.TASK_TYPE,E.TASK_TARGET,
+			(
+			    SELECT COUNT(1) AS FINISH_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID IN (6,7)
+			    AND LEND_DATE >= T.START_DATE AND LEND_DATE <= T.END_DATE 
+			    AND SUBMIT_USER_ID IN(SELECT USER_ID FROM SYS_USER WHERE IS_DEL=0 AND DEPT_ID=D.DEPT_ID)
+			),
+			(
+			    SELECT COUNT(1) AS DC_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID=3
+			    AND LEND_DATE >= T.START_DATE AND LEND_DATE <= T.END_DATE 
+			    AND SUBMIT_USER_ID IN(SELECT USER_ID FROM SYS_USER WHERE IS_DEL=0 AND DEPT_ID=D.DEPT_ID)
+			),
+			(
+			    SELECT COUNT(1) AS SP_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID=4
+			    AND LEND_DATE >= T.START_DATE AND LEND_DATE <= T.END_DATE 
+			    AND SUBMIT_USER_ID IN(SELECT USER_ID FROM SYS_USER WHERE IS_DEL=0 AND DEPT_ID=D.DEPT_ID)
+			),
+			(
+			    SELECT COUNT(1) AS FD_COUNT  FROM LN_LOAN WHERE LOAN_STATUS_ID=5
+			    AND LEND_DATE >= T.START_DATE AND LEND_DATE <= T.END_DATE 
+			    AND SUBMIT_USER_ID IN(SELECT USER_ID FROM SYS_USER WHERE IS_DEL=0 AND DEPT_ID=D.DEPT_ID)
+			)
+			FROM TSK_MICRO_TASK T 
+			RIGHT JOIN(
+			    SELECT EXC.TASK_ID,EXC.DEPT_ID,EXC.USER_ID,EXC.TARGET_DEPT AS TASK_TARGET
+			    FROM TSK_MICRO_TASK_EXECUTE EXC
+			    WHERE EXC.DEPT_ID IN($deptIds$) AND EXC.USER_ID=0
+			    GROUP BY EXC.TASK_ID,EXC.DEPT_ID,EXC.USER_ID,EXC.TARGET_DEPT
+			) E ON T.TASK_ID=E.TASK_ID
+			LEFT JOIN SYS_DEPT D ON E.DEPT_ID=D.DEPT_ID 
+			WHERE T.IS_DEL=0 AND T.TASK_STATUS<>2 
+		]]>
+		<isEqual prepend="and" property="taskType" compareValue="1">
+			<![CDATA[ T.TASK_TYPE=1 ]]>
+		</isEqual>
+		<isEqual prepend="and" property="taskType" compareValue="2">
+			<![CDATA[ T.TASK_TYPE IN(2,3) ]]>
+		</isEqual>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[
+			T.TASK_TITLE=#taskTitle# 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[
+				(T.START_DATE <= #endDate# and T.END_DATE >= #startDate#)
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isEmpty prepend="and" property="endDate">
+				<![CDATA[T.END_DATE >= #startDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<isEmpty prepend="and" property="startDate">
+				<![CDATA[T.START_DATE <= #endDate# ]]>
+			</isEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			) G ORDER BY G.DEPT_NAME ASC
+		]]>
+	</select>
+	
+	<!-- 根据任务名称查询任务 -->
+	<select id="getTaskByTitle" resultMap="LoanTaskReporResult" parameterClass="java.util.Map">
+		<![CDATA[ 
+			SELECT 0 AS DEPT_ID,'' AS DEPT_NAME,0 AS USER_ID,'' AS USER_NAME,TASK_ID,TASK_TITLE,TASK_TYPE,TASK_TARGET,0 AS FINISH_COUNT,
+			0 AS DC_COUNT,0 AS SP_COUNT,0 AS FD_COUNT,0 AS COM_PERCENT
+			FROM TSK_MICRO_TASK   
+			WHERE TASK_STATUS<>2 AND IS_DEL=0 
+		]]>
+		<isEqual prepend="and" property="taskType" compareValue="1">
+			<![CDATA[ TASK_TYPE=1 ]]>
+		</isEqual>
+		<isEqual prepend="and" property="taskType" compareValue="2">
+			<![CDATA[ TASK_TYPE IN(2,3) ]]>
+		</isEqual>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[ TASK_TITLE LIKE '%$taskTitle$%' ESCAPE '^' ]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

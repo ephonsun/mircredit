@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnRejectCustomerSQL">
+    <typeAlias alias="LnRejectCustomer" type="com.banger.mobile.domain.model.loan.LnRejectCustomer" />
+
+    <!-- 贷款操作历史记录表 全字段  -->
+    <resultMap class="LnRejectCustomer" id="LnRejectCustomerResult">
+       <result property="rejectCustomerId" column="REJECT_CUSTOMER_ID" />
+        <result property="customerName" column="CUSTOMER_NAME" />
+        <result property="mobliePhone" column="MOBILE_PHONE" />
+        <result property="idCard" column="ID_CARD" />
+        <result property="useage" column="USEAGE" />
+        <result property="remark" column="REMARK" />
+        <result property="isDel" column="IS_DEL" />
+        <result property="userId" column="USER_ID" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="createUser" column="CREATE_USER" />
+        <result property="updateUser" column="UPDATE_USER" />
+        <result property="userName" column="USER_NAME" nullValue=""/>
+        <result property="deptName" column="DEPT_NAME" nullValue=""/>
+    </resultMap>
+
+    <insert id="insertLnRejectCustomer" parameterClass="LnRejectCustomer">
+        insert into LN_REJECT_CUSTOMER(
+        REJECT_CUSTOMER_ID,
+        CUSTOMER_NAME,
+        MOBILE_PHONE,
+        ID_CARD,
+        USEAGE,
+        REMARK,
+        IS_DEL,
+        USER_ID,
+        CREATE_DATE,
+        CREATE_USER
+        ) values (
+        #rejectCustomerId:INTEGER #,
+        #customerName:VARCHAR #,
+        #mobliePhone:VARCHAR #,
+        #idCard:VARCHAR #,
+        #useage:VARCHAR #,
+        #remark:VARCHAR #,
+        #isDel:INTEGER #,
+        #userId:INTEGER #,
+        #createDate:TIMESTAMP #,
+        #createUser:INTEGER #
+        )
+        <selectKey keyProperty="rejectCustomerId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_LN_REJECT_CUSTOMER
+        </selectKey>
+    </insert>
+
+
+    <update id="updateLnRejectCustomer" parameterClass="LnRejectCustomer">
+
+        update LN_REJECT_CUSTOMER set REJECT_CUSTOMER_ID=#rejectCustomerId#
+        <isNotEmpty property="customerName" prepend=",">
+            CUSTOMER_NAME=#customerName#
+        </isNotEmpty>
+        <isNotEmpty property="mobliePhone" prepend=",">
+            MOBILE_PHONE=#mobliePhone#
+        </isNotEmpty>
+        <isNotEmpty property="idCard" prepend=",">
+            ID_CARD=#idCard#
+        </isNotEmpty>
+        <isNotEmpty property="useage" prepend=",">
+            USEAGE=#useage#
+        </isNotEmpty>
+        <isNotEmpty property="remark" prepend=",">
+            REMARK=#remark#
+        </isNotEmpty>
+        <isNotEmpty property="isDel" prepend=",">
+            IS_DEL=#isDel#
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend=",">
+            USER_ID=#userId#
+        </isNotEmpty>
+        <isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE=#createDate#
+        </isNotEmpty>
+        <isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE=#updateDate#
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend=",">
+            CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER=#updateUser#
+        </isNotEmpty>
+        where REJECT_CUSTOMER_ID=#rejectCustomerId#
+    </update>
+
+    <select id="queryLnRejectCustomerCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select  count(*)
+        from LN_REJECT_CUSTOMER rc
+        left join SYS_USER su on rc.user_id=su.user_id
+        left join SYS_DEPT sd on su.DEPT_ID = sd.DEPT_ID
+        where 1=1
+        <isNotEmpty property="mobliePhone" prepend="and">
+            rc.MOBILE_PHONE=#mobliePhone#
+        </isNotEmpty>
+        <isNotEmpty property="idCard" prepend="and">
+            rc.ID_CARD=#idCard#
+        </isNotEmpty>
+        <isNotEmpty property="isDel" prepend="and">
+            rc.IS_DEL=#isDel#
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            rc.USER_ID in
+            <iterate property="userIds" open="(" close=")" conjunction=",">
+                #userIds[]#
+            </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="startDate" prepend="and">
+            <![CDATA[ rc.CREATE_DATE>=#startDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="endDate" prepend="and">
+            <![CDATA[ rc.CREATE_DATE<=#endDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend="and">
+            rc.CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            (
+            rc.customer_name LIKE '%$customerName$%'
+            or  rc.ID_CARD LIKE '%$customerName$%'
+            or  rc.MOBILE_PHONE LIKE '%$customerName$%'
+            )
+        </isNotEmpty>
+    </select>
+
+    <select id="queryLnRejectCustomerPage" parameterClass="java.util.Map" resultMap="LnRejectCustomerResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+
+        select  rc.*,su.user_name,sd.DEPT_NAME
+        from LN_REJECT_CUSTOMER rc
+        left join SYS_USER su on rc.user_id=su.user_id
+        left join SYS_DEPT sd on su.DEPT_ID = sd.DEPT_ID
+        where 1=1
+        <isNotEmpty property="mobliePhone" prepend="and">
+            rc.MOBILE_PHONE=#mobliePhone#
+        </isNotEmpty>
+        <isNotEmpty property="idCard" prepend="and">
+            rc.ID_CARD=#idCard#
+        </isNotEmpty>
+        <isNotEmpty property="isDel" prepend="and">
+            rc.IS_DEL=#isDel#
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            rc.USER_ID in
+            <iterate property="userIds" open="(" close=")" conjunction=",">
+                #userIds[]#
+            </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="startDate" prepend="and">
+            <![CDATA[ rc.CREATE_DATE>=#startDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="endDate" prepend="and">
+            <![CDATA[ rc.CREATE_DATE<=#endDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend="and">
+            rc.CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            (
+            rc.customer_name LIKE '%$customerName$%'
+            or  rc.ID_CARD LIKE '%$customerName$%'
+            or  rc.MOBILE_PHONE LIKE '%$customerName$%'
+            )
+        </isNotEmpty>
+
+
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow# ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+
+    <select id="queryRejectCustomerByIds" parameterClass="java.util.Map" resultMap="LnRejectCustomerResult">
+        select  rc.*,su.user_name,sd.DEPT_NAME
+        from LN_REJECT_CUSTOMER rc
+        left join SYS_USER su on rc.user_id=su.user_id
+        left join SYS_DEPT sd on su.DEPT_ID = sd.DEPT_ID
+        where 1=1
+        <isNotEmpty property="rejectCustomerIds" prepend="and">
+            rc.REJECT_CUSTOMER_ID in
+            <iterate property="rejectCustomerIds" open="(" close=")" conjunction=",">
+                #rejectCustomerIds[]#
+            </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="mobliePhone" prepend="and">
+            rc.MOBILE_PHONE=#mobliePhone#
+        </isNotEmpty>
+        <isNotEmpty property="idCard" prepend="and">
+            rc.ID_CARD=#idCard#
+        </isNotEmpty>
+        <isNotEmpty property="isDel" prepend="and">
+            rc.IS_DEL=#isDel#
+        </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            rc.USER_ID in
+            <iterate property="userIds" open="(" close=")" conjunction=",">
+                #userIds[]#
+            </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="startDate" prepend="and">
+            <![CDATA[ rc.CREATE_DATE>=#startDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="endDate" prepend="and">
+            <![CDATA[ rc.CREATE_DATE<=#endDate# ]]>
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend="and">
+            rc.CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="customerName" prepend="and">
+            (
+            rc.customer_name LIKE '%$customerName$%'
+            or  rc.ID_CARD LIKE '%$customerName$%'
+            or  rc.MOBILE_PHONE LIKE '%$customerName$%'
+            )
+        </isNotEmpty>
+    </select>
+</sqlMap>

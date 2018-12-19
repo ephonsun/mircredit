@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskResultSQL">
+	<typeAlias alias="RiskResult"
+		type="com.banger.mobile.domain.model.pad.RiskResult" />
+	<typeAlias alias="RskResult"
+		type="com.banger.mobile.domain.model.evaluation.RskResult" />
+	<typeAlias alias="RskResultDetail"
+		type="com.banger.mobile.domain.model.evaluation.RskResultDetail" />
+	<typeAlias alias="CrmCustomerEvaBean" type="com.banger.mobile.domain.model.customer.CrmCustomerEvaBean" />
+
+	<!-- 测评结果列表 -->
+	<resultMap class="RiskResult" id="RiskResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="MOBILE_PHONE" property="mobilePhone" />
+		<result column="TEMPLATE_NO" property="templateNo" />
+		<result column="TEST_DATE" property="testDate" />
+		<result column="TEST_RESULT" property="testResult" />
+		<result column="REMARK" property="remark" />
+		<result column="RESULT_ID" property="testResultId" />
+	</resultMap>
+	
+	<resultMap class="CrmCustomerEvaBean" id="CrmCustomerEvaBean" extends="CrmCustomerSQL.BaseCrmCustomerResult">
+		<result column="TEMPLATE_NO" property="templateNo" />
+		<result column="TEST_DATE" property="testDate" />
+		<result column="TEST_RESULT" property="testResult" />
+		<result column="RESULT_ID" property="testResultId" />
+		<result column="IS_SHARE" property="isShare" />
+		<result column="TEST_REMARK" property="testremark" />
+	</resultMap>
+	
+	
+		<!-- 测评结果列表 -->
+	<resultMap class="RskResult" id="RskResult">
+		<result column="RESULT_ID" property="resultId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="TEST_DATE" property="testDate" />
+		<result column="TEST_RESULT" property="testResult" />
+		<result column="REMARK" property="remark" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+		
+	<select id="getAllRiskResultForPad" resultMap="RiskResult"
+		parameterClass="java.util.Map">
+  	<![CDATA[
+  		SELECT C.CUSTOMER_ID, C.CUSTOMER_NAME,C.CUSTOMER_NAME_PINYIN,C.MOBILE_PHONE1 as MOBILE_PHONE, C.CUSTOMER_TITLE, C.CUSTOMER_NO,
+  		T.TEMPLATE_NO,
+  		To_char(TEST_DATE, 'YYYY-MM-DD HH24:MI:SS') as TEST_DATE, R.TEST_RESULT, R.REMARK, R.RESULT_ID 
+  		
+  		FROM RSK_RESULT R
+  		INNER JOIN RSK_TEMPLATE T ON T.TEMPLATE_ID = R.TEMPLATE_ID
+  		INNER JOIN CRM_CUSTOMER C on R.CUSTOMER_ID = C.CUSTOMER_ID
+  		INNER JOIN SYS_USER U ON U.USER_ID = C.BELONG_USER_ID
+  		
+  		WHERE R.IS_DEL = 0
+  		
+  		
+  	]]>
+  	<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[C.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+	</isPropertyAvailable>
+  	<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[C.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[C.BELONG_USER_ID = $InChargeOfUserIds$]]>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[C.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and C.BELONG_USER_ID = 0 or C.BELONG_USER_ID is null
+					</isNotEmpty>	
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+			    (C.CUSTOMER_ID in (SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+			    left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+			    WHERE 
+                (g.BELONG_USER_ID in ($InChargeOfUserIds$) 
+                <isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+                )
+                <isPropertyAvailable property="QueryDeptIds">
+                  <isNotEqual prepend="and" property="QueryDeptIds" compareValue="-1">
+                    (g.BELONG_DEPT_ID in ($QueryDeptIds$))
+                  </isNotEqual>
+                </isPropertyAvailable>
+                <isPropertyAvailable property="QueryUserIds">
+                  <isNotEmpty prepend="and" property="QueryUserIds">
+                    (g.BELONG_USER_ID in ($QueryUserIds$))
+                  </isNotEmpty>
+                </isPropertyAvailable>
+                <isPropertyAvailable property="SharePresentUserId">
+                  <isNotEmpty prepend="and" property="SharePresentUserId">
+                    (f.SHARE_USER_ID = #SharePresentUserId#)
+                  </isNotEmpty>
+                </isPropertyAvailable>
+                ))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(C.CUSTOMER_ID in (SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on g.CUSTOMER_ID = f.CUSTOMER_ID
+				WHERE f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+				AND g.BELONG_USER_ID != $UserId$ 
+				<isPropertyAvailable property="InChargeOfDeptIds">
+                  <isNotEmpty prepend="and" property="InChargeOfDeptIds">
+                    g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$)
+                  </isNotEmpty>
+                </isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+                  <isNotEmpty prepend="and" property="SharePresentUserId">
+                    f.USER_ID = #SharePresentUserId#
+                  </isNotEmpty>
+                </isPropertyAvailable>
+                ))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<select id="findRiskResultForPad" resultMap="RiskResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		SELECT C.CUSTOMER_ID, C.CUSTOMER_NAME,C.CUSTOMER_NAME_PINYIN,C.MOBILE_PHONE1 as MOBILE_PHONE, C.CUSTOMER_TITLE, C.CUSTOMER_NO,
+  		T.TEMPLATE_NO,
+  		To_char(TEST_DATE, 'YYYY-MM-DD HH24:MI:SS') as TEST_DATE, R.TEST_RESULT, R.REMARK, R.RESULT_ID 
+  		
+  		FROM RSK_RESULT R
+  		INNER JOIN RSK_TEMPLATE T ON T.TEMPLATE_ID = R.TEMPLATE_ID
+  		INNER JOIN CRM_CUSTOMER C on R.CUSTOMER_ID = C.CUSTOMER_ID
+  		INNER JOIN SYS_USER U ON U.USER_ID = C.BELONG_USER_ID
+  		
+  		WHERE R.IS_DEL = 0
+     ]]>
+		<isNotEmpty prepend="and" property="input">
+            <![CDATA[(
+            (C.CUSTOMER_NO like '%$input$%')
+            or (C.CUSTOMER_NAME like '%$input$%')
+            )]]>
+		</isNotEmpty>
+		<isPropertyAvailable  property="isTrash">
+			<isNotEmpty prepend="and" property="isTrash">
+				<![CDATA[C.IS_TRASH = #isTrash#]]>
+			</isNotEmpty>
+	</isPropertyAvailable>
+  	<isNotEmpty prepend="and" property="BelongTo">
+			<isEqual property="BelongTo" compareValue="brAll">
+				(<![CDATA[C.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+				<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[C.BELONG_USER_ID = $InChargeOfUserIds$]]>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUser">
+				(<![CDATA[C.BELONG_USER_ID in ($InChargeOfUserIds$)]]>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brDept">
+				(<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>	
+				</isPropertyAvailable>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="brUnAllocate">
+				(<isPropertyAvailable  property="InChargeOfDeptIds">
+					<isEmpty property="InChargeOfDeptIds">
+						<![CDATA[-1>1]]>
+					</isEmpty>
+					<isNotEmpty  property="InChargeOfDeptIds">
+						<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>	
+						and C.BELONG_USER_ID = 0 or C.BELONG_USER_ID is null
+					</isNotEmpty>	
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToOthers">
+			    (C.CUSTOMER_ID in (SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+			    left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+			    WHERE 
+                (g.BELONG_USER_ID in ($InChargeOfUserIds$) 
+                <isPropertyAvailable  property="InChargeOfDeptIds">
+					<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+						<![CDATA[g.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+                )
+                <isPropertyAvailable property="QueryDeptIds">
+                  <isNotEqual prepend="and" property="QueryDeptIds" compareValue="-1">
+                    (g.BELONG_DEPT_ID in ($QueryDeptIds$))
+                  </isNotEqual>
+                </isPropertyAvailable>
+                <isPropertyAvailable property="QueryUserIds">
+                  <isNotEmpty prepend="and" property="QueryUserIds">
+                    (g.BELONG_USER_ID in ($QueryUserIds$))
+                  </isNotEmpty>
+                </isPropertyAvailable>
+                <isPropertyAvailable property="SharePresentUserId">
+                  <isNotEmpty prepend="and" property="SharePresentUserId">
+                    (f.SHARE_USER_ID = #SharePresentUserId#)
+                  </isNotEmpty>
+                </isPropertyAvailable>
+                ))
+			</isEqual>
+			<isEqual property="BelongTo" compareValue="ShareToMe">
+				(C.CUSTOMER_ID in (SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f
+				left join CRM_CUSTOMER g on g.CUSTOMER_ID = f.CUSTOMER_ID
+				WHERE f.SHARE_USER_ID in ($InChargeOfUserIds$) 
+				AND g.BELONG_USER_ID != $UserId$ 
+				<isPropertyAvailable property="InChargeOfDeptIds">
+                  <isNotEmpty prepend="and" property="InChargeOfDeptIds">
+                    g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$)
+                  </isNotEmpty>
+                </isPropertyAvailable>
+				<isPropertyAvailable property="SharePresentUserId">
+                  <isNotEmpty prepend="and" property="SharePresentUserId">
+                    f.USER_ID = #SharePresentUserId#
+                  </isNotEmpty>
+                </isPropertyAvailable>
+                ))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 修改模版字段 -->
+	<update id="saveRiskResultRemarkForPad" parameterClass="RskResult">
+		UPDATE
+		RSK_RESULT SET REMARK = #remark#
+		WHERE RESULT_ID = #resultId#
+	</update>
+
+	<!-- PAD 保存测评 -->
+	<insert id="insertFromPad" parameterClass="RskResult">
+ 	<![CDATA[
+ 		insert into RSK_RESULT
+ 		(
+ 			RESULT_ID,
+			CUSTOMER_ID,
+			TEMPLATE_ID,
+			TEST_DATE,
+			IS_DEL,
+			CREATE_USER,
+			CREATE_DATE
+ 		)
+ 		values
+ 		(
+ 			#resultId#,
+			#customerId#,
+			#templateId#,
+			#testDate#,
+			#isDel#,
+			#createUser#,
+			#createDate#
+ 		)
+ 	]]>
+		<selectKey keyProperty="resultId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_RSK_RESULT
+		</selectKey>
+	</insert>
+	
+	<!--  保存测评 结果-->
+	<insert id="addRskResult" parameterClass="RskResult">
+ 	<![CDATA[
+ 		insert into RSK_RESULT
+ 		(
+ 			 RESULT_ID,
+			 CUSTOMER_ID,
+			 TEMPLATE_ID,
+			 TEST_DATE,
+			 TEST_RESULT,
+			 REMARK,
+			 IS_DEL,
+			 CREATE_DATE,
+			 UPDATE_DATE,
+			 CREATE_USER,
+			 UPDATE_USER
+ 		)
+ 		values
+ 		(
+ 			#resultId#,
+			#customerId#,
+			#templateId#,
+			current timestamp,
+			#testResult#,
+			#remark#,
+			#isDel#,
+		    current timestamp,
+		    current timestamp,
+		    #createUser#,
+		    #updateUser#
+ 		)
+ 	]]>
+		<selectKey keyProperty="resultId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_RSK_RESULT
+		</selectKey>
+	</insert>
+	
+	
+	
+	<!-- 根据id得到 风险测评结果-->	
+  <select id="getRskResultById"  resultMap="RskResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_RESULT where RESULT_ID=#resultId# and IS_DEL=0  fetch first 1  rows only
+	]]>
+  </select>
+  
+  	<!-- 根据id得到 风险测评结果-->	
+  <select id="getRskResultList"  resultMap="RskResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_RESULT where CUSTOMER_ID=#customerId# and IS_DEL=0
+	]]>
+  </select>
+  
+    <!-- 根据模板编号查询风险测评-->	
+  <select id="getRskResultByTemplateNo"  resultMap="RskResult" parameterClass="java.util.Map">
+	<![CDATA[
+		select * from RSK_RESULT where TEMPLATE_ID=(select TEMPLATE_ID from RSK_TEMPLATE where TEMPLATE_NO=#templastNo#) and IS_DEL=0
+	]]>
+  </select>
+  
+  	<!-- 根据客户id得到 风险测评结果-->	
+  <select id="getRskResultByCustomerId"  resultMap="RskResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_RESULT where CUSTOMER_ID=#customerId# and IS_DEL=0 fetch first 1  rows only
+	]]>
+  </select>
+  
+  
+  
+	<!-- 风险测评结果修改-->
+	<update id="updateRskResult" parameterClass="RskResult">
+	 <![CDATA[
+             update RSK_RESULT  set REMARK=#remark:VARCHAR:NULL#,
+		 ]]>	
+		 <isNotEmpty property="customerId">
+				CUSTOMER_ID=#customerId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="templateId">
+				TEMPLATE_ID=#templateId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="testResult">
+				TEST_RESULT=#testResult#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isDel">
+				IS_DEL=#isDel#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where RESULT_ID=#resultId#
+         ]]> 
+	</update>
+	
+
+	<!-- 保存测评详情-->
+	<insert id="addResultDetail" parameterClass="RskResultDetail">
+ 	<![CDATA[
+ 		insert into RSK_RESULT_DETAIL
+ 		(
+ 			RESULT_DETAIL_ID,
+			RESULT_ID,
+			QUESTION_ID,
+			QUESTION_OPTION_ID,
+			CREATE_DATE,
+			UPDATE_DATE,
+			CREATE_USER,
+			UPDATE_USER
+ 		)
+ 		values
+ 		(
+ 			#resultDetailId#,
+			#resultId#,
+			#questionId#,
+			#questionOptionId#,
+			current timestamp,
+		    current timestamp,
+		    #createUser#,
+		    #updateUser#
+ 		)
+ 	]]>
+		<selectKey keyProperty="resultDetailId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_RSK_RESULT_DETAIL
+		</selectKey>
+	</insert>
+	
+
+
+  <!-- 删除题目下所有选项 -->
+  <delete id="delRskResultDetail" parameterClass="java.lang.Integer">
+  	<![CDATA[
+		delete  from RSK_RESULT_DETAIL where RESULT_ID=#resultId# 
+	]]>
+  </delete>
+  
+    <!-- 删除题目下所有选项 -->
+  <delete id="delRskResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+		delete  from RSK_RESULT where RESULT_ID=#resultId#
+	]]>
+  </delete>
+  
+ <!-- 删除测评结果 -->
+  <update id="updateDelRskResult" parameterClass="java.lang.Integer">
+   <![CDATA[
+		update  RSK_RESULT set IS_DEL=1 where CUSTOMER_ID=#customerId#
+	]]>
+  </update>
+  
+	<!-- PAD 保存测评 -->
+	<insert id="insertDetailFromPad" parameterClass="RskResultDetail">
+ 	<![CDATA[
+ 		insert into RSK_RESULT_DETAIL
+ 		(
+ 			RESULT_DETAIL_ID,
+			RESULT_ID,
+			QUESTION_ID,
+			QUESTION_OPTION_ID
+ 		)
+ 		values
+ 		(
+ 			#resultDetailId#,
+			#resultId#,
+			#questionId#,
+			#questionOptionId#
+ 		)
+ 	]]>
+		<selectKey keyProperty="resultDetailId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_RSK_RESULT_DETAIL
+		</selectKey>
+	</insert>
+
+	<select id="getTemplateScoreIntervalRemarkByTotalScore" resultClass="java.lang.String"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select REMARK 
+		from RSK_TEMPLATE_SCORE_INTERVAL
+		where IS_DEL = 0
+     ]]>
+		<isNotEmpty prepend="and" property="templateId">
+            <![CDATA[
+            TEMPLATE_ID = $templateId$
+            ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="totalScore">
+            <![CDATA[
+            SCORE_MIN <= $totalScore$ and SCORE_MAX >= $totalScore$
+            ]]>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getTemplateIntervalTypeNameByTotalScore" resultClass="java.lang.String"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select t.INTERVAL_TYPE_NAME 
+		
+		from RSK_TEMPLATE_SCORE_INTERVAL i
+		inner join RSK_INTERVAL_TYPE t on i.INTERVAL_TYPE_ID = t.INTERVAL_TYPE_ID
+		
+		where i.IS_DEL = 0
+     ]]>
+		<isNotEmpty prepend="and" property="templateId">
+            <![CDATA[
+            i.TEMPLATE_ID = $templateId$
+            ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="totalScore">
+            <![CDATA[
+            i.SCORE_MIN <= $totalScore$ and i.SCORE_MAX >= $totalScore$
+            ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 修改测评结果 -->
+	<update id="updateTestResultById" parameterClass="RskResult">
+		UPDATE
+		RSK_RESULT SET TEST_RESULT = #testResult#
+		WHERE RESULT_ID = #resultId#
+	</update>
+	
+	
+	
+	  	<!-- 风险测评模板题目分页count -->
+  <select id="getRskResultCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+        SELECT  count(*)
+  		FROM RSK_RESULT R
+  		INNER JOIN RSK_TEMPLATE T ON T.TEMPLATE_ID = R.TEMPLATE_ID
+  		INNER JOIN CRM_CUSTOMER C on R.CUSTOMER_ID = C.CUSTOMER_ID
+  		WHERE R.IS_DEL = 0
+     ]]>
+      <dynamic>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(C.CUSTOMER_NAME like '%$customerName$%')
+			or (C.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+			<![CDATA[C.CUSTOMER_NO = #customerNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[C.CUSTOMER_ID = #customerId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[T.TEMPLATE_NO = #templateNo#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+   	<!-- 分页记录 -->
+  <select id="getRskResultPageMap" resultMap="RiskResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		SELECT C.CUSTOMER_ID, C.CUSTOMER_NAME,C.MOBILE_PHONE1 as MOBILE_PHONE,C.CUSTOMER_NAME_PINYIN, C.CUSTOMER_TITLE, C.CUSTOMER_NO,
+  		T.TEMPLATE_NO,R.TEST_DATE, R.TEST_RESULT, R.REMARK, R.RESULT_ID 
+  		
+  		FROM RSK_RESULT R
+  		INNER JOIN RSK_TEMPLATE T ON T.TEMPLATE_ID = R.TEMPLATE_ID
+  		INNER JOIN CRM_CUSTOMER C on R.CUSTOMER_ID = C.CUSTOMER_ID
+  		WHERE R.IS_DEL = 0
+	]]>
+	 <dynamic>
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(C.CUSTOMER_NAME like '%$customerName$%')
+			or (C.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[C.CUSTOMER_ID = #customerId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+				<![CDATA[C.CUSTOMER_NO = #customerNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[T.TEMPLATE_NO = #templateNo#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by R.TEST_DATE desc 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  
+    	<!-- 风险测评模板题目分页count -->
+  <select id="getRskResultBeanCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+        SELECT  distinct count(*)
+  		FROM RSK_RESULT R
+  		INNER JOIN RSK_TEMPLATE T ON T.TEMPLATE_ID = R.TEMPLATE_ID
+  		INNER JOIN CRM_CUSTOMER C on R.CUSTOMER_ID = C.CUSTOMER_ID
+  		WHERE R.IS_DEL = 0
+     ]]>
+      <dynamic>
+			<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(C.CUSTOMER_NAME like '%$customerName$%')
+			or (C.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="BelongTo">
+		 		<isEqual property="BelongTo" compareValue="brAll">
+					(<![CDATA[C.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+					<isPropertyAvailable  property="InChargeOfDeptIds">
+						<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+							<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable  property="ContainsShare">
+						<isNotEmpty prepend="or" property="ContainsShare">
+							<![CDATA[(C.CUSTOMER_ID in (
+								SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+								left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+								WHERE 
+								SHARE_USER_ID in ($InChargeOfUserIds$) 
+								AND g.BELONG_USER_ID != $UserId$ 
+								AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					)
+				</isEqual>
+				<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[C.BELONG_USER_ID = $InChargeOfUserIds$]]>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+			</isEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+			<![CDATA[C.CUSTOMER_NO = #customerNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[C.CUSTOMER_ID = #customerId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[T.TEMPLATE_NO = #templateNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createUser">
+				<![CDATA[R.CREATE_USER = #createUser#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+   	<!-- 分页记录 -->
+  <select id="getRskResultBeanPageMap" resultMap="CrmCustomerEvaBean"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		SELECT distinct C.*,
+  		T.TEMPLATE_NO,R.TEST_DATE, R.TEST_RESULT, R.REMARK as TEST_REMARK, R.RESULT_ID,  
+  		case
+        when C.BELONG_DEPT_ID in ($InChargeOfDeptIds$) or  C.BELONG_USER_ID = #UserId#
+        then 0
+        else 1
+        end
+        as IS_SHARE
+  		
+  		FROM RSK_RESULT R
+  		INNER JOIN RSK_TEMPLATE T ON T.TEMPLATE_ID = R.TEMPLATE_ID
+  		INNER JOIN CRM_CUSTOMER C on R.CUSTOMER_ID = C.CUSTOMER_ID
+  		WHERE R.IS_DEL = 0
+	]]>
+	 <dynamic>
+	 		<isNotEmpty prepend="and" property="BelongTo">
+		 		<isEqual property="BelongTo" compareValue="brAll">
+					(<![CDATA[C.BELONG_USER_ID in ($InChargeOfUserIds$)]]>	
+					<isPropertyAvailable  property="InChargeOfDeptIds">
+						<isNotEmpty prepend="or" property="InChargeOfDeptIds">
+							<![CDATA[C.BELONG_DEPT_ID in ($InChargeOfDeptIds$)]]>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable  property="ContainsShare">
+						<isNotEmpty prepend="or" property="ContainsShare">
+							<![CDATA[(C.CUSTOMER_ID in (
+								SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+								left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+								WHERE 
+								SHARE_USER_ID in ($InChargeOfUserIds$) 
+								AND g.BELONG_USER_ID != $UserId$ 
+								AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					)
+				</isEqual>
+				<isEqual property="BelongTo" compareValue="brMine">
+				(<![CDATA[C.BELONG_USER_ID = $InChargeOfUserIds$]]>
+				<isPropertyAvailable  property="ContainsShare">
+					<isNotEmpty prepend="or" property="ContainsShare">
+						<![CDATA[(C.CUSTOMER_ID in (
+							SELECT DISTINCT g.CUSTOMER_ID FROM CRM_CUSTOMER_SHARED f 
+							left join CRM_CUSTOMER g on f.CUSTOMER_ID = g.CUSTOMER_ID
+							WHERE 
+							SHARE_USER_ID in ($InChargeOfUserIds$) 
+							AND g.BELONG_USER_ID != $UserId$ 
+							AND g.BELONG_DEPT_ID not in ($InChargeOfDeptIds$))) ]]>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				)
+				</isEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[(
+			(C.CUSTOMER_NAME like '%$customerName$%')
+			or (C.CUSTOMER_NAME_PINYIN like '%$customerName$%')
+			)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[C.CUSTOMER_ID = #customerId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+				<![CDATA[C.CUSTOMER_NO = #customerNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[T.TEMPLATE_NO = #templateNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createUser">
+				<![CDATA[R.CREATE_USER = #createUser#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by R.TEST_DATE desc 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+</sqlMap>
+
+
+
+

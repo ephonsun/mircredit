@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskPlanTargetSQL">
+	<typeAlias alias="TskPlanTarget"
+		type="com.banger.mobile.domain.model.tskContact.TskPlanTarget" />
+	<typeAlias alias="TskPlanDateTarget"
+		type="com.banger.mobile.domain.model.tskContact.TskPlanDateTarget" />
+
+	<!-- 联系计划客户表-->
+	<!-- 信息全字段 -->
+	<resultMap class="TskPlanTarget" id="TskPlanTargetResult">
+		<result column="TARGET_ID" property="targetId" />
+		<result column="PLAN_ID" property="planId" />
+		<result column="CONTACT_TARGET_ID" property="contactTargetId"/>
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE_NO" property="phoneNo" />
+		<result column="FINISH_LEVEL" property="finishLevel" />		
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- 计划客户+计划时间 -->
+	<resultMap class="TskPlanDateTarget" id="TskPlanDateTargetResult" 
+		extends="TskPlanTargetResult">
+		<result column="TASK_PLAN_DATE" property="taskPlanDate" />
+	</resultMap>
+	
+	<!-- 新增联系计划目标客户 -->
+	<insert id="insertTskPlanTarget" parameterClass="TskPlanTarget">
+		<![CDATA[
+			INSERT INTO
+		    	TSK_PLAN_TARGET
+		    (
+		        TARGET_ID,
+		        PLAN_ID,
+		        CONTACT_TARGET_ID,
+		        CUSTOMER_ID,
+		        CUSTOMER_NAME,
+		        PHONE_NO,
+		        FINISH_LEVEL,
+		        REMARK,
+		        CREATE_DATE,
+		        CREATE_USER
+		    )
+		    VALUES
+		    (
+		        #targetId#,
+		        #planId#,
+		        #contactTargetId#,
+		        #customerId#,
+		        #customerName:VARCHAR:NULL#,
+		        #phoneNo:VARCHAR:NULL#,
+		        #finishLevel#,
+		       	#remark:VARCHAR:NULL#,
+		        current timestamp,
+				#createUser#
+		    )
+	    ]]>
+	   	<selectKey keyProperty="targetId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_PLAN_TARGET
+		</selectKey>
+	</insert>	
+	
+	<!-- 编辑 联系计划目标客户-->
+	<update id="updateTskPlanTarget" parameterClass="TskPlanTarget">
+		update TSK_PLAN_TARGET set
+			<isNotNull property="planId">
+				PLAN_ID = #planId#,
+			</isNotNull>
+			<isNotNull property="contactTargetId">
+				CONTACT_TARGET_ID=#contactTargetId#,
+			</isNotNull>
+			<isNotNull property="finishLevel">
+				FINISH_LEVEL=#finishLevel#,
+			</isNotNull>
+			<isNotEmpty property="remark">
+				REMARK=#remark#,
+			</isNotEmpty>
+			UPDATE_USER=#updateUser#,
+			UPDATE_DATE= current timestamp
+		WHERE TARGET_ID =#targetId#
+	</update>
+	
+	<!--查询计划客户实体对象个数 -->
+	<select id="getPlanTargetCountByMap" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		select count(0) from TSK_PLAN_TARGET
+		<dynamic prepend="where">
+			<isNotNull prepend="and" property="planId">
+				PLAN_ID = #planId#
+			</isNotNull>
+			<isNotNull prepend="and" property="contactTargetId">
+				CONTACT_TARGET_ID=#contactTargetId#
+			</isNotNull>
+			<isNotNull prepend="and" property="customerId">
+				CUSTOMER_ID=#customerId#
+			</isNotNull>
+		</dynamic>
+	</select>
+	<!-- 删除目标客户 -->
+	<delete id="delCustInPlan" parameterClass="java.lang.String">
+		delete from TSK_PLAN_TARGET where TARGET_ID in ($value$)
+	</delete>
+	
+	<!-- 查询计划客户实体对象(当天未完成) -->
+	<select id="getPlanTargetByMap" resultMap="TskPlanDateTargetResult" parameterClass="java.util.Map">
+		select target.*,p.TASK_PLAN_DATE
+		from TSK_PLAN_TARGET target
+		left join TSK_PLAN p on p.PLAN_ID=target.PLAN_ID
+		where p.TASK_PLAN_DATE>=current date and p.EXECUTE_USER_ID=$userId$ and target.FINISH_LEVEL=0
+			<isNotNull prepend="and" property="customerId">
+				target.CUSTOMER_ID=#customerId#
+			</isNotNull>
+			<isNotEmpty prepend="and" property="phoneNo">
+				target.PHONE_NO =#phoneNo#
+			</isNotEmpty>
+	</select>
+	
+	
+</sqlMap>

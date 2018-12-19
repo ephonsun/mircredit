@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmTemplateFieldSQL">
+	<typeAlias alias="CrmTemplateField"
+		type="com.banger.mobile.domain.model.templateField.CrmTemplateField" />
+
+	<!-- 模版字段列表-->
+	<!-- CrmTemplateFieldSQL信息全字段 -->
+	<resultMap class="CrmTemplateField" id="CrmTemplateFieldResult">
+		<result column="TEMPLATE_FIELD_ID" property="templateFieldId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="TEMPLATE_FIELD_NAME"
+			property="templateFieldName" />
+		<result column="TEMPLATE_FIELD_TYPE"
+			property="templateFieldType" />
+		<result column="EXT_FIELD_NAME"
+			property="extFieldName" />
+	   <result column="FIELD_TYPE_NAME"
+			property="fieldTypeName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_POPUP" property="isPopUp" />
+		<result column="MEASUREMENT" property="measurement" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<cacheModel id="CrmTemplateField-Cache" type="OSCACHE" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="addCrmTemplateField" />
+		<flushOnExecute statement="updateCrmTemplateField" />
+		<flushOnExecute statement="deleteCrmTemplateFieldById" />
+		<flushOnExecute statement="deleteCrmTemplateFieldByTemplateId" />
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	<!-- 增加一个模版字段-->
+	<insert id="addCrmTemplateField"
+		parameterClass="CrmTemplateField">
+		<![CDATA[
+		INSERT INTO CRM_TEMPLATE_FIELD
+	    (
+	        TEMPLATE_FIELD_ID,
+	        TEMPLATE_ID,
+	        IS_DEL,
+	        TEMPLATE_FIELD_NAME,
+	        TEMPLATE_FIELD_TYPE,
+	        EXT_FIELD_NAME,
+	        SORTNO,
+	        IS_POPUP,
+	        MEASUREMENT,
+	        CREATE_DATE,
+	        UPDATE_DATE,
+	        CREATE_USER,
+	        UPDATE_USER
+	    )
+	    VALUES
+	    (
+	        #templateFieldId#,
+	        #templateId#,
+	        #isDel#,
+	        #templateFieldName#,
+	        #templateFieldType#,
+	        #extFieldName#,
+	        #sortNo#,
+	        #isPopUp#,
+	        #measurement#,
+	        current timestamp,
+		    current timestamp,
+	        #createUser#,
+	        #updateUser#
+	    )
+      ]]>
+		<selectKey keyProperty="templateFieldId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_TEMPLATE_FIELD
+		</selectKey>
+	</insert>
+
+
+	<!-- 修改模版字段-->
+	<update id="updateCrmTemplateField"
+		parameterClass="CrmTemplateField">
+		UPDATE CRM_TEMPLATE_FIELD SET TEMPLATE_ID = #templateId#, IS_DEL
+		= #isDel#, TEMPLATE_FIELD_NAME = #templateFieldName#,
+		TEMPLATE_FIELD_TYPE = #templateFieldType#,EXT_FIELD_NAME=#extFieldName#, SORTNO = #sortNo#,
+		IS_POPUP = #isPopUp#, MEASUREMENT = #measurement#, CREATE_DATE =
+		#createDate#, UPDATE_DATE =
+		<![CDATA[current timestamp]]>, CREATE_USER = #createUser#, UPDATE_USER = #updateUser# WHERE
+		TEMPLATE_FIELD_ID = #templateFieldId#
+	</update>
+
+	<!-- 根据ID删除模版字段 -->
+	<update id="deleteCrmTemplateFieldById"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_TEMPLATE_FIELD SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where TEMPLATE_FIELD_ID= #Id#
+	</update>
+	
+	<!-- 根据模版ID删除模版字段 -->
+	<update id="deleteCrmTemplateFieldByTemplateId"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_TEMPLATE_FIELD SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where TEMPLATE_ID= #Id#
+	</update>
+
+	<!-- 根据id得到模版字段 -->
+	<select id="getCrmTemplateFieldById"
+		resultMap="CrmTemplateFieldResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select a.*,'' as FIELD_TYPE_NAME from CRM_TEMPLATE_FIELD as a where a.TEMPLATE_FIELD_ID= #Id#
+	]]>
+	</select>
+
+	<!-- 根据模版字段名称获取相同模版字段名称的数据 -->
+	<select id="getSameCrmTemplateFieldByName"
+		resultMap="CrmTemplateFieldResult"
+		parameterClass="CrmTemplateField">
+		<![CDATA[
+		select a.*,'' as FIELD_TYPE_NAME from CRM_TEMPLATE_FIELD as a where  a.IS_DEL = 0
+	]]>
+		<isNotEmpty prepend="" property="templateFieldId">
+			<isNotEqual prepend="and" property="templateFieldId"
+				compareValue="0">
+				<![CDATA[a.TEMPLATE_FIELD_ID != #templateFieldId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="templateFieldName">
+			<![CDATA[a.TEMPLATE_FIELD_NAME = #templateFieldName#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="templateId">
+			<![CDATA[a.TEMPLATE_ID = #templateId#]]>
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取现有模版字段是弹屏显示的数据 -->
+	<select id="getPopupCrmTemplateField"
+		resultMap="CrmTemplateFieldResult">
+		select a.*,'' as FIELD_TYPE_NAME from CRM_TEMPLATE_FIELD as a WHERE a.IS_DEL = 0 and a.IS_POPUP =
+		1
+	</select>
+	
+	<!-- 获取新增或编辑模版字段是否已存在在基础模版字段中 -->
+	<select id="getHasSameBasicCrmTemplateField"
+		resultMap="CrmTemplateFieldResult" parameterClass="CrmTemplateField">
+		select a.*,'' as FIELD_TYPE_NAME from CRM_TEMPLATE_FIELD as a WHERE a.IS_DEL = 0 and a.TEMPLATE_ID = 1 
+		and a.TEMPLATE_FIELD_NAME = #templateFieldName#
+		<isNotEmpty prepend="" property="templateFieldId">
+			<isNotEqual prepend="and" property="templateFieldId"
+				compareValue="0">
+				<![CDATA[a.TEMPLATE_FIELD_ID != #templateFieldId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取现有模版字段数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmTemplateField"
+		resultMap="CrmTemplateFieldResult" parameterClass="java.lang.Integer">
+		select a.*,'' as FIELD_TYPE_NAME  from CRM_TEMPLATE_FIELD as a WHERE a.IS_DEL = 0 and a.TEMPLATE_ID = #templateId#
+		Order by
+		a.SORTNO ASC fetch first 1 rows only
+	</select>
+
+	<!-- 获取现有模版字段数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmTemplateField"
+		resultMap="CrmTemplateFieldResult" parameterClass="java.lang.Integer">
+		select a.*,'' as FIELD_TYPE_NAME from CRM_TEMPLATE_FIELD as a WHERE a.IS_DEL = 0 and a.TEMPLATE_ID = #templateId#
+		Order by
+		a.SORTNO DESC fetch first 1 rows only
+	</select>
+
+	<!-- 获取要移动的模版字段对象 -->
+	<select id="getNeedMoveCrmTemplateField"
+		resultMap="CrmTemplateFieldResult" parameterClass="java.util.Map">
+		select a.*,'' as FIELD_TYPE_NAME from CRM_TEMPLATE_FIELD as a WHERE a.IS_DEL = 0
+		<isNotEmpty prepend="and" property="templateId">
+			<![CDATA[a.TEMPLATE_ID = #templateId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType"
+				compareValue="Up">
+				<![CDATA[a.SORTNO < #sortNo#  Order by a.SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+			<isNotEqual prepend="and" property="moveType"
+				compareValue="Up">
+				<![CDATA[a.SORTNO > #sortNo#  Order by a.SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取模版字段列表 -->
+	<select id="getCrmTemplateFieldListByTemplateId"
+		resultMap="CrmTemplateFieldResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select a.*,b.FIELD_TYPE_NAME from  CRM_TEMPLATE_FIELD as a 
+			inner join CRM_FIELD_TYPE as b on b.FIELD_TYPE_ID = a.TEMPLATE_FIELD_TYPE
+			 WHERE a.IS_DEL = 0
+             AND a.TEMPLATE_ID = #id#
+             Order by a.SORTNO ASC
+	]]>
+	</select>
+	<!-- 获取所有客户模版字段列表 -->
+	<select id="getAllCrmTemplateField"
+		resultMap="CrmTemplateFieldResult" cacheModel="CrmTemplateField-Cache">
+		<![CDATA[
+		select 
+		      a.*,'' as FIELD_TYPE_NAME
+        from 
+             CRM_TEMPLATE_FIELD as a inner join CRM_TEMPLATE as b on a.TEMPLATE_ID = b.TEMPLATE_ID
+		WHERE a.IS_DEL = 0 and b.TEMPLATE_TYPE_ID = 1
+             Order by a.SORTNO ASC
+	]]>
+	</select>
+	
+	<!-- 获取所有客户模版字段列表 -->
+	<select id="getAllCrmTemplateFieldNoCache"
+		resultMap="CrmTemplateFieldResult">
+		<![CDATA[
+		select 
+		      a.*,'' as FIELD_TYPE_NAME
+        from 
+             CRM_TEMPLATE_FIELD as a inner join CRM_TEMPLATE as b on a.TEMPLATE_ID = b.TEMPLATE_ID
+		WHERE a.IS_DEL = 0 and b.TEMPLATE_TYPE_ID = 1
+             Order by a.SORTNO ASC
+	]]>
+	</select>
+	
+	<!-- 获取所有产品模版字段列表 -->
+	<select id="getAllPdtCrmTemplateField"
+		resultMap="CrmTemplateFieldResult" cacheModel="CrmTemplateField-Cache">
+		<![CDATA[
+		select 
+		      a.*,'' as FIELD_TYPE_NAME
+        from 
+             CRM_TEMPLATE_FIELD as a inner join CRM_TEMPLATE as b on a.TEMPLATE_ID = b.TEMPLATE_ID
+		WHERE a.IS_DEL = 0 and b.TEMPLATE_TYPE_ID = 2
+             Order by a.SORTNO ASC
+	]]>
+	</select>
+	<!-- 获取正常状态某个客户自定义字段值不为空的数据 -->
+	<select id="getCrmCustomerExtFieldIsNotNull"
+		resultClass="java.util.HashMap" parameterClass="java.util.HashMap">
+		<![CDATA[
+		select a.* from CRM_CUSTOMER_EXT_FIELD as a
+		inner join CRM_CUSTOMER as b on a.CUSTOMER_ID = b.CUSTOMER_ID
+		where $queryColumn$ is not null and b.IS_DEL = 0
+	]]>
+	</select>
+	
+	<!-- 获取正常状态某个产品自定义字段值不为空的数据 -->
+	<select id="getPdtProductextFieldIsNotNull"
+		resultClass="java.util.HashMap" parameterClass="java.util.HashMap">
+		<![CDATA[
+		select a.* from PDT_PRODUCT_EXT_FIELD as a
+		inner join PDT_PRODUCT as b on a.PRODUCT_ID = b.PRODUCT_ID
+		where  $queryColumn$ is not null and b.IS_DEL = 0
+	]]>
+	</select>
+	
+	<!-- 获取所有模版自定义字段值 -->
+	<select id="getCrmCustomerExtFieldByCustomerId" remapResults="true" 
+		resultClass="java.util.HashMap" parameterClass="java.util.HashMap">
+		<![CDATA[
+		select 
+		      $queryColumn$
+        from 
+             CRM_CUSTOMER_EXT_FIELD WHERE CUSTOMER_ID = #customerId#
+	]]>
+	</select>
+
+</sqlMap>

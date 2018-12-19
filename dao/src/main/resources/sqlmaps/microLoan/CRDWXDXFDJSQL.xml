@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CRDWXDXFDJSQL">
+    <typeAlias alias="BaseCRDWXDXFDJ" type="com.banger.mobile.domain.model.base.loan.BaseCRDWXDXFDJ"/>
+
+    <resultMap id="BaseCRDWXDXFDJResult" class="BaseCRDWXDXFDJ">
+        <result column="DJRQ" property="DJRQ"/>
+        <result column="SERNO" property="SERNO" />
+        <result column="KHXM" property="KHXM" />
+        <result column="CSRQ" property="CSRQ" />
+        <result column="XB" property="XB"/>
+        <result column="ZJHM" property="ZJHM"/>
+        <result column="HYZK" property="HYZK" />
+        <result column="JZNX" property="JZNX" />
+        <result column="JTDZ" property="JTDZ"/>
+        <result column="JTRW" property="JTRW"/>
+        <result column="SJHM" property="SJHM"/>
+        <result column="JTDH" property="JTDH"/>
+        <result column="JZZK" property="JZZK"/>
+        <result column="ZGXL" property="ZGXL"/>
+        <result column="ZW" property="ZW"/>
+        <result column="GZDW" property="GZDW"/>
+        <result column="DWDZYB" property="DWDZYB"/>
+        <result column="GZNX" property="GZNX"/>
+        <result column="YGZSP" property="YGZSP"/>
+        <result column="ZZJY" property="ZZJY"/>
+        <result column="SPOUSENAME" property="SPOUSENAME" />
+        <result column="POZJHM" property="POZJHM" />
+        <result column="POZY" property="POZY" />
+        <result column="POGZNX" property="POGZNX" />
+        <result column="PODH" property="PODH"/>
+        <result column="POSJHM" property="POSJHM"/>
+        <result column="POGZDW" property="POGZDW"/>
+        <result column="POZW" property="POZW"/>
+        <result column="PODWDZYB" property="PODWDZYB"/>
+        <result column="POYGZSP" property="POYGZSP"/>
+        <result column="XM" property="XM"/>
+        <result column="XB1" property="XB1"/>
+        <result column="JKZK" property="JKZK"/>
+        <result column="CSRQ1" property="CSRQ1"/>
+        <result column="GZDW1" property="GZDW1"/>
+        <result column="ZGXL1" property="ZGXL1"/>
+        <result column="FMQK" property="FMQK"/>
+        <result column="SQJE" property="SQJE"/>
+        <result column="JKYT" property="JKYT"/>
+        <result column="SQQX" property="SQQX"/>
+        <result column="YDHKRQ" property="YDHKRQ"/>
+        <result column="MHKJE" property="MHKJE"/>
+        <result column="HKLY" property="HKLY"/>
+        <result column="KNDBR" property="KNDBR"/>
+        <result column="DBRZJH" property="DBRZJH"/>
+        <result column="DBRLXDH" property="DBRLXDH"/>
+        <result column="GX" property="GX"/>
+        <result column="GZDW2" property="GZDW2"/>
+        <result column="ZW1" property="ZW1"/>
+        <result column="DWDZYB2" property="DWDZYB2"/>
+        <result column="YGZSP2" property="YGZSP2"/>
+        <result column="ZCQK" property="ZCQK"/>
+        <result column="XXLY" property="XXLY"/>
+        <result column="DJLX" property="DJLX"/>
+        <result column="DSHJYJE" property="DSHJYJE"/>
+        <result column="DSHJYQX" property="DSHJYQX"/>
+        <result column="SQLL" property="SQLL"/>
+        <result column="SQJF" property="SQJF"/>
+        <result column="SQFD" property="SQFD"/>
+        <result column="SQJD" property="SQJD"/>
+        <result column="DQYH" property="DQYH"/>
+        <result column="DJR" property="DJR"/>
+    </resultMap>
+
+    <select id="getOnlyXFLoanInfoByCustomer" parameterClass="java.util.Map" resultMap="BaseCRDWXDXFDJResult">
+        select cwd.*,abs(days(date('$genDate$'))- days(date(cwd.DJRQ))) diffDate
+        from DATA.CRD_WXDXF_DJ cwd where cwd.ZJHM=#idCard# and cwd.KHXM=#customerName#
+        order by diffDate fetch first 1 row only
+    </select>
+
+    <delete id="delCRDWXDXFDJBatch">
+        delete from (SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+        select * from DATA.CRD_WXDXF_DJ
+        ) g ) tmp where tmp.NUMROW &lt;= 30000 and tmp.NUMROW &gt;= 1)
+    </delete>
+
+    <!--查询要更新的贷款笔数-->
+    <select id="getXFLoanInfoCount" resultClass="java.lang.Integer">
+        <![CDATA[
+        select count(*) from (
+        select xf.* from DATA.crd_wxdxf_dj xf left join ln_loan_info lli on xf.serno =lli.SERIAL_NUMBER where lli.loan_info_id is not null
+        ) loanxf
+        where loanxf.serno is not null  and (VALUES DAYS(CURRENT DATE) -DAYS(TO_DATE(loanxf.djrq,'YYYY-MM-DD')))<=900
+         ]]>
+    </select>
+
+    <!--查询要更新的贷款 只查60天内的数据-->
+    <select id="getXFLoanInfoList" resultMap="BaseCRDWXDXFDJResult">
+        <![CDATA[
+          select loanxf.* from (
+                  select xf.* from DATA.crd_wxdxf_dj xf left join ln_loan_info lli on xf.serno =lli.SERIAL_NUMBER where lli.loan_info_id is not null
+                  ) loanxf
+            where loanxf.serno is not null and loanxf.sqjd != '000'  and (VALUES DAYS(CURRENT DATE) -DAYS(TO_DATE(loanxf.djrq,'YYYY-MM-DD')))<=600
+         ]]>
+    </select>
+    <!--查询要缺少的贷款只查60天 -->
+    <select id="getAddXFLoanInfoList" resultMap="BaseCRDWXDXFDJResult">
+        <![CDATA[
+        select xf.*from
+        DATA.crd_wxdxf_dj xf
+        left join ln_loan_info lli
+        on xf.serno=lli.SERIAL_NUMBER
+        where  lli.loan_info_id is null
+        and xf.sqjd != '000'
+        and (VALUES DAYS(CURRENT DATE) -DAYS(TO_DATE(xf.djrq,'YYYY-MM-DD')))<=600
+                 ]]>
+    </select>
+</sqlMap>

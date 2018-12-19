@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DataSmsSQL">
+	<typeAlias alias="SMS" type="com.banger.mobile.domain.model.data.Sms" />
+
+	<!-- 数据权限表 -->
+    <resultMap class="Sms" id="SmsResult">
+		<result column="SMS_ID" property="smsId" />
+		<result column="CUSTOMER_DATA_ID" property="customerDataId" />
+		<result column="SMS_TYPE" property="smsType" />
+		<result column="SMS_CONTENT" property="smsContent" />
+		<result column="REMARK" property="remark" />
+		<result column="SEND_DATE" property="sendDate" />
+		<result column="SEND_USER_ID" property="sendUserId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+  
+	<!--查看客户短信列表分页数据（总数） -->
+	<select id="getCustomerSmsDataCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[		
+			SELECT COUNT(1)
+			FROM DAT_SMS a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID = $eventId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="smsContent" prepend="AND">
+				<![CDATA[ a.SMS_CONTENT Like '%$smsContent$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="smsType" prepend="AND">
+				<![CDATA[ a.SMS_TYPE = $smsType$]]>
+			</isNotEmpty>
+			<isNotEmpty property="sendStartDate" prepend="AND">
+				<![CDATA[ a.SEND_DATE >='$sendStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="sendEndDate" prepend="AND">
+				<![CDATA[ a.SEND_DATE <='$sendEndDate$']]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--查看客户短信列表分页数据（总数） -->
+	<select id="getCustomerSmsDataPage" resultMap="SmsResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*
+			FROM DAT_SMS a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID = $eventId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="smsContent" prepend="AND">
+				<![CDATA[ a.SMS_CONTENT Like '%$smsContent$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="smsType" prepend="AND">
+				<![CDATA[ a.SMS_TYPE = $smsType$]]>
+			</isNotEmpty>
+			<isNotEmpty property="sendStartDate" prepend="AND">
+				<![CDATA[ a.SEND_DATE >='$sendStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="sendEndDate" prepend="AND">
+				<![CDATA[ a.SEND_DATE <='$sendEndDate$']]>
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY a.CREATE_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+</sqlMap>

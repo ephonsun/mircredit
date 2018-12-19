@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CustomerBeanSQL">
+	<typeAlias alias="sex" type="com.banger.mobile.domain.model.system.CdSex" />
+	<typeAlias alias="province" type="com.banger.mobile.domain.model.system.CdProvince" />
+	<typeAlias alias="city" type="com.banger.mobile.domain.model.system.CdCity" />
+	<typeAlias alias="onlineStatus" type="com.banger.mobile.domain.model.user.CdOnlineStatus" />
+	
+	<resultMap class="city" id="cityResult">
+		<result column="CODE" property="code" />
+		<result column="SHORT_NAME" property="shortName" />
+		<result column="PROV_CODE" property="provCode" />
+	</resultMap>
+	
+	<resultMap class="province" id="provResult">
+		<result column="CODE" property="code" />
+		<result column="SHORT_NAME" property="shortName" />
+	</resultMap>
+	
+	<resultMap class="sex" id="sexResult">
+		<result column="SEX_CODE" property="sexCode" />
+		<result column="SEX_NAME" property="sexName" />
+	</resultMap>
+	
+	<resultMap class="onlineStatus" id="onlineStatusResult">
+		<result column="ONLINE_STATUS_ID" property="onlineStatusId" />
+		<result column="ONLINE_STATUS_NAME" property="onlineStatusName" />
+	</resultMap>
+	
+	<select id="getCdOnlineStatus" resultMap="onlineStatusResult" >
+		SELECT * FROM CD_ONLINE_STATUS
+	</select>
+	
+	<select id="getCdSex" resultMap="sexResult" >
+		SELECT * FROM CD_SEX
+	</select>
+	
+	<select id="getProvinces" resultMap="provResult" >
+		SELECT * FROM CD_PROVINCE
+	</select>
+	
+	<select id="getAllCity" resultMap="cityResult" >
+		SELECT * FROM CD_CITY
+	</select>
+	
+	<select id="getCityByProv" resultMap="cityResult" parameterClass="java.util.Map" >
+		SELECT * FROM CD_CITY
+		<dynamic prepend="where" >
+			<isNotEmpty property="provCode" prepend="and" >
+				PROV_CODE = #provCode#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<select id="getProvNameByCode" resultClass="java.lang.String" parameterClass="java.lang.String" >
+		SELECT SHORT_NAME FROM CD_PROVINCE WHERE CODE='$value$'
+	</select>
+	
+	<select id="getProvCodeByName" resultClass="java.lang.String" parameterClass="java.lang.String" >
+		SELECT CODE FROM CD_PROVINCE WHERE SHORT_NAME='$value$'
+	</select>
+	
+	
+	<select id="getCityCodeByName" resultClass="java.lang.String" parameterClass="java.lang.String" >
+		SELECT CODE FROM CD_CITY WHERE SHORT_NAME='$value$'
+	</select>
+	
+	<select id="getCityNameByCode" resultClass="java.lang.String" parameterClass="java.lang.String" >
+		SELECT SHORT_NAME FROM CD_CITY WHERE CODE='$value$'
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtTemplateSQL">
+	<typeAlias alias="PdtTemplate" type="com.banger.mobile.domain.model.pdtProduct.PdtTemplate" />
+	
+	<!-- 产品类型模版表 信息全字段 -->
+	<resultMap class="PdtTemplate" id="PdtTemplateResult">
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="TEMPLATE_RATE" property="templateRate" />
+		<result column="TEMPLATE_ORDER" property="templateOrder" />
+		<result column="TEMPLATE_STATE" property="templateState" />
+		<result column="IS_BUILTIN" property="isBuiltin" />
+		<result column="IS_DEL" property="isDel" /> 
+	    <result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>	
+	<cacheModel id="PdtTemplate-Cache" type="LRU" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="insertPdtTemplate" />
+		<flushOnExecute statement="updatePdtTemplate" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+	<!-- 产品模板列表 总数 -->
+	<select id="getPdtTemplateListCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select count(1) from PDT_TEMPLATE where IS_DEL=0 
+		]]>
+		<isNotEmpty prepend="and" property="templateName">
+			TEMPLATE_NAME like '%$templateName$%'
+		</isNotEmpty>
+	</select>
+	<!-- 产品模板列表 -->
+	<select id="getPdtTemplateList" resultMap="PdtTemplateResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select * from PDT_TEMPLATE where IS_DEL=0 
+		]]>
+		<isNotEmpty prepend="and" property="templateName">
+			TEMPLATE_NAME like '%$templateName$%'
+		</isNotEmpty>
+		order by TEMPLATE_ORDER
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询模板 -->
+	<select id="getPdtTemplateById" resultMap="PdtTemplateResult" parameterClass="PdtTemplate">
+		<![CDATA[
+			select * from PDT_TEMPLATE where IS_DEL=0 
+		]]>
+		<isNotNull prepend="and" property="templateId">
+			TEMPLATE_ID=$templateId$
+		</isNotNull>
+		<isNotEmpty prepend="and" property="templateName">
+			TEMPLATE_NAME = '$templateName$'
+		</isNotEmpty>
+	</select>
+	
+	<!-- 新增模板 -->
+	<insert id="insertPdtTemplate" parameterClass="PdtTemplate">
+		<![CDATA[
+			insert into PDT_TEMPLATE 
+				(
+					TEMPLATE_ID, 
+					TEMPLATE_NAME, 
+					TEMPLATE_RATE,
+					TEMPLATE_ORDER, 
+					TEMPLATE_STATE, 
+					IS_BUILTIN, 
+					IS_DEL, 
+					CREATE_DATE, 
+					CREATE_USER
+				) 
+				values 
+				(
+					#templateId#,
+					#templateName#,
+					#templateRate#,
+					#templateOrder#,
+					1,
+					#isBuiltin#,
+					0,
+					current timestamp,
+					#createUser#
+				)
+		]]>
+		<selectKey keyProperty="templateId" resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_PRODUCT
+		</selectKey>
+	</insert>
+	
+	<!-- 查询所有模板 -->
+	<select id="getAllTempList" resultMap="PdtTemplateResult">
+		<![CDATA[
+			select * from PDT_TEMPLATE where IS_DEL=0 and TEMPLATE_STATE=1 order by TEMPLATE_ORDER
+		]]>
+	</select>
+	
+	<!-- 获取所有产品模版字段列表 -->
+	<select id="getAllTemplateList"
+		resultMap="PdtTemplateResult" cacheModel="PdtTemplate-Cache">
+	<![CDATA[
+		select * from PDT_TEMPLATE where IS_DEL=0 and TEMPLATE_STATE=1 order by TEMPLATE_ORDER
+	]]>
+	</select>
+	
+	<!-- 编辑模板 -->
+	<update id="updatePdtTemplate" parameterClass="PdtTemplate">
+		update PDT_TEMPLATE  set
+			<isNotEmpty property="templateName">
+				TEMPLATE_NAME=#templateName#,
+			</isNotEmpty>
+			<isNotEmpty property="templateRate">
+				TEMPLATE_RATE=#templateRate#,
+			</isNotEmpty>
+			<isNotNull property="templateOrder">
+				TEMPLATE_ORDER=#templateOrder#,
+			</isNotNull>
+			<isNotNull property="templateState">
+				TEMPLATE_STATE=#templateState#,
+			</isNotNull>
+			<isNotNull property="isDel">
+				IS_DEL=#isDel#,
+			</isNotNull>
+			UPDATE_DATE=current timestamp,
+			UPDATE_USER=#updateUser#
+		where TEMPLATE_ID = #templateId#
+	</update>
+	
+	
+</sqlMap>
+

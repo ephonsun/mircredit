@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmFieldTypeSQL">
+	<typeAlias alias="CrmFieldType"
+		type="com.banger.mobile.domain.model.fieldType.CrmFieldType" />
+
+	<!-- 模版字段类型表-->
+	<!-- CrmFieldTypeSQL信息全字段 -->
+	<resultMap class="CrmFieldType" id="CrmFieldTypeResult">
+		<result column="FIELD_TYPE_ID" property="fieldTypeId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="FIELD_TYPE_NAME" property="fieldTypeName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<cacheModel id="CrmFieldType-Cache" type="OSCACHE" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<property name="size" value="200" />
+	</cacheModel>
+
+	<!-- 获取模版字段类型列表 -->
+	<select id="getAllCrmFieldType"
+		resultMap="CrmFieldTypeResult" cacheModel="CrmFieldType-Cache">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_FIELD_TYPE WHERE IS_DEL = 0
+             Order by SORTNO ASC
+	]]>
+	</select>
+</sqlMap>

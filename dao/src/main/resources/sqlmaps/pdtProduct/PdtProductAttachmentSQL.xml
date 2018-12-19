@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtProductAttachmentSQL">
+	<typeAlias alias="PdtProductAttachment" type="com.banger.mobile.domain.model.pdtProduct.PdtProductAttachment" />
+	
+	<!-- 产品类型模版下拉字段项     信息全字段 -->
+	<resultMap class="PdtProductAttachment" id="PdtProductAttachmentResult">
+	 	<result column="ATTACHMENT_ID" property="attachmentId" />
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_NAME_OLD" property="fileNameOld" /> 
+		<result column="UPLOAD_DATE" property="uploadDate" /> 
+	    <result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<!-- 插入在售产品附件 -->
+	<insert id="InsertProductAttachment" parameterClass="PdtProductAttachment">
+		<![CDATA[
+			INSERT INTO PDT_PRODUCT_ATTACHMENT
+			(
+				ATTACHMENT_ID,
+				PRODUCT_ID,
+				FILE_PATH,
+				FILE_NAME,
+				FILE_NAME_OLD,
+				FILE_SIZE,
+				UPLOAD_DATE,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#attachmentId#,
+				#productId#,
+				#filePath#,
+				#fileName#,
+				#fileNameOld#,
+				#fileSize#,
+				#uploadDate#,
+				#createDate#,
+				#createUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="attachmentId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_PDT_PRODUCT_ATTACHMENT
+		</selectKey>
+	</insert>
+	
+	<!-- 删除在售产品指定的附件  -->
+	<delete id="DelAttrByAttId" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM PDT_PRODUCT_ATTACHMENT WHERE ATTACHMENT_ID=#attachmentId# 
+		]]>
+	</delete>
+	
+	<!-- 查询在售产品的附件 -->
+	<select id="GetAttrByProductId" parameterClass="java.lang.Integer" resultMap="PdtProductAttachmentResult">
+		<![CDATA[
+			SELECT * FROM PDT_PRODUCT_ATTACHMENT WHERE PRODUCT_ID=#productId#
+		]]>
+	</select>
+	
+	<!-- 获取指定附件 -->
+	<select id="GetPdtAttrById" parameterClass="java.lang.Integer" resultMap="PdtProductAttachmentResult">
+		<![CDATA[
+			SELECT * FROM PDT_PRODUCT_ATTACHMENT WHERE ATTACHMENT_ID=#attachmentId#
+		]]>
+	</select>
+	
+	<!-- 根据在售产品ID删除所有附件 -->
+	<delete id="DelAllAttrByPdtId" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE FROM PDT_PRODUCT_ATTACHMENT WHERE PRODUCT_ID=#value#
+		]]>
+	</delete>
+</sqlMap>
+

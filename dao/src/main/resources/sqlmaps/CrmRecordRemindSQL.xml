@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmRecordRemindSQL">
+	<typeAlias alias="CrmRecordRemind"
+		type="com.banger.mobile.domain.model.crmRecordRemind.CrmRecordRemind" />
+
+
+	<!-- 录音提示音表-->
+	<!-- CrmRecordRemindSQL信息全字段 -->
+	<resultMap class="CrmRecordRemind" id="CrmRecordRemindResult">
+		<result column="RECORD_REMIND_ID" property="recordRemindId" />
+		<result column="USER_ID" property="userId" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="FILE_MD5" property="fileMd5" />
+		<result column="FILE_NAME" property="fileName" />
+	</resultMap>
+
+	<!-- 更新 -->
+	<update id="updateCrmRecordRemind"
+		parameterClass="CrmRecordRemind">
+		<![CDATA[
+  		update CRM_RECORD_REMIND a
+  		set 
+  		a.UPDATE_DATE = current timestamp
+  		]]>
+  		<isNotEmpty prepend="," property="filePath">
+			a.FILE_PATH = #filePath#
+		</isNotEmpty>
+  		<isNotEmpty prepend="," property="fileMd5">
+				a.FILE_MD5=#fileMd5#
+		</isNotEmpty>
+ 			<isNotEmpty prepend="," property="fileName">
+			a.FILE_NAME=#fileName#
+		</isNotEmpty>
+  		where 
+  			a.USER_ID = #userId#
+	</update>
+
+	<!-- 查询 -->
+	<select id="getCrmRecordRemindByUserId"
+		resultMap="CrmRecordRemindResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		select * from CRM_RECORD_REMIND a  where a.USER_ID=#userId#
+  	]]>
+	</select>
+	
+	<select id="getCrmRecordRemindById"
+		resultMap="CrmRecordRemindResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		select * from CRM_RECORD_REMIND a  where a.RECORD_REMIND_ID=#id#
+  	]]>
+	</select>
+	
+	<!-- 增加一条配置-->
+	<insert id="insertCrmRecordRemind"
+		parameterClass="CrmRecordRemind">
+		<![CDATA[
+		insert into CRM_RECORD_REMIND
+		(
+		 RECORD_REMIND_ID,
+		 USER_ID,
+		 FILE_PATH,
+		 CREATE_DATE,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#recordRemindId#,
+		#userId#,
+	    #filePath#,
+	    current timestamp,
+	    current timestamp
+		)
+      ]]>
+		<selectKey keyProperty="recordRemindId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_RECORD_REMIND
+		</selectKey>
+	</insert>
+	<!-- 删除 -->
+	<delete id="deleteCrmRecordRemind"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		delete from CRM_RECORD_REMIND a  where a.USER_ID=#userId#
+  	]]>
+	</delete>
+
+</sqlMap>
+
+
+
+

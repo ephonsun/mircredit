@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnPledgeSQL">
+    <typeAlias alias="LnPledge" type="com.banger.mobile.domain.model.loan.LnPledge"/>
+   
+    <!--LnPledge全字段-->
+    <resultMap class="LnPledge" id="LnPledgeResult">
+       	<result column="PLEDGE_ID" property="pledgeId"/>
+       	<result column="LOAN_ID" property="loanId"/>
+		<result column="GOODS" property="goods"/>
+		<result column="GOODS_VALUE" property="goodsValue"/>
+
+		<result column="PLEDGE_RATE" property="pledgeRate"/>
+		<result column="GOODS_AMOUNT" property="goodsAmount"/>
+		<result column="GOODS_REMARK" property="goodsRemark"/>
+
+
+		<result column="OWNER_NAME" property="ownerName"/>
+		<result column="TITLE_CERTIFICATE" property="titleCertificate"/>
+		<result column="CREATE_DATE" property="createDate"/>
+		<result column="UPDATE_DATE" property="updateDate"/>
+    </resultMap>
+    
+    
+    <insert id="insertLnPledge" parameterClass="LnPledge">
+        
+           INSERT INTO LN_PLEDGE
+    	    (
+    	    	PLEDGE_ID,
+    	    	LOAN_ID,
+    	    	GOODS,
+    	    	GOODS_VALUE,
+    	    	OWNER_NAME,
+    	    	TITLE_CERTIFICATE,
+				PLEDGE_RATE,
+				GOODS_AMOUNT,
+				GOODS_REMARK,
+				CREATE_DATE
+    	    )VALUES
+    	    (
+    	    	#pledgeId:INTEGER#,
+    	    	#loanId:INTEGER#,
+    	    	#goods:VARCHAR:NULL#,
+    	    	#goodsValue:VARCHAR:NULL#,
+    	    	#ownerName:VARCHAR:NULL#,
+    	    	#titleCertificate:VARCHAR:NULL#,
+    	    	#pledgeRate:VARCHAR:NULL#,
+    	    	#goodsAmount:VARCHAR:NULL#,
+    	    	#goodsRemark:VARCHAR:NULL#,
+
+    	    	current timestamp
+    	    )
+    	    <selectKey keyProperty="pledgeId" resultClass="java.lang.Integer" type="pre">
+            	VALUES NEXTVAL FOR SEQ_LN_PLEDGE
+        	</selectKey>
+    </insert>
+    
+    <select id="selectLnPledgeByLoanId" parameterClass="java.lang.Integer" resultMap="LnPledgeResult">
+    	    
+    	    select
+    	    	*
+    	    from
+    	    	LN_PLEDGE
+    	    where
+    	    	loan_id = #loanId#
+    	    
+    </select>
+    	
+    <delete id="deleteLnPledgeById" parameterClass="java.lang.Integer">
+    	    
+    	  delete from LN_PLEDGE where PLEDGE_ID = #pledgeId#
+    	       	    
+    </delete>
+    
+    <update id="updateLnLoanPledgeById" parameterClass="LnPledge">
+        
+        update LN_PLEDGE set UPDATE_DATE = #updateDate#
+        <isNotEmpty property="goods" prepend=",">
+            GOODS=#goods#
+        </isNotEmpty>
+        <isNotEmpty property="goodsValue" prepend=",">
+            GOODS_VALUE=#goodsValue#
+        </isNotEmpty>
+
+		<isNotEmpty property="pledgeRate" prepend=",">
+			PLEDGE_RATE=#pledgeRate#
+        </isNotEmpty>
+		<isNotEmpty property="goodsAmount" prepend=",">
+			GOODS_AMOUNT=#goodsAmount#
+        </isNotEmpty>
+
+        <isNotEmpty property="ownerName" prepend=",">
+            OWNER_NAME=#ownerName#
+        </isNotEmpty>
+        <isNotEmpty property="titleCertificate" prepend=",">
+            TITLE_CERTIFICATE=#titleCertificate#
+        </isNotEmpty>
+
+		<isNotEmpty property="pledgeRate" prepend=",">
+			PLEDGE_RATE=#pledgeRate#
+		</isNotEmpty>
+		<isNotEmpty property="goodsAmount" prepend=",">
+			GOODS_AMOUNT=#goodsAmount#
+		</isNotEmpty>
+		<isNotEmpty property="goodsRemark" prepend=",">
+			GOODS_REMARK=#goodsRemark#
+		</isNotEmpty>
+         WHERE 1=1
+        <isNotEmpty property="pledgeId" prepend="and">
+            PLEDGE_ID=#pledgeId#
+        </isNotEmpty>
+    </update>
+
+    <select id="getLnLoanPledgeById" parameterClass="java.util.Map" resultMap="LnPledgeResult">
+         select
+    	    	*
+    	    from
+    	    	LN_PLEDGE
+    	    where
+    	    	PLEDGE_ID=#pledgeId#
+    </select>
+    
+</sqlMap>

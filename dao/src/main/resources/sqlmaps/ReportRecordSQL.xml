@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="ReportSQL">
+
+	<!-- 活动量统计 -->
+	<resultMap id="recordCount" class="java.util.HashMap">
+		<result property="type" column="T" />
+		<result property="length" column="L" />
+		<result property="count" column="C" />
+		<result property="name" column="N" />
+		<result property="user" column="U" />
+		<result property="deptName" column="DN" />
+	</resultMap>
+	
+	<!-- 活动量趋势统计 -->
+	<resultMap id="recordTrendCount" class="java.util.HashMap">
+		<result property="type" column="T" />
+		<result property="count" column="C" />
+		<result property="date" column="D" />
+	</resultMap>
+	
+	<typeAlias alias="ReportRecordInfo" type="com.banger.mobile.domain.model.record.ReportRecordInfo" />
+	
+	<!-- 活动量统计明细 -->
+	<resultMap class="ReportRecordInfo" id="RecordInfoBeanResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId"/>
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="CALL_TYPE" property="callType" />
+		<result column="CALL_TYPE_NAME" property="callTypeName" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BIZ_TYPE_NAME" property="bizTypeName" />
+		<result column="COMM_PROGRESS_NAME" property="commProgressName" />
+	</resultMap>
+	
+	<select id="getRecordActivityReportByUser" resultMap="recordCount">
+		select count(*) as c,sum(cast(l as decimal(30))) as l,t,n,u,DN from (
+			select i.call_type as t,i.call_time as l,u.user_name as n,u.user_id as u,d.DEPT_NAME as DN 
+			from rec_record_info i
+			 inner join sys_user u on i.create_user = u.user_id
+			 inner join sys_dept d on u.dept_id = d.dept_id
+			 where i.is_del = 0 and (i.STATUS != '失败' or i.STATUS is null) and i.IS_CANCELED = 0 and i.call_type in (1,2,4,5,7,9)
+			 <isNotEmpty prepend="and" property="dateBegin" >
+				<![CDATA[ i.START_DATE>='$dateBegin$']]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="dateEnd" >
+			 	<![CDATA[ i.START_DATE<='$dateEnd$' ]]>
+			 </isNotEmpty>
+		 	<isNotEmpty prepend="and" property="userIds" >
+		    	<![CDATA[ u.user_id in ($userIds$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptIds" >
+				<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+			</isNotEmpty>
+		) group by t,n,u,DN 
+	</select>
+	
+	<select id="getRecordActivityReportByDept" resultMap="recordCount">
+		select count(*) as c,sum(cast(l as decimal(30))) as l,t,n,u,DN from (
+			select i.call_type as t,i.call_time as l,d.dept_name as n,d.dept_id as u, d.DEPT_NAME as DN 
+			from rec_record_info i
+			 inner join sys_user u on i.create_user = u.user_id
+			 inner join sys_dept d on u.dept_id = d.dept_id
+			 where i.is_del = 0 and (i.STATUS != '失败' or i.STATUS is null) and i.IS_CANCELED = 0 and i.call_type in (1,2,4,5,7,9)
+			 <isNotEmpty prepend="and" property="dateBegin" >
+				<![CDATA[ i.START_DATE>='$dateBegin$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="dateEnd" >
+			 	<![CDATA[ i.START_DATE<='$dateEnd$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userIds" >
+		    	<![CDATA[ u.user_id in ($userIds$) ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptIds" >
+				<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+			 </isNotEmpty>
+		) group by t,n,u,DN 
+	</select>
+	
+	<select id="getRecordActivityTrendReportByUser" resultMap="recordTrendCount">
+		select count(*) as c,d,t from (
+        	select i.call_type as t,TO_CHAR(i.START_DATE,'yyyyMM') as d
+        	from rec_record_info i
+        	 inner join sys_user u on i.create_user = u.user_id
+         	 where i.is_del=0 and (i.STATUS != '失败' or i.STATUS is null) and i.call_type in (1,2,4,5,7,9)
+			 <isNotEmpty prepend="and" property="dateBegin" >
+				<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') >= '$dateBegin$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="dateEnd" >
+				<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') <= '$dateEnd$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userIds" >
+		    	<![CDATA[ u.user_id in ($userIds$) ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptIds" >
+				<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+			 </isNotEmpty>
+		) a group by d,t order by d
+	</select>
+	
+	<select id="getRecordActivityTrendReportByDept" resultMap="recordTrendCount">
+		select count(*) as c,d,t from (
+        	select i.call_type as t,TO_CHAR(i.START_DATE,'yyyyMM') as d
+        	from rec_record_info i
+        	 inner join sys_user u on i.create_user = u.user_id
+         	 where i.is_del=0 and (i.STATUS != '失败' or i.STATUS is null) and i.call_type in (1,2,4,5,7,9)
+			 <isNotEmpty prepend="and" property="dateBegin" >
+				<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') >= '$dateBegin$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="dateEnd" >
+				<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') <= '$dateEnd$' ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userIds" >
+		    	<![CDATA[ u.user_id in ($userIds$) ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptIds" >
+				<![CDATA[ u.dept_Id in ($deptIds$) ]]>
+			 </isNotEmpty>
+		) a group by d,t order by d
+	</select>
+	
+	
+	<!-- 录音记录分页count -->
+  	<select id="getRecordReportDetailCount" resultClass="java.lang.Integer" >
+             select 
+                   count(*)
+             from 
+             REC_RECORD_INFO i 
+             left join sys_user user on i.user_id = user.user_id
+             left join REC_CALL_TYPE ct on i.CALL_TYPE=ct.CALL_TYPE_CODE
+	     	 left join REC_BIZ_TYPE bt on i.BIZ_TYPE=bt.BIZ_TYPE_ID
+	     	 left join CRM_RECORD_SOURCE rc on i.RECORD_SOURCE = rc.RECORD_SOURCE_ID
+     	  	 left join CRM_CUSTOMER c on i.CUSTOMER_ID = c.CUSTOMER_ID
+     	  	 left join REC_CANCELED a on i.IS_CANCELED = a.CANCELED_CODE
+     	  	 left join CRM_COMM_PROGRESS e on e.COMM_PROGRESS_ID = i.COMM_PROGRESS_ID
+     	  	 inner join sys_user u on i.create_user = u.user_id
+         	 where i.is_del=0 and (i.STATUS != '失败' or i.STATUS is null) and i.IS_CANCELED = 0
+         	 <isNotEmpty prepend="and" property="callType" >
+				<![CDATA[ i.call_type = $callType$ ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptId">
+			 	u.dept_id in ($deptId$)
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userId">
+				u.user_id = $userId$
+			 </isNotEmpty>
+         	 <isEqual property="dateType" compareValue="ym">
+	         	 <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') >= '$dateBegin$' ]]>
+				 </isNotEmpty>
+				 <isNotEmpty prepend="and" property="dateEnd" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') <= '$dateEnd$' ]]>
+				 </isNotEmpty>
+			</isEqual>
+			<isEqual property="dateType" compareValue="day">
+	         	 <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyy-MM-dd') >= '$dateBegin$' ]]>
+				 </isNotEmpty>
+				 <isNotEmpty prepend="and" property="dateEnd" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyy-MM-dd') <= '$dateEnd$' ]]>
+				 </isNotEmpty>
+			</isEqual>
+  	</select>
+  
+  	<!-- 录音记录 -->
+  	<select id="getRecordReportDetail" resultMap="RecordInfoBeanResult" >
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		select 
+			  i.RECORD_INFO_ID, i.CUSTOMER_ID, 
+			  (CASE WHEN i.CUSTOMER_ID=0 or i.CUSTOMER_ID IS NULL  THEN i.CUSTOMER_NAME else c.CUSTOMER_NAME end) AS CUSTOMER_NAME,
+			  i.REMOTE_PHONE, i.CALL_TYPE, 
+			  c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.PHONE, c.FAX, c.DEFAULT_PHONE_TYPE,
+			  ct.CALL_TYPE_NAME, i.START_DATE, i.CALL_TIME, user.USER_NAME, bt.BIZ_TYPE_NAME as BIZ_TYPE_NAME, 
+			  e.COMM_PROGRESS_NAME
+        from 
+             REC_RECORD_INFO i 
+             left join sys_user user on i.user_id = user.user_id
+             left join REC_CALL_TYPE ct on i.CALL_TYPE=ct.CALL_TYPE_CODE
+	     	 left join REC_BIZ_TYPE bt on i.BIZ_TYPE=bt.BIZ_TYPE_ID
+	     	 left join CRM_RECORD_SOURCE rc on i.RECORD_SOURCE = rc.RECORD_SOURCE_ID
+     	  	 left join CRM_CUSTOMER c on i.CUSTOMER_ID = c.CUSTOMER_ID
+     	  	 left join REC_CANCELED a on i.IS_CANCELED = a.CANCELED_CODE
+     	  	 left join CRM_COMM_PROGRESS e on e.COMM_PROGRESS_ID = i.COMM_PROGRESS_ID
+     	  	 inner join sys_user u on i.create_user = u.user_id
+         	 where i.is_del=0 and (i.STATUS != '失败' or i.STATUS is null) and i.IS_CANCELED = 0
+         	 <isNotEmpty prepend="and" property="callType" >
+				<![CDATA[ i.call_type = $callType$ ]]>
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="deptId">
+			 	u.dept_id in ($deptId$)
+			 </isNotEmpty>
+			 <isNotEmpty prepend="and" property="userId">
+				u.user_id = $userId$
+			 </isNotEmpty>
+         	 <isEqual property="dateType" compareValue="ym">
+	         	 <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') >= '$dateBegin$' ]]>
+				 </isNotEmpty>
+				 <isNotEmpty prepend="and" property="dateEnd" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyyMM') <= '$dateEnd$' ]]>
+				 </isNotEmpty>
+			</isEqual>
+			<isEqual property="dateType" compareValue="day">
+	         	 <isNotEmpty prepend="and" property="dateBegin" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyy-MM-dd') >= '$dateBegin$' ]]>
+				 </isNotEmpty>
+				 <isNotEmpty prepend="and" property="dateEnd" >
+					<![CDATA[ TO_CHAR(i.START_DATE,'yyyy-MM-dd') <= '$dateEnd$' ]]>
+				 </isNotEmpty>
+			</isEqual>
+		order by i.START_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+</sqlMap>

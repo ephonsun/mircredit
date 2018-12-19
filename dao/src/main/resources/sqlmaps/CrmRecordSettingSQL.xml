@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmRecordSettingSQL">
+	<typeAlias alias="CrmRecordSetting" type="com.banger.mobile.domain.model.crmRecordSetting.CrmRecordSetting" />
+
+
+	<!-- 录音设置表-->
+	<!-- CrmRecordSettingSQL信息全字段 -->
+	<resultMap class="CrmRecordSetting" id="CrmRecordSettingResult">
+		<result column="RECORD_SETTING_ID" property="recordSettingId" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_AUTO_RECORD" property="isAutoRecord" />
+		<result column="IS_AUTO_PLAY" property="isAutoPlay" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+	</resultMap>
+	
+	   <!-- 更新 -->
+	<update id="updateCrmRecordSetting" parameterClass="CrmRecordSetting">
+  <![CDATA[
+  	update CRM_RECORD_SETTING a
+  		set 
+  			a.IS_AUTO_RECORD = #isAutoRecord#,
+  			a.IS_AUTO_PLAY = #isAutoPlay#,
+  			a.UPDATE_DATE= current timestamp
+  		where 
+  			a.USER_ID = #userId#
+  	]]>
+  </update>
+  
+   <!-- 查询 -->
+  <select id="getCrmRecordSettingById"   resultMap="CrmRecordSettingResult" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		select * from CRM_RECORD_SETTING a where a.USER_ID =#userId# 
+  	]]>
+  </select>
+	<!-- 增加一条录音设置-->
+	<insert id="insertCrmRecordSetting" parameterClass="CrmRecordSetting">
+     <![CDATA[
+		insert into CRM_RECORD_SETTING
+		(
+		 RECORD_SETTING_ID,
+		 USER_ID,
+		 IS_AUTO_RECORD,
+		 IS_AUTO_PLAY,
+		 CREATE_DATE,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#recordSettingId#,
+		#userId#,
+	    #isAutoRecord#,
+	    #isAutoPlay#,
+		current timestamp,
+		current timestamp
+		)
+      ]]>
+		<selectKey keyProperty="recordSettingId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_CRM_RECORD_SETTING 
+		</selectKey>
+	</insert>	
+	<delete id="deleteCrmRecordSetting" parameterClass="java.lang.Integer">
+		<![CDATA[
+  		delete from CRM_RECORD_SETTING where USER_ID = #userId#
+  		]]>	
+	</delete>
+
+</sqlMap>
+
+
+
+

@@ -1,0 +1,1127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskTaskSQL">
+	<typeAlias alias="TskTask"
+		type="com.banger.mobile.domain.model.task.TskTask" />
+	<typeAlias alias="CustomerAttrPlugin"
+		type="com.banger.mobile.domain.model.task.CustomerAttrPlugin" />
+
+	<!-- 任务表-->
+	<!-- TskTaskSQL信息全字段 -->
+	<resultMap class="TskTask" id="TskTaskResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="PARENT_TASK_ID" property="parentTaskId"/>
+		<result column="TASK_TYPE" property="taskType"/>
+		<result column="TASK_TITLE" property="taskTitle" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="TARGET_MONEY" property="targetMoney" />
+		<result column="REMARK" property="remark" />
+		<result column="ASSIGN_USER_ID" property="assignUserId" />
+		<result column="EXECUTE_DEPT_ID" property="executeDeptId" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+		<result column="FINISH_DATE" property="finishDate" />
+		<result column="TASK_STATUS" property="taskStatus" />
+		<result column="IS_NEXT_CONTACT" property="isNextContact" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="DEPT_TARGET_MONEY" property="deptTargetMoney" />
+		
+		<result column="EXECUTE_NAME" property="executeName" />
+		<result column="ASSIGN_NAME" property="assignName" />
+		<result column="EXC_USERS_ID" property="excUsersIds" />
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="RAISE_UPPER_LIMIT" property="raiseUpperLimit" />
+		<result column="MONEY_UNIT_NAME" property="moneyUnitName" />
+		
+		<result column="FINISH_COUNT" property="finishCount" />
+		<result column="FINISH_RATE" property="finishRate" />
+		
+		<result column="USER_FINISH_COUNT" property="userFinishCount" />
+		<result column="USER_FINISH_RATE" property="userFinishRate" />
+	</resultMap>
+	
+	<!-- 组织机构及用户树 -->
+	<resultMap class="CustomerAttrPlugin" id="CustomerAttrPluginResult">
+		<result column="ID" property="id" />
+		<result column="PARENT_ID" property="parentId"/>
+		<result column="TEXT_NAME" property="textName"/>
+		<result column="TYPE" property="type" />
+		<result column="COUNTS" property="counts" />
+		<result column="FINISH_COUNT" property="finishCount"/>
+		<result column="TASK_STATUS" property="taskStatus"/>
+		<result column="IS_ACTIVED" property="isActived"/>
+		<result column="IS_DEL" property="isDel"/>
+	</resultMap>
+	
+	<cacheModel id="taskUpdateCache" type="OSCACHE" serialize="true"
+		readOnly="true" >
+		<flushInterval hours="12" />
+		<flushOnExecute statement="InsertTask" />
+		<flushOnExecute statement="UpdateTargetAmount" />
+		<flushOnExecute statement="UpdateTargetDept" />
+		<flushOnExecute statement="InsertTskTaskContact" />
+		<flushOnExecute statement="saveTaskExecuteUser" />
+		<flushOnExecute statement="DeleteTskTask" />
+		<flushOnExecute statement="UpdateTskTaskContact" />
+		<flushOnExecute statement="DeleteTaskByExecuteId" />
+		<flushOnExecute statement="ChangeParentTskStatus" />
+		<flushOnExecute statement="InsertTaskMarket" />
+		<flushOnExecute statement="UpdateNextTaskIsDel" />
+		<flushOnExecute statement="UpdateExecuteUserTaskStatus" />
+		<flushOnExecute statement="UpdateMarketTaskStatus" />
+		<flushOnExecute statement="UpdateFatherTaskCustomerById" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+	<!-- 查询组织机构以及用户树 -->
+	<select id="GetCustomerAttrPluginList" resultMap="CustomerAttrPluginResult" parameterClass="java.util.Map">
+		<![CDATA[
+			with deptUsertree (ID,PARENT_ID,TEXT_NAME,TYPE,COUNTS,FINISH_COUNT,TASK_STATUS,IS_ACTIVED) as 
+			(
+			    select ID,PARENT_ID,TEXT_NAME,TYPE,COUNTS,FINISH_COUNT,0 AS TASK_STATUS,IS_ACTIVED from 
+	    ]]>
+	    <isNotEmpty property="taskAdd">
+	    <![CDATA[
+			    (
+			    	SELECT * FROM TASK_ADD_DEPTUSER_VIEW 
+		]]>
+		<isNotEmpty property="searchKey">
+			    	where ID IN(select distinct DEPT_ID from SYS_USER where DEPT_ID IN (
+					select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$)) and IS_DEL = 0 AND IS_ACTIVED=1) or TYPE='U' 
+		</isNotEmpty>
+		<![CDATA[
+			    ) 
+	    ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="taskId">
+	    	<![CDATA[
+		    (
+		    	select *from table(getTreeUserCount_Fun($taskId$)) as t
+			]]>
+			<isNotEmpty property="searchKey">
+				    	where ID IN(select distinct DEPT_ID from SYS_USER where DEPT_ID IN (
+						select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$)) and IS_DEL = 0) or TYPE='U' 
+			</isNotEmpty>
+			<![CDATA[
+				    ) 
+		    ]]>
+	    </isNotEmpty>
+	    <![CDATA[
+			    as DD  
+			    where DD.ID in($deptId$) or DD.ID=$myUserId$
+			    union all 
+			    select  child.ID,child.PARENT_ID,child.TEXT_NAME,child.TYPE,child.COUNTS,child.FINISH_COUNT,0 AS TASK_STATUS,child.IS_ACTIVED from deptUsertree parent, 
+	    ]]>
+	    <isNotEmpty property="taskAdd">
+	    <![CDATA[
+			    (
+			    	SELECT * FROM TASK_ADD_DEPTUSER_VIEW 
+		]]>
+		<isNotEmpty property="searchKey">
+			    	where ID IN(select distinct DEPT_ID from SYS_USER where DEPT_ID IN (
+					select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$)) and IS_DEL = 0 AND IS_ACTIVED=1) or TYPE='U' 
+		</isNotEmpty>
+		<![CDATA[
+			    ) 
+	    ]]>
+	    </isNotEmpty>
+	    <isNotEmpty property="taskId">
+	    	<![CDATA[
+				    (
+				    	select *from table(getTreeUserCount_Fun($taskId$)) as t
+			]]>
+			<isNotEmpty property="searchKey">
+				    	where ID IN(select distinct DEPT_ID from SYS_USER where DEPT_ID IN (
+						select s2.DEPT_ID from SYS_DEPT as s2 where ($searchKey$)) and IS_DEL = 0 AND IS_ACTIVED=1) or TYPE='U' 
+			</isNotEmpty>
+			<![CDATA[
+				    ) 
+		    ]]>
+	    </isNotEmpty>
+	    <![CDATA[
+			    as child where parent.ID=child.PARENT_ID
+			)
+			select distinct deptUsertree.*,users.IS_DEL from deptUsertree   
+			left join SYS_USER AS users ON users.USER_ID=ID  
+		]]>
+		<isNotEmpty property="deptUserIds">
+	    	<![CDATA[
+	    		where ID IN($deptUserIds$) or (ID in(select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+    				where b.ROLE_ID in (3,4))) 
+	    	]]>
+	    </isNotEmpty>
+		<![CDATA[
+			order by TYPE asc
+		]]>
+	</select>
+	
+	<!-- 组织机构用户树附客户分配数 -->
+	<select id="GetCustomerAttrPluginCount" resultMap="CustomerAttrPluginResult" parameterClass="java.util.Map">
+		<![CDATA[
+			with deptUsertree (ID,PARENT_ID,TEXT_NAME,TYPE,COUNTS,FINISH_COUNT,IS_ACTIVED) as 
+			(
+				select DD.ID,DD.PARENT_ID,DD.TEXT_NAME,DD.TYPE,DD.COUNTS,DD.FINISH_COUNT,DD.IS_ACTIVED from 
+				(
+			            select *from table(getDeptUserTree_Fun($taskId$)) 
+			    ) as DD  
+				where DD.ID in($deptId$) or DD.ID=$myUserId$
+				union all 
+				select  child.ID,child.PARENT_ID,child.TEXT_NAME,child.TYPE,child.COUNTS,child.FINISH_COUNT,child.IS_ACTIVED from deptUsertree parent, 
+				(select *from table(getDeptUserTree_Fun($taskId$)) ) as child where parent.ID=child.PARENT_ID
+			)
+			select distinct deptUsertree.*,task.TASK_STATUS,1 as IS_DEL  
+			from deptUsertree 
+			left join TSK_TASK as task on deptUsertree.ID=task.EXECUTE_USER_ID
+			and task.PARENT_TASK_ID=$taskId$  
+		]]>
+		<dynamic prepend="where">
+	    	<isNotEmpty property="type">
+				<![CDATA[ TYPE='$type$' ]]>
+			</isNotEmpty>
+		</dynamic>
+		<![CDATA[
+			order by ID asc
+		]]>
+	</select>
+	
+	<!-- 查询目标客户数-->
+	<select id="GetUnallocatedCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			select count(0) from 
+			TSK_TASK_TARGET as target
+			inner join TSK_TASK as task on task.TASK_ID=target.TASK_ID
+			LEFT JOIN CRM_CUSTOMER as customer on target.CUSTOMER_ID=customer.CUSTOMER_ID
+			where (task.TASK_ID=$taskId$ or task.PARENT_TASK_ID=$taskId$)  AND customer.IS_DEL=0 
+		]]>
+		<dynamic>
+	    	<isNotEmpty prepend="and" property="executeUsrerId">
+				<![CDATA[ and task.EXECUTE_USER_ID=$executeUsrerId$
+						  and task.EXECUTE_USER_ID is not null and target.IS_FINISH=1 ]]>
+			</isNotEmpty>
+		</dynamic>
+		<![CDATA[
+			and task.EXECUTE_USER_ID is null
+		]]>
+	</select>
+
+	<!-- 任务管理分页count -->
+	<select id="getTskTaskCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+	    select count(0) from(
+		    SELECT product.PRODUCT_NAME,product.RAISE_UPPER_LIMIT,task.*
+		    FROM TSK_TASK  AS task 
+			left join PDT_PRODUCT AS product on task.PRODUCT_ID=product.PRODUCT_ID 
+		]]>
+		<isNotEmpty property="executeUserId">
+			<![CDATA[
+				inner join(
+				    select t.PARENT_TASK_ID as TID  FROM TSK_TASK as t where t.EXECUTE_USER_ID=$executeUserId$
+				) as tt on task.TASK_ID=tt.TID and task.TASK_STATUS=0
+	    	]]>
+		</isNotEmpty>
+		<isNotEmpty property="userIds">
+    		<![CDATA[
+    			INNER JOIN (
+					select distinct PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID IN($userIds$)
+				) AS TP ON TP.PARENT_TASK_ID=task.TASK_ID 
+    		]]>
+    	</isNotEmpty>
+		<![CDATA[
+			WHERE task.IS_DEL=0 and task.PARENT_TASK_ID=0 
+	    ]]>
+	    <dynamic>
+	    	<isNotEmpty prepend="and" property="customerId">
+	    		<![CDATA[
+	    			task.TASK_ID in(
+					    select TASK_ID from TSK_TASK where IS_DEL=0  AND PARENT_TASK_ID=0
+					    AND TASK_ID in(
+					    select distinct t1.PARENT_TASK_ID from TSK_TASK AS t1
+					    WHERE t1.TASK_ID IN(select distinct TASK_ID from TSK_TASK_TARGET WHERE CUSTOMER_ID=$customerId$)
+					    OR t1.PARENT_TASK_ID IN(select distinct TASK_ID from TSK_TASK_TARGET WHERE CUSTOMER_ID=$customerId$))
+					) 
+	    		]]>
+	    	</isNotEmpty>
+	    	<isNotEmpty prepend="and" property="taskTitle">
+				<![CDATA[ task.TASK_TITLE like '%$taskTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="assignUserId">
+				<![CDATA[ task.ASSIGN_USER_ID=$assignUserId$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskType">
+				<![CDATA[ task.TASK_TYPE=$taskType$ ]]>
+			</isNotEmpty>
+			<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="toDayDate">
+				<![CDATA[  
+					    (task.START_DATE<=TO_DATE ('$toDayDate$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$toDayDate$', 'yyyy-MM-dd')) 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="finsihEndDate">
+				<![CDATA[  
+					 (task.START_DATE<=TO_DATE ('$finsihEndDate$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$finsihEndDate$', 'yyyy-MM-dd')  
+					 or (task.START_DATE<=TO_DATE ('$threeDayEndWork$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$threeDayStartWork$', 'yyyy-MM-dd')) 
+					 or (task.START_DATE<=TO_DATE ('$oneWeekEndWork$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$oneWeekStartWork$', 'yyyy-MM-dd'))) 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[ task.REMARK like '%$remark$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productName">
+				<![CDATA[  product.PRODUCT_NAME LIKE '%$productName$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="expiredEndDate">
+				<![CDATA[ task.END_DATE<'$expiredEndDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="threeDayStart">
+				<![CDATA[
+					 (task.START_DATE<=TO_DATE ('$threeDayEnd$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$threeDayStart$', 'yyyy-MM-dd')) 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="oneWeekStart">
+				<![CDATA[
+					 (task.START_DATE<=TO_DATE ('$oneWeekEnd$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$oneWeekStart$', 'yyyy-MM-dd')) 
+				]]>
+			</isNotEmpty>
+	    </dynamic>
+	    <![CDATA[ 
+	    	 ) AS T 
+	    ]]>
+	    <![CDATA[ where 1=1 ]]>
+	    <isNotEmpty property="systemDeptId">
+	    	<![CDATA[ 
+	    		AND T.TASK_ID IN(
+	    			SELECT *FROM (
+	    				select 
+						(case when T.DEPT_TARGET_MONEY>(
+						    select SUM(TARGET_MONEY) from TSK_TASK WHERE PARENT_TASK_ID=T.PARENT_TASK_ID AND EXECUTE_DEPT_ID in($systemDeptId$)
+						) THEN T.PARENT_TASK_ID ELSE 0 END) AS TASK_ID 
+						from(
+						select PARENT_TASK_ID,EXECUTE_DEPT_ID,
+						(CASE WHEN EXECUTE_DEPT_ID=3 THEN t.TARGET_MONEY else DEPT_TARGET_MONEY end) as DEPT_TARGET_MONEY
+						from TSK_TASK 
+						INNER JOIN(SELECT TASK_ID,TARGET_MONEY FROM TSK_TASK WHERE TASK_STATUS=0 AND TASK_TYPE=2) AS t on t.TASK_ID=PARENT_TASK_ID
+						WHERE PARENT_TASK_ID<>0 and TASK_STATUS=0 
+						AND EXECUTE_DEPT_ID in($systemDeptId$) 
+						GROUP BY PARENT_TASK_ID,EXECUTE_DEPT_ID,DEPT_TARGET_MONEY,t.TARGET_MONEY) as T
+	    			)AS C WHERE C.TASK_ID IS NOT NULL
+	    		)
+	    	]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="compliteLoginUserId">
+	    	<![CDATA[ 
+	    		T.TASK_ID IN(select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$compliteLoginUserId$ AND TASK_STATUS=1) OR T.TASK_STATUS=1
+			]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="taskStatus">
+			<![CDATA[ 
+				 T.TASK_STATUS=$taskStatus$ 
+				AND NOT EXISTS(select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$loginUserId$ AND TASK_STATUS=1 AND T.TASK_ID=PARENT_TASK_ID) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="marketFlag">
+				<![CDATA[ 
+					AND NOT EXISTS(
+				       select TASK_ID from TSK_TASK WHERE TASK_ID IN(
+				       select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$loginUserId$  
+				       AND (TARGET_MONEY=0)) AND TASK_TYPE=2 AND IS_DEL=0 AND T.TASK_ID=TASK_ID
+				   )
+				]]>
+		</isNotEmpty>
+		<isNotEmpty property="markerZgFlag">
+			<![CDATA[ 
+					AND NOT EXISTS(
+				        select TASK_ID from TSK_TASK WHERE TASK_ID IN(
+					        SELECT PARENT_TASK_ID FROM (
+					        select A.PARENT_TASK_ID,SUM(A.DEPT_TARGET_MONEY) AS DEPT_TARGET_MONEY
+					        from(select distinct PARENT_TASK_ID,DEPT_TARGET_MONEY from TSK_TASK WHERE EXECUTE_USER_ID IN($userIds$)) as A  
+					        GROUP BY A.PARENT_TASK_ID) WHERE DEPT_TARGET_MONEY=0
+					    ) AND TASK_TYPE=2 AND IS_DEL=0 AND T.TASK_ID=TASK_ID
+				    )
+			]]>
+		</isNotEmpty>
+	</select>
+
+	<!-- 任务管理分页 -->
+	<select id="getTskTaskPageMap" resultMap="TskTaskResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT k.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+	    SELECT T.* FROM (
+			SELECT
+				0 as FINISH_COUNT,
+    			0 as FINISH_RATE,
+    			0 as USER_FINISH_COUNT,
+    			0 as USER_FINISH_RATE,
+			    assign.USER_NAME AS ASSIGN_NAME,
+			    '' as EXECUTE_NAME,
+			    '' as EXC_USERS_ID,
+			    product.PRODUCT_NAME,
+			    product.RAISE_UPPER_LIMIT,
+                unit.MONEY_UNIT_NAME,
+			    task.*
+			FROM
+			TSK_TASK  AS task
+			LEFT JOIN SYS_USER AS assign
+			ON task.ASSIGN_USER_ID=assign.USER_ID
+			left join PDT_PRODUCT AS product on task.PRODUCT_ID=product.PRODUCT_ID 
+			left join CD_MONEY_UNIT as unit on product.MONEY_UNIT_ID=unit.MONEY_UNIT_ID 
+		]]>
+		<isNotEmpty property="executeUserId">
+			<![CDATA[
+				inner join(
+				    select t.PARENT_TASK_ID as TID  FROM TSK_TASK as t where t.EXECUTE_USER_ID=$executeUserId$
+				) as tt on task.TASK_ID=tt.TID and task.TASK_STATUS=0
+	    	]]>
+		</isNotEmpty>
+		<isNotEmpty property="userIds">
+    		<![CDATA[
+    			INNER JOIN (
+					select distinct PARENT_TASK_ID AS PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID IN($userIds$)
+				) AS TP ON TP.PARENT_TASK_ID=task.TASK_ID 
+    		]]>
+    	</isNotEmpty>
+		<![CDATA[
+			WHERE task.IS_DEL=0 and task.PARENT_TASK_ID=0 
+	    ]]>
+	    <dynamic>
+	    	<isNotEmpty prepend="and" property="customerId">
+	    		<![CDATA[
+	    			task.TASK_ID in(
+					    select TASK_ID from TSK_TASK where IS_DEL=0  AND PARENT_TASK_ID=0
+					    AND TASK_ID in(
+					    select distinct t1.PARENT_TASK_ID from TSK_TASK AS t1
+					    WHERE t1.TASK_ID IN(select distinct TASK_ID from TSK_TASK_TARGET WHERE CUSTOMER_ID=$customerId$)
+					    OR t1.PARENT_TASK_ID IN(select distinct TASK_ID from TSK_TASK_TARGET WHERE CUSTOMER_ID=$customerId$))
+					) 
+	    		]]>
+	    	</isNotEmpty>
+	    	<isNotEmpty prepend="and" property="taskTitle">
+				<![CDATA[ task.TASK_TITLE like '%$taskTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="assignUserId">
+				<![CDATA[ task.ASSIGN_USER_ID=$assignUserId$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskType">
+				<![CDATA[ task.TASK_TYPE=$taskType$ ]]>
+			</isNotEmpty>
+			<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="toDayDate">
+				<![CDATA[  
+					    (task.START_DATE<=TO_DATE ('$toDayDate$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$toDayDate$', 'yyyy-MM-dd')) 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="finsihEndDate">
+				<![CDATA[  
+					 (task.START_DATE<=TO_DATE ('$finsihEndDate$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$finsihEndDate$', 'yyyy-MM-dd')  
+					 or (task.START_DATE<=TO_DATE ('$threeDayEndWork$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$threeDayStartWork$', 'yyyy-MM-dd')) 
+					 or (task.START_DATE<=TO_DATE ('$oneWeekEndWork$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$oneWeekStartWork$', 'yyyy-MM-dd'))) 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[ task.REMARK like '%$remark$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productName">
+				<![CDATA[  product.PRODUCT_NAME LIKE '%$productName$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="expiredEndDate">
+				<![CDATA[ task.END_DATE<'$expiredEndDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="threeDayStart">
+				<![CDATA[
+					 (task.START_DATE<=TO_DATE ('$threeDayEnd$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$threeDayStart$', 'yyyy-MM-dd')) 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="oneWeekStart">
+				<![CDATA[
+					 (task.START_DATE<=TO_DATE ('$oneWeekEnd$', 'yyyy-MM-dd') and task.END_DATE>=TO_DATE ('$oneWeekStart$', 'yyyy-MM-dd')) 
+				]]>
+			</isNotEmpty>
+	    </dynamic>
+	    <![CDATA[ 
+	    	) AS T 
+	    ]]>
+	    <![CDATA[ where 1=1 ]]>
+	    <isNotEmpty property="systemDeptId">
+	    	<![CDATA[ 
+	    		AND T.TASK_ID IN(
+	    			SELECT *FROM (
+	    				select 
+						(case when T.DEPT_TARGET_MONEY>(
+						    select SUM(TARGET_MONEY) from TSK_TASK WHERE PARENT_TASK_ID=T.PARENT_TASK_ID AND EXECUTE_DEPT_ID in($systemDeptId$)
+						) THEN T.PARENT_TASK_ID ELSE NULL END) AS TASK_ID 
+						from(
+						select PARENT_TASK_ID,EXECUTE_DEPT_ID,
+						(CASE WHEN EXECUTE_DEPT_ID=3 THEN t.TARGET_MONEY else DEPT_TARGET_MONEY end) as DEPT_TARGET_MONEY
+						from TSK_TASK 
+						INNER JOIN(SELECT TASK_ID,TARGET_MONEY FROM TSK_TASK WHERE TASK_STATUS=0 AND TASK_TYPE=2) AS t on t.TASK_ID=PARENT_TASK_ID
+						WHERE PARENT_TASK_ID<>0 and TASK_STATUS=0 
+						AND EXECUTE_DEPT_ID in($systemDeptId$) 
+						GROUP BY PARENT_TASK_ID,EXECUTE_DEPT_ID,DEPT_TARGET_MONEY,t.TARGET_MONEY) as T
+	    			)AS C WHERE C.TASK_ID IS NOT NULL
+	    		)
+	    	]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="compliteLoginUserId">
+	    	<![CDATA[ 
+	    		T.TASK_ID IN(select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$compliteLoginUserId$ AND TASK_STATUS=1) OR T.TASK_STATUS=1
+			]]>
+		</isNotEmpty>
+	    <isNotEmpty prepend="and" property="taskStatus">
+			<![CDATA[ 
+				T.TASK_STATUS=$taskStatus$ 
+				AND NOT EXISTS(select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$loginUserId$ AND TASK_STATUS=1 AND T.TASK_ID=PARENT_TASK_ID) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="marketFlag">
+				<![CDATA[ 
+					AND NOT EXISTS(
+				       select TASK_ID from TSK_TASK WHERE TASK_ID IN(
+				       select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$loginUserId$  
+				       AND (TARGET_MONEY=0)) AND TASK_TYPE=2 AND IS_DEL=0 AND T.TASK_ID=TASK_ID
+				   )
+				]]>
+		</isNotEmpty>
+		<isNotEmpty property="markerZgFlag">
+			<![CDATA[ 
+					AND NOT EXISTS(
+				        select TASK_ID from TSK_TASK WHERE TASK_ID IN(
+					        SELECT PARENT_TASK_ID FROM (
+					        select A.PARENT_TASK_ID,SUM(A.DEPT_TARGET_MONEY) AS DEPT_TARGET_MONEY
+					        from(select distinct PARENT_TASK_ID,DEPT_TARGET_MONEY from TSK_TASK WHERE EXECUTE_USER_ID IN($userIds$)) as A  
+					        GROUP BY A.PARENT_TASK_ID) WHERE DEPT_TARGET_MONEY=0
+					    ) AND TASK_TYPE=2 AND IS_DEL=0 AND T.TASK_ID=TASK_ID
+				    )
+			]]>
+		</isNotEmpty>
+		<![CDATA[ 
+	    	 order by $orderBy$  
+	    ]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g) k where k.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 新建联系任务 -->
+	<insert id="InsertTskTaskContact" parameterClass="TskTask">
+		<![CDATA[
+			INSERT INTO TSK_TASK
+			(
+				TASK_ID,
+				PARENT_TASK_ID,
+				TASK_TYPE,
+				TASK_TITLE,
+				START_DATE,
+				END_DATE,
+				REMARK,
+				ASSIGN_USER_ID,
+				EXECUTE_DEPT_ID,
+				TASK_STATUS,
+				IS_NEXT_CONTACT,
+				IS_DEL,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#taskId#,
+				0,
+				1,
+				#taskTitle#,
+				#startDate#,
+				#endDate#,
+				#remark#,
+				#assignUserId#,
+				#executeDeptId#,
+				0,
+				#isNextContact#,
+				#isDel#,
+				#createDate#,
+				#createUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="taskId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_TASK
+		</selectKey>
+	</insert>
+	
+	<!-- 插入任务执行者(即主任务下插入子任务) -->
+	<insert id="saveTaskExecuteUser" parameterClass="TskTask">
+		<![CDATA[
+			INSERT INTO TSK_TASK
+			(
+				TASK_ID,
+				PARENT_TASK_ID,
+				EXECUTE_DEPT_ID,
+				EXECUTE_USER_ID,
+				TASK_STATUS,
+				TARGET_MONEY,
+				CREATE_DATE,
+				CREATE_USER,
+				DEPT_TARGET_MONEY
+			)
+			VALUES
+			(
+				#taskId#,
+				#parentTaskId#,
+				#executeDeptId#,
+				#executeUserId#,
+				0,
+				0,
+				#createDate#,
+				#createUser#,
+				0
+			)
+	    ]]>
+	    <selectKey keyProperty="taskId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_TASK
+		</selectKey>
+	</insert>
+	
+	<!-- 根据任务ID查询任务信息 -->
+	<select id="GetTskTaskById" parameterClass="TskTask" resultMap="TskTaskResult">
+		<![CDATA[
+			SELECT
+				case when TC.FINISH_COUNT is null then 0 else TC.FINISH_COUNT end as FINISH_COUNT,
+    			case when TC.FINISH_RATE is null then 0 else TC.FINISH_RATE end as FINISH_RATE,
+    			UTC.USER_FINISH_COUNT,
+    			UTC.USER_FINISH_RATE,
+			    assign.USER_NAME AS ASSIGN_NAME,
+			    0 as EXECUTE_NAME,
+			    0 as EXC_USERS_ID,
+			    product.PRODUCT_NAME,
+			    product.RAISE_UPPER_LIMIT,
+                unit.MONEY_UNIT_NAME,
+			    task.*
+			FROM
+			TSK_TASK  AS task
+			LEFT JOIN SYS_USER AS assign
+			ON task.ASSIGN_USER_ID=assign.USER_ID
+			left join PDT_PRODUCT AS product on task.PRODUCT_ID=product.PRODUCT_ID 
+			left join CD_MONEY_UNIT as unit on product.MONEY_UNIT_ID=unit.MONEY_UNIT_ID 
+			left join(
+			    select PARENT_TASK_ID as PID,
+			    SUM(TARGET_MONEY) AS FINISH_COUNT,
+			    CAST(SUM(TARGET_MONEY)*1.0/(select TARGET_MONEY from TSK_TASK WHERE TASK_ID=#taskId#)*100 as decimal(18,2)) AS FINISH_RATE
+			    from TSK_TASK
+			    WHERE PARENT_TASK_ID=#taskId# 
+			    GROUP BY PARENT_TASK_ID
+			) as TC on TC.PID=task.TASK_ID
+			LEFT JOIN(
+			    select PARENT_TASK_ID as UPID,
+			    SUM(TARGET_MONEY) AS USER_FINISH_COUNT,
+			    CAST((case when TASK_STATUS=0 THEN 0 ELSE SUM(TARGET_MONEY) end)*1.0/(case when SUM(TARGET_MONEY)>0 then SUM(TARGET_MONEY) else 1 end)*100 as decimal(18,2)) AS USER_FINISH_RATE
+			    from TSK_TASK
+			    WHERE PARENT_TASK_ID=#taskId# and EXECUTE_USER_ID=#executeUserId#
+			    GROUP BY PARENT_TASK_ID,TASK_STATUS
+			) AS UTC on UTC.UPID=task.TASK_ID
+			WHERE task.IS_DEL=0 and PARENT_TASK_ID=0 AND task.TASK_ID=#taskId#
+		]]>
+	</select>
+	
+	<!--根据客户ID查询客户对应的下次联系任务 -->
+	<select id="GetCustomerNextTaskById" parameterClass="java.util.Map" resultMap="TskTaskResult">
+		<![CDATA[
+			SELECT 
+			0 as FINISH_COUNT,
+            '' as FINISH_RATE,
+            0 AS USER_FINISH_COUNT,
+            '' AS USER_FINISH_RATE,
+			'' AS ASSIGN_NAME,
+			'' as EXECUTE_NAME,
+			'' as EXC_USERS_ID,
+			'' as PRODUCT_NAME,
+			0 as RAISE_UPPER_LIMIT,
+            '' as MONEY_UNIT_NAME,
+		    task.* 
+			FROM 
+			TSK_TASK  AS task 
+			INNER JOIN TSK_TASK_TARGET AS target on task.TASK_ID=target.TASK_ID and target.CUSTOMER_ID=$customerId$ 
+			WHERE task.IS_DEL=$isDel$ and task.PARENT_TASK_ID=0 
+		]]>
+		<isNotEmpty property="taskId">
+		<![CDATA[
+			and task.TASK_ID=$taskId$ 
+		]]>
+		</isNotEmpty>
+		<isNotEmpty property="isNextContact">
+		<![CDATA[
+			and task.IS_NEXT_CONTACT=1  
+		]]>
+		</isNotEmpty>
+		<![CDATA[
+			order by task.CREATE_DATE DESC fetch first 1 rows only 
+		]]>
+	</select>
+	
+	<!-- 删除任务 -->
+	<update id="DeleteTskTask" parameterClass="java.lang.Integer">
+		<![CDATA[
+			UPDATE TSK_TASK SET IS_DEL=1 WHERE TASK_ID=#taskId#
+		]]>
+	</update>
+	
+	<!-- 编辑联系任务 -->
+	<update id="UpdateTskTaskContact" parameterClass="TskTask">
+		<![CDATA[
+			UPDATE TSK_TASK SET 
+				TASK_TITLE=#taskTitle#,
+				START_DATE=#startDate#,
+				END_DATE=#endDate#,
+				REMARK=#remark#,
+		]]>
+		<isNotEmpty property="taskStatus">
+			<![CDATA[
+				TASK_STATUS=#taskStatus#,
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="finishDate">
+			<![CDATA[
+				FINISH_DATE=#finishDate#,
+			]]>
+		</isNotEmpty>
+		<![CDATA[
+				UPDATE_DATE=#updateDate#,
+				UPDATE_USER=#updateUser#
+			WHERE TASK_ID=#taskId#
+		]]>
+	</update>
+	
+	<!-- 根据任务ID和执行者ID查询是否存在 -->
+	<select id="SearchTaskExecute" parameterClass="TskTask" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(0) FROM TSK_TASK
+			WHERE PARENT_TASK_ID=#parentTaskId# AND EXECUTE_USER_ID=#executeUserId#
+		]]>
+	</select>
+	
+	<!-- 根据任务ID和执行者ID查询是否存在 -->
+	<delete id="DeleteTaskByExecuteId" parameterClass="java.util.Map">
+		<![CDATA[
+			DELETE FROM TSK_TASK
+			WHERE PARENT_TASK_ID=#parentTaskId# AND EXECUTE_USER_ID NOT IN($executeUserIds$)
+		]]>
+	</delete>
+	
+	<!-- 根据任务ID和执行者ID返回子任务ID -->
+	<select id="GetParentTaskId" parameterClass="TskTask" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT TASK_ID FROM TSK_TASK WHERE PARENT_TASK_ID=#taskId# AND EXECUTE_USER_ID=#executeUserId#
+		]]>
+	</select>
+	
+	<!-- 根据任务ID和执行者ID返回子任务的完成状态 -->
+	<select id="GetParentTskStatus" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[
+			select TASK_STATUS from TSK_TASK where PARENT_TASK_ID=#parentTaskId# AND EXECUTE_USER_ID=#executeUserId#
+		]]>
+	</select>
+	
+	<!-- 中止/重启/完成任务状态变更 -->
+	<update id="ChangeTaskFinish" parameterClass="TskTask">
+		<![CDATA[
+			UPDATE TSK_TASK SET
+			TASK_STATUS=#taskStatus#,
+			UPDATE_DATE=#updateDate#,
+			UPDATE_USER=#updateUser#
+			WHERE TASK_ID=#taskId#
+		]]>
+	</update>
+	
+	<!-- 修改子任务的任务状态-->
+	<update id="ChangeParentTskStatus" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE TSK_TASK SET 
+			TASK_STATUS=#taskStatus#, 
+			FINISH_DATE=#finishDate# 
+			where PARENT_TASK_ID=#parentTaskId# AND EXECUTE_USER_ID=#executeUserId#
+		]]>
+	</update>
+	
+	<!-- 根据任务ID和执行者ID返回子任务的完成状态 -->
+	<select id="GetParentTskNotFinishCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[
+			select COUNT(0) from TSK_TASK where PARENT_TASK_ID=#taskId# and TASK_STATUS=0
+		]]>
+	</select>
+	
+	
+	<!-- 营销任务部分 -->
+	<!-- 添加营销任务 -->
+	<insert id="InsertTaskMarket" parameterClass="TskTask">
+		<![CDATA[
+			INSERT INTO TSK_TASK
+			(
+				TASK_ID,
+				PARENT_TASK_ID,
+				TASK_TYPE,
+				TASK_TITLE,
+				PRODUCT_ID,
+				TARGET_MONEY,
+				START_DATE,
+				END_DATE,
+				REMARK,
+				ASSIGN_USER_ID,
+				EXECUTE_DEPT_ID,
+				TASK_STATUS,
+				IS_NEXT_CONTACT,
+				IS_DEL,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			VALUES
+			(
+				#taskId#,
+				0,
+				2,
+				#taskTitle#,
+				#productId#,
+				#targetMoney#,
+				#startDate#,
+				#endDate#,
+				#remark#,
+				#assignUserId#,
+				#executeDeptId#,
+				0,
+				0,
+				0,
+				#createDate#,
+				#createUser#
+			)
+	    ]]>
+	    <selectKey keyProperty="taskId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_TASK
+		</selectKey>
+	</insert>
+	
+	<!-- 根据产品ID查询产品的营销任务量 -->
+	<select id="GetByTaskProductCount" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		<![CDATA[
+			select TASK_TITLE from TSK_TASK where IS_DEL=0 AND PARENT_TASK_ID=0 AND TASK_TYPE=2 AND PRODUCT_ID=#productId#
+		]]>
+	</select>
+	
+	<!-- 编辑营销任务 -->
+	<update id="UpdateTaskMarket" parameterClass="TskTask">
+		<![CDATA[
+			UPDATE TSK_TASK SET 
+				TASK_TITLE=#taskTitle#,
+				START_DATE=#startDate#,
+				END_DATE=#endDate#,
+				REMARK=#remark#,
+				PRODUCT_ID=#productId#,
+				TARGET_MONEY=#targetMoney#,
+				UPDATE_DATE=#updateDate#,
+				UPDATE_USER=#updateUser#
+			WHERE TASK_ID=#taskId#
+		]]>
+	</update>
+	
+	<!-- 查询所有过期的任务数量 -->
+	<select id="GetAllTaskExpiredCount" resultClass="java.lang.Integer">
+		<![CDATA[
+			select count(0) from TSK_TASK WHERE END_DATE<current date and IS_DEL=0 AND PARENT_TASK_ID=0
+		]]>
+	</select>
+	
+	
+	<!-- 任务统计报表明细列表 -->
+	<select id="GetTaskReportDetailCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+		    SELECT
+			    count(distinct task.TASK_ID) 
+			FROM
+			TSK_TASK  AS task
+			LEFT JOIN SYS_USER AS assign
+			ON task.ASSIGN_USER_ID=assign.USER_ID
+			left join PDT_PRODUCT AS product on task.PRODUCT_ID=product.PRODUCT_ID 
+			left join CD_MONEY_UNIT as unit on product.MONEY_UNIT_ID=unit.MONEY_UNIT_ID 
+			inner join(
+				    select t.PARENT_TASK_ID as TID  FROM TSK_TASK as t where t.EXECUTE_USER_ID=$executeUserId$
+			) as tt on task.TASK_ID=tt.TID 
+			WHERE task.IS_DEL=0 and PARENT_TASK_ID=0 and task.TASK_TYPE IN($taskType$) and task.TASK_STATUS<>2 
+	    ]]>
+	    <isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+	</select>
+
+	<select id="GetTaskReportDetailPageMap" resultMap="TskTaskResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (select k.* from (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+			SELECT
+				0 as FINISH_COUNT,
+    			0 as FINISH_RATE,
+    			0 as USER_FINISH_COUNT,
+    			0 as USER_FINISH_RATE,
+			    assign.USER_NAME AS ASSIGN_NAME,
+			    '' as EXECUTE_NAME,
+			    '' as EXC_USERS_ID,
+			    product.PRODUCT_NAME,
+			    product.RAISE_UPPER_LIMIT,
+                unit.MONEY_UNIT_NAME,
+			    task.*
+			FROM
+			TSK_TASK  AS task
+			LEFT JOIN SYS_USER AS assign
+			ON task.ASSIGN_USER_ID=assign.USER_ID
+			left join PDT_PRODUCT AS product on task.PRODUCT_ID=product.PRODUCT_ID 
+			left join CD_MONEY_UNIT as unit on product.MONEY_UNIT_ID=unit.MONEY_UNIT_ID 
+			inner join(
+				    select t.PARENT_TASK_ID as TID  FROM TSK_TASK as t where t.EXECUTE_USER_ID=$executeUserId$
+			) as tt on task.TASK_ID=tt.TID 
+			WHERE task.IS_DEL=0 and PARENT_TASK_ID=0 and task.TASK_TYPE IN($taskType$) and task.TASK_STATUS<>2 
+		]]>
+		<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g) k where k.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 返回无权限范围的执行者ID集合 -->
+	<select id="GetNoPermissionUserIds" parameterClass="java.util.Map" resultClass="java.lang.String">
+		<![CDATA[
+			with 
+			s as (
+			       select row_number()over(partition by executes.PARENT_TASK_ID order by executes.PARENT_TASK_ID) id1,
+			       row_number()over(partition by executes.PARENT_TASK_ID order by executes.PARENT_TASK_ID) id2, 
+			       executes.PARENT_TASK_ID as TASK_ID,excName.USER_NAME as EXECUTE_NAME,executes.EXECUTE_USER_ID as EXECUTE_USER_ID from TSK_TASK as executes
+			       left join SYS_USER as excName on executes.EXECUTE_USER_ID=excName.USER_ID
+			       WHERE executes.PARENT_TASK_ID<>0 and executes.TASK_ID=$taskId$ and executes.EXECUTE_USER_ID not in($excUserIds$) 
+			)
+			,
+			t(TASK_ID,id1,id2,EXECUTE_NAME,EXECUTE_USER_ID) as
+			(
+			select TASK_ID,id1,id2,cast(EXECUTE_NAME as varchar(2500)),cast(EXECUTE_USER_ID as varchar(2500)) from  s where id1 =1 and id2=1
+			union all 
+			select t.TASK_ID,t.id1+1,t.id2,cast(s.EXECUTE_NAME||','||t.EXECUTE_NAME as varchar(2500)),cast(s.EXECUTE_USER_ID||','||t.EXECUTE_USER_ID as varchar(2500)) 
+			from  s, t 
+			where   s.id2=t.id1+1 and t.TASK_ID = s.TASK_ID
+			)
+			select EXECUTE_USER_ID as EXC_USERS_ID from t where t.id1= (select max(id1) from s where s.TASK_ID = t.TASK_ID)
+		]]>
+	</select>
+	
+	<!-- 修改下次联系任务的删除状态 -->
+	<update id="UpdateNextTaskIsDel" parameterClass="java.lang.Integer">
+		<![CDATA[
+			update TSK_TASK set IS_DEL=0 WHERE TASK_ID=$taskId$
+		]]>
+	</update>
+	
+	<!-- 根据产品ID返回产品对应的营销任务量 -->
+	<select id="GetProductTaskCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[
+			select COUNT(0) from TSK_TASK WHERE IS_DEL=0 AND PARENT_TASK_ID=0 AND TASK_TYPE=2 AND PRODUCT_ID=$productId$
+		]]>
+	</select>
+	
+	<!-- 判断任务是否中止 -->
+	<select id="IsStop" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[
+			select COUNT(TASK_ID) from TSK_TASK WHERE IS_DEL=0 AND PARENT_TASK_ID=0 AND TASK_STATUS=2 AND TASK_ID=$taskId$
+		]]>
+	</select>
+	
+	<!-- 查询待分配的营销任务量 -->
+	<select id="GetUnallocatedMarketCount" parameterClass="java.util.Map" resultClass="java.lang.Integer" cacheModel="taskUpdateCache" >
+		<![CDATA[
+			select count(0) from TSK_TASK AS task 
+			where task.TASK_ID IN(
+				select
+				(case when T.DEPT_TARGET_MONEY>(
+				    select SUM(TARGET_MONEY) from TSK_TASK WHERE PARENT_TASK_ID=T.PARENT_TASK_ID AND EXECUTE_DEPT_ID in($deptId$) 
+				) THEN T.PARENT_TASK_ID ELSE 0 END) AS TASK_ID 
+				from(
+					select PARENT_TASK_ID,EXECUTE_DEPT_ID,
+					(CASE WHEN EXECUTE_DEPT_ID=3 THEN t.TARGET_MONEY else DEPT_TARGET_MONEY end) as DEPT_TARGET_MONEY 
+					from TSK_TASK 
+					INNER JOIN(SELECT TASK_ID,TARGET_MONEY FROM TSK_TASK WHERE TASK_STATUS=0 AND TASK_TYPE=2) AS t on t.TASK_ID=PARENT_TASK_ID 
+					WHERE PARENT_TASK_ID<>0 and TASK_STATUS=0 
+					AND EXECUTE_DEPT_ID in($deptId$) 
+					GROUP BY PARENT_TASK_ID,EXECUTE_DEPT_ID,DEPT_TARGET_MONEY,t.TARGET_MONEY
+				) as T
+			) AND task.IS_DEL=0
+		]]>
+	</select>
+	
+	<!-- 查询过期的任务量 -->
+	<select id="GetExpiredTaskCount" parameterClass="java.util.Map" resultClass="java.lang.Integer" cacheModel="taskUpdateCache" >
+		<![CDATA[
+			select count(0) from TSK_TASK as task 
+			WHERE task.PARENT_TASK_ID=0 and task.TASK_STATUS=0 
+			and task.IS_DEL=0 and task.END_DATE<'$expiredEndDate$'  
+			and task.TASK_ID not IN(select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$userId$ AND (TASK_STATUS=1)) 
+			and task.TASK_ID IN(select distinct PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID IN($userIds$)) 
+		]]>
+		<isNotEmpty property="marketFlag">
+				<![CDATA[ 
+					AND  task.TASK_ID NOT IN(
+				       select TASK_ID from TSK_TASK WHERE TASK_ID IN(
+				       select PARENT_TASK_ID from TSK_TASK WHERE EXECUTE_USER_ID=$userId$  
+				       AND (TARGET_MONEY=0)) AND TASK_TYPE=2 AND IS_DEL=0
+				   )
+				]]>
+		</isNotEmpty>
+		<isNotEmpty property="markerZgFlag">
+			<![CDATA[ 
+					AND  task.TASK_ID NOT IN(
+				        select TASK_ID from TSK_TASK WHERE TASK_ID IN(
+					        SELECT PARENT_TASK_ID FROM (
+					        select A.PARENT_TASK_ID,SUM(A.DEPT_TARGET_MONEY) AS DEPT_TARGET_MONEY
+					        from(select distinct PARENT_TASK_ID,DEPT_TARGET_MONEY from TSK_TASK WHERE EXECUTE_USER_ID IN($userIds$)) as A  
+					        GROUP BY A.PARENT_TASK_ID) WHERE DEPT_TARGET_MONEY=0
+					    ) AND TASK_TYPE=2 AND IS_DEL=0
+				    )
+			]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据不同的用户返回营销任务目标 -->
+	<select id="GetTaskTargetMoney" parameterClass="java.util.Map" resultClass="java.lang.Double">
+		<![CDATA[ select ]]>
+		<isNotEmpty property="executeDeptId">
+			<![CDATA[ 
+				distinct DEPT_TARGET_MONEY as money from TSK_TASK  WHERE EXECUTE_DEPT_ID=$executeDeptId$ AND PARENT_TASK_ID=$taskId$ 
+	        ]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeUserId">
+			<![CDATA[ 
+				TARGET_MONEY as money from TSK_TASK  WHERE EXECUTE_USER_ID=$executeUserId$ AND PARENT_TASK_ID=$taskId$  
+	        ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据执行者ID和产品ID查询用户的营销任务目标 -->
+	<select id="GetUserTaskTargetMoneySUM" parameterClass="java.util.Map" resultClass="java.lang.Double">
+		<![CDATA[ 
+			SELECT (CASE WHEN SUM(TARGET_MONEY) IS NULL THEN 0 ELSE SUM(TARGET_MONEY) END) FROM TSK_TASK 
+			WHERE PARENT_TASK_ID<>0 
+		]]>
+		<isNotEmpty property="operFlag">
+			<![CDATA[ and TASK_STATUS=0 ]]>
+		</isNotEmpty>
+		<![CDATA[
+			AND PARENT_TASK_ID =(
+			select TASK_ID from TSK_TASK  WHERE IS_DEL=0 AND TASK_TYPE=2 
+		]]>
+		<isNotEmpty property="operFlag">
+			<![CDATA[ and TASK_STATUS=0 ]]>
+		</isNotEmpty>
+		<![CDATA[
+			AND PRODUCT_ID=$productId$) 
+			AND EXECUTE_USER_ID=$executeUserId$
+		]]>
+	</select>
+	
+	<!-- 判断此产品的所有人员的营销任务是否大于总任务目标,返回1表示大于(总营销任务状态已完成)、返回0表示小于 -->
+	<select id="IsFinishMarketTask" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT 
+			(
+			    CASE WHEN (select * from table(getProductTotalUnDel(T1.TASK_ID)))>=T1.TARGET_MONEY
+			    THEN 1 ELSE 0 END
+			) AS IS_FINISH  
+			FROM TSK_TASK  AS T1  
+			WHERE T1.IS_DEL=0 AND T1.TASK_TYPE=2 AND T1.PRODUCT_ID=$productId$ 
+		]]>
+		<isNotEmpty property="operFlag">
+			<![CDATA[ AND T1.TASK_STATUS=0 ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据执行者ID和产品ID查询用户的营销任务目标，修改状态 -->
+	<update id="UpdateExecuteUserTaskStatus" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE TSK_TASK SET TASK_STATUS=$taskStatus$,FINISH_DATE=current timestamp 
+			WHERE PARENT_TASK_ID<>0 
+		]]>
+		<isNotEmpty property="operFlag">
+			<![CDATA[ and TASK_STATUS=0 ]]>
+		</isNotEmpty>
+		<![CDATA[ 
+			AND PARENT_TASK_ID =(
+			select TASK_ID from TSK_TASK  WHERE IS_DEL=0 AND TASK_TYPE=2 
+		]]>
+		<isNotEmpty property="operFlag">
+			<![CDATA[ and TASK_STATUS=0 ]]>
+		</isNotEmpty>
+		<![CDATA[ 
+			AND PRODUCT_ID=$productId$) 
+			AND EXECUTE_USER_ID=$executeUserId$ 
+		]]>
+	</update>
+	
+	<!-- 修改营销任务主状态 -->
+	<update id="UpdateMarketTaskStatus" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE TSK_TASK SET TASK_STATUS=$taskStatus$,FINISH_DATE=current timestamp   
+			WHERE IS_DEL=0 AND TASK_TYPE=2 AND PRODUCT_ID=$productId$ 
+		]]>
+		<isNotEmpty property="operFlag">
+			<![CDATA[ AND TASK_STATUS=0 ]]>
+		</isNotEmpty>
+	</update>
+	
+	<!-- 根据产品ID查询营销任务目标 -->
+	<select id="GetProductTargetMoneySUM" parameterClass="java.lang.String" resultClass="java.lang.Double">
+		<![CDATA[ 
+			SELECT (case when sum(TARGET_MONEY) is null then 0 else sum(TARGET_MONEY) end) 
+			FROM TSK_TASK WHERE PRODUCT_ID=(SELECT PRODUCT_ID FROM PDT_PRODUCT WHERE PRODUCT_NAME='$value$' AND IS_DEL=0) 
+		]]>
+	</select>
+	
+	<!-- 查询所有子任务列表 -->
+	<select id="GetParentTskTaskList" parameterClass="java.util.Map" resultMap="TskTaskResult">
+		<![CDATA[ 
+			SELECT
+			0 as FINISH_COUNT,        
+			0 as FINISH_RATE,        
+			0 as USER_FINISH_COUNT,        
+			0 as USER_FINISH_RATE,        
+			'' AS ASSIGN_NAME,        
+			USER_NAME AS EXECUTE_NAME,        
+			USER_ID AS EXC_USERS_ID,        
+			'' AS PRODUCT_NAME,        
+			0 AS RAISE_UPPER_LIMIT,                 
+			'' AS MONEY_UNIT_NAME,
+			task.* 
+			FROM TSK_TASK AS task,SYS_USER 
+			WHERE PARENT_TASK_ID<>0 AND USER_ID=EXECUTE_USER_ID 
+			AND EXECUTE_USER_ID IN($userIds$) and PARENT_TASK_ID IN($taskIds$)
+		]]>
+	</select>
+</sqlMap>

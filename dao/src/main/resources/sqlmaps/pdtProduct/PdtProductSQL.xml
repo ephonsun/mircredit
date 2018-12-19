@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PDTProductSQL">
+	<typeAlias alias="PdtProduct" type="com.banger.mobile.domain.model.pdtProduct.PdtProduct" />
+	<typeAlias alias="Customer" type="com.banger.mobile.domain.model.customer.CrmCustomer"/>
+	<typeAlias alias="BuyCustomerBean" type="com.banger.mobile.domain.model.pdtProduct.BuyCustomerBean" />
+	<typeAlias alias="PdtProductCustomer" type="com.banger.mobile.domain.model.pdtProduct.PdtProductCustomer" />
+	<typeAlias alias="Users" type="com.banger.mobile.domain.model.pdtProduct.UserAndCountersBean" />
+	
+	<!-- 产品主体表 信息全字段 -->
+	<resultMap class="PdtProduct" id="PdtProductResult">
+	 	<result column="PRODUCT_ID" property="productId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="PRODUCT_CODE" property="productCode" />
+		<result column="PRODUCT_STATE" property="productState" />
+		<result column="SALE_START_DATE" property="saleStartDate" />
+		<result column="SALE_END_DATE" property="saleEndDate" />
+		<result column="IS_DEL" property="isDel" /> 
+	    <result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		
+		<result column="TEMPLATE_NAME" property="templateName" />
+	</resultMap>
+
+	<!-- 产品列表 -->
+	<resultMap class="PdtProduct" id="ProductListResult">
+		<result column="PRODUCT_ID" property="productId" />
+	 	<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="PRODUCT_CODE" property="productCode" />
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="PRODUCT_STATE" property="productState"/>
+		<result column="BUY_CUSTOMER_COUNT" property="buyCustomerCount" />
+		<result column="BUY_MONEY" property="buyMoney" nullValue="0"/>
+		<result column="SALE_END_DATE" property="saleEndDate"/>
+	</resultMap>
+	
+	<!-- 客户 -->
+	<resultMap class="Customer" id="CustomerResult">
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="CUSTOMER_NO" property="customerNo"/>
+		<result column="CUSTOMER_NAME" property="customerName"/>
+		<result column="ID_CARD" property="idCard"/>
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType"/>
+		<result column="CUSTOMER_PHONE" property="phoneExt"/>
+	</resultMap>
+	
+	<!-- 产品购买客户列表 -->
+	<resultMap class="PdtProductCustomer" id="PdtProductCustomerResult">
+		<result column="PRODUCT_CUSTOMER_ID" property="productCustomerId"/>
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="BUY_DATE" property="buyDate"/>
+		<result column="BUY_MONEY" property="buyMoney"/>
+		<result column="BANK_ACCOUNT" property="bankAccount"/>
+		<result column="ID_CARD" property="idCard"/>
+		<result column="IS_DEAL" property="isDeal"/>		
+		<result column="CUSTOMER_NAME" property="customerName"/>
+		<result column="CUSTOMER_NO" property="customerNo"/>
+		<result column="COMPANY" property="company"/>
+		<result column="PHONE_NUMBER" property="phone"/>
+		<result column="USER_NAME" property="userName"/>		
+	</resultMap>
+
+	<!-- 根据部门id查询所有用户和柜台人员集合并排序 -->
+	<resultMap class="Users" id="UsersResult">
+		<result column="USER_ID" property="userId" />
+		<result column="ACCOUNT" property="account" />
+		<result column="USER_NAME" property="userName" />
+		<result column="TYPE" property="type" />
+	</resultMap>
+	
+	<cacheModel id="PdtProduct-Cache" type="LRU" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="insertPdtProduct" />
+		<flushOnExecute statement="updatePdtProduct" />
+		<flushOnExecute statement="deltePdtProduct" />
+		<flushOnExecute statement="stopPdtProduct" />
+		<flushOnExecute statement="saveBuyPdtProductCustomer" />
+		<flushOnExecute statement="deleteBuyCustomer" />
+		<flushOnExecute statement="updateSellUser" />
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	<!-- 新建在售产品 -->
+	<insert id="insertPdtProduct" parameterClass="PdtProduct">
+		<![CDATA[  
+			INSERT INTO PDT_PRODUCT
+		    (
+		        PRODUCT_ID,
+		        TEMPLATE_ID,
+		        PRODUCT_NAME,
+		        PRODUCT_CODE,
+		        PRODUCT_STATE,
+		        SALE_START_DATE,
+		        SALE_END_DATE,
+		        IS_DEL,
+		        CREATE_DATE,
+		        CREATE_USER
+		    )
+		    VALUES
+		    (
+		        #productId#,
+		        #templateId#,
+		        #productName#,
+		        #productCode#,
+		        0,
+		        #saleStartDate#,
+		        #saleEndDate#,
+		        0,
+		        #createDate#,
+		        #createUser#
+			)
+		]]>
+		<selectKey keyProperty="productId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_PDT_PRODUCT
+		</selectKey>
+	</insert>
+	
+	<!-- 编辑在售产品 -->
+	<update id="updatePdtProduct" parameterClass="PdtProduct">
+		<![CDATA[ 
+			UPDATE
+			    PDT_PRODUCT
+			SET
+			    PRODUCT_NAME = #productName#,
+			    PRODUCT_CODE = #productCode#,
+		]]>
+			<isNotNull property="productState">
+			   	PRODUCT_STATE = #productState#,	
+			</isNotNull>
+			<isNotNull property="saleStartDate">
+			    SALE_START_DATE = #saleStartDate#,
+			</isNotNull>
+		<![CDATA[		
+			    SALE_END_DATE = #saleEndDate#,
+			    UPDATE_DATE = #updateDate#,
+			    UPDATE_USER = #updateUser#
+			WHERE
+			    PRODUCT_ID = #productId#
+		]]>
+	</update>
+	
+	<!-- 获取相同名称的pdtProduct -->
+	<select id="getProductByName" parameterClass="PdtProduct" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT COUNT(1) FROM PDT_PRODUCT WHERE PRODUCT_NAME=#productName# AND IS_DEL=0
+		]]>
+		<isNotEmpty property="productId">
+			<![CDATA[ AND PRODUCT_ID <> #productId#]]>
+		</isNotEmpty>
+	</select>
+	<!-- 获取相同编号的pdtProduct -->
+	<select id="getProductByCode" parameterClass="PdtProduct" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT COUNT(1) FROM PDT_PRODUCT WHERE PRODUCT_CODE=#productCode# AND IS_DEL=0
+		]]>
+		<isNotEmpty property="productId">
+			<![CDATA[ AND PRODUCT_ID<>#productId#]]>
+		</isNotEmpty>
+	</select>
+	
+	<!--通过id得到pdtProduct -->
+	<select id="getPdtProductById" parameterClass="java.lang.Integer" resultMap="PdtProductResult">
+		<![CDATA[ 
+			SELECT p.*,t.TEMPLATE_NAME FROM PDT_PRODUCT as p 
+				left join PDT_TEMPLATE as t on p.TEMPLATE_ID= t.TEMPLATE_ID
+				WHERE p.PRODUCT_ID = #productId# AND p.IS_DEL=0
+		]]>
+	</select>
+	
+	<!-- 删除产品 -->
+	<update id="deltePdtProduct" parameterClass="java.lang.Integer">
+		<![CDATA[UPDATE PDT_PRODUCT SET IS_DEL=1 WHERE PRODUCT_ID = #productId#]]>
+	</update>
+	<!-- 停售产品 -->
+	<update id="stopPdtProduct" parameterClass="java.lang.Integer">
+	<![CDATA[ 
+		UPDATE PDT_PRODUCT SET PRODUCT_STATE = 1 
+		WHERE PRODUCT_ID = #productId#
+	]]>
+	</update>	
+	<!-- 查询总条数（分页） -->
+	<select id="getProductCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+	<![CDATA[		
+		SELECT count(1)
+			FROM 
+				PDT_PRODUCT p 
+			LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = p.TEMPLATE_ID
+			AND pt.IS_DEL = 0 
+			where p.IS_DEL=0 
+	]]>
+		<isNotEmpty prepend="and" property="productCode">
+				<![CDATA[ p.PRODUCT_CODE like '%$productCode$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productName">
+				<![CDATA[ p.PRODUCT_NAME like '%$productName$%' ]]>
+			</isNotEmpty>
+			<isEqual prepend="and" property="type" compareValue="0"><!-- 在售 -->
+				p.PRODUCT_STATE = 0 and p.SALE_START_DATE &lt;= CURRENT DATE and p.SALE_END_DATE >= CURRENT DATE
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="1"><!-- 待上架 -->
+				p.PRODUCT_STATE = 0 and p.SALE_START_DATE > CURRENT DATE
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="2"><!-- 已过期 -->
+				p.PRODUCT_STATE = 0 and p.SALE_END_DATE &lt; CURRENT DATE
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="3"><!-- 停售 -->
+				p.PRODUCT_STATE = 1
+			</isEqual>
+			<isNotEmpty prepend="and" property="createUserId">
+				p.CREATE_USER = #createUserId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tId">
+				p.TEMPLATE_ID = #tId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateId">
+				p.PRODUCT_ID IN (SELECT distinct PRODUCT_ID FROM (
+				<isNotEmpty property="s0">
+					(select PRODUCT_ID FROM PDT_PRODUCT_FIELD WHERE 
+					$s0$)
+				</isNotEmpty>
+				<isNotEmpty property="s1" prepend="INTERSECT">
+					(select PRODUCT_ID FROM PDT_PRODUCT_FIELD WHERE 
+					$s1$)
+				</isNotEmpty>
+				<isNotEmpty property="s2" prepend="INTERSECT">
+					(select PRODUCT_ID FROM PDT_PRODUCT_FIELD WHERE 
+					$s2$)
+				</isNotEmpty>
+				))
+			</isNotEmpty>
+	</select>
+	
+	<!-- 根据页数查询产品记录 -->
+	<select id="getProductPageMap" resultMap="ProductListResult"
+		parameterClass="java.util.Map">
+			<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+				<![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+		         ]]>
+				</isNotEmpty>
+			</isNotEmpty>
+			<![CDATA[
+				SELECT 
+					p.PRODUCT_ID,pt.TEMPLATE_NAME,p.PRODUCT_CODE,p.PRODUCT_NAME,p.PRODUCT_STATE,p.SALE_END_DATE,
+					(select count(1) from PDT_PRODUCT_CUSTOMER c where c.PRODUCT_ID=p.PRODUCT_ID and c.IS_DEL = 0 and (c.USER_ID IN ($userIds$) 
+			]]>
+			<isNotEmpty prepend="or" property="gUserIds">
+				<![CDATA[ c.COUNTER_USER_ID IN ($gUserIds$) ]]>
+			</isNotEmpty>
+			<![CDATA[
+				 )) as BUY_CUSTOMER_COUNT,
+					(select sum(c.BUY_MONEY) from PDT_PRODUCT_CUSTOMER c where c.PRODUCT_ID=p.PRODUCT_ID and c.IS_DEL = 0 and (c.USER_ID IN ($userIds$) 
+			]]>
+			<isNotEmpty prepend="or" property="gUserIds">
+				<![CDATA[ c.COUNTER_USER_ID IN ($gUserIds$) ]]>
+			</isNotEmpty>
+			<![CDATA[
+					)) as BUY_MONEY
+				FROM 
+					PDT_PRODUCT p 
+				LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = p.TEMPLATE_ID
+				AND pt.IS_DEL = 0 
+				where p.IS_DEL=0 
+			]]>
+			<isNotEmpty prepend="and" property="productCode">
+				<![CDATA[ p.PRODUCT_CODE like '%$productCode$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productName">
+				<![CDATA[ p.PRODUCT_NAME like '%$productName$%' ]]>
+			</isNotEmpty>
+			<isEqual prepend="and" property="type" compareValue="0"><!-- 在售 -->
+				p.PRODUCT_STATE = 0 and p.SALE_START_DATE &lt;= CURRENT DATE and p.SALE_END_DATE >= CURRENT DATE
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="1"><!-- 待上架 -->
+				p.PRODUCT_STATE = 0 and p.SALE_START_DATE > CURRENT DATE
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="2"><!-- 已过期 -->
+				p.PRODUCT_STATE = 0 and p.SALE_END_DATE &lt; CURRENT DATE
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="3"><!-- 停售 -->
+				p.PRODUCT_STATE = 1
+			</isEqual>
+			<isNotEmpty prepend="and" property="createUserId">
+				p.CREATE_USER = #createUserId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tId">
+				p.TEMPLATE_ID = #tId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateId">
+				p.PRODUCT_ID IN (SELECT distinct PRODUCT_ID FROM (
+				<isNotEmpty property="s0">
+					(select PRODUCT_ID FROM PDT_PRODUCT_FIELD WHERE 
+					$s0$)
+				</isNotEmpty>
+				<isNotEmpty property="s1" prepend="UNION">
+					(select PRODUCT_ID FROM PDT_PRODUCT_FIELD WHERE 
+					$s1$)
+				</isNotEmpty>
+				<isNotEmpty property="s2" prepend="UNION">
+					(select PRODUCT_ID FROM PDT_PRODUCT_FIELD WHERE 
+					$s2$)
+				</isNotEmpty>
+				))
+			</isNotEmpty>
+			order by pt.TEMPLATE_ORDER
+			<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+					<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+				</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据编号查找客户 -->
+	<select id="findCustomerByNo" resultMap="CustomerResult" parameterClass="java.lang.String">
+		<![CDATA[
+			 select CUSTOMER_ID,CUSTOMER_NO,CUSTOMER_NAME,ID_CARD,DEFAULT_PHONE_TYPE,
+			 CASE DEFAULT_PHONE_TYPE WHEN 1 THEN MOBILE_PHONE1 WHEN 2 THEN MOBILE_PHONE2 WHEN 3 THEN PHONE WHEN 4 THEN FAX end as CUSTOMER_PHONE 
+			 from CRM_CUSTOMER where IS_DEL=0 AND IS_TRASH=0 AND CUSTOMER_NO like '%$customerNo$%' order by CUSTOMER_NAME FETCH FIRST 5 ROWS ONLY
+		]]>
+	</select>
+	
+	<!-- 根据Map查询客户购买记录 -->
+	<select id="queryBuyCustomerByAll" resultClass="java.lang.Integer"
+		parameterClass="BuyCustomerBean">
+		<![CDATA[
+   			select count(*) from PDT_PRODUCT_CUSTOMER a 
+			LEFT JOIN CRM_CUSTOMER b ON a.CUSTOMER_ID=b.CUSTOMER_ID 
+			LEFT JOIN SYS_USER c ON a.USER_ID=c.USER_ID
+            LEFT JOIN CRM_COUNTER_USER d ON d.COUNTER_USER_ID=a.USER_ID
+		  	where a.IS_DEL=0 
+   		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="customerNo">
+				<![CDATA[ b.CUSTOMER_NO = '$customerNo$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[ b.CUSTOMER_NAME = '$customerName$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[ b.CUSTOMER_ID = '$customerId$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="buyMoney">
+				<![CDATA[ a.BUY_MONEY = '$buyMoney$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[ (a.USER_ID = '$userId$' OR a.COUNTER_USER_ID ='$userId$') ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="buyDate">
+				<![CDATA[ a.BUY_DATE = '$buyDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productId">
+				<![CDATA[ a.PRODUCT_ID = '$productId$' ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 保存产品购买记录 -->
+	<insert id="saveBuyPdtProductCustomer"
+		parameterClass="BuyCustomerBean">
+		<![CDATA[
+		insert into PDT_PRODUCT_CUSTOMER(
+		PRODUCT_CUSTOMER_ID,
+		PRODUCT_ID,
+		CUSTOMER_ID,
+		BUY_DATE,
+		BUY_MONEY,
+		BANK_ACCOUNT,
+		ID_CARD,
+		IS_DEAL,
+		IS_DEL,
+		USER_ID,
+		COUNTER_USER_ID,
+		USER_TYPE,
+		CREATE_DATE,
+		UPDATE_DATE,
+		CREATE_USER,
+		UPDATE_USER,
+		PHONE_NUMBER
+		) values (
+		#productCustomerId#,
+		#productId#,
+		#customerId#,
+		#buyDate:TIMESTAMP#,
+		#buyMoney:DOUBLE#,
+		#bankAccount:VARCHAR:NULL#,
+		#idCard:VARCHAR:NULL#,
+		0,
+		0,
+		#userId:INTEGER#,
+		#counterUserId:INTEGER#,
+		#userType:INTEGER#,
+		current timestamp,
+		current timestamp,
+		#createUser#,
+		#updateUser#,
+		#phone#
+		)
+		]]>
+		<selectKey keyProperty="productCustomerId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_PRODUCT_CUSTOMER
+		</selectKey>
+	</insert>
+	
+	<!-- 根据产品模板ID获取产品个数 -->
+	<select id="getProductCountByTempId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[SELECT COUNT(*) FROM PDT_PRODUCT WHERE TEMPLATE_ID = #templateId# AND IS_DEL=0]]>
+	</select>
+	
+	<!-- 产品下面购买客户记录条数 -->
+	<select id="getBuyCusCountByPdtId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[SELECT COUNT(*) FROM PDT_PRODUCT_CUSTOMER WHERE IS_DEL=0 AND PRODUCT_ID=#productId#]]>
+	</select>
+	
+	<!-- 产品购买客户列表 -->
+	<select id="getPdtBuyCustomerPage" parameterClass="java.util.Map" resultMap="PdtProductCustomerResult">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[ select p.PRODUCT_CUSTOMER_ID,p.CUSTOMER_ID ,p.BUY_DATE,p.BUY_MONEY,p.BANK_ACCOUNT,
+	p.ID_CARD,p.IS_DEAL,c.customer_name,c.customer_no,c.COMPANY,p.Phone_number,
+		case when p.user_type=1 then u.user_name else cu.COUNTER_USER_NAME end as user_name   
+		from PDT_PRODUCT_CUSTOMER as p
+		left join CRM_CUSTOMER as c on c.customer_id=p.customer_id
+		left join sys_user as u on u.user_id = p.user_id
+		left join CRM_COUNTER_USER as cu on cu.COUNTER_USER_ID = p.COUNTER_USER_ID
+		where p.is_del=0 and p.product_id=#productId# 
+		and (p.user_id in ($userIds$) or p.COUNTER_USER_ID in ($userIds$))
+		order by p.BUY_DATE desc,COLLATION_KEY_BIT(c.customer_name,'UCA500R1_LZH_AN_CX_EX_FX_HX_NX_S3')
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 产品购买客户列表count -->
+	<select id="getPdtBuyCustomerPageCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+	<![CDATA[ select count(*)  
+		from PDT_PRODUCT_CUSTOMER as p
+		where p.is_del=0 and p.product_id=#productId# 
+		and (p.user_id in ($userIds$) or p.COUNTER_USER_ID in ($userIds$))
+		]]>
+	</select>
+	<!-- 产品销售总额 -->
+	<select id="getProductTotalSales" parameterClass="java.util.Map" resultClass="java.math.BigDecimal">
+	<![CDATA[ 
+		select case when sum(p.buy_money) is null then 0 else sum(p.buy_money) end as total_sales
+		from PDT_PRODUCT_CUSTOMER as p
+		where p.is_del=0  and p.product_id=#productId# 
+		and (p.user_id in ($userIds$) or p.COUNTER_USER_ID in ($userIds$))
+		]]>
+	</select>
+	<!-- 删除客户购买产品信息-->
+	<update id="deleteBuyCustomer" parameterClass="java.lang.Integer">
+		UPDATE PDT_PRODUCT_CUSTOMER set IS_DEL=1 where
+		PRODUCT_CUSTOMER_ID= #pcId#
+	</update>
+	
+		<!-- 根据部门id查询用户表和柜台人员表集合并排序 -->
+	<select id="getUserAndCounterByDeptId" resultMap="UsersResult"
+		parameterClass="java.lang.Integer">
+		(SELECT COUNTER_USER_ID AS USER_ID,COUNTER_USER_ACCOUNT AS
+		ACCOUNT,COUNTER_USER_NAME AS USER_NAME,2 AS TYPE FROM
+		CRM_COUNTER_USER where DEPT_ID = $deptId$ AND IS_DEL=0) union all (select
+		USER_ID,ACCOUNT,USER_NAME,1 AS TYPE from SYS_USER where DEPT_ID
+		= $deptId$ and IS_DEL = 0 and USER_ID in( select a.USER_ID from
+		SYS_USER a left join SYS_ROLE_MEMBER b on a.USER_ID=b.USER_ID
+		left join SYS_ROLE c on b.ROLE_ID=c.ROLE_ID where b.ROLE_ID in
+		(3,4) and c.IS_DEL=0 and a.IS_ACTIVED = 1)) order by USER_NAME
+	</select>
+	
+	<update id="updateSellUser" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE PDT_PRODUCT_CUSTOMER set 
+		]]>
+		<isEqual property="userType" compareValue="1">
+			USER_ID = #userId# ,
+			COUNTER_USER_ID = NULL,
+			USER_TYPE = #userType#
+		</isEqual>
+		<isEqual property="userType" compareValue="2">
+			COUNTER_USER_ID = #userId# ,
+			USER_ID = NULL,
+			USER_TYPE = #userType#
+		</isEqual>
+		<![CDATA[
+			where PRODUCT_CUSTOMER_ID in ($pcIds$)
+		]]>
+	</update>
+	
+	<!-- 查询客户购买理财产品总数-->
+	<select id="getBuyProductCountByCustomer"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(1)
+			FROM PDT_PRODUCT_CUSTOMER pc
+			LEFT JOIN PDT_PRODUCT pp ON pp.PRODUCT_ID = pc.PRODUCT_ID 
+            LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = pp.TEMPLATE_ID
+			WHERE pc.IS_DEL=0 AND pp.IS_DEL=0 
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[ pc.CUSTOMER_ID = '$customerId$' ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 查询客户购买理财产品-->
+	<select id="getBuyProductByCustomer"
+		resultMap="ProductListResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT pc.PRODUCT_ID,pp.PRODUCT_NAME,pp.PRODUCT_CODE,pt.TEMPLATE_NAME,0 AS PRODUCT_STATE,0 AS BUY_CUSTOMER_COUNT,0 AS BUY_MONEY,pp.SALE_END_DATE
+			FROM PDT_PRODUCT_CUSTOMER pc
+			LEFT JOIN PDT_PRODUCT pp ON pp.PRODUCT_ID = pc.PRODUCT_ID 
+            LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = pp.TEMPLATE_ID
+			WHERE pc.IS_DEL=0 AND pp.IS_DEL=0 
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[ pc.CUSTOMER_ID = '$customerId$' ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by pt.TEMPLATE_ORDER
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!--营销任务查询pdtProduct -->
+	<select id="getProductListForTask" parameterClass="java.util.Map" resultMap="PdtProductResult">
+		<![CDATA[ 
+			  	select p.*,t.TEMPLATE_NAME from pdt_product as p 
+			    left join PDT_TEMPLATE as t on t.TEMPLATE_ID = p.TEMPLATE_ID
+			    where p.SALE_END_DATE>= current date AND p.IS_DEL=0 AND p.PRODUCT_STATE=0
+		]]>
+		<isNotEmpty property="productName">
+			<![CDATA[ 	and p.product_name like '%$productName$%']]>
+		</isNotEmpty>
+		<isNotEmpty property="productCode">
+			<![CDATA[ and p.product_code like '%$productCode$%']]>
+		</isNotEmpty>
+		<![CDATA[ 
+			    order by COLLATION_KEY_BIT(t.TEMPLATE_NAME,'UCA500R1_LZH_AN_CX_EX_FX_HX_NX_S3'),
+			    	COLLATION_KEY_BIT(p.product_code,'UCA500R1_LZH_AN_CX_EX_FX_HX_NX_S3')
+		]]>
+	</select>
+	
+	<!-- 查询所有的产品 -->
+	<select id="getAllProductForCache" resultMap="PdtProductResult" cacheModel="PdtProduct-Cache">
+		<![CDATA[SELECT a.*,'' AS TEMPLATE_NAME FROM PDT_PRODUCT a WHERE a.IS_DEL=0]]>
+	</select>
+	
+	<!--通过id得到pdtProduct(包含删除)-->
+	<select id="getAllPdtProductById" parameterClass="java.lang.Integer" resultMap="PdtProductResult">
+		<![CDATA[ 
+			SELECT p.*,t.TEMPLATE_NAME FROM PDT_PRODUCT as p 
+				left join PDT_TEMPLATE as t on p.TEMPLATE_ID= t.TEMPLATE_ID
+				WHERE p.PRODUCT_ID = #productId# 
+		]]>
+	</select>
+</sqlMap>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanInfoDictionarySQL">
+    <typeAlias alias="LnLoanInfoDictionary" type="com.banger.mobile.domain.model.loan.LnLoanInfoDictionary"/>
+
+    <resultMap id="LnLoanInfoDictionaryResult" class="LnLoanInfoDictionary">
+        <result column="LOAN_INFO_DICTIONARY_ID" property="loanInfoDictionaryId"/>
+        <result column="DICTIONARY_NAME" property="dictionaryName"/>
+        <result column="DICTIONARY_VALUE" property="dictionaryValue"/>
+        <result column="REMARK" property="remark"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="DICTIONARY_KEY" property="dictionaryKey"/>
+    </resultMap>
+
+    <insert id="insertLoanInfoDictionary" parameterClass="LnLoanInfoDictionary">
+        INSERT INTO LN_LOAN_INFO_DICTIONARY
+        (
+          LOAN_INFO_DICTIONARY_ID,
+          DICTIONARY_NAME,
+          DICTIONARY_VALUE,
+          REMARK,
+          UPDATE_DATE,
+          DICTIONARY_KEY
+        )
+        VALUES
+        (
+        #loanInfoDictionaryId:INTEGER#,
+        #dictionaryName:VARCHAR:NULL#,
+        #dictionaryValue:VARCHAR:NULL#,
+        #remark:VARCHAR:NULL#,
+        current timestamp,
+        #dictionaryKey:VARCHAR:NULL#
+        )
+        <selectKey keyProperty="loanInfoDictionaryId" resultClass="java.lang.Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_LN_LOAN_INFO_DICTIONARY
+        </selectKey>
+    </insert>
+
+    <update id="updateLoanInfoDictionary" parameterClass="LnLoanInfoDictionary">
+        UPDATE LN_LOAN_INFO_DICTIONARY SET UPDATE_DATE = current timestamp
+        <isNotEmpty property="dictionaryName" prepend=",">
+            DICTIONARY_NAME= #dictionaryName#
+        </isNotEmpty>
+        <isNotEmpty property="dictionaryValue" prepend=",">
+            DICTIONARY_VALUE = #dictionaryVaule#
+        </isNotEmpty>
+        <isNotEmpty property="remark" prepend=",">
+            REMARK = #remark#
+        </isNotEmpty>
+        <isNotEmpty property="dictionaryKey" prepend=",">
+            DICTIONARY_KEY =#dictionaryKey#
+        </isNotEmpty>
+        WHERE
+        LOAN_INFO_DICTIONARY_ID = loanInfoDictionaryId
+    </update>
+
+    <select id="selectLoanInfoDictionaryList" parameterClass="java.util.Map" resultMap="LnLoanInfoDictionaryResult">
+        SELECT * FROM LN_LOAN_INFO_DICTIONARY WHERE 1=1
+        <isNotEmpty property="loanInfoDictionaryId" prepend="and">
+            LOAN_INFO_DICTIONARY_ID = #loanInfoDictionaryId#
+        </isNotEmpty>
+        <isNotEmpty property="dictionaryName" prepend="and">
+            DICTIONARY_NAME= #dictionaryName#
+        </isNotEmpty>
+        <isNotEmpty property="dictionaryValue" prepend="and">
+            DICTIONARY_VALUE = #dictionaryVaule#
+        </isNotEmpty>
+        <isNotEmpty property="remark" prepend="and">
+            REMARK = #remark#
+        </isNotEmpty>
+        <isNotEmpty property="dictionaryKey" prepend="and">
+            DICTIONARY_KEY =#dictionaryKey#
+        </isNotEmpty>
+    </select>
+    <select id="getDictionaryValue" parameterClass="java.util.Map" resultClass="java.lang.String">
+        select DICTIONARY_VALUE from LN_LOAN_INFO_DICTIONARY where 1=1
+        <isNotEmpty property="dictionaryName" prepend="and">
+            DICTIONARY_NAME= #dictionaryName#
+        </isNotEmpty>
+        <isNotEmpty property="dictionaryKey" prepend="and">
+            DICTIONARY_KEY =#dictionaryKey#
+        </isNotEmpty>
+    </select>
+    
+</sqlMap>

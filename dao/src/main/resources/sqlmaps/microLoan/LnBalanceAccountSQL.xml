@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnBalanceAccountSQL">
+
+    <typeAlias alias="LnBalanceAccount" type="com.banger.mobile.domain.model.loan.LnBalanceAccount"/>
+
+    <resultMap class="LnBalanceAccount" id="LnBalanceAccountResult">
+       	<result column="ID" property="id"/>
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+       	<result column="REMARK" property="remark"/>
+       	<result column="TYPE" property="type"/>
+       	<result column="AMOUNT" property="amount"/>
+
+       	<result column="ITEM_NAME" property="itemName"/>
+
+       	<result column="SETTLING_TYPE" property="settlingType"/>
+       	<result column="ACCOUNT_AGE" property="accountAge"/>
+       	<result column="BIZ_RENEW" property="bizRenew"/>
+       	<result column="PAY_METHOD" property="payMethod"/>
+
+    </resultMap>
+
+    <delete id="deleteBalanceAccount" parameterClass="Integer">
+         DELETE FROM LN_BALANCE_ACCOUNT WHERE ID = #ID#
+    </delete>
+
+    <insert id="insertBalanceAccount" parameterClass="LnBalanceAccount">
+        INSERT INTO LN_BALANCE_ACCOUNT
+         (
+         	ID,
+         	LOAN_ID,
+			ITEM_NAME,
+			AMOUNT,
+			REMARK,
+			TYPE,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE,
+			SETTLING_TYPE,
+			ACCOUNT_AGE,
+			BIZ_RENEW,
+			PAY_METHOD
+         )
+         VALUES
+         (
+			#id:INTEGER#,
+			#loanId:INTEGER#,
+			#itemName:VARCHAR#,
+			#amount:DECIMAL#,
+			#remark:VARCHAR#,
+			#type:VARCHAR#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#,
+
+			#settlingType:VARCHAR#,
+			#accountAge:VARCHAR#,
+			#bizRenew:VARCHAR#,
+			#payMethod:VARCHAR#
+
+         )
+		<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_BALANCE_ACCOUNT
+		</selectKey>
+
+	</insert>
+
+
+
+    <update id="updateBalanceAccount" parameterClass="LnBalanceAccount">
+        update LN_BALANCE_ACCOUNT SET ID=ID
+        <isNotEmpty property="loanId" prepend=",">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+		<isNotEmpty property="itemName" prepend=",">
+			ITEM_NAME = #itemName#
+		</isNotEmpty>
+		<isNotEmpty property="amount" prepend=",">
+			AMOUNT = #amount#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			REMARK = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="type" prepend=",">
+			TYPE = #type#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+
+		<isNotEmpty property="settlingType" prepend=",">
+			SETTLING_TYPE = #settlingType#
+		</isNotEmpty>
+		<isNotEmpty property="accountAge" prepend=",">
+			ACCOUNT_AGE = #accountAge#
+		</isNotEmpty>
+		<isNotEmpty property="bizRenew" prepend=",">
+			BIZ_RENEW = #bizRenew#
+		</isNotEmpty>
+		<isNotEmpty property="payMethod" prepend=",">
+			PAY_METHOD = #payMethod#
+		</isNotEmpty>
+        where ID=#id#
+    </update>
+
+
+
+    <select id="getLnBalanceAccountById" resultMap="LnBalanceAccountResult" parameterClass="java.lang.Integer">
+		select * from LN_BALANCE_ACCOUNT where ID=#id#
+    </select>
+
+	<select id="getLnBalanceAccountByLoanId" resultMap="LnBalanceAccountResult" parameterClass="java.util.Map">
+		select * from LN_BALANCE_ACCOUNT where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+	<select id="sumAccountByType" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		select sum(AMOUNT) from LN_BALANCE_ACCOUNT where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+</sqlMap>

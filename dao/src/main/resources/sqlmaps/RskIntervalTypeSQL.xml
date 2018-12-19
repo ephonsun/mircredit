@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskIntervalTypeSQL">
+	<typeAlias alias="RskIntervalType"
+		type="com.banger.mobile.domain.model.rskIntervalType.RskIntervalType" />
+
+	<!-- 投资偏好类型表-->
+	<!-- 信息全字段 -->
+	<resultMap class="RskIntervalType" id="RskIntervalTypeResult">
+		<result column="INTERVAL_TYPE_ID" property="typeId" />
+		<result column="INTERVAL_TYPE_NAME" property="typeName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVE" property="isActive" />
+	</resultMap>
+
+	<!-- 增加投资偏好类型-->
+	<insert id="insertRskIntervalType" parameterClass="RskIntervalType">
+		<![CDATA[
+		INSERT INTO RSK_INTERVAL_TYPE
+    	(
+        INTERVAL_TYPE_ID,
+        INTERVAL_TYPE_NAME,
+        SORTNO,
+        IS_DEL,
+        IS_ACTIVE
+    	)
+    	VALUES
+    	(
+        #typeId#,
+        #typeName#,
+        #sortNo#,
+	    #isDel#,
+	    1
+    	)
+      ]]>
+		<selectKey keyProperty="typeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_RSK_INTERVAL_TYPE
+		</selectKey>
+	</insert>
+
+
+	<!-- 投资类型修改-->
+	<update id="updRskIntervalType" parameterClass="RskIntervalType">
+		UPDATE 
+			RSK_INTERVAL_TYPE
+		SET 
+			IS_DEL = #isDel#,
+			INTERVAL_TYPE_NAME = #typeName#, 
+			SORTNO = #sortNo#
+		where
+			INTERVAL_TYPE_ID= #typeId#
+	</update>
+
+	<!-- 根据ID删除投资偏好类型 -->
+	<update id="deleteRskIntervalType" parameterClass="java.lang.Integer">
+		UPDATE 
+			RSK_INTERVAL_TYPE 
+		SET 
+			IS_DEL = 1
+		where
+		 	INTERVAL_TYPE_ID= #typeId#
+	</update>
+	
+	<!-- 根据id得到投资偏好类型 -->
+	<select id="getTypeById"	resultMap="RskIntervalTypeResult" 
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from RSK_INTERVAL_TYPE where INTERVAL_TYPE_ID=#Id#
+	]]>
+	</select>
+	
+
+	<!-- 获取投资偏好类型列表 -->
+	<select id="getAllRskIntervalType" resultMap="RskIntervalTypeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            RSK_INTERVAL_TYPE 
+        WHERE 
+        	IS_DEL = 0
+        Order by SORTNO ASC
+	]]>
+	</select>
+	<select id="getAllRskIntervalTypes" resultMap="RskIntervalTypeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            RSK_INTERVAL_TYPE 
+        WHERE 
+        	IS_DEL = 0 AND IS_ACTIVE=1
+        Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 获取现有客户类型数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoTye" resultMap="RskIntervalTypeResult">
+		<![CDATA[
+		select *  from 
+			RSK_INTERVAL_TYPE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取现有客户类型数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoTye" resultMap="RskIntervalTypeResult">
+		<![CDATA[
+		select *  from 
+			RSK_INTERVAL_TYPE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取要移动的客户类型对象 -->
+	<select id="getNeedToMoveType"	resultMap="RskIntervalTypeResult" 
+		parameterClass="java.util.Map">
+		select *  from RSK_INTERVAL_TYPE WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询相同名称的对象 -->
+	<select id="getRskIntervalTypeBySameName" resultMap="RskIntervalTypeResult"
+		parameterClass="RskIntervalType">
+		<![CDATA[
+		select * from RSK_INTERVAL_TYPE where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="typeId">
+     		<isNotEqual prepend="and" property="typeId" compareValue="0">
+			<![CDATA[INTERVAL_TYPE_ID != #typeId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="typeName">
+			<![CDATA[INTERVAL_TYPE_NAME = #typeName#]]>
+		</isNotEmpty>
+	
+	</select>
+	<!-- 修改状态-->
+	<update id="changeState" parameterClass="RskIntervalType">
+		<![CDATA[ 
+		UPDATE 
+			RSK_INTERVAL_TYPE 
+		SET 
+			IS_ACTIVE = #isActive#
+		where
+		 	INTERVAL_TYPE_ID= #typeId#
+		]]> 	
+	</update>
+</sqlMap>

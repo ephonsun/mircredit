@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="JfOrderPhotoSQL">
+	<typeAlias alias="JfOrderPhoto" type="com.banger.mobile.domain.model.points.JfOrderPhoto" />
+	<typeAlias alias="SysUploadFile" type="com.banger.mobile.domain.model.uploadFile.SysUploadFile" />
+
+    <resultMap id="BaseJfOrderPhotoResult" class="JfOrderPhoto">
+        <result property="orderPhotoId" column="ORDER_PHOTO_ID"/>
+        <result property="orderNo" column="ORDER_NO"/>
+        <result property="takeDate" column="TAKE_DATE"/>
+        <result property="fileId" column="FILE_ID"/>
+        <result property="userId" column="USER_ID"/>
+    </resultMap>
+
+    <resultMap id="SysUploadFilePartField" class="SysUploadFile">
+        <result column="UPLOAD_DATE" property="uploadDate" />
+        <result column="FILE_NAME" property="fileName" />
+        <result column="FILE_PATH" property="filePath" />
+        <result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="FILE_ID" property="fileId"/>
+    </resultMap>
+
+    <resultMap id="JfOrderPhotoResult" class="JfOrderPhoto" extends="BaseJfOrderPhotoResult">
+        <result property="sysUploadFile" resultMap="JfOrderPhotoSQL.SysUploadFilePartField" nullValue="null"/>
+    </resultMap>
+
+    <insert id="insertJfOrderPhoto" parameterClass="JfOrderPhoto">
+        INSERT INTO JF_ORDER_PHOTO
+        (
+        ORDER_PHOTO_ID,
+        ORDER_NO,
+        TAKE_DATE,
+        FILE_ID,
+        USER_ID
+        )
+        VALUES
+        (
+        #orderPhotoId:INTEGER#,
+        #orderNo:VARCHAR:NULL#,
+        #takeDate:TIMESTAMP#,
+        #fileId:INTEGER#,
+        #userId:INTEGER#
+        )
+        <selectKey keyProperty="orderPhotoId" type="pre" resultClass="java.lang.Integer">
+            values NEXTVAL for SEQ_JF_ORDER_PHOTO
+        </selectKey>
+    </insert>
+
+    <select id="getJfOrderPhotoListByOrderNo" parameterClass="java.util.Map" resultMap="JfOrderPhotoResult">
+        SELECT jop.*,suf.FILE_NAME,suf.FILE_PATH,suf.UPLOAD_DATE,suf.UPLOAD_USER_ID,suf.FILE_ID
+        FROM jf_order_photo jop
+        LEFT JOIN sys_upload_file suf ON jop.file_id=suf.file_id
+        WHERE jop.order_no=#orderNo#
+    </select>
+</sqlMap>

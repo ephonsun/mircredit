@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskTaskPurposeSQL">
+	<typeAlias alias="TskTaskPurpose"
+		type="com.banger.mobile.domain.model.tskTaskPurpose.TskTaskPurpose" />
+
+	<!-- 联系目的表-->
+	<!-- 信息全字段 -->
+	<resultMap class="TskTaskPurpose" id="TskTaskPurposeResult">
+		<result column="TASK_PURPOSE_ID" property="taskPurposeId" />
+		<result column="TASK_PURPOSE_NAME" property="taskPurposeName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="creatDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+	</resultMap>
+
+	<!-- 增加联系目的-->
+	<insert id="addTskTaskPurpose" parameterClass="TskTaskPurpose">
+		<![CDATA[
+		INSERT INTO TSK_TASK_PURPOSE
+    	(
+        TASK_PURPOSE_ID,
+        TASK_PURPOSE_NAME,
+        SORTNO,
+        IS_DEL,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE
+    	)
+    	VALUES
+    	(
+        #taskPurposeId#,
+        #taskPurposeName#,
+        #sortNo#,
+	    #isDel#,
+	    1,
+	    current timestamp,
+	    current timestamp
+    	)
+      ]]>
+		<selectKey keyProperty="taskPurposeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_TSK_TASK_PURPOSE
+		</selectKey>
+	</insert>
+
+
+	<!-- 联系目的修改-->
+	<update id="updateTskTaskPurpose" parameterClass="TskTaskPurpose">
+		UPDATE 
+			TSK_TASK_PURPOSE
+		SET 
+			IS_DEL = #isDel#,
+			TASK_PURPOSE_NAME = #taskPurposeName#, 
+			SORTNO = #sortNo#
+		where
+			TASK_PURPOSE_ID= #taskPurposeId#
+	</update>
+
+	<!-- 根据ID删除联系目的 -->
+	<update id="deleteTskTaskPose" parameterClass="java.lang.Integer">
+		UPDATE 
+			TSK_TASK_PURPOSE 
+		SET 
+			IS_DEL = 1
+		where
+		 	TASK_PURPOSE_ID= #taskPurposeId#
+	</update>
+	
+	<!-- 根据id得到联系目的 -->
+	<select id="getTskTaskPurposeById"	resultMap="TskTaskPurposeResult" 
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from TSK_TASK_PURPOSE where TASK_PURPOSE_ID=#id#
+	]]>
+	</select>
+	
+
+	<!-- 列表 -->
+	<select id="getAllTskTaskPurpose" resultMap="TskTaskPurposeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            TSK_TASK_PURPOSE 
+        WHERE 
+        	IS_DEL = 0
+        Order by SORTNO ASC
+	]]>
+	</select>
+	<!-- 列表 -->
+	<select id="getEnableTskTaskPurpose" resultMap="TskTaskPurposeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            TSK_TASK_PURPOSE 
+        WHERE 
+        	IS_DEL = 0 AND IS_ACTIVED = 1
+        Order by SORTNO ASC
+	]]>
+	</select>
+	<!--  
+	<select id="getAllRskIntervalTypes" resultMap="RskIntervalTypeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            RSK_INTERVAL_TYPE 
+        WHERE 
+        	IS_DEL = 0 AND IS_ACTIVED=1
+        Order by SORTNO ASC
+	]]>
+	</select>
+	-->
+
+	<!-- 获取按排序SORTNO最大的 -->
+	<select id="getMaxSortNoTskTaskPurpose" resultMap="TskTaskPurposeResult">
+		<![CDATA[
+		select *  from 
+			TSK_TASK_PURPOSE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO ASC FETCH FIRST 1 ROWS ONLY
+	]]>
+	</select>
+	
+	<!-- 获取按排序SORTNO最小的 -->
+	<select id="getMinSortNoTskTaskPurpose" resultMap="TskTaskPurposeResult">
+		<![CDATA[
+		select *  from 
+			TSK_TASK_PURPOSE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO DESC FETCH FIRST 1 ROWS ONLY
+	]]>
+	</select>
+	
+	<!-- 获取要移动的对象 -->
+	<select id="getNeedToMoveTskTaskPurpose"	resultMap="TskTaskPurposeResult" 
+		parameterClass="java.util.Map">
+		select *  from TSK_TASK_PURPOSE WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC FETCH FIRST 1 ROWS ONLY]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC FETCH FIRST 1 ROWS ONLY]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询相同名称的对象 -->
+	<select id="getTskTaskPurposeBySameName" resultMap="TskTaskPurposeResult"
+		parameterClass="TskTaskPurpose">
+		<![CDATA[
+		select * from TSK_TASK_PURPOSE where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="taskPurposeId">
+     		<isNotEqual prepend="and" property="taskPurposeId" compareValue="0">
+			<![CDATA[TASK_PURPOSE_ID != #taskPurposeId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskPurposeName">
+			<![CDATA[TASK_PURPOSE_NAME = #taskPurposeName#]]>
+		</isNotEmpty>
+	
+	</select>
+	<!-- 修改状态-->
+	<update id="changePState" parameterClass="TskTaskPurpose">
+		<![CDATA[ 
+		UPDATE 
+			TSK_TASK_PURPOSE 
+		SET 
+			IS_ACTIVED = #isActived#
+		where
+		 	TASK_PURPOSE_ID= #taskPurposeId#
+		]]> 	
+	</update>
+</sqlMap>

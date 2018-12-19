@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmTemplateSQL">
+	<typeAlias alias="CrmTemplate"
+		type="com.banger.mobile.domain.model.template.CrmTemplate" />
+
+	<resultMap class="CrmTemplate" id="CrmTemplateResult">
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="TEMPLATE_TYPE_ID" property="templateTypeId" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="REMARK" property="remark" />
+		<result column="SORTNO" property="sortno" />
+		<result column="IS_BASIC" property="isBasic" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<cacheModel id="CrmTemplate-Cache" type="OSCACHE" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="addCrmTemplate" />
+		<flushOnExecute statement="updateCrmTemplate" />
+		<flushOnExecute statement="deleteCrmTemplateById" />
+		<property name="size" value="500" />
+	</cacheModel>
+
+
+	<!-- 增加 -->
+	<insert id="addCrmTemplate" parameterClass="CrmTemplate">
+		<![CDATA[
+	 	INSERT INTO CRM_TEMPLATE
+		    (
+		        TEMPLATE_ID,
+		        IS_DEL,
+		        TEMPLATE_TYPE_ID,
+		        TEMPLATE_NAME,
+		        REMARK,
+		        SORTNO,
+		        IS_BASIC,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			select
+		    	#templateId#,
+		    	#isDel#,
+		    	#templateTypeId#,
+		    	#templateName#,
+		    	#remark#,
+		    	case when  max(sortno) is null then 1 else max(sortno)+1 end,
+		    	0,
+		    	current timestamp,
+		  		current timestamp,
+		    	#createUser#,
+		    	#updateUser#
+		     from CRM_TEMPLATE
+      ]]>
+		<selectKey keyProperty="templateId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_TEMPLATE
+		</selectKey>
+	</insert>
+
+
+	<!-- 修改-->
+	<update id="updateCrmTemplate" parameterClass="CrmTemplate">
+		<![CDATA[	
+		UPDATE
+		   CRM_TEMPLATE
+		SET 
+		    IS_DEL = #isDel#,
+		    TEMPLATE_TYPE_ID = #templateTypeId#,
+		    TEMPLATE_NAME = #templateName#,
+		    REMARK = #remark#,
+		    SORTNO = #sortno#,
+		    IS_BASIC = #isBasic#, 
+		    UPDATE_DATE =  current timestamp, 
+		    UPDATE_USER = #updateUser#  
+		WHERE 
+		  TEMPLATE_ID = #templateId#
+		  ]]>
+	</update>
+
+
+
+	<!-- 根据ID伪删除 -->
+	<update id="deleteCrmTemplateById" parameterClass="int">
+		<![CDATA[
+		update CRM_TEMPLATE set IS_DEL=1 where TEMPLATE_ID=#Id# 
+	]]>
+	</update>
+
+
+	<!-- 移动对象 -->
+	<select id="getNeedMoveCrmTemplate" resultMap="CrmTemplateResult"
+		parameterClass="java.util.Map">
+		select * from CRM_TEMPLATE WHERE IS_DEL = 0
+		<isNotEmpty prepend="and" property="templateTypeId">
+			<![CDATA[TEMPLATE_TYPE_ID = #templateTypeId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType"
+				compareValue="Up">
+				<![CDATA[ SORTNO<#sortno# Order by SORTNO desc fetch first 1 rows only]]>
+			</isEqual>
+			<isNotEqual prepend="and" property="moveType"
+				compareValue="Up">
+				<![CDATA[SORTNO>#sortno# Order by SORTNO asc fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+
+	<!-- 根据id得到信息 -->
+	<select id="getCrmTemplateById" resultMap="CrmTemplateResult"
+		parameterClass="int">
+		<![CDATA[
+		select * from CRM_TEMPLATE where TEMPLATE_ID=#Id# 
+	]]>
+	</select>
+
+	<!-- 判断是否存在相同名称的业务模板 -->
+	<select id="CheckCrmTemplateByName" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		select count(1) from CRM_TEMPLATE where IS_DEL=0 and TEMPLATE_NAME=#tempName# 
+	 ]]>
+		<isNotEmpty prepend="and" property="tempId">
+			<![CDATA[TEMPLATE_ID != #tempId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="templateTypeId">
+			<![CDATA[TEMPLATE_TYPE_ID = #templateTypeId#]]>
+		</isNotEmpty>
+	</select>
+
+	<!-- 分页count -->
+	<select id="getCrmTemplateCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+             select 
+                   count(*)
+             from 
+                  CRM_TEMPLATE  where IS_DEL=0
+     			<isNotEmpty prepend="and" property="templateTypeId">
+					<![CDATA[TEMPLATE_TYPE_ID = #templateTypeId#]]>
+				</isNotEmpty>
+	</select>
+
+	<!-- 用户分页 -->
+	<select id="getCrmTemplatefoParameterPageMap"
+		resultMap="CrmTemplateResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+			select * from CRM_TEMPLATE a where a.IS_DEL=0
+				<isNotEmpty prepend="and" property="templateTypeId">
+					<![CDATA[TEMPLATE_TYPE_ID = #templateTypeId#]]>
+				</isNotEmpty>
+			order by a.SORTNO asc           
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 获取所有客户模版列表 -->
+	<select id="getAllCrmTemplate" resultMap="CrmTemplateResult" cacheModel="CrmTemplate-Cache">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_TEMPLATE WHERE IS_DEL = 0 and TEMPLATE_TYPE_ID = 1
+             Order by SORTNO ASC
+	]]>
+	</select>
+	
+	<!-- 获取所有产品模版列表 -->
+	<select id="getAllPdtCrmTemplate" resultMap="CrmTemplateResult" cacheModel="CrmTemplate-Cache">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_TEMPLATE WHERE IS_DEL = 0 and TEMPLATE_TYPE_ID = 2
+             Order by SORTNO ASC
+	]]>
+	</select>
+
+</sqlMap>

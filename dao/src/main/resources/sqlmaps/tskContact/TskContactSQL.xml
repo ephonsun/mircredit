@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskContactSQL">
+	<typeAlias alias="BaseTskContact"
+		type="com.banger.mobile.domain.model.base.tskContact.BaseTskContact" />
+	<typeAlias alias="TskContact"
+		type="com.banger.mobile.domain.model.tskContact.TskContact" />
+	<typeAlias alias="CustomerAttrPlugin"
+		type="com.banger.mobile.domain.model.tskContact.CustomerAttrPlugin" />
+	<!-- 中信银行所有联系任务列表 -->
+	<typeAlias alias="TskTaskListBean"
+		type="com.banger.mobile.domain.model.tskContact.TskTaskListBean" />
+	<typeAlias alias="CustModelTaskDetail"
+		type="com.banger.mobile.domain.model.tskContact.CustModelTaskDetail" />
+
+	<!-- 任务表-->
+	<!-- BaseTskContact信息全字段 -->
+	<resultMap class="BaseTskContact" id="BaseTskContactResult">
+		<result column="CONTACT_ID" property="contactId" />
+		<result column="CONTACT_TITLE" property="contactTitle" />
+		<result column="CONTACT_PURPOSE" property="contactPurpose"/>
+		<result column="IS_EMERGENCY" property="isEmergency"/>
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="REMARK" property="remark" />		
+		<result column="ASSIGN_USER_ID" property="assignUserId" />
+		<result column="IS_NEXT_CONTACT" property="isNextContact" />
+		<result column="IS_SUSPEND" property="isSuspend" />		
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<resultMap class="TskContact" id="TskContactResult" extends="BaseTskContactResult">
+		<result column="ASSIGN_USER_NAME" property="assignUserName" />
+		<result column="CONTACT_PURPOSE_NAME" property="contactPurposeName"/>
+		<result column="HAS_FINISHED" property="hasFinished"/>
+		<result column="TOTAL" property="total"/>
+	</resultMap>
+	
+	<!-- TskContact所有任务列表 -->
+	<resultMap class="TskTaskListBean" id="TskTaskListBeanResult">
+		<result column="CONTACT_ID" property="contactId" />
+		<result column="CONTACT_TITLE" property="contactTitle" />
+		<result column="TASK_PURPOSE_NAME" property="taskPurpose"/>
+		<result column="START_DATE" property="startDate"/>
+		<result column="END_DATE" property="endDate" />
+		<result column="HASFINISHED" property="hasfinishedTask" />
+		<result column="TOTAL" property="totalTask" />		
+		<result column="USER_NAME" property="assignName" />
+		<result column="ASSIGN_USER_ID" property="assignId" />
+		<result column="IS_NEXT_CONTACT" property="isNextContact" />
+		<result column="IS_EMERGENCY" property="isEmergency" />
+		<result column="IS_SUSPEND" property="isSuspend"/>
+	</resultMap>
+	<resultMap class="CustModelTaskDetail" id="CustModelTaskDetailResult" extends="TskTaskListBeanResult">
+		<result column="REMARK" property="remark" />
+		<result column="PERCENT" property="percent" />
+	</resultMap>	
+	
+	<!-- 组织机构及用户树 -->
+	<resultMap class="CustomerAttrPlugin"
+		id="CustomerAttrPluginResult">
+		<result column="ID" property="id" />
+		<result column="PARENT_ID" property="parentId" />
+		<result column="TEXT_NAME" property="textName" />
+		<result column="TYPE" property="type" />
+		<result column="COUNTS" property="counts" />
+		<result column="FINISH_COUNT" property="finishCount" />
+		<result column="TASK_STATUS" property="taskStatus" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="IS_DEL" property="isDel" />
+	</resultMap>
+	
+	<!-- 所有联系任务count -->
+	<select id="getTaskContactPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(1) FROM(
+			
+			SELECT distinct tc.CONTACT_ID,tc.CONTACT_TITLE,tp.TASK_PURPOSE_NAME,tc.START_DATE,tc.END_DATE,
+				su.USER_NAME,tc.ASSIGN_USER_ID,tc.IS_NEXT_CONTACT,tc.IS_EMERGENCY,tc.IS_SUSPEND
+			FROM TSK_CONTACT tc
+			LEFT JOIN TSK_TASK_PURPOSE tp ON tc.CONTACT_PURPOSE = tp.TASK_PURPOSE_ID
+			LEFT JOIN SYS_USER su ON tc.ASSIGN_USER_ID = su.USER_ID
+			LEFT JOIN TSK_CONTACT_EXECUTE ce ON ce.CONTACT_ID = tc.CONTACT_ID
+			WHERE tc.IS_DEL = 0 
+			AND tc.CONTACT_ID in (select CONTACT_ID from (select ct.CONTACT_ID,count(0) as total from TSK_CONTACT_TARGET ct LEFT JOIN TSK_CONTACT_EXECUTE ce ON ct.EXECUTE_ID = ce.EXECUTE_ID LEFT JOIN TSK_CONTACT tc ON tc.CONTACT_ID = ct.CONTACT_ID where 1=1 
+			]]>
+			<isNotEmpty prepend="and" property="isCommon">
+				<isNotEmpty property="commonCharge">
+					(
+				</isNotEmpty>
+				<![CDATA[ ce.USER_ID in ($isCommon$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="OR" property="userIdList">
+				<![CDATA[ tc.ASSIGN_USER_ID in ($userIdList$) ]]>
+			</isNotEmpty>
+			<isNotEmpty property="commonCharge">
+					)
+			</isNotEmpty>
+			<![CDATA[
+			 group by ct.CONTACT_ID) where total >0)
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskName">
+				<![CDATA[tc.CONTACT_TITLE like '%$taskName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskPurpose">
+				<![CDATA[tc.CONTACT_PURPOSE =$taskPurpose$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="execUserids">
+				<![CDATA[tc.ASSIGN_USER_ID in ($execUserids$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskstatus">
+				<![CDATA[tc.IS_SUSPEND = 1]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="execution">
+				<![CDATA[
+					CURRENT DATE>=tc.START_DATE AND CURRENT DATE<=tc.END_DATE AND tc.IS_SUSPEND = 0
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="noStart">
+				<![CDATA[
+					tc.START_DATE>CURRENT DATE 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="finishTask">
+				<![CDATA[
+					tc.END_DATE<CURRENT DATE AND tc.IS_SUSPEND = 0
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		)
+	</select>
+	<!-- 所有联系任务 -->
+	<select id="getTaskContactPageMap" resultMap="TskTaskListBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT distinct tc.CONTACT_ID,tc.CONTACT_TITLE,tp.TASK_PURPOSE_NAME,tc.START_DATE,tc.END_DATE,
+			    (SELECT COUNT(1) FROM TSK_CONTACT_TARGET t WHERE t.IS_FINISH = 1 AND t.EXECUTE_ID IN(SELECT EXECUTE_ID FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID = tc.CONTACT_ID 
+			    ]]>
+			    <isNotEmpty prepend="and" property="isCommon">
+					<![CDATA[ USER_ID in ($isCommon$) ]]>
+				</isNotEmpty>
+				<![CDATA[
+			    )) as HASFINISHED,     
+				(SELECT COUNT(1) FROM TSK_CONTACT_TARGET t WHERE t.EXECUTE_ID IN(SELECT EXECUTE_ID FROM TSK_CONTACT_EXECUTE WHERE CONTACT_ID = tc.CONTACT_ID
+				 ]]>
+			    <isNotEmpty prepend="and" property="isCommon">
+					<![CDATA[ USER_ID in ($isCommon$) ]]>
+				</isNotEmpty>
+				<![CDATA[
+				))  as TOTAL,  
+			    su.USER_NAME,tc.ASSIGN_USER_ID,tc.IS_NEXT_CONTACT,tc.IS_EMERGENCY,tc.IS_SUSPEND
+			FROM TSK_CONTACT tc
+			LEFT JOIN TSK_TASK_PURPOSE tp ON tc.CONTACT_PURPOSE = tp.TASK_PURPOSE_ID
+			LEFT JOIN SYS_USER su ON tc.ASSIGN_USER_ID = su.USER_ID
+			LEFT JOIN TSK_CONTACT_EXECUTE ce ON ce.CONTACT_ID = tc.CONTACT_ID
+			WHERE tc.IS_DEL = 0 
+			AND tc.CONTACT_ID in (select CONTACT_ID from (select ct.CONTACT_ID,count(0) as total from TSK_CONTACT_TARGET ct LEFT JOIN TSK_CONTACT_EXECUTE ce ON ct.EXECUTE_ID = ce.EXECUTE_ID LEFT JOIN TSK_CONTACT tc ON tc.CONTACT_ID = ct.CONTACT_ID where 1=1 
+			]]>
+			<isNotEmpty prepend="and" property="isCommon">
+				<isNotEmpty property="commonCharge">
+					(
+				</isNotEmpty>
+				<![CDATA[ ce.USER_ID in ($isCommon$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="OR" property="userIdList">
+				<![CDATA[ tc.ASSIGN_USER_ID in ($userIdList$) ]]>
+			</isNotEmpty>
+			<isNotEmpty property="commonCharge">
+					)
+			</isNotEmpty>
+			<![CDATA[
+			 group by ct.CONTACT_ID) where total >0)
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskName">
+				<![CDATA[tc.CONTACT_TITLE like '%$taskName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskPurpose">
+				<![CDATA[tc.CONTACT_PURPOSE =$taskPurpose$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="execUserids">
+				<![CDATA[tc.ASSIGN_USER_ID in ($execUserids$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskstatus">
+				<![CDATA[tc.IS_SUSPEND = 1]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="execution">
+				<![CDATA[
+					CURRENT DATE>=tc.START_DATE AND CURRENT DATE<=tc.END_DATE AND tc.IS_SUSPEND = 0
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="noStart">
+				<![CDATA[
+					tc.START_DATE>CURRENT DATE 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="finishTask">
+				<![CDATA[
+					tc.END_DATE<CURRENT DATE AND tc.IS_SUSPEND = 0
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by 
+	    	<isPropertyAvailable property="executeRun">
+	    		tc.IS_EMERGENCY desc,
+	    	</isPropertyAvailable>
+	    	tc.END_DATE asc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+		<!-- 任务所对应的联系量 -->
+	<select id="getTaskConnactCount" resultClass="java.lang.Integer" parameterClass="java.util.Map" >
+		select count(1) from TSK_CONTACT_TARGET a 
+		LEFT JOIN TSK_CONTACT b ON a.CONTACT_ID = b.CONTACT_ID 
+		LEFT JOIN TSK_CONTACT_EXECUTE c ON a.EXECUTE_ID = c.EXECUTE_ID
+		WHERE a.CONTACT_ID = #taskId# 
+		<isNotEmpty prepend="and" property="userId">
+			 c.USER_ID = #userId#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="isFinish">
+			  a.IS_FINISH=1
+		</isNotEmpty>
+	</select>
+	
+	<insert id="insertTskContact" parameterClass="TskContact">
+		<![CDATA[INSERT INTO TSK_CONTACT
+			    (
+			        CONTACT_ID,
+			        CONTACT_TITLE,
+			        CONTACT_PURPOSE,
+			        IS_EMERGENCY,
+			        START_DATE,
+			        END_DATE,
+			        REMARK,
+			        ASSIGN_USER_ID,
+			        IS_NEXT_CONTACT,
+			        IS_SUSPEND,
+			        IS_DEL,
+			        CREATE_DATE,
+			        CREATE_USER
+			    )
+			    VALUES
+			    (
+			        #contactId#,
+			        #contactTitle#,
+			        #contactPurpose#,
+			        #isEmergency#,
+			        #startDate#,
+			        #endDate#,
+			        #remark#,
+			        #assignUserId#,
+			        #isNextContact#,
+			        0,
+			        #isDel#,
+			        #createDate#,
+			        #createUser#
+			    )
+	    ]]>
+	   	<selectKey keyProperty="contactId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_CONTACT
+		</selectKey>
+	</insert>
+	
+	<!-- 编辑联系任务 -->
+	<update id="UpdateTskContact" parameterClass="TskContact">
+		<![CDATA[
+			UPDATE TSK_CONTACT SET 
+				CONTACT_TITLE=#contactTitle#,
+				CONTACT_PURPOSE=#contactPurpose#,
+				IS_EMERGENCY=#isEmergency#,
+				START_DATE=#startDate#,
+				END_DATE=#endDate#,
+				REMARK=#remark#,				
+				UPDATE_DATE=#updateDate#,
+				UPDATE_USER=#updateUser#
+			WHERE CONTACT_ID=#contactId#
+		]]>
+	</update>
+	
+	
+	<!-- 根据任务ID查询任务信息 -->
+	<select id="GetTskContactById" parameterClass="java.util.Map"
+		resultMap="TskContactResult">
+		<![CDATA[
+			SELECT t.*,
+				CASE WHEN p.TASK_PURPOSE_NAME IS NULL THEN '' ELSE p.TASK_PURPOSE_NAME END AS CONTACT_PURPOSE_NAME,
+				u.USER_NAME AS ASSIGN_USER_NAME,
+				(select count(1) 
+					from (SELECT t.contact_id,case when e.user_id is null then 0 else e.user_id end as user_id
+					        FROM TSK_CONTACT_TARGET t 
+					        left join tsk_contact_execute as e on e.execute_id = t.execute_id WHERE t.is_finish = 1 
+				     	)as a
+				   	where a.contact_id = #contactId# and a.user_id  in ($userIds$)
+				) as HAS_FINISHED,
+				(select count(1) 
+					from (SELECT t.contact_id,case when e.user_id is null then 0 else e.user_id end as user_id
+				            FROM TSK_CONTACT_TARGET t 
+				            left join tsk_contact_execute as e on e.execute_id = t.execute_id
+				         )as a
+				   	where a.contact_id = #contactId# and a.user_id  in ($userIds$)
+				) as TOTAL
+			FROM TSK_CONTACT AS t
+			LEFT JOIN SYS_USER AS u ON u.USER_ID = t.ASSIGN_USER_ID
+			LEFT JOIN TSK_TASK_PURPOSE AS p ON P.TASK_PURPOSE_ID = t.CONTACT_PURPOSE
+			WHERE t.CONTACT_ID = #contactId#]]> 
+			<isPropertyAvailable property="isDel">
+				<![CDATA[AND t.IS_DEL=1 ]]>
+			</isPropertyAvailable>
+			<isNotPropertyAvailable property="isDel">
+				<![CDATA[AND t.IS_DEL=0 ]]>
+			</isNotPropertyAvailable>
+	</select>
+	
+	<!-- 删除任务 -->
+	<update id="DeleteTskContact" parameterClass="java.lang.Integer">
+		<![CDATA[
+			UPDATE TSK_CONTACT SET IS_DEL=1 WHERE CONTACT_ID=#contactId#
+		]]>
+	</update>
+	
+		
+	<!-- 彻底删除任务 -->
+	<delete id="DeleteTskContactComplete" parameterClass="java.lang.Integer">
+		<![CDATA[
+			DELETE TSK_CONTACT WHERE CONTACT_ID=#contactId#
+		]]>
+	</delete>
+	
+	<!-- 确认新建任务 -->
+	<update id="confirmAddTask" parameterClass="java.lang.Integer">
+		<![CDATA[
+			UPDATE TSK_CONTACT SET IS_DEL = 0 WHERE CONTACT_ID=#contactId#
+		]]>
+	</update>
+	
+	<!-- 中止/重启联系任务 -->
+	<update id="suspendTskContact" parameterClass="TskContact">
+		<![CDATA[
+			UPDATE TSK_CONTACT SET 
+				IS_SUSPEND=#isSuspend#,
+				UPDATE_DATE=#updateDate#,
+				UPDATE_USER=#updateUser#
+			WHERE CONTACT_ID=#contactId#
+		]]>
+	</update>
+	
+	<!-- 查询指定的任务量 -->
+	<select id="GetTaskContactCount" parameterClass="java.util.Map"
+		resultClass="java.lang.Integer">
+		<![CDATA[
+			select count(distinct t.contact_id) from TSK_CONTACT as t 
+			inner join TSK_CONTACT_EXECUTE as e on e.CONTACT_ID = t.CONTACT_ID
+			where t.is_suspend=0 and t.is_del =0 and e.user_id in($userIds$)
+		]]>
+		<dynamic prepend="">
+			<isEqual prepend="" property="type" compareValue="execution">
+				<![CDATA[ and t.START_DATE <= CURRENT DATE AND t.END_DATE >= CURRENT DATE]]>
+			</isEqual>
+			<isEqual prepend="" property="type" compareValue="expired">
+				<![CDATA[ and t.END_DATE<= CURRENT DATE]]>
+			</isEqual>
+		</dynamic>		
+	</select>
+
+	<!-- 联系计划选择客户 任务树 -->
+	<select id="getPlanCustTaskTree" resultMap="BaseTskContactResult" parameterClass="java.util.Map">
+		<![CDATA[
+			select 
+			     distinct t.CONTACT_ID,t.CONTACT_TITLE,t.CONTACT_PURPOSE,t.IS_EMERGENCY,t.START_DATE,t.END_DATE,t.REMARK,     
+    			 t.ASSIGN_USER_ID,t.IS_NEXT_CONTACT,t.IS_SUSPEND,t.IS_DEL,t.CREATE_DATE,t.UPDATE_DATE,t.CREATE_USER,t.UPDATE_USER
+			from 
+			    TSK_CONTACT t
+			left join TSK_CONTACT_EXECUTE a on t.CONTACT_ID = a.CONTACT_ID
+			where 
+			    t.IS_SUSPEND=0 and t.IS_DEL=0
+			    and to_char(t.START_DATE,'yyyy-MM-dd') <= '$planDate$'
+    			and to_char(t.END_DATE,'yyyy-MM-dd') >= '$planDate$'
+			    and  (t.ASSIGN_USER_ID=$userId$ or a.USER_ID=$userId$)
+			    and t.CONTACT_ID in (
+					    	            select CONTACT_ID from (
+							                select g.CONTACT_ID,count(0) as total from TSK_CONTACT_TARGET g
+							                left join TSK_CONTACT_EXECUTE b on g.EXECUTE_ID = b.EXECUTE_ID
+							                where g.IS_FINISH=0 and b.USER_ID=$userId$ 
+							                group by g.CONTACT_ID
+							         ) where total >0
+				)
+		]]>
+	</select>
+	
+	<!-- 关联任务 -->
+	<select id="getCusRelatedTskContact" parameterClass="java.util.Map" resultMap="TskTaskListBeanResult">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select * from
+				(select t.customer_id,c.contact_id,c.contact_title,p.TASK_PURPOSE_NAME,c.IS_SUSPEND,
+					c.start_date,c.end_date,u.user_name,c.assign_user_id,c.IS_NEXT_CONTACT,c.IS_EMERGENCY,
+					case when e.user_id is null then 0 else  e.user_id end as user_id,
+					(select count(1) 
+						from (SELECT t.contact_id,case when e.user_id is null then 0 else e.user_id end as user_id
+						        FROM TSK_CONTACT_TARGET t 
+						        left join tsk_contact_execute as e on e.execute_id = t.execute_id WHERE t.is_finish = 1 
+					     	)as a
+					   	where a.contact_id = c.contact_id and a.user_id  in ($userIds$)
+					) as HASFINISHED,
+					(select count(1) 
+						from (SELECT t.contact_id,case when e.user_id is null then 0 else e.user_id end as user_id
+					            FROM TSK_CONTACT_TARGET t 
+					            left join tsk_contact_execute as e on e.execute_id = t.execute_id
+					         )as a
+					   	where a.contact_id = c.contact_id and a.user_id  in ($userIds$)
+					) as TOTAL
+				from tsk_contact_target as t 
+				left join tsk_contact_execute as e on e.execute_id = t.execute_id
+				left join tsk_contact as c on c.contact_id = t.contact_id 
+				and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+				and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+				and c.is_next_contact =0 and c.is_del = 0 and c.is_suspend=0
+				left join TSK_TASK_PURPOSE as p on p.TASK_PURPOSE_ID = c.contact_purpose
+				left join sys_user as u on u.user_id = c.assign_user_id
+				where t.customer_id = #customerId#
+				) as tc 
+			where tc.contact_id is not null
+		]]>
+		<isNotEmpty property="executeId">
+			<![CDATA[ and tc.user_id = #executeId# ]]>
+		</isNotEmpty>
+		<![CDATA[  
+			order by tc.IS_EMERGENCY desc, tc.END_DATE ]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<select id="getCusRelatedTskContactCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 
+		select count(1) from
+		    (select c.contact_id,case when e.user_id is null then 0 else  e.user_id end as user_id
+				from tsk_contact_target as t 
+				left join tsk_contact_execute as e on e.execute_id = t.execute_id
+				left join tsk_contact as c on c.contact_id = t.contact_id 
+				and to_char(c.START_DATE,'yyyy-MM-dd') <= current date 
+				and to_char(c.END_DATE,'yyyy-MM-dd') >= current date
+				and c.is_next_contact =0 and c.is_del = 0 and c.is_suspend=0
+				where t.customer_id =#customerId#
+			) as tc
+		where tc.contact_id is not null and tc.user_id in ($userIds$)
+		]]>
+		<isNotEmpty property="executeId">
+			<![CDATA[ and tc.user_id = #executeId# ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 客户管理查看任务列表 -->
+	<select id="getTaskListForCustomerModel" parameterClass="java.util.Map" resultMap="CustModelTaskDetailResult">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (select k.* from (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[ 
+			select 
+			     (select count(0) from TSK_CONTACT_TARGET where IS_FINISH=1 and CONTACT_ID=t.CONTACT_ID) as HASFINISHED,
+			     (select count(0) from TSK_CONTACT_TARGET where CONTACT_ID=t.CONTACT_ID) as TOTAL,
+			     ((select count(0) from TSK_CONTACT_TARGET where IS_FINISH=1 and CONTACT_ID=t.CONTACT_ID)*1.0/
+			     	(select count(0) from TSK_CONTACT_TARGET where CONTACT_ID=t.CONTACT_ID)*100) as PERCENT,
+			     u.USER_NAME,p.TASK_PURPOSE_NAME,
+			     t.CONTACT_ID,t.IS_SUSPEND,t.CONTACT_TITLE,t.START_DATE,t.END_DATE,t.ASSIGN_USER_ID,t.IS_NEXT_CONTACT,t.IS_EMERGENCY,t.REMARK
+			from 
+			    TSK_CONTACT_TARGET a
+			left join TSK_CONTACT t on t.CONTACT_ID=a.CONTACT_ID
+			left join TSK_TASK_PURPOSE p on t.CONTACT_PURPOSE = p.TASK_PURPOSE_ID
+			left join SYS_USER u on u.USER_ID = t.ASSIGN_USER_ID
+			where 
+			    a.CUSTOMER_ID=$customerId$ and t.IS_DEL=0
+			order by t.IS_EMERGENCY desc,t.END_DATE
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) k where k.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$ ]]>
+			</isNotEmpty>
+		</isNotEmpty>	
+	</select>
+	<!-- 客户管理查看任务分页 -->
+	<select id="getTaskCountForCustomerModel" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			select 
+			    count(0)
+			from 
+			    TSK_CONTACT_TARGET a
+			left join TSK_CONTACT t on t.CONTACT_ID=a.CONTACT_ID
+			left join TSK_TASK_PURPOSE p on t.CONTACT_PURPOSE = p.TASK_PURPOSE_ID
+			left join SYS_USER u on u.USER_ID = t.ASSIGN_USER_ID
+			where 
+			    a.CUSTOMER_ID=$customerId$ and t.IS_DEL=0
+		]]>
+	</select>
+	
+	<!-- 查询组织机构以及用户树 -->
+	<select id="GetCustomerAttrPluginList"
+		resultMap="CustomerAttrPluginResult" parameterClass="java.util.Map">
+		<![CDATA[
+			with deptUsertree (ID,PARENT_ID,TEXT_NAME,TYPE,COUNTS,FINISH_COUNT,TASK_STATUS,IS_ACTIVED) as 
+			(
+			    select ID,PARENT_ID,TEXT_NAME,TYPE,COUNTS,FINISH_COUNT,0 AS TASK_STATUS,IS_ACTIVED from 
+	    ]]>
+		<isNotEmpty property="taskAdd">
+			<![CDATA[
+			    (SELECT * FROM TASK_ADD_DEPTUSER_VIEW ) 
+	    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="taskId">
+			<![CDATA[
+		    	(select *from table(getTreeUserCount_Fun($taskId$)) as t) 
+		    ]]>
+		</isNotEmpty>
+		<![CDATA[
+			    as DD  
+			    where DD.ID in($deptId$) or DD.ID=$myUserId$
+			    union all 
+			    select  child.ID,child.PARENT_ID,child.TEXT_NAME,child.TYPE,child.COUNTS,child.FINISH_COUNT,0 AS TASK_STATUS,child.IS_ACTIVED from deptUsertree parent, 
+	    ]]>
+		<isNotEmpty property="taskAdd">
+			<![CDATA[
+			    (SELECT * FROM TASK_ADD_DEPTUSER_VIEW ) 
+	    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="taskId">
+			<![CDATA[
+				    (select *from table(getTreeUserCount_Fun($taskId$)) as t) 
+		    ]]>
+		</isNotEmpty>
+		<![CDATA[
+			    as child where parent.ID=child.PARENT_ID
+			)
+			select distinct deptUsertree.*,users.IS_DEL from deptUsertree   
+			left join SYS_USER AS users ON users.USER_ID=ID  
+		]]>
+		<isNotEmpty property="deptUserIds">
+			<![CDATA[
+	    		where ID IN($deptUserIds$) or (ID in(select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+    				where b.ROLE_ID = 4))
+	    	]]>
+		</isNotEmpty>
+		<![CDATA[
+			order by TYPE asc
+		]]>
+	</select>
+	
+	<!-- 编辑拜访记录查询下次联系任务 -->
+	<select id="getNextTaskForRecord" parameterClass="java.util.Map" resultMap="TskContactResult">
+	 	<![CDATA[
+			select * from (
+			    SELECT t.*,
+			            CASE WHEN p.TASK_PURPOSE_NAME IS NULL THEN '' ELSE p.TASK_PURPOSE_NAME END AS CONTACT_PURPOSE_NAME,
+			            '' AS ASSIGN_USER_NAME,
+			            0 as HAS_FINISHED,
+			            0 as TOTAL
+			    FROM TSK_CONTACT AS t
+			    LEFT JOIN TSK_TASK_PURPOSE AS p ON P.TASK_PURPOSE_ID = t.CONTACT_PURPOSE
+			    LEFT JOIN TSK_CONTACT_TARGET c on c.CONTACT_ID=t.CONTACT_ID
+			    LEFT JOIN TSK_CONTACT_EXECUTE e ON e.EXECUTE_ID =c.EXECUTE_ID
+			    WHERE t.IS_DEL=0 and t.IS_NEXT_CONTACT=1  and e.USER_ID=#userId# and c.CUSTOMER_ID=#customerId# and t.END_DATE>= current date
+			) where 1=1 order by START_DATE DESC,END_DATE DESC,CREATE_DATE DESC FETCH FIRST 1 ROWS ONLY
+		]]> 
+	</select>
+</sqlMap>

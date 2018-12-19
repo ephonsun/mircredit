@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MapUserGpsSQL">
+	<typeAlias alias="MapUserGps" type="com.banger.mobile.domain.model.map.MapUserGps" />
+
+	<!-- 用户地理位置表-->
+	<!-- MapUserGpsSQL全字段 -->
+	<resultMap class="MapUserGps" id="MapUserGpsResult">
+		<result column="USER_GPS_ID" property="userGpsId" />
+		<result column="USER_ID" property="userId" />
+		<result column="GPS_LNG" property="gpsLng" />
+		<result column="GPS_LAT" property="gpsLat" />
+		<result column="REMARK" property="remark" />
+		<result column="UPDATE_DATE" property="updateDate" />
+        <result column="ACCOUNT"  property="account"></result>
+        <result column="USER_NAME" property="userName"></result>
+	</resultMap>
+
+    <!--新增用户GPS位置-->
+    <insert id="addMapUserGps" parameterClass="MapUserGps">
+        <![CDATA[
+		insert into MAP_USER_GPS
+		(
+		 USER_GPS_ID,
+		 USER_ID,
+		 GPS_LNG,
+		 GPS_LAT,
+		 REMARK,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#userGpsId#,
+        #userId#,
+        #gpsLng#,
+        #gpsLat#,
+	    #remark#,
+	    current timestamp
+		)
+      ]]>
+        <selectKey keyProperty="userGpsId" resultClass="java.lang.Integer"
+                   type="pre">
+            values NEXTVAL for SEQ_MAP_USER_GPS
+        </selectKey>
+    </insert>
+
+    <!-- 用户GPS记录修改-->
+    <update id="updateMapUserGps" parameterClass="MapUserGps">
+        <![CDATA[
+             update MAP_USER_GPS  set
+		 ]]>
+        <isNotEmpty property="gpsLng">
+            GPS_LNG=#gpsLng#,
+        </isNotEmpty>
+        <isNotEmpty property="gpsLat">
+            GPS_LAT=#gpsLat#,
+        </isNotEmpty>
+        <![CDATA[
+				UPDATE_DATE=current timestamp
+			where USER_ID=#userId#
+         ]]>
+    </update>
+
+    <!-- 用户GPS位置，根据用户名和编号查询 -->
+	<select id="getUserGpsByCondition" resultMap="MapUserGpsResult"  parameterClass="java.util.Map">
+		<![CDATA[
+			select a.USER_GPS_ID , a.USER_ID ,a.GPS_LNG ,a.GPS_LAT,a.REMARK,a.UPDATE_DATE,b.USER_NAME,b.ACCOUNT
+			from  MAP_USER_GPS  as a
+			left join  SYS_USER as b  on a.USER_ID=b.USER_ID
+			where  b.IS_DEL = 0
+		]]>
+        <isNotEmpty prepend="and" property="userName">
+            <![CDATA[(b.USER_NAME like '%$userName$%' or b.USER_CODE like '%$userName$%')]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userId">
+            <![CDATA[a.USER_ID = #userId#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from MAP_USER_GPS where USER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from MAP_USER_GPS where USER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[ a.USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id  in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+	</select>
+
+    <!-- 用户GPS位置，根据西南，东北查询 -->
+    <select id="initUserGps" resultMap="MapUserGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			select a.USER_GPS_ID , a.USER_ID ,a.GPS_LNG ,a.GPS_LAT,a.REMARK,a.UPDATE_DATE,b.USER_NAME,b.ACCOUNT
+			from  MAP_USER_GPS  as a
+			left join  SYS_USER as b  on a.USER_ID=b.USER_ID
+			where  b.IS_DEL = 0
+			and a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+            and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$'
+		]]>
+        <isNotEmpty  prepend="and" property="inChargeUserIds">
+            <![CDATA[ b.USER_ID in ($inChargeUserIds$) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userName">
+            <![CDATA[(b.USER_NAME like '%$userName$%' or b.USER_CODE like '%$userName$%')]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 用户GPS位置，根据坐标查询 -->
+    <select id="getUserListCount" resultClass="java.lang.Integer"  parameterClass="java.util.Map">
+        <![CDATA[
+			select count(*)
+			from  MAP_USER_GPS  as a
+			left join  SYS_USER as b  on a.USER_ID=b.USER_ID
+			where  b.IS_DEL = 0
+		]]>
+        <isNotEmpty prepend="and" property="userName">
+            <![CDATA[(b.USER_NAME like '%$userName$%' or b.USER_CODE like '%$userName$%')]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from MAP_USER_GPS where USER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from MAP_USER_GPS where USER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[  a.USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userId">
+            <![CDATA[a.USER_ID = #userId#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 用户GPS位置，根据坐标查询 -->
+    <select id="getUserList" resultMap="MapUserGpsResult"  parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <![CDATA[
+			select a.USER_GPS_ID , a.USER_ID ,a.GPS_LNG ,a.GPS_LAT,a.REMARK,a.UPDATE_DATE,b.USER_NAME,b.ACCOUNT
+			from  MAP_USER_GPS  as a
+			left join  SYS_USER as b  on a.USER_ID=b.USER_ID
+			where  b.IS_DEL = 0
+		]]>
+        <isNotEmpty prepend="and" property="userName">
+            <![CDATA[(b.USER_NAME like '%$userName$%' or b.USER_CODE like '%$userName$%')]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LNG=(select GPS_LNG from MAP_USER_GPS where USER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ a.GPS_LAT=(select GPS_LAT from MAP_USER_GPS where USER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[  a.USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userId">
+            <![CDATA[a.USER_ID = #userId#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  a.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and a.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+
+    <!-- 用户GPS位置，根据ID查询 -->
+    <select id="getUserGpsById" resultMap="MapUserGpsResult"  parameterClass="java.lang.Integer">
+        <![CDATA[
+			select a.USER_GPS_ID , a.USER_ID ,a.GPS_LNG ,a.GPS_LAT,a.REMARK,a.UPDATE_DATE,b.USER_NAME,b.ACCOUNT
+			from  MAP_USER_GPS  as a
+			left join  SYS_USER as b  on a.USER_ID=b.USER_ID
+			where  b.IS_DEL = 0  and a.USER_GPS_ID=#id#
+		]]>
+    </select>
+
+
+</sqlMap>

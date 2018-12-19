@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtProductCustomerSQL">
+	<typeAlias alias="PdtProductCustomer"
+		type="com.banger.mobile.domain.model.microProduct.PdtProductCustomer" />
+		
+	<typeAlias alias="PdtProductCustomerBean"
+		type="com.banger.mobile.domain.model.microProduct.PdtProductCustomerBean" />
+
+	<!-- 产品意向客户SQL-->
+	<resultMap class="PdtProductCustomer" id="PdtProductCustomerResult">
+		<result column="PRODUCT_CUSTOMER_ID" property="productCustomerId" />
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="REMARK" property="remark" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="PdtProductCustomerBean" id="PdtProductCustomerBeanResult" extends="PdtProductCustomerResult">
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+        <result column="EMAIL" property="email" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BELONG_USER_NAME" property="belongUserName" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="ADDRESS" property="address" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="PRODUCT_NAME" property="productName" />
+        <result column="IS_NOGOOD" property="isNoGood" />
+	</resultMap>
+	
+	<resultMap class="PdtProductCustomerBean" id="CustomerBeanResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="ADDRESS" property="address" />
+		<result column="ID_CARD" property="idCard" />
+	</resultMap>
+	
+	<!-- 增加 -->
+	<insert id="addPdtProductCustomer" parameterClass="PdtProductCustomer">
+		<![CDATA[
+	 	INSERT INTO PDT_MICRO_PRODUCT_CUSTOMER
+		    (
+		        PRODUCT_CUSTOMER_ID,
+		        PRODUCT_ID,
+		        CUSTOMER_ID,
+		        REMARK,
+		        USER_ID,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #productCustomerId#,
+		        #productId:INTEGER#,
+		        #customerId#,
+		        #remark:VARCHAR:NULL#,
+		        #userId#,
+				0,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+		    )
+      ]]>
+		<selectKey keyProperty="productCustomerId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_MICRO_PRODUCT_CUSTOMER
+		</selectKey>
+	</insert>
+	
+	<!-- 修改-->
+	<update id="editPdtProductCustomer" parameterClass="PdtProductCustomer">
+		<![CDATA[	
+		UPDATE
+		   PDT_MICRO_PRODUCT_CUSTOMER
+		SET 
+		    PRODUCT_CUSTOMER_ID = #productCustomerId#,
+	        PRODUCT_ID = #productId#,
+	        CUSTOMER_ID = #customerId#,
+	        REMARK = #remark#,
+	        USER_ID = #userId#,
+	        IS_DEL = #isDel#,
+		    UPDATE_DATE =  current timestamp, 
+		    UPDATE_USER = #updateUser#  
+		WHERE 
+		  PRODUCT_CUSTOMER_ID = #productCustomerId#
+		  ]]>
+	</update>
+	
+	<!-- 根据ID伪删除 -->
+	<update id="delPdtProductCustomerById" parameterClass="int">
+		<![CDATA[
+		UPDATE PDT_MICRO_PRODUCT_CUSTOMER SET IS_DEL=1 WHERE PRODUCT_CUSTOMER_ID = #productCustomerId#
+	]]>
+	</update>
+	
+	<!-- 查询单个产品意向客户数据 -->
+	<select id="getPdtProductCustomerById" resultMap="PdtProductCustomerResult" parameterClass="int">
+		SELECT * FROM PDT_MICRO_PRODUCT_CUSTOMER WHERE PRODUCT_CUSTOMER_ID = #productCustomerId#
+	</select>
+	
+	<!-- 查询所有产品意向客户数据 -->
+	<select id="getAllPdtProductCustomerByConds" resultMap="PdtProductCustomerResult" parameterClass="java.util.Map">
+		SELECT * FROM PDT_MICRO_PRODUCT_CUSTOMER WHERE IS_DEL = 0
+		<isNotEmpty prepend="and" property="productCustomerId">
+			<![CDATA[PRODUCT_CUSTOMER_ID = #productCustomerId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productId">
+			<![CDATA[PRODUCT_ID = #productId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerId">
+			<![CDATA[CUSTOMER_ID = #customerId#]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询所有意向客户数据 -->
+	<select id="getAllCustomerBeanByConds" resultMap="CustomerBeanResult" parameterClass="java.util.Map">
+		SELECT b.CUSTOMER_ID,b.CUSTOMER_NO,b.CUSTOMER_NAME,b.CUSTOMER_TITLE,b.SEX,b.AGE,b.DEFAULT_PHONE_TYPE,
+        b.MOBILE_PHONE1,b.MOBILE_PHONE2,b.PHONE,b.FAX,b.BELONG_DEPT_ID,b.BELONG_USER_ID,b.ADDRESS,b.ID_CARD
+        FROM CRM_CUSTOMER b
+		WHERE b.IS_DEL = 0
+		<isNotEmpty prepend="and" property="customerName">
+			<![CDATA[b.CUSTOMER_NAME LIKE '%$customerName$%' ESCAPE '^']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="address">
+			<![CDATA[b.ADDRESS LIKE '%$address$%' ESCAPE '^']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="cphNumber">
+			<![CDATA[(b.MOBILE_PHONE1  LIKE '%$cphNumber$%' ESCAPE '^' OR b.MOBILE_PHONE2 LIKE '%$cphNumber$%' ESCAPE '^' OR b.PHONE  LIKE '%$cphNumber$%' ESCAPE '^' OR b.FAX  LIKE '%$cphNumber$%' ESCAPE '^')]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="" property="fetchRows">
+			FETCH FIRST $fetchRows$ ROWS ONLY
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询产品（分页查询） -->
+	<select id="getPdtProductCustomerBeanPageByConds" resultMap="PdtProductCustomerBeanResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+			SELECT a.*,b.EMAIL,b.CUSTOMER_NO,b.CUSTOMER_NAME,b.CUSTOMER_TITLE,b.SEX,b.AGE,b.DEFAULT_PHONE_TYPE,b.MOBILE_PHONE1,b.MOBILE_PHONE2,b.PHONE,b.FAX,b.BELONG_DEPT_ID,b.BELONG_USER_ID,b.ADDRESS,b.ID_CARD,b.IS_NOGOOD ,c.USER_NAME,d.USER_NAME AS BELONG_USER_NAME,e.PRODUCT_NAME
+            FROM PDT_MICRO_PRODUCT_CUSTOMER a
+			INNER JOIN CRM_CUSTOMER b ON a.CUSTOMER_ID = b.CUSTOMER_ID
+			INNER JOIN SYS_USER c ON a.CREATE_USER = c.USER_ID
+            LEFT JOIN SYS_USER d ON b.BELONG_USER_ID = d.USER_ID
+			LEFT JOIN PDT_MICRO_PRODUCT e ON a.PRODUCT_ID = e.PRODUCT_ID
+			WHERE a.IS_DEL = 0
+        <!--业务管理权限
+        机构的 显示我的归属客户 我添加的意向 下属的归属客户 下属添加的意向
+        -->
+        <isNotEmpty property="manageUserIds" prepend="and">
+            (
+            b.belong_user_id in ($manageUserIds$) or a.user_id in ($manageUserIds$)
+            )
+        </isNotEmpty>
+        <!--客户经理权限
+        我的 只显示我的归属客户 和 我添加的意向
+        -->
+        <isNotEmpty property="myUserId" prepend="and">
+            (
+            b.belong_user_id=#myUserId# or a.user_id=#myUserId#
+            )
+        </isNotEmpty>
+        <!--
+        还有一种 是客户归属于机构的 归属人员列暂定为空
+        -->
+
+			<isNotEmpty prepend="and" property="productId">
+				<![CDATA[a.PRODUCT_ID = #productId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK LIKE '%$remark$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[b.CUSTOMER_NAME LIKE '%$customerName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cphNumber">
+				<![CDATA[(b.MOBILE_PHONE1  LIKE '%$cphNumber$%' ESCAPE '^' OR b.MOBILE_PHONE2 LIKE '%$cphNumber$%' ESCAPE '^' OR b.PHONE  LIKE '%$cphNumber$%' ESCAPE '^' OR b.FAX  LIKE '%$cphNumber$%' ESCAPE '^')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userName">
+				<![CDATA[c.USER_NAME LIKE '%$userName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="belongUserName">
+				<![CDATA[d.USER_NAME LIKE '%$belongUserName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="padInput">
+				<![CDATA[(b.CUSTOMER_NAME  LIKE '%$padInput$%' ESCAPE '^' OR b.ADDRESS LIKE '%$padInput$%' ESCAPE '^')]]>
+			</isNotEmpty>
+			<!-- 我有权限的客户和我添加的意向信息 -->
+        <!--
+			<isNotEmpty prepend="and" property="userId">
+					((a.USER_ID = #userId#)
+				</isNotEmpty>
+				<isNotEmpty prepend="or" property="brMine">
+					(b.BELONG_USER_ID = #brMine#)
+				</isNotEmpty>
+				<isNotEmpty prepend="or" property="brDept">
+					(b.BELONG_DEPT_ID in ($brDept$))
+				</isNotEmpty>
+			)
+			-->
+            <isNotEmpty property="isPad">
+                ORDER BY a.CREATE_DATE desc
+            </isNotEmpty>
+            <isEmpty property="isPad">
+                ORDER BY a.CREATE_DATE desc
+            </isEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+	</select>
+	
+	<!-- 查询产品（分页求和） -->
+	<select id="getPdtProductCustomerBeanPageCountByConds" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+			SELECT COUNT(0) FROM PDT_MICRO_PRODUCT_CUSTOMER a 
+			INNER JOIN CRM_CUSTOMER b ON a.CUSTOMER_ID = b.CUSTOMER_ID
+			INNER JOIN SYS_USER c ON a.CREATE_USER = c.USER_ID
+			LEFT JOIN SYS_USER d ON b.BELONG_USER_ID = d.USER_ID
+			LEFT JOIN PDT_MICRO_PRODUCT e ON a.PRODUCT_ID = e.PRODUCT_ID
+			WHERE a.IS_DEL = 0
+        <!--业务管理权限
+        机构的 显示我的归属客户 我添加的意向 下属的归属客户 下属添加的意向
+        -->
+        <isNotEmpty property="manageUserIds" prepend="and">
+            (
+            b.belong_user_id in ($manageUserIds$) or a.user_id in ($manageUserIds$)
+            )
+        </isNotEmpty>
+        <!--客户经理权限
+        我的 只显示我的归属客户 和 我添加的意向
+        -->
+        <isNotEmpty property="myUserId" prepend="and">
+            (
+            b.belong_user_id=#myUserId# or a.user_id=#myUserId#
+            )
+        </isNotEmpty>
+        <!--
+        还有一种 是客户归属于机构的 归属人员列暂定为空
+        -->
+			<isNotEmpty prepend="and" property="productId">
+				<![CDATA[a.PRODUCT_ID = #productId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK LIKE '%$remark$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[b.CUSTOMER_NAME LIKE '%$customerName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="cphNumber">
+				<![CDATA[(b.MOBILE_PHONE1  LIKE '%$cphNumber$%' ESCAPE '^' OR b.MOBILE_PHONE2 LIKE '%$cphNumber$%' ESCAPE '^' OR b.PHONE  LIKE '%$cphNumber$%' ESCAPE '^' OR b.FAX  LIKE '%$cphNumber$%' ESCAPE '^')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userName">
+				<![CDATA[c.USER_NAME LIKE '%$userName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="belongUserName">
+				<![CDATA[d.USER_NAME LIKE '%$belongUserName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="padInput">
+				<![CDATA[(b.CUSTOMER_NAME  LIKE '%$padInput$%' ESCAPE '^' OR b.ADDRESS LIKE '%$padInput$%' ESCAPE '^')]]>
+			</isNotEmpty>
+			<!-- 我有权限的客户和我添加的意向信息 -->
+        <!--
+			<isNotEmpty prepend="and" property="userId">
+					((a.USER_ID = #userId#)
+				</isNotEmpty>
+				<isNotEmpty prepend="or" property="brMine">
+					(b.BELONG_USER_ID = #brMine#)
+				</isNotEmpty>
+				<isNotEmpty prepend="or" property="brDept">
+					(b.BELONG_DEPT_ID in ($brDept$))
+				</isNotEmpty>
+			)
+			-->
+	</select>
+
+    <!--得到意向客户产品的数量-->
+    <select id="getProductCustomerCount" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+         select count(1) from PDT_MICRO_PRODUCT_CUSTOMER
+         where is_del !=1
+        <!--
+         <isNotEmpty property="userId" prepend="and">
+             user_id=#userId#
+         </isNotEmpty>
+        <isNotEmpty property="userIds" prepend="and">
+            user_id in ($userIds$)
+        </isNotEmpty>
+        -->
+        <isNotEmpty property="customerId" prepend="and">
+            customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="productId" prepend="and">
+            product_id=#productId#
+        </isNotEmpty>
+    </select>
+</sqlMap>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanContractSQL">
+
+    <typeAlias alias="LnLoanContract" type="com.banger.mobile.domain.model.contract.LnLoanContract"/>
+
+    <resultMap class="LnLoanContract" id="LnLoanContractResult">
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CONTRACT_TYPE" property="contractType"/>
+       	<result column="CONT_COMMON_MAIN" property="contCommMain"/>
+       	<result column="COMMON_MAIN_COUNT" property="commMainCount"/>
+       	<result column="CONT_TOP_MAIN" property="contTopMain"/>
+       	<result column="TOP_MAIN_COUNT" property="topMainCount"/>
+       	<result column="CONT_CARD_MAIN" property="contCardMain"/>
+       	<result column="CARD_MAIN_COUNT" property="cardMainCount"/>
+       	<result column="CONT_COMMON_GUARANTY" property="contCommGuaranty"/>
+       	<result column="COMMON_GUARANTY_COUNT" property="commGuarantyCount"/>
+       	<result column="CONT_TOP_GUARANTY" property="contTopGuaranty"/>
+       	<result column="TOP_GUARANTY_COUNT" property="topGuarantyCount"/>
+       	<result column="CONT_CARD_GUARANTY" property="contCardGuaranty"/>
+       	<result column="CARD_GUARANTY_COUNT" property="cardGuarantyCount"/>
+       	<result column="CONT_COMMON_MORTGAGE" property="contCommMortgage"/>
+       	<result column="COMMON_MORTGAGE_COUNT" property="commMortgageCount"/>
+       	<result column="CONT_TOP_MORTGAGE" property="contTopMortgage"/>
+       	<result column="TOP_MORTGAGE_COUNT" property="topMortgageCount"/>
+       	<result column="CONT_CARD_MORTGAGE" property="contCardMortgage"/>
+       	<result column="CARD_MORTGAGE_COUNT" property="cardMortgageCount"/>
+       	<result column="CONT_COMMON_PLEDGE" property="contCommPledge"/>
+       	<result column="COMMON_PLEDGE_COUNT" property="commPledgeCount"/>
+       	<result column="CONT_TOP_PLEDGE" property="contTopPledge"/>
+       	<result column="TOP_PLEDGE_COUNT" property="topPledgeCount"/>
+       	<result column="CONT_CARD_PLEDGE" property="contCardPledge"/>
+       	<result column="CARD_PLEDGE_COUNT" property="cardPledgeCount"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+       	<result column="IOU" property="iou"/>
+    </resultMap>
+
+    <delete id="deleteLoanContract" parameterClass="Integer">
+         DELETE FROM LN_LOAN_CONTRACT WHERE LOAN_ID = #loanId#
+    </delete>
+
+    <insert id="insertLoanContract" parameterClass="LnLoanContract">
+        INSERT INTO LN_LOAN_CONTRACT
+         (
+         	LOAN_ID,
+			CONTRACT_TYPE,
+			CONT_COMMON_MAIN,
+			COMMON_MAIN_COUNT,
+			CONT_TOP_MAIN,
+			TOP_MAIN_COUNT,
+			CONT_CARD_MAIN,
+			CARD_MAIN_COUNT,
+			CONT_COMMON_GUARANTY,
+			COMMON_GUARANTY_COUNT,
+			CONT_TOP_GUARANTY,
+			TOP_GUARANTY_COUNT,
+			CONT_CARD_GUARANTY,
+			CARD_GUARANTY_COUNT,
+			CONT_COMMON_MORTGAGE,
+			COMMON_MORTGAGE_COUNT,
+			CONT_TOP_MORTGAGE,
+			TOP_MORTGAGE_COUNT,
+			CONT_CARD_MORTGAGE,
+			CARD_MORTGAGE_COUNT,
+			CONT_COMMON_PLEDGE,
+			COMMON_PLEDGE_COUNT,
+			CONT_TOP_PLEDGE,
+			TOP_PLEDGE_COUNT,
+			CONT_CARD_PLEDGE,
+			CARD_PLEDGE_COUNT,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE,
+			IOU
+         )
+         VALUES
+         (
+			#loanId:INTEGER#,
+			#contractType:VARCHAR#,
+			#contCommMain:VARCHAR#,
+			#commMainCount:INTEGER#,
+			#contTopMain:VARCHAR#,
+			#topMainCount:INTEGER#,
+			#contCardMain:VARCHAR#,
+			#cardMainCount:INTEGER#,
+			#contCommGuaranty:VARCHAR#,
+			#commGuarantyCount:INTEGER#,
+			#contTopGuaranty:VARCHAR#,
+			#topGuarantyCount:INTEGER#,
+			#contCardGuaranty:VARCHAR#,
+			#cardGuarantyCount:INTEGER#,
+			#contCommMortgage:VARCHAR#,
+			#commMortgageCount:INTEGER#,
+			#contTopMortgage:VARCHAR#,
+			#topMortgageCount:INTEGER#,
+			#contCardMortgage:VARCHAR#,
+			#cardMortgageCount:INTEGER#,
+			#contCommPledge:VARCHAR#,
+			#commPledgeCount:INTEGER#,
+			#contTopPledge:VARCHAR#,
+			#topPledgeCount:INTEGER#,
+			#contCardPledge:VARCHAR#,
+			#cardPledgeCount:INTEGER#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#,
+			#iou:VARCHAR#
+         )
+    </insert>
+
+
+
+    <update id="updateLoanContract" parameterClass="LnLoanContract">
+        update LN_LOAN_CONTRACT SET LOAN_ID=LOAN_ID
+        <isNotEmpty property="contractType" prepend=",">
+            CONTRACT_TYPE = #contractType#
+		</isNotEmpty>
+		<isNotEmpty property="contCommMain" prepend=",">
+            CONT_COMMON_MAIN = #contCommMain#
+		</isNotEmpty>
+		<isNotEmpty property="commMainCount" prepend=",">
+            COMMON_MAIN_COUNT = #commMainCount#
+		</isNotEmpty>
+		<isNotEmpty property="contTopMain" prepend=",">
+            CONT_TOP_MAIN = #contTopMain#
+		</isNotEmpty>
+		<isNotEmpty property="topMainCount" prepend=",">
+            TOP_MAIN_COUNT = #topMainCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCardMain" prepend=",">
+            CONT_CARD_MAIN = #contCardMain#
+		</isNotEmpty>
+		<isNotEmpty property="cardMainCount" prepend=",">
+            CARD_MAIN_COUNT = #cardMainCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCommGuaranty" prepend=",">
+            CONT_COMMON_GUARANTY = #contCommGuaranty#
+		</isNotEmpty>
+		<isNotEmpty property="commGuarantyCount" prepend=",">
+            COMMON_GUARANTY_COUNT = #commGuarantyCount#
+		</isNotEmpty>
+		<isNotEmpty property="contTopGuaranty" prepend=",">
+            CONT_TOP_GUARANTY = #contTopGuaranty#
+		</isNotEmpty>
+		<isNotEmpty property="topGuarantyCount" prepend=",">
+            TOP_GUARANTY_COUNT = #topGuarantyCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCardGuaranty" prepend=",">
+            CONT_CARD_GUARANTY = #contCardGuaranty#
+		</isNotEmpty>
+		<isNotEmpty property="cardGuarantyCount" prepend=",">
+            CARD_GUARANTY_COUNT = #cardGuarantyCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCommMortgage" prepend=",">
+            CONT_COMMON_MORTGAGE = #contCommMortgage#
+		</isNotEmpty>
+		<isNotEmpty property="commMortgageCount" prepend=",">
+            COMMON_MORTGAGE_COUNT = #commMortgageCount#
+		</isNotEmpty>
+		<isNotEmpty property="contTopMortgage" prepend=",">
+            CONT_TOP_MORTGAGE = #contTopMortgage#
+		</isNotEmpty>
+		<isNotEmpty property="topMortgageCount" prepend=",">
+            TOP_MORTGAGE_COUNT = #topMortgageCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCardMortgage" prepend=",">
+            CONT_CARD_MORTGAGE = #contCardMortgage#
+		</isNotEmpty>
+		<isNotEmpty property="cardMortgageCount" prepend=",">
+            CARD_MORTGAGE_COUNT = #cardMortgageCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCommPledge" prepend=",">
+            CONT_COMMON_PLEDGE = #contCommPledge#
+		</isNotEmpty>
+		<isNotEmpty property="commPledgeCount" prepend=",">
+            COMMON_PLEDGE_COUNT = #commPledgeCount#
+		</isNotEmpty>
+		<isNotEmpty property="contTopPledge" prepend=",">
+            CONT_TOP_PLEDGE = #contTopPledge#
+		</isNotEmpty>
+		<isNotEmpty property="topPledgeCount" prepend=",">
+            TOP_PLEDGE_COUNT = #topPledgeCount#
+		</isNotEmpty>
+		<isNotEmpty property="contCardPledge" prepend=",">
+            CONT_CARD_PLEDGE = #contCardPledge#
+		</isNotEmpty>
+		<isNotEmpty property="cardPledgeCount" prepend=",">
+            CARD_PLEDGE_COUNT = #cardPledgeCount#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+		<isNotEmpty property="iou" prepend=",">
+            IOU = #iou#
+        </isNotEmpty>
+        where LOAN_ID=#loanId#
+    </update>
+
+
+
+    <select id="getLnLoanContractById" resultMap="LnLoanContractResult" parameterClass="java.lang.Integer">
+      select * from LN_LOAN_CONTRACT where loan_id=#loanId#
+    </select>
+
+</sqlMap>

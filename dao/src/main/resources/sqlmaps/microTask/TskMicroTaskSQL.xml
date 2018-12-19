@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMicroTaskSQL">
+	<typeAlias alias="TskMicroTask"
+		type="com.banger.mobile.domain.model.microTask.TskMicroTask" />
+	<!-- 任务表-->
+	<resultMap class="TskMicroTask" id="TskMicroTaskResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="TASK_TYPE" property="taskType" />
+		<result column="TASK_TITLE" property="taskTitle" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="TASK_TARGET" property="taskTarget" />
+		<result column="NEW_CUSTOMER_PERCENT" property="newCustomerPercent" />
+		<result column="OLD_CUSTOMER_PERCENT" property="oldCustomerPercent" />
+		<result column="REMARK" property="remark" />
+		<result column="ASSIGN_USER_ID" property="assignUserId" />
+		<result column="FINISH_DATE" property="finishDate" />
+		<result column="TASK_STATUS" property="taskStatus" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap class="TskMicroTask" id="TskMicroTaskBizResult" extends="TskMicroTaskResult">
+		<result column="USER_TASK_TARGET" property="userTaskTarget"/>
+		<result column="FINISH_COUNT" property="finishCount"/>
+		<result column="COM_PERCENT" property="comPercent"/>
+		<result column="USER_NAME" property="userName"/>
+		<result column="IS_OUT_DATE" property="isOutDate"/>
+		<result column="ROLE_IDS" property="roleIds"/>
+		<result column="ASSIGN_DEPT_ID" property="assignDeptId"/>
+		<result column="ASSIGN_SUB_DEPT" property="assignSubDept"/>
+		<result column="LOGIN_MANAGE_DEPT_ID" property="loginManageDeptId"/>
+	</resultMap>
+	
+	<update id="delTskMicroTask" parameterClass="Integer">
+		<![CDATA[	
+		UPDATE TSK_MICRO_TASK SET IS_DEL = 1 WHERE TASK_ID = #taskId#
+		]]>
+	</update>
+	
+	<update id="stopTskMicroTask" parameterClass="Integer">
+		<![CDATA[	
+		UPDATE TSK_MICRO_TASK SET TASK_STATUS = 2 WHERE TASK_ID = #taskId#
+		]]>
+	</update>
+	
+	<update id="restartTskMicroTask" parameterClass="Integer">
+		<![CDATA[	
+		UPDATE TSK_MICRO_TASK SET TASK_STATUS = 0 WHERE TASK_ID = #taskId#
+		]]>
+	</update>
+	
+	<!-- 分页查询  -->
+	<select id="getTaskListPage"
+		resultMap="TskMicroTaskBizResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT tmp.*,S.USER_NAME,S.DEPT_ID AS ASSIGN_DEPT_ID,
+				GET_MANAGEMENT_DEPT_ID($userId$) AS LOGIN_MANAGE_DEPT_ID,     
+				GET_TASK_ASSIGN_DEPT_ID(tmp.ASSIGN_USER_ID) AS ASSIGN_SUB_DEPT,  
+				GET_ROLE_ID(tmp.ASSIGN_USER_ID) AS ROLE_IDS FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		SELECT T.* FROM (
+		    SELECT R.*, CASE WHEN FINISH_COUNT=USER_TASK_TARGET THEN 1 ELSE 0 END AS IS_FINISH,
+		    CASE WHEN USER_TASK_TARGET > 0 THEN (FINISH_COUNT/USER_TASK_TARGET) ELSE 0 END AS COM_PERCENT,
+		    CASE WHEN END_DATE < Date(current timestamp) THEN 1 ELSE 0 END AS IS_OUT_DATE
+		    FROM (
+		        SELECT A.*,]]>
+            <isNotEmpty  property="userType">
+                <isEqual prepend="" property="userType" compareValue="2">
+                    <![CDATA[
+                                  case when
+                                    ((SELECT TASK_TARGET FROM  TSK_MICRO_TASK WHERE TASK_ID =  A.TASK_ID AND ASSIGN_USER_ID=$userId$)>0
+            						OR (SELECT COUNT(0) FROM SYS_ROLE_MEMBER where USER_ID=A.ASSIGN_USER_ID AND ROLE_ID IN(4))>0)
+                                  then
+                                    A.TASK_TARGET
+                                  else
+                                  (
+                                    CASE WHEN (SELECT COUNT(0) FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID =A.TASK_ID AND USER_ID=0)>0 
+					                THEN(
+					                    SELECT CASE WHEN SUM(TARGET_DEPT)>0 THEN SUM(TARGET_DEPT) 
+					                    ELSE (SELECT SUM(TARGET_DEPT) FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID = A.TASK_ID AND USER_ID=0  AND DEPT_ID IN ($inChargeDepts$)) END 
+					                    FROM TSK_MICRO_TASK_EXECUTE
+					                    WHERE TASK_ID = A.TASK_ID AND USER_ID=0  AND DEPT_ID IN (SELECT DEPT_ID FROM SYS_DEPT_AUTH WHERE USER_ID =$userId$ AND ROLE_ID=3)
+					                ) 
+					                ELSE (
+					                    SELECT  SUM(TARGET_USER) FROM TSK_MICRO_TASK_EXECUTE                                     
+					                    WHERE TASK_ID = A.TASK_ID AND USER_ID=A.ASSIGN_USER_ID
+					                )  END   
+                                  )
+                                  end AS USER_TASK_TARGET,
+                            ]]>
+                </isEqual>
+                <isEqual prepend="" property="userType" compareValue="3">
+                    <![CDATA[
+                                 case when
+                                    (SELECT TASK_TARGET FROM  TSK_MICRO_TASK WHERE TASK_ID =  A.TASK_ID AND ASSIGN_USER_ID=$userId$)>0
+                                  then
+                                    A.TASK_TARGET
+                                  else
+                                    (SELECT  TARGET_USER FROM TSK_MICRO_TASK_EXECUTE   WHERE TASK_ID = A.TASK_ID and USER_ID=$userId$)
+                                end
+                                  AS USER_TASK_TARGET,
+                            ]]>
+                </isEqual>
+            </isNotEmpty>
+                <![CDATA[
+                 CASE WHEN ( SELECT COUNT(1) FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID=A.TASK_ID AND USER_ID<>0 )>0 THEN
+		            GET_FINISH_COUNT('$inChargeUserIdsMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE)
+		         ELSE 0.0
+                 END AS FINISH_COUNT
+		        FROM TSK_MICRO_TASK AS A WHERE A.ASSIGN_USER_ID IN($inChargeUserIds$)
+		        UNION ALL
+		        SELECT A.*,
+		        GET_TASK_TARGET_DEPT($userId$,A.TASK_ID) AS USER_TASK_TARGET,
+		         CASE WHEN ( SELECT COUNT(1) FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID=A.TASK_ID AND USER_ID<>0 )>0 THEN
+		        GET_FINISH_COUNT('$inChargeUserIdsMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE)
+		         ELSE 0.0
+                 END AS FINISH_COUNT
+		        FROM TSK_MICRO_TASK AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIds$) 
+		        AND EXISTS (SELECT TASK_ID FROM TSK_MICRO_TASK_EXECUTE WHERE DEPT_ID IN ($inChargeDepts$) AND TASK_ID = A.TASK_ID FETCH FIRST 1 ROWS ONLY)
+		    	]]>
+		    	<isNotEmpty property="isInChargeOf">
+					<isEqual prepend="" property="isInChargeOf" compareValue="0">
+						<![CDATA[
+				UNION ALL
+		        SELECT A.*,
+		        GET_TASK_TARGET($userId$,A.TASK_ID) AS USER_TASK_TARGET,
+		        GET_FINISH_COUNT('$userIdMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE) AS FINISH_COUNT
+		        FROM TSK_MICRO_TASK AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIds$)
+		        AND A.TASK_ID IN 
+		        (SELECT TASK_ID FROM TSK_MICRO_TASK_EXECUTE WHERE USER_ID in ($userId$))
+						]]>
+					</isEqual>
+				</isNotEmpty>
+		<![CDATA[    	
+		    ) AS R
+		) AS T
+		WHERE T.IS_DEL = 0
+		]]>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[
+			T.TASK_TITLE LIKE '%$taskTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[
+			(T.TASK_TITLE LIKE '%$padInput$%' ESCAPE '^'
+			OR T.REMARK LIKE '%$padInput$%' ESCAPE '^')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskType">
+			<![CDATA[
+			T.TASK_TYPE = #taskType#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID IN($assignUserId$)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[
+				(T.START_DATE <= #endDate# and T.END_DATE >= #startDate#)
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isEmpty prepend="and" property="endDate">
+				<![CDATA[T.END_DATE >= #startDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<isEmpty prepend="and" property="startDate">
+				<![CDATA[T.START_DATE <= #endDate# ]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="isOutDate">
+			<isEqual prepend="and" property="isOutDate" compareValue="1">
+				<![CDATA[
+				T.END_DATE < Date(current timestamp)
+				]]>
+			</isEqual>
+			<isEqual prepend="and" property="isOutDate" compareValue="0">
+				<![CDATA[
+				T.END_DATE >= Date(current timestamp)
+				]]>
+			</isEqual>
+		</isNotEmpty>
+		<!-- 完成情况 -->
+		<isNotEmpty property="taskStatus">
+			<isEqual prepend="and" property="taskStatus" compareValue="1">
+				<![CDATA[ (T.COM_PERCENT >= 1 and T.TASK_STATUS != 2) ORDER BY T.IS_OUT_DATE,T.END_DATE,T.IS_FINISH]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="0">
+				<![CDATA[ (T.COM_PERCENT < 1 and T.TASK_STATUS != 2) ORDER BY T.IS_OUT_DATE,T.END_DATE,T.IS_FINISH]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="2">
+				<![CDATA[ T.TASK_STATUS = 2 ORDER BY  T.END_DATE  DESC ]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="-1">
+				<![CDATA[ T.TASK_STATUS != 2 ORDER BY T.IS_OUT_DATE,T.END_DATE,T.IS_FINISH ]]>
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  
+			INNER JOIN SYS_USER AS S ON tmp.ASSIGN_USER_ID = S.USER_ID
+			where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+        <isEqual  property="taskStatus" compareValue="2">
+            <![CDATA[  ORDER BY  END_DATE  DESC ]]>
+        </isEqual>
+	</select>
+	
+	<!-- 查询所有营销任务分页求和 -->
+	<select id="getTaskListPageCount"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		SELECT count(1) FROM (
+		    SELECT R.*,CASE WHEN USER_TASK_TARGET > 0 THEN (FINISH_COUNT/USER_TASK_TARGET) ELSE 0 END AS COM_PERCENT
+		    FROM (
+                SELECT A.*,
+                <isNotEmpty  property="userType">
+                    <isEqual prepend="" property="userType" compareValue="2">
+                        <![CDATA[
+                                  case when
+                                    (SELECT TASK_TARGET FROM  TSK_MICRO_TASK WHERE TASK_ID =  A.TASK_ID AND ASSIGN_USER_ID=$userId$)>0
+                                  then
+                                    A.TASK_TARGET
+                                  else
+                                  (SELECT  sum(TARGET_DEPT) FROM TSK_MICRO_TASK_EXECUTE
+                                    WHERE TASK_ID = A.TASK_ID AND USER_ID=0  AND DEPT_ID IN (SELECT DEPT_ID FROM SYS_DEPT_AUTH WHERE USER_ID = $userId$ AND ROLE_ID=3)
+                                  )
+                                  end
+                                  AS USER_TASK_TARGET,
+                            ]]>
+                    </isEqual>
+                    <isEqual prepend="" property="userType" compareValue="3">
+                        <![CDATA[
+                                 case when
+                                    (SELECT TASK_TARGET FROM  TSK_MICRO_TASK WHERE TASK_ID =  A.TASK_ID AND ASSIGN_USER_ID=$userId$)>0
+                                  then
+                                    A.TASK_TARGET
+                                  else
+                                    (SELECT  TARGET_USER FROM TSK_MICRO_TASK_EXECUTE   WHERE TASK_ID = A.TASK_ID and USER_ID=$userId$)
+                                end
+                                  AS USER_TASK_TARGET,
+                            ]]>
+                    </isEqual>
+                </isNotEmpty>
+            <![CDATA[
+                 CASE WHEN ( SELECT COUNT(1) FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID=A.TASK_ID AND USER_ID<>0 )>0 THEN
+                GET_FINISH_COUNT('$inChargeUserIdsMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE)
+                ELSE 0.0
+                END AS FINISH_COUNT
+                FROM TSK_MICRO_TASK AS A WHERE A.ASSIGN_USER_ID IN($inChargeUserIds$)
+                UNION ALL
+                SELECT A.*,
+                GET_TASK_TARGET_DEPT($userId$,A.TASK_ID) AS USER_TASK_TARGET,
+                CASE WHEN ( SELECT COUNT(1) FROM TSK_MICRO_TASK_EXECUTE WHERE TASK_ID=A.TASK_ID AND USER_ID<>0 )>0 THEN
+                GET_FINISH_COUNT('$inChargeUserIdsMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE)
+                ELSE 0.0
+                END AS FINISH_COUNT
+                FROM TSK_MICRO_TASK AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIds$)
+                AND EXISTS (SELECT TASK_ID FROM TSK_MICRO_TASK_EXECUTE WHERE DEPT_ID IN ($inChargeDepts$) AND TASK_ID = A.TASK_ID FETCH FIRST 1 ROWS ONLY)
+               ]]>
+		    	<isNotEmpty property="isInChargeOf">
+					<isEqual prepend="" property="isInChargeOf" compareValue="0">
+						<![CDATA[
+                            UNION ALL
+                            SELECT A.*,
+                            GET_TASK_TARGET($userId$,A.TASK_ID) AS USER_TASK_TARGET,
+                            GET_FINISH_COUNT('$userIdMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE) AS FINISH_COUNT
+                            FROM TSK_MICRO_TASK AS A WHERE A.ASSIGN_USER_ID NOT IN ($inChargeUserIds$)
+                            AND A.TASK_ID IN
+                            (SELECT TASK_ID FROM TSK_MICRO_TASK_EXECUTE WHERE USER_ID in ($userId$))
+						]]>
+					</isEqual>
+				</isNotEmpty>
+		    
+		    ) AS R
+		) AS T
+		WHERE T.IS_DEL = 0
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[
+			T.TASK_TITLE LIKE '%$taskTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[
+			(T.TASK_TITLE LIKE '%$padInput$%' ESCAPE '^'
+			OR T.REMARK LIKE '%$padInput$%' ESCAPE '^')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskType">
+			<![CDATA[
+			T.TASK_TYPE = #taskType#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID IN($assignUserId$)
+			]]>
+		</isNotEmpty>
+        <isNotEmpty property="startDate">
+            <isNotEmpty prepend="and" property="endDate">
+                <![CDATA[
+				(T.START_DATE <= #endDate# and T.END_DATE >= #startDate#)
+				]]>
+            </isNotEmpty>
+        </isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isEmpty prepend="and" property="endDate">
+				<![CDATA[T.END_DATE >= #startDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<isEmpty prepend="and" property="startDate">
+				<![CDATA[T.START_DATE <= #endDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="isOutDate">
+			<isEqual prepend="and" property="isOutDate" compareValue="1">
+				<![CDATA[
+				T.END_DATE < Date(current timestamp)
+				]]>
+			</isEqual>
+			<isEqual prepend="and" property="isOutDate" compareValue="0">
+				<![CDATA[
+				T.END_DATE >= Date(current timestamp)
+				]]>
+			</isEqual>
+		</isNotEmpty>
+		<!-- 完成情况 -->
+		<isNotEmpty property="taskStatus">
+			<isEqual prepend="and" property="taskStatus" compareValue="1">
+				<![CDATA[ (T.COM_PERCENT >= 1 and T.TASK_STATUS != 2)]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="0">
+				<![CDATA[ (T.COM_PERCENT < 1 and T.TASK_STATUS != 2)]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="2">
+				<![CDATA[ T.TASK_STATUS = 2]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="-1">
+				<![CDATA[ T.TASK_STATUS != 2]]>
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 我执行的任务 分页查询  -->
+	<select id="getMyTaskListPage"
+		resultMap="TskMicroTaskBizResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT tmp.*,S.USER_NAME,S.DEPT_ID AS ASSIGN_DEPT_ID,
+				GET_MANAGEMENT_DEPT_ID($userId$) AS LOGIN_MANAGE_DEPT_ID,     
+				GET_TASK_ASSIGN_DEPT_ID(tmp.ASSIGN_USER_ID) AS ASSIGN_SUB_DEPT, 
+				GET_ROLE_ID(tmp.ASSIGN_USER_ID) AS ROLE_IDS FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		SELECT T.* FROM (
+		    SELECT R.*,CASE WHEN FINISH_COUNT=USER_TASK_TARGET THEN 1 ELSE 0 END AS IS_FINISH,
+		    CASE WHEN USER_TASK_TARGET > 0 THEN (FINISH_COUNT/USER_TASK_TARGET) ELSE 0 END AS COM_PERCENT,
+		    CASE WHEN END_DATE < Date(current timestamp) THEN 1 ELSE 0 END AS IS_OUT_DATE
+		    FROM (
+		        SELECT A.*,
+		        GET_TASK_TARGET($userId$,A.TASK_ID) AS USER_TASK_TARGET,
+		        GET_FINISH_COUNT('$userIdMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE) AS FINISH_COUNT
+		        FROM TSK_MICRO_TASK AS A WHERE A.TASK_ID IN 
+		        (SELECT TASK_ID FROM TSK_MICRO_TASK_EXECUTE WHERE USER_ID in ($userId$))
+		    ) AS R
+		) AS T
+		WHERE T.IS_DEL = 0
+		]]>
+        <isNotEmpty prepend="and" property="taskId">
+            <![CDATA[
+			T.TASK_ID = #taskId#
+			]]>
+        </isNotEmpty>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[
+			T.TASK_TITLE LIKE '%$taskTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[
+			(T.TASK_TITLE LIKE '%$padInput$%' ESCAPE '^'
+			OR T.REMARK LIKE '%$padInput$%' ESCAPE '^')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskType">
+			<![CDATA[
+			T.TASK_TYPE = #taskType#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID IN($assignUserId$)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[
+				(T.START_DATE <= #endDate# and T.END_DATE >= #startDate#)
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isEmpty prepend="and" property="endDate">
+				<![CDATA[T.END_DATE >= #startDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<isEmpty prepend="and" property="startDate">
+				<![CDATA[T.START_DATE <= #endDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="isOutDate">
+			<isEqual prepend="and" property="isOutDate" compareValue="1">
+				<![CDATA[
+				T.END_DATE < Date(current timestamp)
+				]]>
+			</isEqual>
+			<isEqual prepend="and" property="isOutDate" compareValue="0">
+				<![CDATA[
+				T.END_DATE >= Date(current timestamp)
+				]]>
+			</isEqual>
+		</isNotEmpty>
+		<!-- 完成情况 -->
+		<isNotEmpty property="taskStatus">
+			<isEqual prepend="and" property="taskStatus" compareValue="1">
+				<![CDATA[ (T.COM_PERCENT >= 1 and T.TASK_STATUS != 2)]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="0">
+				<![CDATA[ (T.COM_PERCENT < 1 and T.TASK_STATUS != 2)]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="2">
+				<![CDATA[ T.TASK_STATUS = 2]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="-1">
+				<![CDATA[ T.TASK_STATUS != 2]]>
+			</isEqual>
+		</isNotEmpty>
+		
+		ORDER BY T.IS_OUT_DATE,T.END_DATE,T.IS_FINISH
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  
+			INNER JOIN SYS_USER AS S ON tmp.ASSIGN_USER_ID = S.USER_ID
+			where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+			ORDER BY IS_OUT_DATE,END_DATE
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询我执行任务分页求和 -->
+	<select id="getMyTaskListPageCount"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		SELECT count(1) FROM (
+		    SELECT R.*,CASE WHEN USER_TASK_TARGET > 0 THEN (FINISH_COUNT/USER_TASK_TARGET) ELSE 0 END AS COM_PERCENT
+		    FROM (
+		        SELECT A.*,
+		        GET_TASK_TARGET($userId$,A.TASK_ID) AS USER_TASK_TARGET,
+		        GET_FINISH_COUNT('$userIdMark$',A.TASK_ID,A.TASK_TYPE,A.START_DATE,A.END_DATE) AS FINISH_COUNT
+		        FROM TSK_MICRO_TASK AS A WHERE A.TASK_ID IN 
+		        (SELECT TASK_ID FROM TSK_MICRO_TASK_EXECUTE WHERE USER_ID in ($userId$))
+		    ) AS R
+		) AS T
+		WHERE T.IS_DEL = 0
+        <isNotEmpty prepend="and" property="taskId">
+            <![CDATA[
+			T.TASK_ID = #taskId#
+			]]>
+        </isNotEmpty>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[
+			T.TASK_TITLE LIKE '%$taskTitle$%' ESCAPE '^'
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[
+			(T.TASK_TITLE LIKE '%$padInput$%' ESCAPE '^'
+			OR T.REMARK LIKE '%$padInput$%' ESCAPE '^')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskType">
+			<![CDATA[
+			T.TASK_TYPE = #taskType#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="assignUserId">
+			<![CDATA[
+			T.ASSIGN_USER_ID IN($assignUserId$)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[
+				(T.START_DATE <= #endDate# and T.END_DATE >= #startDate#)
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="startDate">
+			<isEmpty prepend="and" property="endDate">
+				<![CDATA[T.END_DATE >= #startDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="endDate">
+			<isEmpty prepend="and" property="startDate">
+				<![CDATA[T.START_DATE <= #endDate#]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="isOutDate">
+			<isEqual prepend="and" property="isOutDate" compareValue="1">
+				<![CDATA[
+				T.END_DATE < Date(current timestamp)
+				]]>
+			</isEqual>
+			<isEqual prepend="and" property="isOutDate" compareValue="0">
+				<![CDATA[
+				T.END_DATE >= Date(current timestamp)
+				]]>
+			</isEqual>
+		</isNotEmpty>
+		<!-- 完成情况 -->
+		<isNotEmpty property="taskStatus">
+			<isEqual prepend="and" property="taskStatus" compareValue="1">
+				<![CDATA[ (T.COM_PERCENT >= 1 and T.TASK_STATUS != 2)]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="0">
+				<![CDATA[ (T.COM_PERCENT < 1 and T.TASK_STATUS != 2)]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="2">
+				<![CDATA[ T.TASK_STATUS = 2]]>
+			</isEqual>
+			<isEqual prepend="and" property="taskStatus" compareValue="-1">
+				<![CDATA[ T.TASK_STATUS != 2]]>
+			</isEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 增加 -->
+	<insert id="addTskMicroTask" parameterClass="TskMicroTask">
+		<![CDATA[
+	 	INSERT INTO TSK_MICRO_TASK
+		    (
+		        TASK_ID,
+		        TASK_TYPE,
+		        TASK_TITLE,
+		        START_DATE,
+		        END_DATE,
+		        TASK_TARGET,
+		        NEW_CUSTOMER_PERCENT,
+		        OLD_CUSTOMER_PERCENT,
+		        REMARK,
+		        ASSIGN_USER_ID,
+		        FINISH_DATE,
+		        TASK_STATUS,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #taskId#,
+		        #taskType#,
+				#taskTitle#,
+		        #startDate#,
+		        #endDate#,
+		        #taskTarget#,
+		        #newCustomerPercent:INTEGER#,
+		        #oldCustomerPercent:INTEGER#,
+		        #remark#,
+		        #assignUserId#,
+		        #finishDate:TIMESTAMP#,
+		        #taskStatus#,
+				0,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+		    )
+      ]]>
+		<selectKey keyProperty="taskId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_TSK_MICRO_TASK
+		</selectKey>
+	</insert>
+
+
+    <!-- 增加 -->
+    <insert id="addTskMicroTaskBatch" parameterClass="TskMicroTask">
+        <![CDATA[
+	 	INSERT INTO TSK_MICRO_TASK
+		    (
+		        TASK_ID,
+		        TASK_TYPE,
+		        TASK_TITLE,
+		        START_DATE,
+		        END_DATE,
+		        TASK_TARGET,
+		        NEW_CUSTOMER_PERCENT,
+		        OLD_CUSTOMER_PERCENT,
+		        REMARK,
+		        ASSIGN_USER_ID,
+		        FINISH_DATE,
+		        TASK_STATUS,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #taskId#,
+		        #taskType#,
+				#taskTitle#,
+		        #startDate#,
+		        #endDate#,
+		        #taskTarget#,
+		        #newCustomerPercent:INTEGER#,
+		        #oldCustomerPercent:INTEGER#,
+		        #remark#,
+		        #assignUserId#,
+		        #finishDate:TIMESTAMP#,
+		        #taskStatus#,
+				0,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+		    )
+      ]]>
+    </insert>
+	
+	<!-- 修改-->
+	<update id="editTskMicroTask" parameterClass="TskMicroTask">
+		<![CDATA[	
+		UPDATE
+		   TSK_MICRO_TASK
+		SET 
+		    TASK_TYPE = #taskType#,
+	        TASK_TITLE = #taskTitle#,
+	        START_DATE = #startDate#,
+	        END_DATE = #endDate#,
+	        TASK_TARGET = #taskTarget#,
+	        NEW_CUSTOMER_PERCENT = #newCustomerPercent:INTEGER#,
+	        OLD_CUSTOMER_PERCENT = #oldCustomerPercent:INTEGER#,
+	        REMARK = #remark#,
+	        ASSIGN_USER_ID = #assignUserId#,
+	        FINISH_DATE = #finishDate:TIMESTAMP#,
+	        TASK_STATUS = #taskStatus#,
+	        IS_DEL = #isDel#,
+		    UPDATE_DATE =  current timestamp, 
+		    UPDATE_USER = #updateUser#  
+		WHERE 
+		  TASK_ID = #taskId#
+		  ]]>
+	</update>
+	
+	<!-- 查询单个任务数据 -->
+	<select id="getTskMicroTaskById" resultMap="TskMicroTaskResult" parameterClass="int">
+		SELECT * FROM TSK_MICRO_TASK WHERE TASK_ID = #taskId#
+	</select>
+	
+	<!-- 查询所有任务数据 -->
+	<select id="getAllTskMicroTaskByConds" resultMap="TskMicroTaskResult" parameterClass="java.util.Map">
+		SELECT * FROM TSK_MICRO_TASK
+		WHERE IS_DEL = 0
+		<isNotEmpty prepend="and" property="taskId">
+			<![CDATA[TASK_ID = #taskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="unTaskId">
+			<![CDATA[TASK_ID != #unTaskId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskTitle">
+			<![CDATA[TASK_TITLE = #taskTitle#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskType">
+			<![CDATA[TASK_TYPE = #taskType#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="taskStatus">
+			<![CDATA[TASK_STATUS = #taskStatus#]]>
+		</isNotEmpty>
+	</select>
+
+    <!-- 根据用户获取任务-->
+    <select id="getTaskByUserId" resultMap="TskMicroTaskResult" parameterClass="java.util.Map">
+        SELECT a.*
+        FROM TSK_MICRO_TASK a
+        left join TSK_MICRO_TASK_EXECUTE b on a.task_id = b.task_id
+        WHERE 1=1
+        <isNotEmpty property="userId" prepend="and">
+            b.USER_ID= #userId#
+        </isNotEmpty>
+        <isNotEmpty property="taskStatus" prepend="and">
+            a.TASK_STATUS = #taskStatus#
+        </isNotEmpty>
+        <isNotEmpty property="nowDate" prepend="and">
+            <isEqual property="now" compareValue="0">
+            <![CDATA[
+            a.START_DATE <= #nowDate# and a.END_DATE>= #nowDate#
+            ]]>
+            </isEqual>
+            <isEqual property="now" compareValue="1">
+            <![CDATA[
+            a.END_DATE <= #nowDate#
+            ]]>
+            </isEqual>
+        </isNotEmpty>
+    </select>
+
+</sqlMap>

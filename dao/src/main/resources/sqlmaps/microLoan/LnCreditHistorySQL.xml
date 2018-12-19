@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnCreditHistorySQL">
+    <typeAlias alias="LnCreditHistory" type="com.banger.mobile.domain.model.loan.LnCreditHistory" />
+
+    <!-- 信贷历史记录表 全字段  -->
+    <resultMap class="LnCreditHistory" id="LnCreditHistoryResult">
+        <result column="CREDIT_HISTORY_ID" property="creditHistoryId"/>
+        <result column="CUSTOMER_ID" property="customerId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="FINACE_SOURCE" property="finaceSource"/>
+        <result column="LOAN_PURPOSE" property="loanPurpose"/>
+        <result column="LOAN_MOENY" property="loanMoney"/>
+        
+        <result column="LAON_DATE" property="loanDate"/>
+        <result column="LOAN_LIMIT_YEAR" property="loanLimitYear"/>
+        <result column="REPAY_MONTH" property="repayMonth"/>
+        <result column="OVERDUE_INFORMATION" property="overdueInformation"/>
+        <result column="BALANCE_MONEY" property="balanceMoney"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+    </resultMap>
+		
+    	<insert id="insertLnCreditHistory" parameterClass="LnCreditHistory" >
+    	    
+    	    INSERT INTO LN_CREDIT_HISTORY
+    	    (
+    	    	CREDIT_HISTORY_ID,
+    	    	CUSTOMER_ID,
+    	    	LOAN_ID,
+    	    	FINACE_SOURCE,
+    	    	LOAN_PURPOSE,
+    	    	LOAN_MOENY,
+    	    	LAON_DATE,
+    	    	LOAN_LIMIT_YEAR,
+    	    	REPAY_MONTH,
+    	    	OVERDUE_INFORMATION,
+    	    	BALANCE_MONEY,
+    	    	CREATE_DATE
+    	    )VALUES
+    	    (
+    	    	#creditHistoryId:INTEGER#,
+    	    	#customerId:INTEGER#,
+    	    	#loanId:INTEGER#,
+    	    	#finaceSource:VARCHAR:NULL#,
+    	    	#loanPurpose:VARCHAR:NULL#,
+    	    	#loanMoney:VARCHAR:NULL#,
+    	    	#loanDate:VARCHAR:NULL#,
+    	    	#loanLimitYear:VARCHAR:NULL#,
+    	    	#repayMonth:VARCHAR:NULL#,
+    	    	#overdueInformation:VARCHAR:NULL#,
+    	    	#balanceMoney:VARCHAR:NULL#,
+    	    	current timestamp
+    	    )
+    	    <selectKey keyProperty="creditHistoryId" resultClass="java.lang.Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_LN_CREDIT_HISTORY
+        	</selectKey>
+    	</insert>
+    	
+    	<select id="selectCreditHistoryByLoanId" parameterClass="java.lang.Integer" resultMap="LnCreditHistoryResult">
+    	    
+    	    select
+    	    	*
+    	    from
+    	    	LN_CREDIT_HISTORY
+    	    where
+    	    	loan_id = #loanId#
+    	    
+    	</select>
+    	
+    	<delete id="deleteCreditHistoryById" parameterClass="java.lang.Integer">
+    	    
+    	      delete from LN_CREDIT_HISTORY where CREDIT_HISTORY_ID = #creditHistoryId#
+    	       	    
+    	</delete>
+    	
+		<update id="updateLnCreditHistory" parameterClass="LnCreditHistory">
+		    update LN_CREDIT_HISTORY SET CREDIT_HISTORY_ID=CREDIT_HISTORY_ID
+		    <isNotEmpty property="loanId" prepend=",">
+				LOAN_ID=#loanId#
+			</isNotEmpty>
+        	<isNotEmpty property="customerId" prepend=",">
+				CUSTOMER_ID = #customerId#
+			</isNotEmpty>
+        	<isNotEmpty property="finaceSource" prepend=",">
+				FINACE_SOURCE = #finaceSource#
+			</isNotEmpty>			
+			<isNotEmpty property="loanPurpose" prepend=",">
+				LOAN_PURPOSE = #loanPurpose#
+			</isNotEmpty>
+			<isNotEmpty property="loanMoney" prepend=",">
+				LOAN_MOENY = #loanMoney#
+			</isNotEmpty>
+			<isNotEmpty property="loanDate" prepend=",">
+				LAON_DATE = #loanDate#
+			</isNotEmpty>
+			<isNotEmpty property="loanLimitYear" prepend=",">
+				LOAN_LIMIT_YEAR = #loanLimitYear#
+			</isNotEmpty>
+			<isNotEmpty property="repayMonth" prepend=",">
+				REPAY_MONTH = #repayMonth#
+			</isNotEmpty>
+			<isNotEmpty property="overdueInformation" prepend=",">
+				OVERDUE_INFORMATION = #overdueInformation#
+			</isNotEmpty>
+			<isNotEmpty property="balanceMoney" prepend=",">
+				BALANCE_MONEY = #balanceMoney#
+			</isNotEmpty>
+			
+        	where CREDIT_HISTORY_ID=#creditHistoryId#
+		</update>
+	<delete id="deleteByLoanId" parameterClass="java.lang.Integer">
+	     delete from LN_CREDIT_HISTORY where loan_id = #loanId#
+	    
+	</delete>
+</sqlMap>

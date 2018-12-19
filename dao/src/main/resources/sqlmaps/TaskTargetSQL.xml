@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TaskTargetSQL">
+	<typeAlias alias="TaskTarget"
+		type="com.banger.mobile.domain.model.task.TaskTarget" />
+
+	<!-- 任务目标表-->
+	<!-- TaskTargetSQL信息全字段 -->
+	<resultMap class="TaskTarget" id="TaskTargetResult">
+		<result column="TASK_TARGET_ID" property="taskTargetId"/>
+		<result column="TASK_ID" property="taskId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 添加任务目标 -->
+	<insert id="InsertTaskTarget" parameterClass="TaskTarget">
+		<![CDATA[
+			INSERT INTO TSK_TASK_TARGET
+			(
+				TASK_TARGET_ID,
+				TASK_ID,
+				CUSTOMER_ID,
+				IS_FINISH,
+				SORTNO,
+				IS_DEL,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			 VALUES
+			(
+				#taskTargetId#,
+				#taskId#,
+				#customerId#,
+				#isFinish#,
+				1,
+				0,
+				#createDate#,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="taskTargetId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_TASK_TARGET 
+		</selectKey>
+	</insert>
+	
+	<!-- 删除指定任务对应的任务目标 -->
+	<update id="DeleteTaskTarget" parameterClass="java.lang.Integer">
+		<![CDATA[
+			UPDATE TSK_TASK_TARGET SET IS_DEL=1 WHERE TASK_ID=#taskId# 
+		]]>
+	</update>
+	
+	<!-- 根据任务ID查询对应的任务目标 -->
+	<select id="GetTargetCustomerList" resultMap="TaskTargetResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+			select * from TSK_TASK_TARGET WHERE TASK_ID=#taskId# 
+		]]>
+	</select>
+	
+	<!-- 更改任务的客户联系情况  -->
+	<update id="UpdateIsFinish" parameterClass="TaskTarget">
+		<![CDATA[
+			UPDATE TSK_TASK_TARGET 
+			SET 
+			IS_FINISH=#isFinish#,
+			UPDATE_DATE=#updateDate#,
+			UPDATE_USER=#updateUser#
+			WHERE 
+			TASK_ID=#taskId# and CUSTOMER_ID=#customerId#
+		]]>
+	</update>
+	
+	<!-- 根据任务ID和客户ID删除任务目标 -->
+	<delete id="DeleteTaskTargetMsg" parameterClass="TaskTarget">
+		<![CDATA[
+			DELETE FROM TSK_TASK_TARGET  WHERE TASK_ID=#taskId#
+		]]>
+	</delete>
+</sqlMap>

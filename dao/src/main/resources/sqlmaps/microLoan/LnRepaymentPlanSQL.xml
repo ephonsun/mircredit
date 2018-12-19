@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnRepaymentPlanSQL">
+	<typeAlias alias="LnRepaymentPlan" type="com.banger.mobile.domain.model.loan.LnRepaymentPlan" />
+
+	<!-- 还款计划表 全字段  -->
+	
+	<resultMap class="LnRepaymentPlan" id="LnRepaymentPlanResult" >
+		<result column="REPAYMENT_PLAN_ID" property="repaymentPlanId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="PRINCIPAL" property="principal" />
+		<result column="INTEREST" property="interest" />
+		<result column="PAID_PRINCIPAL" property="paidPrincipal" />
+		<result column="PAID_INTEREST" property="paidInterest" />
+		<result column="REMAINING" property="remaining" />
+		<result column="ACCOUNT_REMAINING" property="accountRemaining" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+        <result column="SORTNO" property="sortno" />
+        <result column="PAID_TAG" property="paidTag"/>
+	</resultMap>
+
+
+    <!--查询贷款的还款计划-->
+    <select id="queryLnRepaymentPlanById" resultMap="LnRepaymentPlanResult"  parameterClass="Integer">
+        select * from ln_repayment_plan WHERE loan_id = #loanId# order by sortno
+    </select>
+
+    <!--查询贷款还款计划分页 -->
+    <select id="queryLnRepaymentPlanListPage" resultMap="LnRepaymentPlanResult" parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select * from ln_repayment_plan where loan_id = #loanId#
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow#
+                ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <!--
+        order by sortno
+        -->
+        order by plan_date
+    </select>
+
+    <!--查询还款计划总数 -->
+    <select id="queryLnRepaymentPlanCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(1) from ln_repayment_plan where loan_id =#loanId#
+    </select>
+
+    <!--查询本期还款计划-->
+    <select id="selectCurLnRepaymentPlanById" resultMap="LnRepaymentPlanResult" parameterClass="Integer">
+		 select * from ln_repayment_plan 
+		where plan_date =  (select max(plan_date) from ln_repayment_plan where loan_id = #loanId# )
+		and loan_id =#loanId#  order by sortno desc  fetch first 1 rows only
+    </select>
+
+    <!--查询本期还款计划 kang-->
+    <select id="getCurrentNoRepaymentPlan" resultMap="LnRepaymentPlanResult" parameterClass="Integer">
+        select * from ln_repayment_plan where loan_id = #loanId# and paid_tag = '0' order by sortno fetch first 1 rows only
+    </select>
+
+    <update id="updateLnRepaymentPlanById" parameterClass="LnRepaymentPlan">
+
+        update ln_repayment_plan set REPAYMENT_PLAN_ID = #repaymentPlanId#
+        <isNotEmpty property="planDate" prepend=",">
+            PLAN_DATE=#planDate#
+        </isNotEmpty>
+        <isNotEmpty property="principal" prepend=",">
+            PRINCIPAL=#principal#
+        </isNotEmpty>
+        <isNotEmpty property="interest" prepend=",">
+            INTEREST=#interest#
+        </isNotEmpty>
+        <isNotEmpty property="remaining" prepend=",">
+            REMAINING=#remaining#
+        </isNotEmpty>
+        <isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE=#updateDate#
+        </isNotEmpty>
+        <isNotEmpty property="paidPrincipal" prepend=",">
+            PAID_PRINCIPAL=#paidPrincipal#
+        </isNotEmpty>
+        <isNotEmpty property="paidInterest" prepend=",">
+            PAID_INTEREST=#paidInterest#
+        </isNotEmpty>
+        <isNotEmpty property="paidTag" prepend=",">
+            PAID_TAG=#paidTag#
+        </isNotEmpty>
+        <isNotEmpty property="accountRemaining" prepend=",">
+            ACCOUNT_REMAINING=#accountRemaining#
+        </isNotEmpty>
+        WHERE 1=1
+        <isNotEmpty property="repaymentPlanId" prepend="and">
+            REPAYMENT_PLAN_ID=#repaymentPlanId#
+        </isNotEmpty>
+    </update>
+
+    <!--新增贷款-->
+    <insert id="addRepaymentPlan" parameterClass="LnRepaymentPlan">
+        INSERT INTO LN_REPAYMENT_PLAN
+         (
+          REPAYMENT_PLAN_ID,
+          LOAN_ID,
+          PLAN_DATE,
+          PRINCIPAL,
+          INTEREST,
+          PAID_PRINCIPAL,
+          PAID_INTEREST,
+          REMAINING,
+          SORTNO,
+          CREATE_DATE,
+          CREATE_USER,
+          PAID_TAG
+         )
+         VALUES
+         (
+          #repaymentPlanId:INTEGER#,
+          #loanId:INTEGER#,
+          #planDate:TIMESTAMP#,
+          #principal:DECIMAL#,
+          #interest:DECIMAL#,
+          #paidPrincipal:DECIMAL#,
+          #paidInterest:DECIMAL#,
+          #remaining:DECIMAL#,
+          #sortno:INTEGER#,
+          #createDate:TIMESTAMP#,
+          #createUser:INTEGER#,
+          #paidTag:VARCHAR#
+         )
+        <selectKey keyProperty="repaymentPlanId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_LN_REPAYMENT_PLAN
+        </selectKey>
+    </insert>
+
+    <!--得到贷款的最后一期还款期号-->
+    <select id="getLastSortNoByLoanId" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+        select sortno from ln_repayment_plan
+        where loan_id=#loanId#
+        order by sortno desc fetch first 1 rows only
+    </select>
+    
+    <!--得到贷款的下一期还款期号-->
+    <select id="getNextSortNoByLoanId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select sortno from ln_repayment_plan
+        where loan_id=#loanId#
+        and sortno > #sortno#
+        order by sortno asc fetch first 1 rows only
+    </select>
+
+    <delete id="deletePlanByLoanId" parameterClass="java.lang.Integer">
+        DELETE FROM LN_REPAYMENT_PLAN WHERE LOAN_ID=#loanId#
+    </delete>
+</sqlMap>
+
+
+
+

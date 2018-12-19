@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MapCustomerGpsSQL">
+    <typeAlias alias="MapCustomerGps" type="com.banger.mobile.domain.model.map.MapCustomerGps" />
+
+    <resultMap class="MapCustomerGps" id="MapCustomerGpsResult">
+        <result column="CUSTOMER_NAME" property="customerName" />
+        <result column="CUSTOMER_TITLE" property="customerTitle" />
+        <result column="ADDRESS" property="address" />
+        <result column="USER_NAME" property="userName" />
+        <result column="PHONENO" property="phoneNo" />
+        <result column="CUSTOMER_GPS_ID" property="customerGpsId" />
+        <result column="CUSTOMER_ID" property="customerId" />
+        <result column="GPS_LNG" property="gpsLng" />
+        <result column="GPS_LAT" property="gpsLat" />
+        <result column="IS_NOGOOD" property="isNogood" />
+    </resultMap>
+
+    <insert id="addMapCustomerGps" parameterClass="MapCustomerGps">
+        <![CDATA[
+		insert into MAP_CUSTOMER_GPS
+		(
+		 CUSTOMER_GPS_ID,
+		 CUSTOMER_ID,
+		 GPS_LNG,
+		 GPS_LAT,
+		 REMARK,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#customerGpsId#,
+        #customerId#,
+        #gpsLng#,
+        #gpsLat#,
+	    #remark#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+        <selectKey keyProperty="customerGpsId" resultClass="java.lang.Integer"
+                   type="pre">
+            values NEXTVAL for SEQ_MAP_CUSTOMER_GPS
+        </selectKey>
+    </insert>
+
+    <!-- 客户GPS记录修改-->
+    <update id="updateMapCustomerGps" parameterClass="MapCustomerGps">
+        <![CDATA[
+             update MAP_CUSTOMER_GPS  set
+		 ]]>
+        <isNotEmpty property="gpsLng">
+            GPS_LNG=#gpsLng#,
+        </isNotEmpty>
+        <isNotEmpty property="gpsLat">
+            GPS_LAT=#gpsLat#,
+        </isNotEmpty>
+        <![CDATA[
+				UPDATE_DATE=current timestamp
+			where CUSTOMER_ID=#customerId#
+         ]]>
+    </update>
+
+    <!-- 客户GPS位置，根据客户姓名、客户联系电话查询 -->
+    <select id="getCustomerGpsByCondition" resultMap="MapCustomerGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from  CRM_CUSTOMER a
+            left join MAP_CUSTOMER_GPS c on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0 AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[ a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="userId">
+            <![CDATA[ a.BELONG_USER_ID = #userId# ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LNG=(select GPS_LNG from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LAT=(select GPS_LAT from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="address">
+            <![CDATA[ a.ADDRESS like '%$address$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="customerId">
+            <![CDATA[ a.CUSTOMER_ID =#customerId#  ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+    </select>
+
+
+    <!-- 客户GPS位置，根据客户地址进行查询 -->
+    <select id="getCustomerGpsByAddress" resultMap="MapCustomerGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from  MAP_CUSTOMER_GPS c
+            left join CRM_CUSTOMER a on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0    and  a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) ))  AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LNG=(select GPS_LNG from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LAT=(select GPS_LAT from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="address">
+            <![CDATA[ a.ADDRESS like '%$address$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="customerId">
+            <![CDATA[ a.CUSTOMER_ID =#customerId#  ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 客户GPS位置，根据地图的西南，东北坐标进行查询 -->
+    <select id="initCustomerGpsPage" resultMap="MapCustomerGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from  MAP_CUSTOMER_GPS c
+            left join CRM_CUSTOMER a on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0   and a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) AND a.IS_TRASH =0
+            and c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+            and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$'
+		]]>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' )) ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 客户GPS位置，根据客户地址进行查询 -->
+    <select id="getPadCustomerGpsByCondition" resultMap="MapCustomerGpsResult"  parameterClass="java.util.Map">
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from  CRM_CUSTOMER a
+            left join MAP_CUSTOMER_GPS c on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0  AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[ a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' ) or a.ADDRESS like '%$customerName$%') ]]>
+        </isNotEmpty>
+    </select>
+
+
+
+    <!-- 客户GPS位置，根据坐标查询 -->
+    <select id="getMapCustomerGpsListCount" resultClass="java.lang.Integer"  parameterClass="java.util.Map">
+        <![CDATA[
+			select count(*)
+            from CRM_CUSTOMER a
+            left join MAP_CUSTOMER_GPS c on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0  AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' )) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="userId">
+            <![CDATA[ a.BELONG_USER_ID = #userId# ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LNG=(select GPS_LNG from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LAT=(select GPS_LAT from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="address">
+            <![CDATA[ a.ADDRESS like '%$address$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="customerId">
+            <![CDATA[ a.CUSTOMER_ID =#customerId#  ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 客户GPS位置，根据坐标查询 -->
+    <select id="getMapCustomerGpsList" resultMap="MapCustomerGpsResult"  parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from CRM_CUSTOMER a
+            left join MAP_CUSTOMER_GPS c on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0   AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' )) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="userId">
+            <![CDATA[ a.BELONG_USER_ID = #userId# ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LNG=(select GPS_LNG from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LAT=(select GPS_LAT from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="customerId">
+            <![CDATA[ a.CUSTOMER_ID =#customerId#  ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="address">
+            <![CDATA[ a.ADDRESS like '%$address$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="InChargeUserIds">
+            <![CDATA[a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+
+    <!-- 客户GPS位置，根据坐标查询 -->
+    <select id="getScaningCustomerListCount" resultClass="java.lang.Integer"  parameterClass="java.util.Map">
+        <![CDATA[
+			select count(*)
+            from MAP_CUSTOMER_GPS c
+            left join CRM_CUSTOMER a on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0   and a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) ))  AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LNG=(select GPS_LNG from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LAT=(select GPS_LAT from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="address">
+            <![CDATA[ a.ADDRESS like '%$address$%' ]]>
+        </isNotEmpty>
+    </select>
+
+    <!-- 客户GPS位置，根据坐标查询 -->
+    <select id="getScaningCustomerList" resultMap="MapCustomerGpsResult"  parameterClass="java.util.Map">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from MAP_CUSTOMER_GPS c
+            left join CRM_CUSTOMER a on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0   and a.BELONG_USER_ID in (select  user_id  from   SYS_TEAM_USER    where   team_id in (select   team_id   from   SYS_TEAM_USER  where  user_id in ($InChargeUserIds$) )) AND a.IS_TRASH =0
+		]]>
+        <isNotEmpty prepend="and" property="customerName">
+            <![CDATA[  (a.CUSTOMER_NAME like '%$customerName$%'or(a.MOBILE_PHONE1 like '%$customerName$%'
+            or a.MOBILE_PHONE2 like '%$customerName$%'
+            or a.PHONE like '%$customerName$%' or a.FAX like '%$customerName$%' )) ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginGpsLng">
+            <![CDATA[  c.GPS_LNG between '$beginGpsLng$' and '$endGpsLng$'
+                   and c.GPS_LAT between '$beginGpsLat$' and '$endGpsLat$' ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LNG=(select GPS_LNG from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="gpsId">
+            <![CDATA[ c.GPS_LAT=(select GPS_LAT from MAP_CUSTOMER_GPS where CUSTOMER_GPS_ID=#gpsId#) ]]>
+        </isNotEmpty>
+        <isNotEmpty  prepend="and" property="address">
+            <![CDATA[ a.ADDRESS like '%$address$%' ]]>
+        </isNotEmpty>
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+    <!-- 客户GPS位置，根据ID查询 -->
+    <select id="getCustomerGpsById" resultMap="MapCustomerGpsResult"  parameterClass="java.lang.Integer">
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from MAP_CUSTOMER_GPS c
+            left join CRM_CUSTOMER a on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0 and c.CUSTOMER_GPS_ID=#id#
+		]]>
+    </select>
+    
+    
+    <select id="getCustomerGpsByCustomerId" resultMap="MapCustomerGpsResult"  parameterClass="java.lang.Integer">
+        <![CDATA[
+			select a.IS_NOGOOD,a.CUSTOMER_NAME,a.CUSTOMER_TITLE,a.ADDRESS,b.USER_NAME,c.CUSTOMER_GPS_ID,a.CUSTOMER_ID,c.GPS_LNG,c.GPS_LAT,
+            CASE
+            WHEN DEFAULT_PHONE_TYPE=1  THEN a.MOBILE_PHONE1
+            WHEN DEFAULT_PHONE_TYPE=2  THEN a.MOBILE_PHONE2
+            WHEN DEFAULT_PHONE_TYPE=3  THEN a.PHONE
+            WHEN DEFAULT_PHONE_TYPE=4  THEN a.FAX
+            END as PHONENO
+            from MAP_CUSTOMER_GPS c
+            left join CRM_CUSTOMER a on c.CUSTOMER_ID=a.CUSTOMER_ID
+            left join SYS_USER b on a.BELONG_USER_ID=b.USER_ID
+            where a.IS_DEL = 0 and c.CUSTOMER_ID=#customerId#
+		]]>
+    </select>
+    
+	
+</sqlMap>

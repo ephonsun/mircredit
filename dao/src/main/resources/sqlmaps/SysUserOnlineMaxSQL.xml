@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysUserOnlineMaxSQL">
+	<typeAlias alias="SysUserOnlineMax" type="com.banger.mobile.domain.model.user.SysUserOnlineMax" />
+	
+	<!-- 峰值用户表-->
+	<!-- SysUserOnlineMaxSQL信息全字段  -->
+	<resultMap class="SysUserOnlineMax" id="SysUserOnlineMaxResult">
+		<result column="USER_ONLINE_MAX_ID" property="userOnlineMaxId" />
+		<result column="MAX_NUM" property="maxNum" />
+		<result column="MAX_DATE" property="maxDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条峰值用户-->
+	<insert id="addSysUserOnlineMax" parameterClass="SysUserOnlineMax">
+     <![CDATA[
+		insert into SYS_USER_ONLINE_MAX
+		(
+		 USER_ONLINE_MAX_ID,
+		 MAX_NUM,
+		 MAX_DATE,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#userOnlineMaxId#,
+		#maxNum#,
+	    #maxDate#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="userOnlineMaxId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_USER_ONLINE_MAX 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 峰值用户修改-->
+	<update id="updateSysUserOnlineMax" parameterClass="SysUserOnlineMax">
+	 <![CDATA[
+             update SYS_USER_ONLINE_MAX  set 
+		 ]]>	
+		 <isNotEmpty property="maxNum">
+				MAX_NUM=#maxNum#,
+		 </isNotEmpty>
+		 <isNotEmpty property="maxDate">
+				MAX_DATE=#maxDate#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where USER_ONLINE_MAX_ID=#userOnlineMaxId#
+         ]]> 
+	</update>
+	
+  
+  <!-- 根据id得到峰值用户-->	
+  <select id="getSysUserOnlineMaxById"  resultMap="SysUserOnlineMaxResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_USER_ONLINE_MAX 	where USER_ONLINE_MAX_ID=#USER_ONLINE_MAX_ID#
+	]]>
+  </select>
+
+  <select id="getSysUserOnlineMaxList" resultMap="SysUserOnlineMaxResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_USER_ONLINE_MAX 
+	]]>
+  </select>
+</sqlMap>
+
+
+
+

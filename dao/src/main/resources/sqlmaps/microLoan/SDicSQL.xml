@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SDicSQL">
+    <typeAlias alias="BaseSDic" type="com.banger.mobile.domain.model.loan.BaseSDic"/>
+    
+    <!--S_DIC表的全字段-->
+    <resultMap id="BaseSDicResult" class="BaseSDic">
+        <result property="pk1" column="PK1"/>
+        <result property="cnname" column="CNNAME"/>
+        <result property="enname" column="ENNAME"/>
+        <result property="type1" column="TYPE1"/>
+        <result property="property" column="PROPERTY"/>
+        <result property="memo" column="MEMO"/>
+        <result property="flag" column="FLAG"/>
+    </resultMap>
+
+    <select id="queryDic" resultMap="BaseSDicResult">
+        SELECT * FROM S_DIC
+    </select>
+
+    <select id="queryDicByType" parameterClass="java.util.Map" resultMap="BaseSDicResult">
+        SELECT * FROM S_DIC WHERE 1=1
+        <isNotEmpty property="type" prepend="and">
+            TYPE1 = #type# ORDER BY ENNAME
+        </isNotEmpty>
+    </select>
+
+</sqlMap>

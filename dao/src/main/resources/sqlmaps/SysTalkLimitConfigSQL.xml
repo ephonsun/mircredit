@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysTalkLimitConfigSQL">
+	<typeAlias alias="BaseSysTalklimitConfig"
+		type="com.banger.mobile.domain.model.base.system.BaseSysTalklimitConfig" />
+	
+	<typeAlias alias="SysTalkLimitConfig"
+		type="com.banger.mobile.domain.model.system.SysTalklimitConfig" />
+		
+	<!-- 有效通话量配置表-->
+	<!-- SysTalkLimitConfigSQL信息全字段 -->
+	<resultMap class="BaseSysTalklimitConfig" id="BaseSysTalkLimitConfigResult">
+		<result column="TALKLIMIT_CONIF_ID" property="talklimitConifId" />
+		<result column="USER_ID" property="userid" />
+		<result column="TOPLIMIT" property="toplimit" />
+		<result column="LOWERLIMIT" property="lowerlimit" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+	</resultMap>
+	
+	<resultMap class="SysTalkLimitConfig" id="SysTalkLimitConfigResult" extends="BaseSysTalkLimitConfigResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_NAME" property="deptName" />
+	</resultMap>
+	
+	<!-- 返回所有有效通话量配置 -->
+	<select id="getTalkLimitConfigs" resultMap="SysTalkLimitConfigResult">
+	    <![CDATA[
+	    	SELECT a.*,b.ACCOUNT as USER_NAME,c.DEPT_NAME FROM SYS_TALKLIMIT_CONFIG a INNER JOIN SYS_USER b   ON a.USER_ID = b.USER_ID
+		INNER JOIN SYS_DEPT c ON b.DEPT_ID = c.DEPT_ID ORDER BY c.DEPT_PARENT_ID,c.SORTNO,b.ACCOUNT
+	    ]]>
+	</select>
+	
+	<!-- 查询有效通话量配置 -->
+	<select id="getTalkLimitConfig" resultMap="BaseSysTalkLimitConfigResult" parameterClass="java.lang.Integer">
+	    <![CDATA[
+	    	SELECT * FROM SYS_TALKLIMIT_CONFIG WHERE USER_ID = #userid#
+	    ]]>
+	</select>
+	
+	<!-- 添加有效通话量配置 -->
+	<insert id="insertTalkLimitConfig" parameterClass="BaseSysTalklimitConfig">
+		<![CDATA[
+		    INSERT INTO SYS_TALKLIMIT_CONFIG
+		    (
+		    	TALKLIMIT_CONIF_ID,
+		    	USER_ID,
+		    	TOPLIMIT,
+		    	LOWERLIMIT,
+		    	CREATE_DATE
+		    ) 
+		    VALUES
+		    (
+		    	#talklimitConifId#,
+		    	#userid#,
+		    	#toplimit#,
+		    	#lowerlimit#,
+		    	current timestamp
+		    )
+	    ]]>
+	    <selectKey keyProperty="talklimitConifId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_TALKLIMIT_CONFIG 
+		</selectKey>
+	</insert>
+	
+	<!--修改通话量配置-->
+	<update id="updateTalkLimitConfig" parameterClass="BaseSysTalklimitConfig">
+		<![CDATA[	
+		UPDATE SYS_TALKLIMIT_CONFIG 
+		SET 
+		  USER_ID = #userid#, 
+		  TOPLIMIT = #toplimit#,
+		  LOWERLIMIT = #lowerlimit#,
+		  UPDATE_DATE = current timestamp
+		WHERE 
+		  TALKLIMIT_CONIF_ID = #talklimitConifId#
+		  ]]>
+	</update>
+	
+	<!--删除通话量配置-->
+	<update id="deleteTalkLimitConfig" parameterClass="java.lang.String">
+		<![CDATA[	
+		DELETE FROM SYS_TALKLIMIT_CONFIG 
+		  ]]>
+		<dynamic prepend="where">
+  		<isNotEmpty prepend="and" property="talklimitConifId">
+  			TALKLIMIT_CONIF_ID IN (#talklimitConifId#)
+  		</isNotEmpty>
+  	</dynamic>
+	</update>
+	
+	<!--有效通话量配置开关-->
+	<update id="updateTalkLimitConfigRun" parameterClass="java.lang.String">
+		<![CDATA[	
+		UPDATE SYS_PARAM 
+		SET 
+		  PARAM_VALUE = #VALUE#, 
+		  UPDATE_DATE = current timestamp
+		WHERE 
+		  PARAM_KEY = 'TALK_LIMIT_CONFIG'
+		  ]]>
+	</update>
+	
+	<!-- 返回有效通话量配置开关 -->
+	<select id="getIsTalkLimitConfigRun"
+			resultClass="java.lang.String">
+	    <![CDATA[
+	    	SELECT PARAM_VALUE FROM SYS_PARAM WHERE PARAM_KEY = 'TALK_LIMIT_CONFIG'
+	    ]]>
+	</select>
+	
+	
+	<!-- 查询昨天通话量 -->
+	<select id="getLastDayTalkCount" parameterClass="java.lang.Integer"
+			resultClass="java.lang.Integer">
+	    <![CDATA[
+	    	SELECT COUNT(1) FROM REC_RECORD_INFO WHERE USER_ID=#ID# AND CALL_TYPE IN (1,2) AND START_DATE <= timestamp(date(current date - 2 day) || ' 23:59:59') AND 
+			START_DATE >= timestamp(date(current date -  2 day) || ' 00:00:01') 
+	    ]]>
+	</select>
+</sqlMap>

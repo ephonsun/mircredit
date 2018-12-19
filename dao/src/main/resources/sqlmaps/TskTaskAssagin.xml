@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="AssignTaskBeanSQL">
+	<typeAlias alias="AssignTaskBean"
+		type="com.banger.mobile.domain.model.task.AssignTaskBean" />
+	
+	<typeAlias alias="TskTaskReportBean"
+		type="com.banger.mobile.domain.model.task.TskTaskReportBean" />
+
+	<!-- 分配营销任务统计 -->
+	<resultMap class="AssignTaskBean" id="AssignTaskBeanResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="ID" property="id" />
+		<result column="PARENT_ID" property="parentId"/>
+		<result column="TEXT_NAME" property="textName"/>
+		<result column="TYPE" property="type" />
+		<result column="TARGET_MONEY" property="targetMoney" />
+		<result column="ASSIGNED_MONEY" property="assignedMoney" />
+		<result column="UNASSIGN_MONEY" property="unAssignMoney" />
+		<result column="TASK_RATE" property="taskRate" />
+		<result column="BUY_MONEY" property="buyMoney"/>
+		<result column="FINISH_RATE" property="finishRate"/>
+	</resultMap>
+	
+	<!-- 任务完成统计报表 -->
+	<resultMap class="TskTaskReportBean" id="TskTaskReportBeanResult">
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="TASK_COUNT" property="taskCount"/>
+		<result column="FINISH_COUNT" property="finishCount"/>
+		<result column="UNFINISH_COUNT" property="unFinishCount" />
+		<result column="EXPIRED_COUNT" property="expiredCount" />
+		<result column="FINISH_RATE" property="finishRate" />
+		<result column="UNFINISH_RATE" property="unFinishRate" />
+		<result column="EXPIRED_RATE" property="expiredRate" />
+	</resultMap>
+	
+	<!-- 分配营销任务 -->
+	<select id="GetAssignTaskList" resultMap="AssignTaskBeanResult" parameterClass="java.util.Map">
+		<![CDATA[
+		select Z.*,
+		(
+		    CASE WHEN Z.TARGET_MONEY=0 THEN 0.0
+		    ELSE cast(Z.BUY_MONEY/Z.TARGET_MONEY*1.0*100 as decimal(18,2))
+		    END
+		) as FINISH_RATE
+		from(
+			select TZ.*,
+			(
+			    case when TZ.ID=3 THEN (select case when SUM(BUY_MONEY) is null then 0 else SUM(BUY_MONEY) end from table(getProductTotal($taskId$)))
+			    ELSE (
+			          CASE WHEN TZ.TYPE='D' THEN (select case when SUM(BUY_MONEY) is null then 0 else SUM(BUY_MONEY) end from table(getProductTotal($taskId$)) as PDT 
+						     WHERE BELONG_USER_ID IN(select USER_ID from SYS_USER WHERE DEPT_ID IN(SELECT * FROM TABLE(GETdEPT_ID_FUN(TZ.ID))))) 
+						ELSE (case when P.BUY_MONEY is null then 0.0 else P.BUY_MONEY end) END
+			    ) END
+			) AS BUY_MONEY
+			from (
+				SELECT DT.*,
+				(DT.TARGET_MONEY-DT.ASSIGNED_MONEY) AS UNASSIGN_MONEY,
+				cast(sum(DT.TARGET_MONEY/($targetMoney$)*1.0)*100 as decimal(18,2)) as TASK_RATE
+				FROM( 
+					select 
+					dtree.ID,dtree.PARENT_ID,dtree.TEXT_NAME,dtree.TYPE,task.TASK_ID,
+				    (
+			            CASE when dtree.ID=3 then (select TARGET_MONEY from TSK_TASK WHERE TASK_ID=$taskId$) 
+			            ELSE(
+			                case when dtree.TYPE='D' then (select distinct DEPT_TARGET_MONEY from TSK_TASK where PARENT_TASK_ID=$taskId$ and EXECUTE_DEPT_ID=dtree.ID fetch first 1 rows only) else
+			                (
+			                    CASE WHEN dtree.TYPE='U' THEN task.TARGET_MONEY ELSE 0 END
+			                )end
+			            ) END
+			        ) AS TARGET_MONEY,
+			        (
+			        	CASE when dtree.TYPE='D' 
+                             then (
+                                SELECT *FROM TABLE(SUM_ASSIGN_MONEY($taskId$,dtree.ID))
+                             ) 
+                        else 0 end
+		        	) AS ASSIGNED_MONEY 
+					from (
+						SELECT * FROM DEPT_USER_TREE_VIEW      
+				                where ID in(select EXECUTE_USER_ID as userId from TSK_TASK where PARENT_TASK_ID=$taskId$)               
+				                UNION ALL    
+				                SELECT * FROM DEPT_USER_TREE_VIEW 
+				                where ID in(
+				                      select distinct d1.DEPT_ID from SYS_DEPT as d1 
+				                      inner join(
+				                           select dept.DEPT_ID,dept.DEPT_PARENT_ID from SYS_DEPT as dept 
+				                           where dept.DEPT_ID in(
+				                              select users.DEPT_ID from SYS_USER as users 
+				                              where users.IS_DEL=0 AND users.IS_ACTIVED=1 AND users.USER_ID in(select EXECUTE_USER_ID as userId from TSK_TASK where PARENT_TASK_ID=$taskId$)
+				                           )
+				                      ) as d2
+				                      on d2.DEPT_ID=d1.DEPT_ID or (d2.DEPT_PARENT_ID=d1.DEPT_ID)
+				                )
+				                order by ID asc 
+					) as dtree
+				    left join(
+				       select EXECUTE_USER_ID,TARGET_MONEY,TASK_ID from TSK_TASK WHERE TASK_ID=$taskId$ or PARENT_TASK_ID=$taskId$ 
+				    ) AS task on task.EXECUTE_USER_ID=dtree.ID
+				    group by dtree.ID,dtree.PARENT_ID,dtree.TEXT_NAME,dtree.TYPE,TARGET_MONEY,TASK_ID
+			    ) as DT 
+			    GROUP BY DT.ID,DT.PARENT_ID,DT.TEXT_NAME,DT.TYPE,DT.TARGET_MONEY,DT.ASSIGNED_MONEY,DT.TASK_ID) as TZ
+			left join(
+			    select * from table(getProductTotal($taskId$))
+			) as P on TZ.ID=P.BELONG_USER_ID) as Z
+			where Z.ID IN($deptUserIds$) 
+		group by Z.ID,Z.PARENT_ID,Z.TEXT_NAME,Z.TYPE,Z.TARGET_MONEY,Z.ASSIGNED_MONEY,Z.TASK_ID,Z.UNASSIGN_MONEY,Z.TASK_RATE,BUY_MONEY 
+		order by TYPE asc
+		]]>
+	</select>
+	
+	<!-- 编辑任务目标额(针对客户经理) -->
+	<update id="UpdateTargetAmount" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE TSK_TASK SET TARGET_MONEY=#targetMoney#,TASK_STATUS=$taskStatus$ WHERE TASK_ID=#taskId#
+		]]>
+	</update>
+	
+	<!-- 编辑任务目标额(针对机构) -->
+	<update id="UpdateTargetDept" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE TSK_TASK SET DEPT_TARGET_MONEY=#deptTargetMoney# WHERE PARENT_TASK_ID=#taskId# and EXECUTE_DEPT_ID=#executeDeptId#
+		]]>
+	</update>
+	
+	<!-- 任务完成统计报表 -->
+	<select id="GetTaskReportList" parameterClass="java.util.Map" resultMap="TskTaskReportBeanResult">
+		<![CDATA[
+			SELECT UC.* ,
+			(CASE WHEN UC.TASK_COUNT=0 THEN 0 ELSE cast(UC.FINISH_COUNT*1.0/UC.TASK_COUNT*100 as decimal(18,0))END)as FINISH_RATE,
+			(CASE WHEN UC.TASK_COUNT=0 THEN 0 ELSE cast(UC.UNFINISH_COUNT*1.0/UC.TASK_COUNT*100 as decimal(18,0))END)as UNFINISH_RATE,
+			(CASE WHEN UC.TASK_COUNT=0 THEN 0 ELSE cast(UC.EXPIRED_COUNT*1.0/UC.TASK_COUNT*100 as decimal(18,0))END)as EXPIRED_RATE
+			FROM(
+			select U.USER_ID,U.USER_NAME,
+			    CASE WHEN C.TASK_COUNT IS NOT NULL THEN C.TASK_COUNT ELSE 0 END AS TASK_COUNT,
+			    CASE WHEN C.FINISH_COUNT IS NOT NULL THEN C.FINISH_COUNT ELSE 0 END FINISH_COUNT,
+			    CASE WHEN C.UNFINISH_COUNT IS NOT NULL THEN C.UNFINISH_COUNT ELSE 0 END AS UNFINISH_COUNT,
+			    CASE WHEN C.EXPIRED_COUNT IS NOT NULL THEN C.EXPIRED_COUNT  ELSE 0 END AS EXPIRED_COUNT
+			from SYS_USER as U 
+			left join(
+			    SELECT users.USER_ID,users.USER_NAME,
+			        count(T.TASK_ID) as TASK_COUNT,
+			        count(T2.TASK_ID) as FINISH_COUNT,
+			        count(T3.TASK_ID) as UNFINISH_COUNT,
+			        count(T4.TASK_ID) as EXPIRED_COUNT
+			    FROM TSK_TASK AS task
+			    inner join(
+			    select TASK_ID from TSK_TASK WHERE IS_DEL=0 AND PARENT_TASK_ID=0 AND TASK_STATUS<>2 
+		]]>
+		<isNotEmpty property="taskType">
+			<![CDATA[ and TASK_TYPE IN($taskType$)  ]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<![CDATA[
+			    ) as T
+			    on T.TASK_ID=task.PARENT_TASK_ID
+			    LEFT JOIN(
+			    select TASK_ID from TSK_TASK WHERE IS_DEL=0 AND PARENT_TASK_ID=0 AND TASK_STATUS=1 
+		]]>
+		<isNotEmpty property="taskType">
+			<![CDATA[ and TASK_TYPE IN($taskType$)  ]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<![CDATA[	    
+			    ) AS T2
+			    ON T2.TASK_ID=task.PARENT_TASK_ID
+			    LEFT JOIN(
+			    select TASK_ID from TSK_TASK WHERE IS_DEL=0 AND PARENT_TASK_ID=0 AND TASK_STATUS=0 
+		]]>
+		<isNotEmpty property="taskType">
+			<![CDATA[ and TASK_TYPE IN($taskType$)  ]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<![CDATA[
+			    ) AS T3
+			    ON T3.TASK_ID=task.PARENT_TASK_ID
+			    LEFT JOIN(
+			    select TASK_ID from TSK_TASK WHERE IS_DEL=0 AND PARENT_TASK_ID=0 AND END_DATE<'$currDate$' and TASK_STATUS=0
+		]]>
+		<isNotEmpty property="taskType">
+			<![CDATA[ and TASK_TYPE IN($taskType$)  ]]>
+		</isNotEmpty>
+		<isNotEmpty property="executeDateSearch">
+				<![CDATA[ $executeDateSearch$ ]]>
+		</isNotEmpty>
+		<![CDATA[
+			    ) AS T4
+			    ON T4.TASK_ID=task.PARENT_TASK_ID
+			    left join SYS_USER as users on users.USER_ID=task.EXECUTE_USER_ID
+			    GROUP BY users.USER_ID,users.USER_NAME
+			) as C
+			on C.USER_ID=U.USER_ID
+			WHERE 
+			U.USER_ID IN($userIds$)
+			 OR (U.USER_ID IN(select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  where b.ROLE_ID in (3,4)))
+			) as UC 
+		]]>
+		<isNotEmpty property="userId">
+			<![CDATA[ WHERE UC.USER_ID IN($userId$)]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

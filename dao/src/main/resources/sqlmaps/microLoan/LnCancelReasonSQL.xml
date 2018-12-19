@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnCancelReasonSQL">
+	<typeAlias alias="LnCancelReason"
+		type="com.banger.mobile.domain.model.loan.LnCancelReason" />
+
+	<!--LnCancelReason全字段 -->
+	<resultMap id="LnCancelReasonResult" class="LnCancelReason">
+		<result column="CANCEL_REASON_ID" property="cancelReasonId" />
+		<result column="CANCEL_REASON_NAME" property="cancelReasonName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<select id="getCancelReasonList" resultMap="LnCancelReasonResult">
+		SELECT * FROM
+		             LN_CANCEL_REASON
+		        WHERE 
+		             IS_DEL=0  ORDER BY SORTNO
+	</select>
+	
+	
+	<!-- 增加撤销原因 -->
+	<insert id="insertCancelReason" parameterClass="LnCancelReason">
+	   <![CDATA[
+	    INSERT INTO LN_CANCEL_REASON (
+	           CANCEL_REASON_ID,
+	           CANCEL_REASON_NAME,
+	           IS_DEL,
+	           IS_ACTIVED,
+	           SORTNO,
+	           CREATE_DATE,
+	           CREATE_USER
+	    )
+	    VALUES(
+	        $cancelReasonId$,
+	        #cancelReasonName#,
+	        0,
+	        1,
+	        (select max(SORTNO)+1 from LN_CANCEL_REASON),
+	        current timestamp,
+	        #createUser#
+	    )
+	   ]]>
+	   <selectKey keyProperty="cancelReasonId" resultClass="java.lang.Integer" type="pre">
+	      VALUES NEXTVAL FOR SEQ_LN_CANCEL_REASON
+	   </selectKey>
+	</insert>
+	
+	<!--删除撤销原因 -->
+	<update id="deleteCancelReason" parameterClass="java.lang.Integer">
+	  <![CDATA[
+	    UPDATE LN_CANCEL_REASON SET IS_DEL=1 , UPDATE_DATE=current timestamp WHERE CANCEL_REASON_ID=#cancelReasonId#
+	   ]]>
+	</update>
+	
+	<!-- 修改撤销原因 -->
+	 <update id="updateCancelReason" parameterClass="LnCancelReason">
+	   <![CDATA[
+	    UPDATE  LN_CANCEL_REASON SET
+	   ]]>
+	   <isNotEmpty property="cancelReasonName">
+	     CANCEL_REASON_NAME=#cancelReasonName#,
+	   </isNotEmpty>
+	   <isNotEmpty property="isActived">
+	     IS_ACTIVED=#isActived#,
+	   </isNotEmpty>
+	   <isNotEmpty property="sortNo">
+	     SORTNO=#sortNo#,
+	   </isNotEmpty>
+	   <isNotEmpty property="remark">
+	     REMARK=#remark#,
+	   </isNotEmpty>
+	   <![CDATA[
+	     UPDATE_DATE=current timestamp
+	     WHERE  CANCEL_REASON_ID=#cancelReasonId#
+	   ]]>
+	 </update>
+	 
+	 <!-- 根据Id获取撤销原因 -->
+	 <select id="selCancelReasonById" parameterClass="java.lang.Integer" resultMap="LnCancelReasonResult">
+	   <![CDATA[
+	    SELECT * FROM LN_CANCEL_REASON WHERE CANCEL_REASON_ID=#id# AND IS_DEL=0 
+	   ]]>
+	 </select>
+	 
+	 <!-- 根据Name获取撤销原因 -->
+	 <select id="selCancelReasonByName" parameterClass="java.util.Map" resultMap="LnCancelReasonResult">
+	  <![CDATA[
+	   SELECT * FROM LN_CANCEL_REASON WHERE CANCEL_REASON_NAME=#lnCanReaName# AND IS_DEL=0 
+	  ]]>
+	   <isNotEmpty property="cancelReasonId" prepend="AND">
+		   <![CDATA[
+		   		CANCEL_REASON_ID <> $cancelReasonId$
+		   ]]>
+	   </isNotEmpty>
+	 </select>
+	 
+	 <!-- 根据sortNo获取CancelReason -->
+	 <select id="selCancelReasonBySortNo" parameterClass="java.lang.Integer" resultMap="LnCancelReasonResult">
+	  <![CDATA[
+	   SELECT * FROM LN_CANCEL_REASON WHERE SORTNO=#sortNo# AND IS_DEL=0 
+	  ]]>
+	 </select>
+    
+    <select id="selectCancelReasonById" parameterClass="java.lang.Integer" resultMap="LnCancelReasonResult">
+        SELECT * FROM LN_CANCEL_REASON WHERE CANCEL_REASON_ID=#cancelReasonId#
+    </select>
+</sqlMap>

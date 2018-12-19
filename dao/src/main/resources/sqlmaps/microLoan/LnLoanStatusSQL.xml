@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+   "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnLoanStatusSQL">
+   <typeAlias alias="LnLoanStatus" type="com.banger.mobile.domain.model.loan.LnLoanStatus" />
+
+   <resultMap class="LnLoanStatus" id="LnLoanStatusResult" >
+       <result column="LOAN_STATUS_ID" property="loanStatusId"/>
+       <result column="LOAN_STATUS_NAME" property="loanStatusName"/>
+       <result column="CREATE_DATE" property="createDate"/>
+       <result column="UPDATE_DATE" property="updateDate"/>
+       <result column="CREATE_USER" property="createUser"/>
+       <result column="UPDATE_USER" property="updateUser"/>
+   </resultMap>
+
+    <select id="getLoanStatusList" resultMap="LnLoanStatusResult">
+        SELECT * FROM LN_lOAN_STATUS ORDER BY LOAN_STATUS_ID
+    </select>
+
+
+    <select id="getLoanStatusName" parameterClass="java.lang.String" resultClass="java.lang.String">
+        SELECT LOAN_STATUS_NAME FROM LN_lOAN_STATUS WHERE LOAN_STATUS_ID=#loanStatusId#
+    </select>
+</sqlMap>

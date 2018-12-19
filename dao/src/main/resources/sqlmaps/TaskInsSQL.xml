@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TaskInsSQL">
+
+	<!-- 任务执行情况记录(任务实例信息) -->
+	<resultMap id="taskInsMap"
+		class="com.banger.mobile.domain.model.quartz.TaskIns">
+		<result property="id" column="ID" />
+		<result property="gmtCreate" column="GMT_CREATE" />
+		<result property="gmtModify" column="GMT_MODIFY" />
+		<result property="taskInsName" column="TASK_INS_NAME" />
+		<result property="className" column="CLASS_NAME" />
+		<result property="runStart" column="RUN_START" />
+		<result property="runEnd" column="RUN_END" />
+		<result property="runUseTime" column="RUN_USE_TIME" />
+		<result property="runMode" column="RUN_MODE" />
+		<result property="status" column="STATUS" />
+		<result property="description" column="DESCRIPTION" />
+	</resultMap>
+	
+	<insert id="insert_task_ins"
+		parameterClass="com.banger.mobile.domain.model.quartz.TaskIns">
+	<![CDATA[
+			insert into CRM_TASK_INS
+			(ID,GMT_CREATE,GMT_MODIFY,TASK_INS_NAME,CLASS_NAME,RUN_START,RUN_END,RUN_USE_TIME,RUN_MODE,STATUS,DESCRIPTION )values( #id#,
+			current timestamp,
+			current timestamp,
+			#taskInsName#,
+			#className#,
+			#runStart#,
+			#runEnd#,
+			#runUseTime#,
+			#runMode#,
+			#status#,
+			#description#
+			 )
+	]]>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_TASK_INS
+ 	</selectKey>
+	</insert>
+	
+	<typeAlias alias="taskIns" type="com.banger.mobile.domain.model.quartz.TaskIns"/>
+		<resultMap class="taskIns" id="taskInsResult">
+			<result column="ID" property="id"/>
+			<result column="GMT_CREATE" property="gmtCreate"/>
+			<result column="GMT_MODIFY" property="gmtModify"/>
+			<result column="TASK_INS_NAME" property="taskInsName"/>
+			<result column="CLASS_NAME" property="className"/>
+			<result column="RUN_START" property="runStart"/>
+			<result column="RUN_END" property="runEnd"/>
+			<result column="RUN_USE_TIME" property="runUseTime"/>
+			<result column="RUN_MODE" property="runMode"/>
+			<result column="STATUS" property="status"/>
+			<result column="DESCRIPTION" property="description"/>
+		</resultMap>
+	<!-- create TaskIns object -->
+	<insert id="addTaskIns" parameterClass="taskIns">
+	<![CDATA[
+			insert into CRM_TASK_INS
+			(ID,GMT_CREATE,GMT_MODIFY,TASK_INS_NAME,CLASS_NAME,RUN_START,RUN_END,RUN_USE_TIME,RUN_MODE,STATUS,DESCRIPTION )values( #id#,
+			#gmtCreate#,
+			#gmtModify#,
+			#taskInsName#,
+			#className#,
+			#runStart#,
+			#runEnd#,
+			#runUseTime#,
+			#runMode#,
+			#status#,
+			#description#
+			 )
+	]]>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_TASK_INS
+ 	</selectKey>
+	</insert>
+	<!-- update TaskIns object -->
+	<update id="editTaskIns" parameterClass="taskIns">
+	<![CDATA[
+			update CRM_TASK_INS set GMT_CREATE = #gmtCreate#,
+			GMT_MODIFY = #gmtModify#,
+			TASK_INS_NAME = #taskInsName#,
+			CLASS_NAME = #className#,
+			RUN_START = #runStart#,
+			RUN_END = #runEnd#,
+			RUN_USE_TIME = #runUseTime#,
+			RUN_MODE = #runMode#,
+			STATUS = #status#,
+			DESCRIPTION = #description#
+			 where ID = #id#
+			
+	]]>
+	</update>
+	<!-- delete TaskIns object -->
+	<delete id="removeTaskIns" parameterClass="java.lang.Integer">
+	<![CDATA[
+			delete from CRM_TASK_INS where CRM_TASK_INS.ID = #value# 
+	]]>
+	</delete>
+	<!-- search TaskIns object -->
+	<select id="getTaskIns" parameterClass="java.lang.Integer" resultMap="taskInsResult">
+	<![CDATA[
+			select CRM_TASK_INS.* from CRM_TASK_INS where CRM_TASK_INS.ID = #value# 
+	]]>
+	</select>
+	<!-- searchAll TaskIns List -->
+	<select id="getTaskInss" resultMap="taskInsResult">
+	<![CDATA[
+			select CRM_TASK_INS.* from CRM_TASK_INS
+	]]>
+	</select>	
+	  
+</sqlMap>  	

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="ProductTypeSQL">
+	<typeAlias alias="PDTProductType"
+		type="com.banger.mobile.domain.model.system.ProductType" />
+
+	<!-- 产品类型-->
+	<!-- 信息全字段 -->
+	<resultMap class="PDTProductType" id="ProductTypeResult">
+		<result column="PRODUCT_TYPE_ID" property="productTypeId" />
+		<result column="PRODUCT_TYPE_NAME" property="productTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+	</resultMap>
+
+	<!-- 增加产品类型-->
+	<insert id="insertProductType" parameterClass="PDTProductType">
+		<![CDATA[
+		INSERT INTO PDT_PRODUCT_TYPE
+    	(
+        PRODUCT_TYPE_ID,
+        PRODUCT_TYPE_NAME,
+        IS_DEL,
+        SORTNO
+    	)
+    	VALUES
+    	(
+        #productTypeId#,
+        #productTypeName#,
+	    #isDel#,
+        #sortNo#
+    	)
+      ]]>
+		<selectKey keyProperty="productTypeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_PRODUCT_TYPE
+		</selectKey>
+	</insert>
+
+
+	<!-- 产品类型修改-->
+	<update id="updProductType" parameterClass="PDTProductType">
+		UPDATE 
+			PDT_PRODUCT_TYPE
+		SET 
+			IS_DEL = #isDel#,
+			PRODUCT_TYPE_NAME = #productTypeName#, 
+			SORTNO = #sortNo#
+		where
+			PRODUCT_TYPE_ID= #productTypeId#
+	</update>
+
+	<!-- 根据ID删除产品类型 -->
+	<update id="deleteProductType" parameterClass="java.lang.Integer">
+		UPDATE 
+			PDT_PRODUCT_TYPE 
+		SET 
+			IS_DEL = 1
+		where
+		 	PRODUCT_TYPE_ID= #productTypeId#
+	</update>
+	
+	<!-- 根据id得到产品类型对象 -->
+	<select id="getProductTypeById"	resultMap="ProductTypeResult" 
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from PDT_PRODUCT_TYPE where PRODUCT_TYPE_ID=#Id#
+	]]>
+	</select>
+	
+
+	<!-- 获取产品类型列表 -->
+	<select id="getAllProductType" resultMap="ProductTypeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            PDT_PRODUCT_TYPE 
+        WHERE 
+        	IS_DEL = 0
+        Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 获取按排序SORTNO最大的对象 -->
+	<select id="getMaxNoProductType" resultMap="ProductTypeResult">
+		<![CDATA[
+		select *  from 
+			PDT_PRODUCT_TYPE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取按排序SORTNO最小的对象 -->
+	<select id="getMinNoProductType" resultMap="ProductTypeResult">
+		<![CDATA[
+		select *  from 
+			PDT_PRODUCT_TYPE 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取要移动的对象 -->
+	<select id="getNeedToMoveProductType"	resultMap="ProductTypeResult" 
+		parameterClass="java.util.Map">
+		select *  from PDT_PRODUCT_TYPE WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询相同名称的对象 -->
+	<select id="getProductBySameName" resultMap="ProductTypeResult"
+		parameterClass="PDTProductType">
+		<![CDATA[
+		select * from PDT_PRODUCT_TYPE where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="productTypeId">
+     		<isNotEqual prepend="and" property="productTypeId" compareValue="0">
+			<![CDATA[PRODUCT_TYPE_ID != #productTypeId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productTypeName">
+			<![CDATA[PRODUCT_TYPE_NAME = #productTypeName#]]>
+		</isNotEmpty>
+	
+	</select>
+</sqlMap>

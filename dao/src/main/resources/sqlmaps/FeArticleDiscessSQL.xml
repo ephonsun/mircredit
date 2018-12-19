@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeArticleDiscessSQL">
+	<typeAlias alias="BaseFeArticleDiscess"
+		type="com.banger.mobile.domain.model.base.finance.BaseFeArticleDiscess" />
+
+	<typeAlias alias="FeArticleDiscess"
+		type="com.banger.mobile.domain.model.finance.FeArticleDiscess" />
+
+	<!-- 评论表 -->
+	<!-- BaseFeArticleDiscess信息全字段 -->
+	<resultMap class="BaseFeArticleDiscess" id="BaseFeArticleDiscessResult">
+		<result column="DISCESS_ID" property="discessId" />
+		<result column="ARTICLE_ID" property="articleId" />
+		<result column="DISCESS_CONTENT" property="discessContent" />
+		<result column="DISCESS_SUPPORT_COUNT" property="discessSupportCount" />
+		<result column="DISCESS_REPLY_COUNT" property="discessReplyCount" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />	
+	</resultMap>
+		
+	<!-- FeArticleDiscess信息全字段 -->
+	<resultMap class="FeArticleDiscess" id="FeArticleDiscessResult" extends="BaseFeArticleDiscessResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="SALES_RANK" property="salesRank" />
+		<result column="IS_SUPPORT" property="isSupport"/>
+		<result column="DEPT_ID" property="deptId"/>	
+	</resultMap>
+	
+	<!-- 发表评论 -->
+	<insert id="addArticleDiscess" parameterClass="FeArticleDiscess">
+		<![CDATA[	
+		INSERT INTO
+		    FE_ARTICLE_DISCESS
+		    (
+		        DISCESS_ID,
+		        ARTICLE_ID,
+		        DISCESS_CONTENT,
+		        DISCESS_SUPPORT_COUNT,
+		        DISCESS_REPLY_COUNT,
+		        CREATE_DATE,
+		        CREATE_USER
+		    )
+		    VALUES
+		    (
+		        #discessId#,
+		        #articleId#,
+		        #discessContent#,
+		        0,
+		        0,
+		        #createDate#,
+		        #createUser#
+		    )
+        ]]>
+		<selectKey keyProperty="discessId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_FE_ARTICLE_DISCESS
+		</selectKey>
+	</insert>
+	
+	<!-- 查询评论分页 -->
+	<select id="getArticleDiscessMap" parameterClass="java.util.Map" resultMap="FeArticleDiscessResult" >	
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[	
+			SELECT a.*,u.USER_NAME,u.DEPT_ID,u.BUESS_RANK as SALES_RANK,
+				CASE WHEN r.IS_SUPPORT=1 THEN 1 ELSE 0 END AS IS_SUPPORT
+			FROM FE_ARTICLE_DISCESS AS a
+			LEFT JOIN SYS_USER AS u ON u.USER_ID = a.CREATE_USER 
+			LEFT JOIN FE_USER_RELATION AS r ON r.FE_ID=a.DISCESS_ID AND r.RELATION_TYPE =1  AND r.USER_ID = $userId$
+			WHERE 1=1 ]]>
+		<dynamic>
+			<isNotEmpty prepend="AND" property="articleId">
+				<![CDATA[ a.ARTICLE_ID = $articleId$]]>
+			</isNotEmpty>
+		</dynamic>
+		<![CDATA[ ORDER BY a.CREATE_DATE DESC]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询评论分页count -->
+	<select id="getArticleDiscessMapCount" parameterClass="java.util.Map" resultClass="java.lang.Integer" >	
+		<![CDATA[	
+			SELECT COUNT(*) FROM FE_ARTICLE_DISCESS WHERE 1=1]]>
+		<dynamic>
+			<isNotEmpty prepend="AND" property="articleId">
+				<![CDATA[ ARTICLE_ID = $articleId$]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--更新评论表  -->
+	<update id="updateArticleDiscess" parameterClass="FeArticleDiscess">
+	<![CDATA[
+		UPDATE
+		    FE_ARTICLE_DISCESS
+		SET
+	]]>
+		<isNotEmpty property="discessSupportCount">
+		<![CDATA[
+			DISCESS_SUPPORT_COUNT = (SELECT DISCESS_SUPPORT_COUNT FROM FE_ARTICLE_DISCESS WHERE DISCESS_ID = #discessId#)+1,
+	    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="discessReplyCount">
+		<![CDATA[
+			DISCESS_REPLY_COUNT  = (SELECT DISCESS_REPLY_COUNT FROM FE_ARTICLE_DISCESS WHERE DISCESS_ID = #discessId#)+1,
+	    ]]>
+		</isNotEmpty>
+	<![CDATA[
+			UPDATE_DATE = #updateDate#,
+		    UPDATE_USER = #updateUser#
+		WHERE
+		    DISCESS_ID = #discessId#	
+	]]>
+	</update>
+	
+</sqlMap>

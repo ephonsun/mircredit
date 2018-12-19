@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnOpHistorySQL">
+	<typeAlias alias="LnOpHistory" type="com.banger.mobile.domain.model.loan.LnOpHistory" />
+
+	<!-- 贷款操作历史记录表 全字段  -->
+	
+	<resultMap class="LnOpHistory" id="BaseLnOpHistoryResult" >
+		<result column="OP_HISTORY_ID" property="opHistoryId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="OP_HISTORY_DATE" property="opHistoryDate" />
+		<result column="USER_ID" property="userId" />
+		<result column="CONTENT" property="content" />
+		<result column="REMARK" property="remark" />
+		<result column="BEFORE_STATUS_ID" property="beforeStatusId" />
+		<result column="AFTER_STATUS_ID" property="afterStatusId" />
+	</resultMap>
+
+	<resultMap class="LnOpHistory" id="LnOpHistoryResult" >
+		<result column="OP_HISTORY_ID" property="opHistoryId" />
+		<result column="LOAN_ID" property="loanId" />
+		<result column="OP_HISTORY_DATE" property="opHistoryDate" />
+		<result column="USER_ID" property="userId" />
+		<result column="CONTENT" property="content" />
+		<result column="REMARK" property="remark" />
+		<result column="BEFORE_STATUS_ID" property="beforeStatusId" />
+		<result column="AFTER_STATUS_ID" property="afterStatusId" />
+
+        <result column="USER_NAME" property="userName" />
+        <result column="ACCOUNT" property="account" />
+        <result column="BEFORE_STATUS_NAME" property="beforeStatusName" />
+        <result column="AFTER_STATUS_NAME" property="afterStatusName" />
+	</resultMap>
+
+    <insert id="insertLnOpHistory" parameterClass="LnOpHistory">
+          INSERT INTO LN_OP_HISTORY
+          (
+            OP_HISTORY_ID,
+            LOAN_ID,
+            OP_HISTORY_DATE,
+            USER_ID,
+            CONTENT,
+            BEFORE_STATUS_ID,
+            AFTER_STATUS_ID
+        <isPropertyAvailable property="remark">
+            <isNotEmpty property="remark" prepend=",">
+                REMARK
+            </isNotEmpty>
+        </isPropertyAvailable>
+        )
+          VALUES
+          (
+            #opHistoryId:INTEGER#,
+            #loanId:INTEGER#,
+            #opHistoryDate:TIMESTAMP#,
+            #userId:INTEGER#,
+            #content:VARCHAR:NULL#,
+            #beforeStatusId:INTEGER#,
+            #afterStatusId:INTEGER#
+        <isPropertyAvailable property="remark">
+            <isNotEmpty property="remark" prepend=",">
+                #remark:VARCHAR:NULL#
+            </isNotEmpty>
+        </isPropertyAvailable>
+        )
+        <selectKey keyProperty="opHistoryId" resultClass="java.lang.Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_LN_OP_HISTORY
+        </selectKey>
+    </insert>
+
+    <!-- 查询 -->
+    <select id="getAllOpHistoryListByLoanId" resultMap="LnOpHistoryResult" parameterClass="Integer">
+		SELECT A.*,B.USER_NAME,B.ACCOUNT,C.LOAN_STATUS_NAME AS BEFORE_STATUS_NAME,D.LOAN_STATUS_NAME AS AFTER_STATUS_NAME
+		FROM (select * from LN_OP_HISTORY where loan_id=#loanId#) A
+		LEFT JOIN SYS_USER B ON B.USER_ID = A.USER_ID
+		LEFT JOIN LN_LOAN_STATUS C ON C.LOAN_STATUS_ID = A.BEFORE_STATUS_ID
+		LEFT JOIN LN_LOAN_STATUS D ON D.LOAN_STATUS_ID = A.AFTER_STATUS_ID
+
+		ORDER BY  A.OP_HISTORY_DATE DESC ,A.OP_HISTORY_ID DESC
+	</select>
+
+    <select id="selectHistoryByLoanId" resultMap="BaseLnOpHistoryResult" parameterClass="Integer">
+        select * from ln_op_history
+        where loan_id=#loanId# order by op_history_date desc fetch first 1 rows only
+    </select>
+
+    <select id="selectHistoryByLoanStatus" resultMap="BaseLnOpHistoryResult" parameterClass="java.util.Map">
+        select * from ln_op_history
+        where before_status_id=#beforeStatusId# and after_status_id=#afterStatusId# and loan_id=#loanId#
+        and Rtrim(Ltrim(content)) != #content#
+        order by op_history_date desc fetch first 1 rows only
+    </select>
+    
+    <delete id="deletelnOpHistoryByLoanId" parameterClass="java.lang.Integer">
+        delete from ln_op_history
+        where loan_id=#loanId#
+    </delete>
+</sqlMap>
+
+
+
+

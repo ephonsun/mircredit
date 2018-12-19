@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmEducationalHistorySQL">
+	<typeAlias alias="CrmEducationalHistory" type="com.banger.mobile.domain.model.educationalHistory.EducationalHistory" />
+
+	<!-- CrmEducationalHistorySQL信息全字段 -->
+	<resultMap class="CrmEducationalHistory" id="CrmEducationalHistoryResult">
+		<result column="EDUCATIONAL_HISTORY_ID" property="educationalHistoryId" />
+		<result column="EDUCATIONAL_HISTORY_NAME" property="educationalHistoryName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种教育程度-->
+	<insert id="addCrmEducationalHistory" parameterClass="CrmEducationalHistory">
+		<![CDATA[
+		INSERT INTO CRM_EDUCATIONAL_HISTORY
+    	(
+        EDUCATIONAL_HISTORY_ID,
+        IS_DEL,
+        EDUCATIONAL_HISTORY_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #educationalHistoryId#,
+        #isDel#,
+        #educationalHistoryName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="educationalHistoryId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_EDUCATIONAL_HISTORY
+		</selectKey>
+	</insert>
+
+
+	<!-- 教育程度修改-->
+	<update id="updateCrmEducationalHistory" parameterClass="CrmEducationalHistory">
+		UPDATE CRM_EDUCATIONAL_HISTORY SET 
+			IS_DEL = #isDel#,
+			EDUCATIONAL_HISTORY_NAME = #educationalHistoryName#, 
+			SORTNO = #sortNo#,
+			IS_ACTIVED = #isActived#, 
+			CREATE_DATE = #createDate#,
+			UPDATE_DATE =<![CDATA[current timestamp]]>, 
+			CREATE_USER = #createUser#, 
+			UPDATE_USER = #updateUser# 
+		where
+			EDUCATIONAL_HISTORY_ID= #educationalHistoryId#
+	</update>
+
+	<!-- 根据ID删除教育程度 -->
+	<update id="deleteCrmEducationalHistoryById" parameterClass="java.lang.Integer">
+		UPDATE CRM_EDUCATIONAL_HISTORY SET 
+			IS_DEL = 1, 
+			UPDATE_DATE =<![CDATA[current timestamp]]>
+		where 
+			EDUCATIONAL_HISTORY_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到教育程度 -->
+	<select id="getCrmEducationalHistoryById" resultMap="CrmEducationalHistoryResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_EDUCATIONAL_HISTORY where EDUCATIONAL_HISTORY_ID=#Id#
+	]]>
+	</select>
+	
+	<!-- 根据教育程度名称获取相同教育程度名称的数据 -->
+	<select id="getSameCrmEducationalHistoryByName" resultMap="CrmEducationalHistoryResult" parameterClass="CrmEducationalHistory">
+		<![CDATA[select * from CRM_EDUCATIONAL_HISTORY where  IS_DEL = 0]]>
+     	<isNotEmpty prepend="" property="educationalHistoryId">
+     		<isNotEqual prepend="and" property="educationalHistoryId" compareValue="0">
+			<![CDATA[EDUCATIONAL_HISTORY_ID != #educationalHistoryId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="educationalHistoryName">
+			<![CDATA[EDUCATIONAL_HISTORY_NAME = #educationalHistoryName#]]>
+		</isNotEmpty>	
+	</select>
+
+	<!-- 获取教育程度列表 -->
+	<select id="getAllCrmEducationalHistory" resultMap="CrmEducationalHistoryResult">
+	    <![CDATA[
+		select * from CRM_EDUCATIONAL_HISTORY
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC
+        ]]>
+	</select>
+
+	<!-- 获取现有教育程度数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmEducationalHistory" resultMap="CrmEducationalHistoryResult">
+		<![CDATA[
+		select *  from CRM_EDUCATIONAL_HISTORY 
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取现有教育程度数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmEducationalHistory" resultMap="CrmEducationalHistoryResult">
+		<![CDATA[
+		select *  from CRM_EDUCATIONAL_HISTORY 
+		WHERE IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取要移动的教育程度对象 -->
+	<select id="getNeedMoveCrmEducationalHistory" resultMap="CrmEducationalHistoryResult" parameterClass="java.util.Map">
+		select *  from CRM_EDUCATIONAL_HISTORY WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

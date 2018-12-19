@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtProductFieldSQL">
+	<typeAlias alias="PdtProductField" type="com.banger.mobile.domain.model.pdtProduct.PdtProductField" />
+	
+	<!-- 产品自定义字段     信息全字段 -->
+	<resultMap class="PdtProductField" id="PdtProductFieldResult">
+		<result column="PRODUCT_FIELD_ID" property="productFieldId" />
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+	 	<result column="TEMPLATE_FIELD_ID" property="templateFieldId" />
+		<result column="TEMPLATE_FIELD_TYPE" property="templateFieldType" />
+		<result column="FIELD_VALUE_STRING" property="fieldValueString" />
+		<result column="FIELD_VALUE_DATETIME" property="fieldValueDatetime" />
+		<result column="FIELD_VALUE_NUMERIC" property="fieldValueNumeric" />
+		<result column="FIELD_VALUE_BOOLEAN" property="fieldValueBoolean" /> 
+		<result column="IS_DEL" property="isDel" /> 
+	</resultMap>
+	
+	<!-- 新增 -->
+	<insert id="insertPdtProductField" parameterClass="PdtProductField">
+		<![CDATA[ 
+			INSERT INTO PDT_PRODUCT_FIELD
+		    (
+		        PRODUCT_FIELD_ID,
+		        PRODUCT_ID,
+		        TEMPLATE_ID,
+		        TEMPLATE_FIELD_ID,
+		        TEMPLATE_FIELD_TYPE,
+		        FIELD_VALUE_STRING,
+		        FIELD_VALUE_DATETIME,
+		        FIELD_VALUE_NUMERIC,
+		        FIELD_VALUE_BOOLEAN,
+		        IS_DEL
+		    )
+		    VALUES
+		    (
+		        #productFieldId#,
+		        #productId#,
+		        #templateId#,
+		        #templateFieldId#,
+		        #templateFieldType#,
+		        #fieldValueString:VARCHAR:NULL#,
+		        #fieldValueDatetime:TIMESTAMP#,
+		        #fieldValueNumeric:DECIMAL#,
+		        #fieldValueBoolean:INTEGER#,
+		        0
+		    )
+		]]>
+		<selectKey keyProperty="productFieldId" resultClass="java.lang.Integer"
+			type="pre">
+				values NEXTVAL for SEQ_PDT_PRODUCT
+		</selectKey>
+	</insert>
+	
+	<!-- 删除字段 -->
+	<update id="deleteProductField" parameterClass="PdtProductField">
+	<![CDATA[UPDATE PDT_PRODUCT_FIELD SET IS_DEL=1 WHERE TEMPLATE_ID=#templateId# AND TEMPLATE_FIELD_ID=#templateFieldId#]]>
+	</update>
+	
+	<!-- 查询 -->
+	<select id="getPdtProductFieldCount" parameterClass="PdtProductField" resultClass="java.lang.Integer">
+	<![CDATA[
+		SELECT COUNT(*) FROM PDT_PRODUCT_FIELD WHERE IS_DEL=0
+	]]>
+	<isNotNull property="templateId">
+		<![CDATA[ AND TEMPLATE_ID=#templateId#]]>
+	</isNotNull>
+	<isNotNull property="templateFieldId">
+		<![CDATA[ AND TEMPLATE_FIELD_ID=#templateFieldId#]]>
+	</isNotNull>	
+	</select>
+	
+	<!-- 根据产品ID查询自定义字段 -->
+	<select id="getPdtFieldListByPdtId" parameterClass="java.lang.Integer" resultMap="PdtProductFieldResult">
+	<![CDATA[ 
+		SELECT * FROM PDT_PRODUCT_FIELD WHERE PRODUCT_ID=#productId#
+	]]>
+	</select>
+	<!-- 根据产品ID删除全部字段 -->
+	<delete id="deleteFieldByProductId" parameterClass="java.lang.Integer">
+	<![CDATA[
+		DELETE FROM PDT_PRODUCT_FIELD WHERE PRODUCT_ID = #productId#
+	 ]]>
+	</delete>
+	
+</sqlMap>
+

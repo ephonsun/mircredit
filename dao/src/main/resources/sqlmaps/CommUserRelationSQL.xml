@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommUserRelationSQL">
+	<typeAlias alias="CommUserRelation"
+		type="com.banger.mobile.domain.model.communication.CommUserRelation" />
+
+	<!-- CommUserRelationSQL信息全字段 -->
+	<resultMap class="CommUserRelation" id="CommUserRelationResult">
+		<result column="RELATION_ID" property="relationId" />
+		<result column="RELATION_TYPE" property="relationType" />
+		<result column="COMM_ID" property="commId" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_COLLECT" property="isCollect" />
+		<result column="IS_THEME_SELECT" property="isThemeSelect" />
+		<result column="IS_OPTION_SELECT" property="isOptionSelect" />
+		<result column="COLLECT_DATE" property="collectDate" />
+		<result column="USER_NAME" property="userName" />
+	</resultMap>
+
+	<!-- 用户是否投过票/收藏过 -->
+	<select id="IsUserRelation" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(0) FROM COMM_USER_RELATION WHERE RELATION_TYPE=$relationType$ AND COMM_ID=$commId$ 
+		]]>
+		<isNotEmpty property="userId">
+			<![CDATA[
+				AND USER_ID=$userId$
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="isCollect">
+			<![CDATA[
+				AND IS_COLLECT=1
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="isVote">
+			<![CDATA[
+				AND IS_THEME_SELECT=1
+			]]>
+		</isNotEmpty>
+	</select>
+	<!-- 添加收藏/投票数据 -->
+	<insert id="InsertUserRelation" parameterClass="CommUserRelation">
+		<![CDATA[
+			INSERT INTO COMM_USER_RELATION
+			(
+				RELATION_ID,RELATION_TYPE,COMM_ID,USER_ID,IS_COLLECT,IS_THEME_SELECT,IS_OPTION_SELECT,COLLECT_DATE
+			)
+			VALUES
+			(
+				$relationId$,#relationType#,#commId#,#userId#,#isCollect:INTEGER#,#isThemeSelect:INTEGER#,#isOptionSelect:INTEGER#,current timestamp
+			)
+		]]>
+		<selectKey keyProperty="relationId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_COMM_USER_RELATION
+		</selectKey>
+	</insert>
+	
+	<!-- 查询投票用户明细 -->
+	<select id="getUserRelationList" resultMap="CommUserRelationResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		SELECT a.*,b.USER_NAME FROM COMM_USER_RELATION a LEFT JOIN SYS_USER b ON a.USER_ID=b.USER_ID WHERE a.RELATION_ID IN(
+			SELECT  MAX(a.RELATION_ID)  FROM COMM_USER_RELATION a LEFT JOIN SYS_USER b ON a.USER_ID=b.USER_ID WHERE  COMM_ID=$commId$   
+		]]>
+		<isNotEmpty property="isOptionSelect">
+			<![CDATA[
+				AND a.IS_OPTION_SELECT=$isOptionSelect$
+			]]>
+		</isNotEmpty>
+		group by b.USER_NAME)
+	</select>
+
+	<!-- 删除收藏 -->
+	<delete id="DeleteCollect" parameterClass="java.util.Map">
+		<![CDATA[
+			DELETE FROM COMM_USER_RELATION WHERE USER_ID=$userId$ AND IS_COLLECT=1 AND COMM_ID IN($themeIds$)
+		]]>
+	</delete>
+
+</sqlMap>

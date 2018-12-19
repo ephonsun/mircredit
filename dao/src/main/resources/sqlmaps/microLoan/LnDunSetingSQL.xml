@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnDunSetingSQL">
+    <typeAlias alias="BaseLnDunSeting" type="com.banger.mobile.domain.model.base.loan.BaseLnDunSeting"/>
+	<typeAlias alias="LnDunSeting" type="com.banger.mobile.domain.model.loan.LnDunSeting"/>
+	
+    <resultMap id="BaseLnDunSetingResult" class="BaseLnDunSeting">
+        <result column="DUN_SETTING_ID" property="dunSetingId"/>
+        <result column="IS_ACTIVED" property="isActived"/>
+        <result column="DUN_DAYS" property="dunDays"/>
+        <result column="DUN_TYPE" property="dunType"/>
+        <result column="DUN_VOICE_FILE" property="dunVoiceFile"/>
+        <result column="DUN_TIME" property="dunTime"/>
+        <result column="SMS_CONTENT" property="smsContent"/>
+        <result column="SEND_TIME" property="sendTime"/>
+        <result column="ACCOUNT" property="account"/>
+        <result column="PASSWORD" property="passWord"/>
+        <result column="FLAG" property="flag"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_User" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+    </resultMap>
+    
+    <resultMap id="LnDunSetingResult" class="LnDunSeting" extends="BaseLnDunSetingResult">
+	</resultMap>
+	<!-- 更新 -->
+	<update id="updateLnDunSeting" parameterClass="LnDunSeting">
+	  	update LN_DUN_SETTING a
+  		set 
+  			a.UPDATE_DATE = current timestamp
+  			,a.DUN_VOICE_FILE=#dunVoiceFile:VARCHAR:NULL#
+  			,a.SMS_CONTENT=#smsContent:VARCHAR:NULL#
+  			,a.ACCOUNT = #account:VARCHAR:NULL#
+  			,a.PASSWORD = #passWord:VARCHAR:NULL#
+  			<isNotEmpty prepend="," property="isActived">
+  				a.IS_ACTIVED = #isActived:INTEGER#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="dunDays">
+  				a.DUN_DAYS = #dunDays:INTEGER#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="dunType">
+				a.DUN_TYPE=#dunType:INTEGER#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="dunTime">
+  				a.DUN_TIME = #dunTime:TIME#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="sendTime">
+  				a.SEND_TIME = #sendTime:TIME#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="updateUser">
+  				a.UPDATE_USER = #updateUser:INTEGER#
+  			</isNotEmpty>
+  		where 
+  			a.DUN_SETTING_ID = #dunSetingId:INTEGER# 
+  	</update>
+  	
+  	<!-- 查询 -->
+  	<select id="getLnDunSeting" resultMap="LnDunSetingResult" parameterClass="java.util.Map">
+	  	<![CDATA[
+	  	select A.* from LN_DUN_SETTING A
+		where A.FLAG = #flag:INTEGER#
+	  	]]>
+	</select>
+</sqlMap>

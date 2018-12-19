@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MoneyUnitSQL">
+	<typeAlias alias="MoneyUnit"
+		type="com.banger.mobile.domain.model.system.CdMoneyUnit" />
+
+	<!-- 金融单位-->
+	<!-- 信息全字段 -->
+	<resultMap class="MoneyUnit" id="MoneyUnitResult">
+		<result column="MONEY_UNIT_ID" property="moneyUnitId" />
+		<result column="MONEY_UNIT_NAME" property="moneyUnitName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+	</resultMap>
+
+	<!-- 增加金融单位-->
+	<insert id="insertMoneyUnit" parameterClass="MoneyUnit">
+		<![CDATA[
+		INSERT INTO CD_MONEY_UNIT
+    	(
+        MONEY_UNIT_ID,
+        MONEY_UNIT_NAME,
+        IS_DEL,
+        SORTNO
+    	)
+    	VALUES
+    	(
+        #moneyUnitId#,
+        #moneyUnitName#,
+	    #isDel#,
+        #sortNo#
+    	)
+      ]]>
+		<selectKey keyProperty="moneyUnitId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CD_MONEY_UNIT
+		</selectKey>
+	</insert>
+
+
+	<!-- 金融单位修改-->
+	<update id="updateMoneyUnit" parameterClass="MoneyUnit">
+		UPDATE 
+			CD_MONEY_UNIT
+		SET 
+			IS_DEL = #isDel#,
+			MONEY_UNIT_NAME = #moneyUnitName#, 
+			SORTNO = #sortNo#
+		where
+			MONEY_UNIT_ID= #moneyUnitId#
+	</update>
+
+	<!-- 根据ID删除单位 -->
+	<update id="deleteMoneyUnit" parameterClass="java.lang.Integer">
+		UPDATE 
+			CD_MONEY_UNIT 
+		SET 
+			IS_DEL = 1
+		where
+		 	MONEY_UNIT_ID= #moneyUnitId#
+	</update>
+	
+	<!-- 根据id得到单位对象 -->
+	<select id="getMoneyUnitById"	resultMap="MoneyUnitResult" 
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CD_MONEY_UNIT where MONEY_UNIT_ID=#Id#
+	]]>
+	</select>
+	
+
+	<!-- 获取金融单位列表 -->
+	<select id="getMoneyUnitList" resultMap="MoneyUnitResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+            CD_MONEY_UNIT 
+        WHERE 
+        	IS_DEL = 0
+        Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 获取按排序SORTNO最大的对象 -->
+	<select id="getMaxSortNoMoneyUnit" resultMap="MoneyUnitResult">
+		<![CDATA[
+		select *  from 
+			CD_MONEY_UNIT 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取按排序SORTNO最小的对象 -->
+	<select id="getMinSortNoMoneyUnit" resultMap="MoneyUnitResult">
+		<![CDATA[
+		select *  from 
+			CD_MONEY_UNIT 
+		WHERE 
+			IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+	]]>
+	</select>
+	
+	<!-- 获取要移动的客户类型对象 -->
+	<select id="getNeedMoveMoneyUnit"	resultMap="MoneyUnitResult" 
+		parameterClass="java.util.Map">
+		select *  from CD_MONEY_UNIT WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询相同名称的对象 -->
+	<select id="getSameNameMoneyUnit" resultMap="MoneyUnitResult"
+		parameterClass="MoneyUnit">
+		<![CDATA[
+		select * from CD_MONEY_UNIT where  IS_DEL = 0
+	]]>
+     	<isNotEmpty prepend="" property="moneyUnitId">
+     		<isNotEqual prepend="and" property="moneyUnitId" compareValue="0">
+			<![CDATA[MONEY_UNIT_ID != #moneyUnitId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="moneyUnitName">
+			<![CDATA[MONEY_UNIT_NAME = #moneyUnitName#]]>
+		</isNotEmpty>
+	
+	</select>
+	
+	<!-- 查询是否是最后一个募集单位 -->
+	<select id="queryLaseMoneyUnit" resultClass="java.lang.Integer">
+		<![CDATA[
+			select count(1) from CD_MONEY_UNIT where  IS_DEL = 0
+		]]>
+	</select>
+</sqlMap>

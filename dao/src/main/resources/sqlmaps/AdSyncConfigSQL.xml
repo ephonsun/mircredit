@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="AdSyncConfigSQL">
+    <typeAlias alias="BaseSyncAdPcUsersSetting" type="com.banger.mobile.domain.model.base.adsync.BaseSyncAdPcUsersSetting" />
+	<typeAlias alias="SyncAdPcUsersSetting" type="com.banger.mobile.domain.model.adsync.SyncAdPcUsersSetting" />
+
+
+	<resultMap id="BaseSyncAdPcUsersSettingResult" class="BaseSyncAdPcUsersSetting">
+		<result column="AD_ID" property="adId" />
+		<result column="AD_ACTIVED" property="adActived" />
+		<result column="AD_NAME" property="adName" />
+		<result column="AD_LDAP_URL" property="adLdapUrl" />
+		<result column="AD_ADMIN_NAME" property="adAdminName" />
+		<result column="AD_ADMIN_PASSWORD" property="adAdminPassword" />
+		<result column="AD_ADMIN_PW_ENCRYPT" property="adAdminPwEnctypt" />
+		<result column="AD_SYNC_DEPT_NODE" property="adSyncDeptNode" />
+		<result column="AD_SYNC_DEPT_ID" property="adSyncDeptId" />
+		<result column="AD_SYNC_MODE" property="adSyncMode" />
+		<result column="AD_SYNC_TIME" property="adSyncTime" />
+		<result column="AD_SYNC_RATE" property="adSyncRate" />
+		<result column="AD_SYNC_RATE_SETTING" property="adSyncRateSetting" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<resultMap id="SyncAdPcUsersSettingResult" class="SyncAdPcUsersSetting" extends="BaseSyncAdPcUsersSettingResult">
+		
+	</resultMap>
+	
+	<insert id="insertAdSyncConfig" parameterClass="SyncAdPcUsersSetting">
+     <![CDATA[
+		insert into SYNC_AD_PC_USERS_SETTING
+		(
+			 AD_ID,
+			 AD_ACTIVED,
+			 AD_NAME,
+			 AD_LDAP_URL,
+			 AD_ADMIN_NAME,
+			 AD_ADMIN_PASSWORD,
+			 AD_ADMIN_PW_ENCRYPT,
+			 AD_SYNC_DEPT_NODE,
+			 AD_SYNC_DEPT_ID,
+			 AD_SYNC_MODE,
+			 AD_SYNC_TIME,
+			 AD_SYNC_RATE,
+			 AD_SYNC_RATE_SETTING,
+			 CREATE_DATE,
+			 UPDATE_DATE,
+			 CREATE_USER,
+			 UPDATE_USER 
+		 )
+		values
+		(
+			#adId#,
+			#adActived:INTEGER#,
+		    #adName:VARCHAR:NULL#,
+		    #adLdapUrl:VARCHAR:NULL#,
+		    #adAdminName:VARCHAR:NULL#,
+		    #adAdminPassword:VARCHAR:NULL#,
+		    #adAdminPwEnctypt:VARCHAR:NULL#,
+		    #adSyncDeptNode:VARCHAR:NULL#,
+		    #adSyncDeptId:INTEGER#,
+		    #adSyncMode:VARCHAR:NULL#,
+		    #adSyncTime:TIMESTAMP#,
+		    #adSyncRate:VARCHAR:NULL#,
+		    #adSyncRateSetting:VARCHAR:NULL#,
+		    current timestamp,
+		    current timestamp,
+		    #createUser:INTEGER#,
+		    #updateUser:INTEGER#
+		)
+      ]]>
+		<selectKey keyProperty="adId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYNC_AD_PC_USERS_SETTING
+		</selectKey>
+	</insert>
+	
+	<!-- 更新 -->
+	<update id="updateAdSyncConfig" parameterClass="SyncAdPcUsersSetting">
+	  	update SYNC_AD_PC_USERS_SETTING a
+  		set 
+  			a.CREATE_DATE = current timestamp
+  			<isNotEmpty prepend="," property="adActived">
+  				a.AD_ACTIVED = #adActived:INTEGER#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adName">
+  				a.AD_NAME = #adName:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adLdapUrl">
+				a.AD_LDAP_URL=#adLdapUrl:VARCHAR:NULL#
+			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adAdminName">
+				a.AD_ADMIN_NAME=#adAdminName:VARCHAR:NULL#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="adAdminPassword">
+  				a.AD_ADMIN_PASSWORD = #adAdminPassword:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adAdminPwEnctypt">
+  				a.AD_ADMIN_PW_ENCRYPT = #adAdminPwEnctypt:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adSyncDeptNode">
+  				a.AD_SYNC_DEPT_NODE = #adSyncDeptNode:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adSyncDeptId">
+  				a.AD_SYNC_DEPT_ID = #adSyncDeptId:INTEGER#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adSyncMode">
+  				a.AD_SYNC_MODE = #adSyncMode:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adSyncTime">
+  				a.AD_SYNC_TIME = #adSyncTime:TIMESTAMP#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adSyncRate">
+  				a.AD_SYNC_RATE = #adSyncRate:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="adSyncRateSetting">
+  				a.AD_SYNC_RATE_SETTING = #adSyncRateSetting:VARCHAR:NULL#
+  			</isNotEmpty>
+  			<isNotEmpty prepend="," property="updateUser">
+  				a.UPDATE_USER = #updateUser:INTEGER#
+  			</isNotEmpty>
+  		where 
+  			a.AD_ID = #adId# 
+  	</update>
+	
+	<!-- 查询 -->
+  	<select id="getAdSyncConfig"   resultMap="SyncAdPcUsersSettingResult">
+	  	<![CDATA[
+	  		select * from SYNC_AD_PC_USERS_SETTING a fetch first 1 rows only
+	  	]]>
+	 </select>
+	
+</sqlMap>
+
+
+
+

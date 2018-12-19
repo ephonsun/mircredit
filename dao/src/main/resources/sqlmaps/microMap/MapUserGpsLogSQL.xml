@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="MapUserGpsLogSQL">
+    <typeAlias alias="MapUserGpsLog" type="com.banger.mobile.domain.model.map.MapUserGpsLog"/>
+
+    <!-- 用户地理位置表-->
+    <!-- MapUserGpsSQL全字段 -->
+    <resultMap class="MapUserGpsLog" id="MapUserGpsLogResult">
+        <result column="USER_GPS_LOG_ID" property="userGpsLogId"/>
+        <result column="USER_GPS_ID" property="userGpsId"/>
+        <result column="GPS_LNG" property="gpsLng"/>
+        <result column="GPS_LAT" property="gpsLat"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+    </resultMap>
+    <!--删除用户一个月前的坐标-->
+    <delete id="delMapUserGpsLog" parameterClass="java.lang.Integer">
+        <![CDATA[
+		delete  from MAP_USER_GPS_LOG where USER_GPS_ID=#userGpsId# and UPDATE_DATE<current timestamp-92 DAYS
+	    ]]>
+    </delete>
+    <!--新增用户GPS位置-->
+    <insert id="addMapUserGpsLog" parameterClass="MapUserGpsLog">
+        <![CDATA[
+		insert into MAP_USER_GPS_LOG
+		(
+		 USER_GPS_LOG_ID,
+		 USER_GPS_ID,
+		 GPS_LNG,
+		 GPS_LAT,
+		 REMARK,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#userGpsLogId#,
+        #userGpsId#,
+        #gpsLng#,
+        #gpsLat#,
+	    #remark#,
+	    current timestamp
+		)
+      ]]>
+        <selectKey keyProperty="userGpsLogId" resultClass="java.lang.Integer"
+                   type="pre">
+            values NEXTVAL for SEQ_MAP_USER_GPS_LOG
+        </selectKey>
+    </insert>
+
+    <!-- 用户GPS位置，根据用户名和编号查询 -->
+    <select id="getUserGpsLogByCondition" resultMap="MapUserGpsLogResult"  parameterClass="java.util.Map">
+        <![CDATA[
+           SELECT
+            c.USER_GPS_LOG_ID,
+            a.USER_GPS_ID ,
+            c.GPS_LNG ,
+            c.GPS_LAT,
+            c.UPDATE_DATE
+        FROM
+                 MAP_USER_GPS_LOG c
+        LEFT JOIN MAP_USER_GPS a
+        ON
+            c.USER_GPS_ID=a.USER_GPS_ID
+        WHERE 1=1
+		]]>
+        <isNotEmpty prepend="and" property="userId">
+            <![CDATA[a.USER_ID = #userId#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="beginTime">
+            <![CDATA[  c.UPDATE_DATE >= #beginTime# ]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="endTime">
+            <![CDATA[  c.UPDATE_DATE <= #endTime# ]]>
+        </isNotEmpty>
+        ORDER BY  c.UPDATE_DATE
+    </select>
+
+
+</sqlMap>

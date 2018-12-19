@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CommPartitionSQL">
+	<typeAlias alias="BaseCommPartition" type="com.banger.mobile.domain.model.base.communication.BaseCommPartition" />	
+	<typeAlias alias="CommPartition" type="com.banger.mobile.domain.model.communication.CommPartition" />	
+	
+	<resultMap class="BaseCommPartition" id="BaseCommPartitionResult">
+		<result column="PARTITION_ID" property="partitionId" />
+		<result column="PARTITION_NAME" property="partitionName" />
+		<result column="PARTITION_DESCRIPTION" property="partitionDescription" />
+		<result column="USER_ID" property="userId" />
+		<result column="PARTITION_ORDER" property="partitionOrder" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="IS_BUILTIN" property="isBuiltin" />		
+	</resultMap>
+	<resultMap class="CommPartition" extends="BaseCommPartitionResult" id="CommPartitionResult">
+		<result column="USER_NAME" property="userName" />	
+	</resultMap>
+	
+	<!-- 新增分区 -->
+	<insert id="addCommPartition" parameterClass="CommPartition">
+		<![CDATA[	
+			INSERT INTO
+			    COMM_PARTITION
+			    (
+			        PARTITION_ID,
+					PARTITION_NAME,
+					PARTITION_DESCRIPTION,
+					USER_ID,
+					PARTITION_ORDER,
+					IS_DEL,
+					CREATE_DATE,
+					CREATE_USER,
+					IS_BUILTIN
+			    )
+			    SELECT 
+			       	#partitionId#,
+					#partitionName#,
+					#partitionDescription#,
+					#userId#,
+					case when max(PARTITION_ORDER) is null then 1 else max(PARTITION_ORDER)+1 end,
+					0,
+					#createDate#,
+					#createUser#,
+					#isBuiltin#
+			        FROM COMM_PARTITION
+		]]>	
+		<selectKey keyProperty="partitionId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_COMM_PARTITION
+		</selectKey>	
+	</insert>
+	
+	<!-- 删除分区-->
+	<update id="deleteCommPartition"  parameterClass="CommPartition" >	
+	<![CDATA[ UPDATE COMM_PARTITION SET IS_DEL = 1, UPDATE_DATE = #updateDate#, UPDATE_USER = #updateUser#
+			WHERE PARTITION_ID = #partitionId# ]]>	
+	</update>
+	
+	<!-- 编辑分区内容 -->
+	<update id="updateCommPartition"  parameterClass="CommPartition" >	
+		<![CDATA[ 
+			UPDATE
+			    COMM_PARTITION
+			SET
+			    PARTITION_NAME = #partitionName#,
+			    USER_ID = #userId#,
+			    PARTITION_DESCRIPTION = #partitionDescription#,
+		]]>
+		<isNotEmpty property="partitionOrder">
+			<![CDATA[
+				PARTITION_ORDER = #partitionOrder#,
+		    ]]>
+		</isNotEmpty>	 
+		<isNotEmpty property="updateUser">
+			<![CDATA[
+				UPDATE_USER = #updateUser#,
+		    ]]>
+		</isNotEmpty>	
+		<![CDATA[ 
+        	 UPDATE_DATE = #updateDate#	WHERE PARTITION_ID = #partitionId# 
+        ]]>
+	</update>
+	
+	<!-- 通过ID获取分区 -->
+	<select id="getCommPartitionById" parameterClass="java.lang.Integer" resultMap="CommPartitionResult">
+	<![CDATA[ 	
+		SELECT a.*,b.USER_NAME FROM COMM_PARTITION a LEFT JOIN SYS_USER b ON a.USER_ID = b.USER_ID WHERE a.PARTITION_ID=#id#
+	]]>	
+	</select>
+	
+	<!-- 通过标题获取分区 -->
+	<select id="getCommPartitionByName" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+	<![CDATA[ 	
+		SELECT COUNT(*) FROM COMM_PARTITION a  WHERE a.PARTITION_NAME= '$partitionName$' AND a.IS_DEL = 0
+	]]>	
+		<isNotEmpty property="partitionId">
+			<![CDATA[
+				AND a.PARTITION_ID != #partitionId#
+		    ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 获取所有分区 -->
+	<select id="getCommPartitionList" parameterClass="java.lang.Integer" resultMap="CommPartitionResult">
+	<![CDATA[ 	
+		SELECT a.*,b.USER_NAME FROM COMM_PARTITION a LEFT JOIN SYS_USER b ON a.USER_ID = b.USER_ID WHERE a.IS_DEL = 0 ORDER BY a.PARTITION_ORDER 
+	]]>	
+	</select>
+	
+	<!-- 上移下移查询分区 -->
+	<select id="getDesCommPartition" parameterClass="java.util.Map" resultMap="CommPartitionResult">
+	<![CDATA[
+		SELECT t.*,'' as USER_NAME FROM COMM_PARTITION t WHERE IS_DEL = 0 AND PARTITION_ORDER	
+	]]>	
+	<dynamic prepend="">
+		<isEqual prepend="" property="type" compareValue="up">
+			<![CDATA[ < #orderId# ]]> ORDER BY PARTITION_ORDER DESC
+		</isEqual>
+		<isEqual prepend="" property="type" compareValue="down">
+			<![CDATA[ > #orderId# ]]> ORDER BY PARTITION_ORDER ASC
+		</isEqual>
+	</dynamic>	
+	<![CDATA[ FETCH FIRST 1 ROW ONLY ]]>		
+	</select>
+</sqlMap>
+
+
+
+

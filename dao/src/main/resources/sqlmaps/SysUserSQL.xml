@@ -1,0 +1,761 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysUserSQL">
+	<typeAlias alias="SysUser" type="com.banger.mobile.domain.model.user.SysUser" />
+	<typeAlias alias="SysUserBean" type="com.banger.mobile.domain.model.user.SysUserBean" />
+	<typeAlias alias="SysTalkUserBean" type="com.banger.mobile.domain.model.user.SysTalkUserBean" />
+	<typeAlias alias="UserRoleName" type="com.banger.mobile.domain.model.user.UserRoleName" />
+
+	<!-- 用户信息表-->
+	<!-- SysUserSQL信息全字段 -->
+	<resultMap class="SysUser" id="SysUserResult">
+		<result column="USER_ID" property="userId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="ACCOUNT" property="account" />
+		<result column="PASSWORD" property="password" />
+		<result column="IS_PASSWORD_RESET" property="isPasswordReset" />
+		<result column="LAST_CHANGE_PASSWORD" property="lastChangePassword"/>
+		<result column="LAST_LOGIN_DATE" property="lastLoginDate"/>
+		<result column="PASSWORD_STR" property="passwordStr"/>
+		<result column="PHONE" property="phone"/>
+		<result column="PHONE_EXT" property="phoneExt"/>
+		<result column="USER_CODE" property="userCode" />
+		<result column="USER_NAME" property="userName" />
+		<result column="SEX" property="sex" />
+		<result column="MOBILE_PHONE" property="mobilePhone" />
+		<result column="EMAIL" property="email" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="IS_BINDING" property="isBinding" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="OPERATE_CODE" property="operateCode" />
+        <result column="JGM" property="jgm"/>
+        <result column="LEAVE_TAG" property="leaveTag" />
+        <result column="APPROVAL_VALUE" property="approvalValue" />
+		<result column="BUESS_RANK" property="buessRank" />
+	</resultMap>
+
+	<cacheModel id="CrmGetUserByAccount" type="OSCACHE" serialize="true"
+		readOnly="true" >
+		<flushInterval hours="24" />
+		<flushOnExecute statement="addSysUser" />
+		<flushOnExecute statement="deleteSysUserById" />
+		<flushOnExecute statement="updateSysUser" />
+		<property name="size" value="1000" />
+	</cacheModel>
+	
+		<!-- SysUserBeanSQL信息全字段 -->
+	<resultMap class="SysUserBean" id="SysUserBeanResult">
+		<result column="USER_ID" property="userId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="ACCOUNT" property="account" />
+		<result column="USER_NAME" property="userName" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="DEPT_NAME" property="deptName" />
+	</resultMap>
+	
+		<!-- 返回柜台人员，用户的树形数据 -->
+	<resultMap class="SysUserBean" id="SysUserAndCounterResult">
+		<result column="USER_ID" property="userId" />
+		<result column="DEPT_ID" property="deptId" />
+		<result column="USER_NAME" property="userName" />
+		<result column="DEPT_PARENT_ID" property="deptParentId" />
+	</resultMap>
+	
+	
+	<!-- 来电转接用户 -->
+	<resultMap class="SysTalkUserBean" id="SysTalkUsersResult" extends="SysUserResult" >
+		<result column="DEPT_NAME" property="deptName" />
+	</resultMap>
+	
+	<resultMap class="UserRoleName" id="UserRoleNameResult">
+		<result column="USER_ID" property="userId" />
+		<result column="ROLE_NAME" property="roleName" />
+        <result column="ROLE_ID" property="roleId" />
+	</resultMap>
+	
+	<!-- 缓存所有的客户经理和业务主管 -->
+	<select id="getAllUserForCache" resultMap="SysUserResult" cacheModel="CrmGetUserByAccount">
+		<![CDATA[
+			select * from SYS_USER where USER_ID  in( select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+                                                     where b.ROLE_ID not in (1,2,3,4))  
+                  order by USER_NAME 
+		]]>
+	</select>
+	
+	
+	<!-- 增加一条录音记录信息-->
+	<insert id="addSysUser" parameterClass="SysUser">
+     <![CDATA[
+		insert into SYS_USER
+		(
+		 USER_ID,
+		 DEPT_ID,
+		 ACCOUNT,
+		 PASSWORD,
+		 IS_PASSWORD_RESET,
+		 LAST_CHANGE_PASSWORD,
+		 LAST_LOGIN_DATE,
+		 PASSWORD_STR,
+		 PHONE,
+		 PHONE_EXT,
+		 USER_CODE,
+		 USER_NAME,
+		 IS_ACTIVED,
+		 IS_DEL,
+		 REMARK,
+		 BUESS_RANK,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER,
+		 OPERATE_CODE,
+		 JGM,
+		 APPROVAL_VALUE,
+	     LEAVE_TAG
+		
+		
+	
+	
+		 )
+		values
+		(
+		#userId#,
+		#deptId#,
+	    #account#,
+	    #password#,
+	    #isPasswordReset#,
+	    #lastChangePassword:TIMESTAMP#,
+	    #lastLoginDate:TIMESTAMP#,
+	    #passwordStr#,
+	    #phone:VARCHAR:NULL#,
+	    #phoneExt:VARCHAR:NULL#,
+	    #userCode#,
+	    #userName#,
+	    #isActived#,
+	    #isDel#,
+	    #remark#,
+	    #buessRank:INTEGER#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#,
+	    #operateCode#,
+	    #jgm#,
+	    #approvalValue#,
+	    #leaveTag#
+	 
+	    
+	
+		)
+      ]]>
+		<selectKey keyProperty="userId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_USER 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 用户记录修改-->
+	<update id="updateSysUser" parameterClass="SysUser">
+	 <![CDATA[
+             update SYS_USER  set 
+		 ]]>	
+		 <isNotEmpty property="userName">
+				USER_NAME=#userName#,
+		 </isNotEmpty>
+		 <isNotEmpty property="deptId">
+				DEPT_ID=#deptId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="userCode">
+				USER_CODE=#userCode#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isActived">
+				IS_ACTIVED=#isActived#,
+		 </isNotEmpty>
+		 <isNotEmpty property="updateUser">
+				UPDATE_USER=#updateUser#,
+		 </isNotEmpty>
+		 <isNotEmpty property="password">
+				PASSWORD=#password#,
+		 </isNotEmpty>
+		 <isNotEmpty property="isPasswordReset">
+				IS_PASSWORD_RESET=#isPasswordReset#,
+		 </isNotEmpty>
+		 <isNotEmpty property="lastChangePassword">
+				LAST_CHANGE_PASSWORD=#lastChangePassword#,
+		 </isNotEmpty>
+		 <isNotEmpty property="lastLoginDate">
+				LAST_LOGIN_DATE=#lastLoginDate#,
+		 </isNotEmpty>
+		 	 <isNotEmpty property="passwordStr">
+				PASSWORD_STR=#passwordStr#,
+		 </isNotEmpty>
+		  <isNotEmpty property="phone">
+				PHONE=#phone#,
+		 </isNotEmpty>
+		  <isNotEmpty property="phoneExt">
+				PHONE_EXT=#phoneExt#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isDel">
+				IS_DEL=#isDel#,
+		 </isNotEmpty>
+		 <isNotEmpty property="remark">
+				REMARK=#remark#,
+		 </isNotEmpty>
+		 <isNotEmpty property="buessRank">
+				BUESS_RANK=#buessRank#,
+		 </isNotEmpty>
+        <isNotEmpty property="operateCode">
+            OPERATE_CODE=#operateCode#,
+        </isNotEmpty>
+        <isNotEmpty property="jgm">
+            JGM=#jgm#,
+        </isNotEmpty>
+         <isNotEmpty property="leaveTag">
+            LEAVE_TAG=#leaveTag#,
+        </isNotEmpty>
+     	<isNotEmpty property="approvalValue">
+            APPROVAL_VALUE=#approvalValue#,
+        </isNotEmpty>
+     	  
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where USER_ID=#userId#
+         ]]> 
+	</update>
+	 
+	<!-- 验证用户名 -->
+  <select id="checkAccount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+  	<![CDATA[
+		select count(*) from SYS_USER where ACCOUNT=#ACCOUNT# and IS_DEL =0
+	]]>
+	 <isNotEmpty prepend="and" property="userId">
+		<![CDATA[USER_ID not in(#userId#)]]>
+	</isNotEmpty>
+  </select>
+  <!-- 验证人员编号 -->
+   <select id="checkUserCode" resultClass="java.lang.Integer" parameterClass="java.util.Map" >
+  	<![CDATA[
+		select count(*) from SYS_USER where USER_CODE=#USER_CODE#  and IS_DEL =0  
+	]]>
+	 <isNotEmpty prepend="and" property="userId">
+		<![CDATA[USER_ID not in(#userId#)]]>
+	</isNotEmpty>
+  </select>
+  <!-- 根据用户名查用户 -->
+  <select id="getAccount" resultMap="SysUserResult" parameterClass="java.lang.String" >
+  	<![CDATA[
+		select * from SYS_USER where IS_DEL = 0 and   ACCOUNT= '$ACCOUNT$'  and IS_ACTIVED =1
+	]]>
+  </select>
+  
+  <select id="getAllAccount" resultMap="SysUserResult" cacheModel="CrmGetUserByAccount" >
+  	<![CDATA[
+		select * from SYS_USER where IS_DEL = 0 and IS_ACTIVED =1
+	]]>
+  </select>
+  
+  <select id="getAllUserByAccount" resultMap="SysUserResult" parameterClass="java.lang.String" cacheModel="CrmGetUserByAccount" >
+  	<![CDATA[
+		select * from SYS_USER where ACCOUNT= '$ACCOUNT$' and IS_DEL = 0 and IS_ACTIVED =1
+	]]>
+  </select>
+  <select id="getAllUserByAccountMap" resultMap="SysUserResult" parameterClass="java.util.Map" cacheModel="CrmGetUserByAccount" >
+        <![CDATA[
+		select * from SYS_USER a left join  SYS_ROLE_MEMBER b on a.USER_ID=b.USER_ID
+		                           left join sys_team_user su  on a.USER_ID=su.USER_ID
+		                           where a.IS_DEL = 0 and a.IS_ACTIVED =1
+	    ]]>
+        <isNotEmpty prepend="and" property="userName">
+            <![CDATA[ a.USER_NAME like '%$userName$%']]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="account">
+            <![CDATA[ a.ACCOUNT like '%$account$%']]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="roleId">
+          <![CDATA[ b.role_id = #roleId#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userId">
+          <![CDATA[ su.team_id in(select team_id from sys_team_user st where st.user_id = #userId# )]]>
+        </isNotEmpty>
+
+  </select>
+
+	<select id="getAllUserByAccountAndName" resultMap="SysUserResult" parameterClass="java.util.Map" cacheModel="CrmGetUserByAccount" >
+		<![CDATA[
+		select * from SYS_USER a left join  SYS_ROLE_MEMBER b on a.USER_ID=b.USER_ID
+		                           left join sys_team_user su  on a.USER_ID=su.USER_ID
+		                           where a.IS_DEL = 0 and a.IS_ACTIVED =1
+	    ]]>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[( a.USER_NAME like '%$user$%' or a.ACCOUNT like '%$user$%' )]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="roleId">
+			<![CDATA[ b.role_id = #roleId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ su.team_id in(select team_id from sys_team_user st where st.user_id = #userId# )]]>
+		</isNotEmpty>
+	</select>
+
+
+  
+   <!-- 用户实体取上级用户集合 -->
+   <select id="getSuperiorUserList" resultMap="SysUserBeanResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select  
+		a.USER_ID,
+		a.DEPT_ID,
+		a.ACCOUNT,
+		a.USER_CODE,
+		a.IS_ACTIVED,
+		c.DEPT_NAME,
+		a.REMARK,
+		a.USER_NAME from SYS_USER a 
+		left join SYS_DEPT c on a.DEPT_ID=c.DEPT_ID
+		left join (select * from SYS_ROLE_MEMBER where ROLE_ID=3) d on a.USER_ID=d.USER_ID
+		where a.IS_DEL = 0 and a.IS_ACTIVED =1  and  (a.DEPT_ID=#deptParentId# or a.DEPT_ID=#deptId#)  
+	]]>
+    <isNotEmpty prepend="and" property="account">
+		<![CDATA[a.ACCOUNT = #account#]]>
+	</isNotEmpty>
+  </select>
+  
+     <!-- 根据用户ID集合取出用户对应用户对象 -->
+   <select id="getUserListByIds" resultMap="SysUserBeanResult" parameterClass="java.lang.String" >
+  	<![CDATA[
+  		select  
+		a.USER_ID,
+		a.DEPT_ID,
+		a.ACCOUNT,
+		a.USER_CODE,
+		a.IS_ACTIVED,
+		c.DEPT_NAME,
+		a.REMARK,
+		a.USER_NAME from SYS_USER a 
+		left join SYS_DEPT c on a.DEPT_ID=c.DEPT_ID
+		where a.IS_DEL = 0    and  a.IS_ACTIVED=1 and a.USER_ID in($userIds$)
+	]]>
+  </select>
+  
+     <!-- 用户实体取上级用户集合 -->
+   <select id="getDeptBelongUserTaskList" resultMap="SysUserResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select users.* from SYS_USER as users 
+		where users.IS_DEL=0 and users.IS_ACTIVED=1 and  users.DEPT_ID=#deptId# and users.USER_ID in($userIds$)
+	]]>
+  </select>
+  
+    <!-- 根据部门ID取用户集合 -->
+   <select id="getUserByDeptIdList" resultMap="SysUserResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select * from SYS_USER a
+		inner join (select * from SYS_ROLE_MEMBER where ROLE_ID=3) b on a.USER_ID=b.USER_ID
+		where a.IS_DEL=0 and a.IS_ACTIVED=1 and a.USER_ID!=1 and  a.DEPT_ID=#deptId# 
+		order by a.USER_NAME
+	]]>
+  </select>
+  
+  
+  
+  <!-- 用户实体取下属用户集合 -->
+  <select id="getDeptBelongUser" resultMap="SysUserBeanResult" parameterClass="java.lang.String">
+  	<![CDATA[
+		select  
+			 a.USER_ID,
+			 a.DEPT_ID,
+			 a.ACCOUNT,
+			 a.USER_CODE,
+			 a.IS_ACTIVED,
+			 c.DEPT_NAME,
+			 a.REMARK,
+		 	 a.USER_NAME from SYS_USER a 
+		 	 left join SYS_DEPT c on a.DEPT_ID=c.DEPT_ID
+			 where a.IS_DEL = 0 and a.IS_ACTIVED =1 and a.USER_ID in($userIds$)
+			 order by c.DEPT_PARENT_ID,c.SORTNO,a.ACCOUNT 
+	]]>
+  </select>
+	
+	<!-- 根据ID删除用户记录 -->
+   <delete id="deleteSysUserById" parameterClass="java.lang.Integer">
+	<![CDATA[
+		delete from SYS_USER r where   r.USER_ID= #userId# 
+	]]>
+   </delete>
+	
+  	<!-- 根据id得到用户信息 -->	
+  <select id="getSysUserById" resultMap="SysUserResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from SYS_USER where USER_ID=#userId# and IS_DEL = 0
+	]]>
+  </select>
+
+    <!-- 根据信贷操作号operateCode查用户-->
+    <select id="getSysUserByOperateCode" resultMap="SysUserResult" parameterClass="java.lang.String">
+        <![CDATA[
+            select *from SYS_USER where OPERATE_CODE=#operateCode# and IS_DEL =0 and IS_ACTIVED =1
+        ]]>
+    </select>
+
+  <!-- 用户记录分页count -->
+  <select id="getSysUserCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   SYS_USER a
+                   left join SYS_ROLE_MEMBER b on a.USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.DEPT_ID=c.DEPT_ID
+     ]]>
+     <dynamic prepend="where" >
+	    <isNotEmpty prepend="and" property="userId">
+			<![CDATA[a.USER_ID like '%$userId$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[a.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+         <isNotEmpty prepend="and" property="isActived">
+             <![CDATA[a.IS_ACTIVED = #isActived#]]>
+         </isNotEmpty>
+         <isNotEmpty prepend="and" property="roleId">
+             <![CDATA[ b.role_id = #roleId#]]>
+         </isNotEmpty>
+	</dynamic>
+  </select> 
+  
+  
+  	<!-- 用户分页 -->
+  <select id="getSysUserParameterPageMap" resultMap="SysUserBeanResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+			  a.USER_ID,	
+		      a.ACCOUNT,
+              a.USER_NAME,
+              c.DEPT_ID,
+              c.DEPT_NAME,
+              a.IS_ACTIVED,
+              b.ROLE_ID as ROLENAMES,
+              a.IS_ACTIVED,
+             (CASE a.IS_ACTIVED WHEN 1 THEN '启用' ELSE '停用' END) as STATE
+        from 
+               SYS_USER a
+                   left join SYS_ROLE_MEMBER b on a.USER_ID=b.USER_ID 
+                   left join SYS_DEPT c on a.DEPT_ID=c.DEPT_ID
+	]]>
+	<dynamic prepend="where" >
+	   <isNotEmpty prepend="and" property="userId">
+			<![CDATA[a.USER_ID like '%$userId$%']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userName">
+			<![CDATA[a.USER_NAME like '%$userName$%']]>
+		</isNotEmpty>
+        <isNotEmpty prepend="and" property="isActived">
+            <![CDATA[a.IS_ACTIVED = #isActived#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="roleId">
+            <![CDATA[ b.role_id = #roleId#]]>
+        </isNotEmpty>
+	</dynamic>
+         order by a.USER_NAME
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+
+<!-- 查询所在机构数据 -->
+<select id="getOnDeptData" resultMap="SysUserResult" parameterClass="java.util.Map">
+ <![CDATA[
+ 	select * from SYS_USER where DEPT_ID = #deptId# and IS_DEL = 0 and
+ 					USER_ID  in( select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+            						where b.ROLE_ID in (3,4))
+ ]]>
+  <isNotEmpty prepend="and" property="isActived">
+			<![CDATA[IS_ACTIVED = #isActived#]]>
+  </isNotEmpty>
+  order by USER_NAME 
+</select>
+ <!-- 查询下属机构数据 -->
+  <select id="getInDeptData" resultMap="SysUserResult" parameterClass="java.util.Map">
+  <![CDATA[
+  	select * from SYS_USER where DEPT_ID IN (
+  		select DEPT_ID from SYS_DEPT where DEPT_SEARCH_CODE like '$deptSearchCode$%' and IS_DEL=0) 
+  		 and DEPT_ID != #deptId#
+  		 and IS_DEL = 0  and IS_ACTIVED =1
+  ]]>
+  </select>
+  <!-- 查询本机构及下属机构数据 -->
+  <select id="getContainDeptData" resultMap="SysUserResult" parameterClass="java.lang.String">
+  <![CDATA[
+  	select * from SYS_USER where DEPT_ID IN (
+  		select DEPT_ID from SYS_DEPT where DEPT_SEARCH_CODE like '$deptSearchCode$%' and IS_DEL=0) 
+  		and IS_DEL = 0 and IS_ACTIVED =1
+  ]]>
+  </select>
+  <!-- 查询所有数据 -->
+  <select id="getAllData" resultMap="SysUserResult">
+  	select * from SYS_USER where IS_DEL = 0 and USER_ID != 1 and IS_ACTIVED =1
+  </select>
+
+    <!-- 查询所有业务主管 -->
+    <select id="getAllManagerUser" resultMap="SysUserResult">
+        select U.* from SYS_USER U
+        INNER JOIN SYS_ROLE_MEMBER R ON R.USER_ID = U.USER_ID
+        WHERE  U.IS_DEL = 0 and U.USER_ID != 1 AND R.ROLE_ID = 3 and u.IS_ACTIVED =1
+    </select>
+  
+    <!-- 查询所有数据 包括admin-->
+  <select id="getAllUser" resultMap="SysUserResult">
+  	select * from SYS_USER where IS_DEL = 0 and IS_ACTIVED =1
+  </select>
+  
+
+<!-- 查询所在机构数据 包含删除-->
+<select id="getOnDeptDataHasDel" resultMap="SysUserResult" parameterClass="java.lang.Integer">
+ <![CDATA[
+ 	select * from SYS_USER where DEPT_ID = #deptId#
+ ]]>
+</select>
+ <!-- 查询下属机构数据 包含删除 -->
+  <select id="getInDeptDataHasDel" resultMap="SysUserResult" parameterClass="java.util.Map">
+  <![CDATA[
+  	select * from SYS_USER where DEPT_ID IN (
+  		select DEPT_ID from SYS_DEPT where DEPT_SEARCH_CODE like '$deptSearchCode$%' and IS_DEL=0) 
+  		 and DEPT_ID != #deptId#
+  ]]>
+  </select>
+  <!-- 查询本机构及下属机构数据  包含删除-->
+  <select id="getContainDeptDataHasDel" resultMap="SysUserResult" parameterClass="java.lang.String">
+  <![CDATA[
+  	select * from SYS_USER where DEPT_ID IN (
+  		select DEPT_ID from SYS_DEPT where DEPT_SEARCH_CODE like '$deptSearchCode$%' and IS_DEL=0) 
+  ]]>
+  </select>
+  <!-- 查询所有数据  包含删除-->
+  <select id="getAllDataHasDel" resultMap="SysUserResult">
+  	select * from SYS_USER
+  </select>
+
+  <!-- 查询所管理机构下的用户 不包含伪删除和admin-->
+   <select id="getInChargeDeptUsers" resultMap="SysUserResult" parameterClass="java.util.Map">
+  <![CDATA[
+  	select * from SYS_USER
+  	 where DEPT_ID in (
+	  	    select DEPT_ID from SYS_DEPT 
+	  		  where $searchKey$
+	  		    and IS_DEL = 0  )
+   ]]>
+   <isNotEmpty prepend="and" property="isDel">
+			<![CDATA[IS_DEL = #isDel#]]>
+	</isNotEmpty>
+    <isNotEmpty prepend="and" property="isActived">
+			<![CDATA[IS_ACTIVED = #isActived#]]>
+	</isNotEmpty>
+	<isPropertyAvailable prepend="and" property="noDeptAdmin">
+		<isEqual property="noDeptAdmin" compareValue="1">
+			<![CDATA[ USER_ID  in( select a.USER_ID from SYS_USER a left join SYS_ROLE_MEMBER b  on a.USER_ID=b.USER_ID  
+            where b.ROLE_ID in (3,4))]]>
+		</isEqual>
+		<isEqual property="noDeptAdmin" compareValue="0">
+			USER_ID != 1
+		</isEqual>
+	</isPropertyAvailable>
+
+	
+  </select>
+  
+    <!-- 返回来电转接用户 -->
+  <select id="getCallForwardUsers" resultMap="SysTalkUsersResult" parameterClass="java.util.Map" >
+  		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+  			select u.*,d.DEPT_NAME from SYS_USER u inner join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+  			 where u.IS_DEL=0 and u.IS_ACTIVED=1 and u.PHONE_EXT<>'' and u.USER_ID<>1 order by u.ACCOUNT
+  		]]>
+  		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  <!-- 返回来电转接用户 -->
+  <select id="getCallForwardUserCount" resultClass="java.lang.Integer" parameterClass="java.util.Map" >
+		<![CDATA[
+  			select count(*) from SYS_USER u inner join SYS_DEPT d on u.DEPT_ID = d.DEPT_ID
+  			 where u.IS_DEL=0 and u.IS_ACTIVED=1 and u.PHONE_EXT<>'' and u.USER_ID<>1
+  		]]>
+  </select>
+  <!-- 机构查询人员组装角色 -->
+	<select id="getRoleNamesByUserIds" resultMap="UserRoleNameResult" parameterClass="java.lang.String">
+		<![CDATA[
+			select b.USER_ID,a.ROLE_NAME,a.ROLE_ID from SYS_ROLE a
+				left join SYS_ROLE_MEMBER b on a.ROLE_ID = b.ROLE_ID
+				where USER_ID in ($value$)
+		]]>
+	</select>
+
+    <!--  根据用户ID集合查主管姓名 -->
+    <select id="getLeadNamesByUserId" resultMap="SysUserBeanResult" parameterClass="java.lang.String">
+		<![CDATA[
+            select a.USER_ID,a.DEPT_ID,a.ACCOUNT,a.USER_NAME,a.IS_ACTIVED, '' as DEPT_NAME
+            from SYS_USER  as a
+            left join SYS_ROLE_MEMBER as b
+            on a.USER_ID=b.USER_ID
+            where a.IS_DEL = 0  and  a.IS_ACTIVED=1  and a.USER_ID<>1
+            and a.DEPT_ID in (select  DEPT_ID from SYS_USER where USER_ID=#value#)
+            and ROLE_ID=3
+		]]>
+	</select>
+
+
+	<!-- 查询系统中客户经理 userId -->
+	<select id="getCommonUserIdList" resultClass="java.lang.Integer" cacheModel="CrmGetUserByAccount"> 
+	<![CDATA[
+		select distinct sm.USER_ID from SYS_ROLE_MEMBER sm,SYS_USER su where sm.ROLE_ID=4 and su.IS_DEL = 0 and su.IS_ACTIVED = 1
+	]]>	
+	</select>
+	
+	<!--  返回柜台人员，用户的树形数据 -->
+	<select id="getSysUserAndCounterUser" resultMap="SysUserAndCounterResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT * FROM( 
+				(SELECT  b.USER_ID, b.USER_NAME, b.DEPT_ID,a.DEPT_PARENT_ID FROM SYS_DEPT a LEFT JOIN SYS_USER b ON
+		            a.DEPT_ID =b.DEPT_ID
+			        WHERE
+			            b.USER_ID IS NOT NULL
+			        AND b.IS_DEL=0
+			        AND b.USER_ID<>1
+			        AND a.IS_DEL=0
+			        AND b.IS_ACTIVED=1
+		        )
+			UNION ALL(
+			        SELECT
+			            e.COUNTER_USER_ID,
+			            e.COUNTER_USER_NAME,
+			            e.DEPT_ID,
+			            c.DEPT_PARENT_ID
+			        FROM
+			            SYS_DEPT c
+			        LEFT JOIN CRM_COUNTER_USER e
+			        ON
+			            c.DEPT_ID =e.DEPT_ID
+			        WHERE
+			            c.IS_DEL=0 AND e.IS_DEL=0
+			        AND COUNTER_USER_ID IS NOT NULL
+    				)
+   				 )
+			WHERE
+			    USER_ID <>$userId$ and DEPT_ID in ($deptIds$)
+			ORDER BY
+			    DEPT_ID,
+			    USER_ID
+		]]>
+	</select>
+
+    <!-- 获取用户信贷机构吗 机构名称 -->
+    <select id="getUserJGINFO" resultClass="java.util.HashMap" parameterClass="java.lang.String">
+      SELECT SU.JGM,SD.CNNAME FROM SYS_USER SU LEFT JOIN DATA.S_DEPT SD ON SU.JGM=SD.PK1 WHERE SU.ACCOUNT=#account# and su.is_del=0 fetch first 1 row only
+    </select>
+    
+    
+    <select id="getSysUserTeamCheifByUserId" resultMap="SysUserResult" parameterClass="java.util.Map">
+         
+	select
+	     su.*
+	 from 
+	      sys_team_user st , sys_role_member srm,  sys_role sr, sys_user su
+	  where 
+	       st.user_id = srm.user_id and sr.role_id = srm.role_id and sr.role_id = 5 and st.user_id = su.user_id and st.team_id in (
+	            select st2.team_id from sys_team_user st2 , sys_user su2 where st2.user_id = su2.user_id 
+	            <isNotEmpty property="userId" prepend="and">
+	                su2.user_id =  #userId#
+	            </isNotEmpty>
+	       )
+    </select>
+        
+   	<select id="getUserListBelongToSysTeamByUserId" resultMap="SysUserResult" parameterClass="java.util.Map">
+         <![CDATA[
+	     select 
+            su.*
+        from (
+        
+                select
+                      *
+                from
+                       sys_team_user where team_id in(                        
+                select team_id
+                from
+                       sys_team_user st 
+                where 
+                        st.user_id = #userId#
+                        ) and user_id <> #userId#
+        )t,sys_user su,sys_role_member sm  where t.user_id = su.user_id and su.user_id = sm.user_id and sm.role_id = 7 
+        and su.is_del=0 and is_actived = 1 
+        ]]>
+    </select>
+
+	<select id="getUserNewListBelongToSysTeamByUserId" resultMap="SysUserResult" parameterClass="java.util.Map">
+		<![CDATA[
+	     select
+            su.*
+        from (
+
+                select
+                      *
+                from
+                       sys_team_user where team_id in(
+                select team_id
+                from
+                       sys_team_user st
+                where
+                        st.user_id = #userId#
+                        )
+        )t,sys_user su,sys_role_member sm  where t.user_id = su.user_id and su.user_id = sm.user_id and sm.role_id = 7
+        and su.is_del=0 and is_actived = 1
+        ]]>
+	</select>
+    
+   	<select id="getManagerSysUserUserIdListByTeamMemberUserId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+         <![CDATA[
+         select
+         	DISTINCT su.user_id userId
+         from
+         	sys_team_user su, sys_role_member sm  
+         where su.user_id = sm.user_id 
+		    and su.team_id in(select team_id from sys_team_user st where st.user_id = #userId# )  
+		    and sm.role_id = 6 
+		    and su.user_id not in (Select user_id from sys_user where leave_tag=1)
+        ]]>
+    </select>
+   
+<select id="getManagerByUserIdAndRoleId" resultMap="SysUserResult" parameterClass="java.util.Map" >
+  	<![CDATA[			
+		select c.*from (select * from sys_team_user where team_id in (Select team_id from sys_team_user where user_id = #userId#))
+		 a inner join SYS_ROLE_MEMBER b on a.user_id=b.user_id and b.ROLE_ID in ($roleId$)
+		 inner join sys_user c on a.user_id = c.user_id and c.is_del=0 and c.is_actived=1
+		 
+	]]>
+  </select>
+</sqlMap>

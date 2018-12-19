@@ -1,0 +1,1838 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RecordInfoSQL">
+	<typeAlias alias="RecordInfo"
+		type="com.banger.mobile.domain.model.record.RecordInfo" />
+	<typeAlias alias="RecordInfoBean"
+		type="com.banger.mobile.domain.model.record.RecordInfoBean" />
+	<typeAlias alias="RecordDetail"
+		type="com.banger.mobile.domain.model.record.RecordDetail" />
+	<typeAlias alias="PhoneRecordBean"
+		type="com.banger.mobile.domain.model.record.PhoneRecordBean" />
+	<typeAlias alias="RecordExportBean"
+		type="com.banger.mobile.domain.model.record.RecordExportBean" />
+	<typeAlias alias="BaseCrmCustomer" 
+		type="com.banger.mobile.domain.model.base.customer.BaseCrmCustomer" />
+	<typeAlias alias="RecordTemp" 
+		type="com.banger.mobile.domain.model.record.RecordTemp" />
+	<!-- 录音记录表-->
+	<!-- RecordInfoSQL信息全字段 -->
+	<resultMap class="RecordInfo" id="RecordInfoResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="RECORD_NO" property="recordNo" />
+		<result column="USER_ID" property="userId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CALL_TYPE" property="callType" />
+		<result column="LOCAL_PHONE" property="localPhone" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="BIZ_TYPE" property="bizType" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="CREDIT_CARD" property="creditCard" />
+		<result column="REMARK" property="remark" />
+		<result column="COMM_PROGRESS_ID" property="commProgressId" />
+		<result column="IS_CANCELED" property="isCanceled" />
+		<result column="FILE_Id" property="fileId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ARCHIVED" property="isArchived" />
+		<result column="ARCHIVE_DATE" property="archiveDate" />
+		<result column="RECORD_SOURCE" property="recordSource" />
+		<result column="IS_READ" property="isRead" />
+		<result column="CONTENT" property="content" />
+		<result column="SPLIT_COUNT" property="splitCount" />
+		<result column="STATUS" property="status" />
+		<result column="VERIFY_USER_ID" property="verifyUserId" />
+		<result column="MMS_TITLE" property="mmsTitle" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="RING_TIME" property="ringTime" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="PHONE_EXT" property="phoneExt" />
+		<result column="FAX" property="fax" />
+		<result column="FAX_EXT" property="faxExt" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="CUSTOMER_STR" property="customerStr"/>
+		
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_MD5" property="fileMd5" />
+		<result column="UPLOAD_DATE" property="uploadDate" />
+	</resultMap>
+	
+	<cacheModel id="recordUpdateCache" type="OSCACHE" serialize="true"
+		readOnly="true" >
+		<flushInterval hours="24" />
+		<flushOnExecute statement="mergeRecordInfo" />
+		<flushOnExecute statement="addRecordInfo" />
+		<flushOnExecute statement="addRecordInfoForSeq" />
+		<flushOnExecute statement="updateRecordInfo" />
+		<flushOnExecute statement="deleteRecordInfoById" />
+		<flushOnExecute statement="canceledRecordInfoById" />
+		<flushOnExecute statement="deleteCommIdById" />
+		<flushOnExecute statement="updateArchiveById" />
+		<flushOnExecute statement="updateRec" />
+		<flushOnExecute statement="updateRecordConnect" />
+		<flushOnExecute statement="updateTalkRecordByNo" />
+		<flushOnExecute statement="insertTalkRecordByNo" />
+		<flushOnExecute statement="updateTalkRecord" />
+		<flushOnExecute statement="insertTalkRecord" />
+		<flushOnExecute statement="updateCustomerIdByRecId" />
+		<flushOnExecute statement="updateCustomerIdByPhone" />
+		<flushOnExecute statement="updateCustomerIdByCusId" />
+		<flushOnExecute statement="updateCustomerIdByRecIdForRelation" />
+		<flushOnExecute statement="updateRecordByPhones" />
+		<flushOnExecute statement="updateCustomerStrByRecId" />
+		<flushOnExecute statement="updateCustomerStrByCusId" />
+		<flushOnExecute statement="updateRecord" />
+		<flushOnExecute statement="addVisitRecord" />
+		<flushOnExecute statement="updateVisitRecord" />
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	<!-- RecordInfoBeanSQL信息显示字段 -->
+	<resultMap class="RecordInfoBean" id="RecordInfoBeanResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="RECORD_NO" property="recordNo" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="CALL_TYPE_NAME" property="callTypeName" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BIZ_TYPE" property="bizType" />
+		<result column="RECORD_SOURCE" property="recordSource" />
+		<result column="STATE" property="state" />
+		<result column="FILE_Id" property="fileId" />
+		<result column="IS_READ" property="isRead" />
+		<result column="REMARK" property="remark" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="VERIFY_USER_NAME" property="verifyUserName" />
+		<result column="STATUS" property="status" />
+		<result column="SPLIT_COUNT" property="splitCount" />
+		<result column="CONTENT" property="content" />
+		<result column="MMS_TITLE" property="mmsTitle" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="PHONE_EXT" property="phoneExt" />
+		<result column="FAX" property="fax" />
+		<result column="FAX_EXT" property="faxExt" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="COMM_PROGRESS_NAME" property="commProgressName"/>
+		<result column="IS_NOGOOD" property="isNoGood"/>
+	</resultMap>
+	
+	<!-- 客户联系记录信息接口字段 -->
+	<resultMap class="RecordInfoBean"
+		id="QueryCustomerCallInfoResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="CALL_TYPE_NAME" property="callTypeName" />
+		<result column="BIZ_TYPE" property="bizType" />
+		<result column="COMM_PROGRESS_ID" property="commProgressId" />
+		<result column="REMARK" property="remark" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="RECORD_SOURCE" property="recordSource"/>
+		<result column="IS_CANCELED" property="isCanceled"/>
+		<result column="USER_NAME" property="userName"/>
+	</resultMap>
+
+	<resultMap class="PhoneRecordBean" id="PhoneRecordBeanResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="RECORD_NO" property="recordNo" />
+		<result column="USER_ID" property="userId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CALL_TYPE" property="callType" />
+		<result column="LOCAL_PHONE" property="localPhone" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="BIZ_TYPE" property="bizType" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="CREDIT_CARD" property="creditCard" />
+		<result column="REMARK" property="remark" />
+		<result column="COMM_PROGRESS_ID" property="commProgressId" />
+		<result column="IS_CANCELED" property="isCanceled" />
+		<result column="FILE_ID" property="fileId" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ARCHIVED" property="isArchived" />
+		<result column="ARCHIVE_DATE" property="archiveDate" />
+		<result column="RECORD_SOURCE" property="recordSource" />
+		<result column="IS_READ" property="isRead" />
+		<result column="CONTENT" property="content" />
+		<result column="SPLIT_COUNT" property="splitCount" />
+		<result column="STATUS" property="status" />
+		<result column="VERIFY_USER_ID" property="verifyUserId" />
+		<result column="MMS_TITLE" property="mmsTitle" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="RING_TIME" property="ringTime" />
+	</resultMap>
+
+	<!-- 录音详情信息字段 -->
+	<resultMap class="RecordDetail" id="QueryRecordDetail">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="RECORD_No" property="recordNo" />
+		<result column="RECORD_SOURCE" property="recordSource" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="IS_CANCELED" property="isCanceled" />
+		<result column="CALL_TYPE_NAME" property="callTypeName" />
+		<result column="USER_NAME" property="userName" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="BIZ_TYPE_NAME" property="bizType" />
+		<result column="COMM_PROGRESS_NAME" property="commProgress" />
+		<result column="ID_CARD" property="idCard" />
+		<result column="CREDIT_CARD" property="creditCard" />
+		<result column="REMARK" property="remark" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="FILE_ID" property="fileId" />
+		<result column="CUSTOMER_ID" property="customerId"
+			jdbcType="Integer" nullValue="0" />
+		<result column="VERIFY_USER_NAME" property="verifyUserName" />
+		<result column="STATUS" property="status" />
+		<result column="SPLIT_COUNT" property="splitCount" />
+		<result column="CONTENT" property="content" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="PHONE_EXT" property="phoneExt" />
+		<result column="FAX" property="fax" />
+		<result column="FAX_EXT" property="faxExt" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+	</resultMap>
+
+	<typeAlias alias="TalkRecordInfo"
+		type="com.banger.mobile.domain.model.record.TalkRecordInfo" />
+
+	<!-- 活动量统计明细 -->
+	<resultMap class="TalkRecordInfo" id="TalkRecordInfoResult">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="PHONE" property="phone" />
+		<result column="FAX" property="fax" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="CALL_TYPE" property="callType" />
+		<result column="CALL_TYPE_NAME" property="callTypeName" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TIME" property="callTime" />
+		<result column="USER_NAME" property="userName" />
+		<result column="BIZ_TYPE_NAME" property="bizTypeName" />
+		<result column="COMM_PROGRESS_NAME" property="commProgressName" />
+	</resultMap>
+
+	<!--导出联系记录  -->
+	<resultMap class="RecordExportBean" id="RecordExportBeanResult"
+		extends="RecordInfoResult">
+		<result column="USER_NAME" property="userName" />
+		<result column="CALL_TYPE_NAME" property="callTypeName" />
+		<result column="BIZ_TYPE_NAME" property="bizTypeName" />
+		<result column="RECORD_SOURCE_NAME" property="recordSourceName" />
+		<result column="CANCELED_NAME" property="isCanceledName" />
+		<result column="BELONG_USER_NAME" property="belongUserName" />
+		<result column="BELONG_USER_ACCOUNT"
+			property="belongUserAccount" />
+		<result column="BELONG_DEPT_CODE" property="belongDeptCode" />
+		<result column="BELONG_DEPT_NAME" property="belongDeptName" />
+		<result column="EXT_FIELD_ID" property="extFieldId" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="EXT_DATE01" property="extDate01" />
+		<result column="EXT_DATE02" property="extDate02" />
+		<result column="EXT_DATE03" property="extDate03" />
+		<result column="EXT_DATE04" property="extDate04" />
+		<result column="EXT_DATE05" property="extDate05" />
+		<result column="EXT_DATE06" property="extDate06" />
+		<result column="EXT_DATE07" property="extDate07" />
+		<result column="EXT_DATE08" property="extDate08" />
+		<result column="EXT_DATE09" property="extDate09" />
+		<result column="EXT_DATE10" property="extDate10" />
+		<result column="EXT_DATE11" property="extDate11" />
+		<result column="EXT_DATE12" property="extDate12" />
+		<result column="EXT_DATE13" property="extDate13" />
+		<result column="EXT_DATE14" property="extDate14" />
+		<result column="EXT_DATE15" property="extDate15" />
+		<result column="EXT_DATE16" property="extDate16" />
+		<result column="EXT_DATE17" property="extDate17" />
+		<result column="EXT_DATE18" property="extDate18" />
+		<result column="EXT_DATE19" property="extDate19" />
+		<result column="EXT_DATE20" property="extDate20" />
+		<result column="EXT_FLOAT01" property="extFloat01" />
+		<result column="EXT_FLOAT02" property="extFloat02" />
+		<result column="EXT_FLOAT03" property="extFloat03" />
+		<result column="EXT_FLOAT04" property="extFloat04" />
+		<result column="EXT_FLOAT05" property="extFloat05" />
+		<result column="EXT_FLOAT06" property="extFloat06" />
+		<result column="EXT_FLOAT07" property="extFloat07" />
+		<result column="EXT_FLOAT08" property="extFloat08" />
+		<result column="EXT_FLOAT09" property="extFloat09" />
+		<result column="EXT_FLOAT10" property="extFloat10" />
+		<result column="EXT_FLOAT11" property="extFloat11" />
+		<result column="EXT_FLOAT12" property="extFloat12" />
+		<result column="EXT_FLOAT13" property="extFloat13" />
+		<result column="EXT_FLOAT14" property="extFloat14" />
+		<result column="EXT_FLOAT15" property="extFloat15" />
+		<result column="EXT_FLOAT16" property="extFloat16" />
+		<result column="EXT_FLOAT17" property="extFloat17" />
+		<result column="EXT_FLOAT18" property="extFloat18" />
+		<result column="EXT_FLOAT19" property="extFloat19" />
+		<result column="EXT_FLOAT20" property="extFloat20" />
+		<result column="EXT_LONG_STRING01" property="extLongString01" />
+		<result column="EXT_LONG_STRING02" property="extLongString02" />
+		<result column="EXT_LONG_STRING03" property="extLongString03" />
+		<result column="EXT_LONG_STRING04" property="extLongString04" />
+		<result column="EXT_LONG_STRING05" property="extLongString05" />
+		<result column="EXT_LONG_STRING06" property="extLongString06" />
+		<result column="EXT_LONG_STRING07" property="extLongString07" />
+		<result column="EXT_LONG_STRING08" property="extLongString08" />
+		<result column="EXT_LONG_STRING09" property="extLongString09" />
+		<result column="EXT_LONG_STRING10" property="extLongString10" />
+		
+		<result column="EXT_LONG_STRING11" property="extLongString11" />
+		<result column="EXT_LONG_STRING12" property="extLongString12" />
+		<result column="EXT_LONG_STRING13" property="extLongString13" />
+		<result column="EXT_LONG_STRING14" property="extLongString14" />
+		<result column="EXT_LONG_STRING15" property="extLongString15" />
+		<result column="EXT_LONG_STRING16" property="extLongString16" />
+		<result column="EXT_LONG_STRING17" property="extLongString17" />
+		<result column="EXT_LONG_STRING18" property="extLongString18" />
+		<result column="EXT_LONG_STRING19" property="extLongString19" />
+		<result column="EXT_LONG_STRING20" property="extLongString20" />
+		<result column="EXT_STRING01" property="extString01" />
+		<result column="EXT_STRING02" property="extString02" />
+		<result column="EXT_STRING03" property="extString03" />
+		<result column="EXT_STRING04" property="extString04" />
+		<result column="EXT_STRING05" property="extString05" />
+		<result column="EXT_STRING06" property="extString06" />
+		<result column="EXT_STRING07" property="extString07" />
+		<result column="EXT_STRING08" property="extString08" />
+		<result column="EXT_STRING09" property="extString09" />
+		<result column="EXT_STRING10" property="extString10" />
+		
+		<result column="EXT_STRING11" property="extString11" />
+		<result column="EXT_STRING12" property="extString12" />
+		<result column="EXT_STRING13" property="extString13" />
+		<result column="EXT_STRING14" property="extString14" />
+		<result column="EXT_STRING15" property="extString15" />
+		<result column="EXT_STRING16" property="extString16" />
+		<result column="EXT_STRING17" property="extString17" />
+		<result column="EXT_STRING18" property="extString18" />
+		<result column="EXT_STRING19" property="extString19" />
+		<result column="EXT_STRING20" property="extString20" />
+		<result column="EXT_STRING21" property="extString21" />
+		<result column="EXT_STRING22" property="extString22" />
+		<result column="EXT_STRING23" property="extString23" />
+		<result column="EXT_STRING24" property="extString24" />
+		<result column="EXT_STRING25" property="extString25" />
+		<result column="EXT_STRING26" property="extString26" />
+		<result column="EXT_STRING27" property="extString27" />
+		<result column="EXT_STRING28" property="extString28" />
+		<result column="EXT_STRING29" property="extString29" />
+		<result column="EXT_STRING30" property="extString30" />
+		<result column="EXT_STRING31" property="extString31" />
+		<result column="EXT_STRING32" property="extString32" />
+		<result column="EXT_STRING33" property="extString33" />
+		<result column="EXT_STRING34" property="extString34" />
+		<result column="EXT_STRING35" property="extString35" />
+		<result column="EXT_STRING36" property="extString36" />
+		<result column="EXT_STRING37" property="extString37" />
+		<result column="EXT_STRING38" property="extString38" />
+		<result column="EXT_STRING39" property="extString39" />
+		<result column="EXT_STRING40" property="extString40" />
+		<result column="EXT_STRING41" property="extString41" />
+		<result column="EXT_STRING42" property="extString42" />
+		<result column="EXT_STRING43" property="extString43" />
+		<result column="EXT_STRING44" property="extString44" />
+		<result column="EXT_STRING45" property="extString45" />
+		<result column="EXT_STRING46" property="extString46" />
+		<result column="EXT_STRING47" property="extString47" />
+		<result column="EXT_STRING48" property="extString48" />
+		<result column="EXT_STRING49" property="extString49" />
+		<result column="EXT_STRING50" property="extString50" />
+		<result column="EXT_STRING51" property="extString51" />
+		<result column="EXT_STRING52" property="extString52" />
+		<result column="EXT_STRING53" property="extString53" />
+		<result column="EXT_STRING54" property="extString54" />
+		<result column="EXT_STRING55" property="extString55" />
+		<result column="EXT_STRING56" property="extString56" />
+		<result column="EXT_STRING57" property="extString57" />
+		<result column="EXT_STRING58" property="extString58" />
+		<result column="EXT_STRING59" property="extString59" />
+		<result column="EXT_STRING60" property="extString60" />
+
+		<result column="CUSTOMER_NAME_PINYIN" property="customerNamePinyin" />
+		<result column="SEX" property="sex" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_TITLE" property="customerTitle" />
+		<result column="AGE" property="age" />
+		<result column="CUST_ID_CARD" property="custIdCard" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CUSTOMER_TYPE_ID" property="customerTypeId" />
+		<result column="CUSTOMER_INDUSTRY_ID" property="customerIndustryId" />
+		<result column="COMPANY" property="company" />
+		<result column="CUSTREMARK" property="custRemark" />
+		<result column="HEAD_SHOW" property="headshow" />
+		<result column="PROVINCE" property="province" />
+		<result column="CITY" property="city" />
+		<result column="ADDRESS" property="address" />
+		<result column="DEFAULT_PHONE_TYPE" property="defaultPhoneType" />
+		<result column="MOBILE_PHONE1" property="mobilePhone1" />
+		<result column="MOBILE_PHONE1_REMARK" property="mobilePhone1Remark" />
+		<result column="MOBILE_PHONE2" property="mobilePhone2" />
+		<result column="MOBILE_PHONE2_REMARK" property="mobilePhone2Remark" />
+		<result column="PHONE" property="phone" />
+		<result column="PHONE_EXT" property="phoneExt" />
+		<result column="FAX" property="fax" />
+		<result column="FAX_EXT" property="faxExt" />
+		<result column="EMAIL" property="email" />
+		<result column="TEMPLATE_IDS" property="templateIds" />
+		<result column="IS_TRASH" property="isTrash" />
+		<result column="BELONG_DEPT_ID" property="belongDeptId" />
+		<result column="BELONG_USER_ID" property="belongUserId" />
+		<result column="IS_VISIT" property="isVisit" />
+		<result column="LAST_CONTACT_DATE" property="lastContactDate" />
+		<result column="IS_RECEIVE_SMS" property="isReceiveSms" />
+		<result column="MOBILE_PHONE1_REGULAR" property="mobilePhone1Regular" />
+		<result column="MOBILE_PHONE2_REGULAR" property="mobilePhone2Regular" />
+		<result column="CUST_CREATE_DATE" property="custCreateDate" />
+		<result column="CUST_UPDATE_DATE" property="custUpdateDate" />
+		<result column="CUST_CREATE_USER" property="custCreateUser" />
+		<result column="CUST_UPDATE_USER" property="custUpdateUser" />
+
+		<result column="CUSTOMER_TYPE_NAME" property="customerTypeName" />
+		<result column="CUSTOMER_INDUSTRY_NAME" property="customerIndustryName" />
+		
+	</resultMap>
+	
+	<resultMap class="RecordTemp" id="RecordTempBean">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="CUSTOMER_NAME" property="customerName"/>
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TYPE_NAME" property="callTypeName"/>
+	</resultMap>
+	
+	<!-- 共享时用，客户id集合 -->
+	<resultMap class="BaseCrmCustomer" id="BaseCrmCustomerResult">
+		<result column="CUSTOMER_ID" property="customerId" />
+	</resultMap>
+	
+
+	<!-- 增加一条录音记录信息-->
+	<insert id="addRecordInfo" parameterClass="RecordInfo">
+		<![CDATA[
+		insert into REC_RECORD_INFO
+		(
+		 RECORD_INFO_ID,
+		 RECORD_NO,
+		 USER_ID,
+		 CUSTOMER_ID,
+		 CALL_TYPE,
+		 LOCAL_PHONE,
+		 REMOTE_PHONE,
+		 START_DATE,
+		 END_DATE,
+		 CALL_TIME,
+		 CUSTOMER_NAME,
+		 BIZ_TYPE,
+		 ID_CARD,
+		 CREDIT_CARD,
+		 REMARK,
+		 COMM_PROGRESS_ID,
+		 IS_CANCELED,
+		 FILE_ID,
+		 IS_DEL,
+		 IS_ARCHIVED,
+		 ARCHIVE_DATE,
+		 RECORD_SOURCE,
+		 IS_READ,
+		 CONTENT,
+		 SPLIT_COUNT,
+		 STATUS,
+		 VERIFY_USER_ID,
+		 MMS_TITLE,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER,
+		 RING_TIME,
+		 CUSTOMER_STR
+		 )
+		values
+		(
+		#recordInfoId#,
+		#recordNo:VARCHAR:NULL#,
+	    #userId:INTEGER#, 
+	    #customerId:INTEGER#,
+	    #callType:INTEGER#,
+	    #localPhone:VARCHAR:NULL#,
+	    #remotePhone:VARCHAR:NULL#,
+	    #startDate:TIMESTAMP#,
+	    #endDate:TIMESTAMP#,
+	    #callTime:INTEGER#,
+	    #customerName:VARCHAR:NULL#,
+	    #bizType:INTEGER#,
+	    #idCard:VARCHAR:NULL#,
+	    #creditCard:VARCHAR:NULL#,
+	    #remark:VARCHAR:NULL#,
+	    #commProgressId:INTEGER#,
+	    #isCanceled:INTEGER#,
+	    #fileId:INTEGER#,
+	    #isDel:INTEGER#,
+	    #isArchived:INTEGER#,
+	    #archiveDate:TIMESTAMP#,
+	    #recordSource:INTEGER#,
+	    #isRead:INTEGER#,
+	    #content:VARCHAR:NULL#,
+	    #splitCount:INTEGER#,
+	    #status:VARCHAR:NULL#,
+	    #verifyUserId:INTEGER#,
+	    #mmsTitle:VARCHAR:NULL#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser:INTEGER#,
+	    #updateUser:INTEGER#,
+	    #ringTime:TIMESTAMP#,
+	    #customerStr:VARCHAR#
+		)
+      ]]>
+	</insert>
+
+	<!-- 增加一条录音记录信息（带序列）-->
+	<insert id="addRecordInfoForSeq" parameterClass="RecordInfo">
+		<![CDATA[
+		insert into REC_RECORD_INFO
+		(
+		 RECORD_INFO_ID,
+		 RECORD_NO,
+		 USER_ID,
+		 CUSTOMER_ID,
+		 CALL_TYPE,
+		 LOCAL_PHONE,
+		 REMOTE_PHONE,
+		 START_DATE,
+		 END_DATE,
+		 CALL_TIME,
+		 CUSTOMER_NAME,
+		 BIZ_TYPE,
+		 ID_CARD,
+		 CREDIT_CARD,
+		 REMARK,
+		 COMM_PROGRESS_ID,
+		 IS_CANCELED,
+		 FILE_ID,
+		 IS_DEL,
+		 IS_ARCHIVED,
+		 ARCHIVE_DATE,
+		 RECORD_SOURCE,
+		 IS_READ,
+		 CONTENT,
+		 SPLIT_COUNT,
+		 STATUS,
+		 VERIFY_USER_ID,
+		 MMS_TITLE,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER,
+		 RING_TIME,
+		 CUSTOMER_STR
+		 )
+		values
+		(
+		#recordInfoId#,
+		#recordNo:VARCHAR:NULL#,
+	    #userId:INTEGER#, 
+	    #customerId:INTEGER#,
+	    #callType:INTEGER#,
+	    #localPhone:VARCHAR:NULL#,
+	    #remotePhone:VARCHAR:NULL#,
+	    #startDate:TIMESTAMP#,
+	    #endDate:TIMESTAMP#,
+	    #callTime:INTEGER#,
+	    #customerName:VARCHAR:NULL#,
+	    #bizType:INTEGER#,
+	    #idCard:VARCHAR:NULL#,
+	    #creditCard:VARCHAR:NULL#,
+	    #remark:VARCHAR:NULL#,
+	    #commProgressId:INTEGER#,
+	    #isCanceled:INTEGER#,
+	    #fileId:INTEGER#,
+	    #isDel:INTEGER#,
+	    #isArchived:INTEGER#,
+	    #archiveDate:TIMESTAMP#,
+	    #recordSource:INTEGER#,
+	    #isRead:INTEGER#,
+	    #content:VARCHAR:NULL#,
+	    #splitCount:INTEGER#,
+	    #status:VARCHAR:NULL#,
+	    #verifyUserId:INTEGER#,
+	    #mmsTitle:VARCHAR:NULL#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser:INTEGER#,
+	    #updateUser:INTEGER#,
+	    #ringTime:TIMESTAMP#,
+	    #customerStr:VARCHAR#
+		)
+      ]]>
+		<selectKey keyProperty="recordInfoId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_REC_RECORD_INFO
+		</selectKey>
+	</insert>
+	<!-- 录音记录修改-->
+	<update id="updateRecordInfo" parameterClass="RecordInfo">
+		UPDATE REC_RECORD_INFO set RECORD_INFO_ID = #recordInfoId#
+		<isNotEmpty prepend="," property="recordNo">
+			RECORD_NO=#recordNo#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="userId">
+			USER_ID=#userId#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="customerId">
+			CUSTOMER_ID=#customerId#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="callType">
+			CALL_TYPE=#callType#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="localPhone">
+			LOCAL_PHONE=#localPhone#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="startDate">
+			START_DATE=#startDate#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="endDate">
+			END_DATE=#endDate#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="callTime">
+			CALL_TIME=#callTime#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="customerName">
+			CUSTOMER_NAME=#customerName#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="bizType">
+			BIZ_TYPE=#bizType#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="idCard">
+			ID_CARD=#idCard#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="creditCard">
+			CREDIT_CARD=#creditCard#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="remark">
+			REMARK=#remark#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="commProgressId">
+			COMM_PROGRESS_ID=#commProgressId#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="isCanceled">
+			IS_CANCELED=#isCanceled#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="fileId">
+			FILE_ID=#fileId#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="isDel">
+			IS_DEL=#isDel#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="recordSource">
+			RECORD_SOURCE=#recordSource#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="createDate">
+			CREATE_DATE=#createDate#
+		</isNotEmpty>
+		<isNotEmpty prepend=",">
+			UPDATE_DATE =
+			<![CDATA[current timestamp]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="createUser">
+			CREATE_USER=#createUser#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="updateUser">
+			UPDATE_USER=#updateUser#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="isRead">
+			IS_READ=#isRead#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="ringTime">
+			RING_TIME=#ringTime:TIMESTAMP#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="customerStr">
+			CUSTOMER_STR=#customerStr:VARCHAR#
+		</isNotEmpty>
+		
+		where RECORD_INFO_ID= #recordInfoId#
+	</update>
+
+
+	<!-- 根据ID删除录音记录 -->
+	<update id="deleteRecordInfoById"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		update REC_RECORD_INFO set IS_DEL = 1 where RECORD_INFO_ID= #Id# 
+	]]>
+	</update>
+
+	<!-- 根据ID作废录音记录 -->
+	<update id="canceledRecordInfoById"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		update REC_RECORD_INFO set IS_CANCELED = #isCanceled# where RECORD_INFO_ID= #id#
+	]]>
+	</update>
+
+	<!-- 根据id得到录音信息 -->
+	<select id="getRecordInfoById" resultMap="QueryRecordDetail"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select 
+             a.RECORD_INFO_ID,a.RECORD_No,a.RECORD_SOURCE,(CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL  THEN a.CUSTOMER_NAME else f.CUSTOMER_NAME end) AS CUSTOMER_NAME,
+             a.REMOTE_PHONE,
+             a.IS_CANCELED,c.CALL_TYPE_NAME,
+             b.USER_NAME,a.START_DATE,a.CALL_TIME,d.BIZ_TYPE_NAME,e.COMM_PROGRESS_NAME,
+             a.ID_CARD,a.CREDIT_CARD,a.REMARK,a.FILE_ID,f.CUSTOMER_NO,
+             a.CUSTOMER_ID,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=a.VERIFY_USER_ID) as VERIFY_USER_NAME,a.STATUS,a.SPLIT_COUNT,a.CONTENT,
+             f.MOBILE_PHONE1,f.MOBILE_PHONE2,f.PHONE,f.PHONE_EXT,f.FAX,f.FAX_EXT,f.DEFAULT_PHONE_TYPE,f.CUSTOMER_TITLE
+        from 
+             REC_RECORD_INFO a
+             left join SYS_USER b on a.USER_ID=b.USER_ID 
+             left join REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE
+             left join REC_BIZ_TYPE d on a.BIZ_TYPE=d.BIZ_TYPE_ID
+             left join CRM_CUSTOMER f on a.CUSTOMER_ID=f.CUSTOMER_ID
+             left join CRM_COMM_PROGRESS e on a.COMM_PROGRESS_ID=e.COMM_PROGRESS_ID
+    	where RECORD_INFO_ID=$Id$
+	]]>
+	</select>
+
+	<!-- 录音记录分页count -->
+	<select id="getRecordInfoCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[
+        select 
+        	count(1)     
+        from  REC_RECORD_INFO a
+        	left join SYS_USER b on a.USER_ID=b.USER_ID     
+        	LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID               
+            where a.IS_DEL=0 
+     ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="belongUserId">
+				<![CDATA[a.CUSTOMER_ID IN ( SELECT CUSTOMER_ID FROM CRM_CUSTOMER WHERE BELONG_USER_ID IN ($belongUserId$)) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isKnowCustomer">
+				<![CDATA[(a.CUSTOMER_ID IS NULL or a.CUSTOMER_ID = 0)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customer">
+				<![CDATA[a.CUSTOMER_STR LIKE '%$customer$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.START_DATE>='$startDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.START_DATE<='$endDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callTypeId">
+				<![CDATA[a.CALL_TYPE in ($callTypeId$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="bizType">
+				<![CDATA[(a.BIZ_TYPE = $bizType$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="existRecord">
+				<![CDATA[a.FILE_ID IS NULL]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="notExistRecord">
+				<![CDATA[a.FILE_ID IS NOT NULL]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callTime1">
+				<![CDATA[a.CALL_TIME >$callTime1$ and a.CALL_TIME<= $callTime2$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK like '%$remark$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[a.USER_ID in ($userIds$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptIds">
+				<![CDATA[b.DEPT_ID IN ($deptIds$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[a.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="content">
+				<![CDATA[a.CONTENT like '%$content$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="mmsTitle">
+				<![CDATA[a.MMS_TITLE like '%$mmsTitle$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				<![CDATA[a.STATUS like '%$status$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCanceled">
+				<![CDATA[a.IS_CANCELED = $isCanceled$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isRead">
+				<![CDATA[a.IS_READ = $isRead$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="shareUerId">
+				<![CDATA[a.CUSTOMER_ID in ($shareUerId$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="commProgressId">
+				<![CDATA[a.COMM_PROGRESS_ID = $commProgressId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tskCusId">
+				<![CDATA[a.CUSTOMER_ID = $tskCusId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tskPhone">
+				<![CDATA[a.REMOTE_PHONE = '$tskPhone$']]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 录音记录 -->
+	<select id="getRecordInfoParameterPageMap"
+		resultMap="RecordInfoBeanResult" parameterClass="java.util.Map">
+		<![CDATA[
+		select 
+			r.RECORD_INFO_ID,
+			r.RECORD_NO,
+			r.CUSTOMER_ID,
+			(CASE WHEN r.CUSTOMER_ID=0 or r.CUSTOMER_ID IS NULL  THEN r.CUSTOMER_NAME else g.CUSTOMER_NAME end) AS CUSTOMER_NAME,
+			r.REMOTE_PHONE,
+			r.CALL_TYPE_NAME,
+			r.START_DATE,
+			r.CALL_TIME,
+			r.USER_NAME,
+			r.BIZ_TYPE_NAME as BIZ_TYPE,
+			r.FILE_ID,
+			r.RECORD_SOURCE_NAME as RECORD_SOURCE,
+			r.REMARK,
+			r.CANCELED_NAME as STATE,
+			r.IS_READ,
+			r.FILE_SIZE,
+			(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=r.VERIFY_USER_ID) as VERIFY_USER_NAME,
+			r.STATUS,
+			r.SPLIT_COUNT,
+			r.CONTENT,
+			r.MMS_TITLE,
+			g.MOBILE_PHONE1,
+			g.MOBILE_PHONE2,
+			g.PHONE,
+			g.PHONE_EXT,
+			g.FAX,
+			g.FAX_EXT,
+			g.DEFAULT_PHONE_TYPE,
+			r.COMM_PROGRESS_NAME,
+			g.IS_NOGOOD
+			from(
+		]]>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (    
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			select a.*,c.CALL_TYPE_NAME,b.USER_NAME,d.BIZ_TYPE_NAME,e.RECORD_SOURCE_NAME,f.CANCELED_NAME,h.COMM_PROGRESS_NAME,i.FILE_SIZE
+				from  REC_RECORD_INFO a               
+				left join SYS_USER b on a.USER_ID=b.USER_ID               
+				left join REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE              
+				left join REC_BIZ_TYPE d on a.BIZ_TYPE=d.BIZ_TYPE_ID              
+				left join CRM_RECORD_SOURCE e on a.RECORD_SOURCE = e.RECORD_SOURCE_ID              
+				left join REC_CANCELED f on a.IS_CANCELED = f.CANCELED_CODE    
+				left join CRM_COMM_PROGRESS h on a.COMM_PROGRESS_ID = h.COMM_PROGRESS_ID
+				LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+				where a.IS_DEL=0
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="belongUserId">
+				<![CDATA[a.CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM CRM_CUSTOMER WHERE BELONG_USER_ID IN ($belongUserId$)) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isKnowCustomer">
+				<![CDATA[(a.CUSTOMER_ID IS NULL or a.CUSTOMER_ID = 0)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customer">
+				<![CDATA[a.CUSTOMER_STR LIKE '%$customer$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.START_DATE>='$startDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.START_DATE<='$endDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callTypeId">
+				<![CDATA[a.CALL_TYPE in ($callTypeId$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="bizType">
+				<![CDATA[(a.BIZ_TYPE = $bizType$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="existRecord">
+				<![CDATA[a.FILE_ID IS NULL]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="notExistRecord">
+				<![CDATA[a.FILE_ID IS NOT NULL]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callTime1">
+				<![CDATA[a.CALL_TIME > $callTime1$ and a.CALL_TIME<= $callTime2$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK like '%$remark$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[a.USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptIds">
+				<![CDATA[b.DEPT_ID IN ($deptIds$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[a.CUSTOMER_ID = '$customerId$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="content">
+				<![CDATA[a.CONTENT like '%$content$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="mmsTitle">
+				<![CDATA[a.MMS_TITLE like '%$mmsTitle$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				<![CDATA[a.STATUS like '%$status$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCanceled">
+				<![CDATA[a.IS_CANCELED = $isCanceled$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isRead">
+				<![CDATA[a.IS_READ = $isRead$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="shareUerId">
+				<![CDATA[a.CUSTOMER_ID in ($shareUerId$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="commProgressId">
+				<![CDATA[a.COMM_PROGRESS_ID = $commProgressId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tskCusId">
+				<![CDATA[a.CUSTOMER_ID = $tskCusId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tskPhone">
+				<![CDATA[a.REMOTE_PHONE = '$tskPhone$']]>
+			</isNotEmpty>
+		</dynamic>
+		order by a.START_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		) as r left join CRM_CUSTOMER g on r.CUSTOMER_ID = g.CUSTOMER_ID
+		order by r.START_DATE desc
+	</select>
+
+	<!-- 查询归属客户Id集合 -->
+	<select id="getIdsByBelongUserId" resultClass="java.lang.String"
+		parameterClass="java.util.Map">
+		SELECT CUSTOMER_ID FROM CRM_CUSTOMER WHERE BELONG_USER_ID IN
+		($belongUserId$)
+	</select>
+
+	<!-- 查询包含客户Id集合 -->
+	<select id="getIdsByCustomer" resultClass="java.lang.String"
+		parameterClass="java.util.Map">
+		SELECT CUSTOMER_ID  FROM REC_RECORD_INFO 
+		WHERE CUSTOMER_STR LIKE '%$customer$%'
+	</select>
+	
+	<!-- 查询共享客户Id集合 -->
+	<select id="getIdsShareUerId" resultMap="BaseCrmCustomerResult"
+		parameterClass="java.util.Map">
+		select distinct CUSTOMER_ID from CRM_CUSTOMER_SHARED where SHARE_USER_ID in ($shareUerId$)
+	</select>
+
+
+
+	<!-- 归档录音记录分页count -->
+	<select id="getArchiveRecordInfoCount"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+             select 
+                   count(1)
+             from 
+             REC_RECORD_INFO a 
+             left join SYS_USER b on a.USER_ID=b.USER_ID 
+             left join REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE
+	     	 left join REC_BIZ_TYPE d on a.BIZ_TYPE=d.BIZ_TYPE_ID
+	     	 left join CRM_RECORD_SOURCE e on a.RECORD_SOURCE = e.RECORD_SOURCE_ID
+	     	 left join REC_CANCELED F on a.IS_CANCELED = F.CANCELED_CODE
+	     	 left join CRM_CUSTOMER g on a.CUSTOMER_ID = g.CUSTOMER_ID  
+     ]]>
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="recordInfoId">
+				<![CDATA[a.IS_DEL=0 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="recordNo">
+				<![CDATA[a.RECORD_NO like '%$recordNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[a.CUSTOMER_STR LIKE '%$customer$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="idCard">
+				<![CDATA[ (CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL  THEN a.ID_CARD else g.ID_CARD end) LIKE '%$idCard$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK like '%$remark$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callType">
+				<![CDATA[(a.CALL_TYPE= $callType$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="bizType">
+				<![CDATA[a.BIZ_TYPE= $bizType$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCanceled">
+				<![CDATA[a.IS_CANCELED= $isCanceled$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.START_DATE>='$startDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.START_DATE<='$endDate$' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userName">
+				<![CDATA[a.USER_ID = $userName$]]>
+			</isNotEmpty>
+			<isEqual prepend="and" property="isKnowCustomer"
+				compareValue="1">
+				<![CDATA[( a.CUSTOMER_ID IS NULL or a.CUSTOMER_ID = 0) ]]>
+			</isEqual>
+			<isEqual prepend="and" property="isKnowCustomer"
+				compareValue="2">
+				<![CDATA[ (a.CUSTOMER_ID IS NOT NULL and a.CUSTOMER_ID !=0) ]]>
+			</isEqual>
+			<isNotEmpty prepend="and" property="forcallType">
+				<![CDATA[ (a.CALL_TYPE between 1 and 3 or a.CALL_TYPE=6 )  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="permission">
+				<![CDATA[a.USER_ID in($permission$)]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 归档录音记录 -->
+	<select id="getArchiveRecordInfoParameterPageMap"
+		resultMap="RecordInfoBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+	select 
+			  a.RECORD_INFO_ID,
+		      a.RECORD_NO,
+		      a.CUSTOMER_ID,
+              (CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL  THEN a.CUSTOMER_NAME else g.CUSTOMER_NAME end) AS CUSTOMER_NAME,
+			  a.REMOTE_PHONE,
+              c.CALL_TYPE_NAME,
+              a.START_DATE,
+              a.CALL_TIME,
+              b.USER_NAME,
+              d.BIZ_TYPE_NAME as BIZ_TYPE,
+              a.FILE_NAME,
+              a.FILE_PATH,
+              e.RECORD_SOURCE_NAME as RECORD_SOURCE,
+              f.CANCELED_NAME as STATE,
+              a.IS_READ,
+              a.REMARK,
+              a.FILE_SIZE,
+              g.IS_NOGOOD
+        from 
+             REC_RECORD_INFO a 
+             left join SYS_USER b on a.USER_ID=b.USER_ID 
+             left join REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE
+	     	 left join REC_BIZ_TYPE d on a.BIZ_TYPE=d.BIZ_TYPE_ID
+	     	 left join CRM_RECORD_SOURCE e on a.RECORD_SOURCE = e.RECORD_SOURCE_ID
+	     	 left join REC_CANCELED F on a.IS_CANCELED = F.CANCELED_CODE
+	     	 left join CRM_CUSTOMER g on a.CUSTOMER_ID = g.CUSTOMER_ID  
+	]]>
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="recordInfoId">
+				<![CDATA[and a.IS_DEL=0 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="recordNo">
+				<![CDATA[a.RECORD_NO like '%$recordNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[(a.CUSTOMER_NAME like '%$customerName$%' or a.REMOTE_PHONE like '%$customerName$%')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="idCard">
+				<![CDATA[ (CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL  THEN a.ID_CARD else g.ID_CARD end) LIKE '%$idCard$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK like '%$remark$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callType">
+				<![CDATA[(a.CALL_TYPE= $callType$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="bizType">
+				<![CDATA[a.BIZ_TYPE= $bizType$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCanceled">
+				<![CDATA[a.IS_CANCELED= $isCanceled$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.START_DATE>='$startDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.START_DATE<='$endDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userName">
+				<![CDATA[a.USER_ID = $userName$]]>
+			</isNotEmpty>
+			<isEqual prepend="and" property="isKnowCustomer"
+				compareValue="1">
+				<![CDATA[( a.CUSTOMER_ID IS NULL or a.CUSTOMER_ID = 0) ]]>
+			</isEqual>
+			<isEqual prepend="and" property="isKnowCustomer"
+				compareValue="2">
+				<![CDATA[ (a.CUSTOMER_ID IS NOT NULL and a.CUSTOMER_ID !=0) ]]>
+			</isEqual>
+			<isNotEmpty prepend="and" property="forcallType">
+				<![CDATA[ (a.CALL_TYPE between 1 and 3 or a.CALL_TYPE=6 )   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="permission">
+				<![CDATA[a.USER_ID in($permission$)]]>
+			</isNotEmpty>
+		</dynamic>
+		order by a.START_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=$endRow$ and tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 根据ID删除沟通进度 -->
+	<update id="deleteCommIdById" parameterClass="java.lang.Integer">
+		<![CDATA[
+		update REC_RECORD_INFO set COMM_PROGRESS_ID =null where COMM_PROGRESS_ID=#Id#
+	]]>
+	</update>
+		
+	<!-- 客户联系记录信息接口 PAD -->
+	<select id="queryCustomerCallInfoByCusId"
+		resultMap="QueryCustomerCallInfoResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (select * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (    
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+	   		SELECT a.RECORD_INFO_ID,
+	   		(CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL THEN a.CUSTOMER_NAME else d.CUSTOMER_NAME end) AS CUSTOMER_NAME,
+			(CASE WHEN d.DEFAULT_PHONE_TYPE = 1 THEN d.MOBILE_PHONE1 WHEN d.DEFAULT_PHONE_TYPE = 2 THEN d.MOBILE_PHONE2 WHEN d.DEFAULT_PHONE_TYPE = 3 THEN d.PHONE WHEN d.DEFAULT_PHONE_TYPE = 4 THEN d.FAX end) AS REMOTE_PHONE,
+			a.START_DATE,a.CALL_TIME,a.REMARK,
+	   		a.COMM_PROGRESS_ID,a.CALL_TYPE AS CALL_TYPE_NAME,c.BIZ_TYPE_NAME as BIZ_TYPE,i.FILE_PATH,i.FILE_NAME,a.CUSTOMER_ID,a.RECORD_SOURCE,a.IS_CANCELED,e.USER_NAME
+	   		FROM REC_RECORD_INFO a 
+	        left join REC_CALL_TYPE b on a.CALL_TYPE=b.CALL_TYPE_CODE
+		    left join REC_BIZ_TYPE c on a.BIZ_TYPE=c.BIZ_TYPE_ID 
+			left join CRM_CUSTOMER d on a.CUSTOMER_ID = d.CUSTOMER_ID
+			left join SYS_USER e on a.USER_ID=e.USER_ID 
+			LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+			WHERE a.IS_DEL=0 and a.CUSTOMER_ID = $customerId$ ORDER BY a.START_DATE DESC
+   		]]>
+   		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) v  where v.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 客户联系记录总数接口 PAD -->
+	<select id="queryCustomerCallInfoCountByCusId"
+		resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+   		SELECT COUNT(1)
+   		FROM REC_RECORD_INFO a 
+        left join REC_CALL_TYPE b on a.CALL_TYPE=b.CALL_TYPE_CODE
+	    left join REC_BIZ_TYPE c on a.BIZ_TYPE=c.BIZ_TYPE_ID 
+		left join CRM_CUSTOMER d on a.CUSTOMER_ID = d.CUSTOMER_ID
+		WHERE a.IS_DEL=0 and a.CUSTOMER_ID = $customerId$
+   		]]>
+	</select>
+
+	<!-- 修改归档状态 -->
+	<update id="updateArchiveById" parameterClass="java.util.Map">
+		<![CDATA[
+		update REC_RECORD_INFO set IS_ARCHIVED = 1 ,FILE_PATH ='$filePath$' ,ARCHIVE_DATE='$archiveDate$' where RECORD_INFO_ID = $id$ 
+	]]>
+	</update>
+
+	<!-- 根据归档时间查询所有可归档的录音 -->
+	<select id="queryRecordByArchiveDate" resultMap="RecordInfoResult"
+		parameterClass="java.util.Map">
+		<![CDATA[
+	   		SELECT a.*,i.FILE_NAME,i.FILE_PATH,i.FILE_SIZE,i.FILE_MD5,i.UPLOAD_DATE,b.MOBILE_PHONE1,b.MOBILE_PHONE2,b.PHONE,b.PHONE_EXT,b.FAX,b.FAX_EXT,b.DEFAULT_PHONE_TYPE FROM REC_RECORD_INFO a
+			LEFT JOIN CRM_CUSTOMER b ON a.CUSTOMER_ID=b.CUSTOMER_ID 
+			LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+			WHERE a.IS_ARCHIVED=0 AND a.START_DATE < $GdDATE$
+	   	]]>
+	</select>
+
+	<!-- 根据id查询全字段 -->
+	<select id="queryAllById" resultMap="RecordInfoResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+	   		SELECT a.*,i.FILE_NAME,i.FILE_PATH,i.FILE_SIZE,i.FILE_MD5,i.UPLOAD_DATE,b.MOBILE_PHONE1,b.MOBILE_PHONE2,b.PHONE,b.PHONE_EXT,b.FAX,b.FAX_EXT,b.DEFAULT_PHONE_TYPE FROM REC_RECORD_INFO a 
+			LEFT JOIN CRM_CUSTOMER b ON a.CUSTOMER_ID=b.CUSTOMER_ID 
+			LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+			WHERE a.RECORD_INFO_ID=$Id$
+	   	]]>
+	</select>
+
+	<!-- 根据流水号record_no查询全字段 -->
+	<select id="queryAllByNo" resultMap="RecordInfoResult"
+		parameterClass="java.lang.String">
+		<![CDATA[
+	   		SELECT a.*,i.FILE_NAME,i.FILE_PATH,i.FILE_SIZE,i.FILE_MD5,i.UPLOAD_DATE,b.MOBILE_PHONE1,b.MOBILE_PHONE2,b.PHONE,b.PHONE_EXT,b.FAX,b.FAX_EXT,b.DEFAULT_PHONE_TYPE FROM REC_RECORD_INFO a
+	   		LEFT JOIN CRM_CUSTOMER b ON a.CUSTOMER_ID=b.CUSTOMER_ID 
+	   		LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+	   		WHERE a.RECORD_NO='$No$'
+	   	]]>
+	</select>
+
+	<!-- 根据map修改录音记录 -->
+	<update id="updateRec" parameterClass="java.lang.Integer">
+		<![CDATA[
+		update REC_RECORD_INFO set IS_READ = 1 where RECORD_INFO_ID = #Id# 
+	]]>
+	</update>
+
+	<!-- 修改编辑记录-->
+	<update id="updateRecordConnect" parameterClass="RecordDetail">
+		UPDATE REC_RECORD_INFO set RECORD_INFO_ID = #recordInfoId#
+		<isNotNull prepend=",">
+			BIZ_TYPE=#bizType:VARCHAR:NULL#
+		</isNotNull>
+		<isNotNull prepend=",">
+			COMM_PROGRESS_ID=#commProgress:INTEGER#
+		</isNotNull>
+		<isNotNull prepend=",">ID_CARD=#idCard:VARCHAR:NULL#</isNotNull>
+		<isNotNull prepend=",">
+			CREDIT_CARD=#creditCard:VARCHAR:NULL#
+		</isNotNull>
+		<isNotNull prepend=",">REMARK=#remark:VARCHAR:NULL#</isNotNull>
+		where RECORD_INFO_ID= #recordInfoId#
+	</update>
+
+	<!-- 根据id查询全字段 -->
+	<select id="getNextTalkId" resultClass="java.lang.Integer">
+		SELECT NEXTVAL FOR SEQ_REC_RECORD_INFO FROM SYSIBM.SYSDUMMY1
+	</select>
+
+	<!-- 通话ID是否存在 -->
+	<select id="getIsExistTalkId" resultClass="java.lang.Integer"
+		parameterClass="java.lang.Integer">
+		SELECT COUNT(1) FROM REC_RECORD_INFO WHERE RECORD_INFO_ID=$Id$
+	</select>
+
+	<!-- 通话流水号是否存在 -->
+	<select id="getIsExistTalkNo" resultClass="java.lang.Integer"
+		parameterClass="java.lang.String">
+		SELECT COUNT(1) FROM REC_RECORD_INFO WHERE RECORD_NO='$Id$'
+	</select>
+
+	<update id="updateTalkRecordByNo"
+		parameterClass="PhoneRecordBean">
+		UPDATE REC_RECORD_INFO set RECORD_NO= #recordNo#
+		<isNotEmpty prepend="," property="commProgressId">COMM_PROGRESS_ID=#commProgressId#</isNotEmpty>
+		<isNotEmpty prepend="," property="customerId" >CUSTOMER_ID=#customerId#</isNotEmpty>
+		<isNotEmpty prepend="," property="callType" >CALL_TYPE=#callType#</isNotEmpty>
+		<isNotEmpty prepend="," property="customerName" >CUSTOMER_NAME=#customerName#</isNotEmpty>
+		<isNotEmpty prepend="," property="bizType">BIZ_TYPE=#bizType#</isNotEmpty>
+		<isNotEmpty prepend="," property="remotePhone">REMOTE_PHONE=#remotePhone#</isNotEmpty>
+		<isNotEmpty prepend="," property="remark" >REMARK=#remark#</isNotEmpty>
+		where RECORD_NO= #recordNo#
+	</update>
+
+	<insert id="insertTalkRecordByNo"
+		parameterClass="PhoneRecordBean">
+		<![CDATA[
+		insert into REC_RECORD_INFO
+		(
+		 RECORD_INFO_ID,
+		 RECORD_NO,
+		 USER_ID,
+		 REMOTE_PHONE,
+		 CUSTOMER_ID,
+		 CALL_TYPE,
+		 CUSTOMER_NAME,
+		 BIZ_TYPE,
+		 REMARK,
+		 COMM_PROGRESS_ID,
+		 IS_DEL,
+		 IS_ARCHIVED,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER,
+		 IS_READ,
+		 SPLIT_COUNT,
+		 START_DATE,
+		 RING_TIME
+		 )
+		values
+		(
+		#recordInfoId#,
+		#recordNo#,
+	    #userId#,
+	    #remotePhone:VARCHAR:NULL#,
+	    #customerId:INTEGER#,
+	    #callType:INTEGER#,
+	    #customerName:VARCHAR:NULL#,
+	    #bizType:INTEGER#,
+	    #remark:VARCHAR:NULL#,
+	    #commProgressId:INTEGER#,
+	    #isDel#,
+	    #isArchived#,
+	    current timestamp,  
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#,
+	    #isRead#,
+	    0,
+	    #startDate:TIMESTAMP#,
+	    #ringTime:TIMESTAMP#
+		)
+      ]]>
+	</insert>
+
+	<update id="updateTalkRecord" parameterClass="PhoneRecordBean">
+		UPDATE REC_RECORD_INFO set RECORD_INFO_ID = #recordInfoId#
+		<isNotEmpty prepend=",">
+			COMM_PROGRESS_ID=#commProgressId#
+		</isNotEmpty>
+		<isNotEmpty prepend=",">CUSTOMER_ID=#customerId#</isNotEmpty>
+		<isNotEmpty prepend=",">CALL_TYPE=#callType#</isNotEmpty>
+		<isNotEmpty prepend=",">
+			CUSTOMER_NAME=#customerName#
+		</isNotEmpty>
+		<isNotEmpty prepend=",">BIZ_TYPE=#bizType#</isNotEmpty>
+		<isNotEmpty prepend=",">REMARK=#remark#</isNotEmpty>
+		where RECORD_INFO_ID= #recordInfoId#
+	</update>
+
+	<insert id="insertTalkRecord" parameterClass="PhoneRecordBean">
+		<![CDATA[
+		insert into REC_RECORD_INFO
+		(
+		 RECORD_INFO_ID,
+		 USER_ID,
+		 REMOTE_PHONE,
+		 CUSTOMER_ID,
+		 CALL_TYPE,
+		 CUSTOMER_NAME,
+		 BIZ_TYPE,
+		 REMARK,
+		 COMM_PROGRESS_ID,
+		 IS_DEL,
+		 IS_ARCHIVED,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER,
+		 IS_READ,
+		 SPLIT_COUNT
+		 )
+		values
+		(
+		#recordInfoId#,
+	    #userId#,
+	    #remotePhone#,
+	    #customerId:INTEGER#,
+	    #callType#,
+	    #customerName:VARCHAR:NULL#,
+	    #bizType:INTEGER#,
+	    #remark:VARCHAR:NULL#,
+	    #commProgressId:INTEGER#,
+	    #isDel#,
+	    #isArchived#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#,
+	    #isRead#,
+	    0
+		)
+      ]]>
+	</insert>
+
+
+	<!-- 根据流水号获取通话记录 -->
+	<select id="getRecordInfoByNo" resultMap="PhoneRecordBeanResult"
+		parameterClass="java.lang.String">
+		<![CDATA[
+   		SELECT a.*,b.CALL_TYPE_NAME,c.BIZ_TYPE_NAME as BIZ_TYPE,i.FILE_SIZE
+   		 FROM   REC_RECORD_INFO a 
+         left join REC_CALL_TYPE b on a.CALL_TYPE=b.CALL_TYPE_CODE
+	     left join REC_BIZ_TYPE c on a.BIZ_TYPE=c.BIZ_TYPE_ID 
+	     LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+	     WHERE a.RECORD_NO = '$recordNo$'
+   	]]>
+	</select>
+
+	<!-- 查询相同的通话记录 -->
+	<select id="querySameRecInfoByMap" resultMap="RecordInfoResult"
+		parameterClass="java.util.Map">
+		select
+		a.*,i.FILE_NAME,i.FILE_PATH,i.FILE_SIZE,i.FILE_MD5,i.UPLOAD_DATE,b.MOBILE_PHONE1,b.MOBILE_PHONE2,b.PHONE,b.PHONE_EXT,b.FAX,b.FAX_EXT,b.DEFAULT_PHONE_TYPE
+		FROM REC_RECORD_INFO a 
+		LEFT JOIN CRM_CUSTOMER b ON	a.CUSTOMER_ID=b.CUSTOMER_ID 
+		LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+		WHERE 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="callType">
+				<![CDATA[a.CALL_TYPE = $callType$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[a.USER_ID = $userId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="number">
+				<![CDATA[a.REMOTE_PHONE = '$number$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="ringTime1">
+				<isNotEmpty prepend="" property="ringTime2">
+					<![CDATA[ a.RING_TIME between '$ringTime1$' and '$ringTime2$']]>
+				</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate1">
+				<isNotEmpty prepend="" property="startDate2">
+					<![CDATA[ a.START_DATE between '$startDate1$' and '$startDate2$']]>
+				</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="selfRecordNo">
+				<![CDATA[ a.RECORD_NO <> '$selfRecordNo$']]>
+			</isNotEmpty>
+
+		</dynamic>
+	</select>
+
+	<!-- 根据客户id查询字段 创建时间排序 -->
+	<select id="getLastListbyCustomerId"
+		resultMap="RecordInfoBeanResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+			  select 
+              a.RECORD_INFO_ID,
+              a.RECORD_NO,
+	    	  a.CUSTOMER_ID,
+              a.CUSTOMER_NAME,
+              a.REMOTE_PHONE,
+              c.CALL_TYPE_NAME,
+              a.START_DATE,
+              a.CALL_TIME,
+              b.USER_NAME,
+              d.BIZ_TYPE_NAME as BIZ_TYPE,
+              a.FILE_ID,
+              e.RECORD_SOURCE_NAME as RECORD_SOURCE,
+              f.CANCELED_NAME as STATE,
+              a.IS_READ,
+              a.REMARK,
+              i.FILE_SIZE,
+              d.USER_NAME AS VERIFY_USER_NAME,
+              a.STATUS,
+              a.SPLIT_COUNT,
+              a.CONTENT,
+              a.MMS_TITLE,
+              g.MOBILE_PHONE1,
+              g.MOBILE_PHONE2,
+              g.PHONE,
+              g.PHONE_EXT,
+              g.FAX,
+              g.FAX_EXT,
+              g.DEFAULT_PHONE_TYPE,
+              h.COMM_PROGRESS_NAME,
+              g.IS_NOGOOD
+        from 
+             REC_RECORD_INFO a 
+             left join SYS_USER b on a.USER_ID=b.USER_ID 
+             LEFT JOIN SYS_USER d ON a.VERIFY_USER_ID = d.USER_ID
+             left join REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE
+	     	 left join REC_BIZ_TYPE d on a.BIZ_TYPE=d.BIZ_TYPE_ID
+	     	 left join CRM_RECORD_SOURCE e on a.RECORD_SOURCE = e.RECORD_SOURCE_ID
+	     	 left join REC_CANCELED F on a.IS_CANCELED = F.CANCELED_CODE
+	     	 left join CRM_CUSTOMER g on a.CUSTOMER_ID = g.CUSTOMER_ID
+	     	 left join CRM_COMM_PROGRESS h on a.COMM_PROGRESS_ID = h.COMM_PROGRESS_ID
+	     	 LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+	where a.IS_DEL=0 and a.CUSTOMER_ID = $customerId$ order by a.CREATE_DATE desc
+	   	]]>
+	</select>
+
+	<!-- 根据id修改客户id -->
+	<update id="updateCustomerIdByRecId"
+		parameterClass="java.util.Map">
+		UPDATE REC_RECORD_INFO set RECORD_INFO_ID = #id#
+		<isNotEmpty prepend="," property="customerId">
+			<![CDATA[CUSTOMER_ID = #customerId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="customerName">
+			<![CDATA[CUSTOMER_NAME = #customerName#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="phone">
+			<![CDATA[REMOTE_PHONE = $phone$ ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="customerStr">
+			<![CDATA[CUSTOMER_STR = $customerStr$]]>
+		</isNotEmpty>
+		where RECORD_INFO_ID= #id#
+	</update>
+
+	<!-- 根据电话修改客户id -->
+	<update id="updateCustomerIdByPhone"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		update REC_RECORD_INFO set CUSTOMER_ID = #customerId# , CUSTOMER_NAME = #customerName# where REMOTE_PHONE = '$phone$' AND (CUSTOMER_ID IS NULL OR CUSTOMER_ID =0)
+	]]>
+	</update>
+
+	<!-- 根据客户id修改客户id 取消关联 -->
+	<update id="updateCustomerIdByCusId"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		update REC_RECORD_INFO set CUSTOMER_ID = 0  where CUSTOMER_ID = #customerId# AND REMOTE_PHONE = '$phone$'
+	]]>
+	</update>
+
+	<!-- 根据记录id修改客户id 取消关联 -->
+    	<update id="updateCustomerIdByRecIdForRelation"
+		parameterClass="java.util.Map">
+		<![CDATA[
+		update REC_RECORD_INFO set CUSTOMER_ID = 0  where RECORD_INFO_ID = #recordId#
+	]]>
+	</update>
+
+	<!-- 未读留言或未接电话总数 -->
+	<select id="getUnreadOrMissedCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map" cacheModel="recordUpdateCache" >
+		<![CDATA[
+    	select count(1) from REC_RECORD_INFO a
+    	LEFT JOIN SYS_UPLOAD_FILE i ON a.FILE_ID=i.FILE_ID
+    	 where a.IS_DEL=0 and a.RECORD_SOURCE=1
+    ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="isRead">
+				<![CDATA[ a.IS_READ=$isRead$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="calltype">
+				<![CDATA[ a.CALL_TYPE in ($calltype$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMissed">
+				<![CDATA[ (i.FILE_NAME IS NULL or i.FILE_PATH IS NULL or i.FILE_NAME ='' or i.FILE_PATH = '') ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isNotMissed">
+				<![CDATA[ (i.FILE_NAME IS NOT NULL and i.FILE_NAME !='' and i.FILE_PATH !='' and i.FILE_PATH IS NOT NULL) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="permission">
+				<![CDATA[ a.USER_ID = $permission$ ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<!-- 查询待导出的联系记录 -->
+	<select id="queryRecordInfosByMap"
+		resultMap="RecordExportBeanResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		select 
+	        a.RECORD_INFO_ID,a.RECORD_NO,a.USER_ID,a.CUSTOMER_ID,a.CALL_TYPE,a.LOCAL_PHONE,a.REMOTE_PHONE,a.START_DATE,a.END_DATE,a.CALL_TIME,(CASE WHEN a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL  THEN a.CUSTOMER_NAME else g.CUSTOMER_NAME end) AS CUSTOMER_NAME,a.BIZ_TYPE,
+	        a.ID_CARD,a.CREDIT_CARD,a.REMARK,a.COMM_PROGRESS_ID,a.IS_CANCELED,s.FILE_NAME,s.FILE_PATH,s.FILE_SIZE,s.FILE_MD5,s.UPLOAD_DATE,a.FILE_ID,
+	        a.IS_DEL,a.IS_ARCHIVED,a.ARCHIVE_DATE,a.RECORD_SOURCE,a.IS_READ,a.CONTENT,a.SPLIT_COUNT,a.STATUS,a.VERIFY_USER_ID,a.MMS_TITLE,a.CREATE_DATE,a.UPDATE_DATE,a.CREATE_USER,
+	        a.UPDATE_USER,a.RING_TIME,a.CUSTOMER_STR,i.*,b.USER_NAME as USER_NAME,c.CALL_TYPE_NAME,d.BIZ_TYPE_NAME,k.RECORD_SOURCE_NAME,f.CANCELED_NAME,l.USER_NAME as BELONG_USER_NAME,l.ACCOUNT as BELONG_USER_ACCOUNT ,
+	        m.DEPT_CODE as  BELONG_DEPT_CODE,m.DEPT_NAME as  BELONG_DEPT_NAME,n.CUSTOMER_TYPE_NAME,o.CUSTOMER_INDUSTRY_NAME,g.CUSTOMER_NAME_PINYIN,g.SEX,g.CUSTOMER_NO,g.CUSTOMER_TITLE,g.AGE,
+	        g.BIRTHDAY,g.CUSTOMER_TYPE_ID,g.CUSTOMER_INDUSTRY_ID,g.COMPANY,g.REMARK as CUSTREMARK,g.HEAD_SHOW,g.PROVINCE,g.CITY,g.ADDRESS,g.DEFAULT_PHONE_TYPE,g.MOBILE_PHONE1,g.MOBILE_PHONE1_REMARK,
+	        g.MOBILE_PHONE2,g.MOBILE_PHONE2_REMARK,g.PHONE,g.PHONE_EXT,g.FAX,g.FAX_EXT,g.EMAIL,g.TEMPLATE_IDS,g.IS_TRASH,g.BELONG_DEPT_ID,g.BELONG_USER_ID,g.IS_VISIT,g.LAST_CONTACT_DATE,g.IS_RECEIVE_SMS,
+	        g.MOBILE_PHONE1_REGULAR,g.MOBILE_PHONE2_REGULAR,g.CREATE_DATE as CUST_CREATE_DATE,g.UPDATE_DATE as CUST_UPDATE_DATE,g.CREATE_USER as CUST_CREATE_USER,g.UPDATE_USER as CUST_UPDATE_USER,g.ID_CARD as CUST_ID_CARD
+	    FROM REC_RECORD_INFO a 
+	        LEFT JOIN SYS_USER b on a.USER_ID=b.USER_ID 
+	        LEFT JOIN REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE
+	        LEFT JOIN REC_BIZ_TYPE d on a.BIZ_TYPE=d.BIZ_TYPE_ID
+	        LEFT JOIN CRM_RECORD_SOURCE e on a.RECORD_SOURCE = e.RECORD_SOURCE_ID
+	        LEFT JOIN REC_CANCELED f on a.IS_CANCELED = f.CANCELED_CODE
+	        LEFT JOIN CRM_CUSTOMER g on a.CUSTOMER_ID = g.CUSTOMER_ID
+	        LEFT JOIN CRM_CUSTOMER_EXT_FIELD i ON i.CUSTOMER_ID = g.CUSTOMER_ID
+	        LEFT JOIN SYS_DEPT j ON j.DEPT_ID =b.DEPT_ID
+	        LEFT JOIN CRM_RECORD_SOURCE k ON k.RECORD_SOURCE_ID=a.RECORD_SOURCE
+	        LEFT JOIN SYS_USER l ON l.USER_ID = g.BELONG_USER_ID
+	        LEFT JOIN SYS_DEPT m ON m.DEPT_ID = g.BELONG_DEPT_ID
+			LEFT JOIN CRM_CUSTOMER_TYPE n ON g.CUSTOMER_TYPE_ID = n.CUSTOMER_TYPE_ID
+			LEFT JOIN CRM_CUSTOMER_INDUSTRY o ON g.CUSTOMER_INDUSTRY_ID = o.CUSTOMER_INDUSTRY_ID
+			LEFT JOIN SYS_UPLOAD_FILE s ON a.FILE_ID=s.FILE_ID
+	        WHERE a.IS_DEL = 0
+	    	 ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="belongUserId">
+				<![CDATA[a.CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM CRM_CUSTOMER WHERE BELONG_USER_ID IN ($belongUserId$)) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isKnowCustomer">
+				<![CDATA[(a.CUSTOMER_ID IS NULL or a.CUSTOMER_ID = 0)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customer">
+				<![CDATA[a.CUSTOMER_STR LIKE '%$customer$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.START_DATE>='$startDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.START_DATE<='$endDate$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callTypeId">
+				<![CDATA[a.CALL_TYPE in ($callTypeId$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="bizType">
+				<![CDATA[(a.BIZ_TYPE = $bizType$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="existRecord">
+				<![CDATA[(s.FILE_NAME IS NULL or s.FILE_PATH IS NULL or s.FILE_NAME ='' or s.FILE_PATH = '')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="notExistRecord">
+				<![CDATA[(s.FILE_NAME IS NOT NULL and s.FILE_NAME !='' and s.FILE_PATH !='' and s.FILE_PATH IS NOT NULL)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="callTime1">
+				<![CDATA[a.CALL_TIME > $callTime1$ and a.CALL_TIME<= $callTime2$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="remark">
+				<![CDATA[a.REMARK like '%$remark$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userIds">
+				<![CDATA[a.USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptIds">
+				<![CDATA[b.DEPT_ID IN ($deptIds$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerId">
+				<![CDATA[a.CUSTOMER_ID = '$customerId$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="content">
+				<![CDATA[a.CONTENT like '%$content$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="mmsTitle">
+				<![CDATA[a.MMS_TITLE like '%$mmsTitle$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				<![CDATA[a.STATUS like '%$status$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCanceled">
+				<![CDATA[a.IS_CANCELED = $isCanceled$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isRead">
+				<![CDATA[a.IS_READ = $isRead$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="shareUerId">
+				<![CDATA[a.CUSTOMER_ID in ($shareUerId$)]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="commProgressId">
+				<![CDATA[a.COMM_PROGRESS_ID = $commProgressId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tskCusId">
+				<![CDATA[a.CUSTOMER_ID = $tskCusId$]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="tskPhone">
+				<![CDATA[a.REMOTE_PHONE = '$tskPhone$']]>
+			</isNotEmpty>
+		</dynamic>
+		order by a.START_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=$endRow$ and tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 录音记录 -->
+	<select id="getRecentlyTalkRecord"
+		resultMap="TalkRecordInfoResult">
+		select i.RECORD_INFO_ID, i.CUSTOMER_ID, c.CUSTOMER_NAME,
+		            i.REMOTE_PHONE, i.CALL_TYPE,ct.CALL_TYPE_NAME, i.START_DATE,
+		            i.CALL_TIME, u.USER_NAME, bt.BIZ_TYPE_NAME,
+		            e.COMM_PROGRESS_NAME,c.MOBILE_PHONE1,c.MOBILE_PHONE2,c.PHONE,c.FAX,c.DEFAULT_PHONE_TYPE
+		    from REC_RECORD_INFO i 
+		    left join sys_user u on i.user_id = u.user_id 
+		    left join REC_CALL_TYPE ct on i.CALL_TYPE=ct.CALL_TYPE_CODE 
+		    left join REC_BIZ_TYPE bt on i.BIZ_TYPE=bt.BIZ_TYPE_ID 
+		    left join CRM_RECORD_SOURCE rc on i.RECORD_SOURCE = rc.RECORD_SOURCE_ID 
+		    left join CRM_COMM_PROGRESS e on e.COMM_PROGRESS_ID = i.COMM_PROGRESS_ID
+		    left join CRM_CUSTOMER c on i.CUSTOMER_ID = c.CUSTOMER_ID and c.IS_DEL=0 and c.IS_TRASH=0
+		    where i.is_del=0 and i.IS_CANCELED = 0 and i.CALL_TYPE in (1,2)
+		    <isNotEmpty prepend="and" property="userId">
+				i.user_id = $userId$
+			</isNotEmpty>
+			order by i.START_DATE desc fetch first 10 rows only
+	</select>
+
+	<!-- 根据电话号码自动匹配相同电话的记录并关联 -->
+	<update id="updateRecordByPhones" parameterClass="java.util.Map">
+		update REC_RECORD_INFO set CUSTOMER_ID = #customerId#
+		<isNotEmpty prepend="," property="customerName">
+			<![CDATA[CUSTOMER_NAME = '$customerName$']]>
+		</isNotEmpty>
+		where (CUSTOMER_ID = 0 OR CUSTOMER_ID IS NULL) AND
+		<dynamic prepend="(">
+			<isNotEmpty prepend="or" property="phone1">
+				<![CDATA[REMOTE_PHONE = '$phone1$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="or" property="phone2">
+				<![CDATA[REMOTE_PHONE = '$phone2$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="or" property="phone3">
+				<![CDATA[REMOTE_PHONE = '$phone3$' or REMOTE_PHONE = '$temphone$' or REMOTE_PHONE = '$temphone1$']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="or" property="phone4">
+				<![CDATA[REMOTE_PHONE = '$phone4$']]>
+			</isNotEmpty>
+		</dynamic>
+		)
+	</update>
+
+	<!-- 根据customerId/电话号码得到录音信息 -->
+	<select id="getRecordInfoByCustomer" resultMap="QueryRecordDetail"
+		parameterClass="java.util.Map">
+		select a.RECORD_INFO_ID,a.RECORD_No,a.RECORD_SOURCE,(CASE WHEN
+		a.CUSTOMER_ID=0 or a.CUSTOMER_ID IS NULL THEN a.CUSTOMER_NAME
+		else f.CUSTOMER_NAME end) AS CUSTOMER_NAME, a.REMOTE_PHONE,
+		a.IS_CANCELED,c.CALL_TYPE_NAME,
+		b.USER_NAME,a.START_DATE,a.CALL_TIME,d.BIZ_TYPE_NAME,e.COMM_PROGRESS_NAME,
+		a.ID_CARD,a.CREDIT_CARD,a.REMARK,a.FILE_ID,f.CUSTOMER_NO,
+		a.CUSTOMER_ID,(SELECT USER_NAME FROM SYS_USER WHERE
+		USER_ID=a.VERIFY_USER_ID) as
+		VERIFY_USER_NAME,a.STATUS,a.SPLIT_COUNT,a.CONTENT,
+		f.MOBILE_PHONE1,f.MOBILE_PHONE2,f.PHONE,f.PHONE_EXT,f.FAX,f.FAX_EXT,f.DEFAULT_PHONE_TYPE,f.CUSTOMER_TITLE
+		from REC_RECORD_INFO a 
+		left join SYS_USER b on a.USER_ID=b.USER_ID 
+		left join REC_CALL_TYPE c on a.CALL_TYPE=c.CALL_TYPE_CODE 
+		left join REC_BIZ_TYPE d on	a.BIZ_TYPE=d.BIZ_TYPE_ID 
+		left join CRM_CUSTOMER f on	a.CUSTOMER_ID=f.CUSTOMER_ID 
+		left join CRM_COMM_PROGRESS e on a.COMM_PROGRESS_ID=e.COMM_PROGRESS_ID 
+		where a.CALL_TYPE IN
+		(1,2,4,5)
+		<isNotEmpty prepend="and" property="phone">
+			<![CDATA[a.REMOTE_PHONE = '$phone$']]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="customerId">
+			<![CDATA[a.CUSTOMER_ID = $customerId$]]>
+		</isNotEmpty>
+		order by a.START_DATE DESC fetch first 1 rows only
+	</select>
+
+	<!-- 根据recordId判断是否有权限查看该记录 -->
+	<select id="getRecordPermissionById" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		select count(1) from REC_RECORD_INFO a where a.user_id in
+		($userIds$) and a.RECORD_INFO_ID=$recordId$
+	</select>
+	
+	<!-- 根据联系记录id 修改CUSTOMER_STR 冗余字段的值 -->
+	<update id="updateCustomerStrByRecId" parameterClass="java.util.Map">
+		update REC_RECORD_INFO set CUSTOMER_STR = #customerStr# WHERE RECORD_INFO_ID = #recId#
+	</update>
+	
+	<!-- 根据客户id 修改CUSTOMER_STR 冗余字段的值 -->
+	<update id="updateCustomerStrByCusId" parameterClass="java.util.Map">
+		update REC_RECORD_INFO set CUSTOMER_STR = #customerStr#  where CUSTOMER_ID = #cusId#
+	</update>
+	
+	<!-- 批量关联-根据电话集合查询相符的联系记录  -->
+	<select id="getRecByPhone" resultMap="RecordTempBean"
+		parameterClass="java.lang.String">
+		<![CDATA[
+		SELECT a.RECORD_INFO_ID,a.CUSTOMER_NAME,a.REMOTE_PHONE,a.START_DATE,b.CALL_TYPE_NAME
+   			FROM   REC_RECORD_INFO a 
+   			LEFT JOIN REC_CALL_TYPE b ON a.CALL_TYPE = b.CALL_TYPE_CODE 
+   			WHERE a.REMOTE_PHONE in($phones$) AND (a.CUSTOMER_ID IS NULL OR a.CUSTOMER_ID = 0) AND a.IS_DEL = 0
+   		]]>
+	</select>
+	
+	<!-- 批量关联 修改联系 -->
+	<update id="updateRecord" parameterClass="java.lang.String">
+		UPDATE REC_RECORD_INFO SET $value$
+	</update>
+	
+	<!-- 批量关联 修改客户 -->
+	<update id="updateCustomer" parameterClass="java.lang.String">
+		UPDATE CRM_CUSTOMER SET $value$
+	</update>
+	
+	
+	<resultMap class="RecordTemp" id="RecordTempBean">
+		<result column="RECORD_INFO_ID" property="recordInfoId" />
+		<result column="CUSTOMER_NAME" property="customerName"/>
+		<result column="REMOTE_PHONE" property="remotePhone" />
+		<result column="START_DATE" property="startDate" />
+		<result column="CALL_TYPE_NAME" property="callTypeName"/>
+	</resultMap>
+	<!-- 根据customerId得到最进的一条录音信息 -->
+	<select id="getLastRecByCusId" resultMap="RecordTempBean"
+		parameterClass="java.lang.Integer">
+		SELECT r.RECORD_INFO_ID,r.CUSTOMER_NAME,r.REMOTE_PHONE,r.START_DATE,t.CALL_TYPE_NAME
+		FROM REC_RECORD_INFO r 
+		LEFT JOIN REC_CALL_TYPE t ON t.CALL_TYPE_CODE = r.CALL_TYPE WHERE r.CUSTOMER_ID = #customerId# AND r.IS_DEL = 0
+		order by r.START_DATE DESC fetch first 1 rows only
+	</select>
+
+    <!--获得某一条日程的电话联系记录当天最近的记录-->
+    <select id="getRecentlyRecordForSchedule" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+        select record_info_id from (
+        select rri.*
+        <isNotEmpty property="contactDate" prepend=",">
+            timestampdiff(2,char(timestamp('$contactDate$')-timestamp(rri.start_date)))
+        </isNotEmpty>
+        <isNull property="contactDate" prepend=",">
+            timestampdiff(2,char(timestamp(current timestamp)-timestamp(rri.start_date)))
+        </isNull>
+         dt
+        from rec_record_info rri where rri.customer_id=#customerId# and call_type in (1,2)
+        order by dt fetch first 1 rows only)
+    </select>
+
+    <!-- 根据客户id得到联系记录-->
+    <select id="getRecordCountByCustomerId" resultClass="java.lang.Integer" parameterClass="java.lang.Integer">
+        select count(*) from rec_record_info where is_del=0 and customer_id=#customerId#
+    </select>
+</sqlMap>
+
+
+
+

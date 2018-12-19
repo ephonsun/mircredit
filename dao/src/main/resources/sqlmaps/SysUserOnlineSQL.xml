@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysUserOnlineSQL">
+	<typeAlias alias="SysUserOnline" type="com.banger.mobile.domain.model.user.SysUserOnline" />
+	
+	<!-- 在线用户模板表-->
+	<!-- SysUserOnlineSQL信息全字段  -->
+	<resultMap class="SysUserOnline" id="SysUserOnlineResult">
+		<result column="USER_ONLINE_ID" property="userOnlineId" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_SESSION_ID" property="userSessionId" />
+		<result column="ONLINE_STATUS_ID" property="onlineStatusId" />
+		<result column="LOGIN_DATE" property="loginDate" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条在线用户-->
+	<insert id="addSysUserOnline" parameterClass="SysUserOnline">
+     <![CDATA[
+		insert into SYS_USER_ONLINE
+		(
+		 USER_ONLINE_ID,
+		 USER_ID,
+		 USER_SESSION_ID,
+		 ONLINE_STATUS_ID,
+		 LOGIN_DATE,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#userOnlineId#,
+		#userId#,
+	    #userSessionId#,
+	    #onlineStatusId#,
+	    #loginDate#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="userOnlineId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_USER_ONLINE 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 在线用户修改-->
+	<update id="updateSysUserOnline" parameterClass="SysUserOnline">
+	 <![CDATA[
+             update SYS_USER_ONLINE  set 
+		 ]]>	
+		 <isNotEmpty property="userId">
+				USER_ID=#userId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="userSessionId">
+				USER_SESSION_ID=#userSessionId#,
+		 </isNotEmpty>
+		  <isNotEmpty property="onlineStatusId">
+				ONLINE_STATUS_ID=#onlineStatusId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="loginDate">
+				LOGIN_DATE=#loginDate#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where USER_ONLINE_ID=#userOnlineId#
+         ]]> 
+	</update>
+	
+		<!-- 在线用户修改-->
+	<update id="updateSysUserOnlineStatus" parameterClass="java.util.Map">
+	 <![CDATA[
+             update SYS_USER_ONLINE  set 
+		 ]]>	
+		  <isNotEmpty property="onlineStatusId">
+				ONLINE_STATUS_ID=#onlineStatusId#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where USER_ID=#userId#
+         ]]> 
+	</update>
+	
+		<!-- 在线用户修改-->
+	<update id="initSysUserOnline" parameterClass="SysUserOnline">
+	 <![CDATA[
+            update SYS_USER_ONLINE set ONLINE_STATUS_ID=3 where DAY (current timestamp)<DAY (LOGIN_DATE)
+		 ]]>	
+	</update>
+	
+	
+  
+  <!-- 根据id得到在线用户-->	
+  <select id="getSysUserOnlineById"  resultMap="SysUserOnlineResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from  SYS_USER_ONLINE 	where USER_ONLINE_ID=#userOnlineId#
+	]]>
+  </select>
+  
+  <!-- 根据id得到在线用户信息 -->	
+  <select id="getSysUserOnlineByUserId" resultMap="SysUserOnlineResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from SYS_USER_ONLINE where USER_ID=#userId# 
+	]]>
+  </select>
+  
+  <!-- 取在线和离开的在线用户-->
+    <select id="getSysUserOnlineMList"  resultMap="SysUserOnlineResult">
+	<![CDATA[
+		select * from  SYS_USER_ONLINE 	where ONLINE_STATUS_ID in(1,2)
+	]]>
+  </select>
+  
+
+  <select id="getSysUserOnlineList" resultMap="SysUserOnlineResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_USER_ONLINE where 1=1 and USER_ID!=1
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ USER_ID=#userId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userSessionId">
+			<![CDATA[ USER_SESSION_ID =#userSessionId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="onlineStatusId">
+			<![CDATA[ ONLINE_STATUS_ID=#onlineStatusId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="loginDate">
+			<![CDATA[ LOGIN_DATE=#loginDate#]]>
+		</isNotEmpty>
+	</dynamic>
+	order by CREATE_DATE desc
+  </select>
+  
+	<select id="getALLSysUserOnline" resultMap="SysUserOnlineResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select * from  SYS_USER_ONLINE where 1=1 
+	]]>
+	<dynamic>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[ USER_ID=#userId#]]>
+		</isNotEmpty>
+	</dynamic>	
+	</select>
+	
+	<!-- 更新用户状态 -->
+	<update id="userLoginState" parameterClass="java.lang.Integer" >
+		update SYS_USER_ONLINE set ONLINE_STATUS_ID=3  where USER_ID=#userId# 
+	</update>
+	
+</sqlMap>
+
+
+
+

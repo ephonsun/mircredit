@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmTaskSQL">
+	<typeAlias alias="CrmTask"
+		type="com.banger.mobile.domain.model.task.CrmTask" />
+	<typeAlias alias="TaskCustomer"
+		type="com.banger.mobile.domain.model.task.TaskCustomer" />
+
+	<!-- 任务表-->
+	<!-- CrmTaskSQL信息全字段 -->
+	<resultMap class="CrmTask" id="CrmTaskResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="TASK_TITLE" property="taskTitle" />
+		<result column="EXECUTE_DATE" property="executeDate" />
+		<result column="EXECUTE_USER" property="executeUser" />
+		<result column="REMARK" property="remark" />
+		<result column="ASSIGN_USER" property="assignUser" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="TASK_TYPE" property="taskType"/>
+
+		<result column="EXECUTE_NAME" property="executeName" />
+		<result column="ASSIGN_NAME" property="assignName" />
+	</resultMap>
+	
+	<resultMap class="TaskCustomer" id="TaskCustomerResult">
+		<result column="TASK_ID" property="taskId" />
+		<result column="TASK_TITLE" property="taskTitle" />
+		<result column="EXECUTE_DATE" property="executeDate" />
+		<result column="REMARK" property="remark" />
+		<result column="IS_FINISH" property="isFinish" />
+		<result column="TASK_TYPE" property="taskType"/>
+		<result column="CUSTOMER_ID" property="customrtId" />
+		<result column="CUSTOMER_NAME" property="customerName"/>
+		<result column="EXECUTE_USER" property="executeUser"/>
+	</resultMap>
+
+	<!-- 任务管理分页count -->
+	<select id="getTaskCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+             select count(*) from TSK_TASK as task 
+			 left join SYS_USER as users on task.EXECUTE_USER=users.USER_ID  
+			 left join SYS_USER as assign on task.ASSIGN_USER=assign.USER_ID	
+             where task.IS_DEL=0 
+        ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="isFinish">
+				<![CDATA[ task.IS_FINISH=#isFinish# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskTitle">
+				<![CDATA[ task.TASK_TITLE like '%$taskTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="assignUser">
+				<![CDATA[ task.ASSIGN_USER=$assignUser$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="executeUser">
+				<![CDATA[ task.EXECUTE_USER=$executeUser$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[ task.EXECUTE_DATE>=TO_DATE ('$startDate$', 'yyyy-MM-dd') ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[ task.EXECUTE_DATE<= TO_DATE ('$endDate$', 'yyyy-MM-dd') ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="expiredDate">
+				<![CDATA[ task.EXECUTE_DATE< TO_DATE ('$expiredDate$', 'yyyy-MM-dd') and task.IS_FINISH=0 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptUserIds">
+				<![CDATA[ task.EXECUTE_USER in($deptUserIds$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				exists(select distinct
+				target.TASK_ID
+				from CRM_CUSTOMER as cus
+				left join TSK_TASK_TARGET
+				target on cus.CUSTOMER_ID=target.CUSTOMER_ID
+				where cus.CUSTOMER_NAME
+				like '%$customerName$%'
+				and
+				target.CUSTOMER_ID is not null and
+				target.TASK_ID=task.TASK_ID)
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 任务管理分页 -->
+	<select id="getTaskPageMap" resultMap="CrmTaskResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+		    select users.USER_NAME as EXECUTE_NAME,assign.USER_NAME as ASSIGN_NAME,task.*
+			from TSK_TASK as task 
+			left join SYS_USER as users on task.EXECUTE_USER=users.USER_ID  
+			left join SYS_USER as assign on task.ASSIGN_USER=assign.USER_ID 
+		    where task.IS_DEL=0 
+	    ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="isFinish">
+				<![CDATA[ task.IS_FINISH=#isFinish# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="taskTitle">
+				<![CDATA[ task.TASK_TITLE like '%$taskTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="assignUser">
+				<![CDATA[ task.ASSIGN_USER=$assignUser$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="executeUser">
+				<![CDATA[ task.EXECUTE_USER=$executeUser$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[ task.EXECUTE_DATE>=TO_DATE ('$startDate$', 'yyyy-MM-dd') ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[ task.EXECUTE_DATE<= TO_DATE ('$endDate$', 'yyyy-MM-dd') ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="expiredDate">
+				<![CDATA[ task.EXECUTE_DATE< TO_DATE ('$expiredDate$', 'yyyy-MM-dd') and task.IS_FINISH=0 ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptUserIds">
+				<![CDATA[ task.EXECUTE_USER in($deptUserIds$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				exists(select distinct
+				target.TASK_ID
+				from CRM_CUSTOMER as cus
+				left join TSK_TASK_TARGET
+				target on cus.CUSTOMER_ID=target.CUSTOMER_ID
+				where cus.CUSTOMER_NAME
+				like '%$customerName$%'
+				and
+				target.CUSTOMER_ID is not null and
+				target.TASK_ID=task.TASK_ID) 
+			</isNotEmpty>
+		</dynamic>
+		 order by $orderBy$ 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+	<!-- 添加任务 -->
+	<insert id="InsertTask" parameterClass="CrmTask">
+		<![CDATA[
+			INSERT INTO TSK_TASK
+			(
+				TASK_ID,
+				TASK_TITLE,
+				EXECUTE_DATE,
+				EXECUTE_USER,
+				REMARK,
+				ASSIGN_USER,
+				IS_FINISH,
+				IS_DEL,
+				TASK_TYPE,
+				CREATE_DATE,
+				CREATE_USER
+			)
+			 VALUES
+			(
+				#taskId#,
+				#taskTitle#,
+				#executeDate#,
+				#executeUser#,
+				#remark#,
+				#assignUser#,
+				#isFinish#,
+				0,
+				#taskType#,
+				#createDate#,
+				#createUser#
+			)
+		]]>
+		<selectKey keyProperty="taskId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_TSK_TASK 
+		</selectKey>
+	</insert>
+
+	<!-- 返回CrmTask信息 -->
+	<select id="GetCrmTaskById" resultMap="CrmTaskResult"
+		parameterClass="java.lang.Integer">
+	    <![CDATA[
+            select users.USER_NAME as EXECUTE_NAME,assign.USER_NAME as ASSIGN_NAME,task.*
+			from TSK_TASK as task 
+			left join SYS_USER as users on task.EXECUTE_USER=users.USER_ID  
+			left join SYS_USER as assign on task.ASSIGN_USER=assign.USER_ID 
+		    where task.IS_DEL=0 and task.TASK_ID=#taskId# 
+        ]]>
+	</select>
+	
+	<!-- 删除任务 -->
+	<update id="DeleteTask" parameterClass="java.lang.Integer">
+		<![CDATA[
+			UPDATE TSK_TASK SET IS_DEL=1 WHERE TASK_ID=#taskId# 
+		]]>
+	</update>
+	
+	<!-- 修改完成情况状态 -->
+	<update id="ChangeIsFinsish" parameterClass="CrmTask">
+		<![CDATA[
+			UPDATE TSK_TASK 
+			SET 
+			IS_FINISH=#isFinish#,
+			UPDATE_DATE=#updateDate#,
+			UPDATE_USER=#updateUser# 
+			WHERE TASK_ID=#taskId# 
+		]]>
+	</update>
+	
+	<!-- 编辑任务 -->
+	<update id="UpdateTask" parameterClass="CrmTask">
+		<![CDATA[
+			UPDATE TSK_TASK 
+			SET 
+			TASK_TITLE=#taskTitle#,
+			EXECUTE_DATE=#executeDate#,
+			EXECUTE_USER=#executeUser#,
+			REMARK=#remark#,
+			IS_FINISH=#isFinish#,
+			UPDATE_DATE=#updateDate#,
+			UPDATE_USER=#updateUser# 
+			WHERE TASK_ID=#taskId# 
+		]]>
+	</update>
+	
+	<!-- 返回下次联系的任务信息 -->
+	<select id="GetNextTask" resultMap="TaskCustomerResult" parameterClass="java.lang.Integer">
+		select target.CUSTOMER_ID,
+		customer.CUSTOMER_NAME,
+		task.TASK_ID,
+		task.TASK_TITLE,
+		task.EXECUTE_DATE,
+		task.REMARK,
+		task.IS_FINISH,
+		task.TASK_TYPE,
+		task.EXECUTE_USER  
+		from TSK_TASK task 
+		left join TSK_TASK_TARGET target on target.TASK_ID=task.TASK_ID
+		left join CRM_CUSTOMER customer on target.CUSTOMER_ID=customer.CUSTOMER_ID
+		where task.TASK_TYPE=1 and task.TASK_ID=#taskId#
+	</select>
+	
+	
+	<!-- 返回客户对应的任务信息 count -->
+	<select id="GetCustomerTaskCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+            select count(*) from TSK_TASK as task 
+			left join SYS_USER as users on task.EXECUTE_USER=users.USER_ID  
+			left join SYS_USER as assign on task.ASSIGN_USER=assign.USER_ID 
+			left join TSK_TASK_TARGET target on target.TASK_ID=task.TASK_ID
+			left join CRM_CUSTOMER customer on target.CUSTOMER_ID=customer.CUSTOMER_ID
+			where task.IS_DEL=0 and customer.CUSTOMER_ID=#customerId# 
+        ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="isFinish">
+				<![CDATA[ task.IS_FINISH=#isFinish# ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 返回客户对应的任务信息 -->
+	<select id="GetCustomerTaskPage" resultMap="CrmTaskResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+		    select users.USER_NAME as EXECUTE_NAME,assign.USER_NAME as ASSIGN_NAME,task.*
+			from TSK_TASK as task 
+			left join SYS_USER as users on task.EXECUTE_USER=users.USER_ID  
+			left join SYS_USER as assign on task.ASSIGN_USER=assign.USER_ID 
+			left join TSK_TASK_TARGET target on target.TASK_ID=task.TASK_ID
+			left join CRM_CUSTOMER customer on target.CUSTOMER_ID=customer.CUSTOMER_ID
+			where task.IS_DEL=0 and customer.CUSTOMER_ID=#customerId# 
+	    ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="isFinish">
+				<![CDATA[ task.IS_FINISH=#isFinish# ]]>
+			</isNotEmpty>
+		</dynamic>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 初始化客户对应的下次联系记录 -->
+	<select id="GetInitNextCustomerTask" resultMap="TaskCustomerResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+			select target.CUSTOMER_ID,
+			customer.CUSTOMER_NAME,
+			task.TASK_ID,
+			task.TASK_TITLE,
+			task.EXECUTE_DATE,
+			task.REMARK,
+			task.IS_FINISH,
+			task.TASK_TYPE,
+			task.EXECUTE_USER  
+			from TSK_TASK task 
+			left join TSK_TASK_TARGET target on target.TASK_ID=task.TASK_ID
+			left join CRM_CUSTOMER customer on target.CUSTOMER_ID=customer.CUSTOMER_ID
+			where task.TASK_TYPE=1  and customer.CUSTOMER_ID=#customerId#
+		]]>
+	</select>
+	
+	<!-- 返回任务主键序列 -->
+	<select id="GetTaskKeyId" resultClass="java.lang.Integer">
+		<![CDATA[
+			values NEXTVAL for SEQ_TSK_TASK 
+		]]>
+	</select>
+</sqlMap>

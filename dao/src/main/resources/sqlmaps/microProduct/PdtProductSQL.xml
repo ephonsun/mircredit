@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtProductSQL">
+	<typeAlias alias="PdtProduct"
+		type="com.banger.mobile.domain.model.microProduct.PdtProduct" />
+
+	<!-- 产品SQL-->
+	<resultMap class="PdtProduct" id="PdtProductResult">
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="PRODUCT_CODE" property="productCode" />
+		<result column="PRODUCT_COVER_IMAGE" property="productCoverImage" />
+		<result column="REMARK" property="remark" />
+		<result column="FEATURE" property="feature" />
+		<result column="SUITABLE_USER" property="suitableUser" />
+		<result column="APPLY_NEED_DATA" property="applyNeedData" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 增加 -->
+	<insert id="addPdtProduct" parameterClass="PdtProduct">
+		<![CDATA[
+	 	INSERT INTO PDT_MICRO_PRODUCT
+		    (
+		        PRODUCT_ID,
+		        PRODUCT_NAME,
+		        PRODUCT_CODE,
+		        PRODUCT_COVER_IMAGE,
+		        REMARK,
+		        FEATURE,
+		        SUITABLE_USER,
+		        APPLY_NEED_DATA,
+		        IS_DEL,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #productId#,
+		        #productName#,
+		        #productCode#,
+		        #productCoverImage#,
+		        #remark#,
+		        #feature#,
+		        #suitableUser#,
+		        #applyNeedData#,
+				0,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+		    )
+      ]]>
+		<selectKey keyProperty="productId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_MICRO_PRODUCT
+		</selectKey>
+	</insert>
+	
+	<!-- 修改-->
+	<update id="editPdtProduct" parameterClass="PdtProduct">
+		<![CDATA[	
+		UPDATE
+		   PDT_MICRO_PRODUCT
+		SET 
+		    PRODUCT_NAME = #productName#,
+	        PRODUCT_CODE = #productCode#,
+	        PRODUCT_COVER_IMAGE = #productCoverImage#,
+	        REMARK = #remark#,
+	        FEATURE = #feature#,
+	        SUITABLE_USER = #suitableUser#,
+	        APPLY_NEED_DATA = #applyNeedData#,
+	        IS_DEL = #isDel#,
+		    UPDATE_DATE =  current timestamp, 
+		    UPDATE_USER = #updateUser#  
+		WHERE 
+		  PRODUCT_ID = #productId#
+		  ]]>
+	</update>
+	
+	<!-- 根据ID伪删除 -->
+	<update id="delPdtProductById" parameterClass="int">
+		<![CDATA[
+		UPDATE PDT_MICRO_PRODUCT SET IS_DEL=1 WHERE PRODUCT_ID = #productId#
+	]]>
+	</update>
+	
+	<!-- 查询单个产品数据 -->
+	<select id="getPdtProductById" resultMap="PdtProductResult" parameterClass="int">
+		SELECT * FROM PDT_MICRO_PRODUCT WHERE PRODUCT_ID = #productId#
+	</select>
+	
+	<!-- 查询所有产品数据 -->
+	<select id="getAllPdtProductByConds" resultMap="PdtProductResult" parameterClass="java.util.Map">
+		SELECT * FROM PDT_MICRO_PRODUCT WHERE IS_DEL = 0
+		<isNotEmpty prepend="and" property="productId">
+			<![CDATA[PRODUCT_ID = #productId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productName">
+			<![CDATA[PRODUCT_NAME = #productName#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productCode">
+			<![CDATA[PRODUCT_CODE = #productCode#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="unProductId">
+			<![CDATA[PRODUCT_ID != #unProductId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="padInput">
+			<![CDATA[(PRODUCT_NAME LIKE '%$padInput$%' ESCAPE '^' or PRODUCT_CODE LIKE '%$padInput$%' ESCAPE '^')]]>
+		</isNotEmpty>
+        ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<!-- 查询产品（分页查询） -->
+	<select id="getPdtProductPageByConds" resultMap="PdtProductResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+			SELECT * FROM PDT_MICRO_PRODUCT WHERE IS_DEL = 0
+			<isNotEmpty prepend="and" property="productName">
+				<![CDATA[PRODUCT_NAME LIKE '%$productName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productCode">
+				<![CDATA[PRODUCT_CODE LIKE '%$productCode$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createStartDate">
+					<![CDATA[CREATE_DATE >= #createStartDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createEndDate">
+					<![CDATA[CREATE_DATE <= #createEndDate# ]]>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="padInput">
+				<![CDATA[(PRODUCT_NAME LIKE '%$padInput$%' ESCAPE '^' or PRODUCT_CODE LIKE '%$padInput$%' ESCAPE '^')]]>
+			</isNotEmpty>
+			ORDER BY CREATE_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询产品（分页求和） -->
+	<select id="getPdtProductPageCountByConds" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+			SELECT COUNT(0) FROM PDT_MICRO_PRODUCT WHERE IS_DEL = 0
+			<isNotEmpty prepend="and" property="productName">
+				<![CDATA[PRODUCT_NAME LIKE '%$productName$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="productCode">
+				<![CDATA[PRODUCT_CODE LIKE '%$productCode$%' ESCAPE '^']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createStartDate">
+					<![CDATA[CREATE_DATE >= #createStartDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="createEndDate">
+					<![CDATA[CREATE_DATE <= #createEndDate# ]]>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="padInput">
+				<![CDATA[(PRODUCT_NAME LIKE '%$padInput$%' ESCAPE '^' or PRODUCT_CODE LIKE '%$padInput$%' ESCAPE '^')]]>
+			</isNotEmpty>
+	</select>
+</sqlMap>

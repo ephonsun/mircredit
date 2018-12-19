@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtLibraryAttachmentSQL">
+	<typeAlias alias="PdtLibraryAttachment"
+		type="com.banger.mobile.domain.model.microProduct.PdtLibraryAttachment" />
+    <typeAlias alias="SysUploadFile" type="com.banger.mobile.domain.model.uploadFile.SysUploadFile" />
+
+	<!-- 知识附件表-->
+	<!-- PdtLibraryAttachmentSQL信息全字段 -->
+	<resultMap class="PdtLibraryAttachment" id="PdtLibraryAttachmentResult">
+		<result column="LIBRARY_ATTACHMENT_ID" property="libraryAttachmentId"/>
+		<result column="LIBRARY_ID" property="libraryId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+        <result column="FILE_ID" property="fileId" />
+	</resultMap>
+
+    <!-- sys_upload_file部分字段 -->
+    <resultMap id="SysUploadFileResult" class="SysUploadFile">
+        <result column="FILE_ID" property="fileId"/>
+        <result column="STORAGE_TYPE" property="storageType" />
+        <result column="FILE_NAME" property="fileName" />
+        <result column="FILE_PATH" property="filePath"/>
+        <result column="UPLOAD_FILE_NAME" property="uploadFileName" />
+        <result column="UPLOAD_DATE" property="uploadDate" />
+        <result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="FILE_SIZE" property="fileSize"/>
+        <result column="FILE_MD5" property="fileMd5" />
+    </resultMap>
+
+    <!-- 获取文件结果集 -->
+    <resultMap id="PdtLibraryAttachmentListResult" class="PdtLibraryAttachment" extends="PdtLibraryAttachmentResult">
+        <result property="sysUploadFile" resultMap="PdtLibraryAttachmentSQL.SysUploadFileResult" nullValue="null"></result>
+    </resultMap>
+	
+	<!-- 添加知识附件 -->
+	<insert id="addPdtLibraryAttachment" parameterClass="PdtLibraryAttachment">
+		<![CDATA[
+			INSERT INTO PDT_MICRO_LIBRARY_ATTACHMENT
+			(
+				LIBRARY_ATTACHMENT_ID,
+				LIBRARY_ID,
+				CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER,
+		        FILE_ID
+			)
+			VALUES
+			(
+				#libraryAttachmentId:INTEGER#,
+				#libraryId:INTEGER#,
+				current timestamp,
+			    current timestamp,
+		        #createUser:INTEGER#,
+		        #updateUser:INTEGER#,
+		        #fileId:INTEGER#
+			)
+	    ]]>
+	    <selectKey keyProperty="libraryAttachmentId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_PDT_MICRO_LIBRARY_ATTACHMENT
+		</selectKey>
+	</insert>
+	
+	<!-- 删除知识附件  -->
+	<delete id="delPdtLibraryAttachmentByConds" parameterClass="java.util.Map">
+			DELETE FROM PDT_MICRO_LIBRARY_ATTACHMENT WHERE 1=1
+			<isNotEmpty prepend="and" property="libraryAttachmentId">
+				<![CDATA[LIBRARY_ATTACHMENT_ID = #libraryAttachmentId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="libraryId">
+				<![CDATA[LIBRARY_ID = #libraryId#]]>
+			</isNotEmpty>
+	</delete>
+
+    <!-- 查询知识附件 -->
+    <select id="getPdtLibraryAttachmentByConds" resultMap="PdtLibraryAttachmentResult" parameterClass="java.util.Map">
+        SELECT * FROM PDT_MICRO_LIBRARY_ATTACHMENT WHERE 1=1
+        <isNotEmpty prepend="and" property="libraryAttachmentId">
+            <![CDATA[LIBRARY_ATTACHMENT_ID = #libraryAttachmentId#]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="libraryId">
+            <![CDATA[LIBRARY_ID = #libraryId#]]>
+        </isNotEmpty>
+    </select>
+
+	<!-- 查询知识附件（含基本信息） -->
+	<select id="getAllPdtLibraryAttachmentByConds" resultMap="PdtLibraryAttachmentListResult" parameterClass="java.util.Map">
+		SELECT a.*, b.file_id,b.storage_type, b.file_name, b.file_path,b.upload_file_name,b.upload_date, b.upload_user_id,
+        b.file_size,b.file_md5
+        FROM PDT_MICRO_LIBRARY_ATTACHMENT a
+        left join sys_upload_file b on a.file_id = b.file_id
+        WHERE 1=1
+		<isNotEmpty prepend="and" property="libraryAttachmentId">
+				<![CDATA[LIBRARY_ATTACHMENT_ID = #libraryAttachmentId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="libraryId">
+			<![CDATA[LIBRARY_ID = #libraryId#]]>
+		</isNotEmpty>
+		
+	</select>
+</sqlMap>

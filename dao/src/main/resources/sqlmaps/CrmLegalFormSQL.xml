@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmLegalFormSQL">
+	<typeAlias alias="CrmLegalForm" type="com.banger.mobile.domain.model.legalForm.LegalForm" />
+
+	<!-- CrmMaritalStatusSQL信息全字段 -->
+	<resultMap class="CrmLegalForm" id="CrmLegalFormResult">
+		<result column="LEGAL_FORM_ID" property="legalFormId" />
+		<result column="LEGAL_FORM_NAME" property="legalFormName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 增加一种法律形式-->
+	<insert id="addCrmLegalForm" parameterClass="CrmLegalForm">
+		<![CDATA[
+		INSERT INTO CRM_LEGAL_FORM
+    	(
+        LEGAL_FORM_ID,
+        IS_DEL,
+        LEGAL_FORM_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #legalFormId#,
+        #isDel#,
+        #legalFormName#,
+        #sortNo#,
+        #isActived#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="legalFormId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_MARITAL_STATUS
+		</selectKey>
+	</insert>
+
+
+	<!-- 法律形式修改-->
+	<update id="updateCrmLegalForm" parameterClass="CrmLegalForm">
+		UPDATE CRM_LEGAL_FORM SET 
+			IS_DEL = #isDel#,
+			LEGAL_FORM_NAME = #legalFormName#, 
+			SORTNO = #sortNo#,
+			IS_ACTIVED = #isActived#, 
+			CREATE_DATE = #createDate#,
+			UPDATE_DATE =<![CDATA[current timestamp]]>, 
+			CREATE_USER = #createUser#, 
+			UPDATE_USER = #updateUser# 
+		where
+			LEGAL_FORM_ID= #legalFormId#
+	</update>
+
+	<!-- 根据ID删除法律形式 -->
+	<update id="deleteCrmLegalFormById" parameterClass="java.lang.Integer">
+		UPDATE CRM_LEGAL_FORM SET 
+			IS_DEL = 1, 
+			UPDATE_DATE =<![CDATA[current timestamp]]>
+		where 
+			LEGAL_FORM_ID= #Id#
+	</update>
+	
+	<!-- 根据id得到法律形式 -->
+	<select id="getCrmLegalFormById" resultMap="CrmLegalFormResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_LEGAL_FORM where LEGAL_FORM_ID=#Id#
+	]]>
+	</select>
+	
+	<!-- 根据法律形式名称获取相同法律形式名称的数据 -->
+	<select id="getSameCrmLegalFormByName" resultMap="CrmLegalFormResult" parameterClass="CrmLegalForm">
+		<![CDATA[select * from CRM_LEGAL_FORM where  IS_DEL = 0]]>
+     	<isNotEmpty prepend="" property="legalFormId">
+     		<isNotEqual prepend="and" property="legalFormId" compareValue="0">
+			<![CDATA[LEGAL_FORM_ID != #legalFormId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="legalFormName">
+			<![CDATA[LEGAL_FORM_NAME = #legalFormName#]]>
+		</isNotEmpty>	
+	</select>
+
+	<!-- 获取法律形式列表 -->
+	<select id="getAllCrmLegalForm" resultMap="CrmLegalFormResult">
+	    <![CDATA[
+		select * from CRM_LEGAL_FORM
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC
+        ]]>
+	</select>
+
+	<!-- 获取现有法律形式数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmLegalForm" resultMap="CrmLegalFormResult">
+		<![CDATA[
+		select *  from CRM_LEGAL_FORM 
+		WHERE IS_DEL = 0
+        Order by SORTNO ASC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取现有法律形式数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmLegalForm" resultMap="CrmLegalFormResult">
+		<![CDATA[
+		select *  from CRM_LEGAL_FORM 
+		WHERE IS_DEL = 0
+        Order by SORTNO DESC fetch first 1 rows only
+		]]>
+	</select>
+	
+	<!-- 获取要移动的法律形式对象 -->
+	<select id="getNeedMoveCrmLegalForm" resultMap="CrmLegalFormResult" parameterClass="java.util.Map">
+		select *  from CRM_LEGAL_FORM WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isEqual>
+     		<isNotEqual prepend="and" property="moveType" compareValue="Up">
+			<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

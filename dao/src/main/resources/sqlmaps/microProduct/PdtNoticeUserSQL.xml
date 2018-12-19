@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PdtNoticeUserSQL">
+	<typeAlias alias="PdtNoticeUser"
+		type="com.banger.mobile.domain.model.microProduct.PdtNoticeUser" />
+
+	<!-- 通知SQL-->
+	<resultMap class="PdtNoticeUser" id="PdtNoticeUserResult">
+		<result column="NOTICE_USER_ID" property="noticeUserId" />
+		<result column="NOTICE_ID" property="noticeId" />
+		<result column="USER_ID" property="userId" />
+		<result column="IS_READ" property="isRead" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 增加 -->
+	<insert id="addPdtNoticeUser" parameterClass="PdtNoticeUser">
+		<![CDATA[
+	 	INSERT INTO PDT_MICRO_NOTICE_USER
+		    (
+		        NOTICE_USER_ID,
+		        NOTICE_ID,
+		        USER_ID,
+		        IS_READ,
+		        CREATE_DATE,
+		        UPDATE_DATE,
+		        CREATE_USER,
+		        UPDATE_USER
+		    )
+			VALUES
+		    (
+		        #noticeUserId#,
+		        #noticeId#,
+				#userId#,
+		        #isRead#,
+		        current timestamp,
+			    current timestamp,
+		        #createUser#,
+		        #updateUser#
+		    )
+      ]]>
+		<selectKey keyProperty="noticeUserId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_PDT_MICRO_NOTICE_USER
+		</selectKey>
+	</insert>
+	
+	<delete id="delPdtNoticeUserReadByConds" parameterClass="java.util.Map">
+		DELETE FROM PDT_MICRO_NOTICE_USER WHERE 1=1
+		<isNotEmpty prepend="and" property="noticeIds">
+			<![CDATA[NOTICE_ID IN ($noticeIds$)]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[USER_ID = #userId#]]>
+		</isNotEmpty>
+	</delete>
+</sqlMap>

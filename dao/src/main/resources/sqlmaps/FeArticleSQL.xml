@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeArticleSQL">
+	<typeAlias alias="BaseFeArticle"
+		type="com.banger.mobile.domain.model.base.finance.BaseFeArticle" />
+
+	<typeAlias alias="FeArticle"
+		type="com.banger.mobile.domain.model.finance.FeArticle" />
+
+	<!-- 文章表 -->
+	<!-- FeArticleSQL信息全字段 -->
+	<resultMap class="BaseFeArticle" id="BaseFeArticleResult">
+		<result column="ARTICLE_ID" property="articleId" />
+		<result column="ARTICLE_COLUMN_ID" property="articleColumnId" />
+		<result column="ARTICLE_TITLE" property="articleTitle" />
+		<result column="ARTICLE_SOURCE" property="articleSource" />
+		<result column="ARTICLE_ADDRESS" property="articleAddress" />
+		<result column="ARTICLE_CONTENT" property="articleContent" />
+		<result column="ARTICLE_READTIME_BEGIN" property="articleReadtimeBegin" />
+		<result column="ARTICLE_READTIME_END" property="articleReadtimeEnd" />
+		<result column="IS_MASTREAD" property="isMastread" />
+		<result column="IS_PUBLISH" property="isPublish" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="ARTICLE_READ_COUNT" property="articleReadCount" />
+		<result column="ARTICLE_DISCESS_COUNT" property="articleDiscessCount" />
+		<result column="ARTICLE_COLLECT_COUNT" property="articleCollectCount" />
+		<result column="ARTICLE_PARTAKE_COUNT" property="articlePartakeCount" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+		<result column="PUBLISH_DATE" property="publishDate" />
+	</resultMap>
+
+	<resultMap class="FeArticle" id="FeArticleResult" extends="BaseFeArticleResult">
+		<result column="COLUMN_NAME" property="columnName" />
+	</resultMap>
+	
+	<resultMap class="FeArticle" id="FeArticleExResult" extends="BaseFeArticleResult">
+		<result column="READ_COUNT" property="readCount" />
+		<result column="UNREAD_COUNT" property="unReadCount" />
+	</resultMap>
+	<!-- 新建文章 -->
+	<insert id="insertFeArticle" parameterClass="FeArticle">
+		<![CDATA[
+		    INSERT INTO FE_ARTICLE
+		    (
+		    	ARTICLE_ID,
+				ARTICLE_COLUMN_ID,
+				ARTICLE_TITLE,
+				ARTICLE_SOURCE,
+				ARTICLE_ADDRESS,
+				ARTICLE_CONTENT,
+				ARTICLE_READTIME_BEGIN,
+				ARTICLE_READTIME_END,
+				IS_MASTREAD,
+				IS_PUBLISH,
+				IS_DEL,
+				ARTICLE_READ_COUNT,
+				ARTICLE_DISCESS_COUNT,
+				ARTICLE_COLLECT_COUNT,
+				ARTICLE_PARTAKE_COUNT,
+				CREATE_DATE,
+				UPDATE_DATE,
+				CREATE_USER,
+				PUBLISH_DATE
+		    ) 
+		    VALUES
+		    (
+		    	#articleId#,
+				#articleColumnId:INTEGER#,
+				#articleTitle#,
+				#articleSource#,
+				#articleAddress#,
+				#articleContent#,
+				#articleReadtimeBegin#,
+				#articleReadtimeEnd#,
+				#isMastread:INTEGER#,
+				#isPublish:INTEGER#,
+				#isDel:INTEGER#,
+				#articleReadCount:INTEGER#,
+				#articleDiscessCount:INTEGER#,
+				#articleCollectCount:INTEGER#,
+				#articlePartakeCount:INTEGER#,
+				#createDate:TIMESTAMP#,
+				#updateDate:TIMESTAMP#,
+				#createUser#,
+				#publishDate:TIMESTAMP#
+		    )
+	    ]]>
+		<selectKey keyProperty="articleId" resultClass="java.lang.Integer"
+			type="pre">
+			values NEXTVAL for SEQ_FE_ARTICLE
+		</selectKey>
+	</insert>
+
+	<!--修改文章 -->
+	<update id="updateFeArticle" parameterClass="BaseFeArticle">
+		
+		UPDATE FE_ARTICLE 
+			SET 
+				ARTICLE_COLUMN_ID=#articleColumnId#,
+				ARTICLE_TITLE=#articleTitle#,
+				ARTICLE_SOURCE=#articleSource#,
+				ARTICLE_ADDRESS=#articleAddress#,
+				ARTICLE_CONTENT=#articleContent#,
+				ARTICLE_READTIME_BEGIN=#articleReadtimeBegin#,
+				ARTICLE_READTIME_END=#articleReadtimeEnd#,
+				IS_MASTREAD=#isMastread#,
+				IS_DEL=#isDel#,
+				<isNotNull property="isPublish">
+					IS_PUBLISH=#isPublish#,
+				</isNotNull>
+				<isNotNull property="publishDate">
+					PUBLISH_DATE=#publishDate#,
+				</isNotNull>
+				UPDATE_DATE=current timestamp,
+				CREATE_DATE=#createDate#,
+				UPDATE_USER=#updateUser#
+			WHERE 
+			  ARTICLE_ID = #articleId#
+		 
+	</update>
+	
+	<!--删除文章-->
+	<update id="deleteArticle" parameterClass="java.lang.Integer">
+		<![CDATA[	
+		DELETE FROM FE_ARTICLE WHERE ARTICLE_ID = #articleId#
+		  ]]>
+	</update>
+	<!--发布文章 -->
+	<update id="publishFeArticle" parameterClass="java.util.Map">
+		<![CDATA[
+		UPDATE FE_ARTICLE 
+			SET 
+				IS_PUBLISH=1,
+				UPDATE_DATE=current timestamp,
+				PUBLISH_DATE=current timestamp
+			WHERE 
+			  ARTICLE_ID in ($articleIds$)
+		  ]]>
+	</update>
+	
+	<!--文章目录分类 -->
+	<update id="classifyFeArticle" parameterClass="java.util.Map">
+		<![CDATA[
+		UPDATE FE_ARTICLE 
+			SET 
+				ARTICLE_COLUMN_ID=$articleColumnId$,
+				UPDATE_DATE=current timestamp
+			WHERE 
+			  ARTICLE_ID in ($articleIds$)
+		  ]]>
+	</update>
+	
+	<!--查看单个文章 -->
+	<select id="selectArticle" resultMap="FeArticleResult" parameterClass="java.lang.Integer">
+		<![CDATA[	
+		SELECT a.*,b.COLUMN_NAME  FROM FE_ARTICLE a LEFT JOIN FE_COLUMN b ON a.ARTICLE_COLUMN_ID
+		=b.COLUMN_ID WHERE a.ARTICLE_ID = #articleId# 
+		  ]]>
+	</select>
+	
+	<!--通过标题查看单个文章 -->
+	<select id="selectFeArticleByTitle" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[	
+		SELECT COUNT(*)  FROM FE_ARTICLE a LEFT JOIN FE_COLUMN b ON a.ARTICLE_COLUMN_ID
+		=b.COLUMN_ID WHERE a.ARTICLE_TITLE = '$title$'
+		  ]]>
+		  <dynamic>
+			<isNotEmpty prepend="and" property="articleId">
+				<![CDATA[ a.ARTICLE_ID !=  #articleId# ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<!--搜索文章列表总数(分页) -->
+	<select id="getArticeListCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(*)  FROM FE_ARTICLE a LEFT JOIN FE_COLUMN b ON a.ARTICLE_COLUMN_ID
+		=b.COLUMN_ID 
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="articleTitle">
+				<![CDATA[ a.ARTICLE_TITLE like '%$articleTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId#  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeEnd">
+				<![CDATA[ '$articleReadtimeEnd$' >= a.ARTICLE_READTIME_BEGIN   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeBegin">
+				<![CDATA[ '$articleReadtimeBegin$' <= a.ARTICLE_READTIME_END  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateBegin">
+				<![CDATA[ a.PUBLISH_DATE >= '$publishDateBegin$' || ' 00:00:01' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateEnd">
+				<![CDATA[ a.PUBLISH_DATE <= '$publishDateEnd$' || ' 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMastread">
+				<![CDATA[ a.IS_MASTREAD = $isMastread$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isAttachment">
+				<![CDATA[  a.ARTICLE_ID in (SELECT ARTICLE_ID FROM FE_ARTICLE_ATTACHMENT) ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--搜索文章列表(分页) -->
+	<select id="getArticeList" resultMap="FeArticleResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*,b.COLUMN_NAME  FROM FE_ARTICLE a LEFT JOIN FE_COLUMN b ON a.ARTICLE_COLUMN_ID
+		=b.COLUMN_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="articleTitle">
+				<![CDATA[ a.ARTICLE_TITLE like '%$articleTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeEnd">
+				<![CDATA[ '$articleReadtimeEnd$' >= a.ARTICLE_READTIME_BEGIN   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeBegin">
+				<![CDATA[ '$articleReadtimeBegin$' <= a.ARTICLE_READTIME_END  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateBegin">
+				<![CDATA[ a.PUBLISH_DATE >= '$publishDateBegin$' || ' 00:00:01']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateEnd">
+				<![CDATA[ a.PUBLISH_DATE <= '$publishDateEnd$' || ' 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMastread">
+				<![CDATA[ a.IS_MASTREAD = $isMastread$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isAttachment">
+				<![CDATA[  a.ARTICLE_ID in (SELECT ARTICLE_ID FROM FE_ARTICLE_ATTACHMENT) ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by a.IS_PUBLISH DESC,a.PUBLISH_DATE DESC 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 根据栏目id查询文章数量 -->
+	<select id="getArticleByColumnId" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(*) FROM FE_ARTICLE
+		]]>
+		<isNotEmpty property="articleColumnId">
+		<![CDATA[
+			WHERE ARTICLE_COLUMN_ID = #articleColumnId#
+		]]>
+		</isNotEmpty>
+	</select>
+
+	<!--客户经理阅读文章列表总数(分页) -->
+	<select id="showFinanceMainPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(*)  FROM FE_ARTICLE a 
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="articleTitle">
+				<![CDATA[ a.ARTICLE_TITLE like '%$articleTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId#  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeBegin">
+				<![CDATA[ '$articleReadtimeBegin$' >= a.ARTICLE_READTIME_BEGIN   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeEnd">
+				<![CDATA[ '$articleReadtimeEnd$' <= a.ARTICLE_READTIME_END  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateBegin">
+				<![CDATA[ a.PUBLISH_DATE >= '$publishDateBegin$' || ' 00:00:01' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateEnd">
+				<![CDATA[ a.PUBLISH_DATE <= '$publishDateEnd$' || ' 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMastread">
+				<![CDATA[ a.IS_MASTREAD = $isMastread$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isAttachment">
+				<![CDATA[  a.ARTICLE_ID in (SELECT ARTICLE_ID FROM FE_ARTICLE_ATTACHMENT) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="readed">
+				<![CDATA[ a.ARTICLE_ID IN 
+					(SELECT FE_ID FROM FE_USER_RELATION b WHERE  b.USER_ID = $userId$ AND b.IS_READ=1) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unread">
+				<![CDATA[ a.ARTICLE_ID NOT IN 
+					(SELECT FE_ID FROM FE_USER_RELATION b WHERE  b.USER_ID = $userId$ AND b.IS_READ=1 AND b.RELATION_TYPE=0) ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--客户经理阅读文章列表(分页) -->
+	<select id="showFinanceMainPage" resultMap="FeArticleResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*,'' as COLUMN_NAME FROM FE_ARTICLE a 
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="articleTitle">
+				<![CDATA[ a.ARTICLE_TITLE like '%$articleTitle$%' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeBegin">
+				<![CDATA[ '$articleReadtimeBegin$' >= a.ARTICLE_READTIME_BEGIN   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeEnd">
+				<![CDATA[ '$articleReadtimeEnd$' <= a.ARTICLE_READTIME_END  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateBegin">
+				<![CDATA[ a.PUBLISH_DATE >= '$publishDateBegin$' || ' 00:00:01']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="publishDateBegin">
+				<![CDATA[ a.PUBLISH_DATE <= '$publishDateEnd$' || ' 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMastread">
+				<![CDATA[ a.IS_MASTREAD = $isMastread$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isAttachment">
+				<![CDATA[  a.ARTICLE_ID in (SELECT ARTICLE_ID FROM FE_ARTICLE_ATTACHMENT) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="readed">
+				<![CDATA[ a.ARTICLE_ID IN 
+					(SELECT FE_ID FROM FE_USER_RELATION b WHERE  b.USER_ID = $userId$ AND b.IS_READ=1) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unread">
+				<![CDATA[ a.ARTICLE_ID NOT IN 
+					(SELECT FE_ID FROM FE_USER_RELATION b WHERE  b.USER_ID = $userId$ AND b.IS_READ=1 AND b.RELATION_TYPE=0) ]]>
+			</isNotEmpty>
+			
+		</dynamic>
+		order by a.IS_PUBLISH DESC,a.PUBLISH_DATE DESC 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!--今日文章总数 -->
+	<select id="getToadyCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+				SELECT COUNT(*) AS todayCount FROM FE_ARTICLE  a WHERE timestamp(date(current date)) <= a.ARTICLE_READTIME_END    AND 
+					timestamp(date(current date)) >= a.ARTICLE_READTIME_BEGIN 
+	         ]]>
+	    <dynamic>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--今日文章未读 包含必读总数 -->
+	<select id="getMustReadInUnReadCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+				SELECT  COUNT(*) AS mustReadInUnReadCount  FROM FE_ARTICLE  a WHERE timestamp(date(current date)) <= a.ARTICLE_READTIME_END    AND 
+					timestamp(date(current date)) >= a.ARTICLE_READTIME_BEGIN AND a.IS_MASTREAD = 1 AND a.ARTICLE_ID NOT IN (SELECT FE_ID
+					FROM FE_USER_RELATION WHERE USER_ID = #userId#)
+	         ]]>
+	      <dynamic>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--今日文章已读 总数 -->
+	<select id="getReadedCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+				SELECT COUNT(*) as readedCount FROM FE_ARTICLE  a WHERE timestamp(date(current date)) <= a.ARTICLE_READTIME_END    AND 
+					timestamp(date(current date)) >= a.ARTICLE_READTIME_BEGIN AND a.ARTICLE_ID IN 
+				(SELECT FE_ID FROM FE_USER_RELATION b WHERE  b.USER_ID = #userId# AND b.IS_READ=1)
+	         ]]>
+	     <dynamic>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+		</dynamic>  
+	         
+	</select>
+	
+	<!--今日文章已读 包含必读总数 -->
+	<select id="getMustReadInReadCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+				SELECT COUNT(*) as mustReadInReadCount FROM FE_ARTICLE  a WHERE timestamp(date(current date)) <= a.ARTICLE_READTIME_END    AND 
+					timestamp(date(current date)) >= a.ARTICLE_READTIME_BEGIN AND a.ARTICLE_ID IN                      
+				(SELECT FE_ID FROM FE_USER_RELATION b WHERE  b.USER_ID = #userId# AND b.IS_READ=1) AND a.IS_MASTREAD = 1
+	         ]]>
+	      <dynamic>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--今日文章 包含附件总数 -->
+	<select id="getAttachmentCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+				SELECT COUNT(*) AS attachmentCount FROM FE_ARTICLE  a WHERE timestamp(date(current date)) <= a.ARTICLE_READTIME_END    AND 
+					timestamp(date(current date)) >= a.ARTICLE_READTIME_BEGIN AND a.ARTICLE_ID IN (SELECT ARTICLE_ID FROM FE_ARTICLE_ATTACHMENT ) 
+	         ]]>
+	       <dynamic>
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPublish">
+				<![CDATA[ a.IS_PUBLISH = $isPublish$ ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--业务主管阅读文章列表总数(分页) -->
+	<select id="showInChargeOfFinanceMainPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(*) FROM (SELECT a.*,CASE WHEN b.FCOUNT IS NULL THEN 0 ELSE b.FCOUNT END AS READ_COUNT FROM FE_ARTICLE a 
+				LEFT  JOIN (SELECT COUNT(FE_ID) AS FCOUNT,b.FE_ID FROM FE_USER_RELATION b WHERE 1 = 1
+		]]>
+		<isNotEmpty prepend="and" property="userIds">
+			<![CDATA[
+				 b.USER_ID IN ($userIds$)
+	         ]]>
+		</isNotEmpty > 
+		<![CDATA[
+			AND b.IS_READ =1 GROUP BY b.FE_ID ) b 
+				ON a.ARTICLE_ID=b.FE_ID) a WHERE a.IS_PUBLISH = 1
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="articleReadtimeEnd">
+				<![CDATA[ '$articleReadtimeEnd$' >= a.ARTICLE_READTIME_BEGIN   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeBegin">
+				<![CDATA[ '$articleReadtimeBegin$' <= a.ARTICLE_READTIME_END  ]]>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId#  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMastread">
+				<![CDATA[ a.IS_MASTREAD = $isMastread$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unReadCount">
+				<![CDATA[ ($userIdCount$- a.READ_COUNT) >= $unReadCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleDiscessCount">
+				<![CDATA[ a.ARTICLE_DISCESS_COUNT >= $articleDiscessCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleCollectCount">
+				<![CDATA[ a.ARTICLE_COLLECT_COUNT >= $articleCollectCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="readCount">
+				<![CDATA[ a.READ_COUNT >= $readCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unread">
+				<![CDATA[ a.ARTICLE_ID NOT IN (SELECT FE_ID FROM FE_USER_RELATION WHERE USER_ID = $userId$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="readed">
+				<![CDATA[ a.ARTICLE_ID IN (SELECT FE_ID FROM FE_USER_RELATION WHERE USER_ID = $userId$ AND RELATION_TYPE=0) ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--业务主管阅读文章列表(分页) -->
+	<select id="showInChargeOfFinanceMainPage" resultMap="FeArticleExResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.* 
+		]]>
+		<isNotEmpty property="userIdCount">
+			<![CDATA[
+				,($userIdCount$- a.READ_COUNT) AS UNREAD_COUNT
+	         ]]>
+		</isNotEmpty> 
+		<![CDATA[
+				FROM (SELECT a.*,CASE WHEN b.FCOUNT IS NULL THEN 0 ELSE b.FCOUNT END AS READ_COUNT FROM FE_ARTICLE a 
+				LEFT  JOIN (SELECT COUNT(FE_ID) AS FCOUNT,b.FE_ID FROM FE_USER_RELATION b WHERE 1 = 1
+		]]>
+		<isNotEmpty prepend="and" property="userIds">
+			<![CDATA[
+				 b.USER_ID IN ($userIds$)
+	         ]]>
+		</isNotEmpty > 
+		<![CDATA[
+			AND b.IS_READ =1 GROUP BY b.FE_ID ) b 
+				ON a.ARTICLE_ID=b.FE_ID) a WHERE a.IS_PUBLISH = 1
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="articleReadtimeEnd">
+				<![CDATA[ '$articleReadtimeEnd$' >= a.ARTICLE_READTIME_BEGIN   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleReadtimeBegin">
+				<![CDATA[ '$articleReadtimeBegin$' <= a.ARTICLE_READTIME_END  ]]>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="articleColumnId">
+				<![CDATA[ a.ARTICLE_COLUMN_ID = #articleColumnId#  ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isMastread">
+				<![CDATA[ a.IS_MASTREAD = $isMastread$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unReadCount">
+				<![CDATA[ ($userIdCount$- a.READ_COUNT) >= $unReadCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleDiscessCount">
+				<![CDATA[ a.ARTICLE_DISCESS_COUNT >= $articleDiscessCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="articleCollectCount">
+				<![CDATA[ a.ARTICLE_COLLECT_COUNT >= $articleCollectCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="readCount">
+				<![CDATA[ a.READ_COUNT >= $readCount$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unread">
+				<![CDATA[ a.ARTICLE_ID NOT IN (SELECT FE_ID FROM FE_USER_RELATION WHERE USER_ID = $userId$) ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="readed">
+				<![CDATA[ a.ARTICLE_ID IN (SELECT FE_ID FROM FE_USER_RELATION WHERE USER_ID = $userId$ AND RELATION_TYPE=0)]]>
+			</isNotEmpty>
+			
+		</dynamic>
+		order by a.IS_PUBLISH DESC,a.PUBLISH_DATE DESC 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 更新收藏数，评论数，参与数 -->
+	<update id="updateArticleCount" parameterClass="java.util.Map">
+		<![CDATA[
+			UPDATE FE_ARTICLE 
+			SET
+		]]>
+		<dynamic>
+			<isNotEmpty property="addCollect">
+				<![CDATA[ ARTICLE_COLLECT_COUNT = (SELECT ARTICLE_COLLECT_COUNT FROM FE_ARTICLE WHERE ARTICLE_ID = #articleId#)+1 ]]>
+			</isNotEmpty>
+			<isNotEmpty property="delCollect">
+				<![CDATA[ ARTICLE_COLLECT_COUNT = (SELECT ARTICLE_COLLECT_COUNT FROM FE_ARTICLE WHERE ARTICLE_ID = #articleId#)-1 ]]>
+			</isNotEmpty>
+			<isNotEmpty property="discess">
+				<![CDATA[ ARTICLE_DISCESS_COUNT = (SELECT ARTICLE_DISCESS_COUNT FROM FE_ARTICLE WHERE ARTICLE_ID = #articleId#)+1]]>
+			</isNotEmpty>
+			<isNotEmpty property="partake">
+				<![CDATA[ ARTICLE_PARTAKE_COUNT = (SELECT ARTICLE_PARTAKE_COUNT FROM FE_ARTICLE WHERE ARTICLE_ID = #articleId#)+1 ]]>
+			</isNotEmpty>
+		</dynamic>
+	<![CDATA[ WHERE ARTICLE_ID = #articleId# ]]>
+	</update>
+	<!--财经要点报表明细count -->
+	<select id="GetFianceReportArticleCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT COUNT(0) FROM FE_ARTICLE WHERE ARTICLE_COLUMN_ID=$columnId$ AND IS_DEL=0 AND IS_PUBLISH=1 
+			AND ARTICLE_ID NOT IN(
+			    SELECT F2.ARTICLE_ID FROM FE_USER_RELATION AS F1 
+			    LEFT JOIN FE_ARTICLE AS F2 ON F2.ARTICLE_ID=F1.FE_ID 
+			    WHERE F1.RELATION_TYPE=0 AND F1.USER_ID=$userId$ AND F1.IS_READ=1 AND F2.ARTICLE_COLUMN_ID=$columnId$ 
+			)
+		]]>
+		<isNotEmpty property="searchDate">
+			<![CDATA[ $searchDate$ ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isMastRead">
+			<![CDATA[ AND IS_MASTREAD=1 ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!--财经要点报表明细列表-->
+	<select id="GetFianceReportArticlePage" resultMap="BaseFeArticleResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[
+				SELECT * FROM (SELECT K.* FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT * FROM FE_ARTICLE WHERE ARTICLE_COLUMN_ID=$columnId$ AND IS_DEL=0 AND IS_PUBLISH=1 
+			AND ARTICLE_ID NOT IN(
+			    SELECT F2.ARTICLE_ID FROM FE_USER_RELATION AS F1 
+			    LEFT JOIN FE_ARTICLE AS F2 ON F2.ARTICLE_ID=F1.FE_ID 
+			    WHERE F1.RELATION_TYPE=0 AND F1.USER_ID=$userId$ AND F1.IS_READ=1 AND F2.ARTICLE_COLUMN_ID=$columnId$ 
+			) 
+		]]>
+		<isNotEmpty property="searchDate">
+			<![CDATA[ $searchDate$ ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isMastRead">
+			<![CDATA[ AND IS_MASTREAD=1 ]]>
+		</isNotEmpty>
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g) K WHERE K.NUMROW<=$endRow$ ) tmp  where tmp.NUMROW >= $startRow$
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+</sqlMap>

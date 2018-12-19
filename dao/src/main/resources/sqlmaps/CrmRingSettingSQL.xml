@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmRingSettingSQL">
+	<typeAlias alias="CrmRingSetting"
+		type="com.banger.mobile.domain.model.crmRingSetting.CrmRingSetting" />
+
+
+	<!-- 铃声设置表-->
+	<!-- CrmRingSettingSQL信息全字段 -->
+	<resultMap class="CrmRingSetting" id="CrmRingSettingResult">
+		<result column="RING_SETTING_ID" property="ringSettingId" />
+		<result column="USER_ID" property="userId" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="FILE_MD5" property="fileMd5" />
+		<result column="FILE_NAME" property="fileName" />
+	</resultMap>
+
+	<!-- 更新 -->
+	<update id="updateCrmRingSetting" parameterClass="CrmRingSetting">
+		<![CDATA[
+  		update CRM_RING_SETTING a
+  		set 
+  			a.UPDATE_DATE = current timestamp
+  		]]>
+  		<isNotEmpty prepend="," property="filePath">
+			a.FILE_PATH = #filePath#
+		</isNotEmpty>
+  		<isNotEmpty prepend="," property="fileMd5">
+				a.FILE_MD5=#fileMd5#
+		</isNotEmpty>
+ 		<isNotEmpty prepend="," property="fileName">
+			a.FILE_NAME=#fileName#
+		</isNotEmpty>
+  		where 
+  			a.USER_ID = #userId#
+	</update>
+
+	<!-- 查询 -->
+	<select id="getCrmRingSettingByUserId"
+		resultMap="CrmRingSettingResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		select * from CRM_RING_SETTING a  where a.USER_ID=#userId#
+  	]]>
+	</select>
+	
+	<select id="getCrmRingSettingById"
+		resultMap="CrmRingSettingResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		select * from CRM_RING_SETTING a  where a.RING_SETTING_ID=#id#
+  	]]>
+	</select>
+	
+	<!-- 增加一条配置-->
+	<insert id="insertCrmRingSetting"
+		parameterClass="CrmRingSetting">
+		<![CDATA[
+		insert into CRM_RING_SETTING
+		(
+		 RING_SETTING_ID,
+		 USER_ID,
+		 FILE_PATH,
+		 CREATE_DATE,
+		 UPDATE_DATE
+		 )
+		values
+		(
+		#ringSettingId#,
+		#userId#,
+	    #filePath#,
+	    current timestamp,
+	    current timestamp
+		)
+      ]]>
+		<selectKey keyProperty="ringSettingId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_RING_SETTING
+		</selectKey>
+	</insert>
+	<!-- 删除 -->
+	<delete id="deleteCrmRingSetting"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		delete from CRM_RING_SETTING a  where a.USER_ID=#userId#
+  	]]>
+	</delete>
+
+</sqlMap>
+
+
+
+

@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DataAudioSQL">
+	<typeAlias alias="BaseDatAudio" type="com.banger.mobile.domain.model.base.data.BaseDatAudio" />
+	<typeAlias alias="Audio" type="com.banger.mobile.domain.model.data.Audio" />
+
+	<!-- 数据权限表 -->
+    <resultMap class="BaseDatAudio" id="BaseAudioResult">
+		<result column="AUDIO_ID" property="audioId" />
+		<result column="CUSTOMER_DATA_ID" property="customerDataId" />
+		<result column="AUDIO_NAME" property="audioName" />
+		<result column="RECORD_DATE" property="recordDate" />
+		<result column="RECORD_LENGTH" property="recordLength" />
+		<result column="REMARK" property="remark" />
+		<result column="FILE_ID" property="fileId"/>
+		<result column="RECORD_NO" property="recordNo" />
+		<result column="DAT_UUID" property="datUuid"/>
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	 <resultMap id="AudioResult" class="Audio" extends="BaseAudioResult">
+		<result column="UPLOAD_DATE" property="uploadDate" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="UPLOAD_USER" property="uploadUser" />
+		<result column="EVENT_NAME" property="eventName" />
+    </resultMap>
+
+  <!-- 插入 -->
+  <insert id="addNewAudio" parameterClass="Audio">
+		<![CDATA[
+	 	INSERT INTO DAT_AUDIO
+		    (
+		        AUDIO_ID,
+				CUSTOMER_DATA_ID,
+				AUDIO_NAME,
+				RECORD_DATE,
+				RECORD_LENGTH,
+				REMARK,
+				FILE_ID,
+				RECORD_NO,
+				DAT_UUID,
+				CREATE_DATE,
+				UPDATE_DATE,
+				CREATE_USER,
+				UPDATE_USER
+		    )
+			VALUES
+		    (	
+		        #audioId#,
+				#customerDataId:INTEGER#,
+				#audioName:VARCHAR:NULL#,
+				#recordDate:TIMESTAMP#,
+				#recordLength:INTEGER#,
+				#remark:VARCHAR:NULL#,
+				#fileId:INTEGER#,
+				#recordNo:VARCHAR:NULL#,
+				#datUuid:VARCHAR:NULL#,
+				current timestamp,
+			    current timestamp,
+				#createUser:INTEGER#,
+				#updateUser:INTEGER#
+		    )
+      ]]>
+		<selectKey keyProperty="audioId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_DAT_AUDIO
+		</selectKey>
+	</insert>
+  <!-- 根据 搜索条件 查找录音资料  -->
+  <select id="queryAudioData" resultMap="AudioResult" parameterClass="java.util.HashMap">
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+	         </isNotEmpty>
+	</isNotEmpty>
+  		<![CDATA[
+  		select d.* ,suf.UPLOAD_DATE,suf.FILE_PATH,suf.FILE_NAME,suf.UPLOAD_USER_ID,s.USER_NAME as UPLOAD_USER,'' as EVENT_NAME  from DAT_AUDIO d
+		LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+  		left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID 
+  		where 1=1
+  		]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[d.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId" >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					d.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	<!--TODO customerDataId和 （loanId 或eventId）都为空时  -->
+  	<isNotEmpty property="audioName" prepend="and">
+  		<![CDATA[d.AUDIO_NAME like '%$audioName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.RECORD_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.RECORD_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="audioUploadDateFrom" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE >= #audioUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="audioUploadDateTo" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE <= #audioUploadDateTo#]]>
+  	</isNotEmpty>
+  	
+  	
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+	        </isNotEmpty>
+	</isNotEmpty>
+  </select>
+  
+  <!-- 根据 搜索条件 查找录音资料   求和-->
+  <select id="queryAudioDataCount" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+  	
+  	<![CDATA[
+  		select count(*)  from DAT_AUDIO d
+		LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = d.FILE_ID
+  		left join SYS_USER s on suf.UPLOAD_USER_ID=s.USER_ID 
+  		where 1=1
+  	]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[d.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId"  >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					d.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	
+  	<isNotEmpty property="audioName" prepend="and">
+  		<![CDATA[d.AUDIO_NAME like '%$audioName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.RECORD_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.RECORD_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="audioUploadDateFrom" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE >= #audioUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="audioUploadDateTo" prepend="and">
+  		<![CDATA[suf.UPLOAD_DATE <= #audioUploadDateTo#]]>
+  	</isNotEmpty>
+ 
+  </select >
+  
+  <!-- 根据录音id查找旧的备注 -->
+  <select id="getAudioRemark" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+  		<![CDATA[
+  			select REMARK 
+  			from DAT_AUDIO d
+  			where d.AUDIO_ID = #audioId# 
+  		]]>
+  </select>
+  
+  <!-- 修改录音备注信息 -->
+  <update id="updateAudioRemark" parameterClass="Audio" >
+  		<![CDATA[
+  			update DAT_AUDIO d 
+  			set REMARK = #remark#
+  			where AUDIO_ID = #audioId#
+  		]]>
+  </update>
+
+    <!-- 修改录音备注信息 -->
+    <update id="updateAudioRemarkByRecordNo" parameterClass="java.util.HashMap" >
+    <![CDATA[
+        update DAT_AUDIO d
+        set REMARK = #remark#
+        where RECORD_NO = #recordNo#
+    ]]>
+    </update>
+  
+  
+	<!-- 以下为新资料管理功能 -->
+	<!--查看客户录音列表分页数据（总数） -->
+	<select id="getCustomerAudioDataCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[		
+			SELECT COUNT(1)
+			FROM DAT_AUDIO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID 
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.AUDIO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--查看客户录音列表分页数据（总数） -->
+	<select id="getCustomerAudioDataPage" resultMap="AudioResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*,suf.UPLOAD_DATE,suf.FILE_PATH,suf.FILE_NAME,suf.UPLOAD_USER_ID,c.USER_NAME AS UPLOAD_USER,d.EVENT_NAME
+			FROM DAT_AUDIO a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+            LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = a.FILE_ID
+			LEFT JOIN SYS_USER c ON suf.UPLOAD_USER_ID = c.USER_ID 
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID IN ($eventId$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ a.AUDIO_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.RECORD_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ suf.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ suf.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY suf.UPLOAD_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+    <select id="getAudioDataByUUID" resultMap="BaseAudioResult" parameterClass="Audio">
+         select * from DAT_AUDIO
+         where CUSTOMER_DATA_ID in
+         (select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where LOAN_ID in
+            (select LOAN_ID from DAT_CUSTOMER_DATA where CUSTOMER_DATA_ID = #customerDataId#)
+         )
+         and DAT_UUID = #datUuid#
+    </select>
+
+    <!--获得贷款中各贷款流程的录音资料信息-->
+    <select id="getAudioOnLoanFlow" parameterClass="java.util.Map" resultMap="AudioResult">
+        select da.*,suf.UPLOAD_DATE,suf.FILE_PATH,suf.FILE_NAME,suf.UPLOAD_USER_ID,su.USER_NAME AS UPLOAD_USER,'' as EVENT_NAME from dat_audio da
+        left join dat_customer_data dcd on da.customer_data_id=dcd.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = da.FILE_ID
+        left join sys_user su on suf.upload_user_id=su.user_id
+        where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            dcd.loan_id=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            dcd.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            dcd.event_id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="customerDataId" prepend="and">
+            da.customer_data_id=#customerDataId#
+        </isNotEmpty>
+        order by suf.upload_date
+    </select>
+
+    <delete id="delAudioById" parameterClass="java.util.Map">
+        delete from dat_audio where CUSTOMER_DATA_ID in
+        <iterate property="customerDataIdList" open="(" conjunction="," close=")">
+            #customerDataIdList[]#
+        </iterate>
+    </delete>
+
+    <!--获得审批状态下的最新一段录音文件-->
+    <select id="getLastAudio" parameterClass="java.util.Map" resultMap="BaseAudioResult">
+        select da.* from dat_audio da
+        where da.customer_data_id =
+        (select customer_data_id from dat_customer_data where loan_id=#loanId# and customer_id=#customerId# and event_id=#eventId#)
+        order by da.create_date desc fetch first 1 rows only
+    </select>
+    
+    <select id="selectAudioListByLoanId" parameterClass="java.lang.Integer" resultMap="AudioResult">
+        select da.*,suf.UPLOAD_DATE,suf.FILE_PATH,suf.FILE_NAME,suf.UPLOAD_USER_ID,su.USER_NAME AS UPLOAD_USER,'' as EVENT_NAME from dat_audio da
+        left join dat_customer_data dcd on da.customer_data_id=dcd.customer_data_id
+        LEFT JOIN SYS_UPLOAD_FILE suf ON suf.FILE_ID = da.FILE_ID
+        left join sys_user su on suf.upload_user_id=su.user_id
+  		where  da.CUSTOMER_DATA_ID in (Select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where Loan_id =#loanId# )
+    </select>
+    
+</sqlMap>

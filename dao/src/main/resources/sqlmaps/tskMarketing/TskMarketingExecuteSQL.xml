@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMarketingExecuteSQL.xml">
+	<typeAlias alias="TskMarketingExecute"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingExecute" />
+
+	<!-- 营销任务明细表-->
+	<!-- TskMarketingExecuteSQL信息全字段 -->
+	<resultMap class="TskMarketingExecute" id="TskMarketingExecuteResult">
+		<result column="EXECUTE_ID" property="executeId"/>
+		<result column="MARKETING_ID" property="marketingId" />
+		<result column="DEPT_ID" property="deptId"/>
+		<result column="USER_ID" property="userId"/>
+		<result column="MARKETING_TARGET" property="marketingTarget"/>
+		<result column="DEPT_UNASSIGN" property="deptUnassign"/>
+	</resultMap>
+
+	<!-- 添加营销任务明细 -->
+	<insert id="addTskMarketingExecute" parameterClass="TskMarketingExecute">
+		<![CDATA[
+			INSERT INTO TSK_MARKETING_EXECUTE
+			(
+				EXECUTE_ID,
+				MARKETING_ID,
+				DEPT_ID,
+				USER_ID,
+				MARKETING_TARGET,
+				DEPT_UNASSIGN
+			)
+			VALUES
+			(
+				#executeId#,
+				#marketingId#,
+				#deptId#,
+				#userId#,
+				#marketingTarget#,
+				#deptUnassign#
+			)
+	    ]]>
+	    <selectKey keyProperty="executeId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_TSK_MARKETING_EXECUTE
+		</selectKey>
+	</insert>
+	
+	<!-- 修改营销任务明细 -->
+	<update id="editTskMarketingExecute" parameterClass="TskMarketingExecute">
+		<![CDATA[
+			UPDATE
+		   		TSK_MARKETING_EXECUTE
+			SET 
+			    MARKETING_ID = #marketingId#,
+		        DEPT_ID = #deptId#,
+		        USER_ID = #userId#,
+		        MARKETING_TARGET = #marketingTarget#,
+		        DEPT_UNASSIGN = #deptUnassign#
+			WHERE 
+			  EXECUTE_ID = #executeId#
+	    ]]>
+	</update>
+	
+	<!-- 删除营销任务明细  -->
+	<delete id="delTskMarketingExecuteByConds" parameterClass="java.util.Map">
+		DELETE FROM TSK_MARKETING_EXECUTE WHERE 1=1
+		<isNotEmpty prepend="and" property="executeId">
+			<![CDATA[EXECUTE_ID = #executeId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[MARKETING_ID = #marketingId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="inChargeDepts">
+			<![CDATA[DEPT_ID IN ($inChargeDepts$)]]>
+		</isNotEmpty>
+		
+	</delete>
+	
+	<!-- 查询所有营销任务执行者数据 -->
+	<select id="getAllTskMarketingExecuteByConds" resultMap="TskMarketingExecuteResult" parameterClass="java.util.Map">
+		SELECT * FROM TSK_MARKETING_EXECUTE WHERE 1=1
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[MARKETING_ID = #marketingId#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="userId">
+			<![CDATA[USER_ID = #userId#]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 营销管理更改执行者的机构ID -->
+	<update id="UpdateExecuteUserDeptId" parameterClass="java.util.Map">
+		UPDATE TSK_MARKETING_EXECUTE SET DEPT_ID=$deptId$ WHERE USER_ID=$userId$ 
+	</update>
+</sqlMap>

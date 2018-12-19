@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SysRoleSQL">
+	<typeAlias alias="SysRole"
+		type="com.banger.mobile.domain.model.role.SysRole" />
+
+	<!-- 角色表-->
+	<!-- SysRoleSQL信息全字段 -->
+	<resultMap class="SysRole" id="SysRoleResult">
+		<result column="ROLE_ID" property="roleId" />
+		<result column="ROLE_TYPE_ID" property="roleTypeId" />
+		<result column="ROLE_NAME" property="roleName" />
+		<result column="REMARK" property="remark" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	<!-- 角色分页count -->
+	<select id="getSysRoleCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	    <![CDATA[
+             select count(*) from SYS_ROLE 	where IS_DEL=0 
+        ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="roleName">
+				<![CDATA[ ROLE_NAME like '%$roleName$%' ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 角色分页列表 -->
+	<select id="getSysRolePageMap" resultMap="SysRoleResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	    <![CDATA[
+		    select * from SYS_ROLE where IS_DEL=0 
+	    ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="roleName">
+				<![CDATA[ ROLE_NAME like '%$roleName$%' ]]>
+			</isNotEmpty>
+		</dynamic>
+		order by ROLE_ID asc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 返回所有的角色 -->
+	<select id="GetAllRoleName" resultMap="SysRoleResult">
+	    <![CDATA[
+		    select * from SYS_ROLE where IS_DEL=0 order by ROLE_ID
+	    ]]>
+	</select>
+	
+	<!-- 根据条件返回角色信息 -->
+	<select id="GetSysRoleById" resultMap="SysRoleResult" parameterClass="SysRole">
+	    <![CDATA[
+		    select * from SYS_ROLE where IS_DEL=0 
+	    ]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="roleId">
+				<![CDATA[ ROLE_ID=$roleId$ ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="roleName">
+				<![CDATA[ ROLE_NAME='$roleName$' ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 添加角色 -->
+	<insert id="InsertSysRole" parameterClass="SysRole">
+		<![CDATA[
+		    INSERT INTO SYS_ROLE
+		    (
+		    	ROLE_ID,
+		    	ROLE_TYPE_ID,
+		    	ROLE_NAME,
+		    	REMARK,
+		    	IS_DEL,
+		    	CREATE_DATE,
+		    	CREATE_USER
+		    ) 
+		    VALUES
+		    (
+		    	#roleId#,
+		    	#roleTypeId#,
+		    	#roleName#,
+		    	#remark#,
+		    	#isDel#,
+		    	#createDate#,
+		    	#createUser#
+		    )
+	    ]]>
+	    <selectKey keyProperty="roleId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_SYS_ROLE 
+		</selectKey>
+	</insert>
+	
+	<!-- 修改角色 -->
+	<update id="UpdateSysRole" parameterClass="SysRole">
+		<![CDATA[
+		    UPDATE SYS_ROLE SET ROLE_NAME=#roleName#,REMARK=#remark#,UPDATE_DATE=#updateDate#,UPDATE_USER=#updateUser# 
+		]]>
+		<isNotEmpty property="isDel">
+				<![CDATA[ ,IS_DEL=$isDel$ ]]>
+		</isNotEmpty>
+		<![CDATA[    
+		     WHERE 
+		     ROLE_ID=#roleId#
+	    ]]>
+	</update>
+	
+	<!-- 根据角色ID返回已使用的总数-->
+	<select id="GetIsUseRoleCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		<![CDATA[ 
+			SELECT COUNT(0) FROM SYS_ROLE_MEMBER m
+			left join SYS_USER u on u.USER_ID = m.USER_ID
+			WHERE m.ROLE_ID=#RroleId# and u.IS_DEL=0  
+	    ]]>
+	</select>
+
+    <!-- 返回所有可以查看团队日志的角色 -->
+    <select id="getTeamLogRole" resultMap="SysRoleResult">
+      select * from sys_role where role_id in (select role_id from sys_menu_auth where menu_id=303) and is_del=0
+    </select>
+</sqlMap>

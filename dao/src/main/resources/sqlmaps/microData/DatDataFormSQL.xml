@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DataFormSQL">
+	<typeAlias alias="Form" type="com.banger.mobile.domain.model.data.Form" />
+	<typeAlias alias="BaseForm" type="com.banger.mobile.domain.model.base.data.BaseDatForm" />
+    <typeAlias alias="SysUploadFile" type="com.banger.mobile.domain.model.uploadFile.SysUploadFile" />
+
+	<!-- 数据权限表 -->
+    <resultMap class="BaseForm" id="BaseFormResult">
+		<result column="FORM_ID" property="formId" />
+		<result column="CUSTOMER_DATA_ID" property="customerDataId" />
+        <result column="REMARK" property="remark" />
+        <result column="FILE_ID" property="fileId"/>
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+    <!-- sys_upload_file部分字段 -->
+    <resultMap id="SysUploadFileResult" class="SysUploadFile">
+        <result column="FILE_ID" property="fileId"/>
+        <result column="STORAGE_TYPE" property="storageType" />
+        <result column="FILE_NAME" property="fileName" />
+        <result column="FILE_PATH" property="filePath"/>
+        <result column="UPLOAD_FILE_NAME" property="uploadFileName" />
+        <result column="UPLOAD_DATE" property="uploadDate" />
+        <result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="FILE_SIZE" property="fileSize"/>
+        <result column="FILE_MD5" property="fileMd5" />
+    </resultMap>
+	
+	<resultMap class="Form" id="FormResult" extends="BaseFormResult">
+		<result column="FORM_NAME" property="formName" />
+		<result column="RECORD_DATE" property="recordDate" />
+        <result column="UPLOAD_DATE" property="uploadDate" />
+        <result column="UPLOAD_USER_ID" property="uploadUserId" />
+        <result column="EVENT_NAME" property="eventName" />
+        <result column="UPLOAD_USER" property="uploadUser" />
+        <result column="FILE_PATH" property="filePath" />
+        <result column="FILE_NAME" property="fileName" />
+	</resultMap>
+
+    <resultMap class="Form" id="FlowFormResult" extends="BaseFormResult">
+        <result column="FORM_NAME" property="formName" />
+        <result column="UPLOAD_USER" property="uploadUser" />
+        <result column="UPLOAD_DATE" property="uploadDate" />
+    </resultMap>
+
+    <resultMap id="FormAttachmentResult" class="Form" extends="BaseFormResult">
+        <result property="sysUploadFile" resultMap="DataFormSQL.SysUploadFileResult" nullValue="null"/>
+    </resultMap>
+
+    <insert id="addDatForm" parameterClass="Form">
+        INSERT INTO DAT_FORM
+        (
+        FORM_ID,
+        CUSTOMER_DATA_ID,
+        REMARK,
+        FILE_ID,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+        )
+        VALUES
+        (
+        #formId:INTEGER#,
+        #customerDataId:INTEGER#,
+        #remark:VARCHAR:NULL#,
+        #fileId:INTEGER#,
+        current timestamp,
+        current timestamp,
+        #createUser:INTEGER#,
+        #updateUser:INTEGER#
+        )
+        <selectKey keyProperty="formId" resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_DAT_FORM
+        </selectKey>
+    </insert>
+	
+
+  <!-- 根据 搜索条件 查找资料表资料  -->
+  <select id="queryFormData" resultMap="BaseFormResult" parameterClass="java.util.HashMap">
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+	         </isNotEmpty>
+	</isNotEmpty>
+  		<![CDATA[
+  		select f.* from DAT_FORM f
+			left join SYS_UPLOAD_FILE u on f.FILE_ID = u.FILE_ID
+  		where 1=1
+  		]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[f.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId" >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					f.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	<!--TODO customerDataId和 （loanId 或eventId）都为空时  -->
+  	<isNotEmpty property="formName" prepend="and">
+  		<![CDATA[u.UPLOAD_FILE_NAME like '%$formName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[f.CREATE_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[f.CREATE_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="formUploadDateFrom" prepend="and">
+  		<![CDATA[u.UPLOAD_DATE >= #formUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="formUploadDateTo" prepend="and">
+  		<![CDATA[u.UPLOAD_DATE <= #formUploadDateTo#]]>
+  	</isNotEmpty>
+  	
+  	
+  	<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+	        </isNotEmpty>
+	</isNotEmpty>
+  </select>
+  
+  <!-- 根据 搜索条件 查找资料表资料   求和-->
+  <select id="queryFormDataCount" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+  	
+  	<![CDATA[
+  		select count(*)  from DAT_FORM d
+        left join SYS_UPLOAD_FILE u on d.FILE_ID = u.FILE_ID
+  		left join SYS_USER s on u.UPLOAD_USER_ID = s.USER_ID 
+  		where 1=1
+  	]]>
+  	<isNotEmpty property="customerDataId" prepend="and">
+  		<![CDATA[d.CUSTOMER_DATA_ID = #customerDataId#]]>
+  	</isNotEmpty>
+  	
+  	<isEmpty property="customerDataId"  >
+  		<isNotEmpty property="loanId" >
+  			<isNotEmpty property="eventId" prepend="and">
+  				<![CDATA[
+  					d.CUSTOMER_DATA_ID = 
+  					(select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA dcd where 
+  				dcd.LOAN_ID = #loanId# and dcd.EVENT_ID = #eventId#) ]]>	
+  			</isNotEmpty>
+  		</isNotEmpty>
+  	</isEmpty>
+  	
+  	<isNotEmpty property="formName" prepend="and">
+  		<![CDATA[u.UPLOAD_FILE_NAME like '%$formName$%']]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateFrom" prepend="and">
+  		<![CDATA[d.CREATE_DATE >= #recordDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="recordDateTo" prepend="and">
+  		<![CDATA[d.CREATE_DATE <= #recordDateTo#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="formUploadDateFrom" prepend="and">
+  		<![CDATA[u.UPLOAD_DATE >= #formUploadDateFrom#]]>
+  	</isNotEmpty>
+  	
+  	<isNotEmpty property="formUploadDateTo" prepend="and">
+  		<![CDATA[u.UPLOAD_DATE <= #formUploadDateTo#]]>
+  	</isNotEmpty>
+ 
+  </select >
+
+  
+  <!-- 根据录音id查找旧的备注 -->
+  <select id="getFormRemark" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+  		<![CDATA[
+  			select REMARK 
+  			from DAT_FORM d
+  			where d.FORM_ID = #formId# 
+  		]]>
+  </select>
+  
+  <!-- 修改资料表备注信息 -->
+  <update id="updateFormRemark" parameterClass="Form" >
+  		<![CDATA[
+  			update DAT_FORM d 
+  			set REMARK = #remark#
+  			where FORM_ID = #formId#
+  		]]>
+  </update>
+  
+  <!-- 以下为新资料管理功能 -->
+	<!--查看客户资料列表分页数据（总数） -->
+	<select id="getCustomerFormDataCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+		<![CDATA[		
+			SELECT COUNT(1)
+			FROM DAT_FORM a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+            LEFT JOIN SYS_UPLOAD_FILE e ON a.FILE_ID = e.FILE_ID
+			LEFT JOIN SYS_USER c ON e.UPLOAD_USER_ID = c.USER_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID = $eventId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ e.UPLOAD_FILE_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ e.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ e.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ e.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--查看客户资料列表分页数据（分页） -->
+	<select id="getCustomerFormDataPage" resultMap="FormResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[
+				SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			SELECT a.*,e.UPLOAD_FILE_NAME AS FORM_NAME,a.CREATE_DATE as RECORD_DATE,e.UPLOAD_DATE,e.UPLOAD_USER_ID,c.USER_NAME AS UPLOAD_USER,d.EVENT_NAME,e.FILE_PATH,e.FILE_NAME
+			FROM DAT_FORM a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+            LEFT JOIN SYS_UPLOAD_FILE e ON a.FILE_ID = e.FILE_ID
+			LEFT JOIN SYS_USER c ON e.UPLOAD_USER_ID = c.USER_ID
+		]]>
+		<dynamic prepend="where">
+			<isNotEmpty property="customerId" prepend="AND">
+				<![CDATA[ b.CUSTOMER_ID = $customerId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventId" prepend="AND">
+				<![CDATA[ b.EVENT_ID = $eventId$]]>
+			</isNotEmpty>
+			<isNotEmpty property="eventName" prepend="AND">
+				<![CDATA[ d.EVENT_NAME IN ($eventName$)]]>
+			</isNotEmpty>
+			<isNotEmpty property="dataName" prepend="AND">
+				<![CDATA[ e.UPLOAD_FILE_NAME Like '%$dataName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="createStartDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE >='$createStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="createEndDate" prepend="AND">
+				<![CDATA[ a.CREATE_DATE <='$createEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadStartDate" prepend="AND">
+				<![CDATA[ e.UPLOAD_DATE >='$uploadStartDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="uploadEndDate" prepend="AND">
+				<![CDATA[ e.UPLOAD_DATE <='$uploadEndDate$']]>
+			</isNotEmpty>
+			<isNotEmpty property="userIds" prepend="AND">
+				<![CDATA[ e.UPLOAD_USER_ID IN ($userIds$)]]>
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY e.UPLOAD_DATE DESC
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+
+    <!--获得贷款中各贷款流程的视频资料信息-->
+    <select id="getFormOnLoanFlow" parameterClass="java.util.Map" resultMap="FlowFormResult">
+        select df.*,suf.UPLOAD_FILE_NAME AS FORM_NAME,su.USER_NAME AS UPLOAD_USER,suf.UPLOAD_DATE from dat_form df
+        left join dat_customer_data dcd on df.customer_data_id=dcd.customer_data_id
+        inner join SYS_UPLOAD_FILE suf ON suf.FILE_ID = df.FILE_ID
+        left join sys_user su on su.user_id=suf.upload_user_id
+        where 1=1
+        <isNotEmpty property="loanId" prepend="and">
+            dcd.loan_id=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            dcd.customer_id=#customerId#
+        </isNotEmpty>
+        <isNotEmpty property="eventId" prepend="and">
+            dcd.event_Id=#eventId#
+        </isNotEmpty>
+        <isNotEmpty property="customerDataId" prepend="and">
+            df.customer_data_id=#customerDataId#
+        </isNotEmpty>
+        order by suf.upload_date
+    </select>
+
+    <!--查询当前贷款状态下的表单附件-->
+    <select id="selectFormAttachment" parameterClass="java.util.Map" resultMap="FormAttachmentResult">
+        select df.*,suf.file_id,suf.storage_type, suf.file_name, suf.file_path,suf.upload_file_name,suf.upload_date,
+        suf.upload_user_id,suf.file_size,suf.file_md5 from dat_form df
+        left join sys_upload_file suf on df.file_id=suf.file_id
+        left join dat_customer_data dcd on dcd.customer_data_id=df.customer_data_id
+        left join ln_loan ll on ll.loan_id=dcd.loan_id
+        where 1=1
+         <isNotEmpty property="eventId" prepend="and">
+             dcd.event_id=#eventId#
+         </isNotEmpty>
+        <isNotEmpty property="loanId" prepend="and">
+            dcd.loan_id=#loanId#
+        </isNotEmpty>
+        <isNotEmpty property="customerId" prepend="and">
+            dcd.customer_id=#customerId#
+        </isNotEmpty>
+    </select>
+
+    <!--删除表单附件-->
+    <delete id="delFormAttachment" parameterClass="java.util.Map">
+        delete from dat_form where form_id=#formId#
+    </delete>
+    <!-- 根据loanId获取附件列表 -->
+    <select id="selectFromListByLoanId" resultMap="FormResult" parameterClass="java.lang.Integer">
+        	SELECT a.*,e.UPLOAD_FILE_NAME AS FORM_NAME,a.CREATE_DATE as RECORD_DATE,e.UPLOAD_DATE,e.UPLOAD_USER_ID,c.USER_NAME AS UPLOAD_USER,d.EVENT_NAME,e.FILE_PATH,e.FILE_NAME
+			FROM DAT_FORM a 
+			LEFT JOIN DAT_CUSTOMER_DATA b ON a.CUSTOMER_DATA_ID = b.CUSTOMER_DATA_ID 
+			LEFT JOIN DAT_EVENT d ON b.EVENT_ID = d.EVENT_ID
+            LEFT JOIN SYS_UPLOAD_FILE e ON a.FILE_ID = e.FILE_ID
+			LEFT JOIN SYS_USER c ON e.UPLOAD_USER_ID = c.USER_ID
+
+  		where a.CUSTOMER_DATA_ID in (Select CUSTOMER_DATA_ID from DAT_CUSTOMER_DATA where Loan_id =#loanId# )
+    </select>
+    
+</sqlMap>

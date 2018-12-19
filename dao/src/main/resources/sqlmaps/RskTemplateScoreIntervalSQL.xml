@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskTemplateScoreIntervalSQL">
+	<typeAlias alias="RskTemplateScoreInterval" type="com.banger.mobile.domain.model.evaluation.RskTemplateScoreInterval" />
+
+	<!-- 风险测评模板分值区间表-->
+	<!-- RskTemplateScoreIntervalSQL信息全字段  -->
+	<resultMap class="RskTemplateScoreInterval" id="RskTemplateScoreIntervalResult">
+		<result column="SCORE_INTERVAL_ID" property="scoreIntervalId" />
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="SCORE_MIN" property="scoreMin" />
+		<result column="SCORE_MAX" property="scoreMax" />
+		<result column="INTERVAL_TYPE_ID" property="intervalTypeId" />
+		<result column="INTERVAL_TYPE_NAME" property="intervalTypeName" />
+		<result column="REMARK" property="remark" />
+		<result column="SORTNO" property="sortno" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+
+		<!-- 增加一条风险测评模板分值区间-->
+	<insert id="addRskTemplateScoreInterval" parameterClass="RskTemplateScoreInterval">
+     <![CDATA[
+		insert into RSK_TEMPLATE_SCORE_INTERVAL
+		(
+		 SCORE_INTERVAL_ID,
+		 TEMPLATE_ID,
+		 SCORE_MIN,
+		 SCORE_MAX,
+		 INTERVAL_TYPE_ID,
+		 REMARK,
+		 SORTNO,
+		 IS_DEL,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#scoreIntervalId#,
+		#templateId#,
+	    #scoreMin#,
+	    #scoreMax#,
+     	#intervalTypeId#,
+        #remark#,
+	    #sortno#,
+	    #isDel#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="scoreIntervalId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_RSK_TEMPLATE_SCORE_INTERVAL
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 风险测评模板分值区间修改-->
+	<update id="updateRskTemplateScoreInterval" parameterClass="RskTemplateScoreInterval">
+	 <![CDATA[
+             update RSK_TEMPLATE_SCORE_INTERVAL  set 
+		 ]]>	
+		 <isNotEmpty property="templateId">
+				TEMPLATE_ID=#templateId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="scoreMin">
+				SCORE_MIN=#scoreMin#,
+		 </isNotEmpty>
+		  <isNotEmpty property="scoreMax">
+				SCORE_MAX=#scoreMax#,
+		 </isNotEmpty>
+		 <isNotEmpty property="intervalTypeId">
+				INTERVAL_TYPE_ID=#intervalTypeId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="remark">
+				REMARK=#remark#,
+		 </isNotEmpty>
+		 <isNotEmpty property="sortno">
+				SORTNO=#sortno#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isDel">
+				IS_DEL=#isDel#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where SCORE_INTERVAL_ID=#scoreIntervalId#
+         ]]> 
+	</update>
+ 
+  	<!-- 风险测评模板分值区间分页count -->
+  <select id="getRskTemplateScoreIntervalCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                     RSK_TEMPLATE_SCORE_INTERVAL as a left join RSK_INTERVAL_TYPE as b
+				     on a.INTERVAL_TYPE_ID=b.INTERVAL_TYPE_ID where a.IS_DEL=0
+     ]]>
+     <dynamic>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ a.TEMPLATE_ID=#templateId#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  
+  	<!-- 根据id得到风险测评模板分值区间-->	
+  <select id="getRskTemplateScoreIntervalById"  resultMap="RskTemplateScoreIntervalResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from RSK_TEMPLATE_SCORE_INTERVAL where TEMPLATE_ID=#templateId# and IS_DEL=0
+	]]>
+  </select>
+  <!-- 删除模板下分值区间 -->
+  <delete id="delRskTemplateScoreInterval" parameterClass="java.lang.Integer">
+  	<![CDATA[
+		delete  from RSK_TEMPLATE_SCORE_INTERVAL where TEMPLATE_ID=#templateId# and IS_DEL=0
+	]]>
+  </delete>
+  	<!-- 分页记录 -->
+  <select id="getRskTemplateScoreIntervalPageMap" resultMap="RskTemplateScoreIntervalResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		  select 
+                   *
+             from 
+                  RSK_TEMPLATE_SCORE_INTERVAL as a left join RSK_INTERVAL_TYPE as b
+				  on a.INTERVAL_TYPE_ID=b.INTERVAL_TYPE_ID where a.IS_DEL=0
+	]]>
+	<dynamic>
+			<isNotEmpty prepend="and" property="templateId">
+				<![CDATA[ a.TEMPLATE_ID=#templateId#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by a.SORTNO 
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+
+</sqlMap>
+
+
+
+

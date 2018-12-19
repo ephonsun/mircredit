@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="InBusinessReachesSQL">
+    <typeAlias alias="InBusinessReaches" type="com.banger.mobile.domain.model.loan.InBusinessReaches"/>
+
+    
+    <resultMap id="InBusinessReachesResult" class="InBusinessReaches">
+
+    	<result column="ID" property="id"/>
+    	<result column="LOAN_ID" property="loanId"/>
+    	<result column="BUSINESS_CUSTOMER" property="businessCustomer"/>
+    	<result column="BUSINESS_RATE" property="businessRate"/>
+    	<result column="BUSINESS_YEAR" property="businessYear"/>
+    	<result column="BUSINESS_REMARK" property="businessRemark"/>
+    	<result column="REACHES_TYPE" property="reachesType"/>
+
+    </resultMap>
+    
+    <insert id="insertInBusinessReaches" parameterClass="InBusinessReaches">
+        INSERT INTO LN_BUSINESS_REACHES    	(
+		   		ID,
+				LOAN_ID,
+				BUSINESS_CUSTOMER,
+				BUSINESS_RATE,
+				BUSINESS_YEAR,
+				BUSINESS_REMARK,
+				REACHES_TYPE
+			)VALUES (
+	       		#id:INTEGER#,
+				#loanId:INTEGER#,
+				#businessCustomer:VARCHAR:NULL#,
+				#businessRate:INTEGER#,
+				#businessYear:INTEGER#,
+				#businessRemark:VARCHAR:NULL#,
+				#reachesType:INTEGER#
+        )
+		<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+		VALUES NEXTVAL FOR SEQ_LN_CREDIT_HISTORY
+	</selectKey>
+
+    </insert>
+
+	<select id="selectByLoanId" parameterClass="java.lang.Integer" resultMap="InBusinessReachesResult">
+
+
+		select
+		*
+		from
+		LN_BUSINESS_REACHES
+		where
+		LOAN_ID = #loanId#
+
+	</select>
+
+
+
+    
+     <select id="selectByReachesType" parameterClass="java.util.Map" resultMap="InBusinessReachesResult">
+        SELECT * FROM (SELECT * FROM LN_BUSINESS_REACHES WHERE LOAN_ID = #loanId#) WHERE REACHES_TYPE= #reachesType#
+     </select>
+
+	<delete id="dropInBusinessReaches" parameterClass="java.lang.Integer">
+		delete from LN_BUSINESS_REACHES where ID =#id#
+	</delete>
+</sqlMap>

@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RskTemplateSQL">
+	<typeAlias alias="RskTemplate" type="com.banger.mobile.domain.model.evaluation.RskTemplate" />
+	<typeAlias alias="RiskTemplate" type="com.banger.mobile.domain.model.pad.RiskTemplate" />
+	
+	<!-- 风险测评模板表-->
+	<!-- RskTemplateSQL信息全字段  -->
+	<resultMap class="RskTemplate" id="RskTemplateResult">
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="TEMPLATE_NO" property="templateNo" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="TEMPLATE_TYPE_ID" property="templateTypeId" />
+		<result column="STATUS" property="status" />
+		<result column="TOTAL_SCORE" property="totalScore" />
+		<result column="TEMPLATE_TYPE_NAME" property="templateTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 测评模版 for pad -->
+	<resultMap class="RiskTemplate" id="RiskTemplateResult">
+		<result column="TEMPLATE_ID" property="templateId" />
+		<result column="TEMPLATE_NO" property="templateNo" />
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="TEMPLATE_TYPE_NAME" property="templateTypeName" />
+	</resultMap>
+
+		<!-- 增加一条风险测评模板-->
+	<insert id="addRskTemplate" parameterClass="RskTemplate">
+     <![CDATA[
+		insert into RSK_TEMPLATE
+		(
+		 TEMPLATE_ID,
+		 TEMPLATE_NO,
+		 TEMPLATE_NAME,
+		 TEMPLATE_TYPE_ID,
+		 STATUS,
+		 TOTAL_SCORE,
+		 IS_DEL,
+		 CREATE_DATE,
+		 UPDATE_DATE,
+		 CREATE_USER,
+		 UPDATE_USER
+		 )
+		values
+		(
+		#templateId#,
+		#templateNo#,
+	    #templateName#,
+	    #templateTypeId#,
+	    #status#,
+	    #totalScore#,
+	    #isDel#,
+	    current timestamp,
+	    current timestamp,
+	    #createUser#,
+	    #updateUser#
+		)
+      ]]>
+		<selectKey keyProperty="templateId" resultClass="java.lang.Integer"
+			type="pre">
+			 values NEXTVAL for SEQ_RSK_TEMPLATE 
+		</selectKey>
+	</insert>
+	
+	
+	<!-- 风险测评模板修改-->
+	<update id="updateRskTemplate" parameterClass="RskTemplate">
+	 <![CDATA[
+             update RSK_TEMPLATE  set 
+		 ]]>	
+		 <isNotEmpty property="templateNo">
+				TEMPLATE_NO=#templateNo#,
+		 </isNotEmpty>
+		 <isNotEmpty property="templateName">
+				TEMPLATE_NAME=#templateName#,
+		 </isNotEmpty>
+		  <isNotEmpty property="templateTypeId">
+				TEMPLATE_TYPE_ID=#templateTypeId#,
+		 </isNotEmpty>
+		 <isNotEmpty property="status">
+				STATUS=#status#,
+		 </isNotEmpty>
+		 <isNotEmpty property="totalScore">
+				TOTAL_SCORE=#totalScore#,
+		 </isNotEmpty>
+		  <isNotEmpty property="isDel">
+				IS_DEL=#isDel#,
+		 </isNotEmpty>
+		 <![CDATA[
+				UPDATE_DATE=current timestamp
+			where TEMPLATE_ID=#templateId#
+         ]]> 
+	</update>
+	
+	
+	
+	
+	 	<!-- 验证风险测评模板-->
+  <select id="validationRskTemplate" resultClass="java.lang.Integer"
+		parameterClass="RskTemplate">
+	<![CDATA[
+        select 
+			   count(*)
+        from 
+               RSK_TEMPLATE 
+               where IS_DEL=0 
+     ]]>
+     <dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ TEMPLATE_NO=#templateNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ TEMPLATE_NAME =#templateName#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  	 	<!-- 验证风险测评模板-->
+  <select id="validationUpdateRskTemplate" resultClass="java.lang.Integer"
+		parameterClass="RskTemplate">
+	<![CDATA[
+        select 
+			   count(*)
+        from 
+               RSK_TEMPLATE 
+               where IS_DEL=0 and TEMPLATE_ID !=#templateId#
+     ]]>
+     <dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ TEMPLATE_NO=#templateNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ TEMPLATE_NAME =#templateName#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  
+ 
+  	<!-- 风险测评模板分页count -->
+  <select id="getRskTemplateCount" resultClass="java.lang.Integer"
+		parameterClass="java.util.Map">
+	<![CDATA[
+             select 
+                   count(*)
+             from 
+                   RSK_TEMPLATE a
+                   left join RSK_TEMPLATE_TYPE b on a.TEMPLATE_TYPE_ID=b.TEMPLATE_TYPE_ID 
+                   where a.IS_DEL=0
+     ]]>
+     <dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ a.TEMPLATE_NO like '%$templateNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ a.TEMPLATE_NAME like '%$templateName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateTypeId">
+				<![CDATA[ a.TEMPLATE_TYPE_ID=#templateTypeId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				<![CDATA[ a.STATUS =#status#]]>
+			</isNotEmpty>
+	</dynamic>
+  </select>
+  
+  
+  	<!-- 根据id得到风险测评模板-->	
+  <select id="getRskTemplateById"  resultMap="RskTemplateResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select 
+			  a.TEMPLATE_ID,	
+			  a.TEMPLATE_NO,
+		      a.TEMPLATE_NAME,
+              b.TEMPLATE_TYPE_NAME,
+              a.TEMPLATE_TYPE_ID,
+              a.STATUS,
+              a.IS_DEL,
+              a.TOTAL_SCORE,
+              a.CREATE_DATE,
+			  a.UPDATE_DATE,
+			  a.CREATE_USER,
+			  a.UPDATE_USER
+        from 
+               RSK_TEMPLATE a
+               left join RSK_TEMPLATE_TYPE b on a.TEMPLATE_TYPE_ID=b.TEMPLATE_TYPE_ID 
+               where a.IS_DEL=0 and a.TEMPLATE_ID=#templateId# 
+	]]>
+  </select>
+  
+  	<!-- 分页记录 -->
+  <select id="getRskTemplatePageMap" resultMap="RskTemplateResult"
+		parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	<![CDATA[
+		select 
+			  a.TEMPLATE_ID,	
+			  a.TEMPLATE_NO,
+		      a.TEMPLATE_NAME,
+              b.TEMPLATE_TYPE_NAME,
+              a.TEMPLATE_TYPE_ID,
+              a.STATUS,
+              a.IS_DEL,
+              a.TOTAL_SCORE,
+              a.CREATE_DATE,
+			  a.UPDATE_DATE,
+			  a.CREATE_USER,
+			  a.UPDATE_USER
+        from 
+               RSK_TEMPLATE a
+               left join RSK_TEMPLATE_TYPE b on a.TEMPLATE_TYPE_ID=b.TEMPLATE_TYPE_ID 
+               where a.IS_DEL=0
+	]]>
+	<dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ a.TEMPLATE_NO like '%$templateNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ a.TEMPLATE_NAME like '%$templateName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateTypeId">
+				<![CDATA[ a.TEMPLATE_TYPE_ID=#templateTypeId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				<![CDATA[ a.STATUS =#status#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by a.CREATE_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#
+	        ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+  </select>
+  
+  
+  <select id="getRskTemplateList" resultMap="RskTemplateResult"
+		parameterClass="java.util.Map">
+	<![CDATA[
+		select 
+			  a.TEMPLATE_ID,	
+			  a.TEMPLATE_NO,
+		      a.TEMPLATE_NAME,
+              b.TEMPLATE_TYPE_NAME,
+              a.TEMPLATE_TYPE_ID,
+              a.STATUS,
+              a.IS_DEL,
+              a.TOTAL_SCORE,
+              a.CREATE_DATE,
+			  a.UPDATE_DATE,
+			  a.CREATE_USER,
+			  a.UPDATE_USER
+        from 
+               RSK_TEMPLATE a
+               left join RSK_TEMPLATE_TYPE b on a.TEMPLATE_TYPE_ID=b.TEMPLATE_TYPE_ID 
+               where a.IS_DEL=0
+	]]>
+	<dynamic>
+			<isNotEmpty prepend="and" property="templateNo">
+				<![CDATA[ a.TEMPLATE_NO=#templateNo#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateName">
+				<![CDATA[ a.TEMPLATE_NAME like '%$templateName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="templateTypeId">
+				<![CDATA[ a.TEMPLATE_TYPE_ID=#templateTypeId#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				<![CDATA[ a.STATUS =#status#]]>
+			</isNotEmpty>
+	</dynamic>
+	order by a.CREATE_DATE desc
+  </select>
+
+  <!-- PAD 所有风险测评模版 -->	
+  <select id="getAllRiskTemplateForPad"  resultMap="RiskTemplateResult" >
+	<![CDATA[
+		select 
+			  a.TEMPLATE_ID,	
+			  a.TEMPLATE_NO,
+		      a.TEMPLATE_NAME,
+              b.TEMPLATE_TYPE_NAME
+        from 
+               RSK_TEMPLATE a
+               left join RSK_TEMPLATE_TYPE b on a.TEMPLATE_TYPE_ID = b.TEMPLATE_TYPE_ID 
+               where a.IS_DEL = 0 and a.STATUS = 1 
+	]]>
+  </select>
+
+</sqlMap>
+
+
+
+

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PadTypeSQL">
+	<typeAlias alias="PadBrands" type="com.banger.mobile.domain.model.padManagement.PadBrands" />
+	<typeAlias alias="PadModel" type="com.banger.mobile.domain.model.padManagement.PadModel" />
+
+	<!-- PAD品牌 -->
+	<resultMap class="PadBrands" id="PadBrandsResult" >
+		<result column="BRAND_TYPE_ID" property="brandTypeId" />
+		<result column="BRAND_TYPE_NAME" property="brandTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- PAD型号 -->
+	<resultMap class="PadModel" id="PadModelResult" >
+		<result column="BRAND_SUB_TYPE_ID" property="padSubTypeId"/>
+		<result column="BRAND_TYPE_ID" property="padTypeId" />
+		<result column="BRAND_SUB_TYPE_NAME" property="padSubTypeName" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 查询所有的PAD品牌 -->
+	<select id="GetPadBrandsList" resultMap="PadBrandsResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT * FROM SYS_BRAND_TYPE WHERE IS_DEL=0 
+		]]>	
+		<isNotEmpty property="isActived"><![CDATA[ AND IS_ACTIVED=$isActived$ ]]></isNotEmpty>
+		<![CDATA[
+			ORDER BY SORTNO
+		]]>
+	</select>
+	
+	<!-- 添加PAD品牌-->
+    <insert id="InsertPadBrands" parameterClass="PadBrands">
+        <![CDATA[
+		INSERT INTO SYS_BRAND_TYPE
+    	(
+        BRAND_TYPE_ID,
+        IS_DEL,
+        BRAND_TYPE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        CREATE_USER
+    	)
+    	VALUES
+    	(
+        #brandTypeId#,
+        0,
+        #brandTypeName#,
+        (select count(*)+1 FROM SYS_BRAND_TYPE),
+        1,
+	    current timestamp,
+        #createUser#
+    	)
+      ]]>
+        <selectKey keyProperty="brandTypeId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_SYS_BRAND_TYPE
+        </selectKey>
+    </insert>
+    
+    <!-- 删除PAD品牌 -->
+    <update id="DeletePadBrands" parameterClass="java.lang.Integer">
+    	<![CDATA[
+    		UPDATE SYS_BRAND_TYPE SET IS_DEL=1,UPDATE_DATE=current timestamp 
+    		WHERE BRAND_TYPE_ID=#brandTypeId#
+    	]]>
+    </update>
+    
+    <!-- 编辑PAD品牌 -->
+    <update id="UpdatePadBrands" parameterClass="PadBrands">
+    	<![CDATA[
+    		UPDATE SYS_BRAND_TYPE SET 
+    	]]>
+    	<isNotEmpty property="brandTypeName">
+	    	<![CDATA[
+	    		BRAND_TYPE_NAME=#brandTypeName#,
+	    	]]>
+    	</isNotEmpty>
+    	<isNotEmpty property="sortNo">
+	    	<![CDATA[
+	    		SORTNO=#sortNo#,
+	    	]]>
+    	</isNotEmpty>
+    	<isNotEmpty property="isActived">
+	    	<![CDATA[
+	    		IS_ACTIVED=#isActived#,
+	    	]]>
+    	</isNotEmpty>
+    	<![CDATA[
+    		UPDATE_USER=#updateUser#,
+    		UPDATE_DATE=current timestamp 
+    		WHERE BRAND_TYPE_ID=#brandTypeId#
+    	]]>
+    </update>
+    
+    <!-- 根据PAD品牌ID查询品牌信息 -->
+    <select id="GetPadBrandsById" parameterClass="java.lang.Integer" resultMap="PadBrandsResult">
+    	<![CDATA[
+    		SELECT *FROM SYS_BRAND_TYPE WHERE BRAND_TYPE_ID=$brandTypeId$
+    	]]>
+    </select>
+    <!-- 根据PAD品牌名称查询品牌信息 -->
+    <select id="GetPadBrandsByName" parameterClass="java.lang.String" resultMap="PadBrandsResult">
+    	<![CDATA[
+    		SELECT *FROM SYS_BRAND_TYPE WHERE IS_DEL=0 AND BRAND_TYPE_NAME=#brandTypeName# 
+    	]]>
+    </select>
+    
+    
+    <!-- 查询PAD某个品牌型号 -->
+    <select id="GetPadModelList" resultMap="PadModelResult" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT * FROM SYS_BRAND_SUB_TYPE 
+			WHERE BRAND_TYPE_ID=$padTypeId$
+		]]>
+		<isEmpty property="isDel"><![CDATA[ AND IS_DEL=0 ]]></isEmpty>
+		<isNotEmpty property="isActived"><![CDATA[ AND IS_ACTIVED=$isActived$ ]]></isNotEmpty>
+		<![CDATA[
+			ORDER BY SORTNO 
+		]]>
+	</select>
+	
+	<!-- 添加PAD型号-->
+    <insert id="InsertPadModel" parameterClass="PadModel">
+        <![CDATA[
+		INSERT INTO SYS_BRAND_SUB_TYPE
+    	(
+    	BRAND_SUB_TYPE_ID,
+        BRAND_TYPE_ID,
+        IS_DEL,
+        BRAND_SUB_TYPE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        CREATE_DATE,
+        CREATE_USER
+    	)
+    	VALUES
+    	(
+    	#padSubTypeId#,
+        #padTypeId#,
+        0,
+        #padSubTypeName#,
+        (select count(*)+1 FROM SYS_BRAND_SUB_TYPE),
+        1,
+	    current timestamp,
+        #createUser#
+    	)
+      ]]>
+        <selectKey keyProperty="padSubTypeId"
+                   resultClass="java.lang.Integer" type="pre">
+            values NEXTVAL for SEQ_SYS_BRAND_SUB_TYPE
+        </selectKey>
+    </insert>
+    
+    <!-- 根据条件查询PAD型号信息 -->
+    <select id="GetPadModelById" parameterClass="PadModel" resultMap="PadModelResult">
+		<![CDATA[
+			SELECT * FROM SYS_BRAND_SUB_TYPE 
+			WHERE IS_DEL=0 AND BRAND_TYPE_ID=$padTypeId$ 
+		]]>
+		<isNotEmpty property="padSubTypeName">
+			<![CDATA[ AND BRAND_SUB_TYPE_NAME=#padSubTypeName# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="padSubTypeId">
+			<![CDATA[ AND BRAND_SUB_TYPE_ID=#padSubTypeId# ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 编辑PAD型号 -->
+	<update id="UpdatePadModel" parameterClass="PadModel">
+		<![CDATA[
+			UPDATE SYS_BRAND_SUB_TYPE SET
+		]]>
+		<isNotEmpty property="padSubTypeName">
+			<![CDATA[ BRAND_SUB_TYPE_NAME=#padSubTypeName#, ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isDel">
+			<![CDATA[ IS_DEL=#isDel#, ]]>
+		</isNotEmpty>
+		<isNotEmpty property="sortNo">
+			<![CDATA[ SORTNO=#sortNo#, ]]>
+		</isNotEmpty>
+		<isNotEmpty property="isActived">
+	    	<![CDATA[
+	    		IS_ACTIVED=#isActived#,
+	    	]]>
+    	</isNotEmpty>
+		<![CDATA[
+			UPDATE_DATE=current timestamp,
+			UPDATE_USER=#updateUser#
+			WHERE BRAND_SUB_TYPE_ID=#padSubTypeId#
+		]]>
+	</update>
+</sqlMap>
+
+
+
+

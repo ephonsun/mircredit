@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FeedBackSQL">
+    <typeAlias alias="FeedBack" type="com.banger.mobile.domain.model.feedback.FeedBack"/>
+
+    <resultMap id="feedBackResult" class="FeedBack">
+        <result property="feedBackId" column="FEED_BACK_ID"/>
+        <result property="titleName" column="TITLENAME"/>
+        <result property="modular" column="MODULAR"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="fileUrl" column="FILEURL"/>
+        <result property="status" column="STATUS"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="account" column="ACCOUNT"/>
+        <result property="userName" column="USER_NAME"/>
+    </resultMap>
+
+    <insert id="insertFeedBack" parameterClass="FeedBack">
+        insert into FEED_BACK(
+        FEED_BACK_ID,
+        TITLENAME,
+        MODULAR,
+        DESCRIPTION,
+        FILEURL,
+        STATUS,
+        CREATE_USER,
+        CREATE_DATE
+        )values (
+        #feedBackId:INTEGER#,
+        #titleName:VARCHAR#,
+        #modular:VARCHAR#,
+        #description:VARCHAR#,
+        #fileUrl:VARCHAR#,
+        #status:INTEGER#,
+        #createUser:INTEGER#,
+        #createDate:TIMESTAMP#
+        )
+        <selectKey keyProperty="feedBackId" resultClass="java.lang.Integer" type="pre">
+            VALUES NEXTVAL FOR SEQ_FEED_BACK
+        </selectKey>
+    </insert>
+
+    <update id="updateFeedBack" parameterClass="FeedBack">
+        update FEED_BACK set FEED_BACK_ID=#feedBackId#
+        <isNotEmpty property="titleName" prepend=",">
+            TITLENAME=#titleName#
+        </isNotEmpty>
+        <isNotEmpty property="modular" prepend=",">
+            MODULAR=#modular#
+        </isNotEmpty>
+        <isNotEmpty property="description" prepend=",">
+            DESCRIPTION=#description#
+        </isNotEmpty>
+        <isNotEmpty property="fileUrl" prepend=",">
+            FILEURL=#fileUrl#
+        </isNotEmpty>
+        <isNotEmpty property="status" prepend=",">
+            STATUS=#status#
+        </isNotEmpty>
+        <isNotEmpty property="createUser" prepend=",">
+            CREATE_USER=#createUser#
+        </isNotEmpty>
+        <isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE=#createDate#
+        </isNotEmpty>
+        where FEED_BACK_ID=#feedBackId#
+    </update>
+
+    <select id="queryFeedBacksPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+        select count(1)
+        from FEED_BACK fb left join Sys_user sy
+        on fb.create_User=sy.user_id
+        where sy.is_del=0
+        <isNotEmpty prepend="and" property="feedBackId">
+            fb.FEED_BACK_ID=#feedBackId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="status">
+            fb.STATUS=#status#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="createUser">
+            <![CDATA[sy.account like '%$createUser$%']]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="modular">
+            <![CDATA[fb.MODULAR like '%$modular$%']]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="titleName">
+            <![CDATA[fb.TITLENAME like '%$titleName$%']]>
+        </isNotEmpty>
+    </select>
+
+    <select id="queryFeedBacksPage" parameterClass="java.util.Map" resultMap="feedBackResult">
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW,g.* FROM (
+	         	]]>
+            </isNotEmpty>
+        </isNotEmpty>
+        select fb.*,sy.account,sy.USER_NAME
+        from FEED_BACK fb left join Sys_user sy
+        on fb.create_User=sy.user_id
+        where sy.is_del=0
+        <isNotEmpty prepend="and" property="feedBackId">
+            fb.FEED_BACK_ID=#feedBackId#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="status">
+            fb.STATUS=#status#
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="createUser">
+           <![CDATA[sy.account like '%$createUser$%']]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="modular">
+            <![CDATA[fb.MODULAR like '%$modular$%']]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="titleName">
+            <![CDATA[fb.TITLENAME like '%$titleName$%']]>
+        </isNotEmpty>
+        order by fb.Create_date
+        <isNotEmpty property="startRow">
+            <isNotEmpty property="endRow">
+                <![CDATA[ ) g ) tmp where tmp.NUMROW <= #endRow# and tmp.NUMROW >= #startRow# ]]>
+            </isNotEmpty>
+        </isNotEmpty>
+    </select>
+
+</sqlMap>

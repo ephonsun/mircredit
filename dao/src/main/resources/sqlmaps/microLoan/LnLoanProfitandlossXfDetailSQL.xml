@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="LN_LOAN_PROFITANDLOSS_XF_DETAIL" >
+  <resultMap id="abatorgenerated_LnLoanProfitandlossXfDetailResult" class="com.banger.mobile.domain.model.loan.LnLoanProfitandlossXfDetail" >
+   
+    <result column="PROFITANDLOSS_JY_DETAIL_ID" property="profitandlossJyDetailId" jdbcType="INTEGER" />
+    <result column="LOAN_PROFITANDLOSS_ID" property="loanProfitandlossId" jdbcType="INTEGER" />
+    <result column="ITEM_ID" property="itemId" jdbcType="VARCHAR" />
+    <result column="ITEM_DETAIL_NAME" property="itemDetailName" jdbcType="VARCHAR" />
+    <result column="PRIOR_YEAR" property="priorYear" jdbcType="DECIMAL" />
+    <result column="CURRENT_YEAR" property="currentYear" jdbcType="DECIMAL" />
+    <result column="NOTE" property="note" jdbcType="VARCHAR" />
+    <result column="ITEM_DETAIL_ID" property="itemDetailId" jdbcType="INTEGER" />
+  </resultMap>
+ 
+  <select id="selectXfDetailByPrimary" resultMap="abatorgenerated_LnLoanProfitandlossXfDetailResult" parameterClass="com.banger.mobile.domain.model.loan.LnLoanProfitandlossXfDetail" >
+   
+    select PROFITANDLOSS_JY_DETAIL_ID, LOAN_PROFITANDLOSS_ID, ITEM_ID, ITEM_DETAIL_NAME, PRIOR_YEAR,
+      CURRENT_YEAR, NOTE, ITEM_DETAIL_ID
+    from LN_LOAN_PROFITANDLOSS_XF_DETAIL WHERE 1=1
+    	<isNotEmpty property="loanProfitandlossId" prepend="AND">
+		   		   		LOAN_PROFITANDLOSS_ID = #loanProfitandlossId#
+		</isNotEmpty>
+        <isNotEmpty property="profitandlossJyDetailId" prepend="AND">
+		   		   		PROFITANDLOSS_JY_DETAIL_ID = #profitandlossJyDetailId#
+		</isNotEmpty>
+		<isNotEmpty property="itemId" prepend="AND">
+		   		   		ITEM_ID = #itemId#
+		</isNotEmpty>
+  </select>
+  <delete id="deleteXfDetail" parameterClass="com.banger.mobile.domain.model.loan.LnLoanProfitandlossXfDetail" >
+  
+    delete from LN_LOAN_PROFITANDLOSS_XF_DETAIL WHERE PROFITANDLOSS_JY_DETAIL_ID = #profitandlossJyDetailId#
+    
+  </delete>
+  <insert id="insertXfDetail" parameterClass="com.banger.mobile.domain.model.loan.LnLoanProfitandlossXfDetail" >
+  
+    insert into LN_LOAN_PROFITANDLOSS_XF_DETAIL (PROFITANDLOSS_JY_DETAIL_ID, LOAN_PROFITANDLOSS_ID,
+      ITEM_ID, ITEM_DETAIL_NAME, PRIOR_YEAR, CURRENT_YEAR, NOTE, ITEM_DETAIL_ID)
+    values (#profitandlossJyDetailId:INTEGER#, #loanProfitandlossId:INTEGER#, #itemId:VARCHAR#,
+      #itemDetailName:VARCHAR#, #priorYear:DECIMAL#, #currentYear:DECIMAL#, #note:VARCHAR#,
+      #itemDetailId:INTEGER#)
+       <selectKey keyProperty="profitandlossJyDetailId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_LN_LOAN_PROFITANDLOSS_XF_DETAIL
+		</selectKey>
+  </insert>
+ 
+  <update id="updateXfDetail" parameterClass="com.banger.mobile.domain.model.loan.LnLoanProfitandlossXfDetail">
+  
+    update LN_LOAN_PROFITANDLOSS_XF_DETAIL
+    set PROFITANDLOSS_JY_DETAIL_ID = #profitandlossJyDetailId:INTEGER#,
+      LOAN_PROFITANDLOSS_ID = #loanProfitandlossId:INTEGER#,
+      ITEM_ID = #itemId:VARCHAR#,
+      ITEM_DETAIL_NAME = #itemDetailName:VARCHAR#,
+      PRIOR_YEAR = #priorYear:DECIMAL#,
+      CURRENT_YEAR = #currentYear:DECIMAL#,
+      NOTE = #note:VARCHAR#,
+      ITEM_DETAIL_ID = #itemDetailId:INTEGER#
+   WHERE PROFITANDLOSS_JY_DETAIL_ID = #profitandlossJyDetailId#
+  </update>
+</sqlMap>

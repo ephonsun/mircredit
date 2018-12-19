@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PhoneConfigSQL">
+	<typeAlias alias="PhoneConfig"
+		type="com.banger.mobile.domain.model.phoneConfig.PhoneConfig" />
+
+
+	<!-- 通话基础配置表-->
+	<!-- PhoneConfigSQL信息全字段 -->
+	<resultMap class="PhoneConfig" id="PhoneConfigResult">
+		<result column="PHONE_CONFIG_ID" property="phoneConfigId" />
+		<result column="USER_ID" property="userId" />
+		<result column="CITY_CODE" property="cityCode" />
+		<result column="OUTSIDE_CALL_CODE" property="outsideCallCode" />
+		<result column="INSIDE_EXT_LENGTH" property="insiseExtLength" />
+		<result column="IS_IP_CALL" property="isIpCall" />
+		<result column="IP_NUMBER" property="ipNumber" />
+		<result column="OUT_DELAY" property="outDelay" />
+		<result column="FLASH_BREAK_TIME" property="flashBreakTime" />
+		<result column="OUT_NUMBER" property="outNumber" />
+		<result column="IS_POPUP" property="isPopUp" />
+		<result column="CALL_OVER_POPUP" property="callOverPopUp" />
+		<result column="IS_SCREAM_WORD" property="isScreamWord" />
+		<result column="IS_SHOW_LAST_WINDOW" property="isShowLastWindow" />
+	</resultMap>
+	
+	<cacheModel id="phoneConfigCache" type="OSCACHE" serialize="true" readOnly="true" >
+		<flushInterval hours="24" />
+		<flushOnExecute statement="updatePhoneConfig" />
+		<flushOnExecute statement="updatePhoneConfigIsScreamWord" />
+		<flushOnExecute statement="updatePhoneConfigIsPopUp" />
+		<flushOnExecute statement="addPhoneConfig" />
+		<property name="size" value="1000" />
+	</cacheModel>
+
+	<!-- 更新 -->
+	<update id="updatePhoneConfig" parameterClass="PhoneConfig">
+		<![CDATA[
+  	update CRM_PHONE_CONFIG a
+  		set 
+  			a.CITY_CODE = #cityCode#,
+  			a.OUTSIDE_CALL_CODE = #outsideCallCode#,
+  			a.INSIDE_EXT_LENGTH = #insiseExtLength#,
+  			a.IS_IP_CALL = #isIpCall#,
+  			a.IP_NUMBER = #ipNumber#,
+  			a.OUT_DELAY = #outDelay#,
+  			a.FLASH_BREAK_TIME = #flashBreakTime#,
+  			a.OUT_NUMBER = #outNumber#,
+  			a.IS_POPUP = #isPopUp#,
+  			a.CALL_OVER_POPUP = #callOverPopUp#,
+  			a.IS_SCREAM_WORD = #isScreamWord#,
+  			a.IS_SHOW_LAST_WINDOW = #isShowLastWindow#
+  		where 
+  			a.USER_ID = #userId#
+  	]]>
+	</update>
+	
+	<update id="updatePhoneConfigIsScreamWord" parameterClass="PhoneConfig">
+		<![CDATA[
+  	update CRM_PHONE_CONFIG a
+  		set 
+  			a.IS_SCREAM_WORD = #isScreamWord#
+  		where 
+  			a.USER_ID = #userId#
+  	]]>
+	</update>
+	<update id="updatePhoneConfigIsPopUp" parameterClass="PhoneConfig">
+		<![CDATA[
+  	update CRM_PHONE_CONFIG a
+  		set 
+  			a.IS_POPUP = #isPopUp#
+  		where 
+  			a.USER_ID = #userId#
+  	]]>
+	</update>
+	
+	<select id="queryPhoneConfigAll" resultMap="PhoneConfigResult" cacheModel="phoneConfigCache" >
+		select * from CRM_PHONE_CONFIG
+	</select>
+
+	<!-- 查询 -->
+	<select id="queryPhoneConfig" resultMap="PhoneConfigResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+  		select * from CRM_PHONE_CONFIG a where a.USER_ID=#userId# 
+  	]]>
+	</select>
+	<!-- 增加一条配置-->
+	<insert id="addPhoneConfig" parameterClass="PhoneConfig">
+		<![CDATA[
+		insert into CRM_PHONE_CONFIG
+		(
+		 PHONE_CONFIG_ID,
+		 USER_ID,
+		 CITY_CODE,
+		 OUTSIDE_CALL_CODE,
+		 INSIDE_EXT_LENGTH,
+		 IS_IP_CALL,
+		 IP_NUMBER,
+		 OUT_DELAY,
+		 FLASH_BREAK_TIME,
+		 OUT_NUMBER,
+		 IS_POPUP,
+		 CALL_OVER_POPUP,
+		 IS_SCREAM_WORD,
+		 IS_SHOW_LAST_WINDOW
+		 )
+		values
+		(
+		#phoneConfigId#,
+		#userId#,
+	    #cityCode#,
+	    #outsideCallCode#,
+	    #insiseExtLength#,
+	    #isIpCall#,
+	    #ipNumber#,
+	    #outDelay#,
+	    #flashBreakTime#,
+	    #outNumber#,
+	    #isPopUp#,
+	    #callOverPopUp#,
+	    #isScreamWord#,
+	    #isShowLastWindow#
+		)
+      ]]>
+		<selectKey keyProperty="phoneConfigId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_PHONE_CONFIG
+		</selectKey>
+	</insert>
+
+</sqlMap>
+
+
+
+

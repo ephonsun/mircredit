@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmFieldCodeDataSQL">
+	<typeAlias alias="CrmFieldCodeData"
+		type="com.banger.mobile.domain.model.fieldCodeData.CrmFieldCodeData" />
+
+	<!-- 模版字段代码表代码表列表-->
+	<!-- CrmFieldCodeDataSQL信息全字段 -->
+	<resultMap class="CrmFieldCodeData" id="CrmFieldCodeDataResult">
+		<result column="FIELD_CODEDATA_ID" property="fieldCodeDataId" />
+		<result column="FIELD_ID" property="fieldId" />
+		<result column="FIELD_CODEDATA_KEY" property="fieldCodeDataKey" />
+		<result column="FIELD_CODEDATA_VALUE" property="fieldCodeDataValue" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	<cacheModel id="CrmFieldCodeData-Cache" type="OSCACHE" serialize="true"
+		readOnly="true">
+		<flushInterval hours="24" />
+		<flushOnExecute statement="addCrmFieldCodeData" />
+		<flushOnExecute statement="updateCrmFieldCodeData" />
+		<flushOnExecute statement="deleteCrmFieldCodeDataById" />
+		<flushOnExecute statement="deleteCrmFieldCodeDataByFieldId" />
+		<property name="size" value="500" />
+	</cacheModel>
+
+	<!-- 增加一个模版字段代码表-->
+	<insert id="addCrmFieldCodeData"
+		parameterClass="CrmFieldCodeData">
+		<![CDATA[
+		INSERT INTO CRM_FIELD_CODEDATA
+	    (
+	        FIELD_CODEDATA_ID,
+	        FIELD_ID,
+	        FIELD_CODEDATA_KEY,
+	        FIELD_CODEDATA_VALUE,
+	        IS_DEL,
+	        SORTNO,
+	        CREATE_DATE,
+	        UPDATE_DATE,
+	        CREATE_USER,
+	        UPDATE_USER
+	    )
+	    VALUES
+	    (
+	        #fieldCodeDataId#,
+	        #fieldId#,
+	        #fieldCodeDataKey#,
+	        #fieldCodeDataValue#,
+	        #isDel#,
+	        #sortNo#,
+	        current timestamp,
+		    current timestamp,
+	        #createUser#,
+	        #updateUser#
+	    )
+      ]]>
+		<selectKey keyProperty="fieldCodeDataId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_CRM_FIELD_CODEDATA
+		</selectKey>
+	</insert>
+
+
+	<!-- 修改模版字段代码表-->
+	<update id="updateCrmFieldCodeData"
+		parameterClass="CrmFieldCodeData">
+		UPDATE CRM_FIELD_CODEDATA SET FIELD_ID = #fieldId#, IS_DEL
+		= #isDel#, FIELD_CODEDATA_KEY = #fieldCodeDataKey#,
+		FIELD_CODEDATA_VALUE = #fieldCodeDataValue#, SORTNO = #sortNo#,
+		CREATE_DATE =
+		#createDate#, UPDATE_DATE =
+		<![CDATA[current timestamp]]>, CREATE_USER = #createUser#, UPDATE_USER = #updateUser# WHERE
+		FIELD_CODEDATA_ID = #fieldCodeDataId#
+	</update>
+
+	<!-- 根据ID删除模版字段代码表 -->
+	<update id="deleteCrmFieldCodeDataById"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_FIELD_CODEDATA SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where FIELD_CODEDATA_ID= #Id#
+	</update>
+	
+	<!-- 根据字段ID删除模版字段代码表 -->
+	<update id="deleteCrmFieldCodeDataByFieldId"
+		parameterClass="java.lang.Integer">
+		UPDATE CRM_FIELD_CODEDATA SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where FIELD_ID= #fieldId#
+	</update>
+
+	<!-- 根据id得到模版字段代码表 -->
+	<select id="getCrmFieldCodeDataById"
+		resultMap="CrmFieldCodeDataResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from CRM_FIELD_CODEDATA WHERE fieldCodeDataId= #Id#
+	]]>
+	</select>
+
+	<!-- 根据模版字段代码表名称获取相同模版字段代码表名称的数据 -->
+	<select id="getSameCrmFieldCodeDataByName"
+		resultMap="CrmFieldCodeDataResult"
+		parameterClass="CrmFieldCodeData">
+		<![CDATA[
+		select * from CRM_FIELD_CODEDATA where  IS_DEL = 0
+	]]>
+		<isNotEmpty prepend="" property="fieldCodeDataId">
+			<isNotEqual prepend="and" property="fieldCodeDataId"
+				compareValue="0">
+				<![CDATA[FIELD_CODEDATA_ID != #fieldCodeDataId#]]>
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="templateFieldName">
+			<![CDATA[FIELD_CODEDATA_KEY = #fieldCodeDataKey#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="templateId">
+			<![CDATA[FIELD_ID = #fieldId#]]>
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取现有模版字段代码表数据按排序SORTNO最大的 -->
+	<select id="getMaxSortNoCrmFieldCodeData"
+		resultMap="CrmFieldCodeDataResult">
+		select * from CRM_FIELD_CODEDATA WHERE IS_DEL = 0 Order by
+		SORTNO DESC fetch first 1 rows only
+	</select>
+
+	<!-- 获取现有模版字段代码表数据按排序SORTNO最小的 -->
+	<select id="getMinSortNoCrmFieldCodeData"
+		resultMap="CrmFieldCodeDataResult">
+		select * from CRM_FIELD_CODEDATA WHERE IS_DEL = 0 Order by
+		SORTNO ASC fetch first 1 rows only
+	</select>
+
+	<!-- 获取要移动的模版字段代码表对象 -->
+	<select id="getNeedMoveCrmFieldCodeData"
+		resultMap="CrmFieldCodeDataResult" parameterClass="java.util.Map">
+		select * from CRM_FIELD_CODEDATA WHERE IS_DEL = 0
+		<isNotEmpty prepend="" property="moveType">
+			<isEqual prepend="and" property="moveType"
+				compareValue="Up">
+				<![CDATA[SORTNO > #sortNo#  Order by SORTNO ASC fetch first 1 rows only]]>
+			</isEqual>
+			<isNotEqual prepend="and" property="moveType"
+				compareValue="Up">
+				<![CDATA[SORTNO < #sortNo#  Order by SORTNO DESC fetch first 1 rows only]]>
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取模版字段代码表列表 -->
+	<select id="getCrmFieldCodeDataListByFieldId"
+		resultMap="CrmFieldCodeDataResult" parameterClass="java.lang.Integer">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_FIELD_CODEDATA WHERE IS_DEL = 0
+             AND FIELD_ID = #id#
+             Order by SORTNO ASC
+	]]>
+	</select>
+	<!-- 获取所有模版字段代码表列表 -->
+	<select id="getAllCrmFieldCodeData"
+		resultMap="CrmFieldCodeDataResult" cacheModel="CrmFieldCodeData-Cache">
+		<![CDATA[
+		select 
+		      *
+        from 
+             CRM_FIELD_CODEDATA WHERE IS_DEL = 0
+             Order by SORTNO ASC
+	]]>
+	</select>
+
+
+</sqlMap>

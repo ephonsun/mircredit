@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="CrmModuleExportSQL">
+	<typeAlias alias="CrmModuleExport" type="com.banger.mobile.domain.model.crmModuleExport.CrmModuleExport" />
+	
+	 <resultMap class="CrmModuleExport" id="CrmModuleExportResult">
+		<result column="MODULE_EXPORT_ID" property="moduleExportID" />
+		<result column="USER_ID" property="userId" />
+		<result column="MODULE_NAME" property="moduleName" />
+		<result column="FIELD_NAME" property="feildName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+	
+	<!-- 新增 -->
+	<insert id="insertCrmModuleExport" parameterClass="CrmModuleExport">
+ 	<![CDATA[
+ 		insert into CRM_MODULE_EXPORT
+ 		(
+ 			MODULE_EXPORT_ID,
+			USER_ID,
+			MODULE_NAME,
+			FIELD_NAME,
+			CREATE_DATE,
+			CREATE_USER
+ 		)
+ 		values
+ 		(
+ 			#moduleExportID#,
+			#userId#,
+			#moduleName#,
+			#feildName#,
+			current timestamp,
+			#createUser#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="moduleExportID" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_CRM_MODULE_EXPORT
+ 	</selectKey>
+  </insert>
+ 
+ <!-- 查询 -->
+  <select id="getCrmModuleExport" resultMap="CrmModuleExportResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select * from CRM_MODULE_EXPORT 
+  	]]>
+  	<dynamic prepend="where">
+  		<isNotEmpty prepend="and" property="userId">
+  			USER_ID = #userId#
+  		</isNotEmpty>
+  		<isNotEmpty prepend="and" property="moduleName">
+  			MODULE_NAME = #moduleName#
+  		</isNotEmpty>
+  	</dynamic>
+  </select>
+  
+  <!-- 查询 -->
+  <select id="getCrmModuleLike" resultMap="CrmModuleExportResult" parameterClass="java.util.Map">
+  	<![CDATA[
+  		select * from CRM_MODULE_EXPORT 
+  	]]>
+  	<dynamic prepend="where">
+  		<isNotEmpty prepend="and" property="userId">
+  			USER_ID = #userId#
+  		</isNotEmpty>
+  		<isNotEmpty prepend="and" property="moduleName">
+  			MODULE_NAME  like '%$moduleName$%'
+  		</isNotEmpty>
+  	</dynamic>
+  </select>
+  
+  
+  
+  <!-- 删除 -->
+  <delete id="delCrmModuleExportById" parameterClass="java.lang.Integer">
+  	<![CDATA[
+  		delete from CRM_MODULE_EXPORT where MODULE_EXPORT_ID = #moduleExportID#
+  	]]>
+  </delete>
+   <!-- 按条件删除 -->
+  <delete id="delCrmModuleExport" parameterClass="java.util.Map">
+  	<![CDATA[
+  		delete from CRM_MODULE_EXPORT where USER_ID = #userId# and (MODULE_NAME like 'combox%' or  MODULE_NAME like 'checkbox%' or MODULE_NAME like 'cellNum')
+  	]]>	
+  </delete>
+</sqlMap>

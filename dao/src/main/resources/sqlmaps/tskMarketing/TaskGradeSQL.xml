@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TaskGradeSQL">
+	<typeAlias alias="TaskGrade"
+		type="com.banger.mobile.domain.model.system.TaskGrade" />
+		
+
+	
+	<!-- 任务等级表-->
+	<resultMap class="TaskGrade" id="TaskGradeResult">
+		<result column="MARKETING_GRADE_ID" property="marketingGradeId" />
+		<result column="IS_DEL" property="isDel" />
+		<result column="MARKETING_GRADE_NAME" property="marketingGradeName" />
+		<result column="SORTNO" property="sortNo" />
+		<result column="IS_ACTIVED" property="isActived" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="UPDATE_DATE" property="updateDate" />
+		<result column="CREATE_USER" property="createUser" />
+		<result column="UPDATE_USER" property="updateUser" />
+	</resultMap>
+
+	
+	<!-- 增加一种任务等级-->
+	<insert id="addTaskGrade" parameterClass="TaskGrade">
+		<![CDATA[
+		INSERT INTO TSK_MARKETING_GRADE
+    	(
+        MARKETING_GRADE_ID,
+        IS_DEL,
+        MARKETING_GRADE_NAME,
+        SORTNO,
+        IS_ACTIVED,
+        REMARK,
+        CREATE_DATE,
+        UPDATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #marketingGradeId#,
+        #isDel#,
+        #marketingGradeName#,
+        #marketingGradeId#,
+        #isActived#,
+        #remark#,
+	    current timestamp,
+	    current timestamp,
+        #createUser#,
+        #updateUser#
+    	)
+      ]]>
+		<selectKey keyProperty="marketingGradeId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_TSK_MARKETING
+		</selectKey>
+	</insert>
+
+
+	<!-- 编辑任务等级-->
+	<update id="updateTaskGrade" parameterClass="TaskGrade">
+		UPDATE TSK_MARKETING_GRADE SET UPDATE_DATE =<![CDATA[current timestamp]]>
+		<isNotEmpty property="isDel" prepend=",">
+			IS_DEL = #isDel#
+		</isNotEmpty>
+		<isNotEmpty property="marketingGradeName" prepend=",">
+			MARKETING_GRADE_NAME = #marketingGradeName#
+		</isNotEmpty>
+		<isNotEqual property="sortNo" compareValue="0" prepend=",">
+			 SORTNO = #sortNo#
+		</isNotEqual>
+		<isNotEmpty property="isActived" prepend=",">
+			 IS_ACTIVED = #isActived#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+			 UPDATE_USER = #updateUser# 
+		</isNotEmpty>
+		where
+		MARKETING_GRADE_ID= #marketingGradeId#
+	</update>
+
+	<!-- 根据ID删除任务等级 -->
+	<update id="deleteTaskGradeById"
+		parameterClass="java.lang.Integer">
+		UPDATE TSK_MARKETING_GRADE SET IS_DEL = 1, UPDATE_DATE =
+		<![CDATA[current timestamp]]>
+		where MARKETING_GRADE_ID= #taskGradeId#
+	</update>
+	
+	<!-- 根据id得到任务等级 -->
+	<select id="getTaskGradeById"
+		resultMap="TaskGradeResult"
+		parameterClass="java.lang.Integer">
+		<![CDATA[
+		select * from TSK_MARKETING_GRADE where MARKETING_GRADE_ID=#taskGradeId#
+	]]>
+	</select>
+	
+	<!-- 根据任务等级名称获取相同任务等级名称的数据 -->
+	<select id="getSameTaskGradeByName"
+		resultMap="TaskGradeResult"
+		parameterClass="TaskGrade">
+		<![CDATA[
+		select * from TSK_MARKETING_GRADE where  IS_DEL = 0
+		]]>
+		<isNotEmpty prepend="and" property="marketingGradeName">
+			<![CDATA[MARKETING_GRADE_NAME = #marketingGradeName#]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="marketingGradeId">
+			<![CDATA[MARKETING_GRADE_ID <> #marketingGradeId#]]>
+		</isNotEmpty>
+	
+	</select>
+
+	<!-- 获取任务等级列表 -->
+	<select id="getAllTaskGrade" resultMap="TaskGradeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+             TSK_MARKETING_GRADE WHERE IS_DEL = 0
+             Order by SORTNO ASC
+	]]>
+	</select>
+	
+	<!-- 获取所有未删除且启用的任务等级 -->
+	<select id="GetUnDelActiveTaskGrade" resultMap="TaskGradeResult">
+		<![CDATA[
+		select 
+		      *
+        from 
+             TSK_MARKETING_GRADE WHERE IS_DEL = 0 AND IS_ACTIVED=1 
+             Order by SORTNO ASC
+	]]>
+	</select>
+
+	<!-- 上移栏目 -->
+	
+	<select id="upTaskGrade" resultMap="TaskGradeResult" parameterClass="TaskGrade">
+	<![CDATA[
+		SELECT 
+		* FROM 
+		TSK_MARKETING_GRADE
+		WHERE
+		IS_DEL = 0 AND SORTNO<#sortNo#
+		ORDER BY SORTNO DESC FETCH FIRST 1 ROW ONLY
+	]]>
+	</select>
+	
+	<!-- 下移栏目 -->
+	<select id="downTaskGrade" resultMap="TaskGradeResult" parameterClass="TaskGrade">
+	<![CDATA[
+		SELECT 
+		* FROM 
+		TSK_MARKETING_GRADE
+		WHERE
+		IS_DEL = 0 AND SORTNO>#sortNo#
+		ORDER BY SORTNO ASC FETCH FIRST 1 ROW ONLY
+	]]>
+	</select>
+	
+
+
+</sqlMap>

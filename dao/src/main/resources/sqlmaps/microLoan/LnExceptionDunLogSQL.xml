@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnExceptionDunLogSQL">
+    <typeAlias alias="LnExceptionDunLog" type="com.banger.mobile.domain.model.loan.LnExceptionDunLog"/>
+
+    <!--LnCancelReason全字段-->
+    <resultMap id="LnExceptionDunLogResult" class="LnExceptionDunLog">
+        <result column="EXCEPTION_DUN_LOG_ID" property="exceptionDunLogId"/>
+        <result column="LOAN_ID" property="loanId"/>
+        <result column="da_count" property="daCount"/>
+        <result column="dv_count" property="dvCount"/>
+        <result column="dp_count" property="dpCount"/>
+        
+        <!--
+        <result column="LOAN_REMAINING" property="loanRemaining"/>
+        <result column="ACCOUNT_REMAINING" property="accountRemaining"/>
+        <result column="REPAYMENT_DATE" property="repaymentDate"/>
+        <result column="STATUS" property="status"/>
+        <result column="OVERDUE_PRINCIPAL" property="overduePrincipal"/>
+        <result column="OVERDUE_INTEREST" property="overdueInterest"/>
+        <result column="OWED_PRINCIPAL" property="owedPrincipal"/>
+        <result column="OWED_INTEREST" property="owedInterest"/>
+        <result column="PAID_PRINCIPAL" property="paidPrincipal"/>
+        <result column="PAID_INTEREST" property="paidInterest"/>
+        <result column="IS_FINISH" property="isFinish"/>
+        -->
+        <result column="DUN_USER_ID" property="dunUserId"/>
+        <result column="DUN_DATE" property="dunDate"/>
+        <result column="DUN_TYPE" property="dunType"/>
+        <result column="CUSTOMER_DATA_ID" property="customerDataId"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+        <result column="SORTNO" property="sortno" />
+        <result column="REMARK" property="remark" />
+    </resultMap>
+
+	<insert id="addLnExceptionDunLog" parameterClass="LnExceptionDunLog">
+        <![CDATA[
+		INSERT INTO LN_EXCEPTION_DUN_LOG
+    	(
+        EXCEPTION_DUN_LOG_ID,
+        LOAN_ID,
+        DUN_USER_ID,
+        DUN_DATE,
+        DUN_TYPE,
+        CUSTOMER_DATA_ID,
+        SORTNO,
+        REMARK,
+        CREATE_DATE,
+        CREATE_USER,
+        UPDATE_USER
+    	)
+    	VALUES
+    	(
+        #exceptionDunLogId:INTEGER#,
+        #loanId:INTEGER#,
+	    #dunUserId:INTEGER#,
+	    #dunDate:TIMESTAMP#,
+	    #dunType:INTEGER#,
+	    #customerDataId:INTEGER#,
+	    #sortno:INTEGER#,
+	    #remark:VARCHAR:NULL#,
+        #createDate:TIMESTAMP#,
+        #createUser:INTEGER#,
+        #updateUser:INTEGER#
+    	)
+      ]]>
+    </insert>
+    
+    <select id="getExceptionDunLogById" resultMap="LnExceptionDunLogResult" parameterClass="Integer">
+        select * from LN_EXCEPTION_DUN_LOG where EXCEPTION_DUN_LOG_ID = #exceptionDunLogId#
+    </select>
+    
+    <select id="getExpDunLogByLoanId" resultMap="LnExceptionDunLogResult" parameterClass="Integer">
+        select 
+		(select count(1) from dat_audio da where da.CUSTOMER_DATA_ID = dcd.CUSTOMER_DATA_ID)  da_count,
+		(select count(1) from dat_photo dp where dp.CUSTOMER_DATA_ID = dcd.CUSTOMER_DATA_ID)  dp_count,
+		(select count(1) from dat_video dv where dv.CUSTOMER_DATA_ID = dcd.CUSTOMER_DATA_ID)  dv_count,
+		ledl.*
+		from LN_EXCEPTION_DUN_LOG ledl 
+		left join dat_customer_data dcd on ledl.loan_id = dcd.loan_id
+		where ledl.LOAN_ID=#loanId#
+		 order by SORTNO desc,DUN_DATE DESC
+    </select>
+    
+    <!-- 得到 NEXT SEQ 值 -->
+    <select id="getNextExceptionDunLogId" resultClass="java.lang.Integer" >
+	   	SELECT NEXTVAL FOR SEQ_LN_EXCEPTION_DUN_LOG FROM SYSIBM.SYSDUMMY1
+   	</select>
+   	
+   	<update id="updateExceptionDunLogById" parameterClass="java.util.Map">
+        update LN_EXCEPTION_DUN_LOG set EXCEPTION_DUN_LOG_ID=EXCEPTION_DUN_LOG_ID
+        <isNotEmpty property="remark" prepend=",">
+            remark=#remark#
+        </isNotEmpty>
+        <isNotEmpty property="customerDataId" prepend=",">
+            customer_data_id=#customerDataId#
+        </isNotEmpty>
+        where 1=1
+        <isNotEmpty property="exceptionDunLogId" prepend="and">
+            EXCEPTION_DUN_LOG_ID=#exceptionDunLogId#
+        </isNotEmpty>
+    </update>
+</sqlMap>

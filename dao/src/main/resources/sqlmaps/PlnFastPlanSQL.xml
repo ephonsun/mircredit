@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PlnFastPlanSQL">
+	<typeAlias alias="PlnFastPlan" type="com.banger.mobile.domain.model.plnFastPlan.PlnFastPlan" />
+	<typeAlias alias="PlnFastPlanInfo" type="com.banger.mobile.domain.model.plnFastPlan.PlnFastPlanInfo" />
+
+	<!--快速理财规划-->
+	<resultMap class="PlnFastPlan" id="PlnFastPlanResult">
+		<result column="FAST_PLAN_ID" property="fastPlanId" />
+		<result column="USER_ID" property="userId" />
+		<result column="CUSTOMER_ID" property="customerId"/>
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="PLAN_NAME" property="planName" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="SEX" property="sex" />
+		<result column="AGE" property="age" />
+		<result column="PHONE" property="phone" />
+		<result column="ID_TYPE_ID" property="idTypeId"/>
+		<result column="ID_NO" property="idNo" />
+		<result column="MONTHLY_FAMILY_EXPEND" property="monthlyFamilyExpend"/>
+		<result column="MONTHLY_FAMILY_OUTLAY" property="monthlyFamilyOutLay" />
+		<result column="MONTHLY_DEPOSIT" property="monthlyDeposit" nullValue=""/>
+		<result column="AVAILABLE_INVEST_MONEY" property="availableInvestMoney" />
+		<result column="HOUSE_VALUE" property="houseValue" nullValue=""/>
+		<result column="HOUSE_CREDIT_REMAINING" property="houseCreditRemaining" />
+		<result column="HOUSE_MONTHLY_REPAYMENT" property="houseMonthlyRepayMent" />
+		<result column="HOUSE_CREDIT_RATE" property="houseCreditRate" />
+		<result column="HOUSE_CREDIT_YEAR_LIMIT" property="houseCreditYearLimit" />
+		<result column="INFLATION" property="inflation" />
+		<result column="INTERVAL_TYPE_ID" property="intervalTypeId" />
+		<result column="INVEST_INCOMING_RATE" property="investIncomingRate" />
+		<result column="RETIRE_AGE" property="retireAge" nullValue=""/>
+		<result column="RETIRE_YEAR_LIMIT" property="retireYearLimit" />
+		<result column="RETIRE_MONTHLY_COST" property="retireMonthlyCost" />
+		<result column="IS_DO_HOUSE_PLAN" property="isDoHousePlan" />
+		<result column="PLAN_HOUSE_YEAR" property="planHouseYear" nullValue="0"/>
+		<result column="PLAN_HOUSE_PRICE" property="planHousePrice" />
+		<result column="PLAN_HOUSE_DOWN_PAYMENT" property="planHouseDownPayMent" />
+		<result column="PLAN_HOUSE_YEAR_LIMIT" property="planHouseYearLimit" nullValue="0"/>
+		<result column="IS_DO_COLLEAGE_PLAN" property="isDoCollagePlan" />
+		<result column="COLLEAGE_YEAR_LIMIT" property="collageYearLimit" nullValue="0"/>
+		<result column="COLLEAGE_COST" property="collageCost" />
+		<result column="COLLEAGE_YEAR_NEED" property="collageYearNeed" nullValue="0"/>
+		<result column="IS_DEL" property="isDel" />
+	</resultMap>
+	<!--快速理财规划信息-->
+	<resultMap class="PlnFastPlanInfo" id="PlnFastPlanInfoResult">
+		<result column="FAST_PLAN_ID" property="fastPlanId" />
+		<result column="CUSTOMER_NO" property="customerNo" />
+		<result column="CUSTOMER_ID" property="customerId" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+		<result column="PHONE" property="phone" />
+		<result column="PLAN_NAME" property="planName" />
+		<result column="PLAN_DATE" property="planDate" />
+		<result column="USER_NAME" property="userName" />
+		<result column="USER_ID" property="userId" />
+	</resultMap>
+	
+	  <!-- web端新增快速规划-->
+  	<insert id="insertPlanFromWeb" parameterClass="PlnFastPlan">
+ 	<![CDATA[
+ 		insert into PLN_FAST_PLAN
+ 		(
+ 			FAST_PLAN_ID,
+			USER_ID,
+			CUSTOMER_ID,
+			PLAN_DATE,
+			PLAN_NAME,
+			CUSTOMER_NO,
+			CUSTOMER_NAME,
+			SEX,
+			AGE,
+			PHONE,
+			ID_TYPE_ID,
+			ID_NO,
+			MONTHLY_FAMILY_EXPEND,
+			MONTHLY_FAMILY_OUTLAY,
+			MONTHLY_DEPOSIT,
+			AVAILABLE_INVEST_MONEY,
+			HOUSE_VALUE,
+			HOUSE_CREDIT_REMAINING,
+			HOUSE_MONTHLY_REPAYMENT,
+			HOUSE_CREDIT_RATE,
+			HOUSE_CREDIT_YEAR_LIMIT,
+			INFLATION,
+			INTERVAL_TYPE_ID,
+			INVEST_INCOMING_RATE,
+			RETIRE_AGE,
+			RETIRE_YEAR_LIMIT,
+			RETIRE_MONTHLY_COST,
+			IS_DO_HOUSE_PLAN,
+			PLAN_HOUSE_YEAR,
+			PLAN_HOUSE_PRICE,
+			PLAN_HOUSE_DOWN_PAYMENT,
+			PLAN_HOUSE_YEAR_LIMIT,
+			IS_DO_COLLEAGE_PLAN,
+			COLLEAGE_YEAR_LIMIT,
+			COLLEAGE_COST,
+			COLLEAGE_YEAR_NEED,
+			IS_DEL
+ 		)
+ 		values
+ 		(
+ 			#fastPlanId#,
+			#userId:INTEGER#,
+			#customerId:INTEGER#,
+			#planDate:TIMESTAMP#,
+			#planName:VARCHAR:NULL#,
+			#customerNo:VARCHAR:NULL#,
+			#customerName:VARCHAR:NULL#,
+			#sex:VARCHAR:NULL#,
+			#age:INTEGER#,
+			#phone:VARCHAR:NULL#,
+			#idTypeId:INTEGER:0#,
+			#idNo:VARCHAR:NULL#,
+			#monthlyFamilyExpend:DOUBLE#,
+			#monthlyFamilyOutLay:DOUBLE#,
+			#monthlyDeposit:DOUBLE#,
+			#availableInvestMoney:DOUBLE#,
+			#houseValue:DOUBLE#,
+			#houseCreditRemaining:DOUBLE#,
+			#houseMonthlyRepayMent:DOUBLE#,
+			#houseCreditRate:DOUBLE#,
+			#houseCreditYearLimit:INTEGER#,
+			#inflation:DOUBLE#,
+			#intervalTypeId:INTEGER#,
+			#investIncomingRate:DOUBLE#,
+			#retireAge:INTEGER#,
+			#retireYearLimit:INTEGER#,
+			#retireMonthlyCost:DOUBLE#,
+			#isDoHousePlan:INTEGER#,
+			#planHouseYear:INTEGER:0#,
+			#planHousePrice:DOUBLE#,
+			#planHouseDownPayMent:DOUBLE#,
+			#planHouseYearLimit:INTEGER:0#,
+			#isDoCollagePlan:INTEGER#,
+			#collageYearLimit:INTEGER:0#,
+			#collageCost:DOUBLE#,
+			#collageYearNeed:INTEGER:0#,
+			0
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="fastPlanId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_PLN_FAST_PLAN
+ 	</selectKey>
+  </insert>
+	
+	<!-- 快速规划列表 -->
+	<select id="getAllFastPlanInfo" resultMap="PlnFastPlanInfoResult" parameterClass="java.util.Map">
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+			<![CDATA[SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+	         ]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<![CDATA[
+		select 
+			a.FAST_PLAN_ID,
+			a.CUSTOMER_NO,
+			a.CUSTOMER_NAME,
+			a.CUSTOMER_ID,
+			a.PHONE,
+			a.PLAN_NAME,
+			a.PLAN_DATE,
+			a.USER_ID,
+			b.USER_NAME
+		 from  
+		 	PLN_FAST_PLAN a
+		 left join
+		 	SYS_USER b on a.USER_ID = b.USER_ID
+		 where
+		 	a.IS_DEL=0 
+		]]>
+		 <dynamic>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.PLAN_DATE>='$startDate$ 00:00:00' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.PLAN_DATE<='$endDate$ 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+					<![CDATA[a.CUSTOMER_NO like '%$customerNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[a.CUSTOMER_NAME like '%$customerName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planName">
+				<![CDATA[a.PLAN_NAME like '%$planName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[a.USER_ID = '$userId$']]>
+			</isNotEmpty>
+			
+		 </dynamic>		
+			order by a.PLAN_DATE desc
+		<isNotEmpty property="startRow">
+			<isNotEmpty property="endRow">
+				<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	<!-- 快速规划列表count -->
+	<select id="getAllFastPlanInfoCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+		select 
+			count(*)
+		 from  
+		 	PLN_FAST_PLAN a
+		 left join
+		 	SYS_USER b on a.USER_ID = b.USER_ID
+		 where
+		 	a.IS_DEL=0	
+		]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="startDate">
+				<![CDATA[a.PLAN_DATE>='$startDate$ 00:00:00' ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+				<![CDATA[a.PLAN_DATE<='$endDate$ 23:59:59']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerNo">
+				<![CDATA[a.CUSTOMER_NO like '%$customerNo$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="customerName">
+				<![CDATA[a.CUSTOMER_NAME like '%$customerName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="planName">
+				<![CDATA[a.PLAN_NAME like '%$planName$%']]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userId">
+				<![CDATA[a.USER_ID = '$userId$']]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 根据ID删除快速规划 -->
+	<update id="deletePlnFastPlan" parameterClass="java.lang.String">
+		UPDATE 
+			PLN_FAST_PLAN 
+		SET 
+			IS_DEL = 1
+		where
+		 	FAST_PLAN_ID in ($value$)
+	</update>
+	
+	<!--根据用户id查询快速规划  -->
+	<select id="getPlnFastPlanByUserId" resultMap="PlnFastPlanResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from PLN_FAST_PLAN a where a.USER_ID = #Id# and a.IS_DEL=0
+	]]>
+  	</select>
+  	
+  	<!--根据id查询快速规划  -->
+	<select id="getPlnFastPlanById" resultMap="PlnFastPlanResult" parameterClass="java.lang.Integer">
+	<![CDATA[
+		select * from PLN_FAST_PLAN a where a.FAST_PLAN_ID = #Id# and a.IS_DEL=0
+	]]>
+  	</select>
+  
+    <!--根据用户id查询快速规划  -->
+	<select id="findPlanForPad" resultMap="PlnFastPlanResult" parameterClass="java.util.Map">
+	<![CDATA[
+		select * from PLN_FAST_PLAN a 
+		where a.IS_DEL=0 and a.USER_ID = $userId$ 
+	]]>
+		<isNotEmpty prepend="and" property="input">
+            <![CDATA[(
+            (a.CUSTOMER_NO like '%$input$%')
+            or (a.CUSTOMER_NAME like '%$input$%')
+            )]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateStart">
+            <![CDATA[
+            a.PLAN_DATE >= TIMESTAMP('$planDateStart$')
+            ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateEnd">
+            <![CDATA[
+            a.PLAN_DATE <= TIMESTAMP('$planDateEnd$')
+            ]]>
+		</isNotEmpty>
+    </select>
+    
+    <!-- PAD 新增 规划-->
+  	<insert id="insertPlanFromPad" parameterClass="PlnFastPlan">
+ 	<![CDATA[
+ 		insert into PLN_FAST_PLAN
+ 		(
+ 			FAST_PLAN_ID,
+			USER_ID,
+			CUSTOMER_ID,
+			PLAN_DATE,
+			PLAN_NAME,
+			CUSTOMER_NO,
+			CUSTOMER_NAME,
+			SEX,
+			AGE,
+			PHONE,
+			ID_TYPE_ID,
+			ID_NO,
+			MONTHLY_FAMILY_EXPEND,
+			MONTHLY_FAMILY_OUTLAY,
+			MONTHLY_DEPOSIT,
+			AVAILABLE_INVEST_MONEY,
+			HOUSE_VALUE,
+			HOUSE_CREDIT_REMAINING,
+			HOUSE_MONTHLY_REPAYMENT,
+			HOUSE_CREDIT_RATE,
+			HOUSE_CREDIT_YEAR_LIMIT,
+			INFLATION,
+			INTERVAL_TYPE_ID,
+			INVEST_INCOMING_RATE,
+			RETIRE_AGE,
+			RETIRE_YEAR_LIMIT,
+			RETIRE_MONTHLY_COST,
+			IS_DO_HOUSE_PLAN,
+			PLAN_HOUSE_YEAR,
+			PLAN_HOUSE_PRICE,
+			PLAN_HOUSE_DOWN_PAYMENT,
+			PLAN_HOUSE_YEAR_LIMIT,
+			IS_DO_COLLEAGE_PLAN,
+			COLLEAGE_YEAR_LIMIT,
+			COLLEAGE_COST,
+			COLLEAGE_YEAR_NEED,
+			IS_DEL
+ 		)
+ 		values
+ 		(
+ 			#fastPlanId#,
+			#userId#,
+			#customerId:INTEGER#,
+			#planDate#,
+			#planName#,
+			#customerNo#,
+			#customerName#,
+			#sex#,
+			#age#,
+			#phone#,
+			#idTypeId#,
+			#idNo#,
+			#monthlyFamilyExpend#,
+			#monthlyFamilyOutLay#,
+			#monthlyDeposit#,
+			#availableInvestMoney#,
+			#houseValue#,
+			#houseCreditRemaining#,
+			#houseMonthlyRepayMent#,
+			#houseCreditRate#,
+			#houseCreditYearLimit#,
+			#inflation#,
+			#intervalTypeId#,
+			#investIncomingRate#,
+			#retireAge#,
+			#retireYearLimit#,
+			#retireMonthlyCost#,
+			0,
+			0,
+			0.0,
+			0.0,
+			0,
+			0,
+			0,
+			0.0,
+			0,
+			#isDel#
+ 		)
+ 	]]>
+ 	<selectKey keyProperty="fastPlanId" resultClass="java.lang.Integer" type="pre">
+ 		values NEXTVAL for SEQ_PLN_FAST_PLAN
+ 	</selectKey>
+  </insert>
+
+  <update id="updatePlanFromPad" parameterClass="PlnFastPlan">
+ 	<![CDATA[
+ 		update PLN_FAST_PLAN set
+			CUSTOMER_ID = #customerId:INTEGER#,
+			PLAN_DATE = #planDate#,
+			PLAN_NAME = #planName:VARCHAR:NULL#,
+			CUSTOMER_NO = #customerNo:VARCHAR:NULL#,
+			CUSTOMER_NAME = #customerName:VARCHAR:NULL#,
+			SEX = #sex:VARCHAR:NULL#,
+			AGE=#age:INTEGER#,
+			PHONE = #phone:VARCHAR:NULL#,
+			ID_TYPE_ID = #idTypeId:INTEGER#,
+			ID_NO = #idNo:VARCHAR:NULL#,
+			MONTHLY_FAMILY_EXPEND = #monthlyFamilyExpend:DOUBLE#,
+			MONTHLY_FAMILY_OUTLAY = #monthlyFamilyOutLay:DOUBLE#,
+			MONTHLY_DEPOSIT = #monthlyDeposit:DOUBLE#,
+			AVAILABLE_INVEST_MONEY = #availableInvestMoney:DOUBLE#,
+			HOUSE_VALUE = #houseValue:DOUBLE#,
+			HOUSE_CREDIT_REMAINING = #houseCreditRemaining:DOUBLE#,
+			HOUSE_MONTHLY_REPAYMENT = #houseMonthlyRepayMent:DOUBLE#,
+			HOUSE_CREDIT_RATE = #houseCreditRate:DOUBLE#,
+			HOUSE_CREDIT_YEAR_LIMIT = #houseCreditYearLimit:INTEGER#,
+			INFLATION = #inflation:DOUBLE#,
+			INTERVAL_TYPE_ID = #intervalTypeId:INTEGER#,
+			INVEST_INCOMING_RATE = #investIncomingRate:DOUBLE#,
+			RETIRE_AGE = #retireAge:INTEGER#,
+			RETIRE_YEAR_LIMIT = #retireYearLimit:INTEGER#,
+			RETIRE_MONTHLY_COST = #retireMonthlyCost:DOUBLE#
+		where 
+  			FAST_PLAN_ID = #fastPlanId#
+ 	]]>
+  </update>
+  <!-- web端编辑快速规划 -->
+  <update id="updatePlanByWeb" parameterClass="PlnFastPlan">
+ 	<![CDATA[
+ 		update PLN_FAST_PLAN set
+			CUSTOMER_ID = #customerId:INTEGER#,
+			PLAN_DATE = #planDate#,
+			PLAN_NAME = #planName:VARCHAR:NULL#,
+			CUSTOMER_NO = #customerNo:VARCHAR:NULL#,
+			CUSTOMER_NAME = #customerName:VARCHAR:NULL#,
+			SEX = #sex:VARCHAR:NULL#,
+			AGE=#age:INTEGER#,
+			PHONE = #phone:VARCHAR:NULL#,
+			ID_TYPE_ID = #idTypeId:INTEGER#,
+			ID_NO = #idNo:VARCHAR:NULL#,
+			MONTHLY_FAMILY_EXPEND = #monthlyFamilyExpend:DOUBLE#,
+			MONTHLY_FAMILY_OUTLAY = #monthlyFamilyOutLay:DOUBLE#,
+			MONTHLY_DEPOSIT = #monthlyDeposit:DOUBLE#,
+			AVAILABLE_INVEST_MONEY = #availableInvestMoney:DOUBLE#,
+			HOUSE_VALUE = #houseValue:DOUBLE#,
+			HOUSE_CREDIT_REMAINING = #houseCreditRemaining:DOUBLE#,
+			HOUSE_MONTHLY_REPAYMENT = #houseMonthlyRepayMent:DOUBLE#,
+			HOUSE_CREDIT_RATE = #houseCreditRate:DOUBLE#,
+			HOUSE_CREDIT_YEAR_LIMIT = #houseCreditYearLimit:INTEGER#,
+			INFLATION = #inflation:DOUBLE#,
+			INTERVAL_TYPE_ID = #intervalTypeId:INTEGER#,
+			INVEST_INCOMING_RATE = #investIncomingRate:DOUBLE#,
+			RETIRE_AGE = #retireAge:INTEGER#,
+			RETIRE_YEAR_LIMIT = #retireYearLimit:INTEGER#,
+			RETIRE_MONTHLY_COST = #retireMonthlyCost:DOUBLE#,
+			IS_DO_HOUSE_PLAN=#isDoHousePlan:INTEGER#,
+			PLAN_HOUSE_YEAR=#planHouseYear:INTEGER#,
+			PLAN_HOUSE_PRICE=#planHousePrice:INTEGER#,
+			PLAN_HOUSE_DOWN_PAYMENT=#planHouseDownPayMent:INTEGER#,
+			PLAN_HOUSE_YEAR_LIMIT=#planHouseYearLimit:INTEGER#,
+			IS_DO_COLLEAGE_PLAN=#isDoCollagePlan:INTEGER#,
+			COLLEAGE_YEAR_LIMIT=#collageYearLimit:INTEGER#,
+			COLLEAGE_COST=#collageCost:DOUBLE#,
+			COLLEAGE_YEAR_NEED=#collageYearNeed:INTEGER#
+		where 
+  			FAST_PLAN_ID = #fastPlanId#
+ 	]]>
+  </update>
+</sqlMap>
+
+
+
+

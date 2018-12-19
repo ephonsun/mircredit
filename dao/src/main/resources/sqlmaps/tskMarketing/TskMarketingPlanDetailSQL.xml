@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TskMarketingPlanDetailSQL">
+	<typeAlias alias="TskMarketingPlanDetail"
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingPlanDetail" />
+	<!--  
+	<typeAlias alias="PdtProduct" 
+		type="com.banger.mobile.domain.model.pdtProduct.PdtProduct" /> -->
+	<typeAlias alias="MarketingPdtProduct" 
+		type="com.banger.mobile.domain.model.tskMarketing.TskMarketingProductBean" />
+			
+	<resultMap class="TskMarketingPlanDetail" id="TskMarketingPlanDetailResult">
+		<result column="PLAN_DETAIL_ID" property="planDetailId" />
+		<result column="PLAN_ID" property="planId" />
+		<result column="MARKETING_ID" property="marketingId" />
+		<result column="PRODUCT_ID" property="productId" />
+		<result column="PLAN_DETAIL_TARGET" property="planDetailTarget" />
+		<result column="REMARK" property="remark" />
+		
+		<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="TEMPLATE_RATE" property="templateRate" />
+		<result column="PRODUCT_CODE" property="productCode" />
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="EXECUTE_USER_NAME" property="executeUserName" />
+		<result column="EXECUTE_USER_ID" property="executeUserId" />
+	</resultMap>
+	
+	<!-- 产品列表 -->
+	<resultMap class="MarketingPdtProduct" id="ProductListResult">
+		<result column="PRODUCT_ID" property="productId" />
+	 	<result column="TEMPLATE_NAME" property="templateName" />
+		<result column="PRODUCT_CODE" property="productCode" />
+		<result column="PRODUCT_NAME" property="productName" />
+		<result column="MARKETING_ID" property="marketingId" />
+	</resultMap>
+	
+	<!-- 根据页数查询产品记录 -->
+	<select id="getMarketingPlanProductPage" resultMap="ProductListResult"
+		parameterClass="java.util.Map">
+			<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+				<![CDATA[
+					SELECT * FROM (SELECT rownumber() over() AS NUMROW, g.* from   (
+		         ]]>
+				</isNotEmpty>
+			</isNotEmpty>
+			<![CDATA[
+				SELECT p.PRODUCT_ID,pt.TEMPLATE_NAME,p.PRODUCT_CODE,p.PRODUCT_NAME,TS.MARKETING_ID 
+				FROM PDT_PRODUCT p 
+				LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = p.TEMPLATE_ID AND pt.IS_DEL = 0 
+				INNER JOIN (
+				    SELECT DISTINCT TS.MARKETING_ID,TS.END_DATE,(CASE WHEN TS.SUB_TEMPLATE_NAME='' AND TS.TEMPLATE_ID>0 THEN TS.TEMPLATE_ID ELSE 0 END) AS TEMPLATE_ID,TS.GRADE_ID,
+				    (
+				        CASE WHEN TS.PRODUCT_ID=0 THEN PF.PRODUCT_ID  ELSE TS.PRODUCT_ID END
+				    ) AS PRODUCT_ID,TS.SUB_TEMPLATE_NAME 
+				    FROM TSK_MARKETING TS
+				    LEFT JOIN 
+				    (
+				        SELECT * FROM PDT_PRODUCT_FIELD WHERE PRODUCT_ID NOT IN(
+				        SELECT PRODUCT_ID FROM TSK_MARKETING WHERE PRODUCT_ID>0 AND IS_DEL=0) AND IS_DEL=0
+				    ) PF
+				    ON FIELD_VALUE_STRING=TS.SUB_TEMPLATE_NAME AND PF.IS_DEL=0 AND PF.TEMPLATE_ID=TS.TEMPLATE_ID
+				    WHERE TS.IS_DEL=0
+				) AS TS ON TS.PRODUCT_ID=P.PRODUCT_ID OR TS.TEMPLATE_ID=P.TEMPLATE_ID   
+				AND TO_CHAR(TS.END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd') 
+				where p.IS_DEL = 0 AND p.PRODUCT_STATE = 0 
+				and TO_CHAR(p.SALE_END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd')   
+			]]>
+			<isNotEmpty property="productId">
+				<isGreaterThan prepend="and" property="productId" compareValue="0">
+					<![CDATA[ p.PRODUCT_ID = #productId# AND TS.GRADE_ID=$tskGrade$ AND TS.MARKETING_ID=$marketingId$ ]]>
+				</isGreaterThan>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="subTemplateName">
+				<![CDATA[ 
+				p.PRODUCT_ID in (select PRODUCT_ID from PDT_PRODUCT_FIELD where TEMPLATE_ID = #templateId# 
+				and FIELD_VALUE_STRING = #subTemplateName#) AND TS.GRADE_ID=$tskGrade$  AND TS.MARKETING_ID=$marketingId$ 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="templateId">
+				<isGreaterThan prepend="and" property="templateId" compareValue="0">
+					<![CDATA[ p.TEMPLATE_ID = #templateId# AND TS.GRADE_ID=$tskGrade$  AND TS.MARKETING_ID=$marketingId$  ]]>
+				</isGreaterThan>
+			</isNotEmpty>
+			<isNotEmpty property="gradeId">
+				<![CDATA[ AND TS.GRADE_ID=$gradeId$  ]]>
+			</isNotEmpty>
+			<isNotEmpty property="userId">
+				<![CDATA[ AND TS.MARKETING_ID in(
+					SELECT MARKETING_ID FROM TSK_MARKETING WHERE IS_DEL = 0                        
+					and MARKETING_ID in (select MARKETING_ID from TSK_MARKETING_EXECUTE where USER_ID = $userId$ AND MARKETING_TARGET>0)    
+					AND TO_CHAR(START_DATE,'yyyy-MM-dd')<=TO_CHAR(current timestamp,'yyyy-MM-dd')       
+					AND TO_CHAR(END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd')
+				)  ]]>
+			</isNotEmpty>
+			order by pt.TEMPLATE_NAME asc
+			<isNotEmpty property="startRow">
+				<isNotEmpty property="endRow">
+					<![CDATA[ ) g ) tmp  where tmp.NUMROW<=#endRow# and tmp.NUMROW >= #startRow#]]>
+				</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询总条数（分页） -->
+	<select id="getMarketingPlanProductPageCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[
+			SELECT count(1)
+			FROM PDT_PRODUCT p 
+			LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = p.TEMPLATE_ID AND pt.IS_DEL = 0 
+			INNER JOIN (
+			    SELECT DISTINCT TS.MARKETING_ID,TS.END_DATE,(CASE WHEN TS.SUB_TEMPLATE_NAME='' AND TS.TEMPLATE_ID>0 THEN TS.TEMPLATE_ID ELSE 0 END) AS TEMPLATE_ID,TS.GRADE_ID,
+			    (
+			        CASE WHEN TS.PRODUCT_ID=0 THEN PF.PRODUCT_ID  ELSE TS.PRODUCT_ID END
+			    ) AS PRODUCT_ID,TS.SUB_TEMPLATE_NAME 
+			    FROM TSK_MARKETING TS
+			    LEFT JOIN 
+			    (
+			        SELECT * FROM PDT_PRODUCT_FIELD WHERE PRODUCT_ID NOT IN(
+			        SELECT PRODUCT_ID FROM TSK_MARKETING WHERE PRODUCT_ID>0 AND IS_DEL=0) AND IS_DEL=0
+			    ) PF
+			    ON FIELD_VALUE_STRING=TS.SUB_TEMPLATE_NAME AND PF.IS_DEL=0 AND PF.TEMPLATE_ID=TS.TEMPLATE_ID
+			    WHERE TS.IS_DEL=0
+			) AS TS ON TS.PRODUCT_ID=P.PRODUCT_ID OR TS.TEMPLATE_ID=P.TEMPLATE_ID     
+			AND TO_CHAR(TS.END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd')  
+			where p.IS_DEL = 0 AND p.PRODUCT_STATE = 0 
+			and TO_CHAR(p.SALE_END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd')   
+		]]>
+		<isNotEmpty property="productId">
+				<isGreaterThan prepend="and" property="productId" compareValue="0">
+					<![CDATA[ p.PRODUCT_ID = #productId# AND TS.GRADE_ID=$tskGrade$ AND TS.MARKETING_ID=$marketingId$ ]]>
+				</isGreaterThan>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="subTemplateName">
+				<![CDATA[ 
+				p.PRODUCT_ID in (select PRODUCT_ID from PDT_PRODUCT_FIELD where TEMPLATE_ID = #templateId# 
+				and FIELD_VALUE_STRING = #subTemplateName#) AND TS.GRADE_ID=$tskGrade$  AND TS.MARKETING_ID=$marketingId$ 
+				]]>
+			</isNotEmpty>
+			<isNotEmpty property="templateId">
+				<isGreaterThan prepend="and" property="templateId" compareValue="0">
+					<![CDATA[ p.TEMPLATE_ID = #templateId# AND TS.GRADE_ID=$tskGrade$  AND TS.MARKETING_ID=$marketingId$  ]]>
+				</isGreaterThan>
+			</isNotEmpty>
+		<isNotEmpty property="gradeId">
+			<![CDATA[ AND TS.GRADE_ID=$gradeId$ ]]>
+		</isNotEmpty>
+		<isNotEmpty property="userId">
+			<![CDATA[ AND TS.MARKETING_ID in(
+				SELECT MARKETING_ID FROM TSK_MARKETING WHERE IS_DEL = 0                        
+				and MARKETING_ID in (select MARKETING_ID from TSK_MARKETING_EXECUTE where USER_ID = $userId$ AND MARKETING_TARGET>0)    
+				AND TO_CHAR(START_DATE,'yyyy-MM-dd')<=TO_CHAR(current timestamp,'yyyy-MM-dd')       
+				AND TO_CHAR(END_DATE,'yyyy-MM-dd')>=TO_CHAR(current timestamp,'yyyy-MM-dd')
+			)  ]]>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询任务已销售额 -->
+	<select id="getMarketingProductSumByUserId" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		<![CDATA[
+			select sum(BUY_MONEY) from PDT_PRODUCT_CUSTOMER where PRODUCT_ID in (
+			SELECT p.PRODUCT_ID
+			FROM PDT_PRODUCT p 
+			LEFT JOIN PDT_TEMPLATE pt ON pt.TEMPLATE_ID = p.TEMPLATE_ID AND pt.IS_DEL = 0 
+			where p.IS_DEL = 0 AND p.PRODUCT_STATE = 0
+		]]>
+		<isNotEmpty prepend="and" property="productId">
+			<![CDATA[ p.PRODUCT_ID = #productId# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="subTemplateName">
+			<![CDATA[ 
+			p.PRODUCT_ID in (select PRODUCT_ID from PDT_PRODUCT_FIELD where TEMPLATE_ID = #templateId# 
+			and FIELD_VALUE_STRING = #subTemplateName#)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="templateId">
+			<![CDATA[ p.TEMPLATE_ID = #templateId# ]]>
+		</isNotEmpty>
+		<![CDATA[ 
+			) and IS_DEL = 0 and (USER_ID = #userId# or COUNTER_USER_ID in 
+				(
+					select COUNTER_USER_ID from CRM_COUNTER_USER where USER_ID = #userId#
+				)
+			) and BUY_DATE >= #startDate# and BUY_DATE <= #endDate#
+		]]>
+	</select>
+	
+	<!-- 用户当天产品已销售额 -->
+	<select id="getTodaySaleMoney" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		<![CDATA[
+			select sum(BUY_MONEY) from PDT_PRODUCT_CUSTOMER 
+			where PRODUCT_ID = #productId# 
+			and IS_DEL = 0 
+			and (
+				USER_ID = #executeUserId# or COUNTER_USER_ID in 
+				(
+					select COUNTER_USER_ID from CRM_COUNTER_USER where USER_ID = #executeUserId#
+				)
+			) 
+			and BUY_DATE >= #startDate# and BUY_DATE <= #endDate#
+		]]>
+	</select>
+	
+	<select id="getTodayMarkettingProductSaleMoney" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		<![CDATA[
+			select sum(BUY_MONEY) from PDT_PRODUCT_CUSTOMER 
+			where PRODUCT_ID = #productId# 
+			and IS_DEL = 0 
+			and (
+				USER_ID = #executeUserId# or COUNTER_USER_ID in 
+				(
+					select COUNTER_USER_ID from CRM_COUNTER_USER where USER_ID = #executeUserId#
+				)
+			) 
+			and BUY_DATE >= '$startDate$' and BUY_DATE <= '$endDate$'
+		]]>
+	</select>
+	
+	<!-- 新增计划明细表 -->
+	<insert id="insertTskMarketingPlanDetail" parameterClass="TskMarketingPlanDetail">
+		<![CDATA[
+	 		insert into TSK_MARKETING_PLAN_DETAIL
+	 		(
+	 			PLAN_DETAIL_ID,
+	 			PLAN_ID,
+				MARKETING_ID,
+				PRODUCT_ID,
+				PLAN_DETAIL_TARGET,
+				REMARK
+	 		)
+	 		values
+	 		(
+	 			#planDetailId#,
+	 			#planId#,
+	 			#marketingId#,
+	 			#productId#,
+	 			#planDetailTarget#,
+	 			#remark#
+	 		)
+	 	]]>
+		<selectKey keyProperty="planDetailId"
+			resultClass="java.lang.Integer" type="pre">
+			values NEXTVAL for SEQ_TSK_MARKETING_PLAN_DETAIL
+		</selectKey>
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="updateTskMarketingPlanDetail" parameterClass="TskMarketingPlanDetail">
+		<![CDATA[
+			UPDATE TSK_MARKETING_PLAN_DETAIL 
+			SET 
+			PLAN_DETAIL_TARGET = #planDetailTarget#,
+			REMARK = #remark#
+			WHERE PLAN_DETAIL_ID = #planDetailId# 
+		]]>
+	</update>
+	
+	<!-- 查询计划明细 -->
+	<select id="getMarketingPlanDetail" resultMap="TskMarketingPlanDetailResult" parameterClass="java.util.Map">
+		<![CDATA[ 
+		select a.*,c.PRODUCT_CODE,c.PRODUCT_NAME,d.TEMPLATE_NAME,e.USER_NAME as EXECUTE_USER_NAME,
+		b.EXECUTE_USER_ID, d.TEMPLATE_RATE
+		from TSK_MARKETING_PLAN_DETAIL a 
+		inner join TSK_MARKETING_PLAN b on a.PLAN_ID = b.PLAN_ID
+		inner join PDT_PRODUCT c on c.PRODUCT_ID = a.PRODUCT_ID
+		inner join PDT_TEMPLATE d on d.TEMPLATE_ID = c.TEMPLATE_ID
+		inner join SYS_USER e on e.USER_ID = b.EXECUTE_USER_ID
+		where 1=1
+		]]>
+		<isNotEmpty prepend="and" property="userIds">
+			<![CDATA[ 
+			b.EXECUTE_USER_ID in ($userIds$)
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateFrom">
+			<![CDATA[ 
+			b.PLAN_DATE >= #planDateFrom# 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planDateTo">
+			<![CDATA[
+			b.PLAN_DATE <= #planDateTo# 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="planId">
+			<![CDATA[
+			b.PLAN_ID = #planId# 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="marketingId">
+			<![CDATA[
+			b.MARKETING_ID = #marketingId# 
+			]]>
+		</isNotEmpty>
+		<![CDATA[
+		order by EXECUTE_USER_NAME, TEMPLATE_NAME, PLAN_DETAIL_TARGET desc
+		]]>
+	</select>
+	
+	<!-- 查询计划明细 byId-->
+	<select id="getMarketingPlanDetailById" resultMap="TskMarketingPlanDetailResult" parameterClass="Integer">
+		<![CDATA[ 
+		select a.*,c.PRODUCT_CODE,c.PRODUCT_NAME,d.TEMPLATE_NAME,e.USER_NAME as EXECUTE_USER_NAME,
+		b.EXECUTE_USER_ID, d.TEMPLATE_RATE
+		from TSK_MARKETING_PLAN_DETAIL a 
+		inner join TSK_MARKETING_PLAN b on a.PLAN_ID = b.PLAN_ID
+		inner join PDT_PRODUCT c on c.PRODUCT_ID = a.PRODUCT_ID
+		inner join PDT_TEMPLATE d on d.TEMPLATE_ID = c.TEMPLATE_ID
+		inner join SYS_USER e on e.USER_ID = b.EXECUTE_USER_ID
+		where a.PLAN_DETAIL_ID = #marketingPlanDetailId#
+		]]>
+	</select>
+	
+	<!-- 查询营销计划产品是否存在 -->
+	<select id="GetTaskPlanProductCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		<![CDATA[ 
+			SELECT COUNT(0) FROM TSK_MARKETING_PLAN_DETAIL WHERE PLAN_ID=$planId$ AND PRODUCT_ID=$productId$
+		]]>
+	</select>
+</sqlMap>

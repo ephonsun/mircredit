@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="LnBalanceFixedSQL">
+
+    <typeAlias alias="LnBalanceFixed" type="com.banger.mobile.domain.model.loan.LnBalanceFixed"/>
+
+    <resultMap class="LnBalanceFixed" id="LnBalanceFixedResult">
+       	<result column="ID" property="id"/>
+       	<result column="LOAN_ID" property="loanId"/>
+       	<result column="CREATE_USER" property="createUser"/>
+       	<result column="CREATE_DATE" property="createDate"/>
+       	<result column="UPDATE_USER" property="updateUser"/>
+       	<result column="UPDATE_DATE" property="updateDate"/>
+       	<result column="REMARK" property="remark"/>
+       	<result column="TYPE" property="type"/>
+
+       	<result column="ITEM_NAME" property="itemName"/>
+
+       	<result column="ITEM_TYPE" property="itemType"/>
+       	<result column="ITEM_NUM" property="itemNum"/>
+       	<result column="ORIGINAL_VALUE" property="originalValue"/>
+       	<result column="DEPRECIATION_VALUE" property="depreciationValue"/>
+       	<result column="PRESENT_VALUE" property="presentValue"/>
+       	<result column="PRESENT_AMOUNT" property="presentAmount"/>
+       	<result column="DEPRECIATION_RATE" property="depreciationRate"/>
+
+    </resultMap>
+
+    <delete id="deleteBalanceFixed" parameterClass="Integer">
+         DELETE FROM LN_BALANCE_FIXED WHERE ID = #ID#
+    </delete>
+
+    <insert id="insertBalanceFixed" parameterClass="LnBalanceFixed">
+        INSERT INTO LN_BALANCE_FIXED
+         (
+         	ID,
+         	LOAN_ID,
+			ITEM_NAME,
+			REMARK,
+			TYPE,
+			CREATE_USER,
+			CREATE_DATE,
+			UPDATE_USER,
+			UPDATE_DATE,
+			ITEM_TYPE,
+			ITEM_NUM,
+			ORIGINAL_VALUE,
+			DEPRECIATION_VALUE,
+			PRESENT_VALUE,
+			PRESENT_AMOUNT,
+			DEPRECIATION_RATE
+         )
+         VALUES
+         (
+			#id:INTEGER#,
+			#loanId:INTEGER#,
+			#itemName:VARCHAR#,
+			#remark:VARCHAR#,
+			#type:VARCHAR#,
+			#createUser:INTEGER#,
+			#createDate:INTEGER#,
+			#updateUser:INTEGER#,
+			#updateDate:TIMESTAMP#,
+
+			#itemType:VARCHAR#,
+			#itemNum:INTEGER#,
+			#originalValue:DECIMAL#,
+			#depreciationValue:DECIMAL#,
+			#presentValue:DECIMAL#,
+			#presentAmount:DECIMAL#,
+			#depreciationRate:DOUBLE#
+
+         )
+		<selectKey keyProperty="id" resultClass="java.lang.Integer" type="pre">
+			VALUES NEXTVAL FOR SEQ_LN_BALANCE_FIXED
+		</selectKey>
+    </insert>
+
+
+
+    <update id="updateBalanceFixed" parameterClass="LnBalanceFixed">
+        update LN_BALANCE_FIXED SET ID=ID
+        <isNotEmpty property="loanId" prepend=",">
+			LOAN_ID = #loanId#
+		</isNotEmpty>
+		<isNotEmpty property="itemName" prepend=",">
+			ITEM_NAME = #itemName#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			REMARK = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="type" prepend=",">
+			TYPE = #type#
+		</isNotEmpty>
+		<isNotEmpty property="createUser" prepend=",">
+            CREATE_USER = #createUser#
+		</isNotEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+            CREATE_DATE = #createDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateUser" prepend=",">
+            UPDATE_USER = #updateUser#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+            UPDATE_DATE = #updateDate#
+        </isNotEmpty>
+
+		<isNotEmpty property="itemType" prepend=",">
+			ITEM_TYPE = #itemType#
+		</isNotEmpty>
+		<isNotEmpty property="itemNum" prepend=",">
+			ITEM_NUM = #itemNum#
+		</isNotEmpty>
+		<isNotEmpty property="originalValue" prepend=",">
+			ORIGINAL_VALUE = #originalValue#
+		</isNotEmpty>
+		<isNotEmpty property="depreciationValue" prepend=",">
+			DEPRECIATION_VALUE = #depreciationValue#
+		</isNotEmpty>
+		<isNotEmpty property="presentValue" prepend=",">
+			PRESENT_VALUE = #presentValue#
+		</isNotEmpty>
+		<isNotEmpty property="presentAmount" prepend=",">
+			PRESENT_AMOUNT = #presentAmount#
+		</isNotEmpty>
+		<isNotEmpty property="depreciationRate" prepend=",">
+			DEPRECIATION_RATE = #depreciationRate#
+		</isNotEmpty>
+        where ID=#id#
+    </update>
+
+
+
+    <select id="getLnBalanceFixedById" resultMap="LnBalanceFixedResult" parameterClass="java.lang.Integer">
+		select * from LN_BALANCE_FIXED where ID=#id#
+    </select>
+
+	<select id="getLnBalanceFixedByLoanId" resultMap="LnBalanceFixedResult" parameterClass="java.util.Map">
+		select * from LN_BALANCE_FIXED where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+	<select id="sumFixedByType" resultClass="java.math.BigDecimal" parameterClass="java.util.Map">
+		select sum(PRESENT_AMOUNT) from LN_BALANCE_FIXED where LOAN_ID=#loanId# AND TYPE=#type#
+	</select>
+
+</sqlMap>
